@@ -1,7 +1,25 @@
+<!-- 
+<li th:fragment="acc" class="nav-item">
+	<a class="nav-link" href="charts.html"><i class="fas fa-fw fa-chart-area"></i> <span>회계</span></a>
+</li>
 
-    <li th:fragment="acc" class="nav-item">
-		<a class="nav-link" href="charts.html">
-			<i class="fas fa-fw fa-chart-area"></i>
-			<span>회계</span>
-		</a>
-	</li>
+ -->
+<li th:fragment="acc" class="nav-item"><a
+	class="nav-link collapsed" href="#" data-toggle="collapse"
+	data-target="#collapseArr" aria-expanded="true"
+	aria-controls="collapseArr"> <i class="fas fa-fw fa-folder"></i> <span>회계</span>
+</a>
+	<div id="collapseArr" class="collapse" aria-labelledby="headingArr"
+		data-parent="#accordionsidebar">
+		<div class="bg-white py-2 collapse-inner rounded">
+			<h6 class="collapse-header">login screens:</h6>
+			<a class="collapse-item" href="acc">테스트페이지</a> <a
+				class="collapse-item" href="register.html">register</a> <a
+				class="collapse-item" href="forgot-password.html">forgot
+				password</a>
+			<div class="collapse-divider"></div>
+			<h6 class="collapse-header">other pages:</h6>
+			<a class="collapse-item" href="404.html">404 page</a> <a
+				class="collapse-item" href="blank.html">blank page</a>
+		</div>
+	</div></li>
