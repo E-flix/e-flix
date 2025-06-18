@@ -1,0 +1,98 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 김희정
+  - 최초작성 : 2025-06-18
+  - 설명     : 회계 메인 화면
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-18 (김희정): Bootstrap 5 카드형 UI 적용 및 링크 연결, title 및 내용 추가
+  
+============================================ -->
+<head>
+  <title>회계관리</title>
+</head>
+<div layout:fragment="content">
+  <div class="container" id="acc-main">
+    <h2 class="text-center mb-4 text-white bg-secondary py-3 rounded">회계관리</h2>
+
+    <div class="row g-4">
+      <!-- 기준정보관리 -->
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-dark text-white">
+            기준정보관리
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              <li><a href="/acc/pt" class="text-decoration-none text-dark">• 거래처관리</a></li>
+              <li><a href="/acc/act" class="text-decoration-none text-dark">• 계정과목관리</a></li>
+              <li><a href="/acc/fa" class="text-decoration-none text-dark">• 고정자산관리</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 전표관리 -->
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-dark text-white">
+            전표관리
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              <li><a href="/acc/en" class="text-decoration-none text-dark">• 일반전표</a></li>
+              <li><a href="/acc/enps" class="text-decoration-none text-dark">• 매입매출전표</a></li>
+              <li><a href="/acc/ena" class="text-decoration-none text-dark">• 자동전표처리</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 세무관리 -->
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-dark text-white">
+            세무관리
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              <li><a href="/acc/eti" class="text-decoration-none text-dark">• 전자세금계산서관리</a></li>
+              <li><a href="/acc/cr" class="text-decoration-none text-dark">• 현금영수증관리</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 장부조회 -->
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-dark text-white">
+            장부조회
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              <li><a href="/acc/cl" class="text-decoration-none text-dark">• 거래처원장</a></li>
+              <li><a href="/acc/psr" class="text-decoration-none text-dark">• 매입매출장</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 재무제표 -->
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-dark text-white">
+            재무제표
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              <li><a href="/acc/bs" class="text-decoration-none text-dark">• 재무상태표</a></li>
+              <li><a href="/acc/is" class="text-decoration-none text-dark">• 손익계산서</a></li>
+              <li><a href="/acc/cs" class="text-decoration-none text-dark">• 원가명세서</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
