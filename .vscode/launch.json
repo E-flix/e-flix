@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-EflixApplication<eflix>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.eflix.EflixApplication",
+            "projectName": "eflix",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

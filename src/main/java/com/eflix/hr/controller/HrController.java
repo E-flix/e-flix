@@ -1,0 +1,76 @@
+package com.eflix.hr.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
+/** ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-18
+  - 설명     : 인사 컨트롤러
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-18 (김어진): 인사 메인 화면 및 각 기능별 화면 요청 처리 메소드 추가
+============================================  */
+
+@Controller
+@RequestMapping("/hr")
+public class HrController {
+
+  // 인사 메인 화면
+  @GetMapping("")
+  public String hrMain () {
+    return "hr/hrMain";
+  }
+
+  // 사원 조회 화면
+  @GetMapping("/el")
+  public String empList() {
+    return "hr/emp";
+  }
+
+  // 사원 등록 화면(관리자)
+  @GetMapping("/ea")
+  public String empAdd() {
+      return "hr/empAdd";
+  }
+
+  // 부서 등록 화면(관리자)
+  @GetMapping("/da")
+  public String deptAdd() {
+      return "hr/deptAdd";
+  }
+  
+  // 근태 현황 화면(사원)
+  @GetMapping("/al")
+  public String attdList() {
+      return "hr/attdList";
+  }
+  
+  // 근태 관리화면(관리자)
+  @GetMapping("/am")
+  public String attdMaList() {
+      return "hr/attdManager";
+  }
+  
+  // 근태 신청화면 (사원)
+  @GetMapping("/attdAdd")
+  public String attdAdd() {
+      return "hr/attdAdd";
+  }
+  
+  // 근태 신청승인 화면(관리자)
+  @GetMapping("/attdApproval")
+  public String attdApproval() {
+      return "hr/attdApproval";
+  }
+  
+  // 급여 계산 화면 
+  @GetMapping("/sc")
+  public String salaryCalculate() {
+      return "hr/salaryCalculate";
+  }
+  
+}
