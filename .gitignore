@@ -31,7 +31,3 @@ buildNumber.properties
 
 # Log file
 *.log
-
-# 기타세팅추가
-.factorypath
-.vscode/
