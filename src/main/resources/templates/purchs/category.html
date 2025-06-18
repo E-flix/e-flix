@@ -1,0 +1,61 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+
+<head>
+    <title>재고관리목록</title>
+</head>
+<div layout:fragment="content">
+    <div class="container" id="acc-main">
+        <h2 class="text-center mb-4 text-white bg-secondary py-3 rounded">재고관리</h2>
+
+        <div class="row g-4">
+            <!-- 창고 -->
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        창고
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li><a href="/purchs/warehouse" class="text-decoration-none text-dark">• 창고관리</a></li>
+                            <li><a href="/purchs/warehouse_mnt" class="text-decoration-none text-dark">• 창고이동</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 입출고 -->
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        입•출고
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li><a href="/purchs/inbound" class="text-decoration-none text-dark">• 입고관리</a></li>
+                            <li><a href="/purchs/outbound" class="text-decoration-none text-dark">• 출고관리</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 조회 -->
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        조회
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li><a href="/purchs/inbound_view" class="text-decoration-none text-dark">• 입고조회</a></li>
+                            <li><a href="/purchs/outbound_view" class="text-decoration-none text-dark">• 출고조회</a></li>
+                            <li><a href="/purchs/warehouse_view" class="text-decoration-none text-dark">• 창고조회</a></li>
+                            <li><a href="/purchs/inventory_view" class="text-decoration-none text-dark">• 재고조회</a></li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

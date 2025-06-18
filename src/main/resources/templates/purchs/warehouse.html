@@ -1,9 +1,152 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{common/layouts/default}">
 
+<head>
+	<title>입고관리</title>
+</head>
 <div layout:fragment="content">
-<h1>창고관리페이지</h1>
+	<div class="w-100" id="account">
+		<div class="d-flex justify-content-between align-items-center mb-1">
+			<h3>입고관리</h3>
+		</div>
+
+		<div class="row mb-3">
+			<div class="col-md-12">
+				<div class="radio-group">
+					<input type="radio" class="btn-check" name="accountFilter" id="all" autocomplete="off" checked>
+					<label class="btn btn-outline-secondary btn-sm me-1" for="all">전체</label>
+
+					<input type="radio" class="btn-check" name="accountFilter" id="asset" autocomplete="off">
+					<label class="btn btn-outline-secondary btn-sm me-1" for="asset">자산</label>
+
+					<input type="radio" class="btn-check" name="accountFilter" id="liability" autocomplete="off">
+					<label class="btn btn-outline-secondary btn-sm me-1" for="liability">부채</label>
+
+					<input type="radio" class="btn-check" name="accountFilter" id="capital" autocomplete="off">
+					<label class="btn btn-outline-secondary btn-sm me-1" for="capital">자본</label>
+
+					<input type="radio" class="btn-check" name="accountFilter" id="income" autocomplete="off">
+					<label class="btn btn-outline-secondary btn-sm me-1" for="income">수익</label>
+
+					<input type="radio" class="btn-check" name="accountFilter" id="cost" autocomplete="off">
+					<label class="btn btn-outline-secondary btn-sm" for="cost">비용</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="table-responsive">
+			<table class="table table-hover">
+				<thead class="table-light">
+					<tr>
+						<th><input type="checkbox" name="allCheck" id=""></th>
+						<th>코드</th>
+						<th>계정과목명</th>
+						<th>구분</th>
+						<th>표준계정과목명</th>
+						<th>표준영문명</th>
+						<th>대분류</th>
+						<th>중분류</th>
+						<th>소분류</th>
+						<th>사용</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><input type="checkbox" name="check" id=""></td>
+						<td>101</td>
+						<td>현금</td>
+						<td>일반</td>
+						<td>현금 및 현금성자산</td>
+						<td>Cash and cash equivalents</td>
+						<td>자산</td>
+						<td>유동자산</td>
+						<td>당좌자산</td>
+						<td>○</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<button onclick="showAlert()">알림창 띄우기</button>
+
+			<div class="my-3">
+				<div id="myGrid" class="ag-theme-alpine" style="width:100%; height:400px;"></div>
+			</div>
+		</div>
+	</div>
+	<script>
+		// Row Data Interface
+
+		// Grid API: Access to Grid API methods
+		let gridApi;
+
+		// Grid Options: Contains all of the grid configurations
+		const gridOptions = {
+			// Data to be displayed
+			rowData: [{
+					make: "Tesla",
+					model: "Model Y",
+					price: 64950,
+					electric: true
+				},
+				{
+					make: "Ford",
+					model: "F-Series",
+					price: 33850,
+					electric: false
+				},
+				{
+					make: "Toyota",
+					model: "Corolla",
+					price: 29600,
+					electric: false
+				},
+				{
+					make: "Mercedes",
+					model: "EQA",
+					price: 48890,
+					electric: true
+				},
+				{
+					make: "Fiat",
+					model: "500",
+					price: 15774,
+					electric: false
+				},
+				{
+					make: "Nissan",
+					model: "Juke",
+					price: 20675,
+					electric: false
+				},
+			],
+			// Columns to be displayed (Should match rowData properties)
+			columnDefs: [{
+					field: "make"
+				},
+				{
+					field: "model"
+				},
+				{
+					field: "price"
+				},
+				{
+					field: "electric"
+				},
+			],
+			defaultColDef: {
+				flex: 1,
+			},
+		};
+		// Create Grid: Create new grid within the #myGrid div, using the Grid Options object
+		gridApi = agGrid.createGrid(document.querySelector("#myGrid"), gridOptions);
+
+		function showAlert() {
+			Swal.fire({
+				title: '성공!',
+				text: '작업이 성공적으로 완료되었습니다.',
+				icon: 'success',
+				confirmButtonText: '확인'
+			});
+		}
+	</script>
 </div>
-</html>

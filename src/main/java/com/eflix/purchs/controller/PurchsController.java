@@ -4,9 +4,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+
 //입고페이지
 @Controller
 @RequestMapping("/purchs") public class PurchsController {
+
+	// 재고관리목록
+	@GetMapping("/category") public String category() {
+		return "purchs/category";
+	}
 
 	// 입고관리
 	@GetMapping("/inbound") public String inbound() {
