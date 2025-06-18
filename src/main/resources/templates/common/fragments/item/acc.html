@@ -1,44 +1,7 @@
-<!-- ============================================
-  - 작성자   : 김희정
-  - 최초작성 : 2025-06-18
-  - 설명     : 회계 navigation 메뉴
-  -----------------------------------------------
-  [ 변경 이력 ]
-  - 2025-06-18 (김희정): 회계파트 메뉴 추가 및 링크 연결
-============================================ -->
-<li th:fragment="acc" class="nav-item">
-  <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAcc" aria-expanded="true" aria-controls="collapseAcc">
-    <i class="fas fa-fw fa-folder"></i>
-    <span>회계</span>
-  </a>
-  <div id="collapseAcc" class="collapse" aria-labelledby="headingAcc" data-parent="#accordionsidebar">
-    <div class="bg-white py-2 collapse-inner rounded">
 
-      <a class="collapse-item" href="/acc">회계관리</a>
-
-      <h6 class="collapse-header">기준정보관리:</h6>
-      <a class="collapse-item" href="/acc/pt">거래처관리</a>
-      <a class="collapse-item" href="/acc/act">계정과목관리</a>
-      <a class="collapse-item" href="/acc/fa">고정자산관리</a>
-
-      <h6 class="collapse-header">전표관리:</h6>
-      <a class="collapse-item" href="/acc/en">일반전표</a>
-      <a class="collapse-item" href="/acc/enps">매입매출전표</a>
-      <a class="collapse-item" href="/acc/ena">자동전표처리</a>
-
-      <h6 class="collapse-header">세무관리:</h6>
-      <a class="collapse-item" href="/acc/eti">전자세금계산서관리</a> 
-      <a class="collapse-item" href="/acc/cr">현금영수증관리</a>
-
-      <h6 class="collapse-header">장부조회:</h6>
-      <a class="collapse-item" href="/acc/cl">거래처원장</a> 
-      <a class="collapse-item" href="/acc/psr">매입매출장</a>
-
-      <h6 class="collapse-header">재무제표:</h6>
-      <a class="collapse-item" href="/acc/bs">재무상태표</a> 
-      <a class="collapse-item" href="/acc/is">손익계산서</a>
-      <a class="collapse-item" href="/acc/cs">원가명세서</a>
-
-    </div>
-  </div>
-</li>
+    <li th:fragment="acc" class="nav-item">
+		<a class="nav-link" href="charts.html">
+			<i class="fas fa-fw fa-chart-area"></i>
+			<span>회계</span>
+		</a>
+	</li>
