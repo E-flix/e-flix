@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+    crossorigin="anonymous"></script>
+<head>
+    <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+	<meta name="description" content="" />
+	<meta name="author" content="" />
+	<title>E-FLIX</title>
+	<link rel="icon" type="image/x-icon" th:href="@{/erp/assets/favicon.ico}" />
+	<!-- Bootstrap icons-->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+	<!-- Google fonts-->
+	<link rel="preconnect" href="https://fonts.gstatic.com" />
+	<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,600;1,600&amp;display=swap"
+		rel="stylesheet" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,300;0,500;0,600;0,700;1,300;1,500;1,600;1,700&amp;display=swap"
+		rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;1,400&amp;display=swap"
+		rel="stylesheet" />
+
+	<!-- Jquery CDN -->
+	<script src="https://code.jquery.com/jquery-3.7.1.js"
+		integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+	<!-- Core theme CSS (includes Bootstrap)-->
+	<link th:href="@{/erp/css/styles.css}" rel="stylesheet" />
+	<style>
+		.form-check-label {
+			margin-left: 0.25rem;
+		}
+	</style>
+</head>
+
+<body id="page-top">
+    <!-- Navigation-->
+	<div th:replace="~{common/erp/fragments/topbar::topbar}"></div>
+
+    <!-- Mashead header-->
+    <div layout:fragment="content" class="content"></div>
+    
+    <!-- Footer -->
+    <div th:replace="~{common/erp/fragments/footer::footer}"></div>
+
+	
+	<!-- Modal -->
+	<!-- qna Modal-->
+	<div class="modal fade" id="qnaModal" tabindex="-1" aria-labelledby="qnaModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header bg-gradient-primary-to-secondary p-4">
+					<h5 class="modal-title font-alt text-white" id="qnaModalLabel">문의</h5>
+					<button class="btn-close btn-close-white" type="button" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body border-0 p-4">
+					<form id="contactForm" data-sb-form-api-token="API_TOKEN">
+						<!-- Name input-->
+						<div class="form-floating mb-3">
+							<input class="form-control" id="name" type="text" placeholder="이름..."
+								data-sb-validations="required" /> <label for="name">성함</label>
+							<div class="invalid-qna" data-sb-qna="name:required">성함을
+								입력해주세요.</div>
+						</div>
+						<!-- Email address input-->
+						<div class="form-floating mb-3">
+							<input class="form-control" id="email" type="email" placeholder="name@example.com"
+								data-sb-validations="required,email" /> <label for="email">이메일</label>
+							<div class="invalid-qna" data-sb-qna="email:required">이메일을
+								입력해주세요.</div>
+							<div class="invalid-qna" data-sb-qna="email:email">올바르지
+								않은 이메일 형식입니다.</div>
+						</div>
+						<!-- Phone number input-->
+						<!-- Title input -->
+						<div class="form-floating mb-3">
+							<input class="form-control" id="title" type="text" placeholder="제목..."
+								data-sb-validations="required" /> <label for="phone">제목</label>
+							<div class="invalid-qna" data-sb-qna="title:required">제목을
+								입력해주세요.</div>
+						</div>
+						<!-- Message input-->
+						<!-- content input-->
+						<div class="form-floating mb-3">
+							<textarea class="form-control" id="content" type="text" placeholder="내용..."
+								style="height: 10rem" data-sb-validations="required"></textarea>
+							<label for="message">문의 내용</label>
+							<div class="invalid-qna" data-sb-qna="content:required">내용을
+								입력해주세요.</div>
+						</div>
+
+						<!-- Submit success message-->
+						<!-- This is what your users will see when the form-->
+						<!-- has successfully submitted-->
+						<div class="d-none" id="submitSuccessMessage">
+							<div class="text-center mb-3">
+								<div class="fw-bolder">Form submission successful!</div>
+								To activate this form, sign up at <br /> <a
+									href="https://startbootstrap.com/solution/contact-forms">https://startbootstrap.com/solution/contact-forms</a>
+							</div>
+						</div>
+						<!-- Submit error message-->
+						<!-- This is what your users will see when there is-->
+						<!-- an error submitting the form-->
+						<div class="d-none" id="submitErrorMessage">
+							<div class="text-center text-danger mb-3">Error sending
+								message!</div>
+						</div>
+						<!-- Submit Button-->
+						<div class="d-grid">
+							<button class="btn btn-primary rounded-pill btn-lg disabled" id="submitButton"
+								type="submit">제출</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Login Modal-->
+	<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header bg-gradient-primary-to-secondary p-4">
+					<h5 class="modal-title font-alt text-white" id="loginModalLabel">로그인</h5>
+					<button class="btn-close btn-close-white" type="button" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body border-0 p-4">
+					<form id="loginForm" data-sb-form-api-token="API_TOKEN">
+						<div class="form-floating mb-3">
+							<input class="form-control" id="user_id" type="text" placeholder="아이디..."
+								data-sb-validations="required" /> <label for="user_id">아이디</label>
+							<div class="invalid-login" data-sb-login="user_id:required">아이디를 입력해주세요.</div>
+						</div>
+						<div class="form-floating mb-3">
+							<input class="form-control" id="user_pw" type="password" placeholder="****"
+								data-sb-validations="required" /> <label for="user_pw">비밀번호</label>
+							<div class="invalid-login" data-sb-login="user_pw:required">비밀번호를 입력해주세요.</div>
+						</div>
+						<div class="d-grid">
+							<button class="btn btn-primary rounded-pill btn-lg disabled" id="loginButton"
+								type="submit">로그인</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Register Modal-->
+	<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header bg-gradient-primary-to-secondary p-4">
+					<h5 class="modal-title font-alt text-white" id="registerModalLabel">회원가입</h5>
+					<button class="btn-close btn-close-white" type="button" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body border-0 p-4">
+					<form id="registerForm" data-sb-form-api-token="API_TOKEN">
+						<div class="form-floating mb-3">
+							<input class="form-control" id="user_id" type="text" placeholder="아이디..."
+								data-sb-validations="required" /> <label for="user_id">아이디</label>
+							<div class="invalid-register" data-sb-register="user_id:required">아이디를 입력해주세요.</div>
+						</div>
+						<div class="d-flex g-2 gap-2">
+							<div class="form-floating mb-3">
+								<input class="form-control" id="user_pw" type="password" placeholder="****"
+									data-sb-validations="required" /> <label for="user_pw">비밀번호</label>
+							</div>
+							<div class="form-floating mb-3">
+								<input class="form-control" id="user_pw_check" type="password" placeholder="****"
+									data-sb-validations="required" /> <label for="user_pw_check">비밀번호 확인</label>
+							</div>
+							<div class="invalid-register" data-sb-register="user_pw_check:required">비밀번호를 입력해주세요.</div>
+							<div class="invalid-register" data-sb-register="user_pw_check:user_pw">비밀번호가 서로 일치하지 않습니다.
+							</div>
+						</div>
+						<div class="form-floating mb-3">
+							<input class="form-control" id="user_tel" type="text" placeholder="연락처..."
+								data-sb-validations="required" /> <label for="user_tel">연락처</label>
+							<div class="invalid-register" data-sb-register="user_tel:required">연락처를 입력해주세요.</div>
+						</div>
+						<div class="form-floating mb-3">
+							<input class="form-control" id="user_email" type="text" placeholder="이메일..."
+								data-sb-validations="required" /> <label for="user_email">이메일</label>
+							<div class="invalid-register" data-sb-register="user_email:required">이메일을 입력해주세요.</div>
+						</div>
+						<div class="d-grid">
+							<button class="btn btn-primary rounded-pill btn-lg disabled" id="registerButton"
+								type="submit">회원가입</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+    <!-- Bootstrap core JS-->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+	<!-- Core theme JS-->
+	<script th:src="@{/erp/js/scripts.js}"></script>
+
+	<script th:src="@{/erp/js/home.js}"></script>
+</body>
+
+</html>
