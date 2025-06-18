@@ -26,6 +26,11 @@
 	rel="stylesheet" />
 <!-- Core theme CSS (includes Bootstrap)-->
 <link th:href="@{/erp/css/styles.css}" rel="stylesheet" />
+<style>
+.form-check-label {
+    margin-left: 0.25rem;
+  }
+</style>
 </head>
 <body id="page-top">
 	<!-- Navigation-->
@@ -52,6 +57,20 @@
 					data-bs-toggle="modal" data-bs-target="#feedbackModal">
 					<span class="d-flex align-items-center"> <i
 						class="bi-chat-text-fill me-2"></i> <span class="small">문의</span>
+					</span>
+				</button>
+			</div>
+			<div class="">
+				<button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0"
+					data-bs-toggle="modal" data-bs-target="#feedbackModal">
+					<span class="d-flex align-items-center"><span class="">로그인</span>
+					</span>
+				</button>
+			</div>
+			<div class="">
+				<button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0"
+					data-bs-toggle="modal" data-bs-target="#feedbackModal">
+					<span class="d-flex align-items-center"><span class="">회원가입</span>
 					</span>
 				</button>
 			</div>
@@ -231,7 +250,7 @@
 		</div>
 	</section>
 	<!-- Basic features section-->
-	<section class="bg-light">
+	<!-- <section class="bg-light">
 		<div class="container px-5">
 			<div
 				class="row gx-5 align-items-center justify-content-center justify-content-lg-between">
@@ -252,7 +271,7 @@
 			</div>
 		</div>
 	</section>
-	<!-- Call to action section-->
+	Call to action section
 	<section class="cta">
 		<div class="cta-content">
 			<div class="container px-5">
@@ -264,7 +283,7 @@
 					for free</a>
 			</div>
 		</div>
-	</section>
+	</section> -->
 	<!-- App badge section-->
 	<section class="bg-gradient-primary-to-secondary" id="price">
 		<!-- <div class="container px-5">
@@ -274,40 +293,129 @@
                     <a href="#!"><img class="app-badge" src="assets/img/app-store-badge.svg" alt="..." /></a>
                 </div>
             </div> -->
-		<div class="row justify-content-center g-4">
-			<div class="col-12 col-md-6 col-lg-4 d-flex justify-content-center">
-				<div class="card" style="width: 18rem;">
-					<div class="card-body text-center">
-						<div class="card-title mb-3">기본형</div>
-						<div class="card-text mb-3">50,000원 / 1개월</div>
-						<div class="card-text mb-3">50명</div>
-						<a href="#" class="btn btn-primary">지금 시작하기</a>
+        <div class="container">
+			<div class="row justify-content-center g-4">
+				<div class="col-12 col-md-6 col-lg-4 d-flex justify-content-center">
+					<div class="card" style="width: 18rem;">
+						<h5 class="card-title text-center mt-3">기본형</h5>
+						<div class="card-body text-center">
+							<div class="card-text mb-3">50,000원 / 1개월</div>
+							<div class="card-text mb-3">50명</div>
+							<a href="#" class="btn btn-primary">지금 시작하기</a>
+							
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="hrCheckBox"> <label
+									class="form-check-label mb-0" for="hrCheckBox">인사</label>
+							</div>
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="bsnCheckBox"> <label
+									class="form-check-label mb-0" for="bsnCheckBox">영업</label>
+							</div>
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="purchsCheckBox"> <label
+									class="form-check-label mb-0" for="purchsCheckBox">재고</label>
+							</div>
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="accCheckBox"> <label
+									class="form-check-label mb-0" for="accCheckBox">회계</label>
+							</div>
+						</div>
 					</div>
 				</div>
-			</div>
+	
+				<div class="col-12 col-md-6 col-lg-4 d-flex justify-content-center">
+					<div class="card" style="width: 18rem;">
+					<h5 class="card-title text-center mt-3">표준형</h5>
+						<div class="card-body text-center">
+							<div class="card-text mb-3">50,000원 / 1개월</div>
+							<div class="card-text mb-3">100명</div>
+							<a href="#" class="btn btn-primary">지금 시작하기</a>
+							
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="hrCheckBox"> <label
+									class="form-check-label mb-0" for="hrCheckBox">인사</label>
+							</div>
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="bsnCheckBox"> <label
+									class="form-check-label mb-0" for="bsnCheckBox">영업</label>
+							</div>
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="purchsCheckBox"> <label
+									class="form-check-label mb-0" for="purchsCheckBox">재고</label>
+							</div>
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="accCheckBox"> <label
+									class="form-check-label mb-0" for="accCheckBox">회계</label>
+							</div>
+						</div>
+					</div>
+				</div>
+	
+				<div class="col-12 col-md-6 col-lg-4 d-flex justify-content-center">
+					<div class="card" style="width: 18rem;">
+						<h5 class="card-title text-center mt-3">고급형</h5>
+						<div class="card-body text-center">
+							<div class="card-text mb-3">50,000원</div>
+							<div class="card-text mb-3">60,000원</div>
+							<a href="#" class="btn btn-primary">지금 시작하기</a>
 
-			<div class="col-12 col-md-6 col-lg-4 d-flex justify-content-center">
-				<div class="card" style="width: 18rem;">
-					<div class="card-body text-center">
-						<div class="card-title mb-3">표준형</div>
-						<div class="card-text mb-3">50,000원 / 1개월</div>
-						<div class="card-text mb-3">100명</div>
-						<a href="#" class="btn btn-primary">지금 시작하기</a>
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="hrCheckBox"> <label
+									class="form-check-label mb-0" for="hrCheckBox">인사</label>
+							</div>
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="bsnCheckBox"> <label
+									class="form-check-label mb-0" for="bsnCheckBox">영업</label>
+							</div>
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="purchsCheckBox"> <label
+									class="form-check-label mb-0" for="purchsCheckBox">재고</label>
+							</div>
+							<div
+								class="d-flex align-items-center justify-content-center mt-3"
+								style="margin-left: 1rem;">
+								<input class="form-check-input me-2" type="checkbox"
+									id="accCheckBox"> <label
+									class="form-check-label mb-0" for="accCheckBox">회계</label>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
-
-			<div class="col-12 col-md-6 col-lg-4 d-flex justify-content-center">
-				<div class="card" style="width: 18rem;">
-					<div class="card-body text-center">
-						<div class="card-title mb-3">고급형</div>
-						<div class="card-text mb-3">50,000원</div>
-						<div class="card-text mb-3">60,000원</div>
-						<a href="#" class="btn btn-primary">지금 시작하기</a>
-					</div>
-				</div>
-			</div>
-		</div>
+        </div>
 	</section>
 	<!-- Footer-->
 	<footer class="bg-black text-center py-5">
