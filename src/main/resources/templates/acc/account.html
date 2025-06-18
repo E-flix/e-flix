@@ -5,12 +5,72 @@
   - 설명     : 계정과목관리 화면
   -----------------------------------------------
   [ 변경 이력 ]
-  - 2025-06-18 (김희정): 예시
+  - 2025-06-18 (김희정): title 및 내용 추가
 ============================================ -->
 
+<head>
+  <title>계정과목관리</title>
+</head>
 <div layout:fragment="content">
   <div id="account">
-    <h2>계정과목관리</h2>
-    <p>계정과목관리 화면입니다.</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3>계정과목관리</h3>
+      <button class="btn btn-primary">
+        <i class="bi bi-plus me-1"></i>신규 계정과목
+      </button>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-12">
+        <div class="btn-group" role="group">
+          <input type="radio" class="btn-check" name="accountFilter" id="all" autocomplete="off" checked>
+          <label class="btn btn-outline-primary" for="all">전체</label>
+
+          <input type="radio" class="btn-check" name="accountFilter" id="asset" autocomplete="off">
+          <label class="btn btn-outline-primary" for="asset">자산</label>
+
+          <input type="radio" class="btn-check" name="accountFilter" id="liability" autocomplete="off">
+          <label class="btn btn-outline-primary" for="liability">부채</label>
+
+          <input type="radio" class="btn-check" name="accountFilter" id="capital" autocomplete="off">
+          <label class="btn btn-outline-primary" for="capital">자본</label>
+
+          <input type="radio" class="btn-check" name="accountFilter" id="income" autocomplete="off">
+          <label class="btn btn-outline-primary" for="income">수익</label>
+
+          <input type="radio" class="btn-check" name="accountFilter" id="cost" autocomplete="off">
+          <label class="btn btn-outline-primary" for="cost">비용</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>계정코드</th>
+            <th>계정과목명</th>
+            <th>구분</th>
+            <th>대분류</th>
+            <th>소분류</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>101</td>
+            <td>현금</td>
+            <td><span class="badge bg-primary">일반</span></td>
+            <td>자산</td>
+            <td>유동자산</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary">수정</button>
+              <button class="btn btn-sm btn-outline-danger ms-1">삭제</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+
 </div>
