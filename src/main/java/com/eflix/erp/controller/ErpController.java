@@ -9,7 +9,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class ErpController {
 	
 	@GetMapping()
-	public String getMethodName() {
+	public String home() {
 		return "erp/index";
+	}
+
+	@GetMapping("/check")
+	public String getMethodName() {
+		return "erp/check";
+	}
+	
+
+	@GetMapping("/mypage")
+	public String myPage() {
+		return "erp/mypage";
 	}
 }
