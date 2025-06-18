@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{common/layouts/default}">
+
+<head>
+  <title>견적서 조회</title>
+</head>
+<div layout:fragment="content">
+  <div class="w-100" id="account">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <h3>견적서 조회</h3>
+    </div>
+
+    
+
+    <div class="table-responsive">
+    
+
+      <button onclick="showAlert()">알림창 띄우기</button>
+
+      <div class="my-3">
+        <div id="myGrid" class="ag-theme-alpine" style="width:100%; height:400px;"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    let gridApi;
+    const gridOptions = {
+      rowData: [{
+          견적번호 : "001",
+          견적일자 : "2025/04/25",
+          유효기간:"2025/05/25",
+          거래처명:"테슬라",
+          담당자:"홍길동",
+          연락처: "010-3554-6979",
+          납품장소: "창고1",
+          예상납기일: "2025/04/30",
+          결제조건: "계좌이체",
+        },
+      ],
+      columnDefs: [{
+          field: "견적번호"
+        },
+        {
+          field: "견적일자"
+        },
+        {
+          field: "유효기간"
+        },
+        {
+          field: "거래처명"
+        },
+        {
+          field: "담당자"
+        },
+        {
+          field: "연락처"
+        },
+        {
+          field: "납품장소"
+        },
+        {
+          field: "예상납기일"
+        },
+        {
+          field: "결제조건"
+        },
+      ],
+      defaultColDef: {
+        flex: 1,
+      },
+    };
+    gridApi = agGrid.createGrid(document.querySelector("#myGrid"), gridOptions);
+
+    function showAlert() {
+      Swal.fire({
+        title: '성공!',
+        text: '작업이 성공적으로 완료되었습니다.',
+        icon: 'success',
+        confirmButtonText: '확인'
+      });
+    }
+  </script>
+</div>

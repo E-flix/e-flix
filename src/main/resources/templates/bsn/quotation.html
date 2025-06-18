@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{common/layouts/default}">
+
+<head>
+  <title>견적서 등록</title>
+  <style>
+    .quote-card {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: .25rem;
+      padding: 1.5rem;
+    }
+
+    .detail-table th {
+      background: #4da2f1;
+      color: #fff;
+      text-align: center;
+    }
+
+    .detail-table td,
+    .detail-table th {
+      vertical-align: middle;
+    }
+
+    .btn-cyan {
+      background: #009fb2;
+      color: #fff;
+    }
+
+    .btn-pink {
+      background: #c81d64;
+      color: #fff;
+    }
+
+    .btn-green {
+      background: #1cab26;
+      color: #fff;
+    }
+  </style>
+</head>
+<div layout:fragment="content" class="container-fluid py-4">
+  <!-- 3) 액션 버튼 -->
+  <div class="float-right">
+    <button type="reset" class="btn btn-cyan  me-2">초기화</button>
+    <button type="button" class="btn btn-pink  me-2">목록</button>
+    <button type="button" class="btn btn-green">등록</button>
+  </div>
+  <!-- 제목 -->
+  <h3 class="mb-4">견적서 입력</h3>
+  <!-- 1) 견적 헤더 -->
+  <div class="quote-card mb-4">
+    <form id="quoteForm" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">견적번호</label>
+        <input type="text" class="form-control" placeholder="입력">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">견적일자</label>
+        <input type="date" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">유효기간</label>
+        <select class="form-select">
+          <option value="">선택</option>
+          <option>7일</option>
+          <option>15일</option>
+          <option>30일</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">거래처명</label>
+        <select class="form-select">
+          <option value="">선택</option>
+          <option>테슬라</option>
+          <option>삼성전자</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">담당자</label>
+        <input type="text" class="form-control" placeholder="입력">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">연락처</label>
+        <input type="tel" class="form-control" placeholder="입력">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">납품장소</label>
+        <input type="text" class="form-control" placeholder="입력">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">예상납기일</label>
+        <input type="date" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">결제조건</label>
+        <select class="form-select">
+          <option value="">선택</option>
+          <option>계좌이체</option>
+          <option>현금</option>
+          <option>어음</option>
+        </select>
+      </div>
+    </form>
+  </div>
+
+
+  <!-- 2) 품목 입력 테이블 -->
+  <div class="table-responsive mb-4">
+    <table class="table table-bordered detail-table">
+      <thead>
+        <tr>
+          <th style="width:5%;">순번</th>
+          <th style="width:20%;">품목명</th>
+          <th style="width:10%;">수량</th>
+          <th style="width:15%;">규격</th>
+          <th style="width:10%;">단가</th>
+          <th style="width:10%;">할인율(%)</th>
+          <th style="width:15%;">합계 금액</th>
+          <th style="width:15%;">비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 3행 예시 -->
+        <tr>
+          <td class="text-center">1</td>
+          <td><input type="text" class="form-control form-control-sm"></td>
+          <td><input type="number" class="form-control form-control-sm"></td>
+          <td><input type="text" class="form-control form-control-sm"></td>
+          <td><input type="number" class="form-control form-control-sm"></td>
+          <td><input type="number" class="form-control form-control-sm" min="0" max="100"></td>
+          <td><input type="text" class="form-control form-control-sm" readonly></td>
+          <td><input type="text" class="form-control form-control-sm"></td>
+        </tr>
+        <tr>
+          <td class="text-center">2</td>
+          <td><input type="text" class="form-control form-control-sm"></td>
+          <td><input type="number" class="form-control form-control-sm"></td>
+          <td><input type="text" class="form-control form-control-sm"></td>
+          <td><input type="number" class="form-control form-control-sm"></td>
+          <td><input type="number" class="form-control form-control-sm" min="0" max="100"></td>
+          <td><input type="text" class="form-control form-control-sm" readonly></td>
+          <td><input type="text" class="form-control form-control-sm"></td>
+        </tr>
+        <tr>
+          <td class="text-center">3</td>
+          <td><input type="text" class="form-control form-control-sm"></td>
+          <td><input type="number" class="form-control form-control-sm"></td>
+          <td><input type="text" class="form-control form-control-sm"></td>
+          <td><input type="number" class="form-control form-control-sm"></td>
+          <td><input type="number" class="form-control form-control-sm" min="0" max="100"></td>
+          <td><input type="text" class="form-control form-control-sm" readonly></td>
+          <td><input type="text" class="form-control form-control-sm"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+</div>
+
+</html>
