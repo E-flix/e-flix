@@ -6,6 +6,7 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가, ag-grid 적용
+  - 2025-06-18 (김희정): ag-grid 입력 테스트
 ============================================ -->
 
 <head>
@@ -128,10 +129,12 @@
       ],
       // Columns to be displayed (Should match rowData properties)
       columnDefs: [{
-          field: "make"
+          field: "make", 
+          editable: true
         },
         {
-          field: "model"
+          field: "model",
+          editable: true
         },
         {
           field: "price"
