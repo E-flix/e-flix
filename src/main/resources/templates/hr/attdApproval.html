@@ -2,16 +2,122 @@
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
-  - 설명     : 근태 신청승인화면 (관리자)
+  - 설명     : 근태 신청승인화면 (관리자)  
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김어진): title 및 내용 추가
+  - 2025-06-19 (김어진): layout 구성
 ============================================ -->
-<head>
-  <title>근태신청승인</title>
-</head>
+
 <div layout:fragment="content">
   <div id="empAdd">
-    <h1>근태신청승인 페이지입니다.</h1>
+    <h2>근태신청승인</h2>
+
+    <div class="mt-4 fs-5">
+      <h4 class="fw-bold mb-4">관리자 페이지 (근태 신청 승인)</h4>
+
+      <!-- 신청 리스트 테이블 -->
+      <div class="table-responsive mb-4">
+        <table class="table table-bordered text-center align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>신청자</th>
+              <th>근태 유형</th>
+              <th>기간</th>
+              <th>사유</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="showDetail('홍길동', '인사부', '1001', '2025-06-17', '2025-06-20', '2025-06-20', '연차', '가족 행사 참여', '연차신청서.pdf', '-', '-')">
+              <td>홍길동</td>
+              <td>연차</td>
+              <td>2025-06-20</td>
+              <td>개인사정</td>
+              <td><span class="badge bg-secondary">대기</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 상세 신청 정보 -->
+      <div id="detailBox" class="border rounded p-4 bg-light d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="fw-bold mb-0">&lt; 근태 신청 승인 &gt;</h5>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <p><strong>사원명:</strong> <span id="empName"></span></p>
+            <p><strong>신청일:</strong> <span id="requestDate"></span></p>
+            <p><strong>근태 유형:</strong> <span id="leaveType"></span></p>
+            <p><strong>첨부파일:</strong> <a href="#" class="btn btn-sm btn-primary" id="fileLink">다운로드</a></p>
+            <p><strong>처리자:</strong> <span id="handler"></span></p>
+          </div>
+          <div class="col-md-4">
+            <p><strong>부서:</strong> <span id="department"></span></p>
+            <p><strong>기간:</strong> <span id="period"></span></p>
+            <p><strong>사유:</strong> <span id="reason"></span></p>
+            <p><strong>처리일시:</strong> <span id="processDate"></span></p>
+            <div><strong>현재 상태:</strong> <span class="badge bg-secondary">대기</span></div>
+          </div>
+          <div class="col-md-4 text-end d-flex flex-column justify-content-end align-items-end">
+            <div class="mt-auto">
+              <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#confirmModal">승인</button>
+              <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">반려</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
+
+  <!-- 반려 사유 입력 모달 -->
+  <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">반려 사유 입력</h5>
+          <button class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label">반려 사유</label>
+          <textarea class="form-control" rows="4" placeholder="반려 사유를 입력하세요" required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary">확인</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 승인 확인 모달 -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <p class="mb-3">해당 신청을 승인하시겠습니까?</p>
+          <button class="btn btn-success me-2">확인</button>
+          <button class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showDetail(name, dept, id, requestDate, start, end, leaveType, reason, file, handler, processDate) {
+      document.getElementById("detailBox").classList.remove("d-none");
+      document.getElementById("empName").textContent = name;
+      document.getElementById("department").textContent = dept;
+      document.getElementById("requestDate").textContent = requestDate;
+      document.getElementById("period").textContent = start + ' ~ ' + end;
+      document.getElementById("leaveType").textContent = leaveType;
+      document.getElementById("reason").textContent = reason;
+      document.getElementById("fileLink").textContent = "다운로드 (" + file + ")";
+      document.getElementById("handler").textContent = handler;
+      document.getElementById("processDate").textContent = processDate;
+    }
+  </script>
 </div>
