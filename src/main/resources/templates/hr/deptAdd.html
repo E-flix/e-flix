@@ -1,17 +1,124 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
-  - 설명     : 부서 등록화면 (사원)
+  - 설명     : 근태 관리화면 (관리자)
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김어진): title 및 내용 추가
+  - 2025-06-19 (김어진): layout 구성
 ============================================ -->
+
 <head>
-  <title>부서등록</title>
+  <title>부서관리</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <div layout:fragment="content">
-  <div id="">
-    <h1>부서등록 페이지입니다.</h1>
+  <div class="py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="fw-bold mb-0">부서 목록</h4>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deptModal">+ 부서등록</button>
+    </div>
+
+    <!-- 부서 목록 테이블 -->
+    <div class="table-responsive">
+      <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>부서코드</th>
+            <th>부서명</th>
+            <th>상위부서</th>
+            <th>유형</th>
+            <th>전화번호</th>
+            <th>사용여부</th>
+            <th>수정</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>D001</td>
+            <td>인사팀</td>
+            <td>경영지원실</td>
+            <td>본사</td>
+            <td>02-123-4567</td>
+            <td><span class="badge bg-success">Y</span></td>
+            <td><button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#deptModal">수정</button>
+            </td>
+          </tr>
+          <!-- 추가 행 -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 등록/수정 모달 -->
+    <div class="modal fade" id="deptModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">[부서등록]</h5>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">부서코드 *</label>
+                  <input type="text" class="form-control" placeholder="예: D001">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">부서명 *</label>
+                  <input type="text" class="form-control" placeholder="예: 인사팀">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">상위 부서</label>
+                  <select class="form-select">
+                    <option>(없음)</option>
+                    <option>경영지원실</option>
+                    <option>영업본부</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">사용여부 *</label>
+                  <select class="form-select">
+                    <option>Y</option>
+                    <option>N</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">부서 유형</label>
+                  <select class="form-select">
+                    <option>본사</option>
+                    <option>공장</option>
+                    <option>외부</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">전화번호</label>
+                  <input type="text" class="form-control" placeholder="예: 02-123-4567">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-12">
+                  <label class="form-label">위치정보 / 비고</label>
+                  <input type="text" class="form-control" placeholder="예: 본사 2층, 선택사항">
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary">저장</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+</html>
