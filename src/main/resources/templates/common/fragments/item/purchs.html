@@ -1,7 +1,23 @@
-
-    <li th:fragment="purchs" class="nav-item">
-		<a class="nav-link" href="charts.html">
-			<i class="fas fa-fw fa-chart-area"></i>
-			<span>재고</span>
-		</a>
-	</li>
+<li th:fragment="purchs" class="nav-item"><a class="nav-link collapsed" href="#" data-toggle="collapse"
+		data-target="#collapsePurchs" aria-expanded="true" aria-controls="collapsePurchs"> <i
+			class="fas fa-fw fa-chart-area"></i>
+		<span>재고</span>
+	</a>
+	<div id="collapsePurchs" class="collapse" aria-labelledby="headingPurch" data-parent="#accordionsidebar">
+		<div class="bg-white py-2 collapse-inner rounded">
+			<a class="collapse-item" href="/purchs/category">재고관리목록</a>
+			<h6 class="collapse-header">창고</h6>
+			<a class="collapse-item" href="/purchs/warehouse">창고관리</a>
+			<a class="collapse-item" href="/purchs/warehouse_mnt">창고이동</a>
+			<h6 class="collapse-header">입•출고</h6>
+			<a class="collapse-item" href="/purchs/inbound">입고관리</a>
+			<a class="collapse-item" href="/purchs/outbound">출고관리</a>
+			<h6 class="collapse-header">조회</h6>
+			<a class="collapse-item" href="/purchs/inbound_view">입고조회</a>
+			<a class="collapse-item" href="/purchs/outbound_view">출고조회</a>
+			<a class="collapse-item" href="/purchs/warehouse_view">창고조회</a>
+			<a class="collapse-item" href="/purchs/inventory_view">재고조회</a>
+			<div class="collapse-divider"></div>
+		</div>
+	</div>
+</li>
