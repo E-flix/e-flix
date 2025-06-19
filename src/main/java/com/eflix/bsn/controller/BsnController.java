@@ -46,13 +46,13 @@ public class BsnController {
   //출고 조회
   @GetMapping("/obound_list")
   public String outbound_list(){
-    return "bsn/outbound_list";
+    return "bsn/soutbound_list";
   }
 
   //출고 의뢰
   @GetMapping("/obound")
   public String outbound(){
-    return "bsn/outbound";
+    return "bsn/soutbound";
   }
 }
 
