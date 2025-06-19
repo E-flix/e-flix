@@ -91,6 +91,15 @@
 		    <groupId>nz.net.ultraq.thymeleaf</groupId>
 		    <artifactId>thymeleaf-layout-dialect</artifactId>
 		</dependency>
+
+		<!-- PortOne -->
+		<!-- https://mvnrepository.com/artifact/io.portone/server-sdk -->
+		<dependency>
+			<groupId>io.portone</groupId>
+			<artifactId>server-sdk</artifactId>
+			<version>0.12.0</version>
+			<type>pom</type>
+		</dependency>
 	</dependencies>
 
 	<build>

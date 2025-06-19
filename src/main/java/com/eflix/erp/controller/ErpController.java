@@ -22,13 +22,17 @@ public class ErpController {
 
 	@GetMapping("/mypage_info")
 	public String mypage_info() {
-		return "erp/mypage_info";
+		return "erp/mypageInfo";
 	}
 
 	@GetMapping("/mypage_service")
 	public String mypage_service() {
-		return "erp/mypage_service";
+		return "erp/mypageService";
 	}
 
+	@GetMapping("/info_check")
+	public String info_check() {
+		return "erp/infoCheck";
+	}
 	
 }
