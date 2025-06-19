@@ -1,0 +1,46 @@
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-19
+	- 설명    : E-FLIX 관리자 페이지 sidebar 모듈
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-19 (복성민): 파일생성 및 기본 코드 추가
+============================================
+-->
+<ul th:fragment="sidebar"
+	class="navbar-nav bg-gradient-sidebar sidebar sidebar-dark accordion"
+	id="accordionsidebar">
+
+	<!-- divider -->
+	<hr class="sidebar-divider my-0">
+
+	<!-- nav item - dashboard -->
+ 	<li class="nav-item active">
+	 	<a class="nav-link" href="/erp/admin">
+				<i class="fas fa-fw fa-tachometer-alt"></i>
+				<span>home</span>
+		</a>
+	</li>
+	<!-- ERP MENU -->
+	<div th:replace="~{common/erp/admin/fragments/menu::menu}"></div>
+
+	<!-- sidebar toggler (sidebar) -->
+	<div class="text-center d-none d-md-inline">
+		<button class="rounded-circle border-0" id="sidebarToggle"></button>
+	</div>
+
+	<!-- sidebar message -->
+	<div class="sidebar-card d-none d-lg-flex">
+		<img class="sidebar-card-illustration mb-2"
+			th:src="@{/bootstrap/img/undraw_rocket.svg}" alt="...">
+		<p class="text-center mb-2">
+			<strong>sb admin pro</strong> is packed with premium features,
+			components, and more!
+		</p>
+		<a class="btn btn-success btn-sm"
+			href="https://startbootstrap.com/theme/sb-admin-pro">upgrade to
+			pro!</a>
+	</div>
+
+</ul>
