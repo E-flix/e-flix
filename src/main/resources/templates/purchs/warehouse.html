@@ -58,14 +58,14 @@
 						<!-- 기존 데이터 반복 -->
 						<tr th:each="list, stat : ${whList}">
 							<td th:text="${stat.count}"></td>
-							<td th:text="${list.code}"></td>
-							<td th:text="${list.type}"></td>
-							<td th:text="${list.address}"></td>
-							<td th:text="${list.location}"></td>
-							<td th:text="${list.volume}"></td>
+							<td th:text="${list.warehouseId}"></td>
+							<td th:text="${list.warehouseLocation}"></td>
+							<td th:text="${list.warehouseScale}"></td>
+							<td th:text="${list.warehouseManager}"></td>
+							<!-- <td th:text="${list.volume}"></td>
 							<td th:text="${list.capacity}"></td>
 							<td th:text="${list.name}"></td>
-							<td th:text="${list.manager}"></td>
+							<td th:text="${list.manager}"></td> -->
 						</tr>
 					</tbody>
 				</table>

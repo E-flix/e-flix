@@ -1,10 +1,10 @@
 package com.eflix.purchs.mapper;
 import java.util.List;
 
-import org.springframework.stereotype.Repository;
+// import org.apache.ibatis.annotations.Mapper;
 
 import com.eflix.purchs.dto.WarehouseDTO;
-@Repository
+// @Mapper
 public interface WarehouseMapper {
     public List<WarehouseDTO> getWarehouse();
     
