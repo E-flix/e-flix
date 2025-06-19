@@ -1,11 +1,17 @@
 package com.eflix.purchs.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.eflix.purchs.service.WarehouseService;
+
+import lombok.RequiredArgsConstructor;
+
 
 //입고페이지
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/purchs") public class PurchsController {
 
@@ -24,13 +30,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 		return "purchs/outbound";
 	}
 
+	private final WarehouseService warehouseService;
 	// 창고관리
-	@GetMapping("/warehouse") public String warehouse() {
+	@GetMapping("/warehouse") public String warehouse(Model model) {
+		model.addAttribute("whList", warehouseService.getWarehouse());
 		return "purchs/warehouse";
 	}
 
 	// 창고이동
-	@GetMapping("/warehouse_mnt") public String warehouse_mnt() {
+	@GetMapping("/warehouse_movement") public String warehouse_mnt() {
 		return "purchs/warehouse_movement";
 	}
 

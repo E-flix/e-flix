@@ -1,4 +1,5 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
@@ -7,11 +8,136 @@
   [ 변경 이력 ]
   - 2025-06-18 (김어진): title 및 내용 추가
 ============================================ -->
+
 <head>
   <title>근태현황</title>
 </head>
 <div layout:fragment="content">
   <div id="attdList">
-    <h1>근태현황 사원페이지입니다.</h1>
+    <h2>근태현황</h2>
+    <div class="mt-4">
+      <h4 class="fw-bold mb-4">사원 페이지</h4>
+
+      <!-- 상단 정보 박스 -->
+      <div class="row mb-4">
+        <!-- 사용자 정보 -->
+        <div class="col-md-6">
+          <div class="p-3 bg-light border rounded">
+            <h6 class="fw-bold mb-3">사용자 정보</h6>
+            <div class="mb-3">
+              <label class="form-label">년월</label>
+              <select class="form-select w-50">
+                <option>2024년 11월</option>
+                <option>2024년 10월</option>
+                <option>2024년 9월</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">부서명</label>
+              <p class="form-control-plaintext">A01 본사 → 인사부</p>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">정규 근무일수</label>
+              <p class="form-control-plaintext">22일</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 기본 항목 -->
+        <div class="col-md-6">
+          <div class="p-3 bg-light border rounded">
+            <h6 class="fw-bold mb-3">기본 항목</h6>
+            <div class="row mb-2">
+              <div class="col-6">실제 근무일수: <strong>18일</strong></div>
+              <div class="col-6">총 연차: <strong>11일</strong></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">평일 출근일수: <strong>17일</strong></div>
+              <div class="col-6">연차 사용: <strong>2일</strong></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">휴일 출근일수: <strong>1일</strong></div>
+              <div class="col-6">남은 연차: <strong>9일</strong></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6">결근일수: <strong>-</strong></div>
+              <div class="col-6">지각 횟수: <strong>-</strong></div>
+            </div>
+            <div class="row">
+              <div class="col-6">조회 횟수: <strong>1일</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 근태 상세 테이블 -->
+      <div class="table-responsive">
+        <table class="table table-bordered text-center align-middle">
+          <thead class="table-secondary">
+            <tr>
+              <th>날짜</th>
+              <th>휴일 구분</th>
+              <th>근태 상황</th>
+              <th>근무 스케줄 시간</th>
+              <th>출근 시간</th>
+              <th>퇴근 시간</th>
+              <th>잔업 시간</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 예시 데이터 -->
+            <tr>
+              <td>11월01일(금)</td>
+              <td></td>
+              <td></td>
+              <td>09:00 ~ 18:00</td>
+              <td>08:50</td>
+              <td>19:00</td>
+              <td>01:00</td>
+            </tr>
+            <tr>
+              <td>11월04일(월)</td>
+              <td></td>
+              <td class="text-success fw-bold">조회</td>
+              <td>09:00 ~ 18:00</td>
+              <td>09:00</td>
+              <td>18:00</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>11월05일(화)</td>
+              <td></td>
+              <td class="text-danger fw-bold">지각</td>
+              <td>09:00 ~ 18:00</td>
+              <td>09:30</td>
+              <td>18:00</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="text-primary">11월09일(토)</td>
+              <td class="text-danger">법정공휴일</td>
+              <td></td>
+              <td colspan="4"></td>
+            </tr>
+            <tr>
+              <td>11월10일(일)</td>
+              <td></td>
+              <td class="text-info">외근</td>
+              <td>09:00 ~ 18:00</td>
+              <td>08:50</td>
+              <td>18:00</td>
+              <td>01:50</td>
+            </tr>
+            <tr>
+              <td class="text-primary">11월17일(토)</td>
+              <td class="text-danger">법정공휴일</td>
+              <td></td>
+              <td colspan="4"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </div>

@@ -18,7 +18,6 @@ public class AccountDTO {
   private String account_code;
   private String account_name;
   private String account_type;
-  private String standard_code;
   private String standard_account_name;
   private String standard_english_name;
   private String major_category;

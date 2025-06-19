@@ -1,0 +1,73 @@
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-19
+	- 설명    : E-FLIX 관리자 페이지 menu 모듈
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-19 (복성민): 파일생성 및 기본 코드 추가
+============================================
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<ul th:fragment="menu" class="navbar-nav bg-gradient-sidebar sidebar sidebar-dark accordion" id="accordionsidebar">
+
+	<li class="nav-item">
+		<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUser" aria-expanded="true"
+			aria-controls="collapseUser">
+			<i class="fas fa-fw fa-folder"></i>
+			<span>회원</span>
+		</a>
+		<div id="collapseUser" class="collapse" aria-labelledby="headingUser" data-parent="#accordionsidebar">
+			<div class="bg-white py-2 collapse-inner rounded">
+
+				<h6 class="collapse-header">회원 관리</h6>
+				<a class="collapse-item" href="/erp/admin/user/list">회원조회</a>
+				<!-- <a class="collapse-item" href="">사원등록</a> -->
+		</div>
+	</li>
+
+	<li class="nav-item">
+		<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCS" aria-expanded="true"
+			aria-controls="collapseErp">
+			<i class="fas fa-fw fa-folder"></i>
+			<span>CS</span>
+		</a>
+		<div id="collapseCS" class="collapse" aria-labelledby="headingCS" data-parent="#accordionsidebar">
+			<div class="bg-white py-2 collapse-inner rounded">
+				<h6 class="collapse-header">문의 관리</h6>
+				<a class="collapse-item" href="/erp/admin/cs/list">문의조회</a>
+				<!-- <a class="collapse-item" href="">문의등록</a> -->
+			</div>
+		</div>
+	</li>
+
+	<li class="nav-item">
+		<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCm" aria-expanded="true"
+			aria-controls="collapseCm">
+			<i class="fas fa-fw fa-folder"></i>
+			<span>회사</span>
+		</a>
+		<div id="collapseCm" class="collapse" aria-labelledby="headingCm" data-parent="#accordionsidebar">
+			<div class="bg-white py-2 collapse-inner rounded">
+				<h6 class="collapse-header">회사 관리</h6>
+				<a class="collapse-item" href="/erp/admin/cm/list">회사조회</a>
+				<!-- <a class="collapse-item" href="">회사등록</a> -->
+			</div>
+		</div>
+	</li>
+
+	<li class="nav-item">
+		<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseEmp" aria-expanded="true"
+			aria-controls="collapseEmp">
+			<i class="fas fa-fw fa-folder"></i>
+			<span>사원</span>
+		</a>
+		<div id="collapseEmp" class="collapse" aria-labelledby="headingEmp" data-parent="#accordionsidebar">
+			<div class="bg-white py-2 collapse-inner rounded">
+				<h6 class="collapse-header">사원 관리</h6>
+				<a class="collapse-item" href="/erp/admin/emp/list">사원조회</a>
+				<!-- <a class="collapse-item" href="">회사등록</a> -->
+			</div>
+		</div>
+	</li>
+</ul>

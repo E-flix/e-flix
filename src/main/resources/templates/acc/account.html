@@ -7,6 +7,7 @@
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가, ag-grid 적용
   - 2025-06-18 (김희정): ag-grid 입력 테스트
+  - 2025-06-19 (김희정): 계정과목 전체 조회 API 연동, ag-grid 연동
 ============================================ -->
 
 <head>
@@ -17,7 +18,6 @@
     <div class="d-flex justify-content-between align-items-center mb-1">
       <h3>계정과목관리</h3>
     </div>
-
     <div class="row mb-3">
       <div class="col-md-12">
         <div class="radio-group">
@@ -43,114 +43,46 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table table-hover">
-        <thead class="table-light">
-          <tr>
-            <th><input type="checkbox" name="allCheck" id=""></th>
-            <th>코드</th>
-            <th>계정과목명</th>
-            <th>구분</th>
-            <th>표준계정과목명</th>
-            <th>표준영문명</th>
-            <th>대분류</th>
-            <th>중분류</th>
-            <th>소분류</th>
-            <th>사용</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="checkbox" name="check" id=""></td>
-            <td>101</td>
-            <td>현금</td>
-            <td>일반</td>
-            <td>현금 및 현금성자산</td>
-            <td>Cash and cash equivalents</td>
-            <td>자산</td>
-            <td>유동자산</td>
-            <td>당좌자산</td>
-            <td>○</td>
-          </tr>
-        </tbody>
-      </table>
-      
-<button onclick="showAlert()">알림창 띄우기</button>
+
+
+      <button onclick="showAlert()">알림창 띄우기</button>
 
       <div class="my-3">
-        <div id="myGrid" class="ag-theme-alpine" style="width:100%; height:400px;"></div>
+        <div id="accountGrid" class="ag-theme-alpine" style="width:100%; height:400px;"></div>
       </div>
     </div>
   </div>
-  <script>
-    // Row Data Interface
+  <script th:inline="javascript">
+    // 전체조회 API
+    let accountList = /*[[${accountList}]]*/ [];
 
-    // Grid API: Access to Grid API methods
-    let gridApi;
-
-    // Grid Options: Contains all of the grid configurations
+    // ag-Grid 세팅
     const gridOptions = {
-      // Data to be displayed
-      rowData: [{
-          make: "Tesla",
-          model: "Model Y",
-          price: 64950,
-          electric: true
-        },
-        {
-          make: "Ford",
-          model: "F-Series",
-          price: 33850,
-          electric: false
-        },
-        {
-          make: "Toyota",
-          model: "Corolla",
-          price: 29600,
-          electric: false
-        },
-        {
-          make: "Mercedes",
-          model: "EQA",
-          price: 48890,
-          electric: true
-        },
-        {
-          make: "Fiat",
-          model: "500",
-          price: 15774,
-          electric: false
-        },
-        {
-          make: "Nissan",
-          model: "Juke",
-          price: 20675,
-          electric: false
-        },
+      theme: 'legacy',
+      // 그리드 values 배열
+      rowData: accountList,
+      // 그리드 필드명 정의
+      columnDefs: [
+        { headerName: "코드", field: "account_code", editable: true },
+        { headerName: "계정과목명", field: "account_name", editable: true },
+        { headerName: "구분", field: "account_type", editable: true },
+        { headerName: "표준계정과목명", field: "standard_account_name", editable: true },
+        { headerName: "표준영문명", field: "standard_english_name", editable: true },
+        { headerName: "대분류", field: "major_category", editable: true },
+        { headerName: "중분류", field: "middle_category", editable: true },
+        { headerName: "소분류", field: "minor_category", editable: true },
+        { headerName: "사용", field: "use_flag", editable: true },
       ],
-      // Columns to be displayed (Should match rowData properties)
-      columnDefs: [{
-          field: "make", 
-          editable: true
-        },
-        {
-          field: "model",
-          editable: true
-        },
-        {
-          field: "price"
-        },
-        {
-          field: "electric"
-        },
-      ],
-      defaultColDef: {
-        flex: 1,
-      },
+      rowSelection: {
+        mode: 'multiRow',
+        // checkboxes: true,
+        // enableClickSelection: true,
+      },    
     };
-    // Create Grid: Create new grid within the #myGrid div, using the Grid Options object
-    gridApi = agGrid.createGrid(document.querySelector("#myGrid"), gridOptions);
+    // 그리드 생성
+    agGrid.createGrid(document.querySelector("#accountGrid"), gridOptions);
 
-     function showAlert() {
+    function showAlert() {
       Swal.fire({
         title: '성공!',
         text: '작업이 성공적으로 완료되었습니다.',

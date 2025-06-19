@@ -1,17 +1,200 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
-  <!-- ============================================
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{common/layouts/default}">
+<!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
-  - 설명     : 급여계산 (사원)
+  - 설명     : 근태 관리화면 (관리자)
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김어진): title 및 내용 추가
+  - 2025-06-19 (김어진): layout 구성
 ============================================ -->
+
 <head>
   <title>급여계산</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
+
 <div layout:fragment="content">
   <div id="empAdd">
-    <h1>급여계산 페이지입니다.</h1>
+    <h2>급여계산</h2>
+
+    <!-- 버튼 상단 배치 -->
+    <div class="d-flex justify-content-end flex-wrap gap-2 mb-3">
+      <button class="btn btn-outline-secondary">전체선택</button>
+      <button class="btn btn-warning">급여계산</button>
+      <button class="btn btn-primary">급여확정</button>
+      <button class="btn btn-success">EXCEL</button>
+      <button class="btn btn-outline-danger">PDF생성</button>
+      <button class="btn btn-success">명세서일괄발송</button>
+    </div>
+
+    <!-- 검색조건 -->
+    <div class="bg-light p-3 border rounded mb-3">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-2">
+          <label class="form-label">귀속년월</label>
+          <select id="baseMonth" class="form-select">
+            <option>2025년 05월</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">지급년월</label>
+          <select id="payMonth" class="form-select">
+            <option>2025년 06월</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">사원명</label>
+          <input type="text" class="form-control" placeholder="검색어 입력 후 [Enter]">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">부서명</label>
+          <select class="form-select">
+            <option>선택</option>
+          </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-end gap-2">
+          <button class="btn btn-primary">조회</button>
+          <button class="btn btn-secondary">초기화</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 급여 리스트 -->
+    <div class="table-responsive">
+      <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+          <tr>
+            <th><input type="checkbox"></th>
+            <th>사번</th>
+            <th>이름</th>
+            <th>부서</th>
+            <th>직급</th>
+            <th>귀속년월</th>
+            <th>지급년월</th>
+            <th>기본급</th>
+            <th>수당합계</th>
+            <th>공제합계</th>
+            <th>실수령액</th>
+            <th>계산상태</th>
+            <th>수정</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-bs-toggle="modal" data-bs-target="#salaryDetailModal" class="table-success" style="cursor:pointer;">
+            <td><input type="checkbox"></td>
+            <td>1</td>
+            <td>홍길동</td>
+            <td>인사부</td>
+            <td>사원</td>
+            <td>2025-05</td>
+            <td>2025-06</td>
+            <td>2,000,000</td>
+            <td>200,000</td>
+            <td>100,000</td>
+            <td>2,100,000</td>
+            <td><span class="badge bg-success">계산완료</span></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 상세조회 모달 -->
+    <div class="modal fade" id="salaryDetailModal" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">급여 상세조회</h5>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body p-0">
+            <table class="table table-bordered text-center align-middle mb-0">
+              <thead class="table-success">
+                <tr>
+                  <th>항목</th>
+                  <th>금액</th>
+                  <th>비고</th>
+                  <th>과세/비과세</th>
+                  <th>공제/지급</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>기본급</td>
+                  <td>2,000,000</td>
+                  <td>-</td>
+                  <td>과세</td>
+                  <td>지급</td>
+                </tr>
+                <tr>
+                  <td>직책수당</td>
+                  <td>100,000</td>
+                  <td>정액</td>
+                  <td>과세</td>
+                  <td>지급</td>
+                </tr>
+                <tr>
+                  <td>식대수당</td>
+                  <td>200,000</td>
+                  <td>정액</td>
+                  <td>비과세</td>
+                  <td>지급</td>
+                </tr>
+                <tr>
+                  <td>국민연금</td>
+                  <td>-90,000</td>
+                  <td>4.5%</td>
+                  <td>비과세</td>
+                  <td>공제</td>
+                </tr>
+                <tr>
+                  <td>건강보험</td>
+                  <td>-70,000</td>
+                  <td>3.495%</td>
+                  <td>비과세</td>
+                  <td>공제</td>
+                </tr>
+                <tr>
+                  <td>실수령액</td>
+                  <td>2,221,500</td>
+                  <td>계산 자동</td>
+                  <td>-</td>
+                  <td>-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="modal-footer justify-content-end">
+            <button class="btn btn-primary">명세서 인쇄</button>
+            <button class="btn btn-danger">PDF</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 지급월 자동 설정 -->
+    <script>
+      document.getElementById("baseMonth").addEventListener("change", function () {
+        const base = this.value;
+        const year = parseInt(base.slice(0, 4));
+        const month = parseInt(base.slice(6, 8));
+        let nextMonth = month + 1;
+        let nextYear = year;
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear += 1;
+        }
+        document.getElementById("payMonth").innerHTML =
+          `<option>${nextYear}년 ${String(nextMonth).padStart(2, '0')}월</option>`;
+      });
+    </script>
   </div>
 </div>
+
+</html>
