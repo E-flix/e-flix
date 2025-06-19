@@ -3,7 +3,6 @@ package com.eflix.hr.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 /** ============================================
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김어진): 인사 메인 화면 및 각 기능별 화면 요청 처리 메소드 추가
+  - 2025-06-19 (김어진): 각 기능별 화면 요청 처리 메소드 추가
 ============================================  */
 
 @Controller
@@ -25,16 +25,10 @@ public class HrController {
     return "hr/hrMain";
   }
 
-  // 사원 조회 화면
+  // 사원 관리 화면
   @GetMapping("/el")
   public String empList() {
     return "hr/emp";
-  }
-
-  // 사원 등록 화면(관리자)
-  @GetMapping("/ea")
-  public String empAdd() {
-      return "hr/empAdd";
   }
 
   // 부서 등록 화면(관리자)
@@ -72,5 +66,18 @@ public class HrController {
   public String salaryCalculate() {
       return "hr/salaryCalculate";
   }
+  
+  // 급여 항목 화면
+  @GetMapping("/si")
+  public String salaryItem() {
+      return "hr/salaryItem";
+  }
+
+  // 급여 명세서 화면
+  @GetMapping("/sp")
+  public String salaryPayslip() {
+      return "hr/salaryPayslip";
+  }
+  
   
 }

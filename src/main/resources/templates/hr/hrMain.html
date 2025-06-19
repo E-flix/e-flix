@@ -1,4 +1,5 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
@@ -8,6 +9,7 @@
   - 2025-06-18 (김어진): hrMain페이지 링크 연결
   
 ============================================ -->
+
 <head>
   <title>인사관리</title>
 </head>
@@ -16,30 +18,17 @@
     <h2 class="text-center mb-4 text-white bg-secondary py-3 rounded">인사관리</h2>
 
     <div class="row g-4">
-      <!-- 사원관리 -->
+      <!-- 사원관리,부서관리 -->
       <div class="col-md-6 col-lg-4 mb-3">
         <div class="card h-100 shadow-sm">
           <div class="card-header bg-dark text-white">
-            사원관리
+            조직관리
           </div>
           <div class="card-body">
             <ul class="list-unstyled mb-0">
-              <li><a href="/hr/el" class="text-decoration-none text-dark">• 사원조회</a></li>
-              <li><a href="/hr/ea" class="text-decoration-none text-dark">• 사원등록</a></li>
+              <li><a href="/hr/el" class="text-decoration-none text-dark">• 사원관리</a></li>
+              <li><a href="/hr/da" class="text-decoration-none text-dark">• 부서관리</a></li>
             </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- 부서관리 -->
-      <div class="col-md-6 col-lg-4 mb-3">
-        <div class="card h-100 shadow-sm">
-          <div class="card-header bg-dark text-white">
-            부서관리
-          </div>
-          <div class="card-body">
-            <ul class="list-unstyled mb-0">
-              <li><a href="/hr/da" class="text-decoration-none text-dark">• 부서등록</a></li>
           </div>
         </div>
       </div>
@@ -70,23 +59,8 @@
           <div class="card-body">
             <ul class="list-unstyled mb-0">
               <li><a href="/hr/sc" class="text-decoration-none text-dark">• 급여계산</a></li>
-              <li><a href="" class="text-decoration-none text-dark">• </a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- 재무제표 -->
-      <div class="col-md-6 col-lg-4 mb-3">
-        <div class="card h-100 shadow-sm">
-          <div class="card-header bg-dark text-white">
-            재무제표
-          </div>
-          <div class="card-body">
-            <ul class="list-unstyled mb-0">
-              <li><a href="" class="text-decoration-none text-dark">• </a></li>
-              <li><a href="" class="text-decoration-none text-dark">• </a></li>
-              <li><a href="" class="text-decoration-none text-dark">• </a></li>
+              <li><a href="/hr/si" class="text-decoration-none text-dark">• 급여항목</a></li>
+              <li><a href="/hr/sp" class="text-decoration-none text-dark">• 급여명세서</a></li>
             </ul>
           </div>
         </div>
