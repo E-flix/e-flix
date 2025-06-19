@@ -3,12 +3,22 @@
 	layout:decorate="~{common/layouts/default}">
 
 <div layout:fragment="content" class="container-fluid">
-	<h1>입고페이지</h1>
+	<div class="col-md-12">
+		<div class="radio-group">
+			<input type="radio" class="btn-check" name="accountFilter" id="ibd" autocomplete="off" checked>
+			<label class="btn btn-outline-secondary btn-sm me-1" for="ibd">입고</label>
 
-	<!-- form만 카드로 감싸고 table은 독립적으로 넓게 사용 -->
+			<input type="radio" class="btn-check" name="accountFilter" id="obd" autocomplete="off">
+			<label class="btn btn-outline-secondary btn-sm me-1" for="obd">출고</label>
+			<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#inquiryModal">입고요청</button>
+		</div>
+	</div>
+
 	<div class="card shadow mb-4">
 		<div class="card-body">
 			<h5 class="text-center mb-4">입고 요청</h5>
+			<div class="row mb-3">
+			</div>
 			<form class="row g-3">
 				<div class="col-lg-2 col-md-4 col-sm-6">
 					<label for="date" class="form-label">입고날짜</label>
@@ -94,8 +104,8 @@
 				<tr>
 					<th scope="row">1</th>
 					<td>WH001</td>
-					<td>대구구</td>
-					<td>500</td>
+					<td>대구</td>
+					<td>400</td>
 				</tr>
 			</tbody>
 		</table>
@@ -111,4 +121,11 @@
 	const day = String(today.getDate()).padStart(2, '0');
 	const formattedDate = `${year}-${month}-${day}`;
 	document.getElementById('date').value = formattedDate;
+
+	//입고 - 출고 이동
+	document.getElementById('obd').addEventListener('change', function () {
+		if (this.checked) {
+			window.location.href = '/purchs/outbound';
+		}
+	})
 </script>

@@ -1,9 +1,98 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{common/layouts/default}">
 
-<div layout:fragment="content">
-<h1>출고조회페이지</h1>
+<div layout:fragment="content" class="container-fluid">
+	<div class="p-3">
+		<h5 class="fw-bold mb-4">출고결과조회</h5>
+
+		<!-- 검색 필터 -->
+		<form th:action="@{/outbound/result}" method="get" class="card p-4 shadow-sm mb-4">
+			<div class="row g-3">
+				<div class="col-md-2">
+					<label class="form-label">일자</label>
+					<input type="date" name="date" class="form-control" th:value="${today}" />
+				</div>
+				<div class="col-md-2">
+					<label class="form-label">제품명</label>
+					<input type="text" name="productName" class="form-control" placeholder="제품명" />
+				</div>
+				<div class="col-md-2">
+					<label class="form-label">상품분류</label>
+					<select name="category" class="form-select">
+						<option value="">전체</option>
+						<option value="제품">제품</option>
+						<option value="부품">부품</option>
+					</select>
+				</div>
+				<div class="col-md-2">
+					<label class="form-label">최소 수량</label>
+					<input type="number" name="minQuantity" class="form-control" placeholder="예: 100" />
+				</div>
+				<div class="col-md-2">
+					<label class="form-label">기타 조건</label>
+					<input type="text" name="etc" class="form-control" />
+				</div>
+				<div class="col-md-2 d-flex align-items-end justify-content-start">
+					<button type="submit" class="btn btn-primary w-100">출고조회</button>
+				</div>
+			</div>
+		</form>
+
+		<!-- 버튼 + 테이블 -->
+		<div class="card shadow-sm">
+			<div class="card-body">
+				<!-- 상단 버튼 -->
+				<div class="d-flex justify-content-end mb-2">
+					<button class="btn btn-success btn-sm me-2" onclick="downloadPDF()">PDF</button>
+					<button class="btn btn-danger btn-sm" onclick="deleteSelected()">삭제</button>
+				</div>
+
+				<!-- 테이블 -->
+				<div class="table-responsive">
+					<table class="table table-bordered table-sm text-center align-middle mb-0">
+						<thead class="table-primary">
+							<tr>
+								<th>NO</th>
+								<th>일자</th>
+								<th>제품명</th>
+								<th>상품 분류</th>
+								<th>수량</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>1</td>
+								<td>2025/05/21</td>
+								<td>제품1</td>
+								<td>제품</td>
+								<td>600</td>
+							</tr>
+							<tr>
+								<td>2</td>
+								<td>2025/05/21</td>
+								<td>제품2</td>
+								<td>제품</td>
+								<td>233</td>
+							</tr>
+							<!-- th:each="item, stat : ${outboundList}" 등 반복문 적용 가능 -->
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+	</div>
 </div>
+
 </html>
+
+<script>
+	function downloadPDF() {
+		alert("PDF 다운로드 기능은 구현 필요");
+	}
+
+	function deleteSelected() {
+		alert("삭제 기능은 구현 필요");
+	}
+</script>
