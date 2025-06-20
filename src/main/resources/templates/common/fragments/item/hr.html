@@ -1,4 +1,3 @@
-
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
@@ -6,36 +5,36 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김어진): 인사파트 메뉴 추가 및 링크 연결
+  - 2025-06-19 (김어진): 인사파트 메뉴 추가 및 링크 연결
 ============================================ -->
 
-	<li th:fragment="hr" class="nav-item">
-		<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHr" aria-expanded="true" aria-controls="collapseHr">
-			<i class="fas fa-fw fa-folder"></i>
-			<span>인사</span>
-		</a>
-		<div id="collapseHr" class="collapse" aria-labelledby="headingHr" data-parent="#accordionsidebar">
-			<div class="bg-white py-2 collapse-inner rounded">
+<li th:fragment="hr" class="nav-item">
+	<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHr" aria-expanded="true"
+		aria-controls="collapseHr">
+		<i class="fas fa-fw fa-folder"></i>
+		<span>인사</span>
+	</a>
+	<div id="collapseHr" class="collapse" aria-labelledby="headingHr" data-parent="#accordionsidebar">
+		<div class="bg-white py-2 collapse-inner rounded">
 
-      <a class="collapse-item" href="/hr">인사관리</a>
+			<a class="collapse-item" href="/hr">인사관리</a>
 
-				<h6 class="collapse-header">사원관리:</h6>
-				<a class="collapse-item" href="/hr/el">사원조회</a>
-				<a class="collapse-item" href="/hr/ea">사원등록</a>
+			<h6 class="collapse-header">조직관리:</h6>
+			<a class="collapse-item" href="/hr/el">사원관리</a>
+			<a class="collapse-item" href="/hr/da">부서관리</a>
 
-				<h6 class="collapse-header">부서관리:</h6>
-				<a class="collapse-item" href="/hr/da">부서등록</a>
+			<h6 class="collapse-header">근태관리:</h6>
+			<a class="collapse-item" href="/hr/al">근태현황(사원)</a>
+			<a class="collapse-item" href="/hr/am">근태관리(관리자)</a>
+			<a class="collapse-item" href="/hr/attdAdd">근태신청(사원)</a>
+			<a class="collapse-item" href="/hr/attdApproval">근태신청승인(관리자)</a>
 
-				
-				<h6 class="collapse-header">근태관리:</h6>
-				<a class="collapse-item" href="/hr/al">근태현황(사원)</a>
-				<a class="collapse-item" href="/hr/am">근태관리(관리자)</a>
-				<a class="collapse-item" href="/hr/attdAdd">근태신청(사원)</a>
-				<a class="collapse-item" href="/hr/attdApproval">근태신청승인(관리자)</a>
 
-				
-				<h6 class="collapse-header">급여관리:</h6>
-				<a class="collapse-item" href="/hr/sc">급여계산</a>
+			<h6 class="collapse-header">급여관리:</h6>
+			<a class="collapse-item" href="/hr/sc">급여계산</a>
+			<a class="collapse-item" href="/hr/si">급여항목</a>
+			<a class="collapse-item" href="/hr/sp">급여명세서</a>
 
-			</div>
 		</div>
-	</li>
+	</div>
+</li>
