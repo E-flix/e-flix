@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.bsn.mapper.QuotationMapper">
+    <select id="getQuotationList" resultType="com.eflix.bsn.dto.QuotationDTO">
+        SELECT
+            QUOTATION_NO       AS quotationNo,
+            CUSTOMER_CD        AS customerCd,
+            CUSTOMER_NAME      AS customerName,
+            TO_CHAR(QUOTATION_DT, 'YYYY-MM-DD')      AS quotationDt,
+            TO_CHAR(VALID_PERIOD, 'YYYY-MM-DD')      AS validPeriod,
+            EMP_CD             AS empCd,
+            PHONE              AS phone,
+            DELIVERY_LOCATION  AS deliveryLocation,
+            TO_CHAR(EXPECTED_DELIVERY_DT, 'YYYY-MM-DD') AS expectedDeliveryDt,
+            PAYMENT_TERMS      AS paymentTerms
+        FROM QUOTATION
+        ORDER BY QUOTATION_NO
+    </select>
+</mapper>
