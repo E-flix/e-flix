@@ -1,15 +1,3 @@
-.metadata
-.settings
-bin
-Servers
-
-bin/
-target/
-.project
-.classpath
-.factorypath
-.settings/
-
 ### Maven ###
 target/
 pom.xml.tag
@@ -34,5 +22,19 @@ buildNumber.properties
 *.log
 
 # 기타세팅추가
+.metadata
+.settings
+bin
+Servers
+
+bin/
+target/
+.project
+.classpath
+.settings/
+
 .factorypath
 .vscode/
+
+# properties
+application.properties

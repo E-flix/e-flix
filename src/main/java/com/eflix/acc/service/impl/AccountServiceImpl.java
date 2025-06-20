@@ -3,11 +3,9 @@ package com.eflix.acc.service.impl;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-
 import com.eflix.acc.dto.AccountDTO;
 import com.eflix.acc.mapper.AccountMapper;
 import com.eflix.acc.service.AccountService;
-
 import lombok.RequiredArgsConstructor;
 
 /* ============================================
@@ -21,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
-  private final AccountMapper AccountMapper;
+  private final AccountMapper accountMapper;
 
   /**
    * 계정과목 전체조회
@@ -30,7 +28,7 @@ public class AccountServiceImpl implements AccountService {
    */
   @Override
   public List<AccountDTO> getList() {
-    return AccountMapper.getList();
+    return accountMapper.getList();
   }
 
   // @Override

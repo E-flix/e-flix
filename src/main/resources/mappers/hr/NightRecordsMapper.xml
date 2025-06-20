@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-20
+  - 설명     : NightRecordsMapper query xml
+  [ 변경 이력 ]
+  - 2025-06-19 (김어진): 계정과목 전체조회 작성
+=============================================== -->
+<mapper namespace="com.eflix.hr.mapper.NightRecordsMapper">
+
+</mapper>

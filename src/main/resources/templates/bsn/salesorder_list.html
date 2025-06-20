@@ -17,44 +17,23 @@
       </div>
     </div>
   </div>
-  <script>
+  <script th:inline="javascript">
     let gridApi;
+    let ordersList = JSON.parse(/*[[${ordersList}]]*/ '[]');
     const gridOptions = {
-      rowData: [{
-          주문서번호 : "001",
-          주문일자 : "2025/04/25",
-          거래처명:"테슬라",
-          품목명: "철근",
-          담당자:"홍길동",
-          합계금액: "8,000,000",
-          진행상태: "대기",
-        },
+      rowData: ordersList,
+
+      columnDefs: [
+        { headerName: '주문번호', field: 'orderNo' },
+        { headerName: '주문일자', field: 'orderDt' },
+        { headerName: '납기일자', field: 'deliveryDt' },
+        { headerName: '거래처코드', field: 'customerCd' },
+        { headerName: '담당자', field: 'empCd' },
+        { headerName: '창고', field: 'warehouseCd' },
+        { headerName: '결제조건', field: 'paymentTerms' },
+        { headerName: '세금계산서발행', field: 'taxInvoiceIssueYn' }
       ],
-      columnDefs: [{
-          field: "주문서번호"
-        },
-        {
-          field: "주문일자"
-        },
-        {
-          field: "거래처명"
-        },
-        {
-          field: "품목명"
-        },
-        {
-          field: "담당자"
-        },
-        {
-          field: "합계금액"
-        },
-        {
-          field: "진행상태"
-        },
-      ],
-      defaultColDef: {
-        flex: 1,
-      },
+      defaultColDef: { flex: 1 },
     };
     gridApi = agGrid.createGrid(document.querySelector("#myGrid"), gridOptions);
 

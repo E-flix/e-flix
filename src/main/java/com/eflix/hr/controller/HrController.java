@@ -1,7 +1,15 @@
 package com.eflix.hr.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.eflix.hr.dto.AttendanceRecordsDTO;
+import com.eflix.hr.service.AttendanceRecordsService;
+
 import org.springframework.web.bind.annotation.GetMapping;
 
 
@@ -19,15 +27,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequestMapping("/hr")
 public class HrController {
 
+  @Autowired
+  private AttendanceRecordsService service;
+
   // 인사 메인 화면
   @GetMapping("")
   public String hrMain () {
+    System.out.println(service.getAllAttendanceRecords());
     return "hr/hrMain";
   }
 
   // 사원 관리 화면
   @GetMapping("/el")
-  public String empList() {
+  public String empList(Model model) {
+    List<AttendanceRecordsDTO> records = service.getAllAttendanceRecords();
+    model.addAttribute("records", records);
     return "hr/emp";
   }
 
