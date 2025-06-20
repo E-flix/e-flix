@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.eflix.bsn.service.QuotationService;
+import com.eflix.bsn.service.OrdersService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class BsnController {
 
   private final QuotationService quotationService;
+  private final OrdersService ordersService;
 
   //영업 관리 메인 
   @GetMapping()
@@ -42,7 +44,8 @@ public class BsnController {
 
   //주문서 조회
   @GetMapping("/sorlist")
-  public String salesorder_list(){
+  public String salesorder_list(Model model){
+    model.addAttribute("ordersList", ordersService.getOrdersList());
     return "bsn/salesorder_list";
   }
 
