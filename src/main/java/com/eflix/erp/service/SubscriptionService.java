@@ -29,6 +29,6 @@ package com.eflix.erp.service;
  * </ul>
  */
 
-public class SubscriptionService {
+public interface SubscriptionService {
     
 }
