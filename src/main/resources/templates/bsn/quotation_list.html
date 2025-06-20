@@ -19,9 +19,9 @@
   </div>
   <script th:inline="javascript">
     let gridApi;
-    const rowData = [[${quotationList}]];
+    let quotationList = /*[[${quotationList}]]*/ [];
     const gridOptions = {
-      rowData: rowData,
+      rowData: quotationList,
       columnDefs: [
         { headerName: '견적번호', field: 'quotationNo' },
         { headerName: '견적일자', field: 'quotationDt' },
