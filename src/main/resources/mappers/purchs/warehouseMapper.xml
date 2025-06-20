@@ -9,4 +9,15 @@
       FROM warehouse
   </select>
 
+  <insert id="insertWarehouse" parameterType="WarehouseDTO">
+      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager) VALUES
+      (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager})
+  </insert>
+
+  <delete id="deleteWarehouse" parameterType="WarehouseDTO">
+      BEGIN
+        WAREHOUSE_ID_PROCEDURE(#{warehouseId});
+      END;
+  </delete>
+
 </mapper>

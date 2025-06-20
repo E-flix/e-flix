@@ -1,10 +1,17 @@
+<!-- ============================================
+  - 작성자   : 이혁진
+  - 최초작성 : 2025-06-19
+  - 설명     : 창고 화면
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-19 (이혁진): 화면완성
+  - 2025-06-20 (이혁진): warehouse 리스트 출력 완료
+  - 2025-06-20 (이혁진): warehouse 삽입 완료
+============================================ -->
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" 
-	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  layout:decorate="~{common/layouts/default}">
-
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{common/layouts/default}">
 <div layout:fragment="content" class="container-fluid">
-
 	<div class="col-md-12">
 		<div class="radio-group">
 			<input type="radio" class="btn-check" name="accountFilter" id="warehouse" autocomplete="off" checked>
@@ -14,83 +21,98 @@
 			<label class="btn btn-outline-secondary btn-sm me-1" for="warehouse_mnt">창고이동</label>
 		</div>
 	</div>
-
-
-
-	<!-- 창고 테이블 카드 -->
 	<div class="card shadow-sm">
 		<div class="card-body">
-
 			<!-- 버튼 영역 -->
 			<div class="d-flex justify-content-end mb-2">
-				<button type="button" class="btn btn-success btn-sm me-2" th:onclick="saveWarehouses()">저장</button>
-				<button type="button" class="btn btn-danger btn-sm" th:onclick="deleteWarehouse()">삭제</button>
+				<button type="button" class="btn btn-success btn-sm me-2" id="addBtn">저장</button>
+				<button type="button" class="btn btn-danger btn-sm me-2">삭제</button>
 			</div>
-
 			<!-- 테이블 -->
 			<div class="table-responsive">
 				<table class="table table-bordered table-sm text-center align-middle mb-0">
 					<thead class="table-primary">
 						<tr>
+							<th><input type="checkbox" class="checkAll"></th>
 							<th>NO</th>
 							<th>창고코드</th>
-							<th>주소</th>
 							<th>창고위치</th>
-							<th>용량</th>
 							<th>창고용량</th>
-							<th>이름</th>
 							<th>담당자</th>
 						</tr>
 					</thead>
 					<tbody>
 						<!-- 입력 행 -->
-						<tr>
+						<tr id="inputRow">
+							<th>-</th>
 							<td>-</td>
-							<td><input type="text" class="form-control form-control-sm" name="code" /></td>
-							<td><input type="text" class="form-control form-control-sm" name="address" /></td>
-							<td><input type="text" class="form-control form-control-sm" name="location" /></td>
-							<td><input type="number" class="form-control form-control-sm" name="volume" /></td>
-							<td><input type="number" class="form-control form-control-sm" name="capacity" /></td>
-							<td><input type="text" class="form-control form-control-sm" name="name" /></td>
-							<td><input type="text" class="form-control form-control-sm" name="manager" /></td>
+							<td><input type="text" class="form-control form-control-sm" id="warehouseId" /></td>
+							<td><input type="text" class="form-control form-control-sm" id="warehouseLocation" /></td>
+							<td><input type="text" class="form-control form-control-sm" id="warehouseScale" /></td>
+							<td><input type="text" class="form-control form-control-sm" id="warehouseManager" /></td>
 						</tr>
-
-						<!-- 기존 데이터 반복 -->
+						<!-- 데이터 반복 -->
 						<tr th:each="list, stat : ${whList}">
+							<th><input type="checkbox" class="checkOne"></th>
 							<td th:text="${stat.count}"></td>
 							<td th:text="${list.warehouseId}"></td>
 							<td th:text="${list.warehouseLocation}"></td>
 							<td th:text="${list.warehouseScale}"></td>
 							<td th:text="${list.warehouseManager}"></td>
-							<!-- <td th:text="${list.volume}"></td>
-							<td th:text="${list.capacity}"></td>
-							<td th:text="${list.name}"></td>
-							<td th:text="${list.manager}"></td> -->
 						</tr>
 					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>
-
 </div>
 
 </html>
 
 <script>
-	function saveWarehouses() {
-		// 저장 로직 실행
-		alert('저장 버튼 클릭됨');
-	}
-
-	function deleteWarehouse() {
-		// 삭제 로직 실행
-		alert('삭제 버튼 클릭됨');
-	}
-
+	// 페이지 이동
 	document.getElementById('warehouse_mnt').addEventListener('change', function () {
 		if (this.checked) {
-			window.location.href = '/purchs/warehouse_movement';
+			window.location.href = '/purchs/whm';
 		}
-	})
+	});
+	// 체크박스
+	const checkAll = document.querySelector('.checkAll');
+	const checkboxes = document.querySelectorAll('.checkOne');
+	checkAll.addEventListener('click', function () {
+		const isChecked = checkAll.checked;
+		checkboxes.forEach(checkbox => checkbox.checked = isChecked);
+	});
+	$("#addBtn").on("click", () => {
+		const warehouseId = $("#warehouseId").val();
+		const warehouseLocation = $("#warehouseLocation").val();
+		const warehouseScale = $("#warehouseScale").val();
+		const warehouseManager = $("#warehouseManager").val();
+		const data = {
+			warehouseId,
+			warehouseLocation,
+			warehouseScale,
+			warehouseManager
+		}
+		$.ajax({
+			type: 'POST', //데이터 전송 타입,
+			url: '/purchs/whc', //데이터를 주고받을 파일 주소 입력,
+			contentType: 'application/json', // JSON 형식으로 보내겠다 명시
+			data: JSON.stringify(data), // 데이터를 JSON 문자열로 변환
+			success: function (result) {
+				//작업이 성공적으로 발생했을 경우
+				window.location.reload();
+			},
+			error: function () {
+				Swal.fire({
+					icon: "error",
+					title: "경고",
+					text: "창고정보를 입력하세요.",
+					showConfirmButton: false,
+					timer: 1000
+				});
+				//에러가 났을 경우 실행시킬 코드
+			}
+		})
+	});
 </script>
