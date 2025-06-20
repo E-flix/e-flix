@@ -19,7 +19,7 @@
   </div>
   <script th:inline="javascript">
     let gridApi;
-    let ordersList = /*[[${ordersList}]]*/ [];
+    let ordersList = JSON.parse(/*[[${ordersList}]]*/ '[]');
     const gridOptions = {
       rowData: ordersList,
       columnDefs: [

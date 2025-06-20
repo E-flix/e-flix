@@ -19,7 +19,7 @@
   </div>
   <script th:inline="javascript">
     let gridApi;
-    let quotationList = /*[[${quotationList}]]*/ [];
+    let quotationList = JSON.parse(/*[[${quotationList}]]*/ '[]');
     const gridOptions = {
       rowData: quotationList,
       columnDefs: [

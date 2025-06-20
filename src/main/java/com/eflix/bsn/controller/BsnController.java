@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.eflix.bsn.service.QuotationService;
 import com.eflix.bsn.service.OrdersService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,8 +33,10 @@ public class BsnController {
 
   //견적서 조회
   @GetMapping("/qot_list")
-  public String quotation_list(Model model){
-    model.addAttribute("quotationList", quotationService.getQuotationList());
+  public String quotation_list(Model model) throws JsonProcessingException {
+    var list = quotationService.getQuotationList();
+    String json = new ObjectMapper().writeValueAsString(list);
+    model.addAttribute("quotationList", json);
     return "bsn/quotation_list";
   }
 
@@ -44,8 +48,10 @@ public class BsnController {
 
   //주문서 조회
   @GetMapping("/sorlist")
-  public String salesorder_list(Model model){
-    model.addAttribute("ordersList", ordersService.getOrdersList());
+  public String salesorder_list(Model model) throws JsonProcessingException {
+    var list = ordersService.getOrdersList();
+    String json = new ObjectMapper().writeValueAsString(list);
+    model.addAttribute("ordersList", json);
     return "bsn/salesorder_list";
   }
 
