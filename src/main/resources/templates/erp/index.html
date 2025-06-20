@@ -1,7 +1,31 @@
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-18
+	- 설명     : E-FLIX 메인 화면
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-18 (복성민): Bootstrap 5 Template 적용
+	- 2025-06-19 (복성민): 결제과정 모달창 추가(infoModal, contractModal, contractSignatureModal, paymentModal) 및 결제 연동(PortOne)
+============================================
+-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{common/erp/layouts/default}">
 
+<head>
+	<style>
+		.pricing-card {
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+			cursor: pointer;
+		}
+
+		.pricing-card:hover {
+			transform: translateY(-8px);
+			box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+		}
+	</style>
+</head>
 <div layout:fragment="content">
 	<!-- Mashead header-->
 	<header class="masthead" id="main">
@@ -164,103 +188,512 @@
 	</section>
 	<!-- App badge section-->
 	<section class="bg-gradient-primary-to-secondary" id="price">
-		<div class="container">
+		<div class="container py-5">
 			<div class="row justify-content-center g-4">
-				<div class="col-12 col-md-6 col-lg-4 d-flex justify-content-center">
-					<div class="card" style="width: 18rem;">
-						<h5 class="card-title text-center mt-3">기본형</h5>
+				<!-- 기본형 -->
+				<div class="col-12 col-md-6 col-lg-4">
+					<div class="card h-100 shadow-sm border-0 pricing-card">
+						<div class="text-white text-center py-2 small fw-semibold">
+							asd
+						</div>
+						<div class="card-header bg-white border-0 text-center pt-4">
+							<h5 class="card-title fw-bold fs-4 mb-3">기본형</h5>
+							<p class="text-muted small mb-0">비즈니스를 시작하는 데 도움이 되는 기본 옵션</p>
+						</div>
 						<div class="card-body text-center">
-							<div class="card-text mb-3">50,000원 / 1개월</div>
-							<div class="card-text mb-3">50명</div>
-							<a href="#" class="btn btn-primary">지금 시작하기</a>
+							<div class="mb-3">
+								<span class="h2 fw-bold text-dark">50,000원</span>
+								<span class="text-muted"> / 1개월</span>
+							</div>
+							<div class="mb-4 text-muted">사용자/월, 연간 결제</div>
+							<div class="mb-3 small text-muted">(연간 구독 - 자동 갱신)</div>
+							<div class="mb-4 text-primary fw-semibold">50명</div>
 
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="hrCheckBox"> <label
-									class="form-check-label mb-0" for="hrCheckBox">인사</label>
+							<div class="d-grid gap-2 mb-4">
+								<button class="btn btn-primary fw-semibold py-2" data-bs-toggle="modal"
+									data-bs-target="#infoModal">
+									지금 시작하기
+								</button>
+								<button class="btn btn-outline-primary fw-semibold py-2">
+									무료로 사용해 보기
+								</button>
 							</div>
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="bsnCheckBox"> <label
-									class="form-check-label mb-0" for="bsnCheckBox">영업</label>
+
+							<div class="text-start">
+								<div class="mb-3 fw-semibold text-dark">웹 및 핵심 서비스:</div>
+								<div class="form-check mb-2">
+									<input class="form-check-input" type="checkbox" id="hrCheckBox1">
+									<label class="form-check-label small" for="hrCheckBox1">인사</label>
+								</div>
+								<div class="form-check mb-2">
+									<input class="form-check-input" type="checkbox" id="bsnCheckBox1">
+									<label class="form-check-label small" for="bsnCheckBox1">영업</label>
+								</div>
+								<div class="form-check mb-2">
+									<input class="form-check-input" type="checkbox" id="purchsCheckBox1">
+									<label class="form-check-label small" for="purchsCheckBox1">재고</label>
+								</div>
+								<div class="form-check mb-3">
+									<input class="form-check-input" type="checkbox" id="accCheckBox1">
+									<label class="form-check-label small" for="accCheckBox1">회계</label>
+								</div>
 							</div>
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="purchsCheckBox"> <label
-									class="form-check-label mb-0" for="purchsCheckBox">재고</label>
-							</div>
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="accCheckBox"> <label
-									class="form-check-label mb-0" for="accCheckBox">회계</label>
-							</div>
+						</div>
+						<div class="card-footer bg-white border-0 text-center">
+							<a href="#" class="text-primary text-decoration-none small fw-semibold">자세한 정보</a>
 						</div>
 					</div>
 				</div>
 
-				<div class="col-12 col-md-6 col-lg-4 d-flex justify-content-center">
-					<div class="card" style="width: 18rem;">
-						<h5 class="card-title text-center mt-3">표준형</h5>
+				<!-- 표준형 (인기) -->
+				<div class="col-12 col-md-6 col-lg-4">
+					<div class="card h-100 shadow border-0 position-relative pricing-card">
+						<div class="bg-primary text-white text-center py-2 small fw-semibold">
+							최고 인기
+						</div>
+						<div class="card-header bg-white border-0 text-center pt-4">
+							<h5 class="card-title fw-bold fs-4 mb-3">표준형</h5>
+							<p class="text-muted small mb-0">비즈니스 운영을 위한 강력한 도구와 보안</p>
+						</div>
 						<div class="card-body text-center">
-							<div class="card-text mb-3">50,000원 / 1개월</div>
-							<div class="card-text mb-3">100명</div>
-							<a href="#" class="btn btn-primary">지금 시작하기</a>
+							<div class="mb-3">
+								<span class="h2 fw-bold text-dark">50,000원</span>
+								<span class="text-muted"> / 1개월</span>
+							</div>
+							<div class="mb-4 text-muted">사용자/월, 연간 결제</div>
+							<div class="mb-3 small text-muted">(연간 구독 - 자동 갱신)</div>
+							<div class="mb-4 text-primary fw-semibold">100명</div>
 
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="hrCheckBox"> <label
-									class="form-check-label mb-0" for="hrCheckBox">인사</label>
+							<div class="d-grid gap-2 mb-4">
+								<button class="btn btn-primary fw-semibold py-2" data-bs-toggle="modal"
+									data-bs-target="#infoModal">
+									지금 시작하기
+								</button>
+								<button class="btn btn-outline-primary fw-semibold py-2">
+									무료로 사용해 보기
+								</button>
 							</div>
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="bsnCheckBox"> <label
-									class="form-check-label mb-0" for="bsnCheckBox">영업</label>
+
+							<div class="text-start">
+								<div class="mb-3 fw-semibold text-dark">기본형의 모든 기능과 함께:</div>
+								<div class="form-check mb-2">
+									<input class="form-check-input" type="checkbox" id="hrCheckBox2">
+									<label class="form-check-label small" for="hrCheckBox2">인사</label>
+								</div>
+								<div class="form-check mb-2">
+									<input class="form-check-input" type="checkbox" id="bsnCheckBox2">
+									<label class="form-check-label small" for="bsnCheckBox2">영업</label>
+								</div>
+								<div class="form-check mb-2">
+									<input class="form-check-input" type="checkbox" id="purchsCheckBox2">
+									<label class="form-check-label small" for="purchsCheckBox2">재고</label>
+								</div>
+								<div class="form-check mb-3">
+									<input class="form-check-input" type="checkbox" id="accCheckBox2">
+									<label class="form-check-label small" for="accCheckBox2">회계</label>
+								</div>
 							</div>
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="purchsCheckBox"> <label
-									class="form-check-label mb-0" for="purchsCheckBox">재고</label>
-							</div>
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="accCheckBox"> <label
-									class="form-check-label mb-0" for="accCheckBox">회계</label>
-							</div>
+						</div>
+						<div class="card-footer bg-white border-0 text-center">
+							<a href="#" class="text-primary text-decoration-none small fw-semibold">자세한 정보</a>
 						</div>
 					</div>
 				</div>
 
-				<div class="col-12 col-md-6 col-lg-4 d-flex justify-content-center">
-					<div class="card" style="width: 18rem;">
-						<h5 class="card-title text-center mt-3">고급형</h5>
+				<!-- 고급형 -->
+				<div class="col-12 col-md-6 col-lg-4">
+					<div class="card h-100 shadow-sm border-0 pricing-card">
+						<div class="text-white text-center py-2 small fw-semibold">
+							asd
+						</div>
+						<div class="card-header bg-white border-0 text-center pt-4">
+							<h5 class="card-title fw-bold fs-4 mb-3">고급형</h5>
+							<p class="text-muted small mb-0">비즈니스의 성장을 위한 모든 기능</p>
+						</div>
 						<div class="card-body text-center">
-							<div class="card-text mb-3">50,000원</div>
-							<div class="card-text mb-3">60,000원</div>
-							<a href="#" class="btn btn-primary">지금 시작하기</a>
+							<div class="mb-3">
+								<span class="h2 fw-bold text-dark">60,000원</span>
+								<span class="text-muted"> / 1개월</span>
+							</div>
+							<div class="mb-4 text-muted">사용자/월, 연간 결제</div>
+							<div class="mb-3 small text-muted">(연간 구독 - 자동 갱신)</div>
+							<div class="mb-4 text-primary fw-semibold">무제한</div>
 
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="hrCheckBox"> <label
-									class="form-check-label mb-0" for="hrCheckBox">인사</label>
+							<div class="d-grid gap-2 mb-4">
+								<button class="btn btn-primary fw-semibold py-2" data-bs-toggle="modal"
+									data-bs-target="#infoModal">
+									지금 시작하기
+								</button>
+								<button class="btn btn-outline-primary fw-semibold py-2">
+									무료로 사용해 보기
+								</button>
 							</div>
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="bsnCheckBox"> <label
-									class="form-check-label mb-0" for="bsnCheckBox">영업</label>
+
+							<div class="text-start">
+								<div class="mb-3 fw-semibold text-dark">표준형의 모든 기능과 함께:</div>
+								<div class="form-check mb-2">
+									<input class="form-check-input" type="checkbox" id="hrCheckBox3">
+									<label class="form-check-label small" for="hrCheckBox3">인사</label>
+								</div>
+								<div class="form-check mb-2">
+									<input class="form-check-input" type="checkbox" id="bsnCheckBox3">
+									<label class="form-check-label small" for="bsnCheckBox3">영업</label>
+								</div>
+								<div class="form-check mb-2">
+									<input class="form-check-input" type="checkbox" id="purchsCheckBox3">
+									<label class="form-check-label small" for="purchsCheckBox3">재고</label>
+								</div>
+								<div class="form-check mb-3">
+									<input class="form-check-input" type="checkbox" id="accCheckBox3">
+									<label class="form-check-label small" for="accCheckBox3">회계</label>
+								</div>
 							</div>
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="purchsCheckBox"> <label
-									class="form-check-label mb-0" for="purchsCheckBox">재고</label>
-							</div>
-							<div class="d-flex align-items-center justify-content-center mt-3"
-								style="margin-left: 1rem;">
-								<input class="form-check-input me-2" type="checkbox" id="accCheckBox"> <label
-									class="form-check-label mb-0" for="accCheckBox">회계</label>
-							</div>
+						</div>
+						<div class="card-footer bg-white border-0 text-center">
+							<a href="#" class="text-primary text-decoration-none small fw-semibold">자세한 정보</a>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</section>
+
+	<!-- 모달 -->
+	<div class="modal fade" id="infoModal" aria-hidden="true" aria-labelledby="infoModalLabel" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="infoModalLabel">정보입력</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+				</div>
+				<div class="modal-body">
+					<div class="container">
+						<!-- 가입 정보 -->
+						<h6>가입 정보
+							<input type="checkbox" class="form-check-input ms-2"> 가입자와 동일
+						</h6>
+						<div class="row g-2 mb-3">
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="신청자"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="연락처"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="회사명"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="회사 영문명"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="대표자명"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="연락처"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="주소"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="사업자 번호"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="나머지 주소"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="우편번호"></div>
+							<div class="col-md-10"><input type="text" class="form-control" placeholder="사업자 등록증"></div>
+							<div class="col-md-2"><button class="btn btn-dark w-100">불러오기</button></div>
+						</div>
+
+						<!-- 마스터 ID 정보 -->
+						<h6 class="mt-4">마스터 ID 정보</h6>
+						<div class="row g-2 mb-3">
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="마스터 ID"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="이름"></div>
+							<div class="col-md-6"><input type="password" class="form-control" placeholder="비밀번호"></div>
+							<div class="col-md-6"><input type="password" class="form-control" placeholder="비밀번호 확인">
+							</div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="회사 전화번호"></div>
+							<div class="col-md-6"><input type="text" class="form-control" placeholder="연락처"></div>
+							<div class="col-12"><input type="email" class="form-control" placeholder="이메일"></div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+					<button class="btn btn-primary" data-bs-dismiss="modal" id="toContractModal">
+						다음페이지로 이동
+					</button>
+					<script>
+						document.getElementById('toContractModal').addEventListener('click', function () {
+							// 약간의 지연을 주고 다음 모달을 열어야 이전 모달이 닫힘
+							setTimeout(() => {
+								var contractModal = new bootstrap.Modal(document.getElementById('contractModal'));
+								contractModal.show();
+							}, 500); // 0.5초 딜레이
+						});
+					</script>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 2. 계약서 등록 모달 -->
+	<div class="modal fade" id="contractModal" tabindex="-1" aria-labelledby="contractModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="contractModalLabel">계약서 등록</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+				</div>
+				<div class="modal-body bg-light">
+					<div class="container bg-secondary p-4 text-white">
+						<div class="mx-auto bg-light text-dark p-4" style="width: 80%; min-height: 300px;">
+							<p class="text-center fw-bold">계약서 내용</p>
+							<button class="btn btn-link text-end p-0" data-bs-dismiss="modal" id="toSignatureModal">
+								계약서 사인란
+							</button>
+						</div>
+						<script>
+							document.getElementById('toSignatureModal').addEventListener('click', function () {
+								setTimeout(() => {
+									var signatureModal = new bootstrap.Modal(document.getElementById('contractSignatureModal'));
+									signatureModal.show();
+								}, 500);
+							});
+						</script>
+						<div class="text-center mt-4">
+							<button class="btn btn-light" data-bs-target="#paymentModal" data-bs-toggle="modal"
+								data-bs-dismiss="modal">작성</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 2.1. 계약서 사인 등록 모달 -->
+	<div class="modal fade" id="contractSignatureModal" tabindex="-1" aria-labelledby="contractSignatureModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="contractSignatureModalLabel">사인 등록</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+				</div>
+				<div class="modal-body bg-light">
+					<div class="container bg-secondary p-4 text-white">
+						<div class="mx-auto bg-light text-dark p-4" style="width: 80%; min-height: 300px;">
+							<p class="text-center fw-bold">계약서 내용</p>
+							<div class="mt-5 text-end">계약서 사인란</div>
+						</div>
+						<div class="text-center mt-4">
+							<button class="btn btn-light" data-bs-dismiss="modal" id="toPaymentModal">작성</button>
+							<script>
+								document.getElementById('toPaymentModal').addEventListener('click', function () {
+									setTimeout(() => {
+										var paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+										paymentModal.show();
+									}, 500);
+								});
+							</script>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 3. 결제정보 모달 -->
+	<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">결제정보</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+				</div>
+				<div class="modal-body">
+					<div class="container bg-secondary text-white p-4 rounded">
+						<h4 class="text-center mb-3">구독명</h4>
+						<h6>서비스</h6>
+						<div class="bg-light text-dark p-3 mb-3" style="height: 120px; overflow-y: auto;">
+							<div>서비스명</div>
+							<div>서비스명</div>
+							<div>서비스명</div>
+						</div>
+						<input type="number" class="form-control mb-2" placeholder="개월 수">
+						<input type="text" class="form-control mb-3" placeholder="총가격">
+						<button class="btn btn-light w-100">결제진행</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- 포트원 스크립트 추가 -->
+	<script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			// 아임포트 가맹점 코드
+			const impCode = "channel-key-eb0772e3-8bde-4a0f-884b-cde8bb0fa8cf";
+
+			// 좌석 정보
+			const seatInfo = JSON.parse(localStorage.getItem("selectedSeats"))
+				.map((seat) => {
+					const parts = seat.seatId.split("-");
+					return parts.slice(1).join("-"); // mt20id 제거 후 나머지 부분 합치기
+				})
+				.join(", ");
+
+			document.getElementById("seat-info").textContent = seatInfo; // mt20id 제거된 좌석 정보 출력
+
+			const bookingInfo = JSON.parse(localStorage.getItem("bookingInfo"));
+			const totalPrice = localStorage.getItem("totalPrice");
+
+			// 문자열에서 쉼표(,)와 '원' 제거 후 숫자로 변환
+			const totalPriceRaw = localStorage.getItem("totalPrice") || "0 원";
+			const sanitizedTotalPrice = Number(totalPriceRaw.replace(/[^\d]/g, "")); // 숫자 외 제거
+
+			if (sanitizedTotalPrice <= 0) {
+				alert("결제 금액이 0원입니다. 다시 시도해주세요.");
+				return;
+			}
+
+			const performanceId = localStorage.getItem("performanceId"); // 공연 ID
+			const facilityId = localStorage.getItem("facilityId"); // 공연 시설 ID
+			if (performanceId && facilityId) {
+				console.log("공연 ID:", performanceId);
+				console.log("공연 시설 ID:", facilityId);
+			}
+
+			// 배송지 정보 가져오기
+			const defaultAddress = JSON.parse(localStorage.getItem("defaultAddress"));
+			if (!defaultAddress) {
+				alert("배송지 정보가 없습니다. 배송지를 추가해 주세요.");
+				return;
+			}
+
+			// buyerAddr 생성: address + detailAddress
+			const buyerAddr = `${defaultAddress.address} ${defaultAddress.detailAddress}`;
+			const buyerPostcode = defaultAddress.postcode;
+
+			// booking-info
+			document.getElementById("booking-nickname").textContent = bookingInfo.nickname; // 닉네임
+			document.getElementById("booking-email").textContent = bookingInfo.email; // 이메일
+			document.getElementById("booking-phone").textContent = bookingInfo.phone; // 연락처
+			document.getElementById("total-price").textContent = totalPrice;
+			document.getElementById("prev-btn").addEventListener("click", () => {
+				// localStorage에서 필수 정보를 가져옴
+				const mt20id = localStorage.getItem("performanceId");
+				const selectedDate = localStorage.getItem("selectedDate");
+				const selectedTime = localStorage.getItem("selectedTime");
+				const dayOfWeek = localStorage.getItem("dayOfWeek");
+
+				if (!mt20id || !selectedDate || !selectedTime || !dayOfWeek) {
+					alert("필수 정보가 누락되었습니다. 다시 시도해주세요.");
+					return;
+				}
+
+				// 이전 단계로 이동 (필수 파라미터 포함)
+				window.location.href = `/payment/booking-info?mt20id=${mt20id}&selectedDate=${selectedDate}&selectedTime=${selectedTime}&dayOfWeek=${dayOfWeek}`;
+			});
+
+			// 결제 버튼 이벤트
+			const payButton = document.getElementById("pay-btn");
+
+			payButton.addEventListener("click", () => {
+				const selectedPayment = document.querySelector("input[name='payment']:checked");
+				if (!selectedPayment) {
+					alert("결제 수단을 선택해 주세요.");
+					return;
+				}
+				const paymentMethod = selectedPayment.value; // 카드 or 카카오페이
+				handlePayment(paymentMethod === "kakaopay" ? "kakaopay" : "html5_inicis.INIpayTest", "card");
+			});
+
+			// 결제 처리 함수
+			function handlePayment(pg, payMethod) {
+				console.log(`PG: ${pg}, Payment Method: ${payMethod}`);
+
+				// 아임포트 초기화
+				IMP.init(impCode);
+
+				// 결제 요청
+				IMP.request_pay(
+					{
+						pg: pg, // PG사
+						pay_method: payMethod, // 결제 방식
+						merchant_uid: `ORD-${new Date().getTime()}`, // 주문번호
+						name: `좌석: ${seatInfo}`, // 상품명
+						amount: sanitizedTotalPrice, // 숫자로 변환된 결제 금액
+						buyer_name: bookingInfo.nickname, // 구매자 이름
+						buyer_tel: bookingInfo.phone, // 구매자 연락처
+						buyer_email: bookingInfo.email, // 구매자 이메일
+					},
+					function (rsp) {
+						if (rsp.success) {
+							// 결제 성공 시 처리
+
+							alert(`결제가 성공적으로 완료되었습니다.\n고유ID: ${rsp.imp_uid}`);
+
+							// 결제 데이터 생성
+							const paymentData = {
+								impUid: rsp.imp_uid || null,
+								merchantUid: rsp.merchant_uid || null,
+								payMethod: rsp.pay_method || "unknown",
+								applyNum: rsp.apply_num,
+								cardName: rsp.card_name,
+								cardNumber: rsp.card_number,
+								cardQuota: rsp.card_quota,
+								pgProvider: rsp.pg_provider || null,
+								pgType: rsp.pg_type || null,
+								pgTid: rsp.pg_tid || null,
+								name: rsp.name || `좌석: ${seatInfo}`, // 좌석 정보 반영
+								paidAmount: rsp.paid_amount || 0,
+								currency: rsp.currency || "KRW",
+								buyerName: rsp.buyer_name || bookingInfo.nickname,
+								buyerTel: rsp.buyer_tel || bookingInfo.phone,
+								buyerAddr: buyerAddr, // 배송지 주소 추가
+								buyerPostcode: buyerPostcode, // 우편번호 추가
+								buyerEmail: rsp.buyer_email || bookingInfo.email,
+								status: rsp.status,
+								paidAt: rsp.paid_at
+									? new Date(rsp.paid_at * 1000).toISOString()
+									: null,
+								receiptUrl: rsp.receipt_url || null,
+								seatIds: JSON.parse(localStorage.getItem("selectedSeats")), // 좌석 ID 배열 추가
+								mt20id: performanceId, // 공연 ID 추가
+								mt10id: facilityId, // 공연 시설 ID 추가
+								showDate: localStorage.getItem("selectedDate"), // 공연 날짜 추가
+								showTime: localStorage.getItem("selectedTime"), // 공연 시간 추가
+							};
+
+							// 서버로 결제 검증 요청
+							$.ajax({
+								type: "POST",
+								url: "/payment/save-payment",
+								contentType: "application/json",
+								data: JSON.stringify(paymentData), // paymentData를 바로 사용
+
+								success: function () {
+									alert("결제가 성공적으로 저장되었습니다.");
+									// 필수 파라미터를 URL에 포함
+									const mt20id = localStorage.getItem("performanceId");
+									const selectedDate = localStorage.getItem("selectedDate");
+									const selectedTime = localStorage.getItem("selectedTime");
+									const dayOfWeek = localStorage.getItem("dayOfWeek");
+
+									window.location.href = `/payment/seat-selection?mt20id=${mt20id}&selectedDate=${selectedDate}&selectedTime=${selectedTime}&dayOfWeek=${dayOfWeek}`;
+								},
+								error: function (jqXHR, textStatus, errorThrown) {
+									console.error(
+										"Error during payment save:",
+										textStatus,
+										errorThrown
+									);
+
+									// 서버에서 반환된 asd응답 내용
+									const response = jqXHR.responseText;
+
+									// 응답 내용을 파싱해서 표시
+									try {
+										const parsedResponse = JSON.parse(response);
+										console.error("서버 응답:", parsedResponse);
+										alert(
+											`결제 저장에 실패했습니다: ${parsedResponse.message || response
+											}`
+										);
+									} catch (e) {
+										console.error("응답 파싱 실패. 원본 응답:", response);
+										alert(`결제 저장에 실패했습니다: ${response}`);
+									}
+								},
+							});
+						} else {
+							console.error("결제 실패:", rsp.error_msg);
+							alert(`결제에 실패했습니다. 사유: ${rsp.error_msg}`);
+						}
+					}
+				);
+			}
+		});
+	</script>
+</div>
