@@ -10,18 +10,22 @@ package com.eflix.hr.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.AttendanceRecordsDTO;
+import com.eflix.hr.mapper.AttendanceRecordsMapper;
 import com.eflix.hr.service.AttendanceRecordsService;
 
 @Service
 public class AttendanceRecordsServiceImpl implements AttendanceRecordsService {
 
+  @Autowired
+  AttendanceRecordsMapper attendanceRecordsMapper;
+
   @Override
   public List<AttendanceRecordsDTO> getAllAttendanceRecords() {
-
-    throw new UnsupportedOperationException("Unimplemented method 'getAllAttendanceRecords'");
+    return attendanceRecordsMapper.selectAll();
   }
 
   @Override

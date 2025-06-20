@@ -10,10 +10,12 @@ package com.eflix.hr.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
 import com.eflix.hr.dto.AttendanceRecordsDTO;
 
+@Mapper
 public interface AttendanceRecordsMapper {
     List<AttendanceRecordsDTO> selectAll();
     AttendanceRecordsDTO selectById(@Param("attdIdx") String attdIdx);
