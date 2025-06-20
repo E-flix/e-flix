@@ -6,13 +6,191 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-06-20 (김희정): 레이아웃 및 ag-grid 세팅(enter 이동/ 삭제(view))
+  -----------------------------------------------
+  [ TODO ] 
+  1. DB 연결 (select/ update/ delete/ insert)
+  2. 같은 전표번호 내에서 차대변 차액 발생하면 차액 표시하는 기능 구현 (전표 소계 열/ 합계 열)
+  3. 필수 값 입력 안하면 행 저장 불가 (날짜,차대변,계정과목코드,금액)
+  4. 코드 field에서 F4를 누르면 모달창(계정과목 / 거래처) 띄워주고 데이터받아서 해당 셀의 value값 변경
+  5. 날짜 검색 필터
+  6. 가장 아래 입력할수 있는 칸 추가
+  7. 클릭한 줄과 같은 number field의 값을 가지고 있다면 배경색 강조 표시 (2번과 연결)
+  8. 코드 입력하면 계정과목명 / 거래처명 자동 매칭 불러오기
+  9. 구분 field 번호로 입력하면 자동으로 매칭 1:출금 2:입금 3:차변 4:대변
+  10. 전표번호 자동부여
+  11. 다 하면 자주 사용되는 ag-grid 세팅은 별도의 class만들고 import해서 사용하기
 ============================================ -->
+
 <head>
   <title>일반전표</title>
 </head>
 <div layout:fragment="content">
-  <div id="entry">
-    <h2>일반전표</h2>
-    <p>일반전표 화면입니다.</p>
+  <div class="w-100" id="account">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <!-- 왼쪽: 일반전표 제목 -->
+      <h3 class="mb-0">일반전표</h3>
+      <!-- 오른쪽: 버튼 모음 -->
+      <div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="location.href='/voucher/excel-template'">엑셀 서식 내려받기</button>
+        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#excelUploadModal">엑셀 업로드하기</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="deleteSelected()">삭제</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">인쇄</button>
+      </div>
+    </div>
+    <!-- 엑셀 업로드 모달 -->
+    <div class="modal fade" id="excelUploadModal" tabindex="-1">
+      <div class="modal-dialog">
+        <form class="modal-content" enctype="multipart/form-data" method="post" action="/voucher/upload">
+          <div class="modal-header">
+            <h5 class="modal-title">엑셀 업로드</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="file" name="excelFile" accept=".xlsx,.xls" class="form-control">
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">업로드</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- 검색/필터 영역 -->
+    <form class="row g-2 mb-2 align-items-end" method="get" action="/voucher/list">
+      <div class="col-auto">
+        <label class="form-label mb-0">일자</label>
+        2025 년
+        <input type="number" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:45px;"> 월
+        <input type="number" class="form-control form-control-sm d-inline-block" name="startDay" style="width:45px;"> 일 ~
+        2025 년
+        <input type="number" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:45px;"> 월
+        <input type="number" class="form-control form-control-sm d-inline-block" name="endDay" style="width:45px;"> 일
+      </div>
+    </form>
+    <!-- 본문 ag-Grid -->
+    <div class="grid-container" style="height:100vh;">
+      <div id="entryGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
+    </div>
   </div>
+  <script th:inline="javascript">
+    // 전체조회 API
+    let entryList = /*[[${entryList}]]*/ [];
+
+    // ag-Grid 세팅
+    const gridOptions = {
+      // 헤더 높이 지정
+      headerHeight: 35,
+      // 행 높이 지정
+      rowHeight: 35,
+      // 그리드 values 배열
+      rowData: entryList,
+      // 그리드 필드명 정의
+      columnDefs: [
+        { headerName: "월", field: "month", editable: true, minWidth: 55, maxWidth: 55 },
+        { headerName: "일", field: "day", editable: true, minWidth: 55, maxWidth: 55 },
+        { headerName: "번호", field: "number", editable: true, minWidth: 75, maxWidth: 75 },
+        { headerName: "구분", field: "type", editable: true, minWidth: 70, maxWidth: 70 },
+        { headerName: "코드", field: "accountCode", editable: true, minWidth: 70, maxWidth: 70 },
+        { headerName: "계정과목", field: "account", editable: true, minWidth: 100, maxWidth: 100 },
+        { headerName: "코드", field: "code", editable: true, minWidth: 80, maxWidth: 80 },
+        { headerName: "거래처", field: "customer", editable: true, initialWidth: 250 },
+        { headerName: "차변", field: "debit", editable: true, initialWidth: 135, minWidth: 100 },
+        { headerName: "대변", field: "credit", editable: true, initialWidth: 135, minWidth: 100 },
+        { headerName: "적요", field: "remark", editable: true, minWidth: 400 },
+      ],
+      // 임시 더미데이터 (삭제예정)
+      rowData: [{
+          month: 5,
+          day: 5,
+          number: '00001',
+          type: '차변',
+          accountCode: 830,
+          account: '소모품비',
+          code: '',
+          customer: '다이소',
+          debit: '500,000,000',
+          credit: '',
+          remark: '수정테이프 2개'
+        },
+        {
+          month: 5,
+          day: 5,
+          number: '00001',
+          type: '대변',
+          accountCode: 253,
+          account: '미지급금',
+          code: '90100',
+          customer: '농협카드(1052)',
+          debit: '',
+          credit: 3500,
+          remark: ''
+        }
+      ],
+      // 행 선택 방식을 지정
+      rowSelection: {
+        mode: 'multiRow', // 'single'==> 단일 선택, 'multiRow' ==> 다중 선택
+      },
+      // 체크박스 체크할 때 전표번호가 같으면 같이 체크되게 하는 기능 (사용안함)
+      // onRowSelected: (event) => {
+      //   const selectedNumber = event.data.number; // 선택한 number필드의 value반환 
+      //   const isSelected = event.node.isSelected(); // true | false 
+      //   // 같은 number 값을 갖는 다른 행도 동일 체크
+      //   event.api.forEachNode((node) => { // forEachNode 모든 로우 데이터를 하나씩 반복
+      //     if (node.data.number === selectedNumber && node !== event.node) {
+      //       node.setSelected(isSelected);
+      //     }
+      //   });
+      // },
+      onGridReady: (params) => {
+        gridOptions.api = params.api; // AG Grid에서 제공하는 API 객체들을 gridOptions에 저장 => 필터나 정렬 등 그리드 조작
+      },
+      // Enter 키 입력 시 다음 셀로 포커스를 이동하는 로직
+      onCellKeyDown: (event) => {
+        // Enter 키인지 체크
+        if (event.event.key === 'Enter') {
+          const api = event.api;
+          // 현재 포커스된 행의 인덱스 반환 (전체 행들 중 인덱스)
+          const currentRowIndex = event.node.rowIndex;
+          // 현재 포커스된 컬럼의 필드명 반환
+          const currentCol = event.colDef.field;
+          // 전체 columnDefs로부터 현재 컬럼의 인덱스를 찾아냄 (행 내에서 인덱스)
+          const allColumns = gridOptions.columnDefs; 
+          const currentColIndex = allColumns.findIndex(col => col.field === currentCol);
+          // 다음 컬럼과 다음 행 인덱스를 계산
+          let nextColIndex = currentColIndex + 1; // 다음 셀
+          let nextRowIndex = currentRowIndex; // 현재 행
+          // 마지막 컬럼이라면 첫번째 컬럼으로 이동하고, 행을 한 줄 내림
+          if (nextColIndex >= allColumns.length) {
+            nextColIndex = 0;
+            nextRowIndex = currentRowIndex + 1; // 현재행 + 1 => 다음행
+            // 마지막 행의 마지막 컬럼에서 Enter를 누른 경우 편집 종료
+            if (nextRowIndex >= api.getDisplayedRowCount()) { // getDisplayedRowCount() 필터링이나 정렬 적용후의 행 개수 반환
+              api.stopEditing(); 
+              return;
+            }
+          }
+          // 다음 포커스를 잡을 셀로 편집 모드 시작
+          api.startEditingCell({
+            rowIndex: nextRowIndex, // 몇번째 행인지
+            colKey: allColumns[nextColIndex].field, // 그 행의 몇번째 열인지
+          });
+          // 브라우저 기본 Enter 동작 방지
+          event.event.preventDefault();
+        }
+      }
+    };
+    // 그리드 생성
+    agGrid.createGrid(document.querySelector("#entryGrid"), gridOptions);
+    // 체크한 행 삭제
+    function deleteSelected(){
+      // 현재 선택된 행 데이터를 가져오기
+      const selectedRows = gridOptions.api.getSelectedRows();
+      if (selectedRows.length === 0) {
+        alert("삭제할 행을 선택해주세요.");
+        return;
+      }
+      // AG Grid 데이터에서 선택된 행 삭제
+      gridOptions.api.applyTransaction({ remove: selectedRows });
+    }
+  </script>
 </div>
