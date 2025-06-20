@@ -1,8 +1,10 @@
 package com.eflix.acc.dto;
 
 import java.util.Date;
+import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /* ============================================
   - 작성자   : 김희정
@@ -12,8 +14,8 @@ import lombok.Getter;
   [ 변경 이력 ]
   - 2025-06-20 (김희정): DTO 생성 
 =============================================== */
-
-@Getter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class EntryMasterDTO {
   private int entryNumber;
@@ -33,4 +35,6 @@ public class EntryMasterDTO {
   private int totalSupplyAmount;
   private int totalTaxAmount;
   private String remarks;
+  
+  private List<EntryDetailDTO> details;
 }
