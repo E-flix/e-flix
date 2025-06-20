@@ -17,48 +17,22 @@
       </div>
     </div>
   </div>
-  <script>
+  <script th:inline="javascript">
     let gridApi;
+    const rowData = [[${quotationList}]];
     const gridOptions = {
-      rowData: [{
-          견적번호 : "001",
-          견적일자 : "2025/04/25",
-          유효기간:"2025/05/25",
-          거래처명:"테슬라",
-          담당자:"홍길동",
-          연락처: "010-3554-6979",
-          예상납기일: "2025/04/30",
-          결제조건: "계좌이체",
-        },
+      rowData: rowData,
+      columnDefs: [
+        { headerName: '견적번호', field: 'quotationNo' },
+        { headerName: '견적일자', field: 'quotationDt' },
+        { headerName: '유효기간', field: 'validPeriod' },
+        { headerName: '거래처명', field: 'customerName' },
+        { headerName: '담당자', field: 'empCd' },
+        { headerName: '연락처', field: 'phone' },
+        { headerName: '예상납기일', field: 'expectedDeliveryDt' },
+        { headerName: '결제조건', field: 'paymentTerms' },
       ],
-      columnDefs: [{
-          field: "견적번호"
-        },
-        {
-          field: "견적일자"
-        },
-        {
-          field: "유효기간"
-        },
-        {
-          field: "거래처명"
-        },
-        {
-          field: "담당자"
-        },
-        {
-          field: "연락처"
-        },
-        {
-          field: "예상납기일"
-        },
-        {
-          field: "결제조건"
-        },
-      ],
-      defaultColDef: {
-        flex: 1,
-      },
+      defaultColDef: { flex: 1 },
     };
     gridApi = agGrid.createGrid(document.querySelector("#myGrid"), gridOptions);
 

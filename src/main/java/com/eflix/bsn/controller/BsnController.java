@@ -1,8 +1,13 @@
 package com.eflix.bsn.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.eflix.bsn.service.QuotationService;
+
+import lombok.RequiredArgsConstructor;
 
 /** ============================================
   - 작성자   : 이용진
@@ -11,7 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 ============================================  */
 @Controller
 @RequestMapping("/bsn")
+@RequiredArgsConstructor
 public class BsnController {
+
+  private final QuotationService quotationService;
 
   //영업 관리 메인 
   @GetMapping()
@@ -21,7 +29,8 @@ public class BsnController {
 
   //견적서 조회
   @GetMapping("/qot_list")
-  public String quotation_list(){
+  public String quotation_list(Model model){
+    model.addAttribute("quotationList", quotationService.getQuotationList());
     return "bsn/quotation_list";
   }
 
