@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Spring Security 로그인 성공 핸들러
+ * 공통 모델 속성 주입 클래스
  * <p>
  * 이 클래스는 {@code @ControllerAdvice}를 사용하여 모든 컨트롤러에 공통적으로
  * {@code @ModelAttribute} 값을 주입하는 역할을 합니다.
