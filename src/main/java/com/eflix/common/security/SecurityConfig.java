@@ -8,13 +8,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import com.eflix.common.security.details.CustomUserDetailService;
-import com.eflix.common.security.handler.CustomAccessDeniedHandler;
 import com.eflix.common.security.handler.CustomLoginSuccessHandler;
 
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +22,9 @@ import lombok.extern.slf4j.Slf4j;
  * 웹 애플리케이션의 보안 설정을 담당하며,
  * 현재 프로젝트에서는 모든 요청을 인증 없이 허용하고,
  * CSRF, 로그인 폼, 로그아웃 기능을 비활성화합니다.
+ * 
  * <br>
- * <br>
+ * 
  * 추후 보안 요구사항에 따라 인증/인가 로직 및 세부 정책이 추가될 수 있습니다.
  * </p>
  * 
@@ -46,46 +44,49 @@ import lombok.extern.slf4j.Slf4j;
  * @see
  * 
  * @changelog
- * <ul>
- *   <li>2025-06-19: 최초 생성 (복성민)</li>
- * </ul>
+ *            <ul>
+ *            <li>2025-06-19: 최초 생성 (복성민)</li>
+ *            <li>2025-06-21: securityMatcher, formLogin, remember, logout 설정 추가
+ *            </li>
+ *            </ul>
  */
 
 @Slf4j
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-	
+
 	@Autowired
 	private CustomUserDetailService customUserDetailService;
-	
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
 	@Bean
 	public SecurityFilterChain erpSecurityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.securityMatcher("/erp/**")
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/**","/**/**").permitAll()
-				.anyRequest().authenticated()
-			)
-			.formLogin(form -> form
-				.loginPage("/erp/login")
-				.usernameParameter("user_id")
-				.passwordParameter("user_pw")
-				.successHandler(authenticationSuccessHandler())
-				.permitAll()
-			)
-			.rememberMe(remember -> remember
-				.key("eflix")
-				.tokenValiditySeconds(60 * 60 * 24)
-				.rememberMeParameter("user_remember")
-				.userDetailsService(customUserDetailService)
-			)
-			.logout(logout -> logout
-				.logoutUrl("/erp/logout")
-				.deleteCookies("JSESSIONID", "user_remember")
-			)
-			.csrf(csrf -> csrf.disable())
-			.exceptionHandling(exception -> exception.accessDeniedPage("/erp/error/403"));
+				.securityMatcher("/erp/**")
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/**", "/**/**").permitAll()
+						.anyRequest().authenticated())
+				.formLogin(form -> form
+						.loginPage("/erp/login")
+						.usernameParameter("user_id")
+						.passwordParameter("user_pw")
+						.successHandler(authenticationSuccessHandler())
+						.permitAll())
+				.rememberMe(remember -> remember
+						.key("eflix")
+						.tokenValiditySeconds(60 * 60 * 24)
+						.rememberMeParameter("user_remember")
+						.userDetailsService(customUserDetailService))
+				.logout(logout -> logout
+						.logoutUrl("/erp/logout")
+						.deleteCookies("JSESSIONID", "user_remember"))
+				.csrf(csrf -> csrf.disable())
+				.exceptionHandling(exception -> exception.accessDeniedPage("/erp/error/403"));
 
 		return http.build();
 	}
@@ -93,31 +94,27 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.securityMatcher("/**")
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers( "/**","/**/**").permitAll()
-				.anyRequest().authenticated()
-			)
-			.formLogin(form -> form
-				.loginPage("/login")
-				.usernameParameter("user_id")
-				.passwordParameter("user_pw")
-				.successHandler(authenticationSuccessHandler())
-				.permitAll()
-			)
-			.rememberMe(remember -> remember
-				.key("eflix")
-				.tokenValiditySeconds(60 * 60 * 24)
-				.rememberMeParameter("user_remember")
-				.userDetailsService(customUserDetailService)
-			)
-			
-			.logout(logout -> logout
-				.logoutUrl("/logout")
-				.deleteCookies("JSESSIONID", "user_remember")
-			)
-			.csrf(csrf -> csrf.disable())
-			.exceptionHandling(exception -> exception.accessDeniedPage("/error/403"));
+				.securityMatcher("/**")
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/**", "/**/**").permitAll()
+						.anyRequest().authenticated())
+				.formLogin(form -> form
+						.loginPage("/login")
+						.usernameParameter("user_id")
+						.passwordParameter("user_pw")
+						.successHandler(authenticationSuccessHandler())
+						.permitAll())
+				.rememberMe(remember -> remember
+						.key("eflix")
+						.tokenValiditySeconds(60 * 60 * 24)
+						.rememberMeParameter("user_remember")
+						.userDetailsService(customUserDetailService))
+
+				.logout(logout -> logout
+						.logoutUrl("/logout")
+						.deleteCookies("JSESSIONID", "user_remember"))
+				.csrf(csrf -> csrf.disable())
+				.exceptionHandling(exception -> exception.accessDeniedPage("/error/403"));
 
 		return http.build();
 	}
