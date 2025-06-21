@@ -13,7 +13,7 @@ import lombok.Data;
  * 
  * <h3>설정 내용</h3>
  * <ul>
- * <li>모든 요청에 대해 인증 없이 접근 허용</li>
+ *   <li>모든 요청에 대해 인증 없이 접근 허용</li>
  * </ul>
  * 
  * @author 복성민 (bokseongmin@gmail.com)
@@ -23,9 +23,9 @@ import lombok.Data;
  * @see
  * 
  * @changelog
- *            <ul>
- *            <li>2025-06-20: 최초 생성 (복성민)</li>
- *            </ul>
+ * <ul>
+ *   <li>2025-06-20: 최초 생성 (복성민)</li>
+ * </ul>
  */
 
 @Data
@@ -39,5 +39,5 @@ public class UserDTO {
     private Date userRegdate;
     private Date userModdate;
 
-    private List<ErpRoleDTO> userRole = new ArrayList<>();
+    private String role;
 }

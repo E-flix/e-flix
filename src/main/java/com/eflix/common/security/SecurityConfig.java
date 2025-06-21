@@ -1,10 +1,11 @@
 package com.eflix.common.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -12,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
+import com.eflix.common.security.details.CustomUserDetailService;
 import com.eflix.common.security.handler.CustomAccessDeniedHandler;
 import com.eflix.common.security.handler.CustomLoginSuccessHandler;
 
@@ -44,47 +46,80 @@ import lombok.extern.slf4j.Slf4j;
  * @see
  * 
  * @changelog
- *            <ul>
- *            <li>2025-06-19: 최초 생성 (복성민)</li>
- *            </ul>
+ * <ul>
+ *   <li>2025-06-19: 최초 생성 (복성민)</li>
+ * </ul>
  */
 
 @Slf4j
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	
+	@Autowired
+	private CustomUserDetailService customUserDetailService;
+	
 	@Bean
 	public SecurityFilterChain erpSecurityFilterChain(HttpSecurity http) throws Exception {
-		// 프로젝트 완성 후 수정
 		http
 			.securityMatcher("/erp/**")
-			.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll() // 모든 요청을 인증 없이 허용
-		).csrf(csrf -> csrf.disable()) // CSRF 비활성화
-				.formLogin(form -> form.disable()) // 로그인 폼 비활성화
-				.logout(logout -> logout.disable()); // 로그아웃 비활성화
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/**","/**/**").permitAll()
+				.anyRequest().authenticated()
+			)
+			.formLogin(form -> form
+				.loginPage("/erp/login")
+				.usernameParameter("user_id")
+				.passwordParameter("user_pw")
+				.successHandler(authenticationSuccessHandler())
+				.permitAll()
+			)
+			.rememberMe(remember -> remember
+				.key("eflix")
+				.tokenValiditySeconds(60 * 60 * 24)
+				.rememberMeParameter("user_remember")
+				.userDetailsService(customUserDetailService)
+			)
+			.logout(logout -> logout
+				.logoutUrl("/erp/logout")
+				.deleteCookies("JSESSIONID", "user_remember")
+			)
+			.csrf(csrf -> csrf.disable())
+			.exceptionHandling(exception -> exception.accessDeniedPage("/erp/error/403"));
+
 		return http.build();
 	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		// 프로젝트 완성 후 수정
-		http.securityMatcher("/**").authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll() // 모든 요청을 인증 없이 허용
-		).csrf(csrf -> csrf.disable()) // CSRF 비활성화
-				.formLogin(form -> form.disable()) // 로그인 폼 비활성화
-				.logout(logout -> logout.disable()); // 로그아웃 비활성화
+		http
+			.securityMatcher("/**")
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers( "/**","/**/**").permitAll()
+				.anyRequest().authenticated()
+			)
+			.formLogin(form -> form
+				.loginPage("/login")
+				.usernameParameter("user_id")
+				.passwordParameter("user_pw")
+				.successHandler(authenticationSuccessHandler())
+				.permitAll()
+			)
+			.rememberMe(remember -> remember
+				.key("eflix")
+				.tokenValiditySeconds(60 * 60 * 24)
+				.rememberMeParameter("user_remember")
+				.userDetailsService(customUserDetailService)
+			)
+			
+			.logout(logout -> logout
+				.logoutUrl("/logout")
+				.deleteCookies("JSESSIONID", "user_remember")
+			)
+			.csrf(csrf -> csrf.disable())
+			.exceptionHandling(exception -> exception.accessDeniedPage("/error/403"));
+
 		return http.build();
-	}
-
-	@Bean
-	public AuthenticationEntryPoint customAuthenticationEntryPoint() {
-		return (request, response, authException) -> {
-			response.sendRedirect("/login"); // 로그인 페이지로 리다이렉트
-		};
-	}
-
-	@Bean
-	public AccessDeniedHandler accessDeniedHandler() {
-		return new CustomAccessDeniedHandler();
 	}
 
 	@Bean
@@ -93,7 +128,7 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
+	public UserDetailsService userDetailsService() {
+		return new CustomUserDetailService();
 	}
 }

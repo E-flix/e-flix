@@ -38,11 +38,4 @@ public class LoginController {
         // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return "pages/account/login";
     }
-
-    @PostMapping("/login")
-    public String login(@RequestBody String entity) {
-        
-        return entity;
-    }
-    
 }

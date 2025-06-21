@@ -19,7 +19,4 @@
     <!-- @author 복성민 -->
     <!-- @since 2025-06-20 -->
     <!-- ===================================== -->
-    <select id="findAll" resultType="ErpEmployeeDTO">
-        SELECT * FROM erp_employees
-    </select>
 </mapper>

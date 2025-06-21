@@ -6,5 +6,8 @@ import com.eflix.common.security.dto.UserDTO;
 
 @Mapper
 public interface UserMapper {
-    public UserDTO findById(String userIdx);
+    public UserDTO findByUser_idx(String userIdx);
+
+    public UserDTO findByUserId(String username);
+    
 }
