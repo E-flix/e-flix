@@ -20,6 +20,16 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public List <WarehouseDTO> getWarehouse() {
         return warehouseMapper.getWarehouse();
+    };
+
+    @Override
+    public int insertWarehouse(WarehouseDTO warehouseDTO) {
+        return warehouseMapper.insertWarehouse(warehouseDTO);
+    }
+
+    @Override
+    public int deleteWarehouse(WarehouseDTO warehouseDTO) {
+        return warehouseMapper.deleteWarehouse(warehouseDTO);
     }
 
 }

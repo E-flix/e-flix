@@ -11,6 +11,6 @@ package com.eflix.erp.mapper;
 ===============================================================
 */
 
-public class SubscribeMapper {
+public interface SubscribeMapper {
     
 }

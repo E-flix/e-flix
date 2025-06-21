@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-20
+  - 설명     : AttendanceRecordsMapper query xml
+  [ 변경 이력 ]
+  - 2025-06-19 (김어진): 사원 전체조회 작성
+=============================================== -->
+<mapper namespace="com.eflix.hr.mapper.AttendanceRecordsMapper">
+  <select id="selectAll" resultType="AttendanceRecordsDTO">
+      SELECT 
+      e.emp_idx,
+      e.emp_name,
+      e.dept_idx,
+      d.dept_name,
+      e.emp_grade,
+      e.emp_status,
+      e.emp_type,
+      e.emp_email,
+      e.emp_regdate,
+      e.emp_account
+    FROM employees e
+    LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+    
+  </select>
+</mapper>

@@ -6,34 +6,43 @@
   [ 변경 이력 ]
   - 2025-06-18 (김어진): 인사파트 메뉴 추가 및 링크 연결
   - 2025-06-19 (김어진): 인사파트 메뉴 추가 및 링크 연결
+  - 2025-06-21 (복성민): 메뉴 활성화 코드 추가
 ============================================ -->
 
-<li th:fragment="hr" class="nav-item">
-	<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHr" aria-expanded="true"
+<li th:fragment="hr" class="" th:class="${activeMenu == 'hr'} ? 'nav-item active' : 'nav-item'">
+	<a class="nav-link" href="#" data-toggle="collapse"
+		data-target="#collapseHr" aria-expanded="" th:attr="aria-expanded=${activeMenu == 'hr'}"
 		aria-controls="collapseHr">
 		<i class="fas fa-fw fa-folder"></i>
 		<span>인사</span>
 	</a>
-	<div id="collapseHr" class="collapse" aria-labelledby="headingHr" data-parent="#accordionsidebar">
+	<div id="collapseHr" class="collapse" th:classappend="${activeMenu == 'hr'} ? ' show' : ''" aria-labelledby="headingHr" data-parent="#accordionsidebar">
 		<div class="bg-white py-2 collapse-inner rounded">
 
-			<a class="collapse-item" href="/hr">인사관리</a>
+			<a class="" th:class="${activeMenu  == 'hr'} ? 'collapse-item active' : 'collapse-item'" href="/hr">인사관리</a>
 
 			<h6 class="collapse-header">조직관리:</h6>
-			<a class="collapse-item" href="/hr/el">사원관리</a>
-			<a class="collapse-item" href="/hr/da">부서관리</a>
+			<a class="" th:class="${activeSubMenu == 'el'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/el">사원관리</a>
+			<a class="" th:class="${activeSubMenu == 'da'} ? 'collapse-item active' : 'collapse-item'" href="/hr/da">부서관리</a>
 
 			<h6 class="collapse-header">근태관리:</h6>
-			<a class="collapse-item" href="/hr/al">근태현황(사원)</a>
-			<a class="collapse-item" href="/hr/am">근태관리(관리자)</a>
-			<a class="collapse-item" href="/hr/attdAdd">근태신청(사원)</a>
-			<a class="collapse-item" href="/hr/attdApproval">근태신청승인(관리자)</a>
-
+			<a class="" th:class="${activeSubMenu == 'al'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/al">근태현황(사원)</a>
+			<a class="" th:class="${activeSubMenu == 'am'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/am">근태관리(관리자)</a>
+			<a class="" th:class="${activeSubMenu == 'attdAddl'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/attdAdd">근태신청(사원)</a>
+			<a class="" th:class="${activeSubMenu == 'attdApproval'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/attdApproval">근태신청승인(관리자)</a>
 
 			<h6 class="collapse-header">급여관리:</h6>
-			<a class="collapse-item" href="/hr/sc">급여계산</a>
-			<a class="collapse-item" href="/hr/si">급여항목</a>
-			<a class="collapse-item" href="/hr/sp">급여명세서</a>
+			<a class="" th:class="${activeSubMenu == 'sc'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/sc">급여계산</a>
+			<a class="" th:class="${activeSubMenu == 'si'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/si">급여항목</a>
+			<a class="" th:class="${activeSubMenu == 'sp'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/sp">급여명세서</a>
 
 		</div>
 	</div>

@@ -1,19 +1,29 @@
-  <html xmlns:th="http://www.thymeleaf.org">
- <div th:fragment="menu">
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-18 
+	- 설명    : ERP 페이지 메뉴 모듈
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-18 (복성민): 파일생성 및 기본 코드 추가
+============================================
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="menu">
 	<!-- divider -->
 	<hr class="sidebar-divider d-none d-md-block">
- 	<li th:replace="~{common/fragments/item/hr::hr}"></li>
+	<li th:replace="~{common/fragments/item/hr::hr}"></li>
 	<!-- divider -->
 	<hr class="sidebar-divider d-none d-md-block">
-	
- 	<li th:replace="~{common/fragments/item/bsn::bsn}"></li>
+
+	<li th:replace="~{common/fragments/item/bsn::bsn}"></li>
 	<!-- divider -->
 	<hr class="sidebar-divider d-none d-md-block">
- 	
- 	<li th:replace="~{common/fragments/item/purchs::purchs}"></li>
+
+	<li th:replace="~{common/fragments/item/purchs::purchs}"></li>
 	<!-- divider -->
 	<hr class="sidebar-divider d-none d-md-block">
- 	
- 	<li th:replace="~{common/fragments/item/acc::acc}"></li>
+
+	<li th:replace="~{common/fragments/item/acc::acc}"></li>
 </div>
 </html>

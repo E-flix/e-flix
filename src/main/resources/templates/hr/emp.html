@@ -9,6 +9,7 @@
   [ 변경 이력 ]
   - 2025-06-18 (김어진): title 및 내용 추가
   - 2025-06-19 (김어진): layout 구성 및 모달창 생성
+  - 2025-06-20 (김어진): 사원 전체조회 구현
 ============================================ -->
 
 <head>
@@ -36,7 +37,9 @@
       <div class="row g-3 align-items-center mb-3">
         <div class="col-md-2"><label class="form-label">검색 기준</label></div>
         <div class="col-md-2">
-          <select class="form-select"><option>전체</option></select>
+          <select class="form-select">
+            <option>전체</option>
+          </select>
         </div>
         <div class="col-md-4">
           <input type="text" class="form-control" placeholder="검색어 입력 후 [enter]">
@@ -45,16 +48,24 @@
 
       <div class="row g-3 mb-3">
         <div class="col-md-2"><label class="form-label">부서</label></div>
-        <div class="col-md-2"><select class="form-select"><option>선택</option></select></div>
+        <div class="col-md-2"><select class="form-select">
+            <option>선택</option>
+          </select></div>
         <div class="col-md-2"><label class="form-label">직급</label></div>
-        <div class="col-md-2"><select class="form-select"><option>선택</option></select></div>
+        <div class="col-md-2"><select class="form-select">
+            <option>선택</option>
+          </select></div>
       </div>
 
       <div class="row g-3 mb-3">
         <div class="col-md-2"><label class="form-label">재직 상태</label></div>
-        <div class="col-md-2"><select class="form-select"><option>선택</option></select></div>
+        <div class="col-md-2"><select class="form-select">
+            <option>선택</option>
+          </select></div>
         <div class="col-md-2"><label class="form-label">근무 유형</label></div>
-        <div class="col-md-2"><select class="form-select"><option>선택</option></select></div>
+        <div class="col-md-2"><select class="form-select">
+            <option>선택</option>
+          </select></div>
       </div>
 
       <div class="d-flex gap-2">
@@ -82,7 +93,30 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
+          <!-- records 라는 이름의 List<AttendanceRecordsDTO> 를 하나씩 꺼내서 emp 에 바인딩 -->
+          <tr th:each="emp : ${records}">
+            <td>
+              <input type="checkbox" th:value="${emp.empIdx}" />
+            </td>
+            <td th:text="${emp.empIdx}">사원ID</td>
+            <td th:text="${emp.empName}">사원명</td>
+            <td th:text="${emp.deptName}">부서</td>
+            <td th:text="${emp.empGrade}">직급</td>
+            <td th:text="${emp.empStatus}">재직 상태</td>
+            <td th:text="${emp.empType}">근무 유형</td>
+            <!-- 날짜는 Thymeleaf 유틸리티로 포맷팅 -->
+            <td th:text="${#dates.format(emp.empRegdate, 'yyyy-MM-dd')}">입사일</td>
+            <!-- 연락처 필드가 empAccount 라고 DTO에 있으면 -->
+            <td th:text="${emp.empAccount}">연락처</td>
+            <!-- 근로계약서 다운로드 링크가 필요한 경우 -->
+            <td th:text="${emp.empEmail}"></td>
+              <a th:href="@{'/employees/' + ${emp.empIdx} + '/contract'}" target="_blank">
+                다운로드
+              </a>
+            </td>
+          </tr>
+          <!-- 만약 리스트가 비어있으면 -->
+          <tr th:if="${#lists.isEmpty(records)}">
             <td colspan="11">데이터가 없습니다.</td>
           </tr>
         </tbody>

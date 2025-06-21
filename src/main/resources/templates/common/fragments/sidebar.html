@@ -1,4 +1,14 @@
-
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-18 
+	- 설명    : ERP 페이지 sidebar 모듈
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-18 (복성민): 파일생성 및 기본 코드 추가
+	- 2025-06-21 (복성민): 로고 클릭 시 '/' 경로로 이동하도록 수정
+============================================
+-->
 <ul th:fragment="sidebar"
 	class="navbar-nav bg-gradient-sidebar sidebar sidebar-dark accordion"
 	id="accordionsidebar">
@@ -8,7 +18,7 @@
 
 	<!-- nav item - dashboard -->
  	<li class="nav-item active">
-	 	<a class="nav-link" href="index.html">
+	 	<a class="nav-link" href="/">
 				<i class="fas fa-fw fa-tachometer-alt"></i>
 				<span>dashboard</span>
 		</a>

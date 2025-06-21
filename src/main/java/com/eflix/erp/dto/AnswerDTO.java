@@ -24,7 +24,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class AnswersDTO {
+public class AnswerDTO {
     private String ansrIdx;
     private String qstIdx;
     private String empIdx;

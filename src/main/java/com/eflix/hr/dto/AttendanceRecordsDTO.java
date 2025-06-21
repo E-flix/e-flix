@@ -18,14 +18,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AttendanceRecordsDTO {
-    private String attdIdx;          // attd_idx
     private String empIdx;           // emp_idx
-    private String hdIdx;            // hd_idx
-    private Date attdDate;      // attd_date
-    private Date attdTime;  // attd_time
-    private Date attdStart; // attd_start
-    private Date attdEnd;   // attd_end
-    private String attdStatus;       // attd_status
-    private String abReason;         // ab_reason
-    private String memo;             // memo
+    private String deptIdx;          // dept_idx
+    private String empName;          // emp_name
+    private String empEmail;         // emp_email
+    private Date empRegdate;         // emp_regdate
+    private String empGrade;         // emp_grade
+    private String empType;          // emp_type
+    private String empStatus;        // emp_status
+    private String deptName;         // deptName
+    private String empAccount;      // emp_account
+    
 }

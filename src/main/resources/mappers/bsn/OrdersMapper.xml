@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.bsn.mapper.OrdersMapper">
+    <select id="getOrdersList" resultType="com.eflix.bsn.dto.OrdersDTO">
+        SELECT
+            ORDER_NO            AS orderNo,
+            QUOTATION_NO        AS quotationNo,
+            TO_CHAR(ORDER_DT, 'YYYY-MM-DD') AS orderDt,
+            EMP_CD              AS empCd,
+            PHONE_NUMBER        AS phoneNumber,
+            DELIVERY_ADDR       AS deliveryAddr,
+            WAREHOUSE_CD        AS warehouseCd,
+            TO_CHAR(DELIVERY_DT, 'YYYY-MM-DD') AS deliveryDt,
+            TO_CHAR(EXPECTED_PAYMENT_DT, 'YYYY-MM-DD') AS expectedPaymentDt,
+            PAYMENT_TERMS       AS paymentTerms,
+            TAX_INVOICE_ISSUE_YN AS taxInvoiceIssueYn,
+            CUSTOMER_CD         AS customerCd
+        FROM ORDERS
+        ORDER BY ORDER_NO
+    </select>
+</mapper>

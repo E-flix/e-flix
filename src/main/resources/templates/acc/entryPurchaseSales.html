@@ -6,13 +6,77 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-06-20 (김희정): 임시 레이아웃
 ============================================ -->
+
 <head>
   <title>매입매출전표</title>
 </head>
 <div layout:fragment="content">
-  <div id="entry-purchase-sales">
-    <h2>매입매출전표</h2>
-    <p>매입매출전표 화면입니다.</p>
+  <!-- 매입매출전표 -->
+  <div id="sales-purchase-voucher" class="content-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>매입매출전표</h2>
+      <button class="btn btn-primary">
+        <i class="bi bi-plus me-1"></i>신규 전표
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>거래일자</th>
+            <th>전표번호</th>
+            <th>과세구분</th>
+            <th>품목</th>
+            <th class="text-end">수량</th>
+            <th class="text-end">단가</th>
+            <th class="text-end">공급가액</th>
+            <th class="text-end">세액</th>
+            <th>거래처</th>
+            <th>사업자번호</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>03-06</td>
+            <td>50001</td>
+            <td><span class="badge bg-success">과세</span></td>
+            <td>열심히 공부하는 자바</td>
+            <td class="text-end">2</td>
+            <td class="text-end">₩30,000</td>
+            <td class="text-end">₩60,000</td>
+            <td class="text-end">₩6,000</td>
+            <td>자바유통</td>
+            <td>123-45-78910</td>
+          </tr>
+          <tr>
+            <td>09-03</td>
+            <td>50002</td>
+            <td><span class="badge bg-success">과세</span></td>
+            <td>사무용 볼펜</td>
+            <td class="text-end">20</td>
+            <td class="text-end">₩1,200</td>
+            <td class="text-end">₩24,000</td>
+            <td class="text-end">₩2,400</td>
+            <td>서블릿 문구</td>
+            <td>852-25-64975</td>
+          </tr>
+          <tr>
+            <td>10-25</td>
+            <td>50003</td>
+            <td><span class="badge bg-success">과세</span></td>
+            <td>스프링 부트 처음부터 공부하기</td>
+            <td class="text-end">10</td>
+            <td class="text-end">₩27,500</td>
+            <td class="text-end">₩275,000</td>
+            <td class="text-end">₩27,500</td>
+            <td>자바유통</td>
+            <td>123-45-78910</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
