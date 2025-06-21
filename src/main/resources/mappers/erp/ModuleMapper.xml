@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+===========================================
+  - 파일명   : ModuleMapper.xml
+  - 설명     : 구독 모듈 관련 SQL 정의
+===========================================
+  [작성 정보]
+  - 작성자   : 복성민 (bokseongmin@gmail.com)
+  - 최초작성 : 2025-06-20
+===========================================
+  [변경 이력]
+  - 2025-06-20 : 최초 생성 (복성민)
+===========================================
+-->
+<mapper namespace="com.eflix.erp.mapper.ModuleMapper">
+    <!-- ===================================== -->
+    <!-- 구독 모듈 전체 조회                        -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-20 -->
+    <!-- ===================================== -->
+    <select id="findAll" resultType="ModuleDTO">
+        SELECT * FROM moudles
+    </select>
+</mapper>
