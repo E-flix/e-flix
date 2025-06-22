@@ -15,7 +15,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class partnerDetailDTO {
+public class PartnerDetailDTO {
   private int partnerCode;
   private String partnerName;
   private String partnerType;
