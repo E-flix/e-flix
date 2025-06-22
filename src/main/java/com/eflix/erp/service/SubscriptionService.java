@@ -1,5 +1,7 @@
 package com.eflix.erp.service;
 
+import com.eflix.erp.dto.SubscriptionPackageDTO;
+
 /**
  * ERP 회사 관리를 위한 Service 클래스
  * 
@@ -30,5 +32,5 @@ package com.eflix.erp.service;
  */
 
 public interface SubscriptionService {
-    
+    public SubscriptionPackageDTO findById(String spkIdx);
 }

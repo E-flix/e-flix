@@ -14,12 +14,25 @@
 ===========================================
 -->
 <mapper namespace="com.eflix.erp.mapper.SubscriptionMapper">
-    <!-- ===================================== -->
-    <!-- 구독 전체 조회                        -->
-    <!-- @author 복성민 -->
-    <!-- @since 2025-06-20 -->
-    <!-- ===================================== -->
+    <!-- 
+     * 모든 구독 정보를 가져온다.
+     *
+     * @param
+     * @return SubscriptionDTO
+	-->
     <select id="findAll" resultType="SubscriptionDTO">
         SELECT * FROM subscription
+    </select>
+
+    <!-- 
+     * 구독 패키지 정보를 가져온다.
+     *
+     * @param String
+     * @return SubscriptionPackageDTO
+	-->
+    <select id="findById" parameterType="String" resultType="SubscriptionPackageDTO">
+        SELECT spk_idx, spk_name, spk_max, spk_price
+        FROM subscription_packages
+        WHERE spk_idx = #{spkIdx}
     </select>
 </mapper>

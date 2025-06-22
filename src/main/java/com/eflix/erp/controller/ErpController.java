@@ -1,10 +1,14 @@
 package com.eflix.erp.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.eflix.erp.dto.SubscriptionPackageDTO;
+import com.eflix.erp.service.SubscriptionService;
 
 /**
  * ERP 회사 관리를 위한 Service 클래스
@@ -33,12 +37,16 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @changelog
  * <ul>
  *   <li>2025-06-18: 최초 생성 (복성민)</li>
+ *   <li>2025-06-23: 구독 정보 조회 로직 추가 (복성민)</li>
  * </ul>
  */
 
 @Controller
 @RequestMapping("/erp")
 public class ErpController {
+
+	@Autowired
+	private SubscriptionService service;
 	
 	@GetMapping()
 	public String home() {
@@ -51,8 +59,11 @@ public class ErpController {
 	}
 
 	@GetMapping("/pay")
-	public String pay(@RequestParam("type") String type, Model model) {
-		model.addAttribute("type", type);
+	public String pay(@RequestParam("spkIdx") String spkIdx, Model model) {
+		
+		SubscriptionPackageDTO subscriptionPackageDTO = service.findById(spkIdx);
+
+		model.addAttribute("subscriptionPackage", subscriptionPackageDTO);
 		return "erp/pay";
 	}
 

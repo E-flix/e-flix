@@ -46,7 +46,7 @@
         <div class="text-center mb-4">
             <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" height="30"
                 class="me-2">
-            <h4 class="d-inline-block align-middle fw-bold">E-FELIX - Business <span th:text="${type}"></span></h4>
+            <h4 class="d-inline-block align-middle fw-bold">E-FELIX - Business <span th:text="${subscriptionPackage.spkName}"></span></h4>
         </div>
 
         <div class="card shadow-lg border-0">
@@ -251,6 +251,45 @@
                 <div class="step-content step-4-content d-none">
                     <h5 class="fw-bold">결제 확인</h5>
                     <p>결제 정보를 확인하고 완료하세요.</p>
+                    
+                    <!-- 결제 -->
+                    <main id="checkoutMain" class="d-none">
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-md-8 col-lg-6 col-xl-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <form id="checkoutForm">
+                                            <!-- Item Information -->
+                                            <div class="d-flex align-items-center mb-4">
+                                                <div class="flex-shrink-0 me-3">
+                                                    <img id="itemImage" class="rounded"
+                                                        style="width: 80px; height: 80px; object-fit: cover;" />
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h5 id="itemName" class="mb-1"></h5>
+                                                    <p class="price-value text-muted mb-0"></p>
+                                                </div>
+                                            </div>
+                    
+                                            <!-- Price Summary -->
+                                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-4">
+                                                <label class="fw-bold mb-0">총 구입 가격</label>
+                                                <span class="price-value fw-bold text-primary fs-5"></span>
+                                            </div>
+                    
+                                            <!-- Checkout Button -->
+                                            <button id="checkoutButton" type="submit" class="btn btn-primary w-100 py-3">
+                                                <span class="checkout-text">결제</span>
+                                                <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
                     <div class="d-flex justify-content-between mt-4">
                         <button class="btn btn-secondary" id="back-to-step-2">이전</button>
                         <button class="btn btn-success">완료</button>
@@ -328,45 +367,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- 결제 -->
-    <main id="checkoutMain" class="d-none">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-6 col-xl-4">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <form id="checkoutForm">
-                            <!-- Item Information -->
-                            <div class="d-flex align-items-center mb-4">
-                                <div class="flex-shrink-0 me-3">
-                                    <img id="itemImage" class="rounded"
-                                        style="width: 80px; height: 80px; object-fit: cover;" />
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h5 id="itemName" class="mb-1"></h5>
-                                    <p class="price-value text-muted mb-0"></p>
-                                </div>
-                            </div>
-    
-                            <!-- Price Summary -->
-                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-4">
-                                <label class="fw-bold mb-0">총 구입 가격</label>
-                                <span class="price-value fw-bold text-primary fs-5"></span>
-                            </div>
-    
-                            <!-- Checkout Button -->
-                            <button id="checkoutButton" type="submit" class="btn btn-primary w-100 py-3">
-                                <span class="checkout-text">결제</span>
-                                <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </span>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
     
     <!-- 결제 성공 -->
     <div class="modal fade" id="successModal" tabindex="-1">
@@ -850,13 +850,14 @@
 
             // 초기 Canvas 설정
             initCanvas();
-
-            // 결제 관련
+        console.log(test);
         });
 
+        let test = "[[${subscriptionPackage.spkIdx}]]"
         // 결제
         function Checkout() {
             let item = null;
+
             
             this.load = async () => {
             // 로딩 모달창
@@ -876,9 +877,6 @@
             const waitItem = fetch("/api/payment/item").then(
                 async (response) => (item = await response.json())
             );
-            
-            console.log(waitPortOne);
-            console.log(waitItem);
             
             // 로딩 모달창 닫기
             try {

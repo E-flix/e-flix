@@ -228,7 +228,7 @@
 							<div class="mb-4 text-primary fw-semibold">50명</div>
 
 							<div class="d-grid gap-2 mb-4">
-								<a class="btn btn-primary fw-semibold py-2" href="/erp/pay?type=basic">
+								<a class="btn btn-primary fw-semibold py-2" href="/erp/pay?spkIdx=spk-101">
 									지금 시작하기
 								</a>
 							</div>
@@ -279,7 +279,7 @@
 							<div class="mb-4 text-primary fw-semibold">100명</div>
 
 							<div class="d-grid gap-2 mb-4">
-								<a class="btn btn-primary fw-semibold py-2" href="/erp/pay?type=standard">
+								<a class="btn btn-primary fw-semibold py-2" href="/erp/pay?spkIdx=spk-102">
 									지금 시작하기
 								</a>
 							</div>
@@ -330,7 +330,7 @@
 							<div class="mb-4 text-primary fw-semibold">무제한</div>
 
 							<div class="d-grid gap-2 mb-4">
-								<a class="btn btn-primary fw-semibold py-2" href="/erp/pay?type=premium">
+								<a class="btn btn-primary fw-semibold py-2" href="/erp/pay?spkIdx=spk-103">
 									지금 시작하기
 								</a>
 							</div>
@@ -363,78 +363,4 @@
 			</div>
 		</div>
 	</section>
-
-	<!-- 모달 -->
-	<!-- 2.1. 계약서 사인 등록 모달 -->
-	<div class="modal fade" id="contractSignatureModal" tabindex="-1" aria-labelledby="contractSignatureModalLabel"
-		aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="contractSignatureModalLabel">사인 등록</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-				</div>
-				<div class="modal-body bg-light">
-					<div class="container bg-secondary p-4 text-white">
-						<div class="mx-auto bg-light text-dark p-4" style="width: 80%; min-height: 300px;">
-							<p class="text-center fw-bold">계약서 내용</p>
-							<div class="mt-5 text-end">계약서 사인란</div>
-						</div>
-						<div class="text-center mt-4">
-							<button class="btn btn-light" data-bs-dismiss="modal" id="toPaymentModal">작성</button>
-							<script>
-								document.getElementById('toPaymentModal').addEventListener('click', function () {
-									setTimeout(() => {
-										var paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-										paymentModal.show();
-									}, 500);
-								});
-							</script>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- 3. 결제정보 모달 -->
-	<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">결제정보</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-				</div>
-				<div class="modal-body">
-					<div class="container bg-secondary text-white p-4 rounded">
-						<h4 class="text-center mb-3">구독명</h4>
-						<h6>서비스</h6>
-						<div class="bg-light text-dark p-3 mb-3" style="height: 120px; overflow-y: auto;">
-							<div>서비스명</div>
-							<div>서비스명</div>
-							<div>서비스명</div>
-						</div>
-						<input type="number" class="form-control mb-2" placeholder="개월 수">
-						<input type="text" class="form-control mb-3" placeholder="총가격">
-						<button class="btn btn-light w-100">결제진행</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- 포트원 스크립트 추가 -->
-	<script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
-	<!-- <script>
-		const payment = PortOne.requestPayment({
-				storeId: "store-092db0f4-068f-4f50-9b06-029fca00b36c",
-				channelKey: "channel-key-a0af8c14-0047-4ad6-ade6-5589354d0047",
-				paymentId :'123141414',
-				orderName: "asdasd",
-				totalAmount: 10000,
-				currency: "KRW",
-				payMethod: "CARD",
-				customData: {
-					item: 'asfff',
-				}
-			})
-	</script> -->
 </div>

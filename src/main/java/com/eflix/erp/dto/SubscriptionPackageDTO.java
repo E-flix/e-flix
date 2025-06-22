@@ -23,5 +23,6 @@ import lombok.Data;
 public class SubscriptionPackageDTO {
     private String spkIdx;      // spk-000
     private String spkName;
+    private Long spkMax;
     private Long spkPrice;
 }

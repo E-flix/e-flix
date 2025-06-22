@@ -77,7 +77,7 @@ public class PaymentController {
     static {
         Currency krw = Krw.INSTANCE; // Kotlin의 object는 Java에서 INSTANCE로 접근
         items.put("shoes", new ItemDTO("shoes", "신발", 1000, krw.getValue()));
-}
+    }
 
     @Autowired
     private PaymentService paymentService;
@@ -143,7 +143,6 @@ public class PaymentController {
     }
 
     private boolean verifyPayment(PaidPayment payment) {
-
         String channelTypeValue = payment.getChannel().getType().getValue();
         if (!"live".equalsIgnoreCase(channelTypeValue)) {
             return false;
