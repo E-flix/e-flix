@@ -1,8 +1,10 @@
 package com.eflix.erp.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * ERP 회사 관리를 위한 Service 클래스
@@ -48,6 +50,12 @@ public class ErpController {
 		return "erp/check";
 	}
 
+	@GetMapping("/pay")
+	public String pay(@RequestParam("type") String type, Model model) {
+		model.addAttribute("type", type);
+		return "erp/pay";
+	}
+
 	@GetMapping("/mypage_info")
 	public String mypage_info() {
 		return "erp/mypageInfo";
@@ -57,10 +65,4 @@ public class ErpController {
 	public String mypage_service() {
 		return "erp/mypageService";
 	}
-
-	@GetMapping("/info_check")
-	public String info_check() {
-		return "erp/infoCheck";
-	}
-
 }

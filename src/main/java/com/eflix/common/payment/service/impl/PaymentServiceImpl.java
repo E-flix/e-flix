@@ -1,7 +1,10 @@
 package com.eflix.common.payment.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.eflix.common.payment.Entity.PaymentEntity;
+import com.eflix.common.payment.mapper.PaymentMapper;
 import com.eflix.common.payment.service.PaymentService;
 
 /**
@@ -30,5 +33,32 @@ import com.eflix.common.payment.service.PaymentService;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
+
+    @Autowired
+    private PaymentMapper paymentMapper;
+
+    @Override
+    public PaymentEntity getPaymentById(String paymentIdx) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'getPaymentEntity'");
+
+        return paymentMapper.findPaymentById(paymentIdx);
+    }
+
+    @Override
+    public int insertPayment(PaymentEntity paymentEntity) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'insertPayment'");
+
+        return paymentMapper.insertPayment(paymentEntity);
+    }
+
+    @Override
+    public int updatePayment(PaymentEntity paymentEntity) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'updatePayment'");
+
+        return paymentMapper.updatePayment(paymentEntity);
+    }
 
 }

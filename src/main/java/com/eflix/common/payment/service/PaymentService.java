@@ -1,5 +1,7 @@
 package com.eflix.common.payment.service;
 
+import com.eflix.common.payment.Entity.PaymentEntity;
+
 /**
  * 결제 처리를 담당하는 서비스
  * 
@@ -25,5 +27,10 @@ package com.eflix.common.payment.service;
  */
 
 public interface PaymentService {
-  
+    
+    public PaymentEntity getPaymentById(String paymentIdx);
+
+    public int insertPayment(PaymentEntity paymentEntity);
+
+    public int updatePayment(PaymentEntity paymentEntity);
 }
