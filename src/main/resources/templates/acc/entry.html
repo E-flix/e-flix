@@ -13,6 +13,7 @@
                        : editable가 flase인 셀은 포커스 제외
                        : 필수 값 입력 안하면 행 저장 불가 (날짜,차대변,계정과목코드,금액)
                        : 가장 아래 입력할수 있는 칸 추가
+                       : 거래처 코드 입력하면 거래처명 불러오기
   -----------------------------------------------
   [ TODO ] 
   1. DB 연결 (update/ delete/ insert)
@@ -115,7 +116,7 @@
     });
 
     // 필수 값 체크 (입력 및 수정시 사용)
-    const requiredFields = new Set(['month', 'day', 'resentmenType', 'accountCode']); 
+    const requiredFields = new Set(['month', 'day', 'resentmenType', 'accountCode']);
     function isRowValid(rowData, currentField) {
       // 필수 체크 대상이 아닌 필드는 무조건 true
       if (currentField && !requiredFields.has(currentField)) return true;
@@ -149,7 +150,8 @@
         { headerName: "월", field: "month", editable: true, minWidth: 55, maxWidth: 55 },
         { headerName: "일", field: "day", editable: true, minWidth: 55, maxWidth: 55 },
         { headerName: "번호", field: "entryNumber", editable: true, minWidth: 75, maxWidth: 75 },
-        { headerName: "구분", field: "resentmenType", editable: true, minWidth: 70, maxWidth: 70,
+        {
+          headerName: "구분", field: "resentmenType", editable: true, minWidth: 70, maxWidth: 70,
           valueFormatter: params => {
             // g1~g4 -> 한글 표시
             const map = { g1: '출금', g2: '입금', g3: '차변', g4: '대변' };
@@ -176,7 +178,8 @@
         { headerName: "계정과목", field: "accountName", editable: true, minWidth: 100, maxWidth: 100 },
         { headerName: "코드", field: "partnerCode", editable: true, minWidth: 80, maxWidth: 80 },
         { headerName: "거래처", field: "partnerName", editable: true, initialWidth: 250 },
-        { headerName: "차변", field: "debit", editable: params => params.data.resentmenType !== 'g4', initialWidth: 135, minWidth: 100, valueFormatter: p => p.value?.toLocaleString(),
+        {
+          headerName: "차변", field: "debit", editable: params => params.data.resentmenType !== 'g4', initialWidth: 135, minWidth: 100, valueFormatter: p => p.value?.toLocaleString(),
           valueSetter: params => {
             const val = Number(params.newValue);
             if (!isNaN(val) && val >= 1) {
@@ -187,8 +190,9 @@
               return false; // 입력 거부
             }
           }
-         }, 
-        { headerName: "대변", field: "credit", editable: params => params.data.resentmenType !== 'g3', initialWidth: 135, minWidth: 100, valueFormatter: p => p.value?.toLocaleString(),
+        },
+        {
+          headerName: "대변", field: "credit", editable: params => params.data.resentmenType !== 'g3', initialWidth: 135, minWidth: 100, valueFormatter: p => p.value?.toLocaleString(),
           valueSetter: params => {
             const val = Number(params.newValue);
             if (!isNaN(val) && val >= 1) {
@@ -199,7 +203,7 @@
               return false; // 입력 거부
             }
           }
-         },
+        },
         { headerName: "적요", field: "description", editable: true, minWidth: 400 },
       ],
       // 행 선택 방식을 지정
@@ -228,27 +232,27 @@
           // 현재 행 유효성 체크
           const currentRowNode = api.getDisplayedRowAtIndex(currentRowIndex);
           // 차변/대변 필드에서 Enter 시 1 이상 값인지 확인
-            if (currentCol === 'debit' || currentCol === 'credit') {
-              const val = currentRowNode.data[currentCol];
-              if (!(val >= 1)) {
-                alert("차변/대변 값은 1 이상의 숫자여야 합니다.");
-                event.event.preventDefault();
-                return;
-              }
+          if (currentCol === 'debit' || currentCol === 'credit') {
+            const val = currentRowNode.data[currentCol];
+            if (!(val >= 1)) {
+              alert("차변/대변 값은 1 이상의 숫자여야 합니다.");
+              event.event.preventDefault();
+              return;
             }
+          }
           // description(적요)로 넘어갈 때는 전체 행 유효성 검사
-            if (currentCol === 'description') {
-              if (!isRowValid(currentRowNode.data, null)) {
-                event.event.preventDefault();
-                return;
-              }
-            } else {
-              // description 이외의 컬럼일 때는 해당 컬럼 기준 검사
-              if (!isRowValid(currentRowNode.data, currentCol)) {
-                event.event.preventDefault();
-                return;
-              }
+          if (currentCol === 'description') {
+            if (!isRowValid(currentRowNode.data, null)) {
+              event.event.preventDefault();
+              return;
             }
+          } else {
+            // description 이외의 컬럼일 때는 해당 컬럼 기준 검사
+            if (!isRowValid(currentRowNode.data, currentCol)) {
+              event.event.preventDefault();
+              return;
+            }
+          }
           while (true) {
             // 마지막 컬럼이라면 첫번째 컬럼으로 이동하고, 행을 한 줄 내림
             if (nextColIndex >= allColumns.length) {
@@ -300,13 +304,43 @@
           event.event.preventDefault();
         }
       },
-      // 마지막 셀 유지
-      onCellValueChanged: (params) => {
+      onCellValueChanged: async (params) => {
         const api = params.api;
         const currentRowIndex = params.node.rowIndex;
+        const currentField = params.colDef.field;
+
+        if (currentField === 'partnerCode') {
+          const partnerCode = params.newValue;
+          params.data.partnerName = '';  // 기본 초기화
+          if (partnerCode) {
+            try {
+              const response = await fetch(`/acc/pt/${partnerCode}`);
+              if (response.ok) {
+                const partner = await response.json();
+                if (partner?.partnerName) {
+                  params.data.partnerName = partner.partnerName;
+                } else {
+                  alert("해당 거래처명을 찾을 수 없습니다.");
+                }
+              } else {
+                alert("거래처 조회 중 오류가 발생했습니다.");
+              }
+            } catch (e) {
+              console.error(e);
+              alert("서버와 통신 중 오류가 발생했습니다.");
+            }
+          }
+          api.refreshCells({
+            rowNodes: [params.node],
+            columns: ['partnerName'],
+            force: true
+          });
+        }
+
+        // 마지막 셀 유지
         const lastRowIndex = api.getDisplayedRowCount() - 1; // 마지막 행의 인덱스 = 행 갯수 - 1
         // 엔터로 다음 셀 이동할 때 마지막 행에서 입력 완료되면
-        if (currentRowIndex === lastRowIndex) { 
+        if (currentRowIndex === lastRowIndex) {
           const lastRowNode = api.getDisplayedRowAtIndex(currentRowIndex);
           if (isRowValid(lastRowNode.data, null)) {
             // 새 빈 행 추가
@@ -325,10 +359,11 @@
                 description: ''
               }]
             });
-             // 갱신된 row count
+            // 갱신된 row count
             nextRowIndex = api.getDisplayedRowCount() - 1;
           }
         }
+
       }
     };
     // 그리드 생성

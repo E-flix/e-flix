@@ -7,6 +7,7 @@
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
   - 2025-06-20 (김희정): 임시 레이아웃
+  - 2025-06-23 (김희정): 일반거래처 전체조회 테스트
 ============================================ -->
 
 <head>
@@ -207,4 +208,8 @@
       </div>
     </div>
   </div>
+  <script th:inline="javascript">
+    let partnerList = /*[[${partnerList}]]*/[]; // DB 조회
+    console.log(partnerList);
+  </script>
 </div>
