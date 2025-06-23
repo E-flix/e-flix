@@ -18,4 +18,7 @@ public interface DepartmentService {
     int createDepartment(DepartmentDTO dto);
     int updateDepartment(DepartmentDTO dto);
     int deleteDepartment(String deptIdx);
+
+    public List<DepartmentDTO> findAllDepts();
+    public List<DepartmentDTO> findAllDeptsUP(String deptIdx);
 }
