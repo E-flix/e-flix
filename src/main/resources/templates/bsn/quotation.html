@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{common/layouts/default}">
@@ -6,135 +5,44 @@
   <meta charset="UTF-8">
   <title>견적서 입력</title>
   <style>
-    /* ───── 전체 레이아웃 ───── */ 
-    .quotation-container {
-      font-family: 'Noto Sans KR', sans-serif;
-      margin: 0; padding: 0;
-    }
-    /* ───── 상단 헤더 ───── */
-    .quotation-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f5f5f5;
-      border: 1px solid #ccc;
-      border-bottom: none;
-      padding: 8px 12px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-    .quotation-header .option-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-    }
+    /* ───── 전체 레이아웃 ───── */
+    .quotation-container { font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 0; }
+    .quotation-header { display: flex; justify-content: space-between; align-items: center; background: #f5f5f5; border: 1px solid #ccc; border-bottom: none; padding: 8px 12px; font-size: 16px; font-weight: bold; }
+    .quotation-header .option-btn { background: none; border: none; cursor: pointer; font-size: 14px; }
     /* ───── 탭 ───── */
-    .quotation-tabs {
-      display: flex;
-      border-bottom: 1px solid #ccc;
-      margin-bottom: 8px;
-      padding-left: 0;
-      list-style: none;
-    }
-    .quotation-tabs li {
-      padding: 6px 14px;
-      border: 1px solid #ccc;
-      border-bottom: none;
-      background: #f5f5f5;
-      margin-right: 2px;
-      cursor: pointer;
-    }
-    .quotation-tabs li.active {
-      background: #fff;
-      font-weight: bold;
-    }
+    .quotation-tabs { display: flex; border-bottom: 1px solid #ccc; margin-bottom: 8px; padding-left: 0; list-style: none; }
+    .quotation-tabs li { padding: 6px 14px; border: 1px solid #ccc; border-bottom: none; background: #f5f5f5; margin-right: 2px; cursor: pointer; }
+    .quotation-tabs li.active { background: #fff; font-weight: bold; }
     /* ───── 폼 영역 ───── */
-    .form-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 10px;
-    }
-    .form-table th, .form-table td {
-      border: 1px solid #ccc;
-      padding: 6px 8px;
-      vertical-align: middle;
-      font-size: 14px;
-    }
-    .form-table th {
-      background: #f0f0f0;
-      width: 120px;
-      text-align: left;
-    }
-    .form-table td input,
-    .form-table td select {
-      width: 100%;
-      height: 28px;
-      padding: 2px 4px;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
+    .form-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    .form-table th, .form-table td { border: 1px solid #ccc; padding: 6px 8px; vertical-align: middle; font-size: 14px; }
+    .form-table th { background: #f0f0f0; width: 120px; text-align: left; }
+    .form-table td input, .form-table td select { width: 100%; height: 28px; padding: 2px 4px; box-sizing: border-box; font-size: 14px; }
     /* ───── 액션 버튼 바 ───── */
-    .action-bar {
-      margin-bottom: 10px;
-    }
-    .action-bar .btn {
-      display: inline-block;
-      margin-right: 6px;
-      padding: 4px 10px;
-      font-size: 13px;
-      border: 1px solid #888;
-      border-radius: 3px;
-      background: #e0e0e0;
-      cursor: pointer;
-    }
-    .action-bar .btn.save {
-      background: #4a90e2;
-      color: #fff;
-      border-color: #4a90e2;
-    }
+    .action-bar { margin-bottom: 10px; }
+    .action-bar .btn { display: inline-block; margin-right: 6px; padding: 4px 10px; font-size: 13px; border: 1px solid #888; border-radius: 3px; background: #e0e0e0; cursor: pointer; }
+    .action-bar .btn.save { background: #4a90e2; color: #fff; border-color: #4a90e2; }
     /* ───── 데이터 그리드 ───── */
-    .detail-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .detail-table th, .detail-table td {
-      border: 1px solid #ccc;
-      text-align: center;
-      font-size: 13px;
-      padding: 4px;
-    }
-    .detail-table th {
-      background: #f0f0f0;
-    }
-    .detail-table td input {
-      width: 100%;
-      height: 24px;
-      padding: 2px 4px;
-      box-sizing: border-box;
-      font-size: 13px;
-    }
-    .detail-table thead th:first-child,
-    .detail-table tbody td:first-child {
-      width: 30px;
-    }
-    .detail-table thead th:nth-child(2),
-    .detail-table tbody td:nth-child(2) {
-      width: 24px;
-    }
-    /* ───── 합계 행 ───── */
-    .detail-table tfoot tr {
-      background: #fafafa;
-      font-weight: bold;
-    }
-    .detail-table tfoot td {
-      padding: 6px 4px;
-    }
+    .detail-table { width: 100%; border-collapse: collapse; }
+    .detail-table th, .detail-table td { border: 1px solid #ccc; text-align: center; font-size: 13px; padding: 4px; }
+    .detail-table th { background: #f0f0f0; }
+    .detail-table td input { width: 100%; height: 24px; padding: 2px 4px; box-sizing: border-box; font-size: 13px; }
+    .detail-table thead th:first-child, .detail-table tbody td:first-child { width: 30px; }
+    .detail-table thead th:nth-child(2), .detail-table tbody td:nth-child(2) { width: 24px; }
+    .detail-table tfoot tr { background: #fafafa; font-weight: bold; }
+    .detail-table tfoot td { padding: 6px 4px; }
+    /* ───── 모달 ───── */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 4px; width: 600px; max-height: 80%; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h5 { margin: 0; }
+    .modal-close { cursor: pointer; font-size: 20px; }
+    .modal-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .modal-table th, .modal-table td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    .modal-table th { background: #f0f0f0; }
   </style>
 </head>
-<body>
-
-  <!-- ★ default 레이아웃의 content fragment 위치에 삽입됩니다 -->
   <div layout:fragment="content" class="quotation-container">
     <!-- 상단 헤더 -->
     <div class="quotation-header">
@@ -220,34 +128,153 @@
           <tr>
             <td><input type="checkbox"></td>
             <td>▶</td>
-            <td><input type="text"></td>
-            <td><input type="text"></td>
-            <td><input type="text"></td>
-            <td><input type="number"></td>
-            <td><input type="number"></td>
-            <td><input type="text" readonly></td>
-            <td><input type="text" readonly></td>
-            <td><input type="text"></td>
+            <td><input type="text" class="item-code" readonly></td>
+            <td><input type="text" class="item-name" readonly></td>
+            <td><input type="text" class="item-spec" readonly></td>
+            <td><input type="number" class="item-qty" min="1" value="1"></td>
+            <td><input type="number" class="item-price" readonly></td>
+            <td><input type="text" class="item-amount" readonly></td>
+            <td><input type="text" class="item-tax" readonly></td>
+            <td><input type="text" class="item-remark"></td>
           </tr>
         </tbody>
         <tfoot>
           <tr>
             <td colspan="5">합계</td>
-            <td>0</td>
+            <td class="tot-qty">0</td>
             <td></td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
+            <td class="tot-amount">0</td>
+            <td class="tot-tax">0</td>
+            <td> </td>
           </tr>
         </tfoot>
       </table>
     </div>
+
+    <!-- 품목 선택 모달 -->
+    <div id="itemModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5>품목 목록</h5><span class="modal-close">&times;</span>
+        </div>
+        <table class="modal-table">
+          <thead>
+            <tr>
+              <th>선택</th><th>코드</th><th>이름</th><th>규격</th><th>단위</th><th>단가</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+      console.log('Quotation script loaded');
+      let currentRow;
+      const modal = document.getElementById('itemModal');
+      const modalClose = modal.querySelector('.modal-close');
+      const modalTableBody = modal.querySelector('tbody');
+      const detailTbody = document.querySelector('.detail-table tbody');
+
+      // 모달 오픈 및 전체 품목 로드
+      detailTbody.addEventListener('click', e => {
+        if (e.target.classList.contains('item-code')) {
+          currentRow = e.target.closest('tr');
+          modal.classList.add('active');
+          loadItems();
+        }
+      });
+
+      modalClose.addEventListener('click', () => modal.classList.remove('active'));
+      modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+
+      function loadItems() {
+        fetch('/bsn/item/list')
+          .then(res => res.json())
+          .then(data => {
+            modalTableBody.innerHTML = '';
+            data.forEach(item => {
+              const tr = document.createElement('tr');
+              tr.dataset.taxRate = item.taxRate;
+              tr.innerHTML = `
+                <td><input type="checkbox" class="select-item"></td>
+                <td>${item.itemCode}</td>
+                <td>${item.itemName}</td>
+                <td>${item.spec}</td>
+                <td>${item.unit}</td>
+                <td>${item.salePrice}</td>
+              `;
+              modalTableBody.appendChild(tr);
+            });
+            // 체크박스 선택 이벤트
+            modalTableBody.querySelectorAll('.select-item').forEach(cb => {
+              cb.addEventListener('change', function() {
+                if (this.checked) {
+                  const row = this.closest('tr');
+                  const item = {
+                    itemCode: row.children[1].textContent,
+                    itemName: row.children[2].textContent,
+                    spec: row.children[3].textContent,
+                    unit: row.children[4].textContent,
+                    salePrice: parseFloat(row.children[5].textContent),
+                    taxRate: parseFloat(row.dataset.taxRate)
+                  };
+                  selectItem(item);
+                }
+              });
+            });
+          })
+          .catch(err => {
+            modalTableBody.innerHTML = `<tr><td colspan='6'>조회 실패: ${err.message}</td></tr>`;
+            console.error(err);
+          });
+      }
+
+      function selectItem(item) {
+        currentRow.querySelector('.item-code').value  = item.itemCode;
+        currentRow.querySelector('.item-name').value  = item.itemName;
+        currentRow.querySelector('.item-spec').value  = item.spec;
+        currentRow.querySelector('.item-price').value = item.salePrice;
+        const qty = parseInt(currentRow.querySelector('.item-qty').value) || 1;
+        const amt = qty * item.salePrice;
+        const tax = Math.round(amt * (item.taxRate / 100));
+        currentRow.querySelector('.item-amount').value = amt;
+        currentRow.querySelector('.item-tax').value    = tax;
+        updateTotals();
+        modal.classList.remove('active');
+      }
+
+      function updateTotals() {
+        let totQty=0, totAmt=0, totTax=0;
+        document.querySelectorAll('.detail-table tbody tr').forEach(r => {
+          totQty += +r.querySelector('.item-qty').value||0;
+          totAmt += +r.querySelector('.item-amount').value||0;
+          totTax += +r.querySelector('.item-tax').value||0;
+        });
+        document.querySelector('.tot-qty').textContent    = totQty;
+        document.querySelector('.tot-amount').textContent = totAmt.toLocaleString();
+        document.querySelector('.tot-tax').textContent    = totTax.toLocaleString();
+      }
+
+      // 수량 변경 시 재계산
+      detailTbody.addEventListener('input', e => {
+        if (e.target.classList.contains('item-qty')) {
+          const row = e.target.closest('tr');
+          const price = +row.querySelector('.item-price').value||0;
+          const qty   = +e.target.value||0;
+          const amt   = price*qty;
+          const tax   = Math.round(amt*(+row.dataset.taxRate/100));
+          row.querySelector('.item-amount').value = amt;
+          row.querySelector('.item-tax').value    = tax;
+          updateTotals();
+        }
+      });
+    });
+    </script>
   </div>
 
-  <!-- ★ default 레이아웃의 script fragment 위치에 삽입됩니다 -->
-  <div layout:fragment="script">
-    <!-- 필요하다면 여기에 row 추가 스크립트 등을 넣어주세요 -->
-  </div>
 
-</body>
-</html>
+
+
+
