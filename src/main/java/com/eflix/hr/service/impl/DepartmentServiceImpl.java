@@ -10,13 +10,18 @@ package com.eflix.hr.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.DepartmentDTO;
+import com.eflix.hr.mapper.DepartmentMapper;
 import com.eflix.hr.service.DepartmentService;
 
 @Service
 public class DepartmentServiceImpl implements DepartmentService{
+
+  @Autowired
+  private DepartmentMapper mapper;
 
   @Override
   public List<DepartmentDTO> getAllDepartments() {
@@ -48,4 +53,17 @@ public class DepartmentServiceImpl implements DepartmentService{
     throw new UnsupportedOperationException("Unimplemented method 'deleteDepartment'");
   }
 
+  @Override
+  public List<DepartmentDTO> findAllDepts() {
+    // TODO Auto-generated method stub
+    // throw new UnsupportedOperationException("Unimplemented method 'findAllDepts'");
+    return mapper.findAllDepts();
+  }
+
+  @Override
+  public List<DepartmentDTO> findAllDeptsUP(String deptIdx) {
+    // TODO Auto-generated method stub
+    // throw new UnsupportedOperationException("Unimplemented method 'findAllDeptsUP'");
+    return mapper.findAllDeptsUp(deptIdx);
+  }
 }

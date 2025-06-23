@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.springframework.data.repository.query.Param;
 
+import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.dto.EmployeeDTO;
 
 public interface EmployeeMapper {

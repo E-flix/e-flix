@@ -29,6 +29,6 @@ package com.eflix.erp.service;
  * </ul>
  */
 
-public interface EmployeeService {
+public interface ErpEmployeeService {
 
 }

@@ -1,6 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
   layout:decorate="~{common/layouts/default}">
-
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
@@ -45,17 +44,67 @@
       </div>
 
       <div class="row g-3 mb-3">
-        <div class="col-md-2"><label class="form-label">부서</label></div>
-        <div class="col-md-2"><select class="form-select">
+        <div class="col-md-2">
+          <label class="form-label">부서</label>
+        </div>
+        <div class="col-md-2">
+          <select id="deptSelect" name="deptUpIdx" class="form-select">
             <option>선택</option>
-          </select></div>
-        <div class="col-md-2"><label class="form-label">직급</label></div>
-        <div class="col-md-2"><select class="form-select">
+            <!-- 최상위 부서 목록 바인딩 -->
+            <option th:each="d : ${depts}" th:value="${d.deptIdx}" th:text="${d.deptName}">
+            </option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">상세 부서</label>
+        </div>
+        <div class="col-md-2">
+          <select id="detailDeptSelect" name="deptIdx" class="form-select">
             <option>선택</option>
-          </select></div>
+          </select>
+        </div>
       </div>
+      <script>
+        $(document).ready(function(){
+          $('#deptSelect').on('change', function () {
+            var parentIdx = $(this).val();
+            console.log("값 바뀜", parentIdx);
+            var $child = $('#detailDeptSelect');
+            $child.html('<option value="">선택</option>'); // 초기화
 
-      <div class="row g-3 mb-3">
+            if (!parentIdx) {
+              return; // 선택 해제 시 종료
+            }
+
+            // jQuery AJAX 호출
+            $.ajax({
+              type: 'GET',
+              url: `/hr/${parentIdx}/children`,
+              success: function(res) {
+                $.each(res, function(i, d) {
+                $('<option>')
+                  .val(d.deptIdx)
+                  .text(d.deptName)
+                  .appendTo($child);
+                  });
+              },
+              error: function(req, xhr, err) {
+                console.error(err)
+              }
+            });
+          });
+        });
+      </script>
+
+      <div class="row g-3 mb-3 align-items-center">
+        <div class="col-md-2">
+          <label class="form-label">직급</label>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select">
+            <option>선택</option>
+          </select>
+        </div>
         <div class="col-md-2"><label class="form-label">재직 상태</label></div>
         <div class="col-md-2"><select class="form-select">
             <option>선택</option>
@@ -93,7 +142,7 @@
         </thead>
         <tbody>
           <!-- records 라는 이름의 List<AttendanceRecordsDTO> 를 하나씩 꺼내서 emp 에 바인딩 -->
-          <tr th:each="emp : ${records}">
+          <tr th:each="emp : ${empList}">
             <td>
               <input type="checkbox" th:value="${emp.empIdx}" />
             </td>
@@ -115,7 +164,7 @@
             </td>
           </tr>
           <!-- 만약 리스트가 비어있으면 -->
-          <tr th:if="${#lists.isEmpty(records)}">
+          <tr th:if="${#lists.isEmpty(empList)}">
             <td colspan="11">데이터가 없습니다.</td>
           </tr>
         </tbody>

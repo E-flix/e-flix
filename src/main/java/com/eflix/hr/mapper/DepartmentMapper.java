@@ -20,4 +20,7 @@ public interface DepartmentMapper {
     int insert(DepartmentDTO dto);
     int update(DepartmentDTO dto);
     int deleteById(@Param("deptIdx") String deptIdx);
+
+    List<DepartmentDTO> findAllDepts();
+    List<DepartmentDTO> findAllDeptsUp(String dpetIdx);
 }
