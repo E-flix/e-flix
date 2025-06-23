@@ -9,6 +9,7 @@
   - 2025-06-18 (김어진): title 및 내용 추가
   - 2025-06-19 (김어진): layout 구성 및 모달창 생성
   - 2025-06-20 (김어진): 사원 전체조회 구현
+  - 2025-06-23 (김어진): 조건별 검색 구현
 ============================================ -->
 
 <head>
@@ -16,173 +17,130 @@
 </head>
 
 <div layout:fragment="content">
-  <div id="empList">
-    <h2>사원관리</h2>
-  </div>
-  <div class="py-4">
-
-    <!-- 사원등록 / 수정 버튼 -->
-    <div class="d-flex justify-content-end mb-2 gap-2">
-      <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#employeeModal">
-        사원등록
-      </button>
-      <button class="btn btn-primary">사원수정</button>
+  <div class="w-100" id="empList">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <h3>사원관리</h3>
     </div>
-
-    <!-- 검색 필터 -->
-    <div class="p-4 bg-light rounded mb-4">
-      <div class="row g-3 align-items-center mb-3">
-        <div class="col-md-2"><label class="form-label">검색 기준</label></div>
-        <div class="col-md-2">
-          <select class="form-select">
-            <option>전체</option>
-          </select>
-        </div>
-        <div class="col-md-4">
-          <input type="text" class="form-control" placeholder="검색어 입력 후 [enter]">
-        </div>
+    <div class="py-4">
+      <!-- 사원등록 / 수정 버튼 -->
+      <div class="d-flex justify-content-end mb-2 gap-2">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#employeeModal">
+          사원등록
+        </button>
+        <button class="btn btn-primary">사원수정</button>
       </div>
 
-      <div class="row g-3 mb-3">
-        <div class="col-md-2">
-          <label class="form-label">부서</label>
-        </div>
-        <div class="col-md-2">
-          <select id="deptSelect" name="deptUpIdx" class="form-select">
-            <option>선택</option>
-            <!-- 최상위 부서 목록 바인딩 -->
-            <option th:each="d : ${depts}" th:value="${d.deptIdx}" th:text="${d.deptName}">
-            </option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <label class="form-label">상세 부서</label>
-        </div>
-        <div class="col-md-2">
-          <select id="detailDeptSelect" name="deptIdx" class="form-select">
-            <option>선택</option>
-          </select>
-        </div>
-      </div>
-      <script>
-        $(document).ready(function(){
-          $('#deptSelect').on('change', function () {
-            var parentIdx = $(this).val();
-            console.log("값 바뀜", parentIdx);
-            var $child = $('#detailDeptSelect');
-            $child.html('<option value="">선택</option>'); // 초기화
+      <!-- 검색 필터 -->
+      <form>
+        <div class="p-4 bg-light rounded mb-4">
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-md-2"><label class="form-label">검색 기준</label></div>
+            <div class="col-md-2">
+              <select name="option" class="form-select" id="searchSelect">
+                <option>전체</option>
+                <option value="empName" th:selected="${option=='empName'}">사원명</option>
+                <option value="empIdx" th:selected="${option=='empIdx'}">사원ID</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <input type="text" name="keyword" class="form-control" id="searchInput" placeholder="검색어 입력 후 [enter]">
+            </div>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-2">
+              <label class="form-label">부서</label>
+            </div>
+            <div class="col-md-2">
+              <select id="deptSelect" name="deptUpIdx" class="form-select">
+                <option>선택</option>
+                <!-- 최상위 부서 목록 바인딩 -->
+                <option th:each="d : ${depts}" th:value="${d.deptIdx}" th:text="${d.deptName}">
+                </option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">상세 부서</label>
+            </div>
+            <div class="col-md-2">
+              <select id="detailDeptSelect" name="deptIdx" class="form-select">
+                <option>선택</option>
+              </select>
+            </div>
+          </div>
+          <script>
+            $(document).ready(function () {
+              $('#deptSelect').on('change', function () {
+                var parentIdx = $(this).val();
+                var $child = $('#detailDeptSelect');
+                $child.html('<option value="">선택</option>'); // 초기화
 
-            if (!parentIdx) {
-              return; // 선택 해제 시 종료
-            }
+                if (!parentIdx) {
+                  return; // 선택 해제 시 종료
+                }
 
-            // jQuery AJAX 호출
-            $.ajax({
-              type: 'GET',
-              url: `/hr/${parentIdx}/children`,
-              success: function(res) {
-                $.each(res, function(i, d) {
-                $('<option>')
-                  .val(d.deptIdx)
-                  .text(d.deptName)
-                  .appendTo($child);
-                  });
-              },
-              error: function(req, xhr, err) {
-                console.error(err)
-              }
+                // jQuery AJAX 호출
+                $.ajax({
+                  type: 'GET',
+                  url: `/hr/${parentIdx}/children`,
+                  success: function (res) {
+                    $.each(res, function (i, d) {
+                      $('<option>')
+                        .val(d.deptIdx)
+                        .text(d.deptName)
+                        .appendTo($child);
+                    });
+                  },
+                  error: function (req, xhr, err) {
+                    console.error(err)
+                  }
+                });
+              });
             });
-          });
+          </script>
+
+          <div class="row g-3 mb-3 align-items-center">
+            <div class="col-md-2">
+              <label class="form-label">직급</label>
+            </div>
+            <div class="col-md-2">
+              <select name="option" class="form-select" id="searchSelect">
+                <option>선택</option>
+                <option value="empGrade" th:selected="${option=='empGrade'}"></option>
+              </select>
+            </div>
+            <div class="col-md-2"><label class="form-label">재직 상태</label></div>
+            <div class="col-md-2"><select class="form-select">
+                <option>선택</option>
+              </select></div>
+            <div class="col-md-2"><label class="form-label">근무 유형</label></div>
+            <div class="col-md-2"><select class="form-select">
+                <option>선택</option>
+              </select></div>
+          </div>
+
+          <div class="d-flex justify-content-center gap-3">
+            <button type="submit" class="btn btn-primary" id="searchBtn">조회</button>
+            <button class="btn btn-secondary">초기화</button>
+          </div>
+      </form>
+      <!-- <script>
+        $("#searchBtn").on("click", () => {
+          let searchInput = $("#searchInput").val();
+          let searchSelect = $("#searchSelect").val();
+
+          $.ajax({
+            type: "GET",
+            url: `/hr/el?option=${searchSelect}&keyword=${searchInput}`,
+            success: function(res) {
+              console.log(res);
+            },
+            error: function(xhr, status, err) {
+              console.log(err);
+            }
+          })
         });
-      </script>
-
-      <div class="row g-3 mb-3 align-items-center">
-        <div class="col-md-2">
-          <label class="form-label">직급</label>
-        </div>
-        <div class="col-md-2">
-          <select class="form-select">
-            <option>선택</option>
-          </select>
-        </div>
-        <div class="col-md-2"><label class="form-label">재직 상태</label></div>
-        <div class="col-md-2"><select class="form-select">
-            <option>선택</option>
-          </select></div>
-        <div class="col-md-2"><label class="form-label">근무 유형</label></div>
-        <div class="col-md-2"><select class="form-select">
-            <option>선택</option>
-          </select></div>
-      </div>
-
-      <div class="d-flex justify-content-center gap-3">
-        <button class="btn btn-primary">조회</button>
-        <button class="btn btn-secondary">초기화</button>
-      </div>
-
-    </div>
-
-    <!-- 2. 사원 테이블 -->
-    <div class="table-responsive">
-      <table class="table table-bordered text-center align-middle">
-        <thead class="table-light">
-          <tr>
-            <th><input type="checkbox"></th>
-            <th>사원ID</th>
-            <th>사원명</th>
-            <th>부서</th>
-            <th>직급</th>
-            <th>재직 상태</th>
-            <th>근무 유형</th>
-            <th>입사일</th>
-            <th>연락처</th>
-            <th>이메일</th>
-            <th>근로계약서</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- records 라는 이름의 List<AttendanceRecordsDTO> 를 하나씩 꺼내서 emp 에 바인딩 -->
-          <tr th:each="emp : ${empList}">
-            <td>
-              <input type="checkbox" th:value="${emp.empIdx}" />
-            </td>
-            <td th:text="${emp.empIdx}">사원ID</td>
-            <td th:text="${emp.empName}">사원명</td>
-            <td th:text="${emp.deptName}">부서</td>
-            <td th:text="${emp.empGrade}">직급</td>
-            <td th:text="${emp.empStatus}">재직 상태</td>
-            <td th:text="${emp.empType}">근무 유형</td>
-            <!-- 날짜는 Thymeleaf 유틸리티로 포맷팅 -->
-            <td th:text="${#dates.format(emp.empRegdate, 'yyyy-MM-dd')}">입사일</td>
-            <!-- 연락처 필드가 empAccount 라고 DTO에 있으면 -->
-            <td th:text="${emp.empAccount}">연락처</td>
-            <!-- 근로계약서 다운로드 링크가 필요한 경우 -->
-            <td th:text="${emp.empEmail}">이메일</td>
-              <td><a th:href="@{'/employees/' + ${emp.empIdx} + '/contract'}" target="_blank">
-                다운로드
-              </a>
-            </td>
-          </tr>
-          <!-- 만약 리스트가 비어있으면 -->
-          <tr th:if="${#lists.isEmpty(empList)}">
-            <td colspan="11">데이터가 없습니다.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- 3. 페이지네이션 -->
-    <nav aria-label="Page navigation">
-      <ul class="pagination justify-content-center">
-        <li class="page-item"><a class="page-link" href="#">«</a></li>
-        <li class="page-item"><a class="page-link" href="#">‹</a></li>
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">›</a></li>
-        <li class="page-item"><a class="page-link" href="#">»</a></li>
-      </ul>
-    </nav>
-  </div>
-
+      </script> -->
+      
   <!-- 4. 사원등록 모달 -->
   <div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -250,16 +208,24 @@
 
                   <div class="row g-2 mb-2">
                     <div class="col-md-3"><label class="form-label">부서</label></div>
-                    <div class="col-md-3"><select class="form-select"><option>선택</option></select></div>
+                    <div class="col-md-3"><select class="form-select">
+                        <option>선택</option>
+                      </select></div>
                     <div class="col-md-3"><label class="form-label">직급</label></div>
-                    <div class="col-md-3"><select class="form-select"><option>선택</option></select></div>
+                    <div class="col-md-3"><select class="form-select">
+                        <option>선택</option>
+                      </select></div>
                   </div>
 
                   <div class="row g-2 mb-2">
                     <div class="col-md-3"><label class="form-label">권한</label></div>
-                    <div class="col-md-3"><select class="form-select"><option>선택</option></select></div>
+                    <div class="col-md-3"><select class="form-select">
+                        <option>선택</option>
+                      </select></div>
                     <div class="col-md-3"><label class="form-label">근무유형</label></div>
-                    <div class="col-md-3"><select class="form-select"><option>선택</option></select></div>
+                    <div class="col-md-3"><select class="form-select">
+                        <option>선택</option>
+                      </select></div>
                   </div>
                 </div>
               </div>
@@ -269,7 +235,9 @@
             <div class="tab-pane fade" id="extraInfo">
               <div class="row mb-3">
                 <div class="col-md-2"><label class="form-label">급여계좌</label></div>
-                <div class="col-md-4"><select class="form-select"><option>선택</option></select></div>
+                <div class="col-md-4"><select class="form-select">
+                    <option>선택</option>
+                  </select></div>
               </div>
 
               <div class="mb-3">
@@ -299,4 +267,126 @@
       </div>
     </div>
   </div>
+    </div>
+    <!-- 2. 사원 테이블 -->
+    <div class="container-fluid px-0" style="height:100vh;">
+      <div id="myGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
+    </div>
+  </div>
+  <script th:inline="javascript">
+    // Thymeleaf empList → JS
+    var rowData = /*[[${empList}]]*/ [];
+
+    // 컬럼 정의
+    const columnDefs = [{
+        headerName: "",
+        checkboxSelection: true,
+        headerCheckboxSelection: true,
+        width: 50
+      },
+      {
+        headerName: "사원ID",
+        field: "empIdx",
+        sortable: true,
+        filter: true,
+        resizable: true
+      },
+      {
+        headerName: "사원명",
+        field: "empName",
+        sortable: true,
+        filter: true,
+        resizable: true
+      },
+      {
+        headerName: "부서",
+        field: "deptName",
+        sortable: true,
+        filter: true,
+        resizable: true
+      },
+      {
+        headerName: "직급",
+        field: "empGrade",
+        sortable: true,
+        filter: true,
+        resizable: true
+      },
+      {
+        headerName: "재직 상태",
+        field: "empStatus",
+        sortable: true,
+        filter: true,
+        resizable: true
+      },
+      {
+        headerName: "근무 유형",
+        field: "empType",
+        sortable: true,
+        filter: true,
+        resizable: true
+      },
+      {
+        headerName: "입사일",
+        field: "empRegdate",
+        sortable: true,
+        filter: 'agDateColumnFilter',
+        valueFormatter: params => new Date(params.value).toISOString().slice(0, 10)
+      },
+      {
+        headerName: "연락처",
+        field: "empAccount",
+        sortable: true,
+        filter: true,
+        resizable: true
+      },
+      {
+        headerName: "이메일",
+        field: "empEmail",
+        sortable: true,
+        filter: true,
+        resizable: true
+      },
+      {
+        headerName: "근로계약서",
+        field: "empIdx",
+        cellRenderer: params => `<a href="/employees/${params.value}/contract" target="_blank">다운로드</a>`,
+        resizable: true
+      }
+    ];
+
+    // 그리드 옵션
+    const gridOptions = {
+      columnDefs,
+      rowData,
+      defaultColDef: {
+        flex: 1,
+        minWidth: 100
+      },
+      pagination: true,
+      paginationPageSize: 20,
+      rowSelection: 'multiple'
+    };
+
+    // 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      // 그리드 생성
+      agGrid.createGrid(document.querySelector("#myGrid"), gridOptions);
+
+      // 부서 → 상세부서 AJAX
+      document.getElementById('deptSelect').addEventListener('change', function () {
+        const detail = document.getElementById('detailDeptSelect');
+        detail.innerHTML = '<option value="">선택</option>';
+        if (!this.value) return;
+        fetch(`/hr/${this.value}/children`)
+          .then(r => r.json())
+          .then(list => list.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.deptIdx;
+            opt.textContent = d.deptName;
+            detail.append(opt);
+          }));
+      });
+    });
+  </script>
 </div>

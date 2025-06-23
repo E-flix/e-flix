@@ -5,7 +5,7 @@
   - 최초작성 : 2025-06-20
   - 설명     : DepartmentMapper query xml
   [ 변경 이력 ]
-  - 2025-06-19 (김어진): 계정과목 전체조회 작성
+  - 2025-06-23 (김어진): 부서 상위부서,하위부서 쿼리문 작성
 =============================================== -->
 <mapper namespace="com.eflix.hr.mapper.DepartmentMapper">
   <select id="findAllDepts" resultType="DepartmentDTO">

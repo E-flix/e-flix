@@ -5,6 +5,7 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 클래스 생성
+  - 2025-06-19 (김어진): 조건별 조회기능 구현
 ============================================ */
 package com.eflix.hr.service.impl;
 
@@ -13,7 +14,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.mapper.EmployeeMapper;
 import com.eflix.hr.service.EmployeeService;
@@ -23,10 +23,11 @@ public class EmployeeServiceImpl implements EmployeeService{
 
   @Autowired
   EmployeeMapper employeeMapper;
-
+  
+  // 사원관리 페이지 검색조건 드롭다운 조회
   @Override
-  public List<EmployeeDTO> getAllEmployees() {
-    return employeeMapper.selectAll();
+  public List<EmployeeDTO> getAllEmployees(String option, String keyword) {
+    return employeeMapper.selectAll(option, keyword);
   }
 
   @Override
@@ -51,6 +52,12 @@ public class EmployeeServiceImpl implements EmployeeService{
   public int deleteEmployee(String empIdx) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'deleteEmployee'");
+  }
+
+  // 사원관리 페이지 직급 드롭다운용 조회
+  @Override
+  public List<EmployeeDTO> gradeList() {
+    return employeeMapper.gradeList();
   }
 
 }
