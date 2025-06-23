@@ -3,17 +3,25 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.eflix.purchs.mapper.WarehouseMapper">
-
+  <!-- 조회 -->
   <select id="getWarehouse" resultType="WarehouseDTO">
       SELECT * 
       FROM warehouse
+      ORDER BY warehouse_id
   </select>
-
+  <!-- 마지막 창고번호 가져오기 -->
+  <select id="getNextWarehouseId" resultType="string">
+      SELECT 
+        'wh-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(warehouse_id, 4))), 100) + 1) 
+      FROM 
+        warehouse
+  </select>
+  <!-- 등록 -->
   <insert id="insertWarehouse" parameterType="WarehouseDTO">
       INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager) VALUES
       (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager})
   </insert>
-
+  <!-- 삭제 -->
   <delete id="deleteWarehouse" parameterType="WarehouseDTO">
       BEGIN
         WAREHOUSE_ID_PROCEDURE(#{warehouseId});
