@@ -76,14 +76,22 @@
                         
                             <div class="mb-3">
                                 <label class="form-label fw-bold">웹 및 핵심 서비스:</label>
-                                <div class="form-check"><input class="form-check-input" type="checkbox" value="인사" id="hr"><label
-                                        class="form-check-label" for="hr">인사</label></div>
-                                <div class="form-check"><input class="form-check-input" type="checkbox" value="영업" id="bsn"><label
-                                        class="form-check-label" for="bsn">영업</label></div>
-                                <div class="form-check"><input class="form-check-input" type="checkbox" value="재고" id="purchs"><label
-                                        class="form-check-label" for="purchs">재고</label></div>
-                                <div class="form-check"><input class="form-check-input" type="checkbox" value="회계" id="acc"><label
-                                        class="form-check-label" for="acc">회계</label></div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="인사" id="hr">
+                                    <label class="form-check-label" for="hr">인사</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="영업" id="bsn">
+                                    <label class="form-check-label" for="bsn">영업</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="재고" id="purchs">
+                                    <label class="form-check-label" for="purchs">재고</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="회계" id="acc">
+                                    <label class="form-check-label" for="acc">회계</label>
+                                </div>
                             </div>
                         
                             <div class="mb-3">
@@ -249,50 +257,73 @@
 
                 <!-- Step 4 -->
                 <div class="step-content step-4-content d-none">
-                    <h5 class="fw-bold">결제 확인</h5>
-                    <p>결제 정보를 확인하고 완료하세요.</p>
-                    
-                    <!-- 결제 -->
-                    <main id="checkoutMain" class="d-none">
-                        <div class="row justify-content-center">
-                            <div class="col-12 col-md-8 col-lg-6 col-xl-4">
-                                <div class="card shadow-sm">
-                                    <div class="card-body">
-                                        <form id="checkoutForm">
-                                            <!-- Item Information -->
-                                            <div class="d-flex align-items-center mb-4">
-                                                <div class="flex-shrink-0 me-3">
-                                                    <img id="itemImage" class="rounded"
-                                                        style="width: 80px; height: 80px; object-fit: cover;" />
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h5 id="itemName" class="mb-1"></h5>
-                                                    <p class="price-value text-muted mb-0"></p>
-                                                </div>
+                    <div class="row g-4">
+
+                        <!-- Left -->
+                        <div class="col-md-7">
+                            <h5 class="fw-bold">결제 확인</h5>
+                            <p>결제 정보를 확인하고 완료하세요.</p>
+                        
+                            <!-- 결제 -->
+                            <main id="checkoutMain">
+                                <div class="bg-white p-4 shadow-sm rounded">
+                                    <h6 class="fw-bold mb-4">결제 요약</h6>
+                                    <form id="checkoutForm">
+                                        <!-- Item Information -->
+                                        <div class="d-flex align-items-center mb-4">
+                                            <div class="flex-grow-1">
+                                                <h5 id="itemName" class="mb-1"></h5>
+                                                <p class="price-value text-muted mb-0"></p>
                                             </div>
-                    
-                                            <!-- Price Summary -->
-                                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-4">
+                                        </div>
+                            
+                                        <!-- Price Summary -->
+                                        <div class="bg-light p-3 rounded border mb-4">
+                                            <div class="d-flex justify-content-between">
                                                 <label class="fw-bold mb-0">총 구입 가격</label>
                                                 <span class="price-value fw-bold text-primary fs-5"></span>
                                             </div>
-                    
-                                            <!-- Checkout Button -->
-                                            <button id="checkoutButton" type="submit" class="btn btn-primary w-100 py-3">
-                                                <span class="checkout-text">결제</span>
-                                                <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
-                                                    <span class="visually-hidden">Loading...</span>
-                                                </span>
-                                            </button>
-                                        </form>
-                                    </div>
+                                        </div>
+                            
+                                        <!-- Checkout Button -->
+                                        <button id="checkoutButton" type="submit" class="btn btn-primary w-100 py-3">
+                                            <span class="checkout-text">결제</span>
+                                            <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </span>
+                                        </button>
+                                    </form>
                                 </div>
+                            </main>
+                            <div class="d-flex justify-content-between mt-4">
+                                <button class="btn btn-secondary" id="back-to-step-3">이전</button>
+                                <button class="btn btn-success">완료</button>
                             </div>
                         </div>
-                    </main>
-                    <div class="d-flex justify-content-between mt-4">
-                        <button class="btn btn-secondary" id="back-to-step-2">이전</button>
-                        <button class="btn btn-success">완료</button>
+
+                        <!-- Right -->
+                        <div class="col-md-5">
+                            <div class="bg-white p-4">
+                                <h6 class="fw-bold">주문 요약</h6>
+
+                                <div class="bg-light p-3 rounded border">
+                                    <div class="fw-bold mb-1">E-FELIX - Business <span th:text="${subscriptionPackage.spkName}"></span></div>
+                                    <div class="text-muted mb-2" id="subscription-summary"></div>
+                                
+                                    <div class="d-flex justify-content-between pt-2 border-top mt-3">
+                                        <div>
+                                            <span class="fw-bold">오늘 결제 기한</span>
+                                            <br>
+                                            <small class="text-muted">(세금이 포함되지 않음)</small>
+                                        </div>
+                                        <div class="fw-bold text-end" id="price-display"></div>
+                                    </div>
+                                </div>
+
+                                <p class="">제품 하이라이트</p>
+                                <div id="highlight-list"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -850,10 +881,9 @@
 
             // 초기 Canvas 설정
             initCanvas();
-        console.log(test);
         });
 
-        let test = "[[${subscriptionPackage.spkIdx}]]"
+        let spIdx = "[[${subscriptionPackage.spkIdx}]]"
         // 결제
         function Checkout() {
             let item = null;
@@ -871,10 +901,10 @@
                     clearInterval(polling);
                     resolve();
                 }
-                }, 10000);
+                }, 5000);
             });
             
-            const waitItem = fetch("/api/payment/item").then(
+            const waitItem = fetch(`/api/payment/item?spkIdx=${spIdx}`).then(
                 async (response) => (item = await response.json())
             );
             
@@ -904,62 +934,61 @@
             };
             
             this.showCheckout = async () => {
-            $('#itemName').text(item.name);
-            $('#itemImage').attr('src', `/${item.id}.png`);
-            $('.price-value').text(`${item.price.toLocaleString()}원`);
-            
-            $('#checkoutForm').on('submit', async (e) => {
-                e.preventDefault();
-                this.setWaitingPayment(true);
+                $('#itemName').text(item.name);
+                $('.price-value').text(`${item.price.toLocaleString()}원`);
 
-                function randomId() {
-                return [...crypto.getRandomValues(new Uint32Array(2))]
-                    .map((word) => word.toString(16).padStart(8, "0"))
-                    .join("");
-                }
+                $('#checkoutForm').on('submit', async (e) => {
+                    e.preventDefault();
+                    this.setWaitingPayment(true);
 
-                const paymentId = randomId();
-                const payment = await PortOne.requestPayment({
-                storeId: "store-092db0f4-068f-4f50-9b06-029fca00b36c",
-                channelKey: "channel-key-a0af8c14-0047-4ad6-ade6-5589354d0047",
-                paymentId,
-                orderName: item.name,
-                totalAmount: item.price,
-                currency: item.currency,
-                payMethod: "CARD",
-                customData: {
-                    item: item.id,
-                },
+                    function randomId() {
+                        return [...crypto.getRandomValues(new Uint32Array(2))]
+                            .map((word) => word.toString(16).padStart(8, "0"))
+                            .join("");
+                    }
+
+                    const paymentId = randomId();
+                    const payment = await PortOne.requestPayment({
+                        storeId: "store-092db0f4-068f-4f50-9b06-029fca00b36c",
+                        channelKey: "channel-key-a0af8c14-0047-4ad6-ade6-5589354d0047",
+                        paymentId,
+                        orderName: item.name,
+                        totalAmount: item.price,
+                        currency: item.currency,
+                        payMethod: "CARD",
+                        customData: {
+                            item: item.id,
+                        },
+                    });
+
+                    if (payment.code !== undefined) {
+                        this.setWaitingPayment(false);
+                        console.log(payment);
+                        this.openFailDialog(payment.message);
+                        return;
+                    }
+
+                    const completeResponse = await fetch("/api/payment/complete", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            paymentId: payment.paymentId,
+                        }),
+                    });
+
+                    this.setWaitingPayment(false);
+
+                    if (completeResponse.ok) {
+                        const paymentComplete = await completeResponse.json();
+                        if (paymentComplete.status === "PAID") {
+                            this.openSuccessDialog();
+                        }
+                    } else {
+                        this.openFailDialog(await completeResponse.text());
+                    }
                 });
-                
-                if (payment.code !== undefined) {
-                this.setWaitingPayment(false);
-                console.log(payment);
-                this.openFailDialog(payment.message);
-                return;
-                }
-                
-                const completeResponse = await fetch("/api/payment/complete", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    paymentId: payment.paymentId,
-                }),
-                });
-                
-                this.setWaitingPayment(false);
-                
-                if (completeResponse.ok) {
-                const paymentComplete = await completeResponse.json();
-                if (paymentComplete.status === "PAID") {
-                    this.openSuccessDialog();
-                }
-                } else {
-                this.openFailDialog(await completeResponse.text());
-                }
-            });
             };
             
             this.setWaitingPayment = (isWaiting) => {

@@ -1,6 +1,7 @@
 package com.eflix.common.payment.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eflix.common.payment.Entity.PaymentEntity;
@@ -10,6 +11,9 @@ import com.eflix.common.payment.dto.CustomData;
 import com.eflix.common.payment.dto.ItemDTO;
 import com.eflix.common.payment.exception.SyncPaymentException;
 import com.eflix.common.payment.service.PaymentService;
+import com.eflix.erp.dto.SubscriptionPackageDTO;
+import com.eflix.erp.mapper.ModuleMapper;
+import com.eflix.erp.mapper.SubscriptionMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.portone.sdk.server.common.Currency;
@@ -27,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -81,16 +86,27 @@ public class PaymentController {
     private PaymentService paymentService;
 
     @Autowired
+    private SubscriptionMapper subscriptionMapper;
+
+    @Autowired
+    private ModuleMapper moduleMapper;
+
+    @Autowired
     private PaymentClient paymentClient;
     
-    @Autowired
-    private WebhookVerifier webhookVerifier;
+    // @Autowired
+    // private WebhookVerifier webhookVerifier;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @GetMapping("/item")
-    public ItemDTO getItem() {
-        return items.get("shoes");
+    public ItemDTO getItem(@RequestParam("spkIdx") String spkIdx) {
+
+        SubscriptionPackageDTO subscriptionPackageDTO = subscriptionMapper.findById(spkIdx);
+
+        Currency krw = Krw.INSTANCE; // Kotlin의 object는 Java에서 INSTANCE로 접근
+
+        return new ItemDTO(subscriptionPackageDTO.getSpkIdx(), subscriptionPackageDTO.getSpkName(), subscriptionPackageDTO.getSpkPrice().intValue(), krw.getValue());
     }
 
     @PostMapping("/complete")
@@ -164,24 +180,24 @@ public class PaymentController {
         }
     }
 
-    @PostMapping("/webhook")
-    public CompletableFuture<Void> handleWebhook(
-            @RequestBody String body,
-            @RequestHeader("webhook-id") String webhookId,
-            @RequestHeader("webhook-timestamp") String webhookTimestamp,
-            @RequestHeader("webhook-signature") String webhookSignature) {
+    // @PostMapping("/webhook")
+    // public CompletableFuture<Void> handleWebhook(
+    //         @RequestBody String body,
+    //         @RequestHeader("webhook-id") String webhookId,
+    //         @RequestHeader("webhook-timestamp") String webhookTimestamp,
+    //         @RequestHeader("webhook-signature") String webhookSignature) {
         
-        return CompletableFuture.runAsync(() -> {
-            try {
-                var webhook = webhookVerifier.verify(body, webhookId, webhookTimestamp, webhookSignature);
+    //     return CompletableFuture.runAsync(() -> {
+    //         try {
+    //             var webhook = webhookVerifier.verify(body, webhookId, webhookTimestamp, webhookSignature);
                 
-                if (webhook instanceof WebhookTransaction webhookTransaction) {
-                    syncPayment(webhookTransaction.getData().getPaymentId()).join();
-                }
-            } catch (Exception e) {
-                log.error("Webhook handling failed", e);
-                throw new SyncPaymentException();
-            }
-        });
-    }
+    //             if (webhook instanceof WebhookTransaction webhookTransaction) {
+    //                 syncPayment(webhookTransaction.getData().getPaymentId()).join();
+    //             }
+    //         } catch (Exception e) {
+    //             log.error("Webhook handling failed", e);
+    //             throw new SyncPaymentException();
+    //         }
+    //     });
+    // }
 }

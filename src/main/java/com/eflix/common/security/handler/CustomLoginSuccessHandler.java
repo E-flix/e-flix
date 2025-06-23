@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import com.eflix.common.security.details.CustomUserDetails;
-import com.eflix.common.security.dto.CustomerUserDTO;
 import com.eflix.common.security.dto.UserDTO;
 import com.eflix.hr.dto.EmployeeDTO;
 

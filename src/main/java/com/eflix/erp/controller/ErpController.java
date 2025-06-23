@@ -1,5 +1,7 @@
 package com.eflix.erp.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,7 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.eflix.erp.dto.ModuleDTO;
 import com.eflix.erp.dto.SubscriptionPackageDTO;
+import com.eflix.erp.service.ModuleService;
 import com.eflix.erp.service.SubscriptionService;
 
 /**
@@ -47,6 +51,9 @@ public class ErpController {
 
 	@Autowired
 	private SubscriptionService service;
+
+	@Autowired
+	private ModuleService moduleService;
 	
 	@GetMapping()
 	public String home() {
@@ -63,7 +70,11 @@ public class ErpController {
 		
 		SubscriptionPackageDTO subscriptionPackageDTO = service.findById(spkIdx);
 
+		List<ModuleDTO> moduleList = moduleService.findAll();
+
 		model.addAttribute("subscriptionPackage", subscriptionPackageDTO);
+		model.addAttribute("moduleList", moduleList);
+		
 		return "erp/pay";
 	}
 

@@ -12,7 +12,7 @@
   [변경 이력]
   - 2025-06-20 : 최초 생성 (복성민)
   - 2025-06-22 : 구독 패키지 정보 조회 (복성민)
-  - 2025-06-23 : 구독 패키지 상세 등록 (복성민)
+  - 2025-06-23 : 결제 성공 후 구독 정보 등록 (복성민)
 ===========================================
 -->
 <mapper namespace="com.eflix.erp.mapper.SubscriptionMapper">
@@ -45,7 +45,17 @@
      * @return int
 	-->
     <insert id="insertSubscriptionPackageDetail" parameterType="SubscriptionPackageDetailDTO">
-        INESRT INTO subscription_package_details(spd_idx, spk_idx, module_idx)
-        VALUES(NVL(MAX(TO_NUMBER(SUBSTR(spd_idx, 4))), 100) + 1, #{spkIdx}, #{module_idx})
+        <selectKey resultType="String" keyProperty="spdIdx" order="BEFORE">
+            SELECT 'spd-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(spd_idx, 5))), 100) + 1) FROM subscription_package_details
+        </selectKey>
+        INSERT INTO subscription_package_details(spd_idx, spk_idx, module_idx)
+        VALUES(#{spdIdx}, #{spkIdx}, #{moduleIdx})
     </insert>
+
+    <!-- 
+     * 구독 정보를 등록한다.
+     *
+     * @param SubscriptionPackageDetailDTO
+     * @return int
+	-->
 </mapper>
