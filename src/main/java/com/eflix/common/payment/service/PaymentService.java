@@ -1,6 +1,7 @@
 package com.eflix.common.payment.service;
 
 import com.eflix.common.payment.Entity.PaymentEntity;
+import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
 
 /**
  * 결제 처리를 담당하는 서비스
@@ -33,4 +34,6 @@ public interface PaymentService {
     public int insertPayment(PaymentEntity paymentEntity);
 
     public int updatePayment(PaymentEntity paymentEntity);
+
+    public int insertSubscription(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO);
 }

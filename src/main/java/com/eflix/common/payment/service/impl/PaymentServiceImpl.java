@@ -2,10 +2,13 @@ package com.eflix.common.payment.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eflix.common.payment.Entity.PaymentEntity;
 import com.eflix.common.payment.mapper.PaymentMapper;
 import com.eflix.common.payment.service.PaymentService;
+import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
+import com.eflix.erp.mapper.SubscriptionMapper;
 
 /**
  * 결제 처리를 담당하는 서비스
@@ -37,6 +40,9 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private PaymentMapper paymentMapper;
 
+    @Autowired
+    private SubscriptionMapper subscriptionMapper;
+
     @Override
     public PaymentEntity getPaymentById(String paymentIdx) {
         // TODO Auto-generated method stub
@@ -61,4 +67,12 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentMapper.updatePayment(paymentEntity);
     }
 
+    @Override
+    @Transactional
+    public int insertSubscription(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'insertSubscriptionPackageDetail'");
+        // return subscriptionMapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO);
+        return 0;
+    }
 }
