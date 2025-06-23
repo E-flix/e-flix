@@ -1,6 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
   layout:decorate="~{common/layouts/default}">
-
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
@@ -32,8 +31,6 @@
 
     <!-- 검색 필터 -->
     <div class="p-4 bg-light rounded mb-4">
-      <h5 class="fw-bold mb-3">사원관리</h5>
-
       <div class="row g-3 align-items-center mb-3">
         <div class="col-md-2"><label class="form-label">검색 기준</label></div>
         <div class="col-md-2">
@@ -47,17 +44,67 @@
       </div>
 
       <div class="row g-3 mb-3">
-        <div class="col-md-2"><label class="form-label">부서</label></div>
-        <div class="col-md-2"><select class="form-select">
+        <div class="col-md-2">
+          <label class="form-label">부서</label>
+        </div>
+        <div class="col-md-2">
+          <select id="deptSelect" name="deptUpIdx" class="form-select">
             <option>선택</option>
-          </select></div>
-        <div class="col-md-2"><label class="form-label">직급</label></div>
-        <div class="col-md-2"><select class="form-select">
+            <!-- 최상위 부서 목록 바인딩 -->
+            <option th:each="d : ${depts}" th:value="${d.deptIdx}" th:text="${d.deptName}">
+            </option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">상세 부서</label>
+        </div>
+        <div class="col-md-2">
+          <select id="detailDeptSelect" name="deptIdx" class="form-select">
             <option>선택</option>
-          </select></div>
+          </select>
+        </div>
       </div>
+      <script>
+        $(document).ready(function(){
+          $('#deptSelect').on('change', function () {
+            var parentIdx = $(this).val();
+            console.log("값 바뀜", parentIdx);
+            var $child = $('#detailDeptSelect');
+            $child.html('<option value="">선택</option>'); // 초기화
 
-      <div class="row g-3 mb-3">
+            if (!parentIdx) {
+              return; // 선택 해제 시 종료
+            }
+
+            // jQuery AJAX 호출
+            $.ajax({
+              type: 'GET',
+              url: `/hr/${parentIdx}/children`,
+              success: function(res) {
+                $.each(res, function(i, d) {
+                $('<option>')
+                  .val(d.deptIdx)
+                  .text(d.deptName)
+                  .appendTo($child);
+                  });
+              },
+              error: function(req, xhr, err) {
+                console.error(err)
+              }
+            });
+          });
+        });
+      </script>
+
+      <div class="row g-3 mb-3 align-items-center">
+        <div class="col-md-2">
+          <label class="form-label">직급</label>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select">
+            <option>선택</option>
+          </select>
+        </div>
         <div class="col-md-2"><label class="form-label">재직 상태</label></div>
         <div class="col-md-2"><select class="form-select">
             <option>선택</option>
@@ -68,10 +115,11 @@
           </select></div>
       </div>
 
-      <div class="d-flex gap-2">
+      <div class="d-flex justify-content-center gap-3">
         <button class="btn btn-primary">조회</button>
         <button class="btn btn-secondary">초기화</button>
       </div>
+
     </div>
 
     <!-- 2. 사원 테이블 -->
@@ -94,7 +142,7 @@
         </thead>
         <tbody>
           <!-- records 라는 이름의 List<AttendanceRecordsDTO> 를 하나씩 꺼내서 emp 에 바인딩 -->
-          <tr th:each="emp : ${records}">
+          <tr th:each="emp : ${empList}">
             <td>
               <input type="checkbox" th:value="${emp.empIdx}" />
             </td>
@@ -109,14 +157,14 @@
             <!-- 연락처 필드가 empAccount 라고 DTO에 있으면 -->
             <td th:text="${emp.empAccount}">연락처</td>
             <!-- 근로계약서 다운로드 링크가 필요한 경우 -->
-            <td th:text="${emp.empEmail}"></td>
-              <a th:href="@{'/employees/' + ${emp.empIdx} + '/contract'}" target="_blank">
+            <td th:text="${emp.empEmail}">이메일</td>
+              <td><a th:href="@{'/employees/' + ${emp.empIdx} + '/contract'}" target="_blank">
                 다운로드
               </a>
             </td>
           </tr>
           <!-- 만약 리스트가 비어있으면 -->
-          <tr th:if="${#lists.isEmpty(records)}">
+          <tr th:if="${#lists.isEmpty(empList)}">
             <td colspan="11">데이터가 없습니다.</td>
           </tr>
         </tbody>
@@ -140,7 +188,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content p-3">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold">사원등록 (Modal)</h5>
+          <h5 class="modal-title fw-bold">사원등록</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
         </div>
 

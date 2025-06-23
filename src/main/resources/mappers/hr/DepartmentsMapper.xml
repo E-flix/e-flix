@@ -3,10 +3,37 @@
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-20
-  - 설명     : DepartmentsMapper query xml
+  - 설명     : DepartmentMapper query xml
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 계정과목 전체조회 작성
 =============================================== -->
-<mapper namespace="com.eflix.hr.mapper.DepartmentsMapper">
-
+<mapper namespace="com.eflix.hr.mapper.DepartmentMapper">
+  <select id="findAllDepts" resultType="DepartmentDTO">
+    SELECT dept_idx,
+        dept_up_idx,
+        dept_name,
+        dept_status,
+        dept_memo,
+        dept_regdate,
+        dept_moddate
+    FROM departments
+    WHERE dept_up_idx IS NULL
+  </select>
+  
+  <select id="findAllDeptsUp" parameterType="String" resultType="DepartmentDTO">
+    SELECT 
+        dept_idx,
+        dept_up_idx,
+        dept_name,
+        dept_status,
+        dept_memo,
+        dept_regdate,
+        dept_moddate
+    FROM departments
+    WHERE dept_up_idx = (
+        SELECT dept_idx
+        FROM departments
+        WHERE dept_idx = #{deptIdx}
+    )
+  </select>
 </mapper>

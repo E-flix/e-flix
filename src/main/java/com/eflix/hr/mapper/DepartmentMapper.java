@@ -1,7 +1,7 @@
 /* ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-19
-  - 설명     : 사원 CRUD용 Mybatis Mapper
+  - 설명     : 부서 CRUD용 Mybatis Mapper
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김어진): Mapper 생성
@@ -13,14 +13,14 @@ import java.util.List;
 import org.springframework.data.repository.query.Param;
 
 import com.eflix.hr.dto.DepartmentDTO;
-import com.eflix.hr.dto.EmployeeDTO;
 
-public interface EmployeeMapper {
+public interface DepartmentMapper {
+    List<DepartmentDTO> selectAll();
+    DepartmentDTO selectById(@Param("deptIdx") String deptIdx);
+    int insert(DepartmentDTO dto);
+    int update(DepartmentDTO dto);
+    int deleteById(@Param("deptIdx") String deptIdx);
 
-    public EmployeeDTO findByEmpEmailAndCompany(String empEmail, String coIdx);
-    List<EmployeeDTO> selectAll();
-    EmployeeDTO selectById(@Param("empIdx") String empIdx);
-    int insert(EmployeeDTO dto);
-    int update(EmployeeDTO dto);
-    int deleteById(@Param("empIdx") String empIdx);
+    List<DepartmentDTO> findAllDepts();
+    List<DepartmentDTO> findAllDeptsUp(String dpetIdx);
 }
