@@ -18,9 +18,9 @@
 </head>
 <div layout:fragment="content" class="container-fluid py-4">
   <div class="float-end mb-3">
-    <button type="button" class="btn btn-cyan me-2">초기화</button>
-    <button type="button" class="btn btn-pink me-2">목록</button>
-    <button type="button" class="btn btn-green">등록</button>
+    <button type="reset" class="btn btn-cyan me-2">초기화</button>
+    <button type="button" class="btn btn-pink me-2" onclick="location.href='/bsn/qot_list'">목록</button>
+    <button type="button" id="saveBtn" class="btn btn-green">등록</button>
   </div>
 
   <h3 class="mb-4">견적서 입력</h3>
@@ -28,15 +28,15 @@
     <form id="quoteForm" class="row g-3">
       <div class="col-md-3">
         <label class="form-label">견적번호</label>
-        <input type="text" class="form-control" placeholder="입력">
+        <input type="text" id="quotationNo" class="form-control" placeholder="입력">
       </div>
       <div class="col-md-3">
         <label class="form-label">견적일자</label>
-        <input type="date" class="form-control">
+        <input type="date" id="quotationDt" class="form-control">
       </div>
       <div class="col-md-3">
         <label class="form-label">유효기간</label>
-        <select class="form-select">
+        <select class="form-select" id="validPeriod">
           <option value="">선택</option>
           <option>7일</option>
           <option>15일</option>
@@ -45,7 +45,7 @@
       </div>
       <div class="col-md-3">
         <label class="form-label">거래처명</label>
-        <select class="form-select">
+        <select class="form-select" id="customerName">
           <option value="">선택</option>
           <option>테슬라</option>
           <option>삼성전자</option>
@@ -53,19 +53,23 @@
       </div>
       <div class="col-md-3">
         <label class="form-label">담당자</label>
-        <input type="text" class="form-control" placeholder="입력">
+        <input type="text" id="empCd" class="form-control" placeholder="입력">
       </div>
       <div class="col-md-3">
         <label class="form-label">연락처</label>
-        <input type="tel" class="form-control" placeholder="입력">
+        <input type="tel" id="phone" class="form-control" placeholder="입력">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">배송지</label>
+        <input type="text" id="deliveryLocation" class="form-control" placeholder="입력">
       </div>
       <div class="col-md-3">
         <label class="form-label">예상납기일</label>
-        <input type="date" class="form-control">
+        <input type="date" id="expectedDeliveryDt" class="form-control">
       </div>
       <div class="col-md-3">
         <label class="form-label">결제조건</label>
-        <select class="form-select">
+        <select class="form-select" id="paymentTerms">
           <option value="">선택</option>
           <option>계좌이체</option>
           <option>현금</option>
@@ -153,6 +157,42 @@ $(function() {
       </tr>
     `);
     $tbody.append($tr);
+  });
+
+  $('#saveBtn').on('click', function() {
+    const data = {
+      quotationNo: $('#quotationNo').val(),
+      quotationDt: $('#quotationDt').val(),
+      validPeriod: $('#validPeriod').val(),
+      customerName: $('#customerName').val(),
+      empCd: $('#empCd').val(),
+      phone: $('#phone').val(),
+      deliveryLocation: $('#deliveryLocation').val(),
+      expectedDeliveryDt: $('#expectedDeliveryDt').val(),
+      paymentTerms: $('#paymentTerms').val()
+    };
+
+    $.ajax({
+      type: 'POST',
+      url: '/bsn/qot',
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      success: function() {
+        Swal.fire({
+          icon: 'success',
+          title: '등록 완료',
+          showConfirmButton: false,
+          timer: 1000
+        }).then(() => location.href = '/bsn/qot_list');
+      },
+      error: function() {
+        Swal.fire({
+          icon: 'error',
+          title: '오류',
+          text: '등록 중 문제가 발생했습니다.'
+        });
+      }
+    });
   });
 });
 </script>

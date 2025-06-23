@@ -3,8 +3,12 @@ package com.eflix.bsn.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.eflix.bsn.dto.QuotationDTO;
 import com.eflix.bsn.service.QuotationService;
 import com.eflix.bsn.service.OrdersService;
 
@@ -45,6 +49,14 @@ public class BsnController {
   @GetMapping("/qot")
   public String quotation(){
     return "bsn/quotation";
+  }
+
+  //견적서 등록 처리
+  @PostMapping("/qot")
+  @ResponseBody
+  public QuotationDTO createQuotation(@RequestBody QuotationDTO quotation) {
+    quotationService.insertQuotation(quotation);
+    return quotation;
   }
 
   //주문서 조회
