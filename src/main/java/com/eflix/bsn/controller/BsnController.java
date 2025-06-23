@@ -36,18 +36,18 @@ public class BsnController {
     return "bsn/bsnMain";
   }
 
-  //견적서 조회
+  // 견적서 조회
   @GetMapping("/qot_list")
-  public String quotation_list(Model model) throws JsonProcessingException {
+  public String quotationList(Model model) throws JsonProcessingException {
     var list = quotationService.getQuotationList();
     String json = new ObjectMapper().writeValueAsString(list);
     model.addAttribute("quotationList", json);
     return "bsn/quotation_list";
   }
 
-  //견적서 등록
+  // 견적서 등록 화면
   @GetMapping("/qot")
-  public String quotation(){
+  public String quotation() {
     return "bsn/quotation";
   }
 
