@@ -7,7 +7,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 import com.eflix.common.security.details.CustomUserDetails;
 import com.eflix.common.security.dto.CustomerUserDTO;
-import com.eflix.common.security.dto.EmployeeDTO;
 import com.eflix.common.security.dto.UserDTO;
 
 import jakarta.servlet.ServletException;

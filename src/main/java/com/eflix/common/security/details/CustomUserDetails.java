@@ -8,8 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.eflix.common.security.dto.EmployeeDTO;
 import com.eflix.common.security.dto.UserDTO;
+import com.eflix.hr.dto.EmployeeDTO;
 
 import lombok.Getter;
 

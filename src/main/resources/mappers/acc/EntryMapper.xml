@@ -6,40 +6,81 @@
   - 설명     : EntryMapper query xml
   [ 변경 이력 ]
   - 2025-06-20 (김희정): xml 파일 생성
+  - 2025-06-22 (김희정): EntryDetailDTO매핑, EntryMasterDTO매핑, 전체조회 쿼리 작성
 =============================================== -->
 <mapper namespace="com.eflix.acc.mapper.EntryMapper">
-	<!-- 전표 전체조회 -->
-	<select id="getList" resultType="EntryMasterDTO">
-    SELECT
-      m.entry_number,
+  <!-- property == DTO의 필드명, column == 쿼리 결과의 컬럼명 (alias 포함) -->
+  <!-- EntryDetailDTO 매핑 정의 -->
+  <resultMap id="entryDetailResultMap" type="com.eflix.acc.dto.EntryDetailDTO">
+    <id property="lineNumber" column="line_number" />
+    <result property="entryNumber" column="entry_number" />
+    <result property="partnerCode" column="partner_code" />
+    <result property="partnerName" column="partner_name" />
+    <result property="accountCode" column="account_code" />
+    <result property="resentmenType" column="resentmen_type" />
+    <result property="amount" column="amount" />
+    <result property="description" column="description" />
+    <result property="createdAt" column="created_at" />
+    <result property="updatedAt" column="updated_at" />
+  </resultMap>
+
+  <!-- EntryMasterDTO + details 매핑 정의 -->
+  <resultMap id="entryMasterResultMap" type="com.eflix.acc.dto.EntryMasterDTO">
+    <id property="entryNumber" column="entry_number" />
+    <result property="entryType" column="entry_type" />
+    <result property="entryDate" column="entry_date" />
+    <result property="entryStatus" column="entry_status" />
+    <result property="creator" column="creator" />
+    <result property="createdAt" column="created_at" />
+    <result property="updatedAt" column="updated_at" />
+    <result property="transactionType" column="transaction_type" />
+    <result property="partnerCode" column="partner_code" />
+    <result property="electronicType" column="electronic_type" />
+    <result property="approvalNumber" column="approval_number" />
+    <result property="itemName" column="item_name" />
+    <result property="quantity" column="quantity" />
+    <result property="unitPrice" column="unit_price" />
+    <result property="totalSupplyAmount" column="total_supply_amount" />
+    <result property="totalTaxAmount" column="total_tax_amount" />
+    <result property="remarks" column="remarks" />
+    <!-- 디테일 부분 컬렉션 매핑 => 하위 컬렉션 매핑 (1:N 관계) 
+     ofType == collection에서 리스트 안에 들어가는 객체의 타입을 알려주는 속성 -->
+    <collection property="details" ofType="com.eflix.acc.dto.EntryDetailDTO"
+      resultMap="entryDetailResultMap" />
+  </resultMap>
+
+  <!-- 전표 전체 조회 => 마스터 + 디테일 전체 조회 -->
+  <select id="getList" resultMap="entryMasterResultMap"> 
+    SELECT 
+      m.entry_number, 
       m.entry_type,
-      m.entry_date,
-      m.entry_status,
-      m.creator,
-      m.created_at,
-      m.updated_at,
+      m.entry_date, 
+      m.entry_status, 
+      m.creator, 
+      m.created_at, 
+      m.updated_at, 
       m.transaction_type,
-      m.partner_code,
-      m.electronic_type,
-      m.approval_number,
-      m.item_name,
-      m.quantity,
+      m.partner_code, 
+      m.electronic_type, 
+      m.approval_number, 
+      m.item_name, 
+      m.quantity, 
       m.unit_price,
-      m.total_supply_amount,
-      m.total_tax_amount,
-      m.remarks,
-      d.line_number,
-      d.entry_number,
-      d.partner_code,
-      d.partner_name,
+      m.total_supply_amount, 
+      m.total_tax_amount, 
+      m.remarks, 
+      d.line_number, 
+      d.entry_number AS d_entry_number, 
+      d.partner_code AS d_partner_code, 
+      d.partner_name, 
       d.account_code,
-      d.resentmen_type,
-      d.amount,
-      d.description,
-      d.created_at,
-      d.updated_at
-    FROM entry_master m left outer join entry_detail d
-    ON m.entry_number = d.entry_number
-    ORDER BY m.entry_number;
-	</select>
+      d.resentmen_type, 
+      d.amount, 
+      d.description, 
+      d.created_at AS d_created_at, 
+      d.updated_at AS d_updated_at 
+    FROM entry_master m LEFT JOIN entry_detail d 
+    ON m.entry_number = d.entry_number 
+    ORDER BY m.entry_number
+  </select>
 </mapper>

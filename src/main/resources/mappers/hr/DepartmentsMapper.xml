@@ -8,5 +8,4 @@
   - 2025-06-19 (김어진): 계정과목 전체조회 작성
 =============================================== -->
 <mapper namespace="com.eflix.hr.mapper.DepartmentsMapper">
-
 </mapper>
