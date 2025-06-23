@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Controller
 @RequestMapping("/acc")
 @RequiredArgsConstructor
-public class ElectronicTaxInvoiceController {
+public class AccElectronicTaxInvoiceController {
 
   // private final Service Service;
 

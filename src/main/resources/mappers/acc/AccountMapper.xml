@@ -6,6 +6,7 @@
   - 설명     : accountMapper query xml
   [ 변경 이력 ]
   - 2025-06-19 (김희정): 계정과목 전체조회 작성
+	- 2025-06-23 (김희정): 단건 조회(accountCode) 작성
 =============================================== -->
 <mapper namespace="com.eflix.acc.mapper.AccountMapper">
 	<!-- 계정과목 전체조회 -->
@@ -28,4 +29,11 @@
 		ORDER BY
 			account_code
 	</select>
+
+	<!-- 계정과목 코드로 계정과목 조회 -->
+  <select id="getListByCode" parameterType="int" resultType="com.eflix.acc.dto.AccountDTO">
+    SELECT * 
+    FROM account 
+    WHERE account_code = #{accountCode} 
+  </select>
 </mapper>

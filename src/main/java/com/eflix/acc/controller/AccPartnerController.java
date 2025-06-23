@@ -1,5 +1,6 @@
 package com.eflix.acc.controller;
 
+import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,14 @@ public class AccPartnerController {
     return "acc/partner";
   }
 
+  // 거래처 전체조회
+  @ResponseBody
+  @GetMapping("/pt/list")
+  public List<PartnerDetailDTO> getPartnerList() {
+    return partnerService.getList();
+  }
+
+  // 거래처 단건조회 (partnerCode)
   @ResponseBody
   @GetMapping("/pt/{partnerCode}")
   public PartnerDetailDTO getListByCode(@PathVariable int partnerCode) {
