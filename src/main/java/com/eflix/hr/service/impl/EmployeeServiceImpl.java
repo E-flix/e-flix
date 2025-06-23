@@ -13,35 +13,35 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.eflix.hr.dto.EmployeesDTO;
+import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.mapper.EmployeeMapper;
-import com.eflix.hr.service.EmployeesService;
+import com.eflix.hr.service.EmployeeService;
 
 @Service
-public class EmployeesServiceImpl implements EmployeesService{
+public class EmployeeServiceImpl implements EmployeeService{
 
   @Autowired
   EmployeeMapper employeeMapper;
 
   @Override
-  public List<EmployeesDTO> getAllEmployees() {
+  public List<EmployeeDTO> getAllEmployees() {
     return employeeMapper.selectAll();
   }
 
   @Override
-  public EmployeesDTO getEmployeeById(String empIdx) {
+  public EmployeeDTO getEmployeeById(String empIdx) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getEmployeeById'");
   }
 
   @Override
-  public int createEmployee(EmployeesDTO dto) {
+  public int createEmployee(EmployeeDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createEmployee'");
   }
 
   @Override
-  public int updateEmployee(EmployeesDTO dto) {
+  public int updateEmployee(EmployeeDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateEmployee'");
   }

@@ -10,12 +10,12 @@ package com.eflix.hr.service;
 
 import java.util.List;
 
-import com.eflix.hr.dto.EmployeesDTO;
+import com.eflix.hr.dto.EmployeeDTO;
 
-public interface EmployeesService {
-    public List<EmployeesDTO> getAllEmployees();
-    public EmployeesDTO getEmployeeById(String empIdx);
-    int createEmployee(EmployeesDTO dto);
-    int updateEmployee(EmployeesDTO dto);
+public interface EmployeeService {
+    public List<EmployeeDTO> getAllEmployees();
+    public EmployeeDTO getEmployeeById(String empIdx);
+    int createEmployee(EmployeeDTO dto);
+    int updateEmployee(EmployeeDTO dto);
     int deleteEmployee(String empIdx);
 }

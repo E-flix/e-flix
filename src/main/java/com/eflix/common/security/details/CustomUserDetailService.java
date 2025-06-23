@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.eflix.common.security.dto.EmployeeDTO;
 import com.eflix.common.security.dto.UserDTO;
 import com.eflix.erp.mapper.RoleMapper;
 import com.eflix.erp.mapper.UserMapper;
+import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.mapper.EmployeeMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
