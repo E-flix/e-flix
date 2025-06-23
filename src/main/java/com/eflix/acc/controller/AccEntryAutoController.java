@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Controller
 @RequestMapping("/acc")
 @RequiredArgsConstructor
-public class EntryAutoController {
+public class AccEntryAutoController {
 
   // private final Service Service;
 

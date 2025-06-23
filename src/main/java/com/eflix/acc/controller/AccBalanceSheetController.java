@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Controller
 @RequestMapping("/acc")
 @RequiredArgsConstructor
-public class BalanceSheetController {
+public class AccBalanceSheetController {
 
   // private final Service Service;
 
