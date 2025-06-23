@@ -6,11 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.eflix.hr.dto.AttendanceRecordsDTO;
-import com.eflix.hr.service.AttendanceRecordsService;
+import com.eflix.hr.dto.AttendanceRecordDTO;
+import com.eflix.hr.dto.DepartmentDTO;
+import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.service.AttendanceRecordService;
+import com.eflix.hr.service.DepartmentService;
+import com.eflix.hr.service.EmployeeService;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 
 /** ============================================
@@ -21,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
   [ 변경 이력 ]
   - 2025-06-18 (김어진): 인사 메인 화면 및 각 기능별 화면 요청 처리 메소드 추가
   - 2025-06-19 (김어진): 각 기능별 화면 요청 처리 메소드 추가
+  - 2025-06-23 (김어진): 각 기능별 화면 요청 처리 메소드 추가
 ============================================  */
 
 @Controller
@@ -28,22 +36,46 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HrController {
 
   @Autowired
-  private AttendanceRecordsService service;
+  private EmployeeService employeeService;
+
+  @Autowired
+  private DepartmentService departmentService;
 
   // 인사 메인 화면
   @GetMapping("")
   public String hrMain () {
-    System.out.println(service.getAllAttendanceRecords());
     return "hr/hrMain";
   }
 
   // 사원 관리 화면
   @GetMapping("/el")
-  public String empList(Model model) {
-    List<AttendanceRecordsDTO> records = service.getAllAttendanceRecords();
-    model.addAttribute("records", records);
+  public String empList(@RequestParam(value = "option", required=false) String option, @RequestParam(value = "keyword", required=false) String keyword, Model model) {
+    List<EmployeeDTO> records;
+
+    // keyword 없으면 전체 조회
+    records = employeeService.getAllEmployees(option, keyword);
+
+    // 부서 드롭다운용 전체 부서 조회
+    List<DepartmentDTO> depts = departmentService.findAllDepts();
+
+    // 사원관리 페이지 직급 드롭다운 조회
+    List<EmployeeDTO> gradeList = employeeService.gradeList();
+
+    // 뷰에 넘길 모델
+    model.addAttribute("empList",  records);
+    model.addAttribute("depts",     depts);
+    model.addAttribute("option",    option);
+    model.addAttribute("keyword",   keyword);
+    model.addAttribute("gradeList",   gradeList);
     return "hr/emp";
   }
+
+  /** AJAX: 특정 부서(deptUpIdx)의 하위 부서 목록 JSON 리턴 */
+    @GetMapping("/{deptUpIdx}/children")
+    @ResponseBody
+    public List<DepartmentDTO> children(@PathVariable String deptUpIdx) {
+        return departmentService.findAllDeptsUP(deptUpIdx);
+    }
 
   // 부서 등록 화면(관리자)
   @GetMapping("/da")
@@ -92,6 +124,4 @@ public class HrController {
   public String salaryPayslip() {
       return "hr/salaryPayslip";
   }
-  
-  
 }

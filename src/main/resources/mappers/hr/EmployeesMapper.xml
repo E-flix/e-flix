@@ -6,7 +6,51 @@
   - 설명     : EmployeesMapper query xml
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 계정과목 전체조회 작성
+  - 2025-06-23 (김어진): 사원관리 조건별 조회 쿼리문 작성
 =============================================== -->
-<mapper namespace="com.eflix.hr.mapper.EmployeesMapper">
-
+<mapper namespace="com.eflix.hr.mapper.EmployeeMapper">
+  <select id="selectAll" parameterType="String" resultType="EmployeeDTO">
+      SELECT 
+      e.emp_idx,
+      e.emp_name,
+      e.dept_idx,
+      d.dept_name,
+      e.emp_grade,
+      e.emp_status,
+      e.emp_type,
+      e.emp_email,
+      e.emp_regdate,
+      e.emp_account
+    FROM employees e
+    LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+    WHERE 1=1
+    <if test="keyword != null and keyword != ''">
+      <if test="option != null ">
+          <if test="option.equals('empIdx'.toString())">
+            and emp_idx = #{keyword}
+          </if>
+            <if test="option.equals('empName'.toString())">
+            and emp_name = #{keyword}
+          </if>
+      </if>
+    </if>
+  </select>
+  <!-- 직급 드롭다운 조회 -->
+    <select id="gradeList"
+          resultType="EmployeeDTO">
+      SELECT 
+      e.emp_idx,
+      e.emp_name,
+      e.dept_idx,
+      d.dept_name,
+      e.emp_grade,
+      e.emp_status,
+      e.emp_type,
+      e.emp_email,
+      e.emp_regdate,
+      e.emp_account
+    FROM employees e
+    LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+    WHERE 1=1
+  </select>
 </mapper>

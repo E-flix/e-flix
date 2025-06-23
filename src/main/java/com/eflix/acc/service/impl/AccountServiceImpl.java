@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김희정): 계정과목 전체조회 작성
+  - 2025-06-23 (김희정): 단건 조회(accountCode) 작성
 =============================================== */
 @Service
 @RequiredArgsConstructor
@@ -31,35 +32,9 @@ public class AccountServiceImpl implements AccountService {
     return accountMapper.getList();
   }
 
-  // @Override
-  // public List<BoardVO> findAll(BoardVO boardVO) {
-  // return null;
-  // }
-
-  // @Override
-  // public BoardVO findById(int bno) {
-  // BoardVO result = boardMapper.findById(bno);
-  // return result;
-  // }
-
-  // @Override
-  // public int insert(BoardVO boardVO) {
-  // int result = boardMapper.insert(boardVO);
-  // return result;
-  // }
-
-  // @Override
-  // public int update(BoardVO boardVO) {
-  // return boardMapper.update(boardVO);
-  // }
-
-  // @Override
-  // public int delete(int bno) {
-  // return boardMapper.delete(bno);
-  // }
-
-  // @Override
-  // public Long getTotal(Criteria cri) {
-  // return boardMapper.getTotal(cri);
-  // }
+  // 계정과목 코드로 계정과목 조회
+  @Override
+  public AccountDTO getListByCode(int accountCode) {
+    return accountMapper.getListByCode(accountCode);
+  }
 }

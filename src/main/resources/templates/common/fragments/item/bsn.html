@@ -1,29 +1,31 @@
-<li th:fragment="bsn" class="nav-item">
-  <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBsn" aria-expanded="true" aria-controls="collapseBsn">
+<li th:fragment="bsn" class="" th:class="${activeMenu == 'bsn'} ? 'nav-item active' : 'nav-item'">
+  <a class="nav-link collapsed" href="#" data-toggle="collapse"
+    data-target="#collapseBsn" aria-expanded="" th:attr="aria-expanded=${activeMenu == 'bsn'}"
+    aria-controls="collapseBsn">
     <i class="fas fa-fw fa-folder"></i>
 		<span>영업</span>
 	</a>
-	<div id="collapseBsn" class="collapse" aria-labelledby="headingBsn" data-parent="#accordionsidebar">
+	<div id="collapseBsn" class="collapse" th:classappend="${activeMenu == 'bsn'} ? ' show' : ''" aria-labelledby="headingBsn" data-parent="#accordionsidebar">
     <div class="bg-white py-2 collapse-inner rounded">
 
-      <a class="collapse-item" href="/bsn">영업 관리</a>
+      <a class="" th:class="${activeMenu  == 'bsn'} ? 'collapse-item active' : 'collapse-item'" href="/bsn">영업 관리</a>
 
       <h6 class="collapse-header">견적서 관리:</h6>
-      <a class="collapse-item" href="/bsn/qot_list">견적서 조회</a>
-      <a class="collapse-item" href="/bsn/qot">견적서 등록</a>
+      <a class="" th:class="${activeSubMenu == 'qot_list'} ? 'collapse-item active' : 'collapse-item'" href="/bsn/qot_list">견적서 조회</a>
+      <a class="" th:class="${activeSubMenu == 'qot'} ? 'collapse-item active' : 'collapse-item'" href="/bsn/qot">견적서 등록</a>
 
       <h6 class="collapse-header">주문서 관리:</h6>
-      <a class="collapse-item" href="/bsn/sorlist">주문서 조회</a>
-      <a class="collapse-item" href="/bsn/sorder">주문서 등록</a>
+      <a class="" th:class="${activeSubMenu == 'sorlist'} ? 'collapse-item active' : 'collapse-item'" href="/bsn/sorlist">주문서 조회</a>
+      <a class="" th:class="${activeSubMenu == 'sorder'} ? 'collapse-item active' : 'collapse-item'" href="/bsn/sorder">주문서 등록</a>
 
       <h6 class="collapse-header">출고 관리:</h6>
-      <a class="collapse-item" href="/bsn/obound_list">출고 조회</a> 
-      <a class="collapse-item" href="/bsn/obound">출고 의뢰</a>
+      <a class="" th:class="${activeSubMenu == 'obound_list'} ? 'collapse-item active' : 'collapse-item'" href="/bsn/obound_list">출고 조회</a> 
+      <a class="" th:class="${activeSubMenu == 'obound'} ? 'collapse-item active' : 'collapse-item'" href="/bsn/obound">출고 의뢰</a>
 
       <h6 class="collapse-header">수금 관리:</h6>
-      <a class="collapse-item" href="/bsn/sales_money">영업 매출</a> 
-      <a class="collapse-item" href="/bsn/accounts">미수금 관리</a>
-			<a class="collapse-item" href="/bsn/customer_credit">거래처 여신 관리</a>
+      <a class="" th:class="${activeSubMenu == 'sales_money'} ? 'collapse-item active' : 'collapse-item'" href="/bsn/sales_money">영업 매출</a> 
+      <a class="" th:class="${activeSubMenu == 'accounts'} ? 'collapse-item active' : 'collapse-item'" href="/bsn/accounts">미수금 관리</a>
+			<a class="" th:class="${activeSubMenu == 'customer_credit'} ? 'collapse-item active' : 'collapse-item'" href="/bsn/customer_credit">거래처 여신 관리</a>
     </div>
   </div>
 </li>
