@@ -1,16 +1,20 @@
 <!-- ============================================
   - 작성자   : 이혁진
   - 최초작성 : 2025-06-19
-  - 설명     : 창고 화면
+  - 설명     : 창고 화면 (AG Grid 적용)
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (이혁진): 화면완성
-  - 2025-06-20 (이혁진): warehouse 리스트 출력 완료
-  - 2025-06-20 (이혁진): warehouse 삽입 완료
+  - 2025-06-20 (이혁진): warehouse 조회 완료
+  - 2025-06-20 (이혁진): warehouse 등록 완료
+  - 2025-06-23 (이혁진): warehouse 삭제 완료
+  - 2025-06-23 (이혁진): 가장 최근 ID 불러오기 완료
+  - 2025-06-23 (이혁진): AG Grid 적용
 ============================================ -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{common/layouts/default}">
+
 <div layout:fragment="content" class="container-fluid">
 	<div class="col-md-12">
 		<div class="radio-group">
@@ -21,98 +25,163 @@
 			<label class="btn btn-outline-secondary btn-sm me-1" for="warehouse_mnt">창고이동</label>
 		</div>
 	</div>
-	<div class="card shadow-sm">
+	<div class="card border-0">
 		<div class="card-body">
-			<!-- 버튼 영역 -->
-			<div class="d-flex justify-content-end mb-2">
-				<button type="button" class="btn btn-success btn-sm me-2" id="addBtn">저장</button>
-				<button type="button" class="btn btn-danger btn-sm me-2">삭제</button>
-			</div>
-			<!-- 테이블 -->
-			<div class="table-responsive">
-				<table class="table table-bordered table-sm text-center align-middle mb-0">
-					<thead class="table-primary">
-						<tr>
-							<th><input type="checkbox" class="checkAll"></th>
-							<th>NO</th>
-							<th>창고코드</th>
-							<th>창고위치</th>
-							<th>창고용량</th>
-							<th>담당자</th>
-						</tr>
-					</thead>
-					<tbody>
-						<!-- 입력 행 -->
-						<tr id="inputRow">
-							<th>-</th>
-							<td>-</td>
-							<td><input type="text" class="form-control form-control-sm" id="warehouseId" /></td>
-							<td><input type="text" class="form-control form-control-sm" id="warehouseLocation" /></td>
-							<td><input type="text" class="form-control form-control-sm" id="warehouseScale" /></td>
-							<td><input type="text" class="form-control form-control-sm" id="warehouseManager" /></td>
-						</tr>
-						<!-- 데이터 반복 -->
-						<tr th:each="list, stat : ${whList}">
-							<th><input type="checkbox" class="checkOne"></th>
-							<td th:text="${stat.count}"></td>
-							<td th:text="${list.warehouseId}"></td>
-							<td th:text="${list.warehouseLocation}"></td>
-							<td th:text="${list.warehouseScale}"></td>
-							<td th:text="${list.warehouseManager}"></td>
-						</tr>
-					</tbody>
-				</table>
+<!-- 등록 폼 및 버튼 -->
+<div class="row mb-3 align-items-end">
+  <div class="col-md-2"><input type="text" class="form-control form-control-sm" id="warehouseId" placeholder="창고ID" readonly style="text-align: center;"></div>
+  <div class="col-md-3"><input type="text" class="form-control form-control-sm" id="warehouseLocation" placeholder="창고위치" style="text-align: center;"></div>
+  <div class="col-md-2"><input type="text" class="form-control form-control-sm" id="warehouseScale" placeholder="창고크기 단위 : L" style="text-align: center;"></div>
+  <div class="col-md-3"><input type="text" class="form-control form-control-sm" id="warehouseManager" placeholder="창고담당자" style="text-align: center;"></div>
+  <div class="col-md-2 d-flex justify-content-end">
+    <button type="button" class="btn btn-success btn-sm me-2" id="addBtn">저장</button>
+    <button type="button" class="btn btn-danger btn-sm" id="delBtn">삭제</button>
+  </div>
+</div>
+			<!-- AG Grid -->
+			<div class="grid-container" style="height:100vh; width:100%;">
+				<div id="warehouseGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
 			</div>
 		</div>
 	</div>
 </div>
-
 </html>
 
+<!-- AG Grid 설정 -->
+<script th:inline="javascript">
+	let warehouseList = /*[[${whList}]]*/ [];
+
+	const gridOptions = {
+		headerHeight: 35,
+		rowHeight: 35,
+		rowData: warehouseList,
+		columnDefs: [
+			{ headerName: "창고ID", field: "warehouseId", editable: false},
+			{ headerName: "창고위치", field: "warehouseLocation", editable: false},
+			{ headerName: "창고크기", field: "warehouseScale", editable: false},
+			{ headerName: "담당자", field: "warehouseManager", editable: false}
+		],
+		rowSelection: {
+			mode: "multiRow"
+		},
+		onGridReady: (params) => {
+			gridOptions.api = params.api;
+			params.api.sizeColumnsToFit();
+		}
+	};
+	// 창 크기 바뀔 때도 다시 꽉 채우기
+	window.addEventListener('resize', () => {
+  		if (gridOptions.api) {
+    		gridOptions.api.sizeColumnsToFit();
+  		}
+});
+	// 그리드 초기화
+	agGrid.createGrid(document.querySelector("#warehouseGrid"), gridOptions);
+</script>
+
+<!-- 페이지 기능 -->
 <script>
-	// 페이지 이동
+	// 창고이동
 	document.getElementById('warehouse_mnt').addEventListener('change', function () {
 		if (this.checked) {
 			window.location.href = '/purchs/whm';
 		}
 	});
-	// 체크박스
-	const checkAll = document.querySelector('.checkAll');
-	const checkboxes = document.querySelectorAll('.checkOne');
-	checkAll.addEventListener('click', function () {
-		const isChecked = checkAll.checked;
-		checkboxes.forEach(checkbox => checkbox.checked = isChecked);
-	});
+
+	// 등록
 	$("#addBtn").on("click", () => {
-		const warehouseId = $("#warehouseId").val();
-		const warehouseLocation = $("#warehouseLocation").val();
-		const warehouseScale = $("#warehouseScale").val();
-		const warehouseManager = $("#warehouseManager").val();
-		const data = {
-			warehouseId,
-			warehouseLocation,
-			warehouseScale,
-			warehouseManager
+	const warehouseId = $("#warehouseId").val();
+	const warehouseLocation = $("#warehouseLocation").val();
+	let warehouseScale = $("#warehouseScale").val().trim();
+	const warehouseManager = $("#warehouseManager").val();
+
+	// L 붙이기
+	if (warehouseScale && !warehouseScale.endsWith("L")) {
+		warehouseScale += "L";
+	}
+
+	const data = {
+		warehouseId,
+		warehouseLocation,
+		warehouseScale,
+		warehouseManager
+	};
+
+	$.ajax({
+		type: 'POST',
+		url: '/purchs/whc',
+		contentType: 'application/json',
+		data: JSON.stringify(data),
+		success: function () {
+			Swal.fire({
+				icon: "success",
+				title: "성공",
+				text: "창고정보가 저장되었습니다.",
+				showConfirmButton: false,
+				timer: 1000
+			}).then(() => window.location.reload());
+		},
+		error: function () {
+			Swal.fire({
+				icon: "error",
+				title: "경고",
+				text: "창고정보를 모두 입력하세요.",
+				showConfirmButton: false,
+				timer: 1000
+			});
 		}
+	});
+});
+	// 마지막 창고번호 가져오기
+	$(document).ready(() => {
 		$.ajax({
-			type: 'POST', //데이터 전송 타입,
-			url: '/purchs/whc', //데이터를 주고받을 파일 주소 입력,
-			contentType: 'application/json', // JSON 형식으로 보내겠다 명시
-			data: JSON.stringify(data), // 데이터를 JSON 문자열로 변환
-			success: function (result) {
-				//작업이 성공적으로 발생했을 경우
-				window.location.reload();
+			type: 'GET',
+			url: '/purchs/whNexTid',
+			success: function (id) {
+				$("#warehouseId").val(id);
 			},
 			error: function () {
-				Swal.fire({
-					icon: "error",
-					title: "경고",
-					text: "창고정보를 입력하세요.",
-					showConfirmButton: false,
-					timer: 1000
-				});
-				//에러가 났을 경우 실행시킬 코드
+				alert("오류");
 			}
-		})
+		});
+	});
+	// 삭제
+	$("#delBtn").on("click", () => {
+		const selectedRows = gridOptions.api.getSelectedRows();
+		const selectedIds = selectedRows.map(row => row.warehouseId);
+		if (selectedIds.length === 0) {
+			Swal.fire({
+				icon: "warning",
+				title: "알림",
+				text: "삭제할 창고를 선택하세요.",
+				timer: 1000,
+				showConfirmButton: false
+			});
+			return;
+		}
+		Promise.all(selectedIds.map(id => {
+			return $.ajax({
+				type: "DELETE",
+				url: "/purchs/whd",
+				contentType: "application/json",
+				data: JSON.stringify({ warehouseId: id })
+			});
+		})).then(() => {
+			Swal.fire({
+				icon: "success",
+				title: "삭제 완료",
+				text: "선택된 창고가 삭제되었습니다.",
+				timer: 1000,
+				showConfirmButton: false
+			}).then(() => window.location.reload());
+		}).catch(() => {
+			Swal.fire({
+				icon: "error",
+				title: "오류",
+				text: "삭제 중 오류가 발생했습니다.",
+				timer: 1500,
+				showConfirmButton: false
+			});
+		});
 	});
 </script>

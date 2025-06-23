@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 /** ============================================
-  - 작성자   : 이혁진
+ - 작성자   : 이혁진
   - 최초작성 : 2025-06-18
   - 설명     : 재고 컨트롤러
   -----------------------------------------------
@@ -35,7 +35,7 @@ public class PurchsController {
 	// @GetMapping("/wh") public String warehouse() {
 	// 	return "purchs/warehouse";
 	// }
-
+	
 	// 창고이동
 	@GetMapping("/whm") public String warehouse_mnt() {
 		return "purchs/warehouse_movement";
