@@ -16,4 +16,30 @@
         FROM QUOTATION
         ORDER BY QUOTATION_NO
     </select>
+
+    <insert id="insertQuotation" parameterType="com.eflix.bsn.dto.QuotationDTO">
+        INSERT INTO QUOTATION (
+            QUOTATION_NO,
+            CUSTOMER_CD,
+            CUSTOMER_NAME,
+            QUOTATION_DT,
+            VALID_PERIOD,
+            EMP_CD,
+            PHONE,
+            DELIVERY_LOCATION,
+            EXPECTED_DELIVERY_DT,
+            PAYMENT_TERMS
+        ) VALUES (
+            #{quotationNo},
+            #{customerCd},
+            #{customerName},
+            TO_DATE(#{quotationDt}, 'YYYY-MM-DD'),
+            TO_DATE(#{validPeriod}, 'YYYY-MM-DD'),
+            #{empCd},
+            #{phone},
+            #{deliveryLocation},
+            TO_DATE(#{expectedDeliveryDt}, 'YYYY-MM-DD'),
+            #{paymentTerms}
+        )
+    </insert>
 </mapper>

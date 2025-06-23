@@ -20,4 +20,9 @@ public class QuotationServiceImpl implements QuotationService {
     public List<QuotationDTO> getQuotationList() {
         return quotationMapper.getQuotationList();
     }
+
+    @Override
+    public int insertQuotation(QuotationDTO quotation) {
+        return quotationMapper.insertQuotation(quotation);
+    }
 }
