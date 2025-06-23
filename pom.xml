@@ -111,6 +111,13 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.19.1</version>
 		</dependency>
+
+		<!-- jasper -->
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>6.4.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

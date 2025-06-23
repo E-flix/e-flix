@@ -20,6 +20,6 @@
     <!-- @since 2025-06-20 -->
     <!-- ===================================== -->
     <select id="findAll" resultType="ModuleDTO">
-        SELECT * FROM moudles
+        SELECT module_idx, module_name FROM modules
     </select>
 </mapper>

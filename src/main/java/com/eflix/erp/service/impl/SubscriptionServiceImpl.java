@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.erp.dto.SubscriptionPackageDTO;
+import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
 import com.eflix.erp.mapper.SubscriptionMapper;
 import com.eflix.erp.service.SubscriptionService;
 
@@ -18,6 +19,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'findById'");
         return mapper.findById(spkIdx);
+    }
+
+    @Override
+    public int insertSubscriptionPackageDetail(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'insertSubscriptionPackageDetail'");
+        return mapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO);
     }
 
 }

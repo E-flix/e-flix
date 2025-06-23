@@ -11,6 +11,8 @@
 ===========================================
   [변경 이력]
   - 2025-06-20 : 최초 생성 (복성민)
+  - 2025-06-22 : 구독 패키지 정보 조회 (복성민)
+  - 2025-06-23 : 구독 패키지 상세 등록 (복성민)
 ===========================================
 -->
 <mapper namespace="com.eflix.erp.mapper.SubscriptionMapper">
@@ -35,4 +37,15 @@
         FROM subscription_packages
         WHERE spk_idx = #{spkIdx}
     </select>
+
+    <!-- 
+     * 구독 패키지 상세를 등록한다.
+     *
+     * @param SubscriptionPackageDetailDTO
+     * @return int
+	-->
+    <insert id="insertSubscriptionPackageDetail" parameterType="SubscriptionPackageDetailDTO">
+        INESRT INTO subscription_package_details(spd_idx, spk_idx, module_idx)
+        VALUES(NVL(MAX(TO_NUMBER(SUBSTR(spd_idx, 4))), 100) + 1, #{spkIdx}, #{module_idx})
+    </insert>
 </mapper>
