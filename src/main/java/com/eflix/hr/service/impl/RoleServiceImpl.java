@@ -12,32 +12,32 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.eflix.hr.dto.RolesDTO;
-import com.eflix.hr.service.RolesService;
+import com.eflix.hr.dto.RoleDTO;
+import com.eflix.hr.service.RoleService;
 
 @Service
-public class RolesServiceImpl implements RolesService {
+public class RoleServiceImpl implements RoleService {
 
   @Override
-  public List<RolesDTO> getAllRoles() {
+  public List<RoleDTO> getAllRoles() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllRoles'");
   }
 
   @Override
-  public RolesDTO getRoleById(String roleId) {
+  public RoleDTO getRoleById(String roleId) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getRoleById'");
   }
 
   @Override
-  public int createRole(RolesDTO dto) {
+  public int createRole(RoleDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createRole'");
   }
 
   @Override
-  public int updateRole(RolesDTO dto) {
+  public int updateRole(RoleDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateRole'");
   }

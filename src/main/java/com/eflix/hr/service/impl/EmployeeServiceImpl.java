@@ -10,18 +10,22 @@ package com.eflix.hr.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.EmployeesDTO;
+import com.eflix.hr.mapper.EmployeeMapper;
 import com.eflix.hr.service.EmployeesService;
 
 @Service
 public class EmployeesServiceImpl implements EmployeesService{
 
+  @Autowired
+  EmployeeMapper employeeMapper;
+
   @Override
   public List<EmployeesDTO> getAllEmployees() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getAllEmployees'");
+    return employeeMapper.selectAll();
   }
 
   @Override

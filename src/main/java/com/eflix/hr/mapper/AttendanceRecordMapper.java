@@ -13,13 +13,13 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
-import com.eflix.hr.dto.AttendanceRecordsDTO;
+import com.eflix.hr.dto.AttendanceRecordDTO;
 
 @Mapper
-public interface AttendanceRecordsMapper {
-    List<AttendanceRecordsDTO> selectAll();
-    AttendanceRecordsDTO selectById(@Param("attdIdx") String attdIdx);
-    int insert(AttendanceRecordsDTO dto);
-    int update(AttendanceRecordsDTO dto);
+public interface AttendanceRecordMapper {
+    List<AttendanceRecordDTO> selectAll();
+    AttendanceRecordDTO selectById(@Param("attdIdx") String attdIdx);
+    int insert(AttendanceRecordDTO dto);
+    int update(AttendanceRecordDTO dto);
     int deleteById(@Param("attdIdx") String attdIdx);
 }

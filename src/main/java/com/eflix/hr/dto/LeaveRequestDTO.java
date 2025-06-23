@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LeaveRequestsDTO {
+public class LeaveRequestDTO {
     private String leaveReqIdx;      // leave_req_idx
     private String empIdx;           // emp_idx
     private String approverIdx;      // approver_idx

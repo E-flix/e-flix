@@ -12,32 +12,32 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.eflix.hr.dto.HrWorkTypesDTO;
-import com.eflix.hr.service.HrWorkTypesService;
+import com.eflix.hr.dto.HrWorkTypeDTO;
+import com.eflix.hr.service.HrWorkTypeService;
 
 @Service
-public class HrWorkTypesServiceImpl implements HrWorkTypesService {
+public class HrWorkTypeServiceImpl implements HrWorkTypeService {
 
   @Override
-  public List<HrWorkTypesDTO> getAllWorkTypes() {
+  public List<HrWorkTypeDTO> getAllWorkTypes() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllWorkTypes'");
   }
 
   @Override
-  public HrWorkTypesDTO getWorkTypeById(String workTypeId) {
+  public HrWorkTypeDTO getWorkTypeById(String workTypeId) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getWorkTypeById'");
   }
 
   @Override
-  public int createWorkType(HrWorkTypesDTO dto) {
+  public int createWorkType(HrWorkTypeDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createWorkType'");
   }
 
   @Override
-  public int updateWorkType(HrWorkTypesDTO dto) {
+  public int updateWorkType(HrWorkTypeDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateWorkType'");
   }

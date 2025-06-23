@@ -1,7 +1,7 @@
 /* ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-19
-  - 설명     : 권한 CRUD용 Mybatis Mapper
+  - 설명     : 부서 CRUD용 Mybatis Mapper
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김어진): Mapper 생성
@@ -12,12 +12,12 @@ import java.util.List;
 
 import org.springframework.data.repository.query.Param;
 
-import com.eflix.hr.dto.RolesDTO;
+import com.eflix.hr.dto.DepartmentDTO;
 
-public interface RolesMapper {
-    List<RolesDTO> selectAll();
-    RolesDTO selectById(@Param("roleId") String roleId);
-    int insert(RolesDTO dto);
-    int update(RolesDTO dto);
-    int deleteById(@Param("roleId") String roleId);
+public interface DepartmentMapper {
+    List<DepartmentDTO> selectAll();
+    DepartmentDTO selectById(@Param("deptIdx") String deptIdx);
+    int insert(DepartmentDTO dto);
+    int update(DepartmentDTO dto);
+    int deleteById(@Param("deptIdx") String deptIdx);
 }

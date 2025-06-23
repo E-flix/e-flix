@@ -12,32 +12,32 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.eflix.hr.dto.AttendanceRequestsDTO;
-import com.eflix.hr.service.AttendanceRequestsService;
+import com.eflix.hr.dto.AttendanceRequestDTO;
+import com.eflix.hr.service.AttendanceRequestService;
 
 @Service
-public class AttendanceRequestsServiceImpl implements AttendanceRequestsService{
+public class AttendanceRequestServiceImpl implements AttendanceRequestService{
 
   @Override
-  public List<AttendanceRequestsDTO> getAllAttendanceRequests() {
+  public List<AttendanceRequestDTO> getAllAttendanceRequests() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllAttendanceRequests'");
   }
 
   @Override
-  public AttendanceRequestsDTO getAttendanceRequestById(String editIdx) {
+  public AttendanceRequestDTO getAttendanceRequestById(String editIdx) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAttendanceRequestById'");
   }
 
   @Override
-  public int createAttendanceRequest(AttendanceRequestsDTO dto) {
+  public int createAttendanceRequest(AttendanceRequestDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createAttendanceRequest'");
   }
 
   @Override
-  public int updateAttendanceRequest(AttendanceRequestsDTO dto) {
+  public int updateAttendanceRequest(AttendanceRequestDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateAttendanceRequest'");
   }

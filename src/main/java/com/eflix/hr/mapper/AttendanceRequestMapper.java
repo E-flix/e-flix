@@ -12,12 +12,12 @@ import java.util.List;
 
 import org.springframework.data.repository.query.Param;
 
-import com.eflix.hr.dto.AttendanceRequestsDTO;
+import com.eflix.hr.dto.AttendanceRequestDTO;
 
-public interface AttendanceRequestsMapper {
-    List<AttendanceRequestsDTO> selectAll();
-    AttendanceRequestsDTO selectById(@Param("editIdx") String editIdx);
-    int insert(AttendanceRequestsDTO dto);
-    int update(AttendanceRequestsDTO dto);
+public interface AttendanceRequestMapper {
+    List<AttendanceRequestDTO> selectAll();
+    AttendanceRequestDTO selectById(@Param("editIdx") String editIdx);
+    int insert(AttendanceRequestDTO dto);
+    int update(AttendanceRequestDTO dto);
     int deleteById(@Param("editIdx") String editIdx);
 }

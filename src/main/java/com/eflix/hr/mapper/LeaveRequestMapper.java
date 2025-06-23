@@ -12,12 +12,12 @@ import java.util.List;
 
 import org.springframework.data.repository.query.Param;
 
-import com.eflix.hr.dto.LeaveRequestsDTO;
+import com.eflix.hr.dto.LeaveRequestDTO;
 
-public interface LeaveRequestsMapper {
-    public List<LeaveRequestsDTO> selectAll();
-    public LeaveRequestsDTO selectById(@Param("leaveReqIdx") String leaveReqIdx);
-    int insert(LeaveRequestsDTO dto);
-    int update(LeaveRequestsDTO dto);
+public interface LeaveRequestMapper {
+    public List<LeaveRequestDTO> selectAll();
+    public LeaveRequestDTO selectById(@Param("leaveReqIdx") String leaveReqIdx);
+    int insert(LeaveRequestDTO dto);
+    int update(LeaveRequestDTO dto);
     int deleteById(@Param("leaveReqIdx") String leaveReqIdx);
 }

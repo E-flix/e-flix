@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AttendanceRequestsDTO {
+public class AttendanceRequestDTO {
     private String editIdx;          // edit_idx
     private String attdIdx;          // attd_idx
     private String empIdx;           // emp_idx

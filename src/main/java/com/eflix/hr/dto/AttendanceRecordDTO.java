@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AttendanceRecordsDTO {
+public class AttendanceRecordDTO {
     private String empIdx;           // emp_idx
     private String deptIdx;          // dept_idx
     private String empName;          // emp_name

@@ -12,32 +12,32 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.eflix.hr.dto.NightRecordsDTO;
-import com.eflix.hr.service.NightRecordsService;
+import com.eflix.hr.dto.NightRecordDTO;
+import com.eflix.hr.service.NightRecordService;
 
 @Service
-public class NightRecordsServiceImpl implements NightRecordsService {
+public class NightRecordServiceImpl implements NightRecordService {
 
   @Override
-  public List<NightRecordsDTO> getAllNightRecords() {
+  public List<NightRecordDTO> getAllNightRecords() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllNightRecords'");
   }
 
   @Override
-  public NightRecordsDTO getNightRecordById(String ntIdx) {
+  public NightRecordDTO getNightRecordById(String ntIdx) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getNightRecordById'");
   }
 
   @Override
-  public int createNightRecord(NightRecordsDTO dto) {
+  public int createNightRecord(NightRecordDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createNightRecord'");
   }
 
   @Override
-  public int updateNightRecord(NightRecordsDTO dto) {
+  public int updateNightRecord(NightRecordDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateNightRecord'");
   }

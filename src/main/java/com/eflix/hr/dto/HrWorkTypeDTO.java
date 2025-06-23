@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class HrWorkTypesDTO {
+public class HrWorkTypeDTO {
     private String workTypeId;       // work_type_id
     private String workTypeNm;       // work_type_nm
     private String workTypeDesc;     // work_type_desc

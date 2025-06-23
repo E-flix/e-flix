@@ -17,27 +17,17 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmployeesDTO {
+public class EmployeeDTO {
     private String empIdx;           // emp_idx
     private String deptIdx;          // dept_idx
-    private String empImg;           // emp_img
     private String empName;          // emp_name
-    private String rrnPfx;           // rrn_pfx
-    private String rrnSfx;           // rrn_sfx
     private String empEmail;         // emp_email
-    private String empPw;            // emp_pw
-    private Date empRegdate;    // emp_regdate
+    private Date empRegdate;         // emp_regdate
     private String empGrade;         // emp_grade
-    private String empRole;          // emp_role
     private String empType;          // emp_type
-    private String empAccount;       // emp_account
-    private String empAddr;          // emp_addr
-    private String empAddrDetail;    // emp_addr_detail
-    private Integer empAddrZip;      // emp_addr_zip
-    private String empMemo;          // emp_memo
     private String empStatus;        // emp_status
-    private String empContract;      // emp_contract
-    private String bankCode;         // bank_code
-    private Double leaveAllDays; // leave_all_days
-    private Double leaveDays;    // leave_days
+    private String deptName;         // deptName
+    private String empAccount;      // emp_account
+    private String empPw;           // emp_pw
+    private String coIdx;          // co_idx
 }

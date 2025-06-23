@@ -10,12 +10,12 @@ package com.eflix.hr.service;
 
 import java.util.List;
 
-import com.eflix.hr.dto.RolesDTO;
+import com.eflix.hr.dto.RoleDTO;
 
-public interface RolesService {
-    public List<RolesDTO> getAllRoles();
-    public RolesDTO getRoleById(String roleId);
-    int createRole(RolesDTO dto);
-    int updateRole(RolesDTO dto);
+public interface RoleService {
+    public List<RoleDTO> getAllRoles();
+    public RoleDTO getRoleById(String roleId);
+    int createRole(RoleDTO dto);
+    int updateRole(RoleDTO dto);
     int deleteRole(String roleId);
 }

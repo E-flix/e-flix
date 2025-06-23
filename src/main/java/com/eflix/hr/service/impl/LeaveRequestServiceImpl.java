@@ -12,32 +12,32 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.eflix.hr.dto.LeaveRequestsDTO;
-import com.eflix.hr.service.LeaveRequestsService;
+import com.eflix.hr.dto.LeaveRequestDTO;
+import com.eflix.hr.service.LeaveRequestService;
 
 @Service
-public class LeaveRequestsServiceImpl implements LeaveRequestsService {
+public class LeaveRequestServiceImpl implements LeaveRequestService {
 
   @Override
-  public List<LeaveRequestsDTO> getAllLeaveRequests() {
+  public List<LeaveRequestDTO> getAllLeaveRequests() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllLeaveRequests'");
   }
 
   @Override
-  public LeaveRequestsDTO getLeaveRequestById(String leaveReqIdx) {
+  public LeaveRequestDTO getLeaveRequestById(String leaveReqIdx) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getLeaveRequestById'");
   }
 
   @Override
-  public int createLeaveRequest(LeaveRequestsDTO dto) {
+  public int createLeaveRequest(LeaveRequestDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createLeaveRequest'");
   }
 
   @Override
-  public int updateLeaveRequest(LeaveRequestsDTO dto) {
+  public int updateLeaveRequest(LeaveRequestDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateLeaveRequest'");
   }

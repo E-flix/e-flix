@@ -10,12 +10,12 @@ package com.eflix.hr.service;
 
 import java.util.List;
 
-import com.eflix.hr.dto.DepartmentsDTO;
+import com.eflix.hr.dto.DepartmentDTO;
 
-public interface DepartmentsService {
-    public List<DepartmentsDTO> getAllDepartments();
-    public DepartmentsDTO getDepartmentById(String deptIdx);
-    int createDepartment(DepartmentsDTO dto);
-    int updateDepartment(DepartmentsDTO dto);
+public interface DepartmentService {
+    public List<DepartmentDTO> getAllDepartments();
+    public DepartmentDTO getDepartmentById(String deptIdx);
+    int createDepartment(DepartmentDTO dto);
+    int updateDepartment(DepartmentDTO dto);
     int deleteDepartment(String deptIdx);
 }

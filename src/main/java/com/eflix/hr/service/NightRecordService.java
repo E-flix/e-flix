@@ -10,12 +10,12 @@ package com.eflix.hr.service;
 
 import java.util.List;
 
-import com.eflix.hr.dto.NightRecordsDTO;
+import com.eflix.hr.dto.NightRecordDTO;
 
-public interface NightRecordsService {
-    public List<NightRecordsDTO> getAllNightRecords();
-    public NightRecordsDTO getNightRecordById(String ntIdx);
-    int createNightRecord(NightRecordsDTO dto);
-    int updateNightRecord(NightRecordsDTO dto);
+public interface NightRecordService {
+    public List<NightRecordDTO> getAllNightRecords();
+    public NightRecordDTO getNightRecordById(String ntIdx);
+    int createNightRecord(NightRecordDTO dto);
+    int updateNightRecord(NightRecordDTO dto);
     int deleteNightRecord(String ntIdx);
 }

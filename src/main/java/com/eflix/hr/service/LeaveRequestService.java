@@ -10,12 +10,12 @@ package com.eflix.hr.service;
 
 import java.util.List;
 
-import com.eflix.hr.dto.LeaveRequestsDTO;
+import com.eflix.hr.dto.LeaveRequestDTO;
 
-public interface LeaveRequestsService {
-    public List<LeaveRequestsDTO> getAllLeaveRequests();
-    public LeaveRequestsDTO getLeaveRequestById(String leaveReqIdx);
-    int createLeaveRequest(LeaveRequestsDTO dto);
-    int updateLeaveRequest(LeaveRequestsDTO dto);
+public interface LeaveRequestService {
+    public List<LeaveRequestDTO> getAllLeaveRequests();
+    public LeaveRequestDTO getLeaveRequestById(String leaveReqIdx);
+    int createLeaveRequest(LeaveRequestDTO dto);
+    int updateLeaveRequest(LeaveRequestDTO dto);
     int deleteLeaveRequest(String leaveReqIdx);
 }

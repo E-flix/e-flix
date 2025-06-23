@@ -13,39 +13,45 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.eflix.hr.dto.AttendanceRecordsDTO;
-import com.eflix.hr.mapper.AttendanceRecordsMapper;
-import com.eflix.hr.service.AttendanceRecordsService;
+import com.eflix.hr.dto.AttendanceRecordDTO;
+import com.eflix.hr.mapper.AttendanceRecordMapper;
+import com.eflix.hr.service.AttendanceRecordService;
 
 @Service
-public class AttendanceRecordsServiceImpl implements AttendanceRecordsService {
+public class AttendanceRecordServiceImpl implements AttendanceRecordService {
 
   @Autowired
-  AttendanceRecordsMapper attendanceRecordsMapper;
+  AttendanceRecordMapper attendanceRecordsMapper;
+
+  // @Override
+  // public List<AttendanceRecordDTO> getAllAttendanceRecord(String attdIdxx) {
+  //   throw new UnsupportedOperationException("Unimplemented method 'getAttendanceRecordById'");
+  // }
 
   @Override
-  public List<AttendanceRecordsDTO> getAllAttendanceRecords() {
-    return attendanceRecordsMapper.selectAll();
-  }
-
-  @Override
-  public AttendanceRecordsDTO getAttendanceRecordById(String attdIdx) {
+  public AttendanceRecordDTO getAttendanceRecordById(String attdIdx) {
     throw new UnsupportedOperationException("Unimplemented method 'getAttendanceRecordById'");
   }
 
   @Override
-  public int createAttendanceRecord(AttendanceRecordsDTO dto) {
+  public int createAttendanceRecord(AttendanceRecordDTO dto) {
     throw new UnsupportedOperationException("Unimplemented method 'createAttendanceRecord'");
   }
 
   @Override
-  public int updateAttendanceRecord(AttendanceRecordsDTO dto) {
+  public int updateAttendanceRecord(AttendanceRecordDTO dto) {
     throw new UnsupportedOperationException("Unimplemented method 'updateAttendanceRecord'");
   }
 
   @Override
   public int deleteAttendanceRecord(String attdIdx) {
     throw new UnsupportedOperationException("Unimplemented method 'deleteAttendanceRecord'");
+  }
+
+  @Override
+  public List<AttendanceRecordDTO> getAllAttendanceRecords() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'getAllAttendanceRecords'");
   }
 
 }

@@ -10,12 +10,12 @@ package com.eflix.hr.service;
 
 import java.util.List;
 
-import com.eflix.hr.dto.AttendanceRequestsDTO;
+import com.eflix.hr.dto.AttendanceRequestDTO;
 
-public interface AttendanceRequestsService {
-    public List<AttendanceRequestsDTO> getAllAttendanceRequests();
-    public AttendanceRequestsDTO getAttendanceRequestById(String editIdx);
-    int createAttendanceRequest(AttendanceRequestsDTO dto);
-    int updateAttendanceRequest(AttendanceRequestsDTO dto);
+public interface AttendanceRequestService {
+    public List<AttendanceRequestDTO> getAllAttendanceRequests();
+    public AttendanceRequestDTO getAttendanceRequestById(String editIdx);
+    int createAttendanceRequest(AttendanceRequestDTO dto);
+    int updateAttendanceRequest(AttendanceRequestDTO dto);
     int deleteAttendanceRequest(String editIdx);
 }

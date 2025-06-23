@@ -10,12 +10,12 @@ package com.eflix.hr.service;
 
 import java.util.List;
 
-import com.eflix.hr.dto.HrWorkTypesDTO;
+import com.eflix.hr.dto.HrWorkTypeDTO;
 
-public interface HrWorkTypesService {
-    public List<HrWorkTypesDTO> getAllWorkTypes();
-    public HrWorkTypesDTO getWorkTypeById(String workTypeId);
-    int createWorkType(HrWorkTypesDTO dto);
-    int updateWorkType(HrWorkTypesDTO dto);
+public interface HrWorkTypeService {
+    public List<HrWorkTypeDTO> getAllWorkTypes();
+    public HrWorkTypeDTO getWorkTypeById(String workTypeId);
+    int createWorkType(HrWorkTypeDTO dto);
+    int updateWorkType(HrWorkTypeDTO dto);
     int deleteWorkType(String workTypeId);
 }

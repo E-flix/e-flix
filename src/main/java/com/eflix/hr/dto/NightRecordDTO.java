@@ -1,7 +1,7 @@
 /* ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-19
-  - 설명     : 부서 DTO
+  - 설명     : 야간 근무 기록용 DTO
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 클래스 생성
@@ -17,12 +17,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DepartmentsDTO {
-    private String deptIdx;          // dept_idx
-    private String deptUpIdx;        // dept_up_idx
-    private String deptName;         // dept_name
-    private String deptStatus;       // dept_status
-    private String deptMemo;         // dept_memo
-    private Date deptRegdate;   // dept_regdate
-    private Date deptModdate;   // dept_moddate
+public class NightRecordDTO {
+    private String ntIdx;            // nt_idx
+    private String empIdx;           // emp_idx
+    private Date ntStart;   // nt_start
+    private Date ntEnd;     // nt_end
+    private Date ntDate;        // nt_date
 }

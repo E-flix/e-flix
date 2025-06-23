@@ -12,32 +12,32 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.eflix.hr.dto.DepartmentsDTO;
-import com.eflix.hr.service.DepartmentsService;
+import com.eflix.hr.dto.DepartmentDTO;
+import com.eflix.hr.service.DepartmentService;
 
 @Service
-public class DepartmentsServiceImpl implements DepartmentsService{
+public class DepartmentServiceImpl implements DepartmentService{
 
   @Override
-  public List<DepartmentsDTO> getAllDepartments() {
+  public List<DepartmentDTO> getAllDepartments() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllDepartments'");
   }
 
   @Override
-  public DepartmentsDTO getDepartmentById(String deptIdx) {
+  public DepartmentDTO getDepartmentById(String deptIdx) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getDepartmentById'");
   }
 
   @Override
-  public int createDepartment(DepartmentsDTO dto) {
+  public int createDepartment(DepartmentDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createDepartment'");
   }
 
   @Override
-  public int updateDepartment(DepartmentsDTO dto) {
+  public int updateDepartment(DepartmentDTO dto) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateDepartment'");
   }
