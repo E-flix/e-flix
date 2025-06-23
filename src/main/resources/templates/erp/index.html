@@ -24,6 +24,24 @@
 			transform: translateY(-8px);
 			box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
 		}
+
+		body {
+			/* padding: 2rem; */
+			background-color: #f8f9fa;
+		}
+
+		.contract-section {
+			margin-bottom: 2rem;
+		}
+
+		.contract-title {
+			text-align: center;
+			margin-bottom: 2rem;
+		}
+
+		.signature-box {
+			margin-top: 3rem;
+		}
 	</style>
 </head>
 <div layout:fragment="content">
@@ -210,13 +228,9 @@
 							<div class="mb-4 text-primary fw-semibold">50명</div>
 
 							<div class="d-grid gap-2 mb-4">
-								<button class="btn btn-primary fw-semibold py-2" data-bs-toggle="modal"
-									data-bs-target="#infoModal">
+								<a class="btn btn-primary fw-semibold py-2" href="/erp/pay?spkIdx=spk-101">
 									지금 시작하기
-								</button>
-								<button class="btn btn-outline-primary fw-semibold py-2">
-									무료로 사용해 보기
-								</button>
+								</a>
 							</div>
 
 							<div class="text-start">
@@ -265,13 +279,9 @@
 							<div class="mb-4 text-primary fw-semibold">100명</div>
 
 							<div class="d-grid gap-2 mb-4">
-								<button class="btn btn-primary fw-semibold py-2" data-bs-toggle="modal"
-									data-bs-target="#infoModal">
+								<a class="btn btn-primary fw-semibold py-2" href="/erp/pay?spkIdx=spk-102">
 									지금 시작하기
-								</button>
-								<button class="btn btn-outline-primary fw-semibold py-2">
-									무료로 사용해 보기
-								</button>
+								</a>
 							</div>
 
 							<div class="text-start">
@@ -320,13 +330,9 @@
 							<div class="mb-4 text-primary fw-semibold">무제한</div>
 
 							<div class="d-grid gap-2 mb-4">
-								<button class="btn btn-primary fw-semibold py-2" data-bs-toggle="modal"
-									data-bs-target="#infoModal">
+								<a class="btn btn-primary fw-semibold py-2" href="/erp/pay?spkIdx=spk-103">
 									지금 시작하기
-								</button>
-								<button class="btn btn-outline-primary fw-semibold py-2">
-									무료로 사용해 보기
-								</button>
+								</a>
 							</div>
 
 							<div class="text-start">
@@ -357,171 +363,4 @@
 			</div>
 		</div>
 	</section>
-
-	<!-- 모달 -->
-	<div class="modal fade" id="infoModal" aria-hidden="true" aria-labelledby="infoModalLabel" tabindex="-1">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="infoModalLabel">정보입력</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-				</div>
-				<div class="modal-body">
-					<div class="container">
-						<!-- 가입 정보 -->
-						<h6>가입 정보
-							<input type="checkbox" class="form-check-input ms-2"> 가입자와 동일
-						</h6>
-						<div class="row g-2 mb-3">
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="신청자"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="연락처"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="회사명"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="회사 영문명"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="대표자명"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="연락처"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="주소"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="사업자 번호"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="나머지 주소"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="우편번호"></div>
-							<div class="col-md-10"><input type="text" class="form-control" placeholder="사업자 등록증"></div>
-							<div class="col-md-2"><button class="btn btn-dark w-100">불러오기</button></div>
-						</div>
-
-						<!-- 마스터 ID 정보 -->
-						<h6 class="mt-4">마스터 ID 정보</h6>
-						<div class="row g-2 mb-3">
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="마스터 ID"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="이름"></div>
-							<div class="col-md-6"><input type="password" class="form-control" placeholder="비밀번호"></div>
-							<div class="col-md-6"><input type="password" class="form-control" placeholder="비밀번호 확인">
-							</div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="회사 전화번호"></div>
-							<div class="col-md-6"><input type="text" class="form-control" placeholder="연락처"></div>
-							<div class="col-12"><input type="email" class="form-control" placeholder="이메일"></div>
-						</div>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-					<button class="btn btn-primary" data-bs-dismiss="modal" id="toContractModal">
-						다음페이지로 이동
-					</button>
-					<script>
-						document.getElementById('toContractModal').addEventListener('click', function () {
-							// 약간의 지연을 주고 다음 모달을 열어야 이전 모달이 닫힘
-							setTimeout(() => {
-								var contractModal = new bootstrap.Modal(document.getElementById('contractModal'));
-								contractModal.show();
-							}, 500); // 0.5초 딜레이
-						});
-					</script>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- 2. 계약서 등록 모달 -->
-	<div class="modal fade" id="contractModal" tabindex="-1" aria-labelledby="contractModalLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="contractModalLabel">계약서 등록</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-				</div>
-				<div class="modal-body bg-light">
-					<div class="container bg-secondary p-4 text-white">
-						<div class="mx-auto bg-light text-dark p-4" style="width: 80%; min-height: 300px;">
-							<p class="text-center fw-bold">계약서 내용</p>
-							<button class="btn btn-link text-end p-0" data-bs-dismiss="modal" id="toSignatureModal">
-								계약서 사인란
-							</button>
-						</div>
-						<script>
-							document.getElementById('toSignatureModal').addEventListener('click', function () {
-								setTimeout(() => {
-									var signatureModal = new bootstrap.Modal(document.getElementById('contractSignatureModal'));
-									signatureModal.show();
-								}, 500);
-							});
-						</script>
-						<div class="text-center mt-4">
-							<button class="btn btn-light" data-bs-target="#paymentModal" data-bs-toggle="modal"
-								data-bs-dismiss="modal">작성</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- 2.1. 계약서 사인 등록 모달 -->
-	<div class="modal fade" id="contractSignatureModal" tabindex="-1" aria-labelledby="contractSignatureModalLabel"
-		aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="contractSignatureModalLabel">사인 등록</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-				</div>
-				<div class="modal-body bg-light">
-					<div class="container bg-secondary p-4 text-white">
-						<div class="mx-auto bg-light text-dark p-4" style="width: 80%; min-height: 300px;">
-							<p class="text-center fw-bold">계약서 내용</p>
-							<div class="mt-5 text-end">계약서 사인란</div>
-						</div>
-						<div class="text-center mt-4">
-							<button class="btn btn-light" data-bs-dismiss="modal" id="toPaymentModal">작성</button>
-							<script>
-								document.getElementById('toPaymentModal').addEventListener('click', function () {
-									setTimeout(() => {
-										var paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-										paymentModal.show();
-									}, 500);
-								});
-							</script>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- 3. 결제정보 모달 -->
-	<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">결제정보</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-				</div>
-				<div class="modal-body">
-					<div class="container bg-secondary text-white p-4 rounded">
-						<h4 class="text-center mb-3">구독명</h4>
-						<h6>서비스</h6>
-						<div class="bg-light text-dark p-3 mb-3" style="height: 120px; overflow-y: auto;">
-							<div>서비스명</div>
-							<div>서비스명</div>
-							<div>서비스명</div>
-						</div>
-						<input type="number" class="form-control mb-2" placeholder="개월 수">
-						<input type="text" class="form-control mb-3" placeholder="총가격">
-						<button class="btn btn-light w-100">결제진행</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- 포트원 스크립트 추가 -->
-	<script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
-	<!-- <script>
-		const payment = PortOne.requestPayment({
-				storeId: "store-092db0f4-068f-4f50-9b06-029fca00b36c",
-				channelKey: "channel-key-a0af8c14-0047-4ad6-ade6-5589354d0047",
-				paymentId :'123141414',
-				orderName: "asdasd",
-				totalAmount: 10000,
-				currency: "KRW",
-				payMethod: "CARD",
-				customData: {
-					item: 'asfff',
-				}
-			})
-	</script> -->
 </div>

@@ -1,0 +1,995 @@
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-22
+	- 설명    : E-FLIX 구독 결제 진행
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-22 (복성민): 생성
+============================================
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구독 결제 진행</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/bootstrap/vendor/jquery/jquery.min.js}"></script>
+
+    <!-- PortOne SDK -->
+    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+
+    <style>
+        .step span {
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            padding: 5px 10px;
+            color: #555;
+        }
+
+        .step.active span {
+            background-color: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container my-5">
+        <div class="text-center mb-4">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" height="30"
+                class="me-2">
+            <h4 class="d-inline-block align-middle fw-bold">E-FELIX - Business <span th:text="${subscriptionPackage.spkName}"></span></h4>
+        </div>
+
+        <div class="card shadow-lg border-0">
+            <div class="bg-white p-4 rounded">
+                <!-- Step Indicator -->
+                <div class="row mb-4 text-center step-indicator">
+                    <div class="col step step-1 active"><span>1</span>
+                        <div>구독 정보</div>
+                    </div>
+                    <div class="col step step-2"><span>2</span>
+                        <div>사용자 세부 정보</div>
+                    </div>
+                    <div class="col step step-3"><span>3</span>
+                        <div>계약서</div>
+                    </div>
+                    <div class="col step step-4"><span>4</span>
+                        <div>결제 및 완료</div>
+                    </div>
+                </div>
+
+                <!-- Step 1 -->
+                <div class="step-content step-1-content d-block">
+                    <div class="row g-4">
+                        <!-- Left -->
+                        <div class="col-md-7">
+                            <h5 class="fw-bold">구독 설정</h5>
+                        
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">웹 및 핵심 서비스:</label>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" value="인사" id="hr"><label
+                                        class="form-check-label" for="hr">인사</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" value="영업" id="bsn"><label
+                                        class="form-check-label" for="bsn">영업</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" value="재고" id="purchs"><label
+                                        class="form-check-label" for="purchs">재고</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" value="회계" id="acc"><label
+                                        class="form-check-label" for="acc">회계</label></div>
+                            </div>
+                        
+                            <div class="mb-3">
+                                <label class="form-label">구독 기간 선택</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="period" id="period-year" value="1년" checked>
+                                        <label class="form-check-label" for="period-year">1년</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="period" id="period-month" value="1개월">
+                                        <label class="form-check-label" for="period-month">1개월</label>
+                                    </div>
+                            </div>
+                        
+                            <div class="mb-3">
+                                <label class="form-label">얼마나 자주 청구하시겠습니까?</label>
+                                <select class="form-select" id="billing-cycle">
+                                    <option value="매년">매년</option>
+                                    <option value="매월">매월</option>
+                                </select>
+                            </div>
+                        
+                            <div class="border-top pt-3">
+                                <p class="mb-1">주문 요약</p>
+                                <small>Microsoft 365 Business Standard<br>1년 구독, 사용자 1명에 대해 1년에 ₩202,800.00 지불</small>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="text-muted">오늘 결제 기한 (세금이 포함되지 않음)</span>
+                                <span class="price-box">₩202,800.00</span>
+                            </div>
+                        
+                            <div class="d-grid mt-4">
+                                <button class="btn btn-primary" id="next-to-step-2">다음</button>
+                            </div>
+                        </div>
+
+                        <!-- Right -->
+                        <div class="col-md-5">
+                            <div class="bg-white p-4">
+                                <h5 class="fw-bold">Microsoft 365 Business Standard</h5>
+                                <p class="">제품 하이라이트</p>
+                                <ul>
+                                    <li><strong>[인사]</strong> 인사 문서, 근태표, 인사평가 및 급여 명세를 효율적으로 관리하세요.</li>
+                                    <li>모든 직원 정보에 <strong>언제 어디서나 안전하게 접근</strong></li>
+                                    <li><strong>상시 인사 지원 체계</strong> 포함</li>
+                                </ul>
+                        
+                                <ul>
+                                    <li><strong>[영업]</strong> 견적, 계약서, 영업 보고서 등을 빠르게 작성하고 공유하세요.</li>
+                                    <li><strong>거래 데이터</strong>를 안전하게 클라우드에 저장</li>
+                                    <li><strong>24시간 영업 지원</strong> 가능</li>
+                                </ul>
+                        
+                                <ul>
+                                    <li><strong>[재고]</strong> 입출고, 재고 현황 및 창고 관리를 쉽게 시작하세요.</li>
+                                    <li><strong>다양한 기기</strong>에서 재고 데이터 확인 및 관리</li>
+                                </ul>
+                        
+                                <ul>
+                                    <li><strong>[회계]</strong> 전표, 세금계산서, 재무제표 작성을 빠르게 시작하세요.</li>
+                                    <li><strong>언제 어디서나</strong> 회계 문서 접근 가능</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="step-content step-2-content d-none">
+                    <div class="row g-4">
+                        <!-- Left -->
+                        <div class="col-md-7">
+                            <h5 class="fw-bold">구매자 정보</h5>
+                        
+                            <!-- 가입 정보 -->
+						<fieldset class="border rounded-3 p-3">
+							<legend class="float-none w-auto px-2 fs-6 fw-semibold">가입 정보</legend>
+							<div class="form-check mb-3">
+								<input class="form-check-input" type="checkbox" id="sameAsSubscriber">
+								<label class="form-check-label" for="sameAsSubscriber">가입자와 동일</label>
+							</div>
+							<div class="row g-2 mb-3">
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="신청자"></div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="연락처"></div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="회사명"></div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="회사 영문명">
+								</div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="대표자명"></div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="연락처"></div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="주소"></div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="사업자 번호">
+								</div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="나머지 주소">
+								</div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="우편번호"></div>
+								<div class="col-md-10"><input type="text" class="form-control" placeholder="사업자 등록증">
+								</div>
+								<div class="col-md-2"><button class="btn btn-dark w-100">불러오기</button></div>
+							</div>
+						</fieldset>
+
+						<!-- 마스터 ID 정보 -->
+						<fieldset class="border rounded-3 p-3">
+							<legend class="float-none w-auto px-2 fs-6 fw-semibold">마스터 ID 정보</legend>
+							<div class="row g-2 mb-3">
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="마스터 ID">
+								</div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="이름"></div>
+								<div class="col-md-6"><input type="password" class="form-control" placeholder="비밀번호">
+								</div>
+								<div class="col-md-6"><input type="password" class="form-control" placeholder="비밀번호 확인">
+								</div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="회사 전화번호">
+								</div>
+								<div class="col-md-6"><input type="text" class="form-control" placeholder="연락처"></div>
+								<div class="col-12"><input type="email" class="form-control" placeholder="이메일"></div>
+							</div>
+						</fieldset>
+                        
+                            <div class="d-grid mt-4">
+                                <button class="btn btn-primary" id="next-to-step-3">다음</button>
+                            </div>
+                        </div>
+
+                        <!-- Right -->
+                        <div class="col-md-5">
+                            <div class="bg-white p-4">
+                                <h6 class="fw-bold">주문 요약</h6>
+
+                                <div class="bg-light p-3 rounded border">
+                                    <div class="fw-bold mb-1">E-FELIX - Business <span th:text="${type}"></span></div>
+                                    <div class="text-muted mb-2" id="subscription-summary"></div>
+                                
+                                    <div class="d-flex justify-content-between pt-2 border-top mt-3">
+                                        <div>
+                                            <span class="fw-bold">오늘 결제 기한</span>
+                                            <br>
+                                            <small class="text-muted">(세금이 포함되지 않음)</small>
+                                        </div>
+                                        <div class="fw-bold text-end" id="price-display"></div>
+                                    </div>
+                                </div>
+
+                                <p class="">제품 하이라이트</p>
+                                <div id="highlight-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="step-content step-3-content d-none">
+                    <h5 class="fw-bold">계약서</h5>
+                    <p>계약서 내용을 확인하고 작성하세요.</p>
+                    <div id="contract-document"></div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <button class="btn btn-secondary" id="back-to-step-3">이전</button>
+                        <!-- <button class="btn btn-success" id="next-to-step-4">다음</button> -->
+                        <button class="btn btn-secondary" id="next-to-step-4">결제 진행</button>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="step-content step-4-content d-none">
+                    <h5 class="fw-bold">결제 확인</h5>
+                    <p>결제 정보를 확인하고 완료하세요.</p>
+                    
+                    <!-- 결제 -->
+                    <main id="checkoutMain" class="d-none">
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-md-8 col-lg-6 col-xl-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <form id="checkoutForm">
+                                            <!-- Item Information -->
+                                            <div class="d-flex align-items-center mb-4">
+                                                <div class="flex-shrink-0 me-3">
+                                                    <img id="itemImage" class="rounded"
+                                                        style="width: 80px; height: 80px; object-fit: cover;" />
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h5 id="itemName" class="mb-1"></h5>
+                                                    <p class="price-value text-muted mb-0"></p>
+                                                </div>
+                                            </div>
+                    
+                                            <!-- Price Summary -->
+                                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded mb-4">
+                                                <label class="fw-bold mb-0">총 구입 가격</label>
+                                                <span class="price-value fw-bold text-primary fs-5"></span>
+                                            </div>
+                    
+                                            <!-- Checkout Button -->
+                                            <button id="checkoutButton" type="submit" class="btn btn-primary w-100 py-3">
+                                                <span class="checkout-text">결제</span>
+                                                <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <div class="d-flex justify-content-between mt-4">
+                        <button class="btn btn-secondary" id="back-to-step-2">이전</button>
+                        <button class="btn btn-success">완료</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 서명 모달 -->
+    <div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="signatureModalLabel">전자 서명</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 탭 메뉴 -->
+                    <ul class="nav nav-tabs" id="signatureTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="draw-tab" data-bs-toggle="tab" data-bs-target="#draw-pane"
+                                type="button" role="tab">직접 그리기</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-pane"
+                                type="button" role="tab">파일 업로드</button>
+                        </li>
+                    </ul>
+    
+                    <div class="tab-content" id="signatureTabContent">
+                        <!-- 직접 그리기 탭 -->
+                        <div class="tab-pane fade show active" id="draw-pane" role="tabpanel">
+                            <p class="text-muted mb-3">아래 영역에 마우스나 터치로 서명을 그려주세요.</p>
+                            <div class="text-center">
+                                <canvas id="signatureCanvas" width="400" height="200"></canvas>
+                            </div>
+                            <div class="signature-controls text-center">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="clearCanvas">지우기</button>
+                            </div>
+                        </div>
+    
+                        <!-- 파일 업로드 탭 -->
+                        <div class="tab-pane fade" id="upload-pane" role="tabpanel">
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                <p class="text-muted mb-2">서명 이미지를 드래그하거나 클릭하여 업로드하세요</p>
+                                <p class="text-muted small">PNG, JPG, GIF 파일만 지원됩니다</p>
+                                <input type="file" id="signatureFile" accept="image/*" style="display: none;">
+                            </div>
+                            <div id="uploadPreview" class="mt-3 text-center" style="display: none;">
+                                <img id="uploadedImage" class="signature-preview" alt="업로드된 서명">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="saveSignature">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 -->
+    <div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center p-4">
+                    <div class="spinner-border text-primary me-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span>결제 정보를 불러오는 중입니다.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 결제 성공 -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-check-circle me-2"></i>
+                        결제 성공
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="text-success mb-3">
+                        <svg width="64" height="64" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                            <path
+                                d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z" />
+                        </svg>
+                    </div>
+                    <p class="mb-0">결제에 성공했습니다.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 결제 실패 -->
+    <div class="modal fade" id="failModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        결제 실패
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="text-danger mb-3">
+                        <svg width="64" height="64" fill="currentColor" class="bi bi-exclamation-triangle"
+                            viewBox="0 0 16 16">
+                            <path
+                                d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z" />
+                            <path
+                                d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995z" />
+                        </svg>
+                    </div>
+                    <p id="failMessage" class="mb-0"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step Navigation Script -->
+    <script>
+        $(document).ready(function () {
+            function showStep(stepNumber) {
+                // 모든 step-content 숨김
+                $('.step-content').removeClass('d-block').addClass('d-none');
+                $('.step-' + stepNumber + '-content').removeClass('d-none').addClass('d-block');
+
+                // Step indicator active 설정
+                $('.step-indicator .step').removeClass('active');
+                $('.step-' + stepNumber).addClass('active');
+            }
+
+            $('#next-to-step-2').click(function () {
+                showStep(2);
+            });
+
+            $('#next-to-step-3').click(function () {
+                showStep(3);
+            });
+
+            $('#next-to-step-4').click(function () {
+                const checkout = new Checkout();
+                checkout.load();
+                showStep(4);
+            });
+
+            $('#back-to-step-1').click(function () {
+                showStep(1);
+            });
+
+            $('#back-to-step-2').click(function () {
+                showStep(2);
+            });
+
+            $('#back-to-step-3').click(function () {
+                showStep(3);
+            });
+
+            // 서비스 체크 초기화
+            function resetCheckboxes() {
+                $('#hr, #bsn, #purchs, #acc').prop('disabled', false);
+            }
+
+            $('#hr, #acc').change(function () {
+                if (this.checked) {
+                    $('#bsn, #purchs').prop('disabled', true);
+                } else {
+                    resetCheckboxes();
+                }
+            });
+
+            $('#bsn, #purchs').change(function () {
+                if (this.checked) {
+                    $('#hr, #acc').prop('disabled', true);
+                } else {
+                    resetCheckboxes();
+                }
+            });
+            
+            const highlightMap = {
+                "hr": `
+                    <ul>
+                        <li><strong>[인사]</strong> 인사 문서, 근태표, 인사평가 및 급여 명세를 효율적으로 관리하세요.</li>
+                        <li>모든 직원 정보에 <strong>언제 어디서나 안전하게 접근</strong></li>
+                        <li><strong>상시 인사 지원 체계</strong> 포함</li>
+                    </ul>`,
+                "bsn": `
+                    <ul>
+                        <li><strong>[영업]</strong> 견적, 계약서, 영업 보고서 등을 빠르게 작성하고 공유하세요.</li>
+                        <li><strong>거래 데이터</strong>를 안전하게 클라우드에 저장</li>
+                        <li><strong>24시간 영업 지원</strong> 가능</li>
+                    </ul>`,
+                "purchs": `
+                    <ul>
+                        <li><strong>[재고]</strong> 입출고, 재고 현황 및 창고 관리를 쉽게 시작하세요.</li>
+                        <li><strong>다양한 기기</strong>에서 재고 데이터 확인 및 관리</li>
+                    </ul>`,
+                "acc": `
+                    <ul>
+                        <li><strong>[회계]</strong> 전표, 세금계산서, 재무제표 작성을 빠르게 시작하세요.</li>
+                        <li><strong>언제 어디서나</strong> 회계 문서 접근 가능</li>
+                    </ul>`
+            };
+
+            function updateSummary() {
+                const period = $('input[name="period"]:checked').val(); // 1년 or 1개월
+                const billing = $('#billing-cycle').val(); // 매년 or 매월
+
+                // 금액 계산 (예: 예시로 단가 설정)
+                let price = 0;
+                let unit = '';
+
+                if (period === "1년" && billing === "매년") {
+                    price = 202800;
+                    unit = "년";
+                } else if (period === "1개월" && billing === "매월") {
+                    price = 20000;
+                    unit = "월";
+                } else if (period === "1개월" && billing === "매년") {
+                    price = 20000 * 12;
+                    unit = "년";
+                } else if (period === "1년" && billing === "매월") {
+                    price = 202800 / 12;
+                    unit = "월";
+                }
+
+                // 표시 업데이트
+                $('#subscription-summary').text(`${period} 구독, 사용자 1명당 ₩${price.toLocaleString()} 사용자/${unit} 지불`);
+                $('#price-display').text(`₩${price.toLocaleString()}`);
+            }
+
+            $('input[name="period"]').on('change', updateSummary);
+            $('#billing-cycle').on('change', updateSummary);
+
+            $('#next-to-step-2').click(function () {
+                // 체크된 항목 확인
+                const checkedServices = $('.form-check-input:checked').map(function () {
+                    return this.id; // id 값이 hr, bsn, purchs, acc
+                }).get();
+
+                // 하이라이트 영역 비우고 다시 추가
+                let highlightHtml = "";
+                checkedServices.forEach(serviceId => {
+                    highlightHtml += highlightMap[serviceId] || "";
+                });
+
+                $('#highlight-list').html(highlightHtml);
+            });
+
+            let contractHTML =
+                `
+                <div class="container bg-white p-5 shadow rounded">
+                    <h2 class="contract-title">ERP 시스템 이용 계약서</h2>
+
+                    <div class="contract-section">
+                    <h5>제1조 (당사자)</h5>
+                    <p><strong>갑(공급자)</strong><br>
+                        회사명: E-FLIX<br>
+                        대표자: 팀장<br>
+                        주소: (주)예담직업전문학교 대구광역시 중구 중앙대로 403 (남일동 135-1, 5층)
+                    </p>
+                    <p><strong>을(이용자)</strong><br>
+                        회사명: [이용자 회사명]<br>
+                        대표자: [대표자명]<br>
+                        주소: [주소]
+                    </p>
+                    </div>
+
+                    <div class="contract-section">
+                    <h5>제2조 (계약 목적)</h5>
+                    <p>본 계약은 갑이 개발·제공하는 ERP 시스템(이하 "시스템")을 을이 이용함에 있어 양 당사자의 권리·의무를 정함을 목적으로 한다.</p>
+                    </div>
+
+                    <div class="contract-section">
+                    <h5>제3조 (이용 범위 및 제공 서비스)</h5>
+                    <ol>
+                        <li>갑은 을에게 다음의 서비스를 제공한다:
+                        <ul>
+                            <li>ERP 시스템 웹/모바일 서비스 이용 권한</li>
+                            <li>기술지원 및 유지보수 서비스</li>
+                            <li>사용자 계정 생성 및 관리 기능</li>
+                        </ul>
+                        </li>
+                        <li>을은 시스템을 내부 업무 목적으로만 이용할 수 있다.</li>
+                    </ol>
+                    </div>
+
+                    <div class="contract-section">
+                    <h5>제4조 (계약 기간)</h5>
+                    <p>본 계약의 유효기간은 계약 체결일로부터 <strong>[1년]</strong>이며, 별도 해지 통보가 없을 경우 자동 연장된다.</p>
+                    </div>
+
+                    <div class="contract-section">
+                    <h5>제5조 (이용 요금 및 결제)</h5>
+                    <ol>
+                        <li>을은 시스템 이용 요금으로 월 <strong>[금액]</strong>원을 갑에게 지불한다.</li>
+                        <li>결제일은 매월 <strong>[지정일]</strong>일이며, 지정된 계좌로 송금한다.</li>
+                    </ol>
+                    </div>
+
+                    <div class="contract-section">
+                    <h5>제6조 (유지보수 및 기술지원)</h5>
+                    <p>갑은 을에게 정상적인 시스템 운영을 위한 유지보수와 기술지원을 제공하며, 장애 발생 시 즉시 조치한다.</p>
+                    </div>
+
+                    <div class="contract-section">
+                    <h5>제7조 (비밀유지)</h5>
+                    <p>양 당사자는 계약 수행 중 알게 된 상대방의 모든 정보에 대해 비밀을 유지하며, 제3자에게 누설하지 않는다.</p>
+                    </div>
+
+                    <div class="contract-section">
+                    <h5>제8조 (계약 해지)</h5>
+                    <ol>
+                        <li>어느 일방이 계약 내용을 위반할 경우, 상대방은 계약을 해지할 수 있다.</li>
+                        <li>해지 시 기지불된 요금은 반환되지 않는다.</li>
+                    </ol>
+                    </div>
+
+                    <div class="contract-section">
+                    <h5>제9조 (기타 조항)</h5>
+                    <ol>
+                        <li>본 계약에 명시되지 않은 사항은 관련 법령 및 상관례에 따른다.</li>
+                        <li>계약에 관한 분쟁은 갑의 소재지를 관할하는 법원에서 해결한다.</li>
+                    </ol>
+                    </div>
+
+                    <div class="row signature-box">
+                    <div class="col-md-6">
+                        <strong>갑(공급자)</strong><br>
+                        회사명: [공급자 회사명]<br>
+                        대표자 서명: __________________ (인)<br>
+                        날짜: ____________
+                    </div>
+                    <div class="col-md-6">
+                        <strong>을(이용자)</strong><br>
+                        회사명: [이용자 회사명]<br>
+                        대표자 서명: __________________ <span id="signatureDisplay" style="cursor: pointer; text-decoration: underline;" data-bs-toggle="modal" data-bs-target="#signatureModal">(인)</span><br>
+                        날짜: ____________
+                    </div>
+                    </div>
+                </div>
+                `;
+            $("#contract-document").html(contractHTML);
+
+			// (1) 서명 등록 후 작성 버튼 클릭 → (인) 자리 교체
+			$('#toPaymentModal').on('click', function () {
+				setTimeout(function () {
+					const paymentModal = new bootstrap.Modal($('#paymentModal')[0]);
+					paymentModal.show();
+				}, 500);
+
+				// 예시: canvas 또는 텍스트 입력으로부터 얻은 서명
+				const userSignature = "홍길동"; // 또는 이미지 경로
+
+				// 텍스트 서명 버전
+				$('#signatureDisplay').html(userSignature + ' (서명)');
+
+				// 또는 이미지 서명 버전
+				// $('#signatureDisplay').html('<img src="/images/signature.png" alt="서명" style="height:40px;">');
+			});
+
+			// (2) 서명 영역 클릭 시 서명 모달 다시 열기
+			$('#signatureDisplay').on('click', function () {
+				const signatureModal = new bootstrap.Modal($('#contractSignatureModal')[0]);
+				signatureModal.show();
+			});
+
+             // Canvas 관련 변수
+            let canvas = document.getElementById('signatureCanvas');
+            let ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let currentSignature = null;
+
+            // Canvas 초기화
+            function initCanvas() {
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            }
+
+            // 마우스 이벤트
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // 터치 이벤트
+            canvas.addEventListener('touchstart', handleTouch);
+            canvas.addEventListener('touchmove', handleTouch);
+            canvas.addEventListener('touchend', stopDrawing);
+
+            function startDrawing(e) {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                ctx.beginPath();
+                ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+                ctx.stroke();
+            }
+
+            function stopDrawing() {
+                isDrawing = false;
+                ctx.beginPath();
+            }
+
+            function handleTouch(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                                e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            }
+
+            // Canvas 지우기
+            document.getElementById('clearCanvas').addEventListener('click', function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+
+            // 파일 업로드 관련
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const signatureFile = document.getElementById('signatureFile');
+            const uploadPreview = document.getElementById('uploadPreview');
+            const uploadedImage = document.getElementById('uploadedImage');
+
+            fileUploadArea.addEventListener('click', () => signatureFile.click());
+
+            // 드래그 앤 드롭
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            signatureFile.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            function handleFileSelect(file) {
+                if (!file.type.match('image.*')) {
+                    alert('이미지 파일만 업로드 가능합니다.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage.src = e.target.result;
+                    uploadPreview.style.display = 'block';
+                    currentSignature = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // 서명 저장
+            document.getElementById('saveSignature').addEventListener('click', function() {
+                let signatureData = null;
+
+                // 현재 활성 탭 확인
+                const activeTab = document.querySelector('#signatureTab .nav-link.active').id;
+
+                if (activeTab === 'draw-tab') {
+                    // Canvas에서 서명 데이터 가져오기
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    let hasDrawing = false;
+
+                    // Canvas에 그려진 내용이 있는지 확인
+                    for (let i = 0; i < data.length; i += 4) {
+                        if (data[i + 3] > 0) { // 알파값이 0보다 크면 그려진 내용이 있음
+                            hasDrawing = true;
+                            break;
+                        }
+                    }
+
+                    if (hasDrawing) {
+                        signatureData = canvas.toDataURL();
+                    } else {
+                        alert('서명을 그려주세요.');
+                        return;
+                    }
+                } else if (activeTab === 'upload-tab') {
+                    // 업로드된 이미지 사용
+                    if (currentSignature) {
+                        signatureData = currentSignature;
+                    } else {
+                        alert('서명 이미지를 업로드해주세요.');
+                        return;
+                    }
+                }
+
+                // 서명을 계약서에 적용
+                if (signatureData) {
+                    const signatureDisplay = document.getElementById('signatureDisplay');
+                    signatureDisplay.innerHTML = `<img src="${signatureData}" class="signature-preview" alt="전자서명">`;
+                    signatureDisplay.style.textDecoration = 'none';
+                    signatureDisplay.removeAttribute('data-bs-toggle');
+                    signatureDisplay.removeAttribute('data-bs-target');
+                    signatureDisplay.style.cursor = 'default';
+
+                    // 모달 닫기
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('signatureModal'));
+                    modal.hide();
+
+                    // Canvas와 업로드 초기화
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    uploadPreview.style.display = 'none';
+                    signatureFile.value = '';
+                    currentSignature = null;
+
+                    alert('서명이 저장되었습니다.');
+                }
+            });
+
+            // 모달이 열릴 때 Canvas 초기화
+            document.getElementById('signatureModal').addEventListener('shown.bs.modal', function () {
+                initCanvas();
+            });
+
+            // 초기 Canvas 설정
+            initCanvas();
+        console.log(test);
+        });
+
+        let test = "[[${subscriptionPackage.spkIdx}]]"
+        // 결제
+        function Checkout() {
+            let item = null;
+
+            
+            this.load = async () => {
+            // 로딩 모달창
+            const loadingModal = new bootstrap.Modal('#loadingModal');
+            loadingModal.show();
+            
+            const waitPortOne = new Promise((resolve) => {
+                console.log('Checking window.PortOne:', window.PortOne); // 상태 출력
+                const polling = setInterval(() => {
+                if (window.PortOne != null) {
+                    clearInterval(polling);
+                    resolve();
+                }
+                }, 10000);
+            });
+            
+            const waitItem = fetch("/api/payment/item").then(
+                async (response) => (item = await response.json())
+            );
+            
+            // 로딩 모달창 닫기
+            try {
+                await Promise.all([waitPortOne, waitItem]);
+                console.log('Both promises completed');
+        
+                // 모달 닫기
+                loadingModal.hide();
+                
+                // 모달이 완전히 닫힌 후 다음 단계 실행
+                $('#loadingModal').on('hidden.bs.modal', () => {
+                    $('#checkoutMain').removeClass('d-none');
+                    this.showCheckout();
+                });
+                
+            } catch (error) {
+                console.error('Loading failed:', error);
+                loadingModal.hide();
+                // 에러 처리
+            }
+
+            // 결제창 열기
+            $('#checkoutMain').removeClass('d-none');
+            await this.showCheckout();
+            };
+            
+            this.showCheckout = async () => {
+            $('#itemName').text(item.name);
+            $('#itemImage').attr('src', `/${item.id}.png`);
+            $('.price-value').text(`${item.price.toLocaleString()}원`);
+            
+            $('#checkoutForm').on('submit', async (e) => {
+                e.preventDefault();
+                this.setWaitingPayment(true);
+
+                function randomId() {
+                return [...crypto.getRandomValues(new Uint32Array(2))]
+                    .map((word) => word.toString(16).padStart(8, "0"))
+                    .join("");
+                }
+
+                const paymentId = randomId();
+                const payment = await PortOne.requestPayment({
+                storeId: "store-092db0f4-068f-4f50-9b06-029fca00b36c",
+                channelKey: "channel-key-a0af8c14-0047-4ad6-ade6-5589354d0047",
+                paymentId,
+                orderName: item.name,
+                totalAmount: item.price,
+                currency: item.currency,
+                payMethod: "CARD",
+                customData: {
+                    item: item.id,
+                },
+                });
+                
+                if (payment.code !== undefined) {
+                this.setWaitingPayment(false);
+                console.log(payment);
+                this.openFailDialog(payment.message);
+                return;
+                }
+                
+                const completeResponse = await fetch("/api/payment/complete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    paymentId: payment.paymentId,
+                }),
+                });
+                
+                this.setWaitingPayment(false);
+                
+                if (completeResponse.ok) {
+                const paymentComplete = await completeResponse.json();
+                if (paymentComplete.status === "PAID") {
+                    this.openSuccessDialog();
+                }
+                } else {
+                this.openFailDialog(await completeResponse.text());
+                }
+            });
+            };
+            
+            this.setWaitingPayment = (isWaiting) => {
+            if (isWaiting) {
+                $('#checkoutButton')
+                .prop('disabled', true)
+                .addClass('disabled');
+                $('.checkout-text').addClass('d-none');
+                $('#checkoutButton .spinner-border').removeClass('d-none');
+            } else {
+                $('#checkoutButton')
+                .prop('disabled', false)
+                .removeClass('disabled');
+                $('.checkout-text').removeClass('d-none');
+                $('#checkoutButton .spinner-border').addClass('d-none');
+            }
+            };
+            
+            this.openFailDialog = (message) => {
+            $('#failMessage').text(message);
+            const failModal = new bootstrap.Modal('#failModal');
+            failModal.show();
+            };
+            
+            this.openSuccessDialog = () => {
+            const successModal = new bootstrap.Modal('#successModal');
+            successModal.show();
+            };
+        }
+    </script>
+</body>
+
+</html>

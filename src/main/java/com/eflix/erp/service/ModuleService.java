@@ -1,5 +1,9 @@
 package com.eflix.erp.service;
 
+import java.util.List;
+
+import com.eflix.erp.dto.ModuleDTO;
+
 /**
  * ERP 모듈 관리를 위한 Service 클래스
  * 
@@ -30,5 +34,5 @@ package com.eflix.erp.service;
  */
 
 public interface ModuleService {
-
+    public List<ModuleDTO> findAll();
 }
