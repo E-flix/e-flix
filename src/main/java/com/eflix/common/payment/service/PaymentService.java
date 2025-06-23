@@ -1,6 +1,7 @@
 package com.eflix.common.payment.service;
 
 import com.eflix.common.payment.Entity.PaymentEntity;
+import com.eflix.erp.dto.SubscriptionDTO;
 import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
 
 /**
@@ -35,5 +36,5 @@ public interface PaymentService {
 
     public int updatePayment(PaymentEntity paymentEntity);
 
-    public int insertSubscription(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO);
+    public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO);
 }

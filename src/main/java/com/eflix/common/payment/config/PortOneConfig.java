@@ -21,7 +21,7 @@ public class PortOneConfig {
     @Bean
     public WebhookVerifier webhookVerifier() {
         // 해당 메서드에서 오류 날 시 아래 행 주석처리
-        // return new WebhookVerifier(secretProperties.getWebHook());
-        return null;
+        return new WebhookVerifier(secretProperties.getWebHook());
+        // return null;
     }
 }

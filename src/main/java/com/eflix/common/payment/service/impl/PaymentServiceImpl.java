@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eflix.common.payment.Entity.PaymentEntity;
 import com.eflix.common.payment.mapper.PaymentMapper;
 import com.eflix.common.payment.service.PaymentService;
+import com.eflix.erp.dto.SubscriptionDTO;
 import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
 import com.eflix.erp.mapper.SubscriptionMapper;
 
@@ -69,10 +70,18 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public int insertSubscription(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO) {
+    public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO) {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'insertSubscriptionPackageDetail'");
         // return subscriptionMapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO);
+
+        int affectedRows = subscriptionMapper.insertSubscription(subscriptionDTO);
+
+        String spi_idx = "";
+        if(affectedRows > 0)  {
+            spi_idx = subscriptionDTO.getSpiIdx();
+        }
+
         return 0;
     }
 }

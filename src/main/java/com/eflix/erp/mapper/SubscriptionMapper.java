@@ -3,6 +3,7 @@ package com.eflix.erp.mapper;
 import java.util.List;
 
 import com.eflix.erp.dto.ModuleDTO;
+import com.eflix.erp.dto.SubscriptionDTO;
 import com.eflix.erp.dto.SubscriptionPackageDTO;
 import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
 
@@ -41,6 +42,10 @@ import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
 
 public interface SubscriptionMapper {
     public SubscriptionPackageDTO findById(String spkIdx);
+
+    public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO);
+
+    public int insertSubscription(SubscriptionDTO subscriptionDTO);
 
     public int insertSubscriptionPackageDetail(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO);
 }

@@ -94,8 +94,8 @@ public class PaymentController {
     @Autowired
     private PaymentClient paymentClient;
     
-    // @Autowired
-    // private WebhookVerifier webhookVerifier;
+    @Autowired
+    private WebhookVerifier webhookVerifier;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -180,24 +180,24 @@ public class PaymentController {
         }
     }
 
-    // @PostMapping("/webhook")
-    // public CompletableFuture<Void> handleWebhook(
-    //         @RequestBody String body,
-    //         @RequestHeader("webhook-id") String webhookId,
-    //         @RequestHeader("webhook-timestamp") String webhookTimestamp,
-    //         @RequestHeader("webhook-signature") String webhookSignature) {
+    @PostMapping("/webhook")
+    public CompletableFuture<Void> handleWebhook(
+            @RequestBody String body,
+            @RequestHeader("webhook-id") String webhookId,
+            @RequestHeader("webhook-timestamp") String webhookTimestamp,
+            @RequestHeader("webhook-signature") String webhookSignature) {
         
-    //     return CompletableFuture.runAsync(() -> {
-    //         try {
-    //             var webhook = webhookVerifier.verify(body, webhookId, webhookTimestamp, webhookSignature);
+        return CompletableFuture.runAsync(() -> {
+            try {
+                var webhook = webhookVerifier.verify(body, webhookId, webhookTimestamp, webhookSignature);
                 
-    //             if (webhook instanceof WebhookTransaction webhookTransaction) {
-    //                 syncPayment(webhookTransaction.getData().getPaymentId()).join();
-    //             }
-    //         } catch (Exception e) {
-    //             log.error("Webhook handling failed", e);
-    //             throw new SyncPaymentException();
-    //         }
-    //     });
-    // }
+                if (webhook instanceof WebhookTransaction webhookTransaction) {
+                    syncPayment(webhookTransaction.getData().getPaymentId()).join();
+                }
+            } catch (Exception e) {
+                log.error("Webhook handling failed", e);
+                throw new SyncPaymentException();
+            }
+        });
+    }
 }
