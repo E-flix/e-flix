@@ -16,4 +16,26 @@
         FROM QUOTATION
         ORDER BY QUOTATION_NO
     </select>
+
+    <insert id="insertQuotation" parameterType="com.eflix.bsn.dto.QuotationDTO">
+    INSERT INTO EFLIX.QUOTATIONS (
+        QUOTATION_NO, CUSTOMER_CD, CUSTOMER_NAME, QUOTATION_DT,
+        VALID_PERIOD, EMP_CD, PHONE, EXPECTED_DELIVERY_DT,
+        PAYMENT_TERMS, ATTACHMENT_PATH
+    ) VALUES (
+        #{quotationNo}, #{customerCd}, #{customerName},
+        #{quotationDt}, #{validPeriod}, #{empCd}, #{phone},
+        #{expectedDeliveryDt}, #{paymentTerms}, #{attachmentPath}
+    )
+    </insert>
+
+    <insert id="insertQuotationDetail" parameterType="com.eflix.bsn.dto.QuotationDetailDTO">
+        INSERT INTO EFLIX.QUOTATION_DETAIL (
+        QUOTATION_NO, LINE_NO, ITEM_CODE, ITEM_NAME,
+        SPEC, QTY, UNIT_PRICE, TOTAL_MONEY, TAX_AMOUNT, REMARKS
+        ) VALUES (
+        #{quotationNo}, #{lineNo}, #{itemCode}, #{itemName},
+        #{spec}, #{qty}, #{unitPrice}, #{totalMoney}, #{taxAmount}, #{remarks}
+    )
+    </insert>
 </mapper>
