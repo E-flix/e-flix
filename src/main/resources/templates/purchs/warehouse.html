@@ -58,7 +58,7 @@
 		columnDefs: [
 			{ headerName: "창고ID", field: "warehouseId", editable: false},
 			{ headerName: "창고위치", field: "warehouseLocation", editable: false},
-			{ headerName: "창고크기", field: "warehouseScale", editable: false},
+			{ headerName: "창고크기", field: "warehouseScale", editable: false, valueFormatter: params => params.value + "L"},
 			{ headerName: "담당자", field: "warehouseManager", editable: false}
 		],
 		rowSelection: {
@@ -73,8 +73,8 @@
 	window.addEventListener('resize', () => {
   		if (gridOptions.api) {
     		gridOptions.api.sizeColumnsToFit();
-  		}
-});
+			}
+  		});
 	// 그리드 초기화
 	agGrid.createGrid(document.querySelector("#warehouseGrid"), gridOptions);
 </script>
@@ -92,13 +92,8 @@
 	$("#addBtn").on("click", () => {
 	const warehouseId = $("#warehouseId").val();
 	const warehouseLocation = $("#warehouseLocation").val();
-	let warehouseScale = $("#warehouseScale").val().trim();
+	const warehouseScale = $("#warehouseScale").val();
 	const warehouseManager = $("#warehouseManager").val();
-
-	// L 붙이기
-	if (warehouseScale && !warehouseScale.endsWith("L")) {
-		warehouseScale += "L";
-	}
 
 	const data = {
 		warehouseId,
