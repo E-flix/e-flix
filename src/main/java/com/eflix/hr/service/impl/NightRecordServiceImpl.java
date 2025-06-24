@@ -20,31 +20,26 @@ public class NightRecordServiceImpl implements NightRecordService {
 
   @Override
   public List<NightRecordDTO> getAllNightRecords() {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllNightRecords'");
   }
 
   @Override
   public NightRecordDTO getNightRecordById(String ntIdx) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getNightRecordById'");
   }
 
   @Override
   public int createNightRecord(NightRecordDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createNightRecord'");
   }
 
   @Override
   public int updateNightRecord(NightRecordDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateNightRecord'");
   }
 
   @Override
   public int deleteNightRecord(String ntIdx) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'deleteNightRecord'");
   }
 

@@ -20,31 +20,26 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
   @Override
   public List<LeaveRequestDTO> getAllLeaveRequests() {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllLeaveRequests'");
   }
 
   @Override
   public LeaveRequestDTO getLeaveRequestById(String leaveReqIdx) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getLeaveRequestById'");
   }
 
   @Override
   public int createLeaveRequest(LeaveRequestDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createLeaveRequest'");
   }
 
   @Override
   public int updateLeaveRequest(LeaveRequestDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateLeaveRequest'");
   }
 
   @Override
   public int deleteLeaveRequest(String leaveReqIdx) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'deleteLeaveRequest'");
   }
 
