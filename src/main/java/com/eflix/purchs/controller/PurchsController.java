@@ -21,10 +21,10 @@ public class PurchsController {
 		return "purchs/category";
 	}
 
-	// 입고관리
-	@GetMapping("/ibd") public String inbound() {
-		return "purchs/inbound";
-	}
+	// // 입고관리
+	// @GetMapping("/ibd") public String inbound() {
+	// 	return "purchs/inbound";
+	// }
 
 	// 출고관리
 	@GetMapping("/obd") public String outbound() {

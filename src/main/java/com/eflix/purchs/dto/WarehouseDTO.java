@@ -13,6 +13,6 @@ import lombok.Data;
 public class WarehouseDTO {
     String warehouseId;
     String warehouseLocation;
-    String warehouseScale;
+    int warehouseScale;
     String warehouseManager;
 }

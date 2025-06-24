@@ -1,8 +1,16 @@
 package com.eflix.purchs.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.eflix.common.code.service.CommonService;
+import com.eflix.purchs.dto.InboundDTO;
+import com.eflix.purchs.service.InboundService;
+
+import lombok.RequiredArgsConstructor;
 /** ============================================
   - 작성자   : 이혁진
   - 최초작성 : 2025-06-23
@@ -11,8 +19,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
   [ 변경 이력 ]
   - 2025-06-23 (이혁진): 입고화면 컨트롤러 완성
 ============================================  */
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/purchs")
-public class inboundController {
+public class InboundController {
+  private final InboundService inboundService;
+  private final CommonService commonService;
+  // 입고조회
+  @GetMapping("/ibd")
+  public String inbound(Model model) {
+    model.addAttribute("ibdp", commonService.getCommon("PRD00"));
+    model.addAttribute("ibdList", inboundService.getInbound());
+    return "purchs/inbound";
+  }
 
+  //생산등록
+  @PostMapping("/ibdp")
+  @ResponseBody
+  public InboundDTO prodInsert(@RequestBody InboundDTO inbound) {
+      inboundService.insertProd(inbound);
+      return inbound;
+  }
+
+  // 마지막 prod_id번호 가져오기
+	@GetMapping("/lprd")
+	@ResponseBody
+	public String getNextProdId() {
+		return inboundService.getNextProdId();
+	}
 }

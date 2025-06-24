@@ -3,9 +3,12 @@ package com.eflix.bsn.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.eflix.bsn.service.QuotationService;
+import com.eflix.bsn.dto.QuotationDTO;
 import com.eflix.bsn.service.OrdersService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,15 +39,23 @@ public class BsnController {
   @GetMapping("/qot_list")
   public String quotation_list(Model model) throws JsonProcessingException {
     var list = quotationService.getQuotationList();
-    String json = new ObjectMapper().writeValueAsString(list);
-    model.addAttribute("quotationList", json);
+    model.addAttribute("quotationList", list);
     return "bsn/quotation_list";
   }
 
-  //견적서 등록
+  //견적서 입력
   @GetMapping("/qot")
-  public String quotation(){
+  public String quotation(Model model){
+    String nextNo = quotationService.generateNextQuotationNo();
+    model.addAttribute("nextQuotationNo", nextNo);
     return "bsn/quotation";
+  }
+
+  /** 견적서 등록 처리 */
+  @PostMapping("/qot")
+  public String createQuotation(@ModelAttribute QuotationDTO quotation) {
+    quotationService.createQuotation(quotation);
+    return "redirect:/bsn/qot_list";  // 등록 후 목록으로
   }
 
   //주문서 조회

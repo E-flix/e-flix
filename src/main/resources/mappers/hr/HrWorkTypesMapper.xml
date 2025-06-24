@@ -6,7 +6,17 @@
   - 설명     : HrWorkTypesMapper query xml
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 계정과목 전체조회 작성
+  - 2025-06-23 (김어진): 근무유형 드롭다운 조회 완료
 =============================================== -->
-<mapper namespace="com.eflix.hr.mapper.HrWorkTypesMapper">
+<mapper namespace="com.eflix.hr.mapper.HrWorkTypeMapper">
 
+    <!-- 근무유형 드롭다운 조회 -->
+  <select id ="workList" resultType="HrWorkTypeDTO">
+  SELECT DISTINCT work_type_nm FROM hr_work_types
+          <!-- 선택한 '근무 유형'만 필터링 -->
+        <if test="workTypeNm != null and workTypeNm != '' and workTypeNm != '선택'">
+            AND w.work_type_nm = #{workTypeNm}
+        </if>
+  </select>
+  
 </mapper>

@@ -40,7 +40,7 @@ public class warehouseController {
 		return warehouseService.getNextWarehouseId();
 	}
 
-	// 창고관리 - 삽입
+	// 창고관리 - 등록
 	@PostMapping("/whc")
 	@ResponseBody
 	public WarehouseDTO warehouseInsert(@RequestBody WarehouseDTO warehouse) {
