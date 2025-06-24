@@ -13,10 +13,23 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Service
 public class InboundServiceImpl implements InboundService {
+    // 입고조회
     @Autowired
     InboundMapper inboundMapper;
     // 조회
+    @Override
     public List<InboundDTO> getInbound() {
         return inboundMapper.getInbound();
     }
+    // 생산입력
+    @Override
+    public int insertProd(InboundDTO inboundDTO) {
+        return inboundMapper.insertProd(inboundDTO);
+    }
+    // 가장 마지막 prod_id 가져오기
+    @Override
+     public String getNextProdId() {
+        return inboundMapper.getNextProdId();
+     };
+
 }
