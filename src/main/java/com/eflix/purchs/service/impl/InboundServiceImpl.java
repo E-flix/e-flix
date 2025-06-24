@@ -31,5 +31,11 @@ public class InboundServiceImpl implements InboundService {
      public String getNextProdId() {
         return inboundMapper.getNextProdId();
      };
+     // 반품
+     @Override
+      public int deleteProd(InboundDTO inboundDTO) {
+        return inboundMapper.deleteProd(inboundDTO);
+      };
+
 
 }

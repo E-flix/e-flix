@@ -17,7 +17,7 @@
       from
         inventory i join warehouse w on (i.warehouse_id = w.warehouse_id)
   </select>
-<!--생산입력-->
+  <!--생산입력-->
   <insert id="insertProd" parameterType="inboundDTO">
     INSERT INTO prod (prod_id, prod_name, make_prod_date, prod_quantity, safety_stock_amount, product_type) 
     VALUES (#{prodId}, #{prodName}, #{makeProdDate}, #{prodQuantity}, #{safetyStockAmount}, #{productType})
@@ -31,4 +31,9 @@
       prod
   </select>
 
+  <!--반품-->
+  <delete id="deleteProd" parameterType="inboundDTO">
+    DELETE FROM prod
+    WHERE prod_id = #{prodId}
+  </delete>
 </mapper>

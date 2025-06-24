@@ -11,4 +11,6 @@ public interface InboundService {
      public int insertProd(InboundDTO inboundDTO);
          // 가장 마지막 prod_id 가져오기
      public String getNextProdId();
+         // 반품
+     public int deleteProd(InboundDTO inboundDTO);
 }
