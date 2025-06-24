@@ -22,4 +22,7 @@
     <select id="findAll" resultType="CompanyDTO">
         SELECT * FROM companyies
     </select>
+
+    <insert id="insert" parameterType="CompanyDTO">
+    </insert>
 </mapper>

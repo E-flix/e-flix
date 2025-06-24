@@ -1,3 +1,38 @@
+
+/**
+ * PortOne 결제 처리 컨트롤러
+ * <p>
+ * 이 클래스는 PortOne SDK를 사용하여 결제 처리, 검증, 웹훅 처리 등의
+ * 결제 관련 API 엔드포인트를 제공합니다.
+ * <br><br>
+ * 상품 조회, 결제 완료 처리, 결제 동기화, 웹훅 이벤트 처리 등의
+ * 핵심 결제 기능을 담당하며, 결제 데이터의 무결성 검증을 수행합니다.
+ * </p>
+ *
+ * <h3>주요 기능</h3>
+ * <ul>
+ *   <li><b>상품 조회</b> : 등록된 상품 정보를 반환</li>
+ *   <li><b>결제 완료 처리</b> : 클라이언트 결제 완료 후 서버 측 검증 및 동기화</li>
+ *   <li><b>결제 동기화</b> : PortOne API를 통한 실제 결제 상태 확인 및 로컬 저장소 업데이트</li>
+ *   <li><b>웹훅 처리</b> : PortOne에서 발송하는 결제 상태 변경 이벤트 처리</li>
+ *   <li><b>결제 검증</b> : 결제 금액, 상품명, 통화 등의 데이터 무결성 검증</li>
+ * </ul>
+ *
+ * @author 복성민 (bokseongmin@gmail.com)
+ * @version 1.0
+ * @since 2025-06-19
+ *
+ * @see PaymentClient
+ * @see WebhookVerifier
+ * @see PortOneSecretProperties
+ *
+ * @changelog
+ * <ul>
+ *   <li>2025-06-19: Kotlin에서 Java로 변환 및 최초 생성 (복성민)</li>
+ * </ul>
+ */
+
+
 // package com.eflix.common.payment.controller;
 
 // import org.springframework.web.bind.annotation.RequestMapping;
@@ -97,6 +132,7 @@
 //     // @Autowired
 //     // private WebhookVerifier webhookVerifier;
 
+
 //     private final ObjectMapper objectMapper = new ObjectMapper();
 
 //     @GetMapping("/item")
@@ -106,6 +142,7 @@
 
 //         Currency krw = Krw.INSTANCE; // Kotlin의 object는 Java에서 INSTANCE로 접근
 
+
 //         return new ItemDTO(subscriptionPackageDTO.getSpkIdx(), subscriptionPackageDTO.getSpkName(), subscriptionPackageDTO.getSpkPrice().intValue(), krw.getValue());
 //     }
 
@@ -113,6 +150,7 @@
 //     public CompletableFuture<PaymentEntity> completePayment(@RequestBody CompletePaymentRequest request) {
 //         return syncPayment(request.getPaymentId());
 //     }
+
 
 //     public CompletableFuture<PaymentEntity> syncPayment(String paymentId) {
 //         return CompletableFuture.supplyAsync(() -> {
@@ -134,9 +172,11 @@
 //                 if (actualPayment instanceof PaidPayment) {
 //                     PaidPayment paidPayment = (PaidPayment) actualPayment;
                     
+
 //                     if (!verifyPayment(paidPayment)) {
 //                         throw new SyncPaymentException();
 //                     }
+
                     
 //                     log.info("결제 성공 {}", actualPayment);
                     
@@ -145,6 +185,7 @@
 //                         paymentService.updatePayment(payment);
 //                     }
                     
+
 //                     return payment;
 //                 } else {
 //                     throw new SyncPaymentException();
@@ -165,10 +206,12 @@
 //         try {
 //             String customDataStr = payment.getCustomData();
 //             if (customDataStr == null) return false;
+
             
 //             CustomData customData = objectMapper.readValue(customDataStr, CustomData.class);
 //             ItemDTO item = items.get(customData.getItem());
             
+
 //             if (item == null) return false;
             
 //             return Objects.equals(payment.getOrderName(), item.getName()) &&
@@ -201,3 +244,4 @@
 //     //     });
 //     // }
 // }
+

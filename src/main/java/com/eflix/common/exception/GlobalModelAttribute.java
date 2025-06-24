@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.eflix.common.payment.exception.SyncPaymentException;
-
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
