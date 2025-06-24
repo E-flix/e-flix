@@ -37,13 +37,12 @@ import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
  * <ul>
  *   <li>2025-06-19: 최초 생성 (복성민)</li>
  *   <li>2025-06-23: 구독 상세 값 등록 로직 추가 (복성민)</li>
+ *   <li>2025-06-24: 구독 정보 로직 수정 (복성민)</li>
  * </ul>
  */
 
 public interface SubscriptionMapper {
     public SubscriptionPackageDTO findById(String spkIdx);
-
-    public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO);
 
     public int insertSubscription(SubscriptionDTO subscriptionDTO);
 

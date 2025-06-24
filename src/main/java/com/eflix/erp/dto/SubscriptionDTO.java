@@ -1,6 +1,7 @@
 package com.eflix.erp.dto;
 
 import java.util.Date;
+import java.util.List;
 
 import groovy.transform.builder.Builder;
 import lombok.Data;
@@ -31,6 +32,9 @@ public class SubscriptionDTO {
     private String spiStatus;
     private Date spiStart;
     private Date spiEnd;
-    private Date spiPeriod;
+    private int spiPeriod;
     private String spiCtrt;     // 계약서 파일
+    private String spiUid;      // PortOne UID
+
+    private List<String> checkedModules;
 }

@@ -24,5 +24,5 @@ public class SubscriptionPackageDetailDTO {
     private String spdIdx;      // spd-000
     private String spkIdx;      // spk-000
     private String moduleIdx;   // mou-000
-    private String field;
+    private String spiIdx;      // spi-000
 }

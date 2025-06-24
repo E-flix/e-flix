@@ -1,5 +1,6 @@
 package com.eflix.erp.service;
 
+import com.eflix.erp.dto.SubscriptionDTO;
 import com.eflix.erp.dto.SubscriptionPackageDTO;
 import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
 
@@ -34,6 +35,8 @@ import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
 
 public interface SubscriptionService {
     public SubscriptionPackageDTO findById(String spkIdx);
+
+    public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO);
 
     public int insertSubscriptionPackageDetail(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO);
 }

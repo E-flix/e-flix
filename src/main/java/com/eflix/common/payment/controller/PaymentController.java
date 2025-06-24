@@ -4,14 +4,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.eflix.common.exception.SyncPaymentException;
 import com.eflix.common.payment.Entity.PaymentEntity;
 import com.eflix.common.payment.config.PortOneSecretProperties;
 import com.eflix.common.payment.dto.CompletePaymentRequest;
 import com.eflix.common.payment.dto.CustomData;
 import com.eflix.common.payment.dto.ItemDTO;
-import com.eflix.common.payment.exception.SyncPaymentException;
 import com.eflix.common.payment.service.PaymentService;
-import com.eflix.erp.dto.CompanyDTO;
 import com.eflix.erp.dto.SubscriptionPackageDTO;
 import com.eflix.erp.mapper.ModuleMapper;
 import com.eflix.erp.mapper.SubscriptionMapper;
@@ -116,7 +115,7 @@ public class PaymentController {
     }
 
     @PostMapping("/complete")
-    public CompletableFuture<PaymentEntity> completePayment(@RequestBody CompletePaymentRequest request) {
+    public CompletableFuture<PaymentEntity> completePayment(@RequestBody CompletePaymentRequest request ) {
         return syncPayment(request.getPaymentId());
     }
 
@@ -212,4 +211,12 @@ public class PaymentController {
             }
         });
     }
+
+    @PostMapping("/billings")
+    public String billings(@RequestBody String body) {
+        //TODO: process POST request
+        System.out.println(body);
+        return body;
+    }
+    
 }

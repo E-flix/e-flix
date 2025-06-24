@@ -49,7 +49,7 @@
             SELECT 'spi-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(spi_idx, 5))), 100) + 1) FROM subscription
         </selectKey>
         INSERT INTO subscription(spi_idx, spk_idx, co_idx, emp_idx, spi_pay, spi_status, spi_start, spi_end, spi_period, spi_ctrt)
-        VALUES(#{spiIdx}, #{spkIdx}, #{coIdx}, #{empIdx}, #{spiPay}, #{spiStatus}, #{spiStart}, #{spiEnd}, #{spiPeriod}, #{spiCtrt})
+        VALUES(#{spiIdx}, #{spkIdx}, #{coIdx}, #{empIdx}, #{spiPay}, #{spiStatus}, SYSDATE, ADD_MONTHS(SYSDATE, #{spiPeriod}) , #{spiPeriod}, #{spiCtrt})
     </insert>
 
     <!-- 
@@ -59,7 +59,10 @@
      * @return int
 	-->
     <insert id="insertSubscriptionPackageDetail" parameterType="SubscriptionPackageDetailDTO">
-        INSERT INTO subscription_package_details(spd_idx, spk_idx, module_idx)
-        VALUES(#{spdIdx}, #{spkIdx}, #{moduleIdx})
+        <selectKey resultType="String" keyProperty="spdIdx" order="BEFORE">
+            SELECT 'spd-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(spd_idx, 5))), 100) + 1) FROM subscription_package_details
+        </selectKey>
+        INSERT INTO subscription_package_details(spd_idx, spi_idx, spk_idx, module_idx)
+        VALUES(#{spdIdx}, #{spiIdx}, #{spkIdx}, #{moduleIdx})
     </insert>
 </mapper>

@@ -82,6 +82,8 @@ public class PaymentServiceImpl implements PaymentService {
             spi_idx = subscriptionDTO.getSpiIdx();
         }
 
+        affectedRows = subscriptionMapper.insertSubscriptionPackageDetail(null);
+
         return 0;
     }
 }

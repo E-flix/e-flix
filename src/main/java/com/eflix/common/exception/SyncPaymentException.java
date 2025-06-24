@@ -1,4 +1,4 @@
-package com.eflix.common.payment.exception;
+package com.eflix.common.exception;
 
 public class SyncPaymentException extends RuntimeException {
     public SyncPaymentException() {
