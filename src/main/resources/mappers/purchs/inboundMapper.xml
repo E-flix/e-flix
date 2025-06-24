@@ -3,9 +3,9 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.eflix.purchs.mapper.InboundMapper">
-
+  <!--조회-->
   <select id="getInbound" resultType="InboundDTO">
-
+      select * from inbound order by inbound_id
   </select>
 
 </mapper>
