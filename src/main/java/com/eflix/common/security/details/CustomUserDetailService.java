@@ -38,6 +38,8 @@ public class CustomUserDetailService implements UserDetailsService {
 				.getRequest();
 		String uri = req.getRequestURI();
 
+		log.info("로그인 시도 - Username: {}, URI: {}", username, uri);
+		
 		if (uri.startsWith("/erp")) {
 			// 일반 사용자
 			UserDTO user = userMapper.findByUserId(username);

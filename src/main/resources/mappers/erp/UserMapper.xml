@@ -22,4 +22,28 @@
     <select id="findAll" resultType="UserDTO">
         SELECT * FROM users
     </select>
+
+    <!-- ===================================== -->
+    <!-- 유저 등록                        -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-20 -->
+    <!-- ===================================== -->
+    <insert id="insert" parameterType="String">
+        <selectKey resultType="String" keyProperty="userIdx" order="BEFORE">
+            SELECT 'user-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(user_idx, 6))), 100) + 1) FROM users
+        </selectKey>
+        INSERT INTO users(user_idx, user_id, user_pw, user_name, user_tel, user_email, user_regdate)
+        VALUES(#{userIdx}, #{userId}, #{userPw}, #{userName}, #{userTel}, #{userEmail}, SYSDATE)
+    </insert>
+
+	<!-- ===================================== -->
+    <!-- 유저 정보 조회                       -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-25 -->
+    <!-- ===================================== -->
+    <select id="findByUserId" resultType="UserDTO">
+        SELECT user_idx, user_id, user_pw, user_name, user_tel, user_email, user_regdate, user_role
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
 </mapper>

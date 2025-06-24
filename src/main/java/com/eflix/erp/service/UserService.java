@@ -1,5 +1,7 @@
 package com.eflix.erp.service;
 
+import com.eflix.common.security.dto.UserDTO;
+
 /**
  * ERP 회원 관리를 위한 Service 클래스
  * 
@@ -30,5 +32,7 @@ package com.eflix.erp.service;
  */
 
 public interface UserService {
+
+    public int insert(UserDTO userDTO);
     
 }

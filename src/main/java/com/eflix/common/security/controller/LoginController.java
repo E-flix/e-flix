@@ -1,11 +1,23 @@
 package com.eflix.common.security.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.eflix.common.res.ResUtil;
+import com.eflix.common.res.result.ResResult;
+import com.eflix.common.res.result.ResStatus;
+import com.eflix.common.security.dto.UserDTO;
+import com.eflix.erp.service.UserService;
 
 
 /**
@@ -26,13 +38,42 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @changelog
  * <ul>
  *   <li>2025-06-19: 최초 생성 (복성민)</li>
+ *   <li>2025-06-24: 회원가입 로직 추가 (복성민)</li>
  * </ul>
  */
 
 @Slf4j
 @Controller
 public class LoginController {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     
+    @PostMapping("/erp/signup")
+    @ResponseBody
+    public ResponseEntity<ResResult> postMethodName(@RequestBody UserDTO userDTO, RedirectAttributes rttr) {
+        //TODO: process POST request
+
+        ResResult result;
+
+        System.out.println(userDTO.toString());
+        
+        userDTO.setUserPw(passwordEncoder.encode(userDTO.getUserPw()));
+
+        int affectedRow = userService.insert(userDTO);
+
+        if(affectedRow > 0) {
+            result = ResUtil.makeResult(ResStatus.OK, null);
+        } else {
+            result = ResUtil.makeResult("400", "회원가입에 실패했습니다.", null);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    
+
     @GetMapping("/login")
     public String login() {
         // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

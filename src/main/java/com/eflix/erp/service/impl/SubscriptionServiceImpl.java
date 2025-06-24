@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eflix.common.exception.SubscriptionException;
+import com.eflix.common.exception.Exception;
 import com.eflix.erp.dto.SubscriptionDTO;
 import com.eflix.erp.dto.SubscriptionPackageDTO;
 import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
@@ -41,7 +41,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscriptionDTO.setSpiStatus("SS01");
 
         if(mapper.insertSubscription(subscriptionDTO) <= 0) {
-            throw new SubscriptionException("구독 정보를 등록하지 못했습니다.");
+            throw new Exception("구독 정보를 등록하지 못했습니다.");
         }
 
         SubscriptionPackageDetailDTO subscriptionPackageDetailDTO = new SubscriptionPackageDetailDTO();
@@ -51,7 +51,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         for(String moduleIdx : subscriptionDTO.getCheckedModules()) {
             subscriptionPackageDetailDTO.setModuleIdx(moduleIdx);
             if(mapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO) <= 0) {
-                throw new SubscriptionException("구독 모듈 저장 실패: " + moduleIdx);
+                throw new Exception("구독 모듈 저장 실패: " + moduleIdx);
             }
         }
         

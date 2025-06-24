@@ -3,6 +3,7 @@ package com.eflix.common.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +15,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import com.eflix.common.security.details.CustomUserDetailService;
 import com.eflix.common.security.handler.CustomLoginSuccessHandler;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -44,11 +46,11 @@ import lombok.extern.slf4j.Slf4j;
  * @see
  * 
  * @changelog
- *            <ul>
- *            <li>2025-06-19: 최초 생성 (복성민)</li>
- *            <li>2025-06-21: securityMatcher, formLogin, remember, logout 설정 추가
- *            </li>
- *            </ul>
+ * <ul>
+ *   <li>2025-06-19: 최초 생성 (복성민)</li>
+ *   <li>2025-06-21: securityMatcher, formLogin, remember, logout 설정 추가</li>
+ *   <li>2025-06-24: /erp Security 설정</li>
+ * </ul>
  */
 
 @Slf4j
@@ -65,33 +67,36 @@ public class SecurityConfig {
 	}
 
 	@Bean
+	@Order(1)
 	public SecurityFilterChain erpSecurityFilterChain(HttpSecurity http) throws Exception {
-		http
-				.securityMatcher("/erp/**")
+		http.securityMatcher("/erp/**")
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/**", "/**/**").permitAll()
-						.anyRequest().authenticated())
-				.formLogin(form -> form
-						.loginPage("/erp/login")
-						.usernameParameter("user_id")
-						.passwordParameter("user_pw")
-						.successHandler(authenticationSuccessHandler())
-						.permitAll())
-				.rememberMe(remember -> remember
-						.key("eflix")
-						.tokenValiditySeconds(60 * 60 * 24)
-						.rememberMeParameter("user_remember")
-						.userDetailsService(customUserDetailService))
-				.logout(logout -> logout
-						.logoutUrl("/erp/logout")
-						.deleteCookies("JSESSIONID", "user_remember"))
-				.csrf(csrf -> csrf.disable())
-				.exceptionHandling(exception -> exception.accessDeniedPage("/erp/error/403"));
+					.requestMatchers("/erp", "/erp/login", "/erp/signup", "/erp/error/**", "/erp/assets/**", "/erp/css/**", "/erp/js/**", "/bootstrap/**", "/common/**").permitAll()
+					.requestMatchers("/erp/api/**").authenticated())
+			.formLogin(form -> form
+				.loginProcessingUrl("/erp/login")
+				.loginPage("/")
+				.usernameParameter("user_id")
+				.passwordParameter("user_pw")
+				.successHandler(authenticationSuccessHandler())
+				.permitAll())
+			// .rememberMe(remember -> remember
+			// 	.key("eflix")
+			// 	.tokenValiditySeconds(60 * 60 * 24)
+			// 	.rememberMeParameter("user_remember")
+			// 	.userDetailsService(customUserDetailService))
+			.userDetailsService(customUserDetailService)
+			.logout(logout -> logout
+				.logoutUrl("/erp/logout")
+				.deleteCookies("JSESSIONID", "user_remember"))
+			.csrf(csrf -> csrf.disable())
+			.exceptionHandling(exception -> exception.accessDeniedPage("/erp/error/403"));
 
 		return http.build();
 	}
 
 	@Bean
+	@Order(2)
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 				.securityMatcher("/**")

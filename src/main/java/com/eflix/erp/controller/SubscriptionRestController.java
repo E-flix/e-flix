@@ -3,7 +3,7 @@ package com.eflix.erp.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.eflix.common.exception.SubscriptionException;
+import com.eflix.common.exception.Exception;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +73,7 @@ public class SubscriptionRestController {
         try {
             service.insertSubscriptionInfo(subscriptionDTO);
             result = ResUtil.makeResult(ResStatus.OK, null);
-        } catch (SubscriptionException e) {
+        } catch (Exception e) {
             result = ResUtil.makeResult("400", e.getMessage(), null);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
