@@ -17,9 +17,9 @@ public interface EntryService {
 	// 전표 전체조회
   public List<EntryMasterDTO> getList();
   // insert
-  public void insertEntry(EntryMasterDTO entryMaster);
+  public EntryMasterDTO insertEntry(EntryMasterDTO entryMaster);
   // update
-  public void updateEntry(EntryMasterDTO entryMaster);
+  public EntryMasterDTO updateEntry(EntryMasterDTO entryMaster);
   // delete
   public void deleteEntry(List<EntryDetailDTO> entryDetail);
   // select max+1 entry_number

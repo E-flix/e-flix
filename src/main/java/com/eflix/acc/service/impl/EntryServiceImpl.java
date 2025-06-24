@@ -1,6 +1,8 @@
 package com.eflix.acc.service.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.eflix.acc.dto.EntryDetailDTO;
@@ -34,21 +36,24 @@ public class EntryServiceImpl implements EntryService {
   // insert
   @Override
   @Transactional(rollbackFor = Exception.class)
-  public void insertEntry(EntryMasterDTO entryMaster) {
-    entryMapper.insertEntryMaster(entryMaster); // master insert
+  public EntryMasterDTO insertEntry(EntryMasterDTO entryMaster) {
+    // detail Count가 1이상이라면 이미 master가 있다는 뜻이므로 master insert는 생략
+    int count = entryMapper.selectCountDetailByEntryNumber(entryMaster.getEntryNumber()); 
+    if (count == 0) entryMapper.insertEntryMaster(entryMaster); // master update
     if (entryMaster.getDetails() != null) { // detail 테이블 insert위해서 추출
       for (EntryDetailDTO detail : entryMaster.getDetails()) {
         detail.setEntryNumber(entryMaster.getEntryNumber()); // FK 설정 => master.entry == detail.entry
         entryMapper.insertEntryDetail(detail); // detail insert
       }
     }
+    return entryMaster;
   }
 
   // update
   @Override
   @Transactional(rollbackFor = Exception.class) 
-  public void updateEntry(EntryMasterDTO entryMaster) {
-    entryMapper.updateEntryMaster(entryMaster); // master update
+  public EntryMasterDTO updateEntry(EntryMasterDTO entryMaster) {
+    entryMapper.updateEntryMaster(entryMaster); // master insert
     // 기존 상세는 모두 삭제 후 다시 삽입
     entryMapper.deleteEntryDetailsByEntryNumber(entryMaster.getEntryNumber()); // detail delete
     if (entryMaster.getDetails() != null) {
@@ -57,6 +62,7 @@ public class EntryServiceImpl implements EntryService {
         entryMapper.insertEntryDetail(detail); // detail insert
       }
     }
+    return entryMaster;
   }
 
   // delete
@@ -64,14 +70,17 @@ public class EntryServiceImpl implements EntryService {
   @Transactional(rollbackFor = Exception.class)
   public void deleteEntry(List<EntryDetailDTO> entryDetail) {
     if (entryDetail == null || entryDetail.isEmpty()) return;
-    for (EntryDetailDTO entry : entryDetail){
-      entryMapper.deleteEntryDetailsByLineNumber(entry); // detail delete
-      // master delete => master는 detail count<1 이면 삭제
-      int enNo = entryDetail.get(0).getEntryNumber(); // EntryNumber 추출
-      int count = entryMapper.selectCountDetailByEntryNumber(enNo); // 반복 시점 detail 갯수
-      if (count < 1) {
-        entryMapper.deleteEntryMasterByEntryNumber(enNo);
-      }
+    // 중복 없이 EntryNumber를 저장할 Set 생성
+    Set<Integer> entryNumbers = new HashSet<>();
+    for (EntryDetailDTO detail : entryDetail) {
+        entryMapper.deleteEntryDetailsByLineNumber(detail);  // detail 삭제
+        entryNumbers.add(detail.getEntryNumber());           // 중복 없이 entryNumber 저장
+    }
+    for (Integer enNo : entryNumbers) {
+        int count = entryMapper.selectCountDetailByEntryNumber(enNo);  // detail 개수 확인
+        if (count < 1) {
+            entryMapper.deleteEntryMasterByEntryNumber(enNo);          // detail이 없으면 master 삭제
+        }
     }
   }
 

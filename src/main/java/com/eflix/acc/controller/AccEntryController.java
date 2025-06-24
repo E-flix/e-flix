@@ -67,24 +67,25 @@ public class AccEntryController {
 
   // insert
   @PostMapping("/en")
-  public ResponseEntity<String> createEntry(@RequestBody EntryMasterDTO entryMaster) {
+  public ResponseEntity<EntryMasterDTO> createEntry(@RequestBody EntryMasterDTO entryMaster) {
     try {
-      entryService.insertEntry(entryMaster); // insert 실행
-      return ResponseEntity.ok("Insert success"); // 성공 응답
+      EntryMasterDTO savedEntry = entryService.insertEntry(entryMaster);// insert 실행
+      return ResponseEntity.ok(savedEntry); // 성공 응답
     } catch (Exception e) {
-      return ResponseEntity.status(500).body("Insert failed: " + e.getMessage()); // 실패 응답
+      e.printStackTrace();
+      return ResponseEntity.status(500).body(null); // 실패 응답
     }
   }
   
   // update
   @PutMapping("/en")
-  public ResponseEntity<String> updateEntry(@PathVariable int entryNumber, @RequestBody EntryMasterDTO entryMaster) {
-    try {
-      entryMaster.setEntryNumber(entryNumber); // entryNumber지정 
+  public ResponseEntity<EntryMasterDTO> updateEntry(@RequestBody EntryMasterDTO entryMaster) {
+    try { 
       entryService.updateEntry(entryMaster); // update 실행
-      return ResponseEntity.ok("Update success"); // 성공 응답
+      return ResponseEntity.ok(entryMaster); // 성공 응답
     } catch (Exception e) {
-      return ResponseEntity.status(500).body("Update failed: " + e.getMessage()); // 실패 응답
+      e.printStackTrace();
+      return ResponseEntity.status(500).body(null); // 실패 응답
     }
   }
 
