@@ -20,31 +20,26 @@ public class RoleServiceImpl implements RoleService {
 
   @Override
   public List<RoleDTO> getAllRoles() {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllRoles'");
   }
 
   @Override
   public RoleDTO getRoleById(String roleId) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getRoleById'");
   }
 
   @Override
   public int createRole(RoleDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createRole'");
   }
 
   @Override
   public int updateRole(RoleDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateRole'");
   }
 
   @Override
   public int deleteRole(String roleId) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'deleteRole'");
   }
 

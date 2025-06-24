@@ -5,6 +5,7 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김어진): Mapper 생성
+  - 2025-06-24 (김어진): 근무 유형 드롭다운 구현
 ============================================ */
 package com.eflix.hr.mapper;
 
@@ -20,4 +21,7 @@ public interface HrWorkTypeMapper {
     int insert(HrWorkTypeDTO dto);
     int update(HrWorkTypeDTO dto);
     int deleteById(@Param("workTypeId") String workTypeId);
+
+    // 근무유형 드롭다운 조회
+    public List<HrWorkTypeDTO> workList();
 }

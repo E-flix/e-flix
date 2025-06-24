@@ -6,6 +6,7 @@
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 클래스 생성
   - 2025-06-19 (김어진): 조건별 조회기능 구현
+  - 2025-06-24 (김어진): 사원등록 기능 구현
 ============================================ */
 package com.eflix.hr.dto;
 
@@ -31,7 +32,10 @@ public class EmployeeDTO {
     private String empAccount;      // emp_account
     private String empPw;           // emp_pw
     private String coIdx;          // co_idx
-
+    private String rrnPfx;
+    private String rrnSfx;
+    private String empPhone;
+    
     private String option;
     private String keyword;
 }

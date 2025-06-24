@@ -50,7 +50,6 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
 
   @Override
   public List<AttendanceRecordDTO> getAllAttendanceRecords() {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllAttendanceRecords'");
   }
 

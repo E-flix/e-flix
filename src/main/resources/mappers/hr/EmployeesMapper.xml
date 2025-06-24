@@ -7,50 +7,108 @@
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 계정과목 전체조회 작성
   - 2025-06-23 (김어진): 사원관리 조건별 조회 쿼리문 작성
+  - 2025-06-24 (김어진): 사원관리 조건별 조회 구현 및 사원등록 쿼리문 작성
 =============================================== -->
 <mapper namespace="com.eflix.hr.mapper.EmployeeMapper">
-  <select id="selectAll" parameterType="String" resultType="EmployeeDTO">
-      SELECT 
-      e.emp_idx,
-      e.emp_name,
-      e.dept_idx,
-      d.dept_name,
-      e.emp_grade,
-      e.emp_status,
-      e.emp_type,
-      e.emp_email,
-      e.emp_regdate,
-      e.emp_account
+  
+<select id="selectAll" parameterType="map" resultType="EmployeeDTO">
+    SELECT DISTINCT
+        e.emp_idx,
+        e.emp_name,
+        e.dept_idx,
+        d.dept_name,
+        e.emp_grade,
+        e.emp_status,
+        e.emp_type,
+        e.emp_email,
+        e.emp_regdate,
+        e.emp_account
     FROM employees e
     LEFT JOIN departments d ON e.dept_idx = d.dept_idx
-    WHERE 1=1
-    <if test="keyword != null and keyword != ''">
-      <if test="option != null ">
-          <if test="option.equals('empIdx'.toString())">
-            and emp_idx = #{keyword}
-          </if>
-            <if test="option.equals('empName'.toString())">
-            and emp_name = #{keyword}
-          </if>
-      </if>
-    </if>
-  </select>
+    <where>
+        <!-- 선택한 '상위 부서'만 필터링 -->
+        <if test="deptUpIdx != null and deptUpIdx != '' and deptUpIdx != '선택'">
+            AND (d.dept_up_idx = #{deptUpIdx} OR d.dept_idx = #{deptUpIdx})
+        </if>
+        
+        <!-- 선택한 '상세 부서'만 필터링 -->
+        <if test="deptIdx != null and deptIdx != '' and deptIdx != '선택'">
+            AND e.dept_idx = #{deptIdx}
+        </if>
+        
+        <!-- 선택한 '직급'만 필터링 -->
+        <if test="empGrade != null and empGrade != '' and empGrade != '선택'">
+            AND (e.emp_grade = #{empGrade} OR e.emp_grade LIKE '%' || #{empGrade} || '%')
+        </if>
+        
+        <!-- 선택한 '재직 상태'만 필터링 -->
+        <if test="empStatusType != null and empStatusType != '' and empStatusType != '선택'">
+            AND e.emp_status = #{empStatusType}
+        </if>
+        
+
+        
+        <!-- 검색 키워드 & 옵션 처리 -->
+        <if test="keyword != null and keyword != '' and keyword != '선택'">
+            <choose>
+                <when test="option != null and option == 'empIdx' and option != '전체'">
+                    AND e.emp_idx LIKE '%' || #{keyword} || '%'
+                </when>
+                <when test="option != null and option == 'empName' and option != '전체'">
+                    AND e.emp_name LIKE '%' || #{keyword} || '%'
+                </when>
+                <otherwise>
+                    <!-- 옵션이 없거나 그 외의 값일 때 둘 다 검색 -->
+                    AND (
+                        e.emp_idx LIKE '%' || #{keyword} || '%'
+                        OR e.emp_name LIKE '%' || #{keyword} || '%'
+                    )
+                </otherwise>
+            </choose>
+        </if>
+    </where>
+    ORDER BY e.emp_idx ASC
+</select>
+
   <!-- 직급 드롭다운 조회 -->
-    <select id="gradeList"
-          resultType="EmployeeDTO">
-      SELECT 
-      e.emp_idx,
-      e.emp_name,
-      e.dept_idx,
-      d.dept_name,
-      e.emp_grade,
-      e.emp_status,
-      e.emp_type,
-      e.emp_email,
-      e.emp_regdate,
-      e.emp_account
-    FROM employees e
-    LEFT JOIN departments d ON e.dept_idx = d.dept_idx
-    WHERE 1=1
+    <select id="gradeList" resultType="EmployeeDTO">
+      SELECT DISTINCT emp_grade FROM employees
+    </select>
+  <!-- 재직 상태 드롭다운 조회 -->
+  <select id="empStatusList" resultType="EmployeeDTO">
+    SELECT DISTINCT emp_status FROM employees
   </select>
+
+<!-- 사원 등록 -->
+<insert id="insertEmp" parameterType="EmployeeDTO">
+    INSERT INTO employees (
+        emp_idx,
+        emp_name,
+        rrn_pfx,
+        rrn_sfx,
+        emp_email,
+        dept_idx,
+        emp_grade,
+        emp_status,
+        emp_type,
+        emp_regdate,
+        emp_account,
+        emp_phone,
+        emp_pw
+    ) VALUES (
+        #{empIdx},
+        #{empName},
+        #{rrnPfx},
+        #{rrnSfx},
+        #{empEmail},
+        'test-001',
+        #{empGrade},
+        #{empStatus},
+        #{empType},
+        #{empRegdate},
+        #{empAccount},
+        #{empPhone},
+        #{empPw}
+    )
+</insert>
 </mapper>
