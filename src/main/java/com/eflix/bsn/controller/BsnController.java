@@ -39,8 +39,7 @@ public class BsnController {
   @GetMapping("/qot_list")
   public String quotation_list(Model model) throws JsonProcessingException {
     var list = quotationService.getQuotationList();
-    String json = new ObjectMapper().writeValueAsString(list);
-    model.addAttribute("quotationList", json);
+    model.addAttribute("quotationList", list);
     return "bsn/quotation_list";
   }
 
