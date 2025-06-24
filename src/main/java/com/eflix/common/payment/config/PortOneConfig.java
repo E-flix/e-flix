@@ -15,6 +15,7 @@ public class PortOneConfig {
 
     @Bean
     public PaymentClient paymentClient() {
+        System.out.println(secretProperties.getApi() + secretProperties.getStoreId());
         return new PaymentClient(secretProperties.getApi(), "https://api.portone.io", secretProperties.getStoreId());
     }
 

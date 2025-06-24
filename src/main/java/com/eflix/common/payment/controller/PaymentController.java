@@ -11,9 +11,11 @@ import com.eflix.common.payment.dto.CustomData;
 import com.eflix.common.payment.dto.ItemDTO;
 import com.eflix.common.payment.exception.SyncPaymentException;
 import com.eflix.common.payment.service.PaymentService;
+import com.eflix.erp.dto.CompanyDTO;
 import com.eflix.erp.dto.SubscriptionPackageDTO;
 import com.eflix.erp.mapper.ModuleMapper;
 import com.eflix.erp.mapper.SubscriptionMapper;
+import com.eflix.erp.service.CompanyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.portone.sdk.server.common.Currency;
@@ -74,9 +76,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @RequestMapping("/api/payment")
 public class PaymentController {
 
-    // 샘플 데이터
     private static final Map<String, ItemDTO> items = new HashMap<>();
 
+    // 샘플 데이터
     static {
         Currency krw = Krw.INSTANCE; // Kotlin의 object는 Java에서 INSTANCE로 접근
         items.put("shoes", new ItemDTO("shoes", "신발", 1000, krw.getValue()));
@@ -84,6 +86,9 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private CompanyService companyService;
 
     @Autowired
     private SubscriptionMapper subscriptionMapper;
@@ -106,7 +111,8 @@ public class PaymentController {
 
         Currency krw = Krw.INSTANCE; // Kotlin의 object는 Java에서 INSTANCE로 접근
 
-        return new ItemDTO(subscriptionPackageDTO.getSpkIdx(), subscriptionPackageDTO.getSpkName(), subscriptionPackageDTO.getSpkPrice().intValue(), krw.getValue());
+        items.put(spkIdx, new ItemDTO(subscriptionPackageDTO.getSpkIdx(), subscriptionPackageDTO.getSpkName(), subscriptionPackageDTO.getSpkPrice().intValue(), krw.getValue()));
+        return items.get(spkIdx);
     }
 
     @PostMapping("/complete")
@@ -135,7 +141,11 @@ public class PaymentController {
                     PaidPayment paidPayment = (PaidPayment) actualPayment;
                     
                     if (!verifyPayment(paidPayment)) {
-                        throw new SyncPaymentException();
+                        log.error("결제 검증 실패 - Payment ID: {}, getStatusChangedAt: {}, Amount: {}",
+                                paidPayment.getId(),
+                                paidPayment.getStatusChangedAt(),
+                                paidPayment.getAmount());
+                        throw new SyncPaymentException("결제 검증에 실패했습니다.");
                     }
                     
                     log.info("결제 성공 {}", actualPayment);
@@ -158,9 +168,10 @@ public class PaymentController {
 
     private boolean verifyPayment(PaidPayment payment) {
         String channelTypeValue = payment.getChannel().getType().getValue();
-        if (!"live".equalsIgnoreCase(channelTypeValue)) {
-            return false;
-        }
+        log.info(channelTypeValue);
+        // if (!"live".equalsIgnoreCase(channelTypeValue)) {
+        //     return false;
+        // }
 
         try {
             String customDataStr = payment.getCustomData();
@@ -169,6 +180,7 @@ public class PaymentController {
             CustomData customData = objectMapper.readValue(customDataStr, CustomData.class);
             ItemDTO item = items.get(customData.getItem());
             
+            System.out.println("item" + item);
             if (item == null) return false;
             
             return Objects.equals(payment.getOrderName(), item.getName()) &&
