@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.eflix.common.code.service.CommonService;
 import com.eflix.purchs.dto.InboundDTO;
 import com.eflix.purchs.service.InboundService;
+import com.eflix.purchs.service.WarehouseService;
 
 import lombok.RequiredArgsConstructor;
 /** ============================================
@@ -29,35 +30,62 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class InboundController {
   private final InboundService inboundService;
   private final CommonService commonService;
+  private final WarehouseService warehouseService;
+
   // 입고조회
   @GetMapping("/ibd")
   public String inbound(Model model) {
+    // 제품 - 반제품 조회 option
     model.addAttribute("ibdp", commonService.getCommon("PRD00"));
+    // 제품조회
     model.addAttribute("ibdList", inboundService.getInbound());
+    // 사용가능한 창고 조회
+    model.addAttribute("vwh", warehouseService.warehouseState());
     return "purchs/inbound";
   }
 
-  //생산등록
+  // 생산등록
   @PostMapping("/ibdp")
   @ResponseBody
   public InboundDTO prodInsert(@RequestBody InboundDTO inbound) {
-      inboundService.insertProd(inbound);
-      return inbound;
+    inboundService.insertProd(inbound);
+    return inbound;
   }
 
   // 마지막 prod_id번호 가져오기
-	@GetMapping("/lprd")
-	@ResponseBody
-	public String getNextProdId() {
-		return inboundService.getNextProdId();
-	}
+  @GetMapping("/lprd")
+  @ResponseBody
+  public String getNextProdId() {
+    return inboundService.getNextProdId();
+  }
 
-  //반품
+  // 반품
   @DeleteMapping("/dprd")
   @ResponseBody
   public int prodDelete(@RequestBody InboundDTO inbound) {
     return inboundService.deleteProd(inbound);
   }
+
+  // 마지막 inbound_id 가져오기
+  @GetMapping("/gnpi")
+  @ResponseBody
+  public String getNextInboundId() {
+    return inboundService.getNextInboundId();
+  }
+
+  // 마지막 inbound_lot 가져오기
+  @GetMapping("/gnpl")
+  @ResponseBody
+  public String getNextInboundLot() {
+    return inboundService.getNextInboundLot();
+  }
+
+  // 입고등록 (제품 -> 창고)
+  @PostMapping("/pibd")
+  @ResponseBody
+  public InboundDTO inbound(@RequestBody InboundDTO inbound) {
+    inboundService.inbound(inbound);
+      return inbound;
+  }
+ }
 }
-
-
