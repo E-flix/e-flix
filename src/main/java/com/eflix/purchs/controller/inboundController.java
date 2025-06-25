@@ -59,3 +59,5 @@ public class InboundController {
     return inboundService.deleteProd(inbound);
   }
 }
+
+
