@@ -8,12 +8,13 @@ import lombok.Data;
 
 @Data
 // public class InboundDTO {
-//     String inboundId;
-//     String inboundLot;
-//     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-//     Date inboundDate;
-//     String memo;
-//     String inboundManager;
+// String inboundId;
+// String inboundLot;
+// @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss",
+// timezone = "Asia/Seoul")
+// Date inboundDate;
+// String memo;
+// String inboundManager;
 // }
 
 public class InboundDTO {
@@ -24,4 +25,12 @@ public class InboundDTO {
     int prodQuantity;
     int safetyStockAmount;
     String productType;
+
+    String inboundId;
+    String inboundQuantity;
+    String inboundLot;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    Date inboundDate;
+    String inboundManager;
+    String warehouseId;
 }
