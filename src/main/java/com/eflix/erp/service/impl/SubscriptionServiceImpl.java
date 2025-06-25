@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eflix.common.exception.Exception;
+import com.eflix.erp.dto.MasterDTO;
 import com.eflix.erp.dto.SubscriptionDTO;
 import com.eflix.erp.dto.SubscriptionPackageDTO;
 import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
+import com.eflix.erp.mapper.MasterMapper;
 import com.eflix.erp.mapper.SubscriptionMapper;
 import com.eflix.erp.service.SubscriptionService;
 
@@ -16,31 +18,34 @@ import com.eflix.erp.service.SubscriptionService;
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Autowired
-    private SubscriptionMapper mapper;
+    private SubscriptionMapper subscriptionMapper;
+
+    @Autowired
+    private MasterMapper masterMapper;
 
     @Override
     public SubscriptionPackageDTO findById(String spkIdx) {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'findById'");
-        return mapper.findById(spkIdx);
+        return subscriptionMapper.findById(spkIdx);
     }
 
     @Override
     public int insertSubscriptionPackageDetail(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO) {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'insertSubscriptionPackageDetail'");
-        return mapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO);
+        return subscriptionMapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO);
     }
 
     @Override
     @Transactional
-    public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO) {
+    public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO, MasterDTO masterDTO) {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'insertSubscriptionInfo'");
 
         subscriptionDTO.setSpiStatus("SS01");
 
-        if(mapper.insertSubscription(subscriptionDTO) <= 0) {
+        if(subscriptionMapper.insertSubscription(subscriptionDTO) <= 0) {
             throw new Exception("구독 정보를 등록하지 못했습니다.");
         }
 
@@ -50,9 +55,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         for(String moduleIdx : subscriptionDTO.getCheckedModules()) {
             subscriptionPackageDetailDTO.setModuleIdx(moduleIdx);
-            if(mapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO) <= 0) {
+            if(subscriptionMapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO) <= 0) {
                 throw new Exception("구독 모듈 저장 실패: " + moduleIdx);
             }
+        }
+
+        if(masterMapper.insertMaster(masterDTO) <= 0) {
+            throw new Exception("마스터 계정을 등록하지 못했습니다.");
         }
         
         return 1;

@@ -214,6 +214,7 @@
                                 </div>
                             </fieldset>
                             <script th:inline="javascript">
+                                let coIdx = null;
                                 $(document).ready(function () {
                                     $('#sameAsSubscriber').change(function () {
                                         const userIdx = /*[[${session.userIdx}]]*/ "";
@@ -225,6 +226,7 @@
                                                 success: function (res) {
                                                     const data = res.body;
                                                     if(res.head.res_code === "200") {
+                                                        coIdx = data.coIdx;
                                                         $('#pschName').val(data.pschName);
                                                         $('#pschTel').val(data.pschTel);
                                                         $('#coName').val(data.coName);
@@ -541,7 +543,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Step Navigation Script -->
-    <script>
+    <script th:inline="javascript">
         $(document).ready(function () {
             function showStep(stepNumber) {
                 // 모든 step-content 숨김
@@ -1107,22 +1109,25 @@
                 // customerId, cardNumber, expiryYear, expiryMonth, birthOrBusinessRegistrationNumber, passwordTwoDigits 등 정보를 전달받습니다.
 
                 // 포트원 빌링키 발급 API 호출
+            
+                const userName = /*[[${session.userName}]]*/ "";
+                const packageName = /*[[${subscriptionPackage.spkName}]]*/ "";
+                console.log(packageName);
                 IMP.init('imp73166581');
                 IMP.request_pay({
                     pg: "kakaopay",
                     pay_method: "card",
                     merchant_uid: Date.now(),
                     customer_uid: "user_" + Date.now(),
-                    name: "정기 구독",
+                    name: packageName,
                     amount: spkPrice * $('.form-check-input[name=period]:checked').val(),
-                    buyer_email: "wer@sdfsf.com",
-                    buyer_name: "복성민",
-                    buyer_tel: "123123123",
-                    buyer_addr: "대구광역시 중구",
-                    buyer_postcode: "12345"
+                    buyer_email: $('#pschEmail').val(),
+                    buyer_name: userName,
+                    buyer_tel: $('#pschTel').val(),
+                    buyer_addr: $('#coAddr').val() + $('#coAddrDetail'),
+                    buyer_postcode: $('#coZip').val()
                 }, async function (res) {
                     let contractName= `contract_${Date.now()}`
-                    console.log(res);
                     if (res.success) {
                         addContract(contractName);
                         addSubscription(res.customer_uid, res.pg_provider, contractName);
@@ -1146,9 +1151,9 @@
                     contentType: "application/json",
                     success: function(res) {
                         if(res.head.res_code === "200") {
-
+                            // Swal.fire();
                         } else {
-
+                            // Swal.fire();
                         }
                     },
                     error: function(xhr, status, err) {
@@ -1162,37 +1167,49 @@
                     return this.value;
                 }).get();
 
-                const subscriptionData = {
-                    spkIdx,
-                    coIdx: 'co-101',
-                    empIdx: 'emp-101',
-                    spiPay: pg_provider,
-                    spiPeriod: $('.form-check-input[name=period]:checked').val(),
-                    spiCtrt: contractName,
-                    spiUid: customer_uid,
-                    checkedModules,
+                const subMasterData = {
+                    subscriptionDTO: {
+                        spkIdx,
+                        coIdx: coIdx,
+                        empIdx: 'emp-101',
+                        spiPay: pg_provider,
+                        spiPeriod: $('.form-check-input[name=period]:checked').val(),
+                        spiCtrt: contractName,
+                        spiUid: customer_uid,
+                        checkedModules,
+                    }, masterDTO: {
+                        coIdx: coIdx,
+                        mstId: $('#mstId').val(),
+                        mstName: $('#mstName').val(),
+                        mstPw: $('#mstPw').val(),
+                        coTel: $('#coTel').val(),
+                        mstTel: $('#mstTel').val(),
+                        mstEmail: $('#mstEmail').val(),
+                    }
                 }
+
                 $.ajax({
                     type: "POST",
                     url: "/erp/subscription",
-                    data: JSON.stringify(subscriptionData),
+                    data: JSON.stringify(subMasterData),
                     contentType: "application/json",
                     success: function(res) {
                         if(res.head.res_code === "200") {
-
+                            Swal.fire("성공", "구독이 성공적으로 이루어졌습니다.", "success");
                         } else {
-
+                            Swal.fire("실패", res.body, "error");
                         }
                     },
                     error: function(xhr, status, err) {
                         console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
                     }
                 });
             }
         });
 
-        const spkPrice = "[[${subscriptionPackage.spkPrice}]]"
-        const spkIdx = "[[${subscriptionPackage.spkIdx}]]"
+        const spkPrice = /*[[${subscriptionPackage.spkPrice}]]*/ ""
+        const spkIdx = /*[[${subscriptionPackage.spkIdx}]]*/ ""
         // 결제
         function Checkout() {
             let item = null;

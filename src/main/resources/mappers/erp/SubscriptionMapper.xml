@@ -48,8 +48,8 @@
         <selectKey resultType="String" keyProperty="spiIdx" order="BEFORE">
             SELECT 'spi-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(spi_idx, 5))), 100) + 1) FROM subscription
         </selectKey>
-        INSERT INTO subscription(spi_idx, spk_idx, co_idx, emp_idx, spi_pay, spi_status, spi_start, spi_end, spi_period, spi_ctrt)
-        VALUES(#{spiIdx}, #{spkIdx}, #{coIdx}, #{empIdx}, #{spiPay}, #{spiStatus}, SYSDATE, ADD_MONTHS(SYSDATE, #{spiPeriod}) , #{spiPeriod}, #{spiCtrt})
+        INSERT INTO subscription(spi_idx, spk_idx, co_idx, emp_idx, spi_pay, spi_status, spi_start, spi_end, spi_period, spi_ctrt, spi_uid)
+        VALUES(#{spiIdx}, #{spkIdx}, #{coIdx}, #{empIdx}, #{spiPay}, #{spiStatus}, SYSDATE, ADD_MONTHS(SYSDATE, #{spiPeriod}) , #{spiPeriod}, #{spiCtrt}, #{spiUid})
     </insert>
 
     <!-- 
