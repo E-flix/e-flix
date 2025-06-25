@@ -27,4 +27,6 @@ public class EntryDetailDTO {
   private String description;
   private Date createdAt;
   private Date updatedAt;
+
+  private String accountName;
 }

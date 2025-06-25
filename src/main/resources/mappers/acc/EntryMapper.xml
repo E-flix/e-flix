@@ -7,14 +7,15 @@
   [ 변경 이력 ]
   - 2025-06-20 (김희정): xml 파일 생성
   - 2025-06-22 (김희정): EntryDetailDTO매핑, EntryMasterDTO매핑, 전체조회 쿼리 작성
+  - 2025-06-24 (김희정): insert, update, delete 쿼리 작성
 =============================================== -->
 <mapper namespace="com.eflix.acc.mapper.EntryMapper">
   <!-- property == DTO의 필드명, column == 쿼리 결과의 컬럼명 (alias 포함) -->
   <!-- EntryDetailDTO 매핑 정의 -->
   <resultMap id="entryDetailResultMap" type="com.eflix.acc.dto.EntryDetailDTO">
     <id property="lineNumber" column="line_number" />
-    <result property="entryNumber" column="entry_number" />
-    <result property="partnerCode" column="partner_code" />
+    <result property="entryNumber" column="d_entry_number" />
+    <result property="partnerCode" column="d_partner_code" />
     <result property="partnerName" column="partner_name" />
     <result property="accountCode" column="account_code" />
     <result property="resentmenType" column="resentmen_type" />
@@ -22,6 +23,8 @@
     <result property="description" column="description" />
     <result property="createdAt" column="created_at" />
     <result property="updatedAt" column="updated_at" />
+    
+    <result property="accountName" column="account_name"/>
   </resultMap>
 
   <!-- EntryMasterDTO + details 매핑 정의 -->
@@ -45,8 +48,7 @@
     <result property="remarks" column="remarks" />
     <!-- 디테일 부분 컬렉션 매핑 => 하위 컬렉션 매핑 (1:N 관계) 
      ofType == collection에서 리스트 안에 들어가는 객체의 타입을 알려주는 속성 -->
-    <collection property="details" ofType="com.eflix.acc.dto.EntryDetailDTO"
-      resultMap="entryDetailResultMap" />
+    <collection property="details" ofType="com.eflix.acc.dto.EntryDetailDTO" resultMap="entryDetailResultMap" />
   </resultMap>
 
   <!-- 전표 전체 조회 => 마스터 + 디테일 전체 조회 -->
@@ -78,9 +80,151 @@
       d.amount, 
       d.description, 
       d.created_at AS d_created_at, 
-      d.updated_at AS d_updated_at 
-    FROM entry_master m LEFT JOIN entry_detail d 
-    ON m.entry_number = d.entry_number 
+      d.updated_at AS d_updated_at,
+      a.account_name
+    FROM entry_master m LEFT JOIN entry_detail d ON m.entry_number = d.entry_number 
+    LEFT JOIN account a ON d.account_code = a.account_code
     ORDER BY m.entry_number
+  </select>
+
+  <!-- EntryMasterDTO Insert -->
+  <insert id="insertEntryMaster" parameterType="com.eflix.acc.dto.EntryMasterDTO">
+    INSERT INTO entry_master (
+      entry_number,
+      entry_type, 
+      entry_date, 
+      entry_status, 
+      creator, 
+      created_at, 
+      updated_at, 
+      transaction_type,
+      partner_code, 
+      electronic_type, 
+      approval_number, 
+      item_name, 
+      quantity, 
+      unit_price, 
+      total_supply_amount,
+      total_tax_amount, 
+      remarks)
+    VALUES
+    (
+      #{entryNumber},
+      #{entryType}, 
+      #{entryDate}, 
+      #{entryStatus}, 
+      #{creator}, 
+      #{createdAt}, 
+      #{updatedAt}, 
+      #{transactionType},
+      #{partnerCode}, 
+      #{electronicType}, 
+      #{approvalNumber}, 
+      #{itemName}, 
+      #{quantity}, 
+      #{unitPrice},
+      #{totalSupplyAmount},
+      #{totalTaxAmount}, 
+      #{remarks})
+  </insert>
+
+  <!-- EntryDetailDTO Insert -->
+  <insert id="insertEntryDetail" parameterType="com.eflix.acc.dto.EntryDetailDTO">
+    INSERT INTO entry_detail (
+      line_number, 
+      entry_number, 
+      partner_code, 
+      partner_name, 
+      account_code, 
+      resentmen_type,
+      amount, 
+      description, 
+      created_at, 
+      updated_at)
+    VALUES ( 
+      #{lineNumber}, 
+      #{entryNumber}, 
+      #{partnerCode}, 
+      #{partnerName}, 
+      #{accountCode}, 
+      #{resentmenType}, 
+      #{amount}, 
+      #{description}, 
+      #{createdAt}, 
+      #{updatedAt})
+  </insert>
+
+  <!-- EntryMaster Update -->
+  <update id="updateEntryMaster" parameterType="com.eflix.acc.dto.EntryMasterDTO">
+    UPDATE entry_master
+    SET entry_type = #{entryType},
+        entry_date = #{entryDate},
+        entry_status = #{entryStatus},
+        creator = #{creator},
+        created_at = #{createdAt},
+        updated_at = #{updatedAt},
+        transaction_type = #{transactionType},
+        partner_code = #{partnerCode},
+        electronic_type = #{electronicType},
+        approval_number = #{approvalNumber},
+        item_name = #{itemName},
+        quantity = #{quantity},
+        unit_price = #{unitPrice},
+        total_supply_amount = #{totalSupplyAmount},
+        total_tax_amount = #{totalTaxAmount},
+        remarks = #{remarks}
+    WHERE entry_number = #{entryNumber}
+  </update>
+
+  <!-- EntryDetail Update -->
+  <update id="updateEntryDetail" parameterType="com.eflix.acc.dto.EntryDetailDTO">
+    UPDATE entry_detail
+    SET partner_code = #{partnerCode},
+        partner_name = #{partnerName},
+        account_code = #{accountCode},
+        resentmen_type = #{resentmenType},
+        amount = #{amount},
+        description = #{description},
+        created_at = #{createdAt},
+        updated_at = #{updatedAt}
+    WHERE entry_number = #{entryNumber} AND line_number = #{lineNumber}
+  </update>
+
+  <!-- EntryDetail Delete by EntryNumber -->
+  <delete id="deleteEntryDetailsByEntryNumber" parameterType="int">
+    DELETE FROM entry_detail 
+    WHERE entry_number = #{entryNumber}
+  </delete>
+
+  <!-- EntryDetail Delete by LineNumber -->
+  <delete id="deleteEntryDetailsByLineNumber" parameterType="com.eflix.acc.dto.EntryDetailDTO">
+    DELETE FROM entry_detail 
+    WHERE entry_number = #{entryNumber}
+    AND line_number = #{lineNumber}
+  </delete>
+
+  <!-- EntryMaster Delete -->
+  <delete id="deleteEntryMasterByEntryNumber" parameterType="int">
+    DELETE FROM entry_master 
+    WHERE entry_number = #{entryNumber}
+  </delete>
+
+  <!-- EntryDetail 갯수 => master 삭제할때 Detail < count 1이면 삭제해야 함-->
+  <select id="selectCountDetailByEntryNumber" parameterType="int">
+    SELECT COUNT(*) 
+    FROM entry_detail
+    WHERE entry_number = #{entryNumber}
+  </select>
+
+  <!-- select max+1 entry_number -->
+  <select id="selectMaxPlusOneEntryNumber" resultType="int">
+    SELECT COALESCE(MAX(entry_number)+1, 1) AS enNo FROM entry_master
+  </select>
+
+  <!-- select max+1 line_number -->
+  <select id="selectMaxPlusOneLineNumber" resultType="int" parameterType="int">
+    SELECT COALESCE(MAX(line_number)+1, 1) AS lineNo 
+    FROM entry_detail
+    WHERE entry_number = #{entry_number}
   </select>
 </mapper>
