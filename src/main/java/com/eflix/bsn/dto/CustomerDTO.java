@@ -1,10 +1,14 @@
 package com.eflix.bsn.dto;
 
+import java.math.BigDecimal;
+
 public class CustomerDTO {
     private String customerCd;
     private String customerNm;
     private String salesEmpCd;
     private String phoneNo;
+    private BigDecimal discountRate;
+
     // (필요하다면 대표자, 주소 등 다른 필드도 추가)
 
     // 기본 생성자
@@ -22,4 +26,12 @@ public class CustomerDTO {
 
     public String getPhoneNo() { return phoneNo; }
     public void setPhoneNo(String phoneNo) { this.phoneNo = phoneNo; }
+
+    public BigDecimal getDiscountRate() {
+        return discountRate;
+    }
+
+    public void setDiscountRate(BigDecimal discountRate) {
+        this.discountRate = discountRate;
+    }
 }

@@ -1,320 +1,102 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{common/layouts/default}">
-
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>견적서 입력</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
-    /* ───── 전체 레이아웃 ───── */
-    .quotation-container {
-      font-family: 'Noto Sans KR', sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
-    .quotation-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f5f5f5;
-      border: 1px solid #ccc;
-      border-bottom: none;
-      padding: 8px 12px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .quotation-header .option-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .button-group {
-      display: flex;
-      justify-content: flex-end;
-      margin: 8px 12px 0;
-    }
-
-    .button-group .btn {
-      margin-left: 6px;
-      padding: 4px 10px;
-      font-size: 13px;
-      border: 1px solid #888;
-      border-radius: 3px;
-      background: #e0e0e0;
-      cursor: pointer;
-    }
-
-    .button-group .btn.save {
-      background: #4a90e2;
-      color: #fff;
-      border-color: #4a90e2;
-    }
-
-    /* 행 추가/삭제 버튼 그룹 */
-    .detail-btn-group {
-      display: flex;
-      margin: 8px 12px;
-    }
-
-    .detail-btn-group .btn {
-      margin-right: 6px;
-      padding: 4px 10px;
-      font-size: 13px;
-      border: 1px solid #888;
-      border-radius: 3px;
-      background: #7f8c8d;
-      color: #fff;
-      cursor: pointer;
-    }
-
-    .detail-btn-group .btn.delete-row {
-      background: #e74c3c;
-      border-color: #e74c3c;
-    }
-
-    /* ───── 탭 ───── */
-    .quotation-tabs {
-      display: flex;
-      border-bottom: 1px solid #ccc;
-      margin-bottom: 8px;
-      padding-left: 0;
-      list-style: none;
-    }
-
-    .quotation-tabs li {
-      padding: 6px 14px;
-      border: 1px solid #ccc;
-      border-bottom: none;
-      background: #f5f5f5;
-      margin-right: 2px;
-      cursor: pointer;
-    }
-
-    .quotation-tabs li.active {
-      background: #fff;
-      font-weight: bold;
-    }
-
-    /* ───── 폼 영역 ───── */
-    .form-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 10px;
-    }
-
-    .form-table th,
-    .form-table td {
-      border: 1px solid #ccc;
-      padding: 6px 8px;
-      vertical-align: middle;
-      font-size: 14px;
-    }
-
-    .form-table th {
-      background: #f0f0f0;
-      width: 120px;
-      text-align: left;
-    }
-
-    .form-table td input,
-    .form-table td select {
-      width: 100%;
-      height: 28px;
-      padding: 2px 4px;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
-
-    /* ───── 데이터 그리드 ───── */
-    .detail-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .detail-table th,
-    .detail-table td {
-      border: 1px solid #ccc;
-      text-align: center;
-      font-size: 13px;
-      padding: 4px;
-    }
-
-    .detail-table th {
-      background: #f0f0f0;
-    }
-
-    .detail-table td input {
-      width: 100%;
-      height: 24px;
-      padding: 2px 4px;
-      box-sizing: border-box;
-      font-size: 13px;
-    }
-
-    .detail-table thead th:first-child,
-    .detail-table tbody td:first-child {
-      width: 30px;
-    }
-
-    .detail-table thead th:nth-child(2),
-    .detail-table tbody td:nth-child(2) {
-      width: 24px;
-    }
-
-    .detail-table tfoot tr {
-      background: #fafafa;
-      font-weight: bold;
-    }
-
-    .detail-table tfoot td {
-      padding: 6px 4px;
-    }
-
-    /* ───── 모달 ───── */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: #fff;
-      padding: 20px;
-      border-radius: 4px;
-      width: 600px;
-      max-height: 80%;
-      overflow-y: auto;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-header h5 {
-      margin: 0;
-    }
-
-    .modal-close {
-      cursor: pointer;
-      font-size: 20px;
-    }
-
-    .modal-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    .modal-table th,
-    .modal-table td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: left;
-    }
-
-    .modal-table th {
-      background: #f0f0f0;
-    }
+    .bg-cell { background-color: #f5f5f5; }
+    .detail-table thead th { background-color: #f5f5f5; }
+    .detail-table input { height: 28px; }
   </style>
 </head>
-
-<div layout:fragment="content" class="quotation-container">
-  <!-- 상단 헤더 -->
-  <div class="quotation-header">
-    <div>☆ 견적서 입력</div>
-    <button class="option-btn">⚙ Option</button>
+<div layout:fragment="content" class="container-fluid px-3 py-2">
+  <!-- 헤더 -->
+  <div class="d-flex justify-content-between align-items-center border p-2 rounded bg-light mb-2">
+    <h6 class="mb-0">견적서 입력</h6>
   </div>
-  <!-- 등록/초기화/목록 버튼 (오른쪽 정렬) -->
-  <div class="button-group">
-    <button class="btn save">등록</button>
-    <button class="btn reset">초기화</button>
-    </a><button class="btn list">목록</button>
+  <!-- 버튼 그룹 -->
+  <div class="text-end mb-2">
+    <button class="btn btn-primary btn-sm me-1">등록</button>
+    <button class="btn btn-light btn-sm border btn-reset me-1">초기화</button>
+    <button type="button"  class="btn btn-light btn-sm border btn-list">목록</button>
   </div>
-
   <!-- 탭 -->
-  <ul class="quotation-tabs">
-    <li class="active">내역</li>
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link active" href="#">내역</a></li>
   </ul>
-
-  <!-- 입력 폼 -->
-  <table class="form-table">
-    <tr>
-      <th>견적서 번호</th>
-      <td><input type="text" id="quotationNo" th:value="${nextQuotationNo}" readonly/>
-      <th>일자</th>
-      <td><input type="date" id="quotationDate" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
-    </tr>
-    <tr>
-      <th>거래처</th>
-      <td>
-        <input type="text" id="customer" placeholder="거래처 코드/이름" readonly>
-      </td>
-      <th>담당자</th>
-      <td><input type="text" id="salesRep" readonly></td>
-    </tr>
-    <tr>
-      <th>거래유형</th>
-      <td>
-        <select id="tradeType">
-          <option value="vat">부가세율 적용</option>
-          <option value="no-vat">부가세율 미적용</option>
-        </select>
-      </td>
-      <th>전화번호</th>
-      <td><input type="text" id="phone" readonly></td>
-    </tr>
-    <tr>
-      <th>유효기간</th>
-      <td><input type="date" id="validUntil"></td>
-      <th>납기일</th>
-      <td><input type="date" id="deliveryDate"></td>
-    </tr>
-    <tr>
-      <th>첨부</th>
-      <td colspan="3">
-        <a href="#" id="attachmentLink">개인파일함</a>
-        <input type="file" id="attachmentInput" multiple style="display:none">
-        <div id="attachmentList" style="margin-top:4px;font-size:13px;color:#333"></div>
-      </td>
-    </tr>
-  </table>
-
-  <!-- 행 추가/삭제 버튼 (품목 입력란 위) -->
-  <div class="detail-btn-group">
-    <button class="btn add-row">행 추가</button>
-    <button class="btn delete-row">행 삭제</button>
+  <!-- 입력 테이블 -->
+  <div class="table-responsive mb-3">
+    <table class="table table-bordered align-middle">
+      <colgroup>
+        <col style="width:15%;">
+        <col style="width:35%;">
+        <col style="width:15%;">
+        <col style="width:35%;">
+      </colgroup>
+      <tbody>
+        <tr>
+          <th class="bg-cell" style="width:140px;">견적서 번호</th>
+          <td><input type="text" class="form-control form-control-sm" th:value="${nextQuotationNo}" readonly></td>
+          <th class="bg-cell" style="width:140px;">일자</th>
+          <td style="width:280px;"><input type="date" class="form-control form-control-sm" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"></td>
+        </tr>
+        <tr>
+          <th class="bg-cell">거래처</th>
+          <td><input id="customer" type="text" class="form-control form-control-sm" placeholder="거래처 코드/이름" readonly></td>
+          <th class="bg-cell">담당자</th>
+          <td><input id="salesRep" type="text" class="form-control form-control-sm" readonly></td>
+        </tr>
+        <tr>
+          <th class="bg-cell">거래유형</th>
+          <td>
+            <select id="tradeType" class="form-select form-select-sm">
+              <option value="vat">부가세율 적용</option>
+              <option value="no-vat">부가세율 미적용</option>
+            </select>
+          </td>
+          <th class="bg-cell">전화번호</th>
+          <td><input id="phone" type="text" class="form-control form-control-sm" readonly></td>
+        </tr>
+        <tr>
+          <th class="bg-cell">할인율(%)</th>
+          <td><input id="discountRate" type="number" step="0.01" min="0" max="100" class="form-control form-control-sm" value="0.00"></td>
+          <th class="bg-cell">유효기간</th>
+          <td><input id="validUntil" type="date" class="form-control form-control-sm"></td>
+        </tr>
+        <tr>
+          <th class="bg-cell">납기예정일</th>
+          <td><input id="deliveryDate" type="date" class="form-control form-control-sm"></td>
+          <th class="bg-cell">첨부</th>
+          <td colspan="3">
+            <a href="#" id="attachmentLink">개인파일함</a>
+            <input type="file" id="attachmentInput" multiple class="d-none">
+            <div id="attachmentList" class="small text-body mt-1"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-
-  <!-- 상세 그리드 (초기 3개 행) -->
+  <!-- 행추가/삭제 버튼 -->
+  <div class="mb-3">
+    <button class="btn btn-secondary btn-sm add-row me-1">행 추가</button>
+    <button class="btn btn-danger btn-sm delete-row">행 삭제</button>
+  </div>
+  <!-- 상세 테이블 -->
   <div class="table-responsive">
-    <table class="detail-table">
+    <table class="table table-bordered text-center detail-table" style="min-width:1200px;">
       <thead>
         <tr>
-          <th><input type="checkbox"></th>
-          <th>▶</th>
+          <th style="width:35px;"><input type="checkbox"></th>
+          <th style="width:35px;">▶</th>
           <th>품목코드</th>
           <th>품목명</th>
           <th>규격</th>
-          <th>수량</th>
-          <th>단가</th>
-          <th>공급가액</th>
-          <th>부가세</th>
+          <th style="width:70px;">수량</th>
+          <th style="width:90px;">단가</th>
+          <th style="width:110px;">공급가액</th>
+          <th style="width:90px;">부가세</th>
           <th>비고</th>
         </tr>
       </thead>
@@ -322,43 +104,19 @@
         <tr>
           <td><input type="checkbox"></td>
           <td>▶</td>
-          <td><input class="item-code" readonly></td>
-          <td><input class="item-name" readonly></td>
-          <td><input class="item-spec" readonly></td>
-          <td><input type="number" class="item-qty" min="1" value="1"></td>
-          <td><input class="item-price" readonly></td>
-          <td><input class="item-amount" readonly></td>
-          <td><input class="item-tax" readonly></td>
-          <td><input class="item-remark"></td>
-        </tr>
-        <tr>
-          <td><input type="checkbox"></td>
-          <td>▶</td>
-          <td><input class="item-code" readonly></td>
-          <td><input class="item-name" readonly></td>
-          <td><input class="item-spec" readonly></td>
-          <td><input type="number" class="item-qty" min="1" value="1"></td>
-          <td><input class="item-price" readonly></td>
-          <td><input class="item-amount" readonly></td>
-          <td><input class="item-tax" readonly></td>
-          <td><input class="item-remark"></td>
-        </tr>
-        <tr>
-          <td><input type="checkbox"></td>
-          <td>▶</td>
-          <td><input class="item-code" readonly></td>
-          <td><input class="item-name" readonly></td>
-          <td><input class="item-spec" readonly></td>
-          <td><input type="number" class="item-qty" min="1" value="1"></td>
-          <td><input class="item-price" readonly></td>
-          <td><input class="item-amount" readonly></td>
-          <td><input class="item-tax" readonly></td>
-          <td><input class="item-remark"></td>
+          <td><input class="form-control form-control-sm item-code" readonly></td>
+          <td><input class="form-control form-control-sm item-name" readonly></td>
+          <td><input class="form-control form-control-sm item-spec" readonly></td>
+          <td><input type="number" class="form-control form-control-sm item-qty" min="1" value="1"></td>
+          <td><input class="form-control form-control-sm item-price" readonly></td>
+          <td><input class="form-control form-control-sm item-amount" readonly></td>
+          <td><input class="form-control form-control-sm item-tax" readonly></td>
+          <td><input class="form-control form-control-sm item-remark"></td>
         </tr>
       </tbody>
-      <tfoot>
+      <tfoot class="table-light fw-bold">
         <tr>
-          <td colspan="5">합계</td>
+          <td colspan="5" class="text-end">합계</td>
           <td class="tot-qty">0</td>
           <td></td>
           <td class="tot-amount">0</td>
@@ -369,88 +127,91 @@
     </table>
   </div>
 
-  <!-- 품목 선택 모달 -->
-  <div id="itemModal" class="modal">
+
+<!-- 품목 모달 -->
+<div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5>품목 목록</h5><span class="modal-close">&times;</span>
+        <h5 class="modal-title">품목 목록</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <table class="modal-table">
-        <thead>
-          <tr>
-            <th>선택</th>
-            <th>코드</th>
-            <th>이름</th>
-            <th>규격</th>
-            <th>단위</th>
-            <th>단가</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="modal-body p-0">
+        <table class="table table-bordered m-0 modal-table">
+          <thead class="table-light">
+            <tr><th>선택</th><th>코드</th><th>이름</th><th>규격</th><th>단위</th><th>단가</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- 거래처 조회 모달 -->
-  <div id="customerModal" class="modal">
+<!-- 거래처 모달 -->
+<div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5>거래처 조회</h5>
-        <span class="modal-close">&times;</span>
+        <h5 class="modal-title">거래처 조회</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <input type="text" id="customerSearch" placeholder="거래처명 검색" style="width:60%;margin-top:8px;padding:4px">
-      <button id="btnCustomerSearch" style="margin-left:4px;padding:4px 8px">검색</button>
-      <table class="modal-table" style="margin-top:10px">
-        <thead>
-          <tr>
-            <th>선택</th><th>코드</th><th>이름</th><th>담당자</th><th>전화번호</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="modal-body">
+        <div class="input-group mb-2">
+          <input id="customerSearch" type="text" class="form-control" placeholder="거래처명 검색">
+          <button id="btnCustomerSearch" class="btn btn-outline-secondary">검색</button>
+        </div>
+        <table class="table table-bordered modal-table mb-0">
+          <thead class="table-light">
+            <tr><th>선택</th><th>코드</th><th>이름</th><th>담당자</th><th>전화번호</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </div>
+</div>
 
-
-  <script th:inline="javascript">
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
   document.addEventListener('DOMContentLoaded', () => {
-    console.log('Quotation script loaded');
+    // 개인파일함 기능
+  const attachLink = document.getElementById('attachmentLink');
+  const attachInput = document.getElementById('attachmentInput');
+  const attachList = document.getElementById('attachmentList');
+  if (attachLink && attachInput && attachList) {
+    attachLink.addEventListener('click', e => {
+      e.preventDefault();
+      attachInput.click();
+    });
+    attachInput.addEventListener('change', () => {
+      attachList.innerHTML = '';
+      Array.from(attachInput.files).forEach(file => {
+        const div = document.createElement('div');
+        div.textContent = file.name;
+        attachList.appendChild(div);
+      });
+    });
+  }
 
+    // 모달 인스턴스 생성
+    const itemModalEl = document.getElementById('itemModal');
+    const itemModal = new bootstrap.Modal(itemModalEl);
+    const customerModalEl = document.getElementById('customerModal');
+    const customerModal = new bootstrap.Modal(customerModalEl);
 
-    // 요소 참조
-    const custInput     = document.getElementById('customer');
-    const custModal     = document.getElementById('customerModal');
-    const custClose     = custModal?.querySelector('.modal-close');
-    const custTbody     = custModal?.querySelector('tbody');
-    const custNameIn    = document.getElementById('customerSearch');
+    // 거래처 모달
+    const custInput = document.getElementById('customer');
+    const custTbody = document.querySelector('#customerModal tbody');
     const btnCustSearch = document.getElementById('btnCustomerSearch');
 
-    // 필요한 요소가 전부 있나 체크
-    if (!custInput || !custModal || !custClose || !custTbody || !btnCustSearch) {
-      console.error('거래처 모달 초기화 실패: 요소를 찾을 수 없습니다.', {
-        custInput, custModal, custClose, custTbody, btnCustSearch
-      });
-      return;  // 스크립트 더 이상 실행하지 않음
-    }
-
-    // 1) 거래처 입력란 클릭 → 모달 오픈 & 즉시 전체 조회
     custInput.addEventListener('click', () => {
-      custModal.classList.add('active');
-      loadCustomers();  
+      loadCustomers();
+      customerModal.show();
     });
+    btnCustSearch.addEventListener('click', () => loadCustomers(document.getElementById('customerSearch').value.trim()));
 
-    // 2) 모달 닫기
-    custClose.addEventListener('click', () => custModal.classList.remove('active'));
-    custModal.addEventListener('click', e => {
-      if (e.target === custModal) custModal.classList.remove('active');
-    });
-
-    // 3) 검색 버튼(선택사항)
-    btnCustSearch.addEventListener('click', () => {
-      loadCustomers(custNameIn.value.trim());
-    });
-
-    // 4) 거래처 데이터 로드
     function loadCustomers(name) {
       let url = '/bsn/customer/list';
       if (name) url += `?customerName=${encodeURIComponent(name)}`;
@@ -460,213 +221,133 @@
           custTbody.innerHTML = '';
           data.forEach(c => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td><input type="checkbox" class="select-cust"></td>
-              <td>${c.customerCd}</td>
-              <td>${c.customerNm}</td>
-              <td>${c.salesEmpCd}</td>
-              <td>${c.phoneNo}</td>
-            `;
+            tr.innerHTML = `<td><button class="btn btn-sm btn-outline-primary selCust">선택</button></td>
+                            <td>${c.customerCd}</td>
+                            <td>${c.customerNm}</td>
+                            <td>${c.salesEmpCd}</td>
+                            <td>${c.phoneNo}</td>`;
             custTbody.appendChild(tr);
           });
-          // 선택 이벤트 바인딩
-          custTbody.querySelectorAll('.select-cust').forEach(cb => {
-            cb.addEventListener('change', function() {
-              if (this.checked) {
-                const r = this.closest('tr');
-                selectCustomer({
-                  code:  r.children[1].textContent,
-                  name:  r.children[2].textContent,
-                  emp:   r.children[3].textContent,
-                  phone: r.children[4].textContent
-                });
-              }
-            });
-          });
-        })
-        .catch(err => console.error('거래처 로드 실패', err));
+          custTbody.querySelectorAll('.selCust').forEach(btn => btn.addEventListener('click', function() {
+            const r = this.closest('tr');
+            selectCustomer({ code: r.children[1].textContent, name: r.children[2].textContent, emp: r.children[3].textContent, phone: r.children[4].textContent });
+            customerModal.hide();
+          }));
+        });
     }
-
-    // 5) 거래처 선택 시 폼 채우기
     function selectCustomer(c) {
-      custInput.value                        = `${c.code} / ${c.name}`;
+      custInput.value = `${c.code} / ${c.name}`;
       document.getElementById('salesRep').value = c.emp;
-      document.getElementById('phone').value    = c.phone;
-      custModal.classList.remove('active');
+      document.getElementById('phone').value = c.phone;
     }
 
-
-  // 1) 일자 자동 설정
-  const dateInput = document.getElementById('quotationDate');
-  if (dateInput) dateInput.value = new Date().toISOString().slice(0,10);
-
-  // 2) 초기화
-  const resetBtn = document.querySelector('.btn.reset');
-  resetBtn?.addEventListener('click', () => {
-    document.querySelectorAll('.form-table input:not(#quotationDate), .form-table select')
-      .forEach(el => el.value = '');
-    if (dateInput) dateInput.value = new Date().toISOString().slice(0,10);
-
-    // 상세 그리드 초기화
-    const tbody = document.querySelector('.detail-table tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    rows.slice(3).forEach(r => r.remove());
-    tbody.querySelectorAll('tr').forEach(r => {
-      r.querySelectorAll('input').forEach(i => {
-        if (i.type==='checkbox') i.checked = false;
-        else if (i.classList.contains('item-qty')) i.value = 1;
-        else i.value = '';
-      });
+    // 품목 모달
+    const detailTbody = document.querySelector('.detail-table tbody');
+    let currentRow;
+    detailTbody.addEventListener('click', e => {
+      if (e.target.classList.contains('item-code')) {
+        currentRow = e.target.closest('tr');
+        loadItems();
+        itemModal.show();
+      }
     });
-    updateTotals();
-
-    // 첨부 초기화
-    const attachInput = document.getElementById('attachmentInput');
-    const attachList  = document.getElementById('attachmentList');
-    if (attachInput) attachInput.value = null;
-    if (attachList) attachList.textContent = '';
-  });
-
-  // 3) 목록 이동
-  const listBtn = document.querySelector('.btn.list');
-  listBtn?.addEventListener('click', () => {
-    window.location.href = '/bsn/quotation/list';
-  });
-
-  // 4) 개인파일함
-  const attachLink  = document.getElementById('attachmentLink');
-  const attachInput = document.getElementById('attachmentInput');
-  const attachList  = document.getElementById('attachmentList');
-  if (attachLink && attachInput && attachList) {
-    attachLink.addEventListener('click', e => {
-      e.preventDefault(); attachInput.click();
-    });
-    attachInput.addEventListener('change', () => {
-      attachList.textContent = '';
-      Array.from(attachInput.files).forEach(f => {
-        const d = document.createElement('div');
-        d.textContent = f.name;
-        attachList.appendChild(d);
-      });
-    });
-  }
-
-  // 5) 상세 그리드 기능
-  const detailTbody = document.querySelector('.detail-table tbody');
-  let currentRow;
-
-  // 행 추가
-  document.querySelector('.detail-btn-group .add-row')?.addEventListener('click', () => {
+    function loadItems() {
+      fetch('/bsn/item/list')
+        .then(res => res.json())
+        .then(data => {
+          const body = document.querySelector('#itemModal tbody');
+          body.innerHTML = '';
+          data.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.dataset.taxRate = item.taxRate;
+            tr.innerHTML = `<td><button class="btn btn-sm btn-outline-primary selItem">선택</button></td>
+                            <td>${item.itemCode}</td>
+                            <td>${item.itemName}</td>
+                            <td>${item.spec}</td>
+                            <td>${item.unit}</td>
+                            <td>${item.salePrice}</td>`;
+            body.appendChild(tr);
+          });
+          body.querySelectorAll('.selItem').forEach(btn => btn.addEventListener('click', function() {
+            const r = this.closest('tr');
+            selectItem({
+              itemCode: r.children[1].textContent,
+              itemName: r.children[2].textContent,
+              spec: r.children[3].textContent,
+              unit: r.children[4].textContent,
+              salePrice: +r.children[5].textContent,
+              taxRate: +r.dataset.taxRate
+            });
+            itemModal.hide();
+          }));
+        });
+    }
+    // 행 추가 버튼
+  document.querySelector('.add-row').addEventListener('click', () => {
     const tr = detailTbody.querySelector('tr').cloneNode(true);
     tr.querySelectorAll('input').forEach(i => {
-      if (i.type==='checkbox') i.checked = false;
+      if (i.type === 'checkbox') i.checked = false;
       else if (i.classList.contains('item-qty')) i.value = 1;
       else i.value = '';
     });
     detailTbody.appendChild(tr);
   });
 
-  // 행 삭제
-  document.querySelector('.detail-btn-group .delete-row')?.addEventListener('click', () => {
+  // 행 삭제 버튼
+  document.querySelector('.delete-row').addEventListener('click', () => {
     detailTbody.querySelectorAll('input[type="checkbox"]:checked')
       .forEach(cb => cb.closest('tr').remove());
     updateTotals();
   });
 
-  // 모달 호출
-  detailTbody?.addEventListener('click', e => {
-    if (e.target.classList.contains('item-code')) {
-      currentRow = e.target.closest('tr');
-      document.getElementById('itemModal').classList.add('active');
-      loadItems();
-    }
+  // 초기화 버튼
+  document.querySelector('.btn-reset').addEventListener('click', () => {
+    document.querySelectorAll('input:not([readonly]), select').forEach(el => el.value = (el.type==='number'? '': ''));
+    document.querySelectorAll('.item-qty').forEach(i => i.value = 1);
+    updateTotals();
+  });
+  // 목록 버튼
+  document.querySelector('.btn-list').addEventListener('click', () => {
+    window.location.href = '/bsn/qot_list';
   });
 
-  // // 모달 닫기
-  // document.querySelector('.modal-close')?.addEventListener('click', () =>
-  //   document.getElementById('itemModal').classList.remove('active'));
-  // document.getElementById('itemModal')?.addEventListener('click', e => {
-  //   if (e.target.id==='itemModal') e.target.classList.remove('active');
-  // });
 
-
-      // 모달 닫기
-      document.querySelector('.modal-close').addEventListener('click', () => document.getElementById('itemModal')
-        .classList.remove('active'));
-      document.getElementById('itemModal').addEventListener('click', e => {
-        if (e.target.id === 'itemModal') e.target.classList.remove('active');
-      });
-
-      function loadItems() {
-        fetch( /*[[ @{/bsn/item/list} ]]*/ '/bsn/item/list')
-          .then(res => res.json())
-          .then(data => {
-            const body = document.querySelector('.modal-table tbody');
-            body.innerHTML = '';
-            data.forEach(item => {
-              const tr = document.createElement('tr');
-              tr.dataset.taxRate = item.taxRate;
-              tr.innerHTML =
-                `<td><input type="checkbox" class="select-item"></td><td>${item.itemCode}</td><td>${item.itemName}</td><td>${item.spec}</td><td>${item.unit}</td><td>${item.salePrice}</td>`;
-              body.appendChild(tr);
-            });
-            body.querySelectorAll('.select-item').forEach(cb => cb.addEventListener('change', function () {
-              if (this.checked) {
-                const r = this.closest('tr');
-                selectItem({
-                  itemCode: r.children[1].textContent,
-                  itemName: r.children[2].textContent,
-                  spec: r.children[3].textContent,
-                  unit: r.children[4].textContent,
-                  salePrice: +r.children[5].textContent,
-                  taxRate: +r.dataset.taxRate
-                });
-              }
-            }));
-          });
-      }
-
-
-      function selectItem(item) {
-        currentRow.querySelector('.item-code').value = item.itemCode;
-        currentRow.querySelector('.item-name').value = item.itemName;
-        currentRow.querySelector('.item-spec').value = item.spec;
-        currentRow.querySelector('.item-price').value = item.salePrice;
-        const qty = +currentRow.querySelector('.item-qty').value || 1;
-        const amt = qty * item.salePrice;
-        const tax = Math.round(amt * (item.taxRate / 100));
-        currentRow.querySelector('.item-amount').value = amt;
-        currentRow.querySelector('.item-tax').value = tax;
-        updateTotals();
-        document.getElementById('itemModal').classList.remove('active');
-      }
-
-      function updateTotals() {
-        let totQty = 0,
-          totAmt = 0,
-          totTax = 0;
-        document.querySelectorAll('.detail-table tbody tr').forEach(r => {
-          totQty += +r.querySelector('.item-qty').value || 0;
-          totAmt += +r.querySelector('.item-amount').value || 0;
-          totTax += +r.querySelector('.item-tax').value || 0;
-        });
-        document.querySelector('.tot-qty').textContent = totQty;
-        document.querySelector('.tot-amount').textContent = totAmt.toLocaleString();
-        document.querySelector('.tot-tax').textContent = totTax.toLocaleString();
-      }
-
-      detailTbody?.addEventListener('input', e => {
-    if (e.target.classList.contains('item-qty')) {
-      const row = e.target.closest('tr');
-      const price = +row.querySelector('.item-price').value || 0;
-      const qty   = +e.target.value || 0;
-      const amt   = price * qty;
-      const tax   = Math.round(amt * (+row.dataset.taxRate/100));
-      row.querySelector('.item-amount').value = amt;
-      row.querySelector('.item-tax').value    = tax;
+    function selectItem(item) {
+      currentRow.querySelector('.item-code').value = item.itemCode;
+      currentRow.querySelector('.item-name').value = item.itemName;
+      currentRow.querySelector('.item-spec').value = item.spec;
+      currentRow.querySelector('.item-price').value = item.salePrice;
+      const qty = +currentRow.querySelector('.item-qty').value || 1;
+      const amt = qty * item.salePrice;
+      const tax = Math.round(amt * (item.taxRate / 100));
+      currentRow.querySelector('.item-amount').value = amt;
+      currentRow.querySelector('.item-tax').value = tax;
       updateTotals();
     }
+    function updateTotals() {
+      let totQty = 0, totAmt = 0, totTax = 0;
+      document.querySelectorAll('.detail-table tbody tr').forEach(r => {
+        totQty += +r.querySelector('.item-qty').value || 0;
+        totAmt += +r.querySelector('.item-amount').value || 0;
+        totTax += +r.querySelector('.item-tax').value || 0;
       });
+      document.querySelector('.tot-qty').textContent = totQty;
+      document.querySelector('.tot-amount').textContent = totAmt.toLocaleString();
+      document.querySelector('.tot-tax').textContent = totTax.toLocaleString();
+    }
+    // 수량 변경 이벤트
+    detailTbody.addEventListener('input', e => {
+      if (e.target.classList.contains('item-qty')) {
+        const row = e.target.closest('tr');
+        const price = +row.querySelector('.item-price').value || 0;
+        const qty = +e.target.value || 0;
+        const amt = price * qty;
+        const tax = Math.round(amt * (+row.dataset.taxRate / 100));
+        row.querySelector('.item-amount').value = amt;
+        row.querySelector('.item-tax').value = tax;
+        updateTotals();
+      }
     });
-  </script>
+  });
+</script>
 </div>

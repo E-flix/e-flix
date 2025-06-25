@@ -9,21 +9,45 @@
     <result property="customerNm" column="CUSTOMER_NM"/>
     <result property="salesEmpCd" column="SALES_EMP_CD"/>
     <result property="phoneNo"    column="PHONE_NO"/>
+    <result property="discountRate"  column="DISCOUNT_RATE"/>
   </resultMap>
 
   <!-- 전체 조회 -->
   <select id="selectAll" resultMap="CustomerResult">
-    SELECT CUSTOMER_CD, CUSTOMER_NM, SALES_EMP_CD, PHONE_NO
+    SELECT
+      CUSTOMER_CD,
+      CUSTOMER_NM,
+      SALES_EMP_CD,
+      PHONE_NO,
+      DISCOUNT_RATE
     FROM CUSTOMERS
     WHERE USE_YN = 'Y'
   </select>
 
   <!-- 이름 검색 -->
   <select id="selectByName" parameterType="string" resultMap="CustomerResult">
-    SELECT CUSTOMER_CD, CUSTOMER_NM, SALES_EMP_CD, PHONE_NO
+    SELECT
+      CUSTOMER_CD,
+      CUSTOMER_NM,
+      SALES_EMP_CD,
+      PHONE_NO,
+      DISCOUNT_RATE
     FROM CUSTOMERS
     WHERE USE_YN = 'Y'
       AND CUSTOMER_NM LIKE '%' || #{name} || '%'
+  </select>
+
+  <!-- 거래처 코드로 단건 조회 (Optional) -->
+  <select id="selectByCode" parameterType="string" resultMap="CustomerResult">
+    SELECT
+      CUSTOMER_CD,
+      CUSTOMER_NM,
+      SALES_EMP_CD,
+      PHONE_NO,
+      DISCOUNT_RATE
+    FROM CUSTOMERS
+    WHERE USE_YN = 'Y'
+      AND CUSTOMER_CD = #{customerCd}
   </select>
 
 </mapper>

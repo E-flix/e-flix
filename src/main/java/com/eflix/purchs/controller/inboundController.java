@@ -87,4 +87,5 @@ public class InboundController {
     inboundService.inbound(inbound);
       return inbound;
   }
+ }
 }
