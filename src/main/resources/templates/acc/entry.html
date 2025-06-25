@@ -16,7 +16,7 @@
                        : 코드(거래처/계정과목) 입력하면 이름(거래처/계정과목) 불러오기 
                        : resentmenType 변경 감지해서 값 위치 변경
                        : 코드 field에서 F4를 누르면 모달창(계정과목 / 거래처) 띄워주고 데이터받아서 해당 셀의 value값 변경
-  - 2025-06-23 (김희정): DB 연결 (delete)  
+  - 2025-06-24 (김희정): DB 연결 (delete)  
                        : 행 추가시 신규 전표번호 조회               
   -----------------------------------------------
   [ TODO ] 
@@ -136,8 +136,6 @@
         });
       });
     });
-    // 원본 데이터를 복사해 둡니다 (필터링을 위해)
-  const originalRowData = [...rowData];
     // rowData 초기값 만들 때 맨 끝에 빈 행 추가
     rowData.push({
       month: null,
@@ -441,31 +439,31 @@
         }
         // ---------------- ▲ 계정과목코드 => 계정과목명 매핑 ▲ ---------------- 
       },
-onCellFocused: (event) => {
-  // 전역 gridApi가 null이면 종료
-  if (!gridApi) return;
+      onCellFocused: (event) => {
+        const focusedRowIndex = event.rowIndex;
 
-  const rowIndex = event.rowIndex;
-  if (rowIndex == null || rowIndex < 0) return;
+        // 포커스된 셀이 유효한 행인지 확인
+        if (focusedRowIndex == null || focusedRowIndex < 0) return;
 
-  const focusedNode = gridApi.getDisplayedRowAtIndex(rowIndex);
-  if (!focusedNode || !focusedNode.data) return;
+        // 현재 보여지고 있는 행 데이터 가져오기
+        const focusedRow = gridOptions.api.getDisplayedRowAtIndex(focusedRowIndex)?.data;
+        if (!focusedRow || !focusedRow.entryNumber) return;
 
-  const focusedEntryNumber = focusedNode.data.entryNumber;
-  if (!focusedEntryNumber || focusedEntryNumber.toString().includes("소계")) return;
+        const entryNumber = focusedRow.entryNumber;
 
-  const filteredRows = originalRowData.filter(r => r.entryNumber === focusedEntryNumber);
-  const summaryRow = generateSummaryRow(focusedEntryNumber);
-  const newRowData = [...filteredRows, summaryRow];
+        // 전체 row 데이터를 가져오기
+        const allRowData = [];
+        gridOptions.api.forEachNode(node => {
+          allRowData.push(node.data);
+        });
 
-  gridApi.setRowData(newRowData);
-},
-    getRowStyle: params => {
-      if (params.data?.isSummary) {
-        return { fontWeight: 'bold', backgroundColor: '#f0f0f0' };
+        // 소계/합계 계산
+        const summaryData = generateSummaryRow(allRowData, entryNumber);
+
+        // 만약 소계/합계를 하단에 표시
+        gridOptions.api.setGridOption('rowData', summaryData);
+        gridOptions.api.setPinnedBottomRowData(summaryRows);
       }
-      return null;
-    },
     };
     // 그리드 생성
     agGrid.createGrid(document.querySelector("#entryGrid"), gridOptions);
@@ -808,33 +806,61 @@ onCellFocused: (event) => {
       if (partnerModalInstance) partnerModalInstance.hide();
     }
     // ------------------------▲ 모달 ▲------------------------------
-
-
     //소계/차액 계산 함수
-function generateSummaryRow(entryNumber) {
-  const filteredRows = originalRowData.filter(r => r.entryNumber === entryNumber);
-  let debitSum = 0, creditSum = 0;
+    function generateSummaryRow(rowData, entryNumber) {
+      const result = [];
+      // partnerName열에 차액 표시
+      let subtotal = { partnerName: 0, debit: 0, credit: 0 }; // 전표 소계
+      let grandTotal = { partnerName: 0, debit: 0, credit: 0 }; // 합계
 
-  filteredRows.forEach(r => {
-    debitSum += Number(r.debit) || 0;
-    creditSum += Number(r.credit) || 0;
-  });
+      // 소계행 계산하는 forEach
+      rowData.forEach(data=> {
+        // 전표 소계 누적(entryNumber가 일치하면)
+        if (data.entryNumber === entryNumber) {
+          subtotal.debit += data.debit;
+          subtotal.credit += data.credit;
+          result.push(data); // 일치하는 데이터는 결과에 그대로 포함
+        }
+        // 합계 누적
+        grandTotal.debit += data.debit;
+        grandTotal.credit += data.credit;
+      });
+      // 차액(절댓값 차이) 계산
+      subtotal.partnerName = Math.abs(subtotal.debit - subtotal.credit);
+      grandTotal.partnerName = Math.abs(grandTotal.debit - grandTotal.credit);
 
-  return {
-    year: '', month: '', day: '',
-    entryNumber: entryNumber + ' 소계',
-    resentmenType: '',
-    accountCode: '',
-    accountName: '',
-    partnerCode: '',
-    partnerName: '',
-    debit: debitSum,
-    credit: creditSum,
-    description: '소계',
-    lineNumber: null,
-    isSummary: true
-  };
-}
+      // 소계 행 추가
+      result.push({
+        year: '', month: '', day: '',
+        entryNumber: '',
+        resentmenType: '',
+        accountCode: '',
+        accountName: `${entryNumber} 전표 소계`,
+        partnerCode: '차액',
+        partnerName: subtotal.partnerName,
+        debit: subtotal.debit,
+        credit: subtotal.credit,
+        description: null,
+        lineNumber: null,
+        isSummary: true
+      });
 
+      // 총합계 행 추가
+      result.push({
+        year: '', month: '', day: '',
+        entryNumber: '',
+        resentmenType: '',
+        accountCode: '',
+        accountName: '합계',
+        partnerCode: '차액',
+        partnerName: grandTotal.partnerName,
+        debit: grandTotal.debit,
+        credit: grandTotal.credit,
+        description: null,
+        lineNumber: null,
+        isSummary: true
+      });
+      return result
+    }
   </script>
 </div>
