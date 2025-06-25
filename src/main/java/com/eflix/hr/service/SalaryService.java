@@ -18,4 +18,6 @@ public interface SalaryService {
     int createSalary(SalaryDTO dto);
     int updateSalary(SalaryDTO dto);
     int deleteSalary(String salaryIdx);
+    
+    public List<SalaryDTO> bankList();
 }

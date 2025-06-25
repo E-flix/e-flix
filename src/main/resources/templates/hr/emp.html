@@ -68,35 +68,6 @@
               </select>
             </div>
           </div>
-          <script>
-            // $(document).ready(function () {
-            //   $('#deptSelect').on('change', function () {
-            //     var parentIdx = $(this).val();
-            //     var $child = $('#detailDeptSelect');
-            //     $child.html('<option value="">선택</option>'); // 초기화
-            //     if (!parentIdx) {
-            //       return; // 선택 해제 시 종료
-            //     }
-            //     // jQuery AJAX 호출
-            //     $.ajax({
-            //       type: 'GET',
-            //       url: `/hr/${parentIdx}/children`,
-            //       success: function (res) {
-            //         $.each(res, function (i, d) {
-            //           $('<option>')
-            //             .val(d.deptIdx)
-            //             .text(d.deptName)
-            //             .appendTo($child);
-            //         });
-            //       },
-            //       error: function (req, xhr, err) {
-            //         console.error(err)
-            //       }
-            //     });
-            //   });
-            // });
-          </script>
-
           <div class="row g-3 mb-3 align-items-center">
             <div class="col-md-2">
               <label class="form-label">직급</label>
@@ -205,16 +176,33 @@
                     <input type="date" id="hireDate" name="empRegdate" class="form-control">
                   </div>
                 </div>
+                </select>
 
                 <!-- 부서 / 직급 -->
                 <div class="row mb-3 align-items-center">
-                  <label for="deptIdx" class="col-md-2 col-form-label">부서</label>
-                  <div class="col-md-4">
-                    <select id="deptIdx" class="form-select">
-                      <option value="">선택</option>
-                      <!-- <option>…</option> -->
-                    </select>
+                  <div class="row mb-3 align-items-center gx-4">
+                    <label for="deptIdx" class="col-md-2 col-form-label">부서</label>
+                    <div class="col-md-4">
+                      <select id="insertDeptSelect" name="deptUpIdx" class="form-select">
+                        <option value="">선택</option>
+                        <option th:each="d : ${depts}" th:value="${d.deptIdx}" th:text="${d.deptName}"></option>
+                      </select>
+                    </div>
+
+                    <!-- <div class="col-md-2">
+              <select id="detailDeptSelect" name="deptIdx" class="form-select">
+                <option>선택</option>
+              </select>
+            </div> -->
+
+                    <label class="col-md-2 col-form-label">상세 부서</label>
+                    <div class="col-md-4">
+                      <select id="insertDetailDeptSelect" name="deptIdx" class="form-select">
+                        <option>선택</option>
+                      </select>
+                    </div>
                   </div>
+
                   <label for="empGrade" class="col-md-2 col-form-label">직급</label>
                   <div class="col-md-4">
                     <select name="empGrade" class="form-select">
@@ -233,31 +221,43 @@
                 <div class="row mb-3 align-items-center">
                   <label for="authority" class="col-md-2 col-form-label">권한</label>
                   <div class="col-md-4">
-                    <select id="authority" class="form-select">
+                    <select name="roleName" class="form-select">
                       <option value="">선택</option>
+                      <option th:each="r : ${roleList}" th:value="${r.roleId}" th:text="${r.roleName}"
+                        th:selected="${option=='roleName' and keyword==roleName}">
+                      </option>
                     </select>
                   </div>
                   <label for="empType" class="col-md-2 col-form-label">근무유형</label>
                   <div class="col-md-4">
                     <select id="empType" class="form-select">
                       <option value="">선택</option>
+                      <option th:each="w : ${workList}" th:value="${w.workTypeId}" th:text="${w.workTypeNm}"
+                        th:selected="${option=='empType' and keyword==w.workTypeId}">
+                      </option>
                     </select>
                   </div>
                 </div>
-
                 <!-- 급여계좌 -->
                 <div class="row mb-3 align-items-center">
-                  <label for="bankAccount" class="col-md-2 col-form-label">급여계좌</label>
-                  <div class="col-md-6">
-                    <select id="bankAccount" name="empAccount" class="form-select">
+                  <label for="bankListSelect" class="col-md-2 col-form-label">
+                    급여계좌
+                  </label>
+                  <div class="col-md-4">
+                    <select id="bankListSelect" name="bankListSelect" class="form-select">
                       <option value="">선택</option>
+                      <option th:each="bank : ${bankList}" th:value="${bank.commonCode}"
+                        th:text="${bank.commonCodeName}">
+                      </option>
                     </select>
                   </div>
+                  <label for="empAccount" class="col-md-2 col-form-label">
+                    계좌번호
+                  </label>
                   <div class="col-md-4">
-                    <input type="text" name="empAccount" class="form-control">
+                    <input type="text" id="empAccount" name="empAccount" class="form-control">
                   </div>
                 </div>
-
                 <!-- 주소 -->
                 <div class="row mb-3">
                   <label class="col-md-2 col-form-label">주소</label>
@@ -300,6 +300,7 @@
     <script th:inline="javascript">
       // Thymeleaf empList → JS
       var rowData = /*[[${empList}]]*/ [];
+      console.log(rowData);
 
       // 컬럼 정의
       const columnDefs = [{
@@ -411,7 +412,23 @@
               detail.append(opt);
             }));
         });
+        // 사원등록 부서 → 상세부서 AJAX
+        document.getElementById('insertDeptSelect').addEventListener('change', function () {
+          const detail = document.getElementById('insertDetailDeptSelect');
+          detail.innerHTML = '<option value="">선택</option>';
+          if (!this.value) return;
+          fetch(`/hr/${this.value}/children`)
+            .then(r => r.json())
+            .then(list => list.forEach(d => {
+              const opt = document.createElement('option');
+              opt.value = d.deptIdx;
+              opt.textContent = d.deptName;
+              detail.append(opt);
+            }));
+        });
       });
+
+
 
       $('#employeeForm').on('submit', function (e) {
         e.preventDefault(); // 기본 submit 방지
