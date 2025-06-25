@@ -88,30 +88,30 @@
 							<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
 								data-bs-parent="#accordionExample">
 								<div class="accordion-body">
-									<form id="company" data-sb-form-api-token="API_TOKEN">
+									<form id="companyForm">
 										<div class="d-flex g-2 gap-2">
 											<div class="form-floating mb-3">
-												<input class="form-control" id="co_name" type="text" placeholder="회사명"
+												<input class="form-control" id="coName" type="text" placeholder="회사명"
 													data-sb-validations="required" />
-												<label for="co_name">회사명</label>
-												<div class="invalid-register" data-sb-qna="co_name:required">회사명을
+												<label for="coName">회사명</label>
+												<div class="invalid-register" data-sb-qna="coName:required">회사명을
 													입력해주세요.
 												</div>
 											</div>
 											<div class="form-floating mb-3">
-												<input class="form-control" id="co_name_en" type="text"
+												<input class="form-control" id="coNameEn" type="text"
 													placeholder="회사 영문명" />
-												<label for="co_name">회사 영문명</label>
+												<label for="coNameEn">회사 영문명</label>
 											</div>
 										</div>
 
 										<!-- 카카오 맵 API -->
 										<div class="d-flex g-2 gap-2">
 											<div class="form-floating mb-3">
-												<input class="form-control" id="co_zip" type="text" placeholder="회사명"
+												<input class="form-control" id="coZip" type="text" placeholder="우편번호"
 													data-sb-validations="required" />
-												<label for="co_zip">우편번호</label>
-												<div class="invalid-register" data-sb-qna="co_zip:required">우편번호를 입려하세요.
+												<label for="coZip">우편번호</label>
+												<div class="invalid-register" data-sb-qna="coZip:required">우편번호를 입려하세요.
 												</div>
 											</div>
 											<div class="form-floating text-center mb-3">
@@ -121,16 +121,16 @@
 										</div>
 										<div class="d-flex g-2 gap-2">
 											<div class="form-floating mb-3">
-												<input class="form-control" id="co_addr" type="text" placeholder="주소"
+												<input class="form-control" id="coAddr" type="text" placeholder="주소"
 													data-sb-validations="required" />
-												<label for="co_addr">주소</label>
-												<div class="invalid-register" data-sb-qna="co_addr:required">주소를 입려하세요.
+												<label for="coAddr">주소</label>
+												<div class="invalid-register" data-sb-qna="coAddr:required">주소를 입려하세요.
 												</div>
 											</div>
 											<div class="form-floating mb-3">
-												<input class="form-control" id="co_addr_detail" type="text"
+												<input class="form-control" id="coAddrDetail" type="text"
 													placeholder="상세 주소" />
-												<label for="co_zip">상세주소</label>
+												<label for="coAddrDetail">상세주소</label>
 											</div>
 										</div>
 										<script
@@ -176,79 +176,133 @@
 														}
 
 														// 우편번호와 주소 정보를 해당 필드에 넣는다.
-														document.getElementById('co_zip').value = data.zonecode;
-														document.getElementById("co_addr").value = addr;
+														document.getElementById('coZip').value = data.zonecode;
+														document.getElementById("coAddr").value = addr;
 														// 커서를 상세주소 필드로 이동한다.
-														document.getElementById("co_addr_detail").focus();
+														document.getElementById("coAddrDetail").focus();
 													}
 												}).open();
 											}
 										</script>
 										<div class="form-floating mb-3">
-											<input class="form-control" id="bizr_no" type="number"
+											<input class="form-control" id="bizrNo" type="text"
 												placeholder="000-00-000000" data-sb-validations="required" />
-											<label for="bizr_no">사업자등록번호</label>
-											<div class="invalid-register" data-sb-register="bizr_no:required">사업자등록번호를
+											<label for="bizrNo">사업자등록번호</label>
+											<div class="invalid-register" data-sb-register="bizrNo:required">사업자등록번호를
 												입력하세요.</div>
 										</div>
 										<div class="form-floating mb-3">
-											<input class="form-control" id="bizr_cert" type="file"
+											<input class="form-control" id="bizrCert" type="file"
 												placeholder="파일을 선택해주세요" data-sb-validations="required" /> <label
-												for="bizr_cert">사업자등록증</label>
-											<div class="invalid-register" data-sb-register="bizr_cert:required">파일을
+												for="bizrCert">사업자등록증</label>
+											<div class="invalid-register" data-sb-register="bizrCert:required">파일을
 												등록해주세요.
 											</div>
 										</div>
 										<div class="d-flex g-2 gap-2">
 											<div class="form-floating mb-3">
-												<input class="form-control" id="ceo_name" type="text" placeholder="대표자명"
+												<input class="form-control" id="ceoName" type="text" placeholder="대표자명"
 													data-sb-validations="required" />
-												<label for="ceo_name">대표자명</label>
-												<div class="invalid-register" data-sb-qna="ceo_name:required">대표자명을
+												<label for="ceoName">대표자명</label>
+												<div class="invalid-register" data-sb-qna="ceoName:required">대표자명을
 													입력하세요.
 												</div>
 											</div>
 											<div class="form-floating mb-3">
-												<input class="form-control" id="ceo_tel" type="tel"
+												<input class="form-control" id="ceoTel" type="tel"
 													placeholder="대표자 연락처" />
-												<label for="ceo_tel">대표자 연락처</label>
-												<div class="invalid-register" data-sb-qna="ceo_tel:required">대표자 연락처를
+												<label for="ceoTel">대표자 연락처</label>
+												<div class="invalid-register" data-sb-qna="ceoTel:required">대표자 연락처를
 													입력하세요.
 												</div>
 											</div>
 										</div>
 										<div class="d-flex g-2 gap-2">
 											<div class="form-floating mb-3">
-												<input class="form-control" id="psch_name" type="text"
-													placeholder="대표자명" data-sb-validations="required" />
-												<label for="psch_name">담당자명</label>
-												<div class="invalid-register" data-sb-qna="psch_name:required">담당자명을
+												<input class="form-control" id="pschName" type="text" placeholder="대표자명"
+													data-sb-validations="required" />
+												<label for="pschName">담당자명</label>
+												<div class="invalid-register" data-sb-qna="pschName:required">담당자명을
 													입력하세요.
 												</div>
 											</div>
 											<div class="form-floating mb-3">
-												<input class="form-control" id="psch_tel" type="tel"
+												<input class="form-control" id="pschTel" type="tel"
 													placeholder="대표자 연락처" />
-												<label for="psch_tel">담당자연락처</label>
-												<div class="invalid-register" data-sb-qna="psch_tel:required">담당자 연락처를
+												<label for="pschTel">담당자연락처</label>
+												<div class="invalid-register" data-sb-qna="pschTel:required">담당자 연락처를
 													입력하세요.</div>
 											</div>
 										</div>
 										<div class="form-floating mb-3">
-											<input class="form-control" id="psch_email" type="number"
+											<input class="form-control" id="pschEmail" type="email"
 												placeholder="abc@naver.com" data-sb-validations="required" />
-											<label for="psch_email">사업자등록번호</label>
-											<div class="invalid-register" data-sb-register="psch_email:required">담당자
+											<label for="pschEmail">사업자등록번호</label>
+											<div class="invalid-register" data-sb-register="pschEmail:required">담당자
 												이메일을
 												입력하세요.</div>
 										</div>
 										<div class="d-grid">
-											<button class="btn btn-primary rounded-pill btn-lg disabled"
-												id="companyButton" type="submit">저장</button>
+											<button class="btn btn-primary rounded-pill btn-lg" id="companyBtn"
+												type="button">저장</button>
 										</div>
 									</form>
 								</div>
 							</div>
+							<script th:inline="javascript">
+								$(document).ready(function () {
+									const userIdx = /*[[${session.userIdx}]]*/ "";
+									// 회사 정보 등록
+									$('#companyBtn').on('click', function () {
+										const companyData = {
+											userIdx: userIdx,
+											coName: $('#coName').val(),
+											coNameEn: $('#coNameEn').val(),
+											coZip: $('#coZip').val(),
+											coAddr: $('#coAddr').val(),
+											coAddrDetail: $('#coAddrDetail').val(),
+											ceoName: $('#ceoName').val(),
+											ceoTel: $('#ceoTel').val(),
+											bizrNo: $('#bizrNo').val(),
+											// bizrCert: $('#bizrCert').val(),
+											pschName: $('#pschName').val(),
+											pschTel: $('#pschTel').val(),
+											pschEmail: $('#pschEmail').val()
+										}
+
+										let formData = new FormData();
+										formData.append("companyData", new Blob([JSON.stringify(companyData)], {type: "application/json"}));
+										const bizrCert = $('#bizrCert')[0].files[0];
+										if(bizrCert) {
+											formData.append("bizrCert", bizrCert);
+										} else {
+											Swal.fire("실패", "파일을 선택해주세요.", "error");
+											return;
+										}
+
+										$.ajax({
+											type: "POST",
+											url: "/erp/company/insert",
+											data: formData,
+											contentType: false,
+											processData: false,
+											success: function (res) {
+												if (res.head.res_code === "200") {
+													Swal.fire("성공", "회사정보 등록 완료", "success");
+												} else {
+													Swal.fire("실패", res.body, "error");
+													$('#sameAsSubscriber').prop('checked', false);
+												}
+											},
+											error: function (xhr, status, err) {
+												console.error(err);
+												Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+												$('#sameAsSubscriber').prop('checked', false);
+											}
+										});
+									});
+								});
+							</script>
 						</div>
 					</div>
 				</div>

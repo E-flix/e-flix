@@ -1,5 +1,7 @@
 package com.eflix.erp.dto;
 
+import java.util.Date;
+
 import groovy.transform.builder.Builder;
 import lombok.Data;
 
@@ -36,4 +38,5 @@ public class CompanyDTO {
     private String pschTel;
     private String pschEmail;
     private String svcStatus;
+    private Date coRegdate;
 }

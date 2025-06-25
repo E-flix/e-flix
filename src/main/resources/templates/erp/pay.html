@@ -213,6 +213,57 @@
                                     <div class="col-md-2"><button class="btn btn-dark w-100">불러오기</button></div>
                                 </div>
                             </fieldset>
+                            <script th:inline="javascript">
+                                $(document).ready(function () {
+                                    $('#sameAsSubscriber').change(function () {
+                                        const userIdx = /*[[${session.userIdx}]]*/ "";
+                                        if ($(this).is(':checked')) {
+                                            // 체크되었을 때 AJAX로 가입자 정보 가져오기
+                                            $.ajax({
+                                                type: 'GET',
+                                                url: `/erp/company/find?userIdx=${userIdx}`,
+                                                success: function (res) {
+                                                    const data = res.body;
+                                                    if(res.head.res_code === "200") {
+                                                        $('#pschName').val(data.pschName);
+                                                        $('#pschTel').val(data.pschTel);
+                                                        $('#coName').val(data.coName);
+                                                        $('#coNameEn').val(data.coNameEn);
+                                                        $('#ceoName').val(data.ceoName);
+                                                        $('#ceoTel').val(data.ceoTel);
+                                                        $('#coAddr').val(data.coAddr);
+                                                        $('#bizr_no').val(data.bizrNo);
+                                                        $('#coAddrDetail').val(data.coAddrDetail);
+                                                        $('#coZip').val(data.coZip);
+                                                        $('#bizr_cert').val(data.bizrCert);
+                                                    } else {
+                                                        Swal.fire({
+                                                            title: "등록된 회사가 없습니다. </br> 해당 정보로 등록하시겠나요?",
+                                                            showDenyButton: true,
+                                                            confirmButtonText: "등록",
+                                                            denyButtonText: `취소`,
+                                                            icon: 'question'
+                                                        }).then((result) => {
+                                                            /* Read more about isConfirmed, isDenied below */
+                                                            if (result.isConfirmed) {
+                                                                Swal.fire("저장되었습니다", "", "success");
+                                                            }
+                                                        });
+                                                    }
+                                                    
+                                                },
+                                                error: function (xhr, status, err) {
+                                                    console.error(err);
+                                                    Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+                                                }
+                                            });
+                                        } else {
+                                            // 체크 해제 시 폼의 모든 input 값을 초기화
+                                            $('#targetForm input').val('');
+                                        }
+                                    });
+                                });
+                            </script>
 
                             <!-- 마스터 ID 정보 -->
                             <fieldset class="border rounded-3 p-3">
@@ -485,6 +536,10 @@
         </div>
     </div>
 
+    <!-- SweetAlert2 CSS/JS CDN  -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Step Navigation Script -->
     <script>
         $(document).ready(function () {
@@ -498,12 +553,25 @@
                 $('.step-' + stepNumber).addClass('active');
             }
 
+            function stepValidation1() {
+                
+            }
+
+            function stepValidation2() {
+
+            }
+
+            function stepValidation3() {
+
+            }
+
             $('#next-to-step-2').click(function () {
+                stepValidation1();
                 showStep(2);
             });
 
             $('#next-to-step-3').click(function () {
-
+                applyContract();
                 showStep(3);
             });
 
@@ -532,6 +600,7 @@
             }
 
             $('#hr, #acc').change(function () {
+                updateSummary();
                 if (this.checked) {
                     $('#bsn, #purchs').prop('disabled', true);
                 } else {
@@ -540,6 +609,7 @@
             });
 
             $('#bsn, #purchs').change(function () {
+                updateSummary();
                 if (this.checked) {
                     $('#hr, #acc').prop('disabled', true);
                 } else {
@@ -707,104 +777,110 @@
                 });
             }
 
-            const today = new Date();
-            const formatted = today.getFullYear() + '-' +
-                String(today.getMonth() + 1).padStart(2, '0') + '-' +
-                String(today.getDate()).padStart(2, '0');
-            let contractDocumentHTML =
-                `
-                <div class="container bg-white p-5 shadow rounded" id="contract-group">
-                    <h2 class="contract-title">ERP 시스템 이용 계약서</h2>
+            function applyContract() {
+                const today = new Date();
+                const formatted = today.getFullYear() + '-' +
+                    String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(today.getDate()).padStart(2, '0');
+                const signCoName = $('#coName').val();
+                const signPschName = $('#pschName').val();
+                const signCoAddr = $('#coAddr').val();
 
-                    <div class="contract-section">
-                    <h5>제1조 (당사자)</h5>
-                    <p><strong>갑(공급자)</strong><br>
-                        회사명: E-FLIX<br>
-                        대표자: 팀장<br>
-                        주소: (주)예담직업전문학교 대구광역시 중구 중앙대로 403 (남일동 135-1, 5층)
-                    </p>
-                    <p><strong>을(이용자)</strong><br>
-                        회사명: [이용자 회사명]<br>
-                        대표자: [대표자명]<br>
-                        주소: [주소]
-                    </p>
-                    </div>
+                let contractDocumentHTML =
+                    `
+                    <div class="container bg-white p-5 shadow rounded" id="contract-group">
+                        <h2 class="contract-title">ERP 시스템 이용 계약서</h2>
 
-                    <div class="contract-section">
-                    <h5>제2조 (계약 목적)</h5>
-                    <p>본 계약은 갑이 개발·제공하는 ERP 시스템(이하 "시스템")을 을이 이용함에 있어 양 당사자의 권리·의무를 정함을 목적으로 한다.</p>
-                    </div>
+                        <div class="contract-section">
+                        <h5>제1조 (당사자)</h5>
+                        <p><strong>갑(공급자)</strong><br>
+                            회사명: E-FLIX<br>
+                            대표자: 팀장<br>
+                            주소: (주)예담직업전문학교 대구광역시 중구 중앙대로 403 (남일동 135-1, 5층)
+                        </p>
+                        <p><strong>을(이용자)</strong><br>
+                            회사명: ${signCoName}<br>
+                            대표자: ${signPschName}<br>
+                            주소: ${signCoAddr}
+                        </p>
+                        </div>
 
-                    <div class="contract-section">
-                    <h5>제3조 (이용 범위 및 제공 서비스)</h5>
-                    <ol>
-                        <li>갑은 을에게 다음의 서비스를 제공한다:
-                        <ul>
-                            <li>ERP 시스템 웹/모바일 서비스 이용 권한</li>
-                            <li>기술지원 및 유지보수 서비스</li>
-                            <li>사용자 계정 생성 및 관리 기능</li>
-                        </ul>
-                        </li>
-                        <li>을은 시스템을 내부 업무 목적으로만 이용할 수 있다.</li>
-                    </ol>
-                    </div>
+                        <div class="contract-section">
+                        <h5>제2조 (계약 목적)</h5>
+                        <p>본 계약은 갑이 개발·제공하는 ERP 시스템(이하 "시스템")을 을이 이용함에 있어 양 당사자의 권리·의무를 정함을 목적으로 한다.</p>
+                        </div>
 
-                    <div class="contract-section">
-                    <h5>제4조 (계약 기간)</h5>
-                    <p>본 계약의 유효기간은 계약 체결일로부터 <strong>[1년]</strong>이며, 별도 해지 통보가 없을 경우 자동 연장된다.</p>
-                    </div>
+                        <div class="contract-section">
+                        <h5>제3조 (이용 범위 및 제공 서비스)</h5>
+                        <ol>
+                            <li>갑은 을에게 다음의 서비스를 제공한다:
+                            <ul>
+                                <li>ERP 시스템 웹/모바일 서비스 이용 권한</li>
+                                <li>기술지원 및 유지보수 서비스</li>
+                                <li>사용자 계정 생성 및 관리 기능</li>
+                            </ul>
+                            </li>
+                            <li>을은 시스템을 내부 업무 목적으로만 이용할 수 있다.</li>
+                        </ol>
+                        </div>
 
-                    <div class="contract-section">
-                    <h5>제5조 (이용 요금 및 결제)</h5>
-                    <ol>
-                        <li>을은 시스템 이용 요금으로 월 <strong>[금액]</strong>원을 갑에게 지불한다.</li>
-                        <li>결제일은 매월 <strong>[지정일]</strong>일이며, 지정된 계좌로 송금한다.</li>
-                    </ol>
-                    </div>
+                        <div class="contract-section">
+                        <h5>제4조 (계약 기간)</h5>
+                        <p>본 계약의 유효기간은 계약 체결일로부터 <strong>[1년]</strong>이며, 별도 해지 통보가 없을 경우 자동 연장된다.</p>
+                        </div>
 
-                    <div class="contract-section">
-                    <h5>제6조 (유지보수 및 기술지원)</h5>
-                    <p>갑은 을에게 정상적인 시스템 운영을 위한 유지보수와 기술지원을 제공하며, 장애 발생 시 즉시 조치한다.</p>
-                    </div>
+                        <div class="contract-section">
+                        <h5>제5조 (이용 요금 및 결제)</h5>
+                        <ol>
+                            <li>을은 시스템 이용 요금으로 월 <strong>[금액]</strong>원을 갑에게 지불한다.</li>
+                            <li>결제일은 매월 <strong>[지정일]</strong>일이며, 지정된 계좌로 송금한다.</li>
+                        </ol>
+                        </div>
 
-                    <div class="contract-section">
-                    <h5>제7조 (비밀유지)</h5>
-                    <p>양 당사자는 계약 수행 중 알게 된 상대방의 모든 정보에 대해 비밀을 유지하며, 제3자에게 누설하지 않는다.</p>
-                    </div>
+                        <div class="contract-section">
+                        <h5>제6조 (유지보수 및 기술지원)</h5>
+                        <p>갑은 을에게 정상적인 시스템 운영을 위한 유지보수와 기술지원을 제공하며, 장애 발생 시 즉시 조치한다.</p>
+                        </div>
 
-                    <div class="contract-section">
-                    <h5>제8조 (계약 해지)</h5>
-                    <ol>
-                        <li>어느 일방이 계약 내용을 위반할 경우, 상대방은 계약을 해지할 수 있다.</li>
-                        <li>해지 시 기지불된 요금은 반환되지 않는다.</li>
-                    </ol>
-                    </div>
+                        <div class="contract-section">
+                        <h5>제7조 (비밀유지)</h5>
+                        <p>양 당사자는 계약 수행 중 알게 된 상대방의 모든 정보에 대해 비밀을 유지하며, 제3자에게 누설하지 않는다.</p>
+                        </div>
 
-                    <div class="contract-section">
-                    <h5>제9조 (기타 조항)</h5>
-                    <ol>
-                        <li>본 계약에 명시되지 않은 사항은 관련 법령 및 상관례에 따른다.</li>
-                        <li>계약에 관한 분쟁은 갑의 소재지를 관할하는 법원에서 해결한다.</li>
-                    </ol>
-                    </div>
+                        <div class="contract-section">
+                        <h5>제8조 (계약 해지)</h5>
+                        <ol>
+                            <li>어느 일방이 계약 내용을 위반할 경우, 상대방은 계약을 해지할 수 있다.</li>
+                            <li>해지 시 기지불된 요금은 반환되지 않는다.</li>
+                        </ol>
+                        </div>
 
-                    <div class="row signature-box">
-                    <div class="col-md-6">
-                        <strong>갑(공급자)</strong><br>
-                        회사명: E-FLIX<br>
-                        대표자 서명: 팀장 (인)<br>
-                        날짜: ${today}
+                        <div class="contract-section">
+                        <h5>제9조 (기타 조항)</h5>
+                        <ol>
+                            <li>본 계약에 명시되지 않은 사항은 관련 법령 및 상관례에 따른다.</li>
+                            <li>계약에 관한 분쟁은 갑의 소재지를 관할하는 법원에서 해결한다.</li>
+                        </ol>
+                        </div>
+
+                        <div class="row signature-box">
+                        <div class="col-md-6">
+                            <strong>갑(공급자)</strong><br>
+                            회사명: E-FLIX<br>
+                            대표자 서명: 팀장 <img src="/eflix-sign.png" alt="대표자 서명 이미지" width="400" height="200"><br>
+                            날짜: ${formatted}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>을(이용자)</strong><br>
+                            회사명: ${signCoName}<br>
+                            대표자 서명: ${signPschName} <span id="signatureDisplay" style="cursor: pointer; text-decoration: underline;" data-bs-toggle="modal" data-bs-target="#signatureModal">(인)</span><br>
+                            날짜: ${formatted}
+                        </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <strong>을(이용자)</strong><br>
-                        회사명: [이용자 회사명]<br>
-                        대표자 서명: <span id="signatureDisplay" style="cursor: pointer; text-decoration: underline;" data-bs-toggle="modal" data-bs-target="#signatureModal">(인)</span><br>
-                        날짜: ${today}
-                    </div>
-                    </div>
-                </div>
-                `;
-            $("#contract-document").html(contractDocumentHTML);
+                    `;
+                $("#contract-document").html(contractDocumentHTML);
+            }
 
             // (1) 서명 등록 후 작성 버튼 클릭 → (인) 자리 교체
             $('#toPaymentModal').on('click', function () {

@@ -3,6 +3,7 @@ package com.eflix.common.security.details;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class CustomUserDetailService implements UserDetailsService {
+public class SecurityUserDetailService implements UserDetailsService {
 
 	@Autowired
 	private UserMapper userMapper;
@@ -34,19 +35,18 @@ public class CustomUserDetailService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-				.getRequest();
+		HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 		String uri = req.getRequestURI();
 
 		log.info("로그인 시도 - Username: {}, URI: {}", username, uri);
-		
+
 		if (uri.startsWith("/erp")) {
 			// 일반 사용자
 			UserDTO user = userMapper.findByUserId(username);
 			if (user == null) {
 				throw new UsernameNotFoundException("사용자 없음");
 			}
-			return new CustomUserDetails(user);
+			return new SecurityUserDetails(user);
 
 		} else {
 			// ERP 관리자 로그인 (emp_id + co_idx 등으로 조회)
@@ -61,7 +61,7 @@ public class CustomUserDetailService implements UserDetailsService {
 			// 해당 사원의 권한 리스트 조회 (role_code만 뽑아오면 됨)
 			List<String> roleIds = roleMapper.findRoleIdsByEmpIdx(employee.getEmpIdx());
 
-			return new CustomUserDetails(employee, roleIds);
+			return new SecurityUserDetails(employee, roleIds);
 		}
 	}
 }

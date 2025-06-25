@@ -11,5 +11,6 @@ public interface UserMapper {
     public UserDTO findByUserId(String user_id);
 
     public int insert(UserDTO userDTO);
-    
+
+    public int updateUser(UserDTO userDTO);
 }

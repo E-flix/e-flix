@@ -14,20 +14,20 @@ import com.eflix.hr.dto.EmployeeDTO;
 import lombok.Getter;
 
 @Getter
-public class CustomUserDetails implements UserDetails {
+public class SecurityUserDetails implements UserDetails {
 
 	private final UserDTO userDTO;
 	private final EmployeeDTO employeeDTO;
 
 	private final Collection<? extends GrantedAuthority> authorities;
 
-	public CustomUserDetails(UserDTO user) {
+	public SecurityUserDetails(UserDTO user) {
 		this.userDTO = user;
 		this.employeeDTO = null;
-		this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+		this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserRole()));
 	}
 
-	public CustomUserDetails(EmployeeDTO employee, List<String> roleCodes) {
+	public SecurityUserDetails(EmployeeDTO employee, List<String> roleCodes) {
 		this.employeeDTO = employee;
 		this.userDTO = null;
 		this.authorities = roleCodes.stream()

@@ -28,11 +28,15 @@ import com.eflix.common.security.dto.UserDTO;
  * @changelog
  * <ul>
  *   <li>2025-06-19: 최초 생성 (복성민)</li>
+ *   <li>2025-06-25: userIdx 추가 (복성민)</li>
  * </ul>
  */
 
 public interface UserService {
 
-    public int insert(UserDTO userDTO);
-    
+    public int insertUser(UserDTO userDTO);
+
+    public UserDTO findByUserIdx(String userIdx);
+
+    public int updateUser(UserDTO userDTO);
 }

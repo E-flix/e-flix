@@ -36,7 +36,7 @@
         VALUES(#{userIdx}, #{userId}, #{userPw}, #{userName}, #{userTel}, #{userEmail}, SYSDATE)
     </insert>
 
-	<!-- ===================================== -->
+	  <!-- ===================================== -->
     <!-- 유저 정보 조회                       -->
     <!-- @author 복성민 -->
     <!-- @since 2025-06-25 -->
@@ -46,4 +46,36 @@
         FROM users
         WHERE user_id = #{userId}
     </select>
+
+    <!-- ===================================== -->
+    <!-- 유저 정보 조회                       -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-25 -->
+    <!-- ===================================== -->
+    <select id="findByUserIdx" resultType="UserDTO">
+        SELECT user_idx, user_id, user_pw, user_name, user_tel, user_email, user_regdate, user_role
+        FROM users
+        WHERE user_idx = #{userIdx}
+    </select>
+
+    <!-- ===================================== -->
+    <!-- 유저 정보 수정                       -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-25 -->
+    <!-- ===================================== -->
+    <update id="updateUser" parameterType="UserDTO">
+        UPDATE users
+        SET
+        <if test="user_pw != null and user_pw !=''">
+            user_pw = #{userPw},
+        </if>
+        <if test="userTel != null and userTel !=''">
+            user_tel = #{userTel},
+        </if>
+        <if test="userEmail != null and userEmail !=''">
+            user_email = #{userEmail},
+        </if>
+            user_moddate = now()
+        WHERE user_idx = #{userIdx}
+    </update>
 </mapper>

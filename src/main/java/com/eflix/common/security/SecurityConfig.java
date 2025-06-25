@@ -12,7 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-import com.eflix.common.security.details.CustomUserDetailService;
+import com.eflix.common.security.details.SecurityUserDetailService;
 import com.eflix.common.security.handler.CustomLoginSuccessHandler;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -59,7 +59,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SecurityConfig {
 
 	@Autowired
-	private CustomUserDetailService customUserDetailService;
+	private SecurityUserDetailService customUserDetailService;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -72,7 +72,7 @@ public class SecurityConfig {
 		http.securityMatcher("/erp/**")
 				.authorizeHttpRequests(auth -> auth
 					.requestMatchers("/erp", "/erp/login", "/erp/signup", "/erp/error/**", "/erp/assets/**", "/erp/css/**", "/erp/js/**", "/bootstrap/**", "/common/**").permitAll()
-					.requestMatchers("/erp/api/**").authenticated())
+					.requestMatchers("/erp/**").authenticated())
 			.formLogin(form -> form
 				.loginProcessingUrl("/erp/login")
 				.loginPage("/")
@@ -90,7 +90,7 @@ public class SecurityConfig {
 				.logoutUrl("/erp/logout")
 				.deleteCookies("JSESSIONID", "user_remember"))
 			.csrf(csrf -> csrf.disable())
-			.exceptionHandling(exception -> exception.accessDeniedPage("/erp/error/403"));
+			.exceptionHandling(exception -> exception.accessDeniedPage("/common/error/403.html"));
 
 		return http.build();
 	}
@@ -129,8 +129,8 @@ public class SecurityConfig {
 		return new CustomLoginSuccessHandler();
 	}
 
-	@Bean
+	// @Bean
 	public UserDetailsService userDetailsService() {
-		return new CustomUserDetailService();
+		return new SecurityUserDetailService();
 	}
 }

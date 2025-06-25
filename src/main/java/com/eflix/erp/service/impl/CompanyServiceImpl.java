@@ -14,10 +14,24 @@ public class CompanyServiceImpl implements CompanyService {
     private CompanyMapper companyMapper;
 
     @Override
-    public void insertCompany(CompanyDTO companyDTO) {
+    public int insertCompany(CompanyDTO companyDTO) {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'updateCompany'");
-        companyMapper.insert(companyDTO);
+        return companyMapper.insert(companyDTO);
+    }
+
+    @Override
+    public CompanyDTO findByUserIdx(String userIdx) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'findByUserId'");
+        return companyMapper.findByUserIdx(userIdx);
+    }
+
+    @Override
+    public int updateCompany(CompanyDTO companyDTO) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'updateCompany'");
+        return companyMapper.updateCompany(companyDTO);
     }
 
 }

@@ -63,7 +63,7 @@ public class LoginController {
         
         userDTO.setUserPw(passwordEncoder.encode(userDTO.getUserPw()));
 
-        int affectedRow = userService.insert(userDTO);
+        int affectedRow = userService.insertUser(userDTO);
 
         if(affectedRow > 0) {
             result = ResUtil.makeResult(ResStatus.OK, null);

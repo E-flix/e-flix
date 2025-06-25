@@ -14,11 +14,24 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     @Override
-    public int insert(UserDTO userDTO) {
+    public int insertUser(UserDTO userDTO) {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'insert'");
 
         return userMapper.insert(userDTO);
     }
 
+    @Override
+    public UserDTO findByUserIdx(String userIdx) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'findByUserIdx'");
+        return userMapper.findByUser_idx(userIdx);
+    }
+
+    @Override
+    public int updateUser(UserDTO userDTO) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'updateUser'");
+        return userMapper.updateUser(userDTO);
+    }
 }

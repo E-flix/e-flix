@@ -32,5 +32,9 @@ import com.eflix.erp.dto.CompanyDTO;
  */
 
 public interface CompanyService {
-    public void insertCompany(CompanyDTO companyDTO);
+    public int insertCompany(CompanyDTO companyDTO);
+
+    public CompanyDTO findByUserIdx(String userIdx);
+
+    public int updateCompany(CompanyDTO companyDTO);
 }

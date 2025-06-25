@@ -3,6 +3,8 @@ package com.eflix.erp.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.eflix.erp.dto.ModuleDTO;
 import com.eflix.erp.dto.SubscriptionPackageDTO;
+import com.eflix.erp.service.CompanyService;
 import com.eflix.erp.service.ModuleService;
 import com.eflix.erp.service.SubscriptionService;
 
@@ -54,6 +57,9 @@ public class ErpController {
 
 	@Autowired
 	private ModuleService moduleService;
+
+	@Autowired
+	private CompanyService companyService;
 	
 	@GetMapping()
 	public String home() {
@@ -67,7 +73,6 @@ public class ErpController {
 
 	@GetMapping("/pay")
 	public String pay(@RequestParam("spkIdx") String spkIdx, Model model) {
-		
 		SubscriptionPackageDTO subscriptionPackageDTO = service.findById(spkIdx);
 
 		List<ModuleDTO> moduleList = moduleService.findAll();
