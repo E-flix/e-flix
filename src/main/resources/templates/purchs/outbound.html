@@ -1,16 +1,19 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 이혁진
   - 최초작성 : 2025-06-23
-  - 설명     : 출고 화면 (AG Grid 적용, 통일된 UI)
+  - 설명     : 출고 관리 (AG Grid 적용, 통일된 UI)
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-23 (이혁진): AG Grid 스타일 및 구조 통일 적용
 ============================================ -->
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{common/layouts/default}">
-
+<head>
+	<title>출고관리</title>
+</head>
 <div layout:fragment="content" class="container-fluid">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h2>창고조회</h2>
+	</div>
 	<div class="col-md-12 mb-3">
 		<div class="d-flex justify-content-between align-items-center">
 			<div class="radio-group">
@@ -123,6 +126,7 @@
 		</div>
 	</div>
 </div>
+
 </html>
 
 <script>

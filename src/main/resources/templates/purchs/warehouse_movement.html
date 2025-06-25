@@ -1,9 +1,19 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{common/layouts/default}">
-
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 이혁진
+  - 최초작성 : 2025-00-00
+  - 설명     : 창고간 제품 이동 관리 (AG Grid 적용)
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-00-00 (이혁진): 페이지 완성
+============================================ -->
+<head>
+	<title>창고이동관리</title>
+</head>
 <div layout:fragment="content" class="container-fluid">
-
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h2>창고이동관리</h2>
+	</div>
 	<!-- 상단 탭 -->
 	<div class="col-md-12">
 		<div class="radio-group">
