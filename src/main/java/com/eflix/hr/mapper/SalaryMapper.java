@@ -20,4 +20,6 @@ public interface SalaryMapper {
     int insert(SalaryDTO dto);
     int update(SalaryDTO dto);
     int deleteById(@Param("salaryIdx") String salaryIdx);
+    
+    List<SalaryDTO> bankList();
 }

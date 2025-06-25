@@ -11,18 +11,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.eflix.common.code.dto.CommonDTO;
+import com.eflix.common.code.service.CommonService;
 import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.dto.HrWorkTypeDTO;
+import com.eflix.hr.dto.RoleDTO;
 import com.eflix.hr.service.DepartmentService;
 import com.eflix.hr.service.EmployeeService;
 import com.eflix.hr.service.HrWorkTypeService;
+import com.eflix.hr.service.RoleService;
+import com.eflix.hr.service.SalaryService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 
 
 /** ============================================
@@ -49,6 +52,15 @@ public class HrController {
 
   @Autowired
   private HrWorkTypeService hrWorkTypeService;
+
+  @Autowired
+  private RoleService roleService;
+  
+  @Autowired
+  private SalaryService salaryService;
+
+  @Autowired
+  private CommonService commonService;
 
   // 인사 메인 화면
   @GetMapping("")
@@ -80,6 +92,12 @@ public class HrController {
     // 재직상태 드롭다운 조회
     List<EmployeeDTO> empStatusList = employeeService.empStatusList();
 
+    // 권한 드롭다운 조회
+    List<RoleDTO> roleList = roleService.roleList();
+    
+    // 은행 드롭다운 조회
+      List<CommonDTO> bankList = commonService.getCommon("BK00");
+
     Map<String,Object> params = new HashMap<>();
     params.put("option", option);
     params.put("keyword", keyword);
@@ -88,6 +106,7 @@ public class HrController {
     params.put("empGrade", empGrade);
     params.put("empStatusType", empStatusType);
     params.put("empType", empType);
+    params.put("roleList", roleList);
 
     System.out.println(params.toString());
     
@@ -101,6 +120,10 @@ public class HrController {
     model.addAttribute("gradeList",   gradeList);
     model.addAttribute("workList",   workList);
     model.addAttribute("empStatusList",   empStatusList);
+
+    // 은행코드
+    model.addAttribute("bankList", bankList);
+
     model.addAllAttributes(params);
     return "hr/emp";
   }

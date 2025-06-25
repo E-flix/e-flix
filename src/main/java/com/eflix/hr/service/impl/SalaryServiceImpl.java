@@ -10,13 +10,18 @@ package com.eflix.hr.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.SalaryDTO;
+import com.eflix.hr.mapper.SalaryMapper;
 import com.eflix.hr.service.SalaryService;
 
 @Service
 public class SalaryServiceImpl implements SalaryService {
+
+  @Autowired
+  private SalaryMapper salaryMapper;
 
   @Override
   public List<SalaryDTO> getAllSalaries() {
@@ -41,6 +46,11 @@ public class SalaryServiceImpl implements SalaryService {
   @Override
   public int deleteSalary(String salaryIdx) {
     throw new UnsupportedOperationException("Unimplemented method 'deleteSalary'");
+  }
+
+  @Override
+  public List<SalaryDTO> bankList() {
+    return salaryMapper.bankList();
   }
 
 }

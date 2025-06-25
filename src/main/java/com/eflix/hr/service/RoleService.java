@@ -18,4 +18,5 @@ public interface RoleService {
     int createRole(RoleDTO dto);
     int updateRole(RoleDTO dto);
     int deleteRole(String roleId);
+    public List<RoleDTO> roleList();
 }

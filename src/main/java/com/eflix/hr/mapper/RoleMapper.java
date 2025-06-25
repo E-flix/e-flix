@@ -20,7 +20,8 @@ public interface RoleMapper {
     int insert(RoleDTO dto);
     int update(RoleDTO dto);
     int deleteById(@Param("roleId") String roleId);
-
     
     List<String> findRoleIdsByEmpIdx(String empIdx);
+
+    List<RoleDTO> roleList();
 }

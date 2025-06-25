@@ -10,13 +10,18 @@ package com.eflix.hr.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.RoleDTO;
+import com.eflix.hr.mapper.RoleMapper;
 import com.eflix.hr.service.RoleService;
 
 @Service
 public class RoleServiceImpl implements RoleService {
+
+  @Autowired
+  private RoleMapper roleMapper;
 
   @Override
   public List<RoleDTO> getAllRoles() {
@@ -41,6 +46,12 @@ public class RoleServiceImpl implements RoleService {
   @Override
   public int deleteRole(String roleId) {
     throw new UnsupportedOperationException("Unimplemented method 'deleteRole'");
+  }
+
+  // 사원관리 페이지 권한 드롭다운
+  @Override
+  public List<RoleDTO> roleList() {
+    return roleMapper.roleList();
   }
 
 }
