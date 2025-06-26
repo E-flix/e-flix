@@ -6,13 +6,175 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-06-26 (김희정): DB조회 후 ag-gird 전체조회 기능 구현 (날짜/계정과목코드/거래처코드 필터가능)
+  [ to-do ]
+  - 거래처원장 탭 구분 (잔액/내용)
+  - 대분류까지 불러오기 => loadLedger함수의 잔액 필터 수정
+  - 계정과목코드를 반드시 입력해야 데이터 나오도록 수정
 ============================================ -->
+
 <head>
   <title>거래처원장</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <div layout:fragment="content">
-  <div id="clients-ledger">
-    <h2>거래처원장</h2>
-    <p>거래처원장 화면입니다.</p>
+  <!-- 모달 불러오기 -->
+  <div th:replace="acc/modal/modal :: modals"></div>
+  <div class="w-100" id="clients-ledger">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <!-- 왼쪽: 일반전표 제목 -->
+      <h3 class="mb-0">거래처원장</h3>
+      <!-- 오른쪽: 버튼 모음 -->
+      <div>
+        <button class="btn btn-secondary btn-sm" onclick="printLedger()">인쇄</button>
+      </div>
+    </div>
+    <div class="d-flex mb-2 align-items-end flex-nowrap" style="flex-wrap:nowrap;">
+      <div class="d-flex align-items-center me-2">
+        <label class="form-label me-2 mb-0">일자</label>
+        2025 년
+        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" style="width:45px;"> 월
+        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startDay" style="width:45px;"> 일 ~
+        2025 년
+        <input type="number" value="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" style="width:45px;"> 월
+        <input type="number" value="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" style="width:45px;"> 일
+      </div>
+      <div class="d-flex align-items-center me-2">
+        <label class="me-2 mb-0" style="white-space:nowrap;">계정과목</label>
+        <input type="text" id="accountCode" class="form-control form-control-sm d-inline-block me-1" style="width:45px;">
+        <button class="btn btn-outline-secondary btn-sm me-1"><i class="bi bi-search"></i></button>
+        <input type="text" id="accountName" class="form-control form-control-sm d-inline-block" style="width:120px;">
+      </div>
+      <div class="d-flex align-items-center me-2">
+        <label class="me-2 mb-0" style="white-space:nowrap;">거래처</label>
+        <input type="text" id="partnerCode" class="form-control form-control-sm d-inline-block me-1" style="width:60px;">
+        <button class="btn btn-outline-secondary btn-sm me-1"><i class="bi bi-search"></i></button>
+        <input type="text" id="partnerName" class="form-control form-control-sm d-inline-block" style="min-width:120px;">
+      </div>
+    </div>
+    <!-- 본문 ag-Grid -->
+    <div class="grid-container" style="height:75vh;">
+      <div id="ledgerGrid" class="ag-theme-alpine" style="width:100%; height:100%;"></div>
+    </div>
   </div>
+  <script th:inline="javascript">
+    let year = 2025;
+    const gridOptions = {
+      // 헤더 높이 지정
+      headerHeight: 35,
+      // 행 높이 지정
+      rowHeight: 35,
+      // 그리드 values 배열
+      rowData: [],
+      // 헤더 설정
+      columnDefs: [
+        { headerName: '코드', field: 'partnerCode' },
+        { headerName: '거래처명', field: 'partnerName' },
+        { headerName: '전기이월', field: 'openingBalance', valueFormatter: p => p.value?.toLocaleString() },
+        { headerName: '차변', field: 'debit', valueFormatter: p => p.value?.toLocaleString() },
+        { headerName: '대변', field: 'credit', valueFormatter: p => p.value?.toLocaleString() },
+        { headerName: '잔액', field: 'balance', valueFormatter: p => p.value?.toLocaleString() },
+        { headerName: '등록번호', field: 'businessNumber' },
+        { headerName: '대표자명', field: 'representativeName' }
+      ]
+    };
+    const api = agGrid.createGrid(document.querySelector("#ledgerGrid"), gridOptions);
+    const columnApi = api.columnApi;
+
+    loadLedger();
+    $('input[name=startMonth], input[name=startDay], input[name=endMonth], input[name=endDay], #accountCode, #partnerCode').on('change', loadLedger);
+
+    // 말일 함수
+    function getLastDayOfMonth(year, month) {
+      return new Date(year, month, 0).getDate();
+    }
+    // 날짜 검증 함수
+    function isValidDate(year, month, day) {
+      const d = new Date(year, month - 1, day);
+      return d.getFullYear() == year && (d.getMonth() + 1) == month && d.getDate() == day;
+    }
+    // DB조회하고 ag-grid 데이터 파싱 및 추가
+    async function loadLedger() {
+      // 검색 시작 년월일
+      let startMonth = $('[name=startMonth]').val();
+      let startDay = $('[name=startDay]').val();
+      // 시작일 보정
+      if (!isValidDate(year, startMonth, startDay)) {
+        startDay = getLastDayOfMonth(year, startMonth);
+        $('[name=startDay]').val(startDay); // input 값도 보정
+      }
+      let startDate = `${year}-${startMonth.toString().padStart(2, '0')}-${startDay.toString().padStart(2, '0')}`;
+      // 검색 종료 년월일
+      let endMonth = $('[name=endMonth]').val();
+      let endDay = $('[name=endDay]').val();
+      // 종료일 보정
+      if (!isValidDate(year, endMonth, endDay)) {
+        endDay = getLastDayOfMonth(year, endMonth);
+        $('[name=endDay]').val(endDay); // input 값도 보정
+      }
+      let endDate = `${year}-${endMonth.toString().padStart(2, '0')}-${endDay.toString().padStart(2, '0')}`;
+      // 검색 계정과목코드
+      let accountCode = $('#accountCode').val();
+      // 검색 거래처코드
+      let partnerCode = $('#partnerCode').val();
+      // DB 조회
+      const response = await fetch(`/acc/cl/list?startDate=${startDate}&endDate=${endDate}&accountCode=${accountCode}&partnerCode=${partnerCode}`);
+      // 조회한 DB 데이터 json 파싱
+      let data = await response.json();
+      console.log("조회 데이터", data);
+      // ag-grid에서 사용할 rowData 구성하기
+      let rowMap = new Map();
+      data.forEach(master => {
+        master.details.forEach(detail => {
+          const key = detail.partnerCode || '[거래처코드 없음]';
+          const existing = rowMap.get(key); // 지정한 key(partnerCode)에 해당하는 값
+
+          const debit = detail.resentmenType === 'g3' ? detail.amount : 0;
+          const credit = detail.resentmenType === 'g4' ? detail.amount : 0;
+
+          if (existing) {
+            existing.debit += debit;
+            existing.credit += credit;
+            // 잔액 갱신
+            //if () { // 대분류가 자산/비용이면
+              existing.balance = existing.openingBalance + existing.debit - existing.credit;
+            //} else { // 대분류가 부채/자본/수익이면 
+            //  existing.balance = existing.openingBalance - existing.debit + existing.credit;
+            //}
+          } else {
+            const openingBalance = 0; // 전기이월
+            // 잔액 계산
+            //if () { // 대분류가 자산/비용이면
+            const balance = openingBalance + debit - credit;
+            //} else { // 대분류가 부채/자본/수익이면 
+            //  existing.balance = existing.openingBalance - existing.debit + existing.credit;
+            //}
+            rowMap.set(key, { 
+              partnerCode: detail.partnerCode, // 거래처코드
+              partnerName: detail.partnerName || '[거래처코드 없음]', // 거래처명
+              openingBalance: openingBalance, // 전기이월 
+              debit: debit, // 차변
+              credit: credit, // 대변
+              balance: balance, //잔액
+              businessNumber: detail.businessNumber || detail.residentNumber || null, // 등록번호
+              representativeName: detail.representativeName || null // 대표자명
+            });
+          }
+        });
+      });
+      // rowMap.values(): Map 내부 값들만 순서대로 꺼낼 수 있는 반복자(iterator)
+      // Array.from(): 반복자나 유사 배열 객체를 배열로 변환하는 함수
+      let rowData = Array.from(rowMap.values()); // rowMap 에 들어 있는 값들을 배열로 변환
+
+      // 거래처코드 기준으로 오름차순 정렬 + 거래처코드가 없다면 가장 마지막으로 정렬
+      rowData.sort((a, b) => {
+        if (!a.partnerCode) return 1;
+        if (!b.partnerCode) return -1;
+        // 두 partnerCode 가 모두 값이 있으면 숫자형으로 변환하여 오름차순 정렬 (작은 값이 앞에 오도록)
+        return Number(a.partnerCode) - Number(b.partnerCode);
+      });
+      console.log("그리드에 적용할 rowData", rowData);
+      api.updateGridOptions({ rowData: rowData });
+    }
+  </script>
 </div>

@@ -28,5 +28,13 @@ public class EntryDetailDTO {
   private Date createdAt;
   private Date updatedAt;
 
-  private String accountName;
+  private String accountName; // 계정과목명
+  //private String partner_name, 
+  private String businessNumber; // 사업자등록번호
+  private String residentNumber; // 주민등록번호
+  private String representativeName; // 대표자명
+  private String institutionName; // 금융기관명
+  private String accountNumber; // 계좌번호
+  private String cardName; // 카드명
+  private String cardNumber; // 카드번호
 }
