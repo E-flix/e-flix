@@ -3,6 +3,7 @@ package com.eflix.erp.service;
 import com.eflix.erp.dto.SubscriptionDTO;
 import com.eflix.erp.dto.SubscriptionPackageDTO;
 import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
+import com.eflix.erp.dto.etc.SubscriptionInfoDTO;
 
 /**
  * ERP 회사 관리를 위한 Service 클래스
@@ -39,4 +40,8 @@ public interface SubscriptionService {
     public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO);
 
     public int insertSubscriptionPackageDetail(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO);
+
+    public SubscriptionInfoDTO test(String coIdx);
+
+    public SubscriptionInfoDTO findSubscriptionByCoIdx(String userIdx);
 }

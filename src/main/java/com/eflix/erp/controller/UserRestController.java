@@ -3,13 +3,16 @@ package com.eflix.erp.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
+import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.common.security.dto.UserDTO;
 import com.eflix.erp.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,10 +32,10 @@ public class UserRestController {
     private UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<ResResult> me(@AuthenticationPrincipal UserDTO userDTO) {
+    public ResponseEntity<ResResult> me(@AuthenticationPrincipal SecurityUserDetails securityUserDetails) {
         ResResult result = null;
 
-        UserDTO dto = userService.findByUserIdx(userDTO.getUserIdx());
+        UserDTO dto = userService.findByUserIdx(securityUserDetails.getUserDTO().getUserIdx());
 
         if(dto != null) {
             result = ResUtil.makeResult(ResStatus.OK, dto);

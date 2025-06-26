@@ -3,6 +3,8 @@ package com.eflix.erp.dto;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import groovy.transform.builder.Builder;
 import lombok.Data;
 
@@ -30,7 +32,9 @@ public class SubscriptionDTO {
     private String empIdx;      // emp-000
     private String spiPay;      // SP01: 무통장, SP02: 카드, SP03: 계좌, SP04: 카카오, SP05: 네이버
     private String spiStatus;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private Date spiStart;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private Date spiEnd;
     private int spiPeriod;
     private String spiCtrt;     // 계약서 파일

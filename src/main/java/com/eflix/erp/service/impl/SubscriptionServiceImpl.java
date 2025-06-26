@@ -6,9 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eflix.common.exception.Exception;
+import com.eflix.erp.dto.CompanyDTO;
 import com.eflix.erp.dto.SubscriptionDTO;
 import com.eflix.erp.dto.SubscriptionPackageDTO;
 import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
+import com.eflix.erp.dto.etc.SubscriptionInfoDTO;
+import com.eflix.erp.mapper.CompanyMapper;
 import com.eflix.erp.mapper.SubscriptionMapper;
 import com.eflix.erp.service.SubscriptionService;
 
@@ -16,20 +19,23 @@ import com.eflix.erp.service.SubscriptionService;
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Autowired
-    private SubscriptionMapper mapper;
+    private SubscriptionMapper subscriptionMapper;
+
+    @Autowired
+    private CompanyMapper companyMapper;
 
     @Override
     public SubscriptionPackageDTO findById(String spkIdx) {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'findById'");
-        return mapper.findById(spkIdx);
+        return subscriptionMapper.findById(spkIdx);
     }
 
     @Override
     public int insertSubscriptionPackageDetail(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO) {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'insertSubscriptionPackageDetail'");
-        return mapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO);
+        return subscriptionMapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO);
     }
 
     @Override
@@ -40,7 +46,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         subscriptionDTO.setSpiStatus("SS01");
 
-        if(mapper.insertSubscription(subscriptionDTO) <= 0) {
+        if(subscriptionMapper.insertSubscription(subscriptionDTO) <= 0) {
             throw new Exception("구독 정보를 등록하지 못했습니다.");
         }
 
@@ -50,12 +56,28 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         for(String moduleIdx : subscriptionDTO.getCheckedModules()) {
             subscriptionPackageDetailDTO.setModuleIdx(moduleIdx);
-            if(mapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO) <= 0) {
+            if(subscriptionMapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO) <= 0) {
                 throw new Exception("구독 모듈 저장 실패: " + moduleIdx);
             }
         }
         
         return 1;
+    }
+
+    @Override
+    public SubscriptionInfoDTO test(String coIdx) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'findSubscriptionByCoIdx'");
+        return subscriptionMapper.findSubscriptionByCoIdx(coIdx);
+    }
+
+    @Override
+    public SubscriptionInfoDTO findSubscriptionByCoIdx(String userIdx) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'getSubscriptionInfoByCoIdx'");
+        CompanyDTO companyDTO = companyMapper.findByUserIdx(userIdx);
+
+        return subscriptionMapper.findSubscriptionByCoIdx(companyDTO.getCoIdx());
     }
 
 }

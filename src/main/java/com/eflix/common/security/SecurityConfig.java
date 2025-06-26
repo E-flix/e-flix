@@ -69,10 +69,11 @@ public class SecurityConfig {
 	@Bean
 	@Order(1)
 	public SecurityFilterChain erpSecurityFilterChain(HttpSecurity http) throws Exception {
-		http.securityMatcher("/erp/**")
+		http.securityMatcher("/**")
 				.authorizeHttpRequests(auth -> auth
-					.requestMatchers("/erp", "/erp/login", "/erp/signup", "/erp/error/**", "/erp/assets/**", "/erp/css/**", "/erp/js/**", "/bootstrap/**", "/common/**").permitAll()
-					.requestMatchers("/erp/**").authenticated())
+					.requestMatchers("/erp", "/erp/login", "/erp/signup", "/erp/inquiry/**", "/erp/error/**", "/erp/assets/**", "/erp/css/**", "/erp/js/**", "/bootstrap/**", "/common/**").permitAll()
+					.requestMatchers("/erp/**").permitAll()
+					.requestMatchers("/**").authenticated())
 			.formLogin(form -> form
 				.loginProcessingUrl("/erp/login")
 				.loginPage("/")
@@ -90,39 +91,42 @@ public class SecurityConfig {
 				.logoutUrl("/erp/logout")
 				.deleteCookies("JSESSIONID", "user_remember"))
 			.csrf(csrf -> csrf.disable())
+			.headers(headers -> headers
+            	.frameOptions(frame -> frame.disable()))
 			.exceptionHandling(exception -> exception.accessDeniedPage("/common/error/403.html"));
 
 		return http.build();
 	}
 
-	@Bean
-	@Order(2)
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-				.securityMatcher("/**")
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/**", "/**/**").permitAll()
-						.anyRequest().authenticated())
-				.formLogin(form -> form
-						.loginPage("/login")
-						.usernameParameter("user_id")
-						.passwordParameter("user_pw")
-						.successHandler(authenticationSuccessHandler())
-						.permitAll())
-				.rememberMe(remember -> remember
-						.key("eflix")
-						.tokenValiditySeconds(60 * 60 * 24)
-						.rememberMeParameter("user_remember")
-						.userDetailsService(customUserDetailService))
+	// @Bean
+	// @Order(2)
+	// public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	// 	http
+	// 			.securityMatcher("/**")
+	// 			.authorizeHttpRequests(auth -> auth
+	// 					.requestMatchers("/**", "/**/**").permitAll()
+	// 					.anyRequest().authenticated())
+	// 			.formLogin(form -> form
+	// 					.loginPage("/login")
+	// 					.usernameParameter("user_id")
+	// 					.passwordParameter("user_pw")
+	// 					.successHandler(authenticationSuccessHandler())
+	// 					.permitAll())
+	// 			.rememberMe(remember -> remember
+	// 					.key("eflix")
+	// 					.tokenValiditySeconds(60 * 60 * 24)
+	// 					.rememberMeParameter("user_remember")
+	// 					.userDetailsService(customUserDetailService))
 
-				.logout(logout -> logout
-						.logoutUrl("/logout")
-						.deleteCookies("JSESSIONID", "user_remember"))
-				.csrf(csrf -> csrf.disable())
-				.exceptionHandling(exception -> exception.accessDeniedPage("/error/403"));
+	// 			.logout(logout -> logout
+	// 					.logoutUrl("/logout")
+	// 					.deleteCookies("JSESSIONID", "user_remember"))
+	// 			.csrf(csrf -> csrf.disable())
+	// 			.headers(headers -> headers.frameOptions().disable())
+	// 			.exceptionHandling(exception -> exception.accessDeniedPage("/error/403"));
 
-		return http.build();
-	}
+	// 	return http.build();
+	// }
 
 	@Bean
 	public AuthenticationSuccessHandler authenticationSuccessHandler() {

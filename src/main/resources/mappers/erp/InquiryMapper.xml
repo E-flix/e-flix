@@ -31,4 +31,17 @@
     <select id="findAllAnswers" resultType="AnswerDTO">
         SELECT * FROM answers
     </select>
+
+    <!-- ===================================== -->
+    <!-- 문의 등록                        -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-26 -->
+    <!-- ===================================== -->
+    <insert id="insertQst" parameterType="QuestionDTO">
+        <selectKey resultType="String" keyProperty="qstIdx" order="BEFORE">
+            SELECT 'qst-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(qst_idx, 5))), 100) + 1) FROM questions
+        </selectKey>
+        INSERT INTO questions(qst_idx, qst_title, qst_writer, qst_content, qst_email, qst_tel, qst_regdate)
+        VALUES(#{qstIdx}, #{qstTitle}, #{qstWriter}, #{qstContent}, #{qstEmail}, #{qstTel}, SYSDATE)
+    </insert>
 </mapper>

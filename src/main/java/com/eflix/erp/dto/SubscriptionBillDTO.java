@@ -22,7 +22,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class SubscriptionBill {
+public class SubscriptionBillDTO {
     private String spbIdx;      // spd-000
     private String spiIdx;      // spi-000
     private String spbFile;

@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
+import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.common.security.dto.UserDTO;
 import com.eflix.erp.dto.CompanyDTO;
 import com.eflix.erp.service.CompanyService;
@@ -76,10 +77,10 @@ public class CompnayRestController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ResResult> my(@AuthenticationPrincipal UserDTO userDTO) {
+    public ResponseEntity<ResResult> my(@AuthenticationPrincipal SecurityUserDetails securityUserDetails) {
         ResResult result = null;
 
-        CompanyDTO companyDTO = companyService.findByUserIdx(userDTO.getUserIdx());
+        CompanyDTO companyDTO = companyService.findByUserIdx(securityUserDetails.getUserDTO().getUserIdx());
 
         if(companyDTO != null) {
             result = ResUtil.makeResult(ResStatus.OK, companyDTO);

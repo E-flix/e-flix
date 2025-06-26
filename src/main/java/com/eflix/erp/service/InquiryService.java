@@ -1,5 +1,8 @@
 package com.eflix.erp.service;
 
+import com.eflix.erp.dto.AnswerDTO;
+import com.eflix.erp.dto.QuestionDTO;
+
 /**
  * ERP 고객 문의 관리를 위한 Service 클래스
  * 
@@ -26,9 +29,14 @@ package com.eflix.erp.service;
  * @changelog
  * <ul>
  *   <li>2025-06-19: 최초 생성 (복성민)</li>
+ *   <li>2025-06-26: 문의 로직 추가 (복성민)</li>
  * </ul>
  */
 
 public interface InquiryService {
+
+    public int insertQst(QuestionDTO questionDTO);
+
+    public int insertAns(AnswerDTO answerDTO);
     
 }

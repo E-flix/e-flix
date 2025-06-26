@@ -71,62 +71,29 @@
 						aria-label="Close"></button>
 				</div>
 				<div class="modal-body border-0 p-4">
-					<form id="contactForm" data-sb-form-api-token="API_TOKEN">
-						<!-- Name input-->
+					<form id="contactForm">
 						<div class="form-floating mb-3">
-							<input class="form-control" id="name" type="text" placeholder="이름..."
-								data-sb-validations="required" /> <label for="name">성함</label>
-							<div class="invalid-qna" data-sb-qna="name:required">성함을
-								입력해주세요.</div>
+							<input class="form-control" id="qstWriter" name="qstWriter" type="text" placeholder="이름..." data-sb-validations="required" /> <label for="name">성함</label>
+							<div class="invalid-qna" data-sb-qna="name:required">성함을 입력해주세요.</div>
 						</div>
-						<!-- Email address input-->
 						<div class="form-floating mb-3">
-							<input class="form-control" id="email" type="email" placeholder="name@example.com"
-								data-sb-validations="required,email" /> <label for="email">이메일</label>
-							<div class="invalid-qna" data-sb-qna="email:required">이메일을
-								입력해주세요.</div>
-							<div class="invalid-qna" data-sb-qna="email:email">올바르지
-								않은 이메일 형식입니다.</div>
+							<input class="form-control" id="qstEmail" name="qstEmail" type="email" placeholder="name@example.com" data-sb-validations="required,email" /> 
+							<label for="email">이메일</label>
+							<div class="invalid-qna" data-sb-qna="email:required">이메일을 입력해주세요.</div>
+							<div class="invalid-qna" data-sb-qna="email:email">올바르지 않은 이메일 형식입니다.</div>
 						</div>
-						<!-- Phone number input-->
-						<!-- Title input -->
 						<div class="form-floating mb-3">
-							<input class="form-control" id="title" type="text" placeholder="제목..."
+							<input class="form-control" id="qstTitle" name="qstTitle" type="text" placeholder="제목..."
 								data-sb-validations="required" /> <label for="phone">제목</label>
-							<div class="invalid-qna" data-sb-qna="title:required">제목을
-								입력해주세요.</div>
+							<div class="invalid-qna" data-sb-qna="title:required">제목을 입력해주세요.</div>
 						</div>
-						<!-- Message input-->
-						<!-- content input-->
 						<div class="form-floating mb-3">
-							<textarea class="form-control" id="content" type="text" placeholder="내용..."
-								style="height: 10rem" data-sb-validations="required"></textarea>
+							<textarea class="form-control" id="qstContent" name="qstContent" type="text" placeholder="내용..." style="height: 10rem" data-sb-validations="required"></textarea>
 							<label for="message">문의 내용</label>
-							<div class="invalid-qna" data-sb-qna="content:required">내용을
-								입력해주세요.</div>
+							<div class="invalid-qna" data-sb-qna="content:required">내용을 입력해주세요.</div>
 						</div>
-
-						<!-- Submit success message-->
-						<!-- This is what your users will see when the form-->
-						<!-- has successfully submitted-->
-						<div class="d-none" id="submitSuccessMessage">
-							<div class="text-center mb-3">
-								<div class="fw-bolder">Form submission successful!</div>
-								To activate this form, sign up at <br /> <a
-									href="https://startbootstrap.com/solution/contact-forms">https://startbootstrap.com/solution/contact-forms</a>
-							</div>
-						</div>
-						<!-- Submit error message-->
-						<!-- This is what your users will see when there is-->
-						<!-- an error submitting the form-->
-						<div class="d-none" id="submitErrorMessage">
-							<div class="text-center text-danger mb-3">Error sending
-								message!</div>
-						</div>
-						<!-- Submit Button-->
 						<div class="d-grid">
-							<button class="btn btn-primary rounded-pill btn-lg disabled" id="submitButton"
-								type="submit">제출</button>
+							<button class="btn btn-primary rounded-pill btn-lg" id="sendBtn" type="submit">제출</button>
 						</div>
 					</form>
 				</div>
@@ -218,6 +185,39 @@
 	</div>
 	<script>
 		$(document).ready(function() {
+			$('#contactForm').on('submit', function(e) {
+				e.preventDefault();
+
+				const contactData = $(this).serializeArray().reduce(function(obj, item) {
+					obj[item.name] = item.value;
+					return obj;
+				}, {});
+
+				console.log(contactData);
+
+				$.ajax({
+					type: "POST",
+					url: "/erp/inquiry/qst",
+					data: JSON.stringify(contactData),
+					contentType: "application/json",
+					success: function(res) {
+						console.log(res);
+						if(res.head.res_code === "200") {
+							Swal.fire("성공", "문의 등록 완료", "success");
+						
+							$('#qnaModal').hide();
+							$('.modal-backdrop').remove();
+						} else {
+							Swal.fire("실패", res.head.res_result, "error");
+						}
+					},
+					error: function(xhr, status, err) {
+						console.error(err);
+						Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+					}
+				});
+			});
+
 			$('#signupForm').on('submit', function(e) {
 				e.preventDefault();
 
@@ -238,12 +238,36 @@
 							$('#signupModal').hide();
 							$('.modal-backdrop').remove();
 						} else {
-							Swal.fire("실패", res.body, "error");
+							Swal.fire("실패", res.head.res_result, "error");
 						}
 					},
 					error: function(xhr, status, err) {
 						console.error(err);
 						Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+					}
+				});
+			});
+
+			$('#signoutBtn').on('click', function() {
+				Swal.fire({
+                    title: "정말로 로그아웃 하시겠나요?",
+					showDenyButton: true,
+					confirmButtonText: "확인",
+					denyButtonText: `취소`,
+					icon: 'question'
+				}).then((result) => {	
+					if (result.isConfirmed) {
+						$.ajax({
+							type: "POST",
+							url: "/erp/logout",
+							contentType: "application/json",
+							success: function (res) {
+								window.location.href = "/erp";
+							},
+							error: function (xhr, status, err) {
+
+							}
+						});
 					}
 				});
 			});
