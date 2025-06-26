@@ -8,6 +8,7 @@ import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
 import com.eflix.erp.dto.SubscriptionDTO;
+import com.eflix.erp.dto.etc.SubMasterDTO;
 import com.eflix.erp.service.SubscriptionService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -67,11 +68,11 @@ public class SubscriptionRestController {
     }
     
     @PostMapping("/subscription")
-    public ResponseEntity<ResResult> postMethodName(@RequestBody SubscriptionDTO subscriptionDTO) {
+    public ResponseEntity<ResResult> postMethodName(@RequestBody SubMasterDTO subMasterDTO) {
         //TODO: process POST request
         ResResult result;
         try {
-            service.insertSubscriptionInfo(subscriptionDTO);
+            service.insertSubscriptionInfo(subMasterDTO.getSubscriptionDTO(), subMasterDTO.getMasterDTO());
             result = ResUtil.makeResult(ResStatus.OK, null);
         } catch (Exception e) {
             result = ResUtil.makeResult("400", e.getMessage(), null);

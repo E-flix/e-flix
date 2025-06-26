@@ -1,6 +1,5 @@
 package com.eflix.erp.service.impl;
 
-import org.hibernate.tool.schema.spi.SqlScriptException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +11,8 @@ import com.eflix.erp.dto.SubscriptionPackageDTO;
 import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
 import com.eflix.erp.dto.etc.SubscriptionInfoDTO;
 import com.eflix.erp.mapper.CompanyMapper;
+import com.eflix.erp.dto.MasterDTO;
+import com.eflix.erp.mapper.MasterMapper;
 import com.eflix.erp.mapper.SubscriptionMapper;
 import com.eflix.erp.service.SubscriptionService;
 
@@ -23,6 +24,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Autowired
     private CompanyMapper companyMapper;
+
+    @Autowired
+    private MasterMapper masterMapper;
 
     @Override
     public SubscriptionPackageDTO findById(String spkIdx) {
@@ -40,7 +44,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO) {
+    public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO, MasterDTO masterDTO) {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'insertSubscriptionInfo'");
 
@@ -59,6 +63,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if(subscriptionMapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO) <= 0) {
                 throw new Exception("구독 모듈 저장 실패: " + moduleIdx);
             }
+        }
+
+        if(masterMapper.insertMaster(masterDTO) <= 0) {
+            throw new Exception("마스터 계정을 등록하지 못했습니다.");
         }
         
         return 1;
