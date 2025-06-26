@@ -8,6 +8,7 @@
   - 2025-06-19 (김어진): 계정과목 전체조회 작성
   - 2025-06-23 (김어진): 사원관리 조건별 조회 쿼리문 작성
   - 2025-06-24 (김어진): 사원관리 조건별 조회 구현 및 사원등록 쿼리문 작성
+  - 2025-06-24 (김어진): 사원수정 구현 및 사원수정 쿼리문 작성
 =============================================== -->
 <mapper namespace="com.eflix.hr.mapper.EmployeeMapper">
   
@@ -22,7 +23,11 @@
         e.emp_type,
         e.emp_email,
         e.emp_regdate,
-        e.emp_account
+        e.emp_account,
+        e.emp_memo,
+        e.emp_addr,
+        e.emp_addr_detail,
+        e.emp_addr_zip
     FROM employees e
     LEFT JOIN departments d ON e.dept_idx = d.dept_idx
     <where>
@@ -109,4 +114,8 @@
         #{empPw}
     )
 </insert>
+<!-- 단건조회 -->
+<select id="selectById" parameterType="String" resultType="EmployeeDTO">
+    SELECT * FROM employees WHERE emp_idx = #{empIdx}
+</select>
 </mapper>

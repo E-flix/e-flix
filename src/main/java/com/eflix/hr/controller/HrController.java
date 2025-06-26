@@ -37,7 +37,8 @@ import org.springframework.web.bind.annotation.PostMapping;
   - 2025-06-18 (김어진): 인사 메인 화면 및 각 기능별 화면 요청 처리 메소드 추가
   - 2025-06-19 (김어진): 각 기능별 화면 요청 처리 메소드 추가
   - 2025-06-23 (김어진): 사원조회 화면 요청 처리 메소드 추가
-  - 2025-06-23 (김어진): 사원등록 화면 요청 처리 메소드 추가
+  - 2025-06-25 (김어진): 사원등록 화면 요청 처리 메소드 추가
+  - 2025-06-26 (김어진): 사원수정 화면 요청 처리 메소드 추가
 ============================================  */
 
 @Controller
@@ -112,6 +113,7 @@ public class HrController {
     
     List<EmployeeDTO> records = employeeService.getAllEmployees(params);
 
+    System.out.println("사원 리스트 : " + records);
     // 뷰에 넘길 모델
     model.addAttribute("empList",  records);
     model.addAttribute("depts",     depts);
@@ -133,6 +135,12 @@ public class HrController {
     @ResponseBody
     public List<DepartmentDTO> children(@PathVariable String deptUpIdx) {
         return departmentService.findAllDeptsUP(deptUpIdx);
+    }
+
+    @GetMapping("/findEmp")
+    @ResponseBody
+    public EmployeeDTO findEmp(@RequestParam("empIdx") String empIdx) {
+      return employeeService.selectById(empIdx);
     }
 
   //사원 등록

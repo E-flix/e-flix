@@ -6,6 +6,7 @@
   - 설명     : DepartmentMapper query xml
   [ 변경 이력 ]
   - 2025-06-23 (김어진): 부서 상위부서,하위부서 쿼리문 작성
+  - 2025-06-26 (김어진): 부서등록 쿼리문 작성
 =============================================== -->
 <mapper namespace="com.eflix.hr.mapper.DepartmentMapper">
   <select id="findAllDepts" resultType="DepartmentDTO">
@@ -25,4 +26,33 @@
     WHERE dept_up_idx = #{deptIdx}
     ORDER BY dept_name
   </select>
+  
+  <!-- 부서등록 -->
+  <!-- <insert id="insertDepartment" parameterType="com.eflix.hr.dto.DepartmentDTO">
+    INSERT INTO departments
+      (dept_idx,
+        dept_up_idx,
+        dept_name,
+        dept_status,
+        dept_memo,
+        dept_regdate,
+        dept_moddate)
+    VALUES
+      (
+        #{deptIdx},
+        <choose>
+          <when test="deptUpIdx != null and deptUpIdx != ''">
+            #{deptUpIdx}
+          </when>
+          <otherwise>
+            NULL
+          </otherwise>
+        </choose>,
+        #{deptName},
+        #{deptStatus},
+        #{deptMemo},
+        SYSDATE,
+        NULL
+      )
+  </insert> -->
 </mapper>

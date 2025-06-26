@@ -7,6 +7,7 @@
   - 2025-06-19 (김어진): Mapper 생성
   - 2025-06-23 (김어진): 사원관리 페이지 조건검색 구현
   - 2025-06-24 (김어진): 사원등록 구현
+  - 2025-06-26 (김어진): 사원수정 구현
 ============================================ */
 package com.eflix.hr.mapper;
 
@@ -35,6 +36,7 @@ public interface EmployeeMapper {
     // 재직 상태 드롭다운 조회
     public List<EmployeeDTO> empStatusList();
 
-    public int insertEmp(EmployeeDTO emp);
+    // // 사원등록
+    // public int insertEmp(EmployeeDTO emp);
 
 }

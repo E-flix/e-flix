@@ -5,7 +5,8 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 클래스 생성
-  - 2025-06-19 (김어진): 조건별 조회 구현
+  - 2025-06-23 (김어진): 조건별 조회 구현
+  - 2025-06-23 (김어진): 부서등록구현
 ============================================ */
 package com.eflix.hr.service.impl;
 
@@ -22,7 +23,7 @@ import com.eflix.hr.service.DepartmentService;
 public class DepartmentServiceImpl implements DepartmentService{
 
   @Autowired
-  private DepartmentMapper mapper;
+  private DepartmentMapper departmentMapper;
 
   @Override
   public List<DepartmentDTO> getAllDepartments() {
@@ -51,13 +52,17 @@ public class DepartmentServiceImpl implements DepartmentService{
 
   @Override
   public List<DepartmentDTO> findAllDepts() {
-    // throw new UnsupportedOperationException("Unimplemented method 'findAllDepts'");
-    return mapper.findAllDepts();
+    return departmentMapper.findAllDepts();
   }
 
   @Override
   public List<DepartmentDTO> findAllDeptsUP(String deptIdx) {
-    // throw new UnsupportedOperationException("Unimplemented method 'findAllDeptsUP'");
-    return mapper.findAllDeptsUp(deptIdx);
+    return departmentMapper.findAllDeptsUp(deptIdx);
   }
+
+  // 부서등록
+  // @Override
+  // public int insertDept(DepartmentDTO dept) {
+  //   return departmentMapper.insertDept(dept);
+  // }
 }

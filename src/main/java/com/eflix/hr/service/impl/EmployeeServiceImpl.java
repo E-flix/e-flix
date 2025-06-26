@@ -5,8 +5,9 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 클래스 생성
-  - 2025-06-19 (김어진): 조건별 조회기능 구현
+  - 2025-06-23 (김어진): 조건별 조회기능 구현
   - 2025-06-24 (김어진): 사원관리 드롭다운 구현
+  - 2025-06-26 (김어진): 사원수정 구현
 ============================================ */
 package com.eflix.hr.service.impl;
 
@@ -33,8 +34,9 @@ public class EmployeeServiceImpl implements EmployeeService{
   // }
 
   @Override
-  public EmployeeDTO getEmployeeById(String empIdx) {
-    throw new UnsupportedOperationException("Unimplemented method 'getEmployeeById'");
+  public EmployeeDTO selectById(String empIdx) {
+    // throw new UnsupportedOperationException("Unimplemented method 'getEmployeeById'");
+    return employeeMapper.selectById(empIdx);
   }
 
   @Override
@@ -71,6 +73,13 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     @Override
     public int insertEmp(EmployeeDTO emp) {
-      return employeeMapper.insertEmp(emp);
+      // TODO Auto-generated method stub
+      throw new UnsupportedOperationException("Unimplemented method 'insertEmp'");
     }
+
+  //  // 사원등록 
+  //   @Override
+  //   public int insertEmp(EmployeeDTO emp) {
+  //     return employeeMapper.insertEmp(emp);
+  //   }
 }

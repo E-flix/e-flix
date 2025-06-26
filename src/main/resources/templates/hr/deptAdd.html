@@ -8,6 +8,7 @@
   [ 변경 이력 ]
   - 2025-06-18 (김어진): title 및 내용 추가
   - 2025-06-19 (김어진): layout 구성
+  - 2025-06-26 (김어진): 부서등록 구현
 ============================================ -->
 
 <head>
@@ -122,3 +123,44 @@
 </div>
 
 </html>
+<!-- <script th:inline="javascript">
+  $('#employeeForm').on('submit', function (e) {
+    e.preventDefault(); // 기본 submit 방지
+
+    var $form = $(this);
+    var formData = new FormData(this);
+    $.ajax({
+      url: "insertDept",
+      type: 'POST',
+      data: formData,
+      processData: false, // jQuery가 data를 문자열로 변환하지 않도록
+      contentType: false, // multipart/form-data 헤더를 자동 세팅하도록
+      success: function (code) {
+        if (code === '200') {
+          alert('등록 성공!');
+          resetForm();
+          closeEmpModal();
+        } else {
+          resetForm();
+          alert('등록 실패: 저장에 문제가 발생했습니다.');
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error(error);
+        resetForm();
+        alert('서버 통신 중 에러가 발생했습니다.');
+      }
+    });
+  });
+
+  // 초기화
+  function closeEmpModal() {
+    resetForm();
+    $('#employeeModal').hide();
+    $('.modal-backdrop').remove();
+  }
+
+  function resetForm() {
+    $('#employeeForm')[0].reset();
+  }
+</script> -->

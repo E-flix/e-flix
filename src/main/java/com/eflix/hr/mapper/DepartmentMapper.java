@@ -6,6 +6,7 @@
   [ 변경 이력 ]
   - 2025-06-19 (김어진): Mapper 생성
   - 2025-06-23 (김어진): 조건별 조회 구현
+  - 2025-06-26 (김어진): 부서등록 구현
 ============================================ */
 package com.eflix.hr.mapper;
 
@@ -24,4 +25,6 @@ public interface DepartmentMapper {
 
     List<DepartmentDTO> findAllDepts();
     List<DepartmentDTO> findAllDeptsUp(String dpetIdx);
+
+  // public int insertDept(DepartmentDTO dept);
 }

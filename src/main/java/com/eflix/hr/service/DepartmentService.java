@@ -5,7 +5,8 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 인터페이스 생성
-  - 2025-06-19 (김어진): 조건별 조회 구현
+  - 2025-06-23 (김어진): 조건별 조회 구현
+  - 2025-06-26 (김어진): 부서등록 구현
 ============================================ */
 package com.eflix.hr.service;
 
@@ -22,4 +23,7 @@ public interface DepartmentService {
 
     public List<DepartmentDTO> findAllDepts();
     public List<DepartmentDTO> findAllDeptsUP(String deptIdx);
+    
+    // // 부서등록
+    // public int insertDept(DepartmentDTO dept);
 }

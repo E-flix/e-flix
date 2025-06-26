@@ -11,6 +11,7 @@
   - 2025-06-20 (김어진): 사원 전체조회 구현
   - 2025-06-23 (김어진): 조건별 검색 구현
   - 2025-06-24 (김어진): 사원등록 구현 중
+  - 2025-06-26 (김어진): 사원등록 구현완료 및 사원수정 구현
 ============================================ -->
 
 <head>
@@ -28,7 +29,7 @@
         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#employeeModal">
           사원등록
         </button>
-        <button class="btn btn-primary">사원수정</button>
+        <button id="editBtn" class="btn btn-primary">사원수정</button>
       </div>
 
       <!-- 검색 필터 -->
@@ -118,7 +119,7 @@
             <!-- 1) 헤더 -->
             <div class="modal-header">
               <h5 class="modal-title" id="employeeModalLabel">사원등록</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              <button type="button" id="employeeModalCloseX" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <!-- 2) 바디 -->
@@ -176,7 +177,13 @@
                     <input type="date" id="hireDate" name="empRegdate" class="form-control">
                   </div>
                 </div>
-                </select>
+
+                    <!-- <div class="col-md-2">
+              <select id="detailDeptSelect" name="deptIdx" class="form-select">
+                <option>선택</option>
+              </select>
+            </div> -->
+
 
                 <!-- 부서 / 직급 -->
                 <div class="row mb-3 align-items-center">
@@ -185,20 +192,20 @@
                     <div class="col-md-4">
                       <select id="insertDeptSelect" name="deptUpIdx" class="form-select">
                         <option value="">선택</option>
-                        <option th:each="d : ${depts}" th:value="${d.deptIdx}" th:text="${d.deptName}"></option>
-                      </select>
+                        <option th:each="d : ${depts}" th:value="${d.deptIdx}" th:text="${d.deptName}"
+                          th:selected="${option=='deptUpIdx' and keyword==d.deptIdx}">
+                        </option>
+                    </select>
                     </div>
-
-                    <!-- <div class="col-md-2">
-              <select id="detailDeptSelect" name="deptIdx" class="form-select">
-                <option>선택</option>
-              </select>
-            </div> -->
 
                     <label class="col-md-2 col-form-label">상세 부서</label>
                     <div class="col-md-4">
                       <select id="insertDetailDeptSelect" name="deptIdx" class="form-select">
-                        <option>선택</option>
+                        <option value="">선택</option>
+                        <!-- detailDepts 는 페이지 로드 시 한 번만 채워지거나, 비워둬도 됩니다 -->
+                        <option th:each="sd : ${detailDepts}" th:value="${sd.deptIdx}" th:text="${sd.deptName}"
+                          th:selected="${sd.deptIdx == deptIdx}">
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -230,7 +237,7 @@
                   </div>
                   <label for="empType" class="col-md-2 col-form-label">근무유형</label>
                   <div class="col-md-4">
-                    <select id="empType" class="form-select">
+                    <select name="empType" class="form-select">
                       <option value="">선택</option>
                       <option th:each="w : ${workList}" th:value="${w.workTypeId}" th:text="${w.workTypeNm}"
                         th:selected="${option=='empType' and keyword==w.workTypeId}">
@@ -264,18 +271,18 @@
                   <div class="col-md-8">
                     <div class="input-group mb-2">
                       <button class="btn btn-outline-danger" type="button">📍 우편번호 검색</button>
-                      <input type="text" class="form-control" placeholder="우편번호">
+                      <input type="text" name="empAddrZip" class="form-control" placeholder="우편번호">
                     </div>
-                    <input type="text" class="form-control mb-2" placeholder="기본 주소">
-                    <input type="text" class="form-control" placeholder="상세주소 입력">
+                    <input type="text" name="empAddr" class="form-control mb-2" placeholder="기본 주소">
+                    <input type="text" name="empAddrDetail" class="form-control" placeholder="상세주소 입력">
                   </div>
                 </div>
 
                 <!-- 메모 -->
                 <div class="row mb-3">
-                  <label for="memo" class="col-md-2 col-form-label">메모</label>
+                  <label for="empMemo" class="col-md-2 col-form-label">메모</label>
                   <div class="col-md-8">
-                    <textarea id="memo" class="form-control" rows="4" placeholder="필요시 입력하세요"></textarea>
+                    <textarea id="empMemo" name="empMemo" class="form-control" rows="4" placeholder="필요시 입력하세요"></textarea>
                   </div>
                 </div>
               </form>
@@ -283,150 +290,213 @@
 
             <!-- 3) 푸터 -->
             <div class="modal-footer justify-content-end">
-              <button type="submit" form="employeeForm" class="btn btn-primary">등록</button>
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+              <button type="submit" form="employeeForm" class="btn btn-primary" id="modalbtn">저장</button>
+              <button type="button" id="employeeModalCloseBtn" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
             </div>
 
           </div>
         </div>
       </div>
-
-
       <!-- 2. 사원 테이블 -->
       <div class="container-fluid px-0" style="height:100vh;">
         <div id="myGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
       </div>
     </div>
     <script th:inline="javascript">
-      // Thymeleaf empList → JS
-      var rowData = /*[[${empList}]]*/ [];
-      console.log(rowData);
-
-      // 컬럼 정의
-      const columnDefs = [{
-          headerName: "",
-          checkboxSelection: true,
-          headerCheckboxSelection: true,
-          width: 50
-        },
-        {
-          headerName: "사원ID",
-          field: "empIdx",
-          sortable: true,
-          filter: true,
-          resizable: true
-        },
-        {
-          headerName: "사원명",
-          field: "empName",
-          sortable: true,
-          filter: true,
-          resizable: true
-        },
-        {
-          headerName: "부서",
-          field: "deptName",
-          sortable: true,
-          filter: true,
-          resizable: true
-        },
-        {
-          headerName: "직급",
-          field: "empGrade",
-          sortable: true,
-          filter: true,
-          resizable: true
-        },
-        {
-          headerName: "재직 상태",
-          field: "empStatus",
-          sortable: true,
-          filter: true,
-          resizable: true
-        },
-        {
-          headerName: "근무 유형",
-          field: "empType",
-          sortable: true,
-          filter: true,
-          resizable: true
-        },
-        {
-          headerName: "입사일",
-          field: "empRegdate",
-          sortable: true,
-          filter: 'agDateColumnFilter',
-          valueFormatter: params => new Date(params.value).toISOString().slice(0, 10)
-        },
-        {
-          headerName: "연락처",
-          field: "empAccount",
-          sortable: true,
-          filter: true,
-          resizable: true
-        },
-        {
-          headerName: "이메일",
-          field: "empEmail",
-          sortable: true,
-          filter: true,
-          resizable: true
-        },
-        {
-          headerName: "근로계약서",
-          field: "empIdx",
-          cellRenderer: params => `<a href="/employees/${params.value}/contract" target="_blank">다운로드</a>`,
-          resizable: true
-        }
-      ];
-
-      // 그리드 옵션
-      const gridOptions = {
-        columnDefs,
-        rowData,
-        defaultColDef: {
-          flex: 1,
-          minWidth: 100
-        },
-        pagination: true,
-        paginationPageSize: 20,
-        rowSelection: 'multiple'
-      };
-
-      // 초기화
       document.addEventListener('DOMContentLoaded', () => {
-        // 그리드 생성
+        // Thymeleaf empList → JS
+        var rowData = /*[[${empList}]]*/ [];
+        console.log(rowData);
+
+        // 컬럼 정의
+        const columnDefs = [{
+            headerName: "",
+            checkboxSelection: true,
+            headerCheckboxSelection: true,
+            width: 50
+          },
+          {
+            headerName: "사원ID",
+            field: "empIdx",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "사원명",
+            field: "empName",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "부서",
+            field: "deptName",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "직급",
+            field: "empGrade",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "재직 상태",
+            field: "empStatus",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "근무 유형",
+            field: "empType",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "입사일",
+            field: "empRegdate",
+            sortable: true,
+            filter: 'agDateColumnFilter',
+            valueFormatter: params => new Date(params.value).toISOString().slice(0, 10)
+          },
+          {
+            headerName: "연락처",
+            field: "empAccount",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "이메일",
+            field: "empEmail",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "근로계약서",
+            field: "empIdx",
+            cellRenderer: params => `<a href="/employees/${params.value}/contract" target="_blank">다운로드</a>`,
+            resizable: true
+          }
+        ];
+
+        // 그리드 옵션
+        const gridOptions = {
+          columnDefs,
+          rowData,
+          defaultColDef: {
+            flex: 1,
+            minWidth: 100
+          },
+          pagination: true,
+          paginationPageSize: 20,
+          rowSelection: 'multiple',
+          onGridReady: params => {
+            gridApi = params.api;
+            columnApi = params.columnApi;
+          }
+        };
+
+        // 1) ag-Grid 생성
         agGrid.createGrid(document.querySelector("#myGrid"), gridOptions);
 
-        // 부서 → 상세부서 AJAX
-        document.getElementById('deptSelect').addEventListener('change', function () {
-          const detail = document.getElementById('detailDeptSelect');
-          detail.innerHTML = '<option value="">선택</option>';
-          if (!this.value) return;
-          fetch(`/hr/${this.value}/children`)
-            .then(r => r.json())
-            .then(list => list.forEach(d => {
-              const opt = document.createElement('option');
-              opt.value = d.deptIdx;
-              opt.textContent = d.deptName;
-              detail.append(opt);
-            }));
+        // 2) 부서 → 상세부서 AJAX (조회 & 등록 모달 모두)
+        const bindDept = (parentId, childSelectId) => {
+          document.getElementById(parentId).addEventListener('change', function () {
+            const detail = document.getElementById(childSelectId);
+            detail.innerHTML = '<option value="">선택</option>';
+            if (!this.value) return;
+            fetch(`/hr/${this.value}/children`)
+              .then(r => r.json())
+              .then(list => {
+                list.forEach(d => {
+                  const opt = document.createElement('option');
+                  opt.value = d.deptIdx;
+                  opt.textContent = d.deptName;
+                  detail.append(opt);
+                });
+              });
+          });
+        };
+        bindDept('deptSelect', 'detailDeptSelect');
+        bindDept('insertDeptSelect', 'insertDetailDeptSelect');
+        // 3) 수정 버튼 클릭
+        document.getElementById('editBtn').addEventListener('click', () => {
+          console.log('사원수정 클릭'); // ← 바인딩 확인용 로그
+          if (!gridApi) return console.error('Grid API가 아직 준비되지 않았습니다.');
+          const selected = gridApi.getSelectedRows();
+          if (selected.length !== 1) return alert('수정할 사원을 하나만 선택하세요.');
+          const emp = selected[0];
+
+          console.log(emp);
+          
+          $.ajax({
+            type: "GET",
+            url: `/hr/findEmp?empIdx=${emp.empIdx}`,
+            success: function (res) {
+              console.log(res)
+              $('#empIdx').val();
+              $('#empName').val();
+              $('input[name=empPhone]').val(res.empPhone);
+              $('#hireDate').val();
+              $('input[name=rrnPfx]').val(res.rrnPfx);
+              $('input[name=rrnSfx]').val(res.rrnSfx);
+              $('input[name=empPw]').val(res.empPw);
+              $('select[name=empGrade]').val(res.empGrade);
+              $('select[name=empType]').val(res.empType);
+              $('select[name=deptUpIdx]').val(res.deptUpIdx);
+              // $('select[name=deptIdx]').val(res.deptIdx);
+              $('input[name=empAccount]').val(res.empAccount);
+              $('textarea[name=empMemo]').val(res.empMemo);
+              $('input[name=empAddr]').val(res.empAddr);
+              $('input[name=empAddrDetail]').val(res.empAddrDetail);
+              $('input[name=empAddrZip').val(res.empAddrZip);
+            },
+            error: function (xhr, status, err) {
+
+            }
+          });
+
+          // 폼 필드 채우기 (예시 일부)
+          document.getElementById('empIdx').value = emp.empIdx;
+          document.getElementById('empName').value = emp.empName;
+          document.getElementById('empEmail').value = emp.empEmail;
+          document.getElementById('empPhone').value = emp.empPhone;
+          document.getElementById('hireDate').value = new Date(emp.empRegdate).toISOString().slice(0, 10);
+          // 부서/상세부서
+          document.getElementById('insertDeptSelect').value = emp.deptUpIdx;
+          document.getElementById('insertDeptSelect').dispatchEvent(new Event('change'));
+          setTimeout(() => {
+            document.getElementById('insertDetailDeptSelect').value = emp.deptIdx;
+          }, 200);
+          // 직급, 권한, 근무유형, 계좌 등…
+
+          // 모달 타이틀·폼 액션 변경
+          document.getElementById('employeeModalLabel').textContent = '사원수정';
+          const form = document.getElementById('employeeForm');
+          form.action = '/updateEmp';
+          form.method = 'post';
+          // hidden mode 필드
+          let modeInput = form.querySelector('input[name="mode"]');
+          if (!modeInput) {
+            modeInput = document.createElement('input');
+            modeInput.type = 'hidden';
+            modeInput.name = 'mode';
+            form.append(modeInput);
+          }
+          modeInput.value = 'update';
+
+          // 모달 열기
+          new bootstrap.Modal(document.getElementById('employeeModal')).show();
         });
-        // 사원등록 부서 → 상세부서 AJAX
-        document.getElementById('insertDeptSelect').addEventListener('change', function () {
-          const detail = document.getElementById('insertDetailDeptSelect');
-          detail.innerHTML = '<option value="">선택</option>';
-          if (!this.value) return;
-          fetch(`/hr/${this.value}/children`)
-            .then(r => r.json())
-            .then(list => list.forEach(d => {
-              const opt = document.createElement('option');
-              opt.value = d.deptIdx;
-              opt.textContent = d.deptName;
-              detail.append(opt);
-            }));
-        });
-      });
+      }); // DOMContentLoaded
+
 
 
 
@@ -445,18 +515,38 @@
           success: function (code) {
             if (code === '200') {
               alert('등록 성공!');
-              // 원하면 리다이렉트도 가능합니다.
               // window.location.href = '/empList';
-              $('employeeModal').modal('hide');
+              resetForm();
+              closeEmpModal();
             } else {
+              resetForm();
               alert('등록 실패: 저장에 문제가 발생했습니다.');
             }
           },
           error: function (xhr, status, error) {
             console.error(error);
+            resetForm();
             alert('서버 통신 중 에러가 발생했습니다.');
           }
         });
       });
+
+      $('#employeeModalCloseBtn').on('click', function() {
+        closeEmpModal();
+      });
+
+      $('#employeeModalCloseX').on('click', function() {
+        closeEmpModal();
+      })
+
+      function closeEmpModal() {
+        resetForm();
+        $('#employeeModal').hide();
+        $('.modal-backdrop').remove();
+      }
+
+      function resetForm() {
+        $('#employeeForm')[0].reset();
+      }
     </script>
   </div>
