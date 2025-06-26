@@ -1,7 +1,8 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 이혁진
   - 최초작성 : 2025-06-19
-  - 설명     : 창고 화면 (AG Grid 적용)
+  - 설명     : 창고 관리 (AG Grid 적용)
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (이혁진): 화면완성
@@ -11,11 +12,13 @@
   - 2025-06-23 (이혁진): 가장 최근 ID 불러오기 완료
   - 2025-06-23 (이혁진): AG Grid 적용
 ============================================ -->
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{common/layouts/default}">
-
+<head>
+	<title>창고관리</title>
+</head>
 <div layout:fragment="content" class="container-fluid">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h2>창고관리</h2>
+	</div>
 	<div class="col-md-12">
 		<div class="radio-group">
 			<input type="radio" class="btn-check" name="accountFilter" id="warehouse" autocomplete="off" checked>

@@ -43,7 +43,7 @@
     FROM
       inbound
   </select>
-
+  
     <!--가장 마지막 inbound_lot 가져오기-->
   <select id="getNextInboundLot" resultType="String">
     SELECT

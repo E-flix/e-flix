@@ -1,19 +1,23 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 이혁진
   - 최초작성 : 2025-06-23
-  - 설명     : 입고 화면 (AG Grid 적용)
+  - 설명     : 입고 관리 (AG Grid 적용)
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-23 (이혁진): AG Grid, 레이아웃 통일 적용
   - 2025-06-24 (이혁진): 조회 완료 수동등록 작업중 및 프로시저 자동 생성 기능 예정
   - 2025-06-24 (이혁진): 반품기능 준비중
   - 2025-06-24 (이혁진): 반품기능 완료
+  - 2025-06-25 (이혁진): 입고기능 개발 중
 ============================================ -->
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{common/layouts/default}">
-
+<head>
+	<title>입고관리</title>
+</head>
 <div layout:fragment="content" class="container-fluid">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h2>입고관리</h2>
+	</div>
 	<div class="col-md-12">
 		<div class="radio-group">
 			<input type="radio" class="btn-check" name="accountFilter" id="ibd" autocomplete="off" checked>
@@ -24,7 +28,6 @@
 	</div>
 	<div class="card border-0 mt-3">
 		<div class="card-body">
-			<!-- <h5 class="text-center mb-4">입고 요청</h5> -->
 			<div class="row mb-3 align-items-end">
 				<div class="col-md-2">
 					<label class="form-label" for="todayDate">생산날짜</label>
@@ -267,9 +270,94 @@
 		});
 	});
 
-	// 입고등록
-	$("inboundBtn").on("click", () => {
-		const selectProd = ibdGridOptions.api.getSelectedRows();
-		const selectWarehouse = whGridOptions.api.getSelectedRows();
-	})
+	let latestInboundId = "";
+	let latestInboundLot = "";
+	// 마지막 입고번호 가져오기
+	$(document).ready(() => {
+		$.ajax({
+			type: 'GET',
+			url: '/purchs/gnpi',
+			success: function (id) {
+				latestInboundId = id;
+			},
+			error: function () {
+				alert("오류");
+			}
+		});
+	});
+// 마지막 로트번호 가져오기
+	$(document).ready(() => {
+		$.ajax({
+			type: 'GET',
+			url: '/purchs/gnpl',
+			success: function (id) {
+				latestInboundLot = id;
+			},
+			error: function () {
+				alert("오류");
+			}
+		});
+	});
+
+	
+$("#inboundBtn").on("click", async () => {
+	const selectedProducts = ibdGridOptions.api.getSelectedRows();
+	const selectedWarehouse = whGridOptions.api.getSelectedRows();
+
+	if (selectedProducts.length === 0 || selectedWarehouse.length !== 1) {
+		Swal.fire({
+			icon: "warning",
+			title: "선택 오류",
+			text: "제품 및 창고를 정확히 선택하세요.",
+			timer: 1500,
+			showConfirmButton: false
+		});
+		return;
+	}
+
+	try {
+		const [inboundId, inboundLot] = await Promise.all([
+			$.get('/purchs/gnpi'),
+			$.get('/purchs/gnpl')
+		]);
+
+		const inboundManager = "admin"; // 또는 서버에서 받은 값
+
+		const payload = {
+			inboundId,
+			prodId: selectedProducts.map(p => p.prodId),
+			inboundQuantity: selectedProducts.map(p => p.prodQuantity),
+			inboundLot,
+			inboundDate: document.getElementById("fullDateTime").value,
+			inboundManager,
+			warehouseId: selectedWarehouse[0].warehouseId
+		};
+
+		await $.ajax({
+			type: "POST",
+			url: "/purchs/pibd",
+			contentType: "application/json",
+			data: JSON.stringify(payload)
+		});
+
+		Swal.fire({
+			icon: "success",
+			title: "입고 완료",
+			text: "제품이 창고에 입고되었습니다.",
+			timer: 1200,
+			showConfirmButton: false
+		}).then(() => window.location.reload());
+
+	} catch (error) {
+		Swal.fire({
+			icon: "error",
+			title: "입고 실패",
+			text: "입고번호 또는 서버 오류가 발생했습니다.",
+			timer: 1500,
+			showConfirmButton: false
+		});
+	}
+});
+
+
 </script>

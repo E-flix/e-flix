@@ -27,7 +27,7 @@ public class InboundDTO {
     String productType;
 
     String inboundId;
-    String inboundQuantity;
+    int inboundQuantity;
     String inboundLot;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     Date inboundDate;
