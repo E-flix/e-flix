@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-23 (이혁진): 입고화면 컨트롤러 완성
+  - 2025-06-23 (이혁진): 파일명 ibound 수정 Ibound
 ============================================  */
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
