@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 public class CustomerDTO {
     private String customerCd;
     private String customerNm;
-    private String salesEmpCd;
+    private String representativeNm;
     private String phoneNo;
     private BigDecimal discountRate;
 
@@ -21,8 +21,16 @@ public class CustomerDTO {
     public String getCustomerNm() { return customerNm; }
     public void setCustomerNm(String customerNm) { this.customerNm = customerNm; }
 
-    public String getSalesEmpCd() { return salesEmpCd; }
-    public void setSalesEmpCd(String salesEmpCd) { this.salesEmpCd = salesEmpCd; }
+    // public String getSalesEmpCd() { return salesEmpCd; }
+    // public void setSalesEmpCd(String salesEmpCd) { this.salesEmpCd = salesEmpCd; }
+
+    public String getRepresentativeNm(){
+        return representativeNm;
+    }
+
+    public void setRepresentativeNM(String representativeNm){
+        this.representativeNm = representativeNm;
+    }
 
     public String getPhoneNo() { return phoneNo; }
     public void setPhoneNo(String phoneNo) { this.phoneNo = phoneNo; }
