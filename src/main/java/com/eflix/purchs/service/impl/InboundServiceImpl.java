@@ -53,8 +53,8 @@ public class InboundServiceImpl implements InboundService {
     }
     // 입고등록
     @Override
-    public int inbound(InboundDTO inboundDTO) {
-        return inboundMapper.inbound(inboundDTO);
+    public int prodToWarehouse(InboundDTO inboundDTO) {
+        return inboundMapper.prodToWarehouse(inboundDTO);
     }
 
 }

@@ -6,9 +6,15 @@
 
   <!-- 조회 -->
   <select id="getWarehouse" resultType="WarehouseDTO">
-      SELECT *
-      FROM warehouse
-      ORDER BY warehouse_id
+      SELECT
+        warehouse_id, 
+        warehouse_location, 
+        warehouse_scale, 
+        warehouse_manager
+      FROM 
+        warehouse
+      ORDER BY 
+        warehouse_id
   </select>
 
   <!-- 마지막 창고번호 가져오기 -->
@@ -21,14 +27,14 @@
 
   <!-- 등록 -->
   <insert id="insertWarehouse" parameterType="WarehouseDTO">
-      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager) VALUES
-      (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager})
+      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager, warehouse_status) 
+      VALUES (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager}, 's01')
   </insert>
 
   <!-- 삭제 -->
   <delete id="deleteWarehouse" parameterType="WarehouseDTO">
       BEGIN
-        WAREHOUSE_ID_PROCEDURE(#{warehouseId});
+        DELETE_WAREHOUSE_PROCEDURE(#{warehouseId});
       END;
   </delete>
 

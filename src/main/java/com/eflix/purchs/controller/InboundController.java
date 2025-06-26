@@ -83,7 +83,8 @@ public class InboundController {
   @PostMapping("/pibd")
   @ResponseBody
   public InboundDTO inbound(@RequestBody InboundDTO inbound) {
-    inboundService.inbound(inbound);
+    System.out.println(inbound.toString());
+    inboundService.prodToWarehouse(inbound);
       return inbound;
   }
  }

@@ -6,13 +6,37 @@
 
   <!--입고(제품)조회-->
   <select id="getInbound" resultType="InboundDTO">
-      select * from prod order by prod_id
+      select 
+         prod_id, 
+         prod_name, 
+         make_prod_date, 
+         prod_quantity, 
+         safety_stock_amount, 
+         product_type
+      from 
+        prod
+      WHERE 
+        prod_inbound_status = 'pis02'
+      order by prod_id
   </select>
-
   <!--생산입력-->
   <insert id="insertProd" parameterType="InboundDTO">
-    INSERT INTO prod (prod_id, prod_name, make_prod_date, prod_quantity, safety_stock_amount, product_type) 
-    VALUES (#{prodId}, #{prodName}, #{makeProdDate}, #{prodQuantity}, #{safetyStockAmount}, #{productType})
+    INSERT INTO prod
+                     (prod_id, 
+                      prod_name, 
+                      make_prod_date, 
+                      prod_quantity, 
+                      safety_stock_amount, 
+                      product_type, 
+                      prod_inbound_status) 
+    VALUES 
+                      (#{prodId}, 
+                       #{prodName}, 
+                       #{makeProdDate}, 
+                       #{prodQuantity}, 
+                       #{safetyStockAmount}, 
+                       #{productType}, 
+                       'pis02')
   </insert>
 
   <!--가장 마지막 prod_id 가져오기-->
@@ -29,12 +53,18 @@
     WHERE prod_id = #{prodId}
   </delete>
 
-  <!--'제품 => 창고' 입고-->
+  <!--'제품 => 창고' 입고 후 제품 상태 값 update-->
   <insert id="prodToWarehouse" parameterType="InboundDTO">
+    BEGIN
+      PROD_TO_WAREHOUSE(#{inboundId}, #{prodId}, #{inboundQuantity}, #{inboundLot},#{inboundDate}, #{inboundManager}, #{warehouseId});
+    END;
+  </insert>
+
+  <!-- <insert id="prodToWarehouse" parameterType="InboundDTO">
     INSERT INTO inbound
     (inbound_id, prod_id, inbound_quantity, inbound_lot, inbound_date, inbound_manager, warehouse_id)
-    VALUE(#{inboundId}, #{prodId}, #{inboundQuantity}, #{inboundLot},#{inboundDate}, #{inboundManager}, #{warehouseId})
-  </insert>
+    VALUES(#{inboundId}, #{prodId}, #{inboundQuantity}, #{inboundLot},#{inboundDate}, #{inboundManager}, #{warehouseId})
+  </insert> -->
 
     <!--가장 마지막 inbound_id 가져오기-->
   <select id="getNextInboundId" resultType="String">
