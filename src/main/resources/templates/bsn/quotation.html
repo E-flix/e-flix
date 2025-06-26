@@ -45,23 +45,23 @@
         <tr>
           <th class="bg-cell">거래처</th>
           <td><input id="customer" type="text" class="form-control form-control-sm" placeholder="거래처 코드/이름" readonly></td>
-          <th class="bg-cell">담당자</th>
-          <td><input id="salesRep" type="text" class="form-control form-control-sm" readonly></td>
+          <th class="bg-cell">대표명</th>
+          <td><input id="repName" type="text" class="form-control form-control-sm" readonly></td>
         </tr>
         <tr>
-          <th class="bg-cell">거래유형</th>
-          <td>
-            <select id="tradeType" class="form-select form-select-sm">
-              <option value="vat">부가세율 적용</option>
-              <option value="no-vat">부가세율 미적용</option>
-            </select>
-          </td>
+          <th class="bg-cell">발신담당자</th>
+          <td><input id="sender" type="text"  class="form-control form-control-sm"></td>
           <th class="bg-cell">전화번호</th>
           <td><input id="phone" type="text" class="form-control form-control-sm" readonly></td>
         </tr>
         <tr>
           <th class="bg-cell">할인율(%)</th>
-          <td><input id="discountRate" type="number" step="0.01" min="0" max="100" class="form-control form-control-sm" value="0.00"></td>
+          <td>
+            <div class="input-group input-group-sm">
+              <input id="discountRate" type="number" step="0.01" min="0" max="100" class="form-control" value="0">
+              <span class="input-group-text">%</span>
+            </div>
+          </td>
           <th class="bg-cell">유효기간</th>
           <td><input id="validUntil" type="date" class="form-control form-control-sm"></td>
         </tr>
@@ -116,11 +116,8 @@
       </tbody>
       <tfoot class="table-light fw-bold">
         <tr>
-          <td colspan="5" class="text-end">합계</td>
-          <td class="tot-qty">0</td>
-          <td></td>
-          <td class="tot-amount">0</td>
-          <td class="tot-tax">0</td>
+          <td colspan="7" class="text-end">총&nbsp;합계</td>
+          <td class="tot-final" colspan="2">0</td>
           <td></td>
         </tr>
       </tfoot>
@@ -163,7 +160,7 @@
         </div>
         <table class="table table-bordered modal-table mb-0">
           <thead class="table-light">
-            <tr><th>선택</th><th>코드</th><th>이름</th><th>담당자</th><th>전화번호</th></tr>
+            <tr><th>선택</th><th>코드</th><th>이름</th><th>대표명</th><th>전화번호</th><th>할인율(%)</th></tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -176,115 +173,111 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
   document.addEventListener('DOMContentLoaded', () => {
-    // 개인파일함 기능
-  const attachLink = document.getElementById('attachmentLink');
+  const VAT_RATE = 10;  
+  /* ───── 공용 요소 ───── */
+  const detailTbody   = document.querySelector('.detail-table tbody');
+  const discountInput = document.getElementById('discountRate');
+
+  /* ───── 개인파일함 ───── */
+  const attachLink  = document.getElementById('attachmentLink');
   const attachInput = document.getElementById('attachmentInput');
-  const attachList = document.getElementById('attachmentList');
-  if (attachLink && attachInput && attachList) {
-    attachLink.addEventListener('click', e => {
-      e.preventDefault();
-      attachInput.click();
+  const attachList  = document.getElementById('attachmentList');
+  attachLink?.addEventListener('click', e => { e.preventDefault(); attachInput.click(); });
+  attachInput?.addEventListener('change', () => {
+    attachList.innerHTML = '';
+    Array.from(attachInput.files).forEach(f => {
+      const d = document.createElement('div'); d.textContent = f.name; attachList.appendChild(d);
     });
-    attachInput.addEventListener('change', () => {
-      attachList.innerHTML = '';
-      Array.from(attachInput.files).forEach(file => {
-        const div = document.createElement('div');
-        div.textContent = file.name;
-        attachList.appendChild(div);
+  });
+
+  /* ───── 모달 ───── */
+  const itemModal     = new bootstrap.Modal(document.getElementById('itemModal'));
+  const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
+
+  /* ───── 거래처 선택 로직 ───── */
+  const custInput  = document.getElementById('customer');
+  const repInput   = document.getElementById('repName');
+  const phoneInput = document.getElementById('phone');
+  const custTbody  = document.querySelector('#customerModal tbody');
+  document.getElementById('btnCustomerSearch').addEventListener('click', () =>
+    loadCustomers(document.getElementById('customerSearch').value.trim())
+  );
+  custInput.addEventListener('click', () => { loadCustomers(); customerModal.show(); });
+
+  function loadCustomers(name = '') {
+    let url = '/bsn/customer/list';
+    if (name) url += `?customerName=${encodeURIComponent(name)}`;
+    fetch(url).then(r => r.json()).then(list => {
+      custTbody.innerHTML = '';
+      list.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          `<td><button class="btn btn-sm btn-outline-primary selCust">선택</button></td>
+          <td>${c.customerCd}</td><td>${c.customerNm}</td>
+          <td>${c.representativeNm}</td><td>${c.phoneNo}</td><td>${c.discountRate}</td>`;
+        custTbody.appendChild(tr);
       });
+      custTbody.querySelectorAll('.selCust').forEach(btn => btn.addEventListener('click', () => {
+        const r = btn.closest('tr');
+        // 폼 채우기
+        custInput.value     = `${r.children[1].textContent} / ${r.children[2].textContent}`;
+        repInput.value      = r.children[3].textContent;
+        phoneInput.value    = r.children[4].textContent;
+        discountInput.value = r.children[5].textContent;
+        customerModal.hide();
+        recalcAllRows(); updateTotals();
+      }));
     });
   }
 
-    // 모달 인스턴스 생성
-    const itemModalEl = document.getElementById('itemModal');
-    const itemModal = new bootstrap.Modal(itemModalEl);
-    const customerModalEl = document.getElementById('customerModal');
-    const customerModal = new bootstrap.Modal(customerModalEl);
+  /* ───── 품목 선택 로직 ───── */
+  let currentRow;
+  detailTbody.addEventListener('click', e => {
+    if (e.target.classList.contains('item-code')) {
+      currentRow = e.target.closest('tr');
+      loadItems(); itemModal.show();
+    }
+  });
 
-    // 거래처 모달
-    const custInput = document.getElementById('customer');
-    const custTbody = document.querySelector('#customerModal tbody');
-    const btnCustSearch = document.getElementById('btnCustomerSearch');
-
-    custInput.addEventListener('click', () => {
-      loadCustomers();
-      customerModal.show();
+  function loadItems() {
+    fetch('/bsn/item/list').then(r => r.json()).then(list => {
+      const body = document.querySelector('#itemModal tbody'); body.innerHTML = '';
+      list.forEach(it => {
+        const tr = document.createElement('tr'); tr.dataset.taxRate = it.taxRate;
+        tr.innerHTML =
+          `<td><button class="btn btn-sm btn-outline-primary selItem">선택</button></td>
+          <td>${it.itemCode}</td><td>${it.itemName}</td><td>${it.spec}</td>
+          <td>${it.unit}</td><td>${it.salePrice}</td>`;
+        body.appendChild(tr);
+      });
+      body.querySelectorAll('.selItem').forEach(btn => btn.addEventListener('click', () => {
+        const r = btn.closest('tr');
+        currentRow.dataset.taxRate                 = r.dataset.taxRate;   // ★ taxRate 복사
+        currentRow.querySelector('.item-code').value  = r.children[1].textContent;
+        currentRow.querySelector('.item-name').value  = r.children[2].textContent;
+        currentRow.querySelector('.item-spec').value  = r.children[3].textContent;
+        currentRow.querySelector('.item-price').value = r.children[5].textContent;
+        recalcRow(currentRow); 
+        updateTotals();
+        itemModal.hide();
+      }));
     });
-    btnCustSearch.addEventListener('click', () => loadCustomers(document.getElementById('customerSearch').value.trim()));
+  }
 
-    function loadCustomers(name) {
-      let url = '/bsn/customer/list';
-      if (name) url += `?customerName=${encodeURIComponent(name)}`;
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          custTbody.innerHTML = '';
-          data.forEach(c => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td><button class="btn btn-sm btn-outline-primary selCust">선택</button></td>
-                            <td>${c.customerCd}</td>
-                            <td>${c.customerNm}</td>
-                            <td>${c.salesEmpCd}</td>
-                            <td>${c.phoneNo}</td>`;
-            custTbody.appendChild(tr);
-          });
-          custTbody.querySelectorAll('.selCust').forEach(btn => btn.addEventListener('click', function() {
-            const r = this.closest('tr');
-            selectCustomer({ code: r.children[1].textContent, name: r.children[2].textContent, emp: r.children[3].textContent, phone: r.children[4].textContent });
-            customerModal.hide();
-          }));
-        });
-    }
-    function selectCustomer(c) {
-      custInput.value = `${c.code} / ${c.name}`;
-      document.getElementById('salesRep').value = c.emp;
-      document.getElementById('phone').value = c.phone;
-    }
+  /* ───── 할인율·수량 변경 처리 ───── */
+  discountInput.addEventListener('input', () => { recalcAllRows(); updateTotals(); });
 
-    // 품목 모달
-    const detailTbody = document.querySelector('.detail-table tbody');
-    let currentRow;
-    detailTbody.addEventListener('click', e => {
-      if (e.target.classList.contains('item-code')) {
-        currentRow = e.target.closest('tr');
-        loadItems();
-        itemModal.show();
-      }
-    });
-    function loadItems() {
-      fetch('/bsn/item/list')
-        .then(res => res.json())
-        .then(data => {
-          const body = document.querySelector('#itemModal tbody');
-          body.innerHTML = '';
-          data.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.dataset.taxRate = item.taxRate;
-            tr.innerHTML = `<td><button class="btn btn-sm btn-outline-primary selItem">선택</button></td>
-                            <td>${item.itemCode}</td>
-                            <td>${item.itemName}</td>
-                            <td>${item.spec}</td>
-                            <td>${item.unit}</td>
-                            <td>${item.salePrice}</td>`;
-            body.appendChild(tr);
-          });
-          body.querySelectorAll('.selItem').forEach(btn => btn.addEventListener('click', function() {
-            const r = this.closest('tr');
-            selectItem({
-              itemCode: r.children[1].textContent,
-              itemName: r.children[2].textContent,
-              spec: r.children[3].textContent,
-              unit: r.children[4].textContent,
-              salePrice: +r.children[5].textContent,
-              taxRate: +r.dataset.taxRate
-            });
-            itemModal.hide();
-          }));
-        });
+  detailTbody.addEventListener('input', e => {
+    if (e.target.classList.contains('item-qty')) {
+      recalcRow(e.target.closest('tr')); 
+      updateTotals();
     }
-    // 행 추가 버튼
+  });
+
+  /* ───── 행 추가/삭제 ───── */
   document.querySelector('.add-row').addEventListener('click', () => {
     const tr = detailTbody.querySelector('tr').cloneNode(true);
+    // tr.dataset.taxRate = 0;                         // 기본 부가세율
     tr.querySelectorAll('input').forEach(i => {
       if (i.type === 'checkbox') i.checked = false;
       else if (i.classList.contains('item-qty')) i.value = 1;
@@ -292,62 +285,49 @@
     });
     detailTbody.appendChild(tr);
   });
-
-  // 행 삭제 버튼
   document.querySelector('.delete-row').addEventListener('click', () => {
     detailTbody.querySelectorAll('input[type="checkbox"]:checked')
       .forEach(cb => cb.closest('tr').remove());
     updateTotals();
   });
 
-  // 초기화 버튼
+  /* ───── 계산 유틸 ───── */
+  function recalcRow(row) {
+    const price   = +row.querySelector('.item-price').value || 0;
+    const qty     = +row.querySelector('.item-qty').value   || 0;
+    const discPct = +discountInput.value                    || 0;
+
+    const raw  = price * qty;
+    const amt  = Math.round(raw * (1 - discPct / 100));
+    const tax  = Math.round(amt  * (VAT_RATE / 100));  // 부가세 고정 10%
+
+    row.querySelector('.item-amount').value = amt;
+    row.querySelector('.item-tax').value    = tax;
+  }
+
+  function recalcAllRows() {
+    detailTbody.querySelectorAll('tr').forEach(recalcRow);
+  }
+
+  function updateTotals() {
+    let totQty = 0, totAmt = 0, totTax = 0;
+    detailTbody.querySelectorAll('tr').forEach(r => {
+      totAmt += +r.querySelector('.item-amount').value|| 0;
+      totTax += +r.querySelector('.item-tax').value   || 0;
+    });
+    const fianl = totAmt + totTax;
+    document.querySelector('.tot-final').textContent = fianl.toLocaleString();
+  }
+
+  /* ───── 초기화·목록 버튼 ───── */
   document.querySelector('.btn-reset').addEventListener('click', () => {
-    document.querySelectorAll('input:not([readonly]), select').forEach(el => el.value = (el.type==='number'? '': ''));
-    document.querySelectorAll('.item-qty').forEach(i => i.value = 1);
-    updateTotals();
+    document.querySelectorAll('input:not([readonly])').forEach(el => el.value = '');
+    detailTbody.querySelectorAll('.item-qty').forEach(i => i.value = 1);
+    recalcAllRows(); updateTotals();
   });
-  // 목록 버튼
   document.querySelector('.btn-list').addEventListener('click', () => {
     window.location.href = '/bsn/qot_list';
   });
-
-
-    function selectItem(item) {
-      currentRow.querySelector('.item-code').value = item.itemCode;
-      currentRow.querySelector('.item-name').value = item.itemName;
-      currentRow.querySelector('.item-spec').value = item.spec;
-      currentRow.querySelector('.item-price').value = item.salePrice;
-      const qty = +currentRow.querySelector('.item-qty').value || 1;
-      const amt = qty * item.salePrice;
-      const tax = Math.round(amt * (item.taxRate / 100));
-      currentRow.querySelector('.item-amount').value = amt;
-      currentRow.querySelector('.item-tax').value = tax;
-      updateTotals();
-    }
-    function updateTotals() {
-      let totQty = 0, totAmt = 0, totTax = 0;
-      document.querySelectorAll('.detail-table tbody tr').forEach(r => {
-        totQty += +r.querySelector('.item-qty').value || 0;
-        totAmt += +r.querySelector('.item-amount').value || 0;
-        totTax += +r.querySelector('.item-tax').value || 0;
-      });
-      document.querySelector('.tot-qty').textContent = totQty;
-      document.querySelector('.tot-amount').textContent = totAmt.toLocaleString();
-      document.querySelector('.tot-tax').textContent = totTax.toLocaleString();
-    }
-    // 수량 변경 이벤트
-    detailTbody.addEventListener('input', e => {
-      if (e.target.classList.contains('item-qty')) {
-        const row = e.target.closest('tr');
-        const price = +row.querySelector('.item-price').value || 0;
-        const qty = +e.target.value || 0;
-        const amt = price * qty;
-        const tax = Math.round(amt * (+row.dataset.taxRate / 100));
-        row.querySelector('.item-amount').value = amt;
-        row.querySelector('.item-tax').value = tax;
-        updateTotals();
-      }
-    });
-  });
+});
 </script>
 </div>
