@@ -12,10 +12,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.eflix.common.security.dto.UserDTO;
-import com.eflix.erp.mapper.UserMapper;
 import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.mapper.EmployeeMapper;
 import com.eflix.hr.mapper.RoleMapper;
+import com.eflix.main.mapper.UserMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -36,19 +36,12 @@ public class SecurityUserDetailService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		String companyId = req.getParameter("companyId");
 		String uri = req.getRequestURI();
 
-		log.info("로그인 시도 - Username: {}, URI: {}", username, uri);
+		log.info("로그인 시도 - Username: {}, URI: {}", username, companyId == null ? "main" : "erp");
 
 		if (uri.startsWith("/erp")) {
-			// 일반 사용자
-			UserDTO user = userMapper.findByUserId(username);
-			if (user == null) {
-				throw new UsernameNotFoundException("사용자 없음");
-			}
-			return new SecurityUserDetails(user);
-
-		} else {
 			// ERP 관리자 로그인 (emp_id + co_idx 등으로 조회)
 			String empEmail = req.getParameter("emp_email");
 			String coIdx = req.getParameter("co_idx");
@@ -62,6 +55,15 @@ public class SecurityUserDetailService implements UserDetailsService {
 			List<String> roleIds = roleMapper.findRoleIdsByEmpIdx(employee.getEmpIdx());
 
 			return new SecurityUserDetails(employee, roleIds);
+		} else if(companyId == null) {
+			// 일반 사용자
+			UserDTO user = userMapper.findByUserId(username);
+			if (user == null) {
+				throw new UsernameNotFoundException("사용자 없음");
+			}
+			return new SecurityUserDetails(user);
+		} else {
+			throw new UsernameNotFoundException("로그인 중 오류가 발생했습니다.");
 		}
 	}
 }

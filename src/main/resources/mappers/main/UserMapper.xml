@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+===========================================
+  - 파일명   : UserMapper.xml
+  - 설명     : 사용자 정보 관련 SQL 정의
+===========================================
+  [작성 정보]
+  - 작성자   : 복성민 (bokseongmin@gmail.com)
+  - 최초작성 : 2025-06-20
+===========================================
+  [변경 이력]
+  - 2025-06-20 : 최초 생성 (복성민)
+===========================================
+-->
+<mapper namespace="com.eflix.main.mapper.UserMapper">
+	<!-- ===================================== -->
+    <!-- 유저 전체 조회                        -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-20 -->
+    <!-- ===================================== -->
+    <select id="findAll" resultType="UserDTO">
+        SELECT * FROM users
+    </select>
+
+    <!-- ===================================== -->
+    <!-- 유저 등록                        -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-20 -->
+    <!-- ===================================== -->
+    <insert id="insert" parameterType="String">
+        <selectKey resultType="String" keyProperty="userIdx" order="BEFORE">
+            SELECT 'user-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(user_idx, 6))), 100) + 1) FROM users
+        </selectKey>
+        INSERT INTO users(user_idx, user_id, user_pw, user_name, user_tel, user_email, user_regdate)
+        VALUES(#{userIdx}, #{userId}, #{userPw}, #{userName}, #{userTel}, #{userEmail}, SYSDATE)
+    </insert>
+
+	  <!-- ===================================== -->
+    <!-- 유저 정보 조회                       -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-25 -->
+    <!-- ===================================== -->
+    <select id="findByUserId" resultType="UserDTO">
+        SELECT user_idx, user_id, user_pw, user_name, user_tel, user_email, user_regdate, user_role
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- ===================================== -->
+    <!-- 유저 정보 조회                       -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-25 -->
+    <!-- ===================================== -->
+    <select id="findByUserIdx" resultType="UserDTO">
+        SELECT user_idx, user_id, user_pw, user_name, user_tel, user_email, user_regdate, user_role
+        FROM users
+        WHERE user_idx = #{userIdx}
+    </select>
+
+    <!-- ===================================== -->
+    <!-- 유저 정보 수정                       -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-25 -->
+    <!-- ===================================== -->
+    <update id="updateUser" parameterType="UserDTO">
+        UPDATE users
+        SET
+        <if test="user_pw != null and user_pw !=''">
+            user_pw = #{userPw},
+        </if>
+        <if test="userTel != null and userTel !=''">
+            user_tel = #{userTel},
+        </if>
+        <if test="userEmail != null and userEmail !=''">
+            user_email = #{userEmail},
+        </if>
+            user_moddate = now()
+        WHERE user_idx = #{userIdx}
+    </update>
+</mapper>

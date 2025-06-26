@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eflix.common.payment.Entity.PaymentEntity;
 import com.eflix.common.payment.mapper.PaymentMapper;
 import com.eflix.common.payment.service.PaymentService;
-import com.eflix.erp.dto.SubscriptionDTO;
-import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
-import com.eflix.erp.mapper.SubscriptionMapper;
+import com.eflix.main.dto.SubscriptionDTO;
+import com.eflix.main.dto.SubscriptionPackageDetailDTO;
+import com.eflix.main.mapper.SubscriptionMapper;
 
 /**
  * 결제 처리를 담당하는 서비스

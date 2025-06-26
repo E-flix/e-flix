@@ -3,6 +3,8 @@ package com.eflix.common.security.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,14 +12,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import com.eflix.acc.controller.AccAccountController;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
 import com.eflix.common.security.dto.UserDTO;
-import com.eflix.erp.service.UserService;
+import com.eflix.main.service.UserService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 
 /**
@@ -46,11 +51,17 @@ import com.eflix.erp.service.UserService;
 @Controller
 public class LoginController {
 
+    private final AccAccountController accAccountController;
+
     @Autowired
     private UserService userService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    LoginController(AccAccountController accAccountController) {
+        this.accAccountController = accAccountController;
+    }
     
     @PostMapping("/erp/signup")
     @ResponseBody
@@ -73,10 +84,35 @@ public class LoginController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
     
+    // @PostMapping("path")
+    // public String postMethodName(@RequestParam String company, @RequestParam String user_id, @RequestParam String user_pw, HttpServletRequest request) {
+    //     //TODO: process POST request
+
+    //     request.getS
+        
+    //     return entity;
+    // }
+    
 
     @GetMapping("/login")
     public String login() {
         // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return "pages/account/login";
     }
+
+    // @GetMapping("/logout")
+    // public String erpLogout() {
+    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+    //     if(auth != null) {
+    //         new SecurityContext
+    //     }
+
+    //     return "redirect:/erp";
+    // }
+
+    // @GetMapping("/erp/logout")
+    // public String logout() {
+    //     return "redirect:/";
+    // }
 }

@@ -9,13 +9,16 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import com.eflix.common.security.details.SecurityUserDetailService;
+import com.eflix.common.security.handler.CustomAuthenticationEntryPoint;
 import com.eflix.common.security.handler.CustomLoginSuccessHandler;
+import com.eflix.common.security.handler.CustomLogoutSuccessHandler;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -67,16 +70,16 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	@Order(1)
 	public SecurityFilterChain erpSecurityFilterChain(HttpSecurity http) throws Exception {
 		http.securityMatcher("/**")
 				.authorizeHttpRequests(auth -> auth
-					.requestMatchers("/erp", "/erp/login", "/erp/signup", "/erp/inquiry/**", "/erp/error/**", "/erp/assets/**", "/erp/css/**", "/erp/js/**", "/bootstrap/**", "/common/**").permitAll()
-					.requestMatchers("/erp/**").permitAll()
+					.requestMatchers("/", "/erp", "/erp/login", "/erp/signup", "/erp/inquiry/**", "/main/error/**", "/main/assets/**", "/main/css/**", "/main/js/**", "/bootstrap/**", "/common/**",
+						"/bootstrap/**", "/img/**").permitAll()
+					.requestMatchers("/erp/**").authenticated()
 					.requestMatchers("/**").authenticated())
 			.formLogin(form -> form
-				.loginProcessingUrl("/erp/login")
-				.loginPage("/")
+				.loginProcessingUrl("/login")
+				// .loginPage("/")
 				.usernameParameter("user_id")
 				.passwordParameter("user_pw")
 				.successHandler(authenticationSuccessHandler())
@@ -88,49 +91,31 @@ public class SecurityConfig {
 			// 	.userDetailsService(customUserDetailService))
 			.userDetailsService(customUserDetailService)
 			.logout(logout -> logout
-				.logoutUrl("/erp/logout")
+				.logoutSuccessHandler(logoutSuccessHandler())
 				.deleteCookies("JSESSIONID", "user_remember"))
 			.csrf(csrf -> csrf.disable())
 			.headers(headers -> headers
             	.frameOptions(frame -> frame.disable()))
-			.exceptionHandling(exception -> exception.accessDeniedPage("/common/error/403.html"));
+			.exceptionHandling(exception -> exception
+				.accessDeniedPage("/common/error/403.html")
+				.authenticationEntryPoint(authenticationEntryPoint()));
 
 		return http.build();
 	}
 
-	// @Bean
-	// @Order(2)
-	// public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-	// 	http
-	// 			.securityMatcher("/**")
-	// 			.authorizeHttpRequests(auth -> auth
-	// 					.requestMatchers("/**", "/**/**").permitAll()
-	// 					.anyRequest().authenticated())
-	// 			.formLogin(form -> form
-	// 					.loginPage("/login")
-	// 					.usernameParameter("user_id")
-	// 					.passwordParameter("user_pw")
-	// 					.successHandler(authenticationSuccessHandler())
-	// 					.permitAll())
-	// 			.rememberMe(remember -> remember
-	// 					.key("eflix")
-	// 					.tokenValiditySeconds(60 * 60 * 24)
-	// 					.rememberMeParameter("user_remember")
-	// 					.userDetailsService(customUserDetailService))
-
-	// 			.logout(logout -> logout
-	// 					.logoutUrl("/logout")
-	// 					.deleteCookies("JSESSIONID", "user_remember"))
-	// 			.csrf(csrf -> csrf.disable())
-	// 			.headers(headers -> headers.frameOptions().disable())
-	// 			.exceptionHandling(exception -> exception.accessDeniedPage("/error/403"));
-
-	// 	return http.build();
-	// }
-
 	@Bean
 	public AuthenticationSuccessHandler authenticationSuccessHandler() {
 		return new CustomLoginSuccessHandler();
+	}
+
+	@Bean
+	public LogoutSuccessHandler logoutSuccessHandler() {
+		return new CustomLogoutSuccessHandler();
+	}
+
+	@Bean
+	public AuthenticationEntryPoint authenticationEntryPoint() {
+		return new CustomAuthenticationEntryPoint();
 	}
 
 	// @Bean

@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.eflix.common.security.dto.UserDTO;
-import com.eflix.erp.mapper.UserMapper;
+import com.eflix.main.mapper.UserMapper;
 
 @SpringBootTest
 public class UserServiceTest {

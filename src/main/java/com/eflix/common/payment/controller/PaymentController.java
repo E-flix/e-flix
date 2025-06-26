@@ -11,10 +11,10 @@ import com.eflix.common.payment.dto.CompletePaymentRequest;
 import com.eflix.common.payment.dto.CustomData;
 import com.eflix.common.payment.dto.ItemDTO;
 import com.eflix.common.payment.service.PaymentService;
-import com.eflix.erp.dto.SubscriptionPackageDTO;
-import com.eflix.erp.mapper.ModuleMapper;
-import com.eflix.erp.mapper.SubscriptionMapper;
-import com.eflix.erp.service.CompanyService;
+import com.eflix.main.dto.SubscriptionPackageDTO;
+import com.eflix.main.mapper.ModuleMapper;
+import com.eflix.main.mapper.SubscriptionMapper;
+import com.eflix.main.service.CompanyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.portone.sdk.server.common.Currency;
