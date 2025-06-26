@@ -118,7 +118,6 @@
     let loginUser = 'loginUser';
     // 전체조회 API
     let entryList = /*[[${entryList}]]*/[]; // DB 조회
-    console.log(entryList)
     let rowData = []; // 실제 List만들 배열
     entryList.forEach(master => {
       if (master.entryType !== '일반') return; // entryType이 일반이 아닌 것은 건너뜀
