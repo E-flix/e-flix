@@ -25,6 +25,7 @@ public class InboundDTO {
     int prodQuantity;
     int safetyStockAmount;
     String productType;
+    String prodInboundStatus;
 
     String inboundId;
     int inboundQuantity;

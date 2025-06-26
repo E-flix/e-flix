@@ -1,4 +1,5 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 이혁진
   - 최초작성 : 2025-06-23
@@ -10,7 +11,9 @@
   - 2025-06-24 (이혁진): 반품기능 준비중
   - 2025-06-24 (이혁진): 반품기능 완료
   - 2025-06-25 (이혁진): 입고기능 개발 중
+  - 2025-06-25 (이혁진): 입고기능 개발 완료
 ============================================ -->
+
 <head>
 	<title>입고관리</title>
 </head>
@@ -59,7 +62,7 @@
 				<div class="col-md-2">
 					<div class="d-flex gap-2">
 						<button type="button" class="btn btn-outline-secondary btn-sm" id="makeBtn">생산</button>
-						<button type="button" class="btn btn-outline-secondary btn-sm" id="rejectBtn">반품</button>
+						<button type="button" class="btn btn-outline-secondary btn-sm" id="rejectBtn">반려</button>
 						<button type="button" class="btn btn-outline-secondary btn-sm" id="inboundBtn">창고입고</button>
 					</div>
 				</div>
@@ -72,6 +75,51 @@
 			<div class="grid-container" style="height: 30vh; width: 100%;">
 				<div id="warehouseGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 			</div>
+			<!-- 선택 정보 표시 -->
+			<div id="selectionSummary" class="ag-theme-alpine mt-3" style="width: 100%; display: none;">
+				<div class="ag-header ag-header-viewport"
+					style="padding: 8px; background: #f5f5f5; font-weight: bold; border-bottom: 1px solid #d3d3d3;">
+					입고 예정 정보
+				</div>
+				<div style="max-height: 200px; overflow-y: auto;">
+					<table class="ag-center-cols-container" style="width: 100%;">
+						<thead style="background-color: #f1f1f1; text-align: center; font-weight: bold;">
+							<tr>
+								<th style="padding: 8px; border-bottom: 1px solid #ccc;">제품ID</th>
+								<th style="padding: 8px; border-bottom: 1px solid #ccc;">입고요청량</th>
+								<th style="padding: 8px; border-bottom: 1px solid #ccc;">창고ID</th>
+								<th style="padding: 8px; border-bottom: 1px solid #ccc;">입고가능량</th>
+								<th style="padding: 8px; border-bottom: 1px solid #ccc;">입고후용량</th>
+							</tr>
+						</thead>
+						<tbody id="summaryTableBody" style="text-align: center;">
+							<tr>
+								<td style="padding: 8px; border-bottom: 1px solid #eee;">
+									<input id="summaryProdId" type="text" readonly
+										class="form-control form-control-sm" />
+								</td>
+								<td style="padding: 8px; border-bottom: 1px solid #eee;">
+									<input id="summaryQuantity" type="text" readonly
+										class="form-control form-control-sm" />
+								</td>
+								<td style="padding: 8px; border-bottom: 1px solid #eee;">
+									<input id="summaryWarehouseId" type="text" readonly
+										class="form-control form-control-sm" />
+								</td>
+								<td style="padding: 8px; border-bottom: 1px solid #eee;">
+									<input id="summaryWarehouseAmount" type="text" readonly
+										class="form-control form-control-sm" />
+								</td>
+								<td style="padding: 8px; border-bottom: 1px solid #eee;">
+									<input id="summaryAmountAfter" type="text" readonly
+										class="form-control form-control-sm" />
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
 		</div>
 	</div>
 </div>
@@ -126,9 +174,9 @@
 		columnDefs: [
 			{ headerName: "창고ID", field: "warehouseId", editable: false },
 			{ headerName: "창고위치", field: "warehouseLocation", editable: false },
-			{ headerName: "기존용량", field: "warehouseScale", editable: false },
+			{ headerName: "최대용량", field: "warehouseScale", editable: false },
 			{ headerName: "현재용량", field: "currentQuantity", editable: false },
-			{ headerName: "사용가능용량", field: "availableCapacity", editable: false },
+			{ headerName: "입고가능용량", field: "availableCapacity", editable: false },
 		],
 		rowSelection: {
 			mode: "multiRow"
@@ -196,7 +244,7 @@
 					makeProdDate,
 					prodQuantity,
 					safetyStockAmount,
-					productType
+					productType,
 				};
 				$.ajax({
 					type: 'POST',
@@ -213,7 +261,6 @@
 						}).then(() => window.location.reload());
 					},
 					error: function () {
-						console.log(data); // 여기도 오타 수정: conso → console
 						Swal.fire({
 							icon: "warning",
 							title: "경고",
@@ -238,7 +285,7 @@
 			Swal.fire({
 				icon: "warning",
 				title: "선택 필요",
-				text: "반품할 제품을 선택하세요.",
+				text: "반려할 제품을 선택하세요.",
 				showConfirmButton: false,
 				timer: 1500
 			});
@@ -255,7 +302,7 @@
 			Swal.fire({
 				icon: "success",
 				title: "삭제 완료",
-				text: "선택된 제품이 삭제되었습니다.",
+				text: "선택된 제품이 반려되었습니다.",
 				timer: 1000,
 				showConfirmButton: false
 			}).then(() => window.location.reload());
@@ -263,7 +310,7 @@
 			Swal.fire({
 				icon: "error",
 				title: "오류",
-				text: "삭제 중 오류가 발생했습니다.",
+				text: "반려 중 오류가 발생했습니다.",
 				timer: 1500,
 				showConfirmButton: false
 			});
@@ -285,7 +332,7 @@
 			}
 		});
 	});
-// 마지막 로트번호 가져오기
+	// 마지막 로트번호 가져오기
 	$(document).ready(() => {
 		$.ajax({
 			type: 'GET',
@@ -299,65 +346,95 @@
 		});
 	});
 
-	
-$("#inboundBtn").on("click", async () => {
-	const selectedProducts = ibdGridOptions.api.getSelectedRows();
-	const selectedWarehouse = whGridOptions.api.getSelectedRows();
 
-	if (selectedProducts.length === 0 || selectedWarehouse.length !== 1) {
-		Swal.fire({
-			icon: "warning",
-			title: "선택 오류",
-			text: "제품 및 창고를 정확히 선택하세요.",
-			timer: 1500,
-			showConfirmButton: false
-		});
-		return;
+	$("#inboundBtn").on("click", async () => {
+		const selectedProducts = ibdGridOptions.api.getSelectedRows();
+		const selectedWarehouse = whGridOptions.api.getSelectedRows();
+
+		if (selectedProducts.length === 0 || selectedWarehouse.length !== 1) {
+			Swal.fire({
+				icon: "warning",
+				title: "선택 오류",
+				text: "제품 및 창고를 선택하세요.",
+				timer: 1500,
+				showConfirmButton: false
+			});
+			return;
+		}
+
+		try {
+			const [inboundId, inboundLot] = await Promise.all([
+				$.get('/purchs/gnpi'),
+				$.get('/purchs/gnpl')
+			]);
+
+			const inboundManager = "admin"; // 또는 서버에서 받은 값
+
+			const payload = {
+				inboundId,
+				prodId: selectedProducts.map(p => p.prodId).join(","),
+				inboundQuantity: selectedProducts.map(p => p.prodQuantity).join(","),
+				inboundLot,
+				inboundDate: document.getElementById("fullDateTime").value,
+				inboundManager,
+				warehouseId: selectedWarehouse[0].warehouseId
+			};
+
+			await $.ajax({
+				type: "POST",
+				url: "/purchs/pibd",
+				contentType: "application/json",
+				data: JSON.stringify(payload)
+			});
+			console.log(payload);
+			Swal.fire({
+				icon: "success",
+				title: "입고 완료",
+				text: "제품이 창고에 입고되었습니다.",
+				timer: 1200,
+				showConfirmButton: false
+			}).then(() => window.location.reload());
+
+		} catch (error) {
+			Swal.fire({
+				icon: "error",
+				title: "입고 실패",
+				text: "오류가 발생하였습니다.",
+				timer: 1500,
+				showConfirmButton: false
+			});
+		}
+	});
+
+	function updateSelectionSummary() {
+		const selectedProducts = ibdGridOptions.api.getSelectedRows();
+		const selectedWarehouse = whGridOptions.api.getSelectedRows();
+		const summarySection = document.getElementById("selectionSummary");
+
+		if (selectedProducts.length > 0) {
+
+			summarySection.style.display = "block";
+
+			const prodIds = selectedProducts.map(p => p.prodId).join(", "); // 제품ID
+			const quantities = selectedProducts.map(p => p.prodQuantity).join(", "); // 입고요청량
+			const warehouseId = selectedWarehouse[0]?.warehouseId || ""; // 창고ID
+			const availableCapacity = selectedWarehouse[0]?.availableCapacity || ""; // 사용가능한 용량
+			const currentQuantity = selectedWarehouse[0]?.currentQuantity || ""; // 입고된용량
+			const warehouseScale = selectedWarehouse[0]?.warehouseScale || "" // 창고기존용량
+			// 계산
+			const result = availableCapacity - quantities;
+			document.getElementById("summaryProdId").value = prodIds; // 제품ID
+			document.getElementById("summaryQuantity").value = quantities; // 입고요청량
+			document.getElementById("summaryWarehouseId").value = warehouseId; // 창고ID
+			document.getElementById("summaryWarehouseAmount").value = availableCapacity; // 입고가능량
+			document.getElementById("summaryAmountAfter").value = result; // 입고후용량
+		} else {
+			// 숨기기
+			summarySection.style.display = "none";
+		}
 	}
-
-	try {
-		const [inboundId, inboundLot] = await Promise.all([
-			$.get('/purchs/gnpi'),
-			$.get('/purchs/gnpl')
-		]);
-
-		const inboundManager = "admin"; // 또는 서버에서 받은 값
-
-		const payload = {
-			inboundId,
-			prodId: selectedProducts.map(p => p.prodId),
-			inboundQuantity: selectedProducts.map(p => p.prodQuantity),
-			inboundLot,
-			inboundDate: document.getElementById("fullDateTime").value,
-			inboundManager,
-			warehouseId: selectedWarehouse[0].warehouseId
-		};
-
-		await $.ajax({
-			type: "POST",
-			url: "/purchs/pibd",
-			contentType: "application/json",
-			data: JSON.stringify(payload)
-		});
-
-		Swal.fire({
-			icon: "success",
-			title: "입고 완료",
-			text: "제품이 창고에 입고되었습니다.",
-			timer: 1200,
-			showConfirmButton: false
-		}).then(() => window.location.reload());
-
-	} catch (error) {
-		Swal.fire({
-			icon: "error",
-			title: "입고 실패",
-			text: "입고번호 또는 서버 오류가 발생했습니다.",
-			timer: 1500,
-			showConfirmButton: false
-		});
-	}
-});
-
-
+	// 제품 테이블에서 선택 시
+	ibdGridOptions.onSelectionChanged = updateSelectionSummary;
+	// 창고 테이블에서 선택 시
+	whGridOptions.onSelectionChanged = updateSelectionSummary;
 </script>

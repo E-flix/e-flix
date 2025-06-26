@@ -24,5 +24,5 @@ public interface InboundService {
     public String getNextInboundLot();
 
     // 입고등록
-    public int inbound(InboundDTO inboundDTO);
+    public int prodToWarehouse(InboundDTO inboundDTO);
 }
