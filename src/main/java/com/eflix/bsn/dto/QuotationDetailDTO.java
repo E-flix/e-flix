@@ -10,9 +10,10 @@ public class QuotationDetailDTO {
     private String  itemCode;       // 품목코드
     private String  itemName;
     private String  spec;           // 규격
-    private Integer      qty;
+    private BigDecimal       qty;
     private BigDecimal unitPrice;
+    private BigDecimal supplyAmount;
     private BigDecimal totalMoney;
-    private BigDecimal tax;   // 부가세
+    private BigDecimal taxAmount;
     private String  remarks;        // 비고
 }
