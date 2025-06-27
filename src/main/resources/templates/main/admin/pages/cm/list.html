@@ -159,7 +159,7 @@
 		let currentPage = 1;
 
 		// 데이터 로딩
-		function loadUsers(page = 1) {
+		function loadCompanies(page = 1) {
 			currentPage = page;
 
 			let params = $("#searchForm").serialize();
@@ -252,22 +252,21 @@
 			`);
 		}
 
-		// 검색 폼 제출
+		// 검색 버튼
 		$("#searchBtn").on("click", function (e) {
-			console.log("test")
-			loadUsers(1); // 검색 시 1페이지부터
+			loadCompanies(1); // 검색 시 1페이지부터
 		});
 
 		// 페이지 클릭 이벤트
 		$("#paginationArea").on("click", "a.page-link", function (e) {
 			e.preventDefault();
 			const page = $(this).data("page");
-			if (page) loadUsers(page);
+			if (page) loadCompanies(page);
 		});
 
 		// 초기 데이터 로딩
 		$(document).ready(function () {
-			loadUsers();
+			loadCompanies();
 		});
 	</script>
 </div>

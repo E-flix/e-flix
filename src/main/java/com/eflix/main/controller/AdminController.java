@@ -45,7 +45,7 @@ public class AdminController {
     
     @GetMapping("/cs/list")
     public String csList() {
-        return "main/admin/pages/emp/list";
+        return "main/admin/pages/cs/list";
     }
 
     @GetMapping("/cm/list")

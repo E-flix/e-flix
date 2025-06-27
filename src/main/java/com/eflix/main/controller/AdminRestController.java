@@ -21,6 +21,7 @@ import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
 import com.eflix.main.dto.etc.UserSearchDTO;
 import com.eflix.main.service.CompanyService;
+import com.eflix.main.service.InquiryService;
 import com.eflix.main.service.UserService;
 
 // 최초 생성 6 27
@@ -35,8 +36,11 @@ public class AdminRestController {
     @Autowired
     private CompanyService companyService;
 
+    @Autowired
+    private InquiryService inquiryService;
+
     @GetMapping("/api/users")
-    public ResponseEntity<ResResult> user(@ModelAttribute UserSearchDTO userSearchDTO) {
+    public ResponseEntity<ResResult> users(@ModelAttribute UserSearchDTO userSearchDTO) {
 
         ResResult result = null;
 
@@ -63,7 +67,7 @@ public class AdminRestController {
     }
 
     @GetMapping("/api/companies")
-    public ResponseEntity<ResResult> company(@ModelAttribute CompanySearchDTO companySearchDTO) {
+    public ResponseEntity<ResResult> companies(@ModelAttribute CompanySearchDTO companySearchDTO) {
         ResResult result = null;
 
         int companyCount = companyService.findAllCompanyCount(companySearchDTO);
@@ -88,4 +92,14 @@ public class AdminRestController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @GetMapping("/api/inquirys")
+    public ResponseEntity<ResResult> getMethodName(@RequestParam String param) {
+        ResResult result = null;
+
+        int inquiryCount = 0;
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    
 }
