@@ -1,6 +1,9 @@
 package com.eflix.main.service;
 
+import java.util.List;
+
 import com.eflix.main.dto.CompanyDTO;
+import com.eflix.main.dto.etc.CompanySearchDTO;
 
 /**
  * ERP 회사 관리를 위한 Service 클래스
@@ -28,6 +31,7 @@ import com.eflix.main.dto.CompanyDTO;
  * @changelog
  * <ul>
  *   <li>2025-06-19: 최초 생성 (복성민)</li>
+ *   <li>2025-06-27: 회사 목록 검색 로직 추가 (복성민)</li>
  * </ul>
  */
 
@@ -37,4 +41,8 @@ public interface CompanyService {
     public CompanyDTO findByUserIdx(String userIdx);
 
     public int updateCompany(CompanyDTO companyDTO);
+
+    public int findAllCompanyCount(CompanySearchDTO companySearchDTO);
+
+    public List<CompanyDTO> findAllCompany(CompanySearchDTO companySearchDTO);
 }

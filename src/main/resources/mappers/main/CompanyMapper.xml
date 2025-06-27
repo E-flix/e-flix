@@ -95,4 +95,45 @@
             co_moddate = now()
         WHERE co_idx = #{coIdx}
     </update>
+
+    <!-- ===================================== -->
+    <!-- 회사 정보 검색 수                      -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-27 -->
+    <!-- ===================================== -->
+    <select id="findAllCompanyCount" parameterType="CompanySearchDTO" resultType="int">
+        SELECT COUNT(*) FROM companies
+        WHERE 1=1
+        <if test="coName != null and coName != ''">
+            AND co_name LIKE '%' || #{coName} || '%'
+        </if>
+        <if test="bizrNo != null and bizrNo != ''">
+            AND bizr_no LIKE '%' || #{bizrNo} || '%'
+        </if>
+    </select>
+
+    <!-- ===================================== -->
+    <!-- 회사 정보 검색                       -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-27 -->
+    <!-- ===================================== -->
+    <select id="findAllCompany" parameterType="CompanySearchDTO" resultType="CompanyDTO">
+        SELECT * FROM (
+            SELECT ROWNUM AS rnum, a.*
+            FROM (
+                SELECT *
+                FROM companies
+                WHERE 1=1
+                <if test="coName != null and coName != ''">
+                    AND co_name LIKE '%' || #{coName} || '%'
+                </if>
+                <if test="bizrNo != null and bizrNo != ''">
+                    AND bizr_no LIKE '%' || #{bizrNo} || '%'
+                </if>
+                ORDER BY co_regdate DESC
+            ) a
+            WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rnum &gt; #{offset}
+    </select>
 </mapper>

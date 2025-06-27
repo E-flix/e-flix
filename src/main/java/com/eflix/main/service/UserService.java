@@ -1,6 +1,9 @@
 package com.eflix.main.service;
 
+import java.util.List;
+
 import com.eflix.common.security.dto.UserDTO;
+import com.eflix.main.dto.etc.UserSearchDTO;
 
 /**
  * ERP 회원 관리를 위한 Service 클래스
@@ -39,4 +42,8 @@ public interface UserService {
     public UserDTO findByUserIdx(String userIdx);
 
     public int updateUser(UserDTO userDTO);
+
+    public List<UserDTO> findAllUsers(UserSearchDTO userSearchDTO);
+
+    public int findAllUsersCount(UserSearchDTO userSearchDTO);
 }

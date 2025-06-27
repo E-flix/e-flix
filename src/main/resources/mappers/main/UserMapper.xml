@@ -78,4 +78,51 @@
             user_moddate = now()
         WHERE user_idx = #{userIdx}
     </update>
+
+    <!-- ===================================== -->
+    <!-- 유저 정보 검색 결과 수                      -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-27 -->
+    <!-- ===================================== -->
+    <select id="findAllUsersCount" parameterType="UserSearchDTO" resultType="int">
+        SELECT COUNT(*) FROM users
+        WHERE 1=1
+        <if test="userId != null and userId != ''">
+            AND user_id LIKE '%' || #{userId} || '%'
+        </if>
+        <if test="userEmail != null and userEmail != ''">
+            AND user_email LIKE '%' || #{userEmail} || '%'
+        </if>
+        <if test="userTel != null and userTel != ''">
+            AND user_tel LIKE '%' || #{userTel} || '%'
+        </if>
+    </select>
+
+    <!-- ===================================== -->
+    <!-- 유저 정보 검색 결과                      -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-27 -->
+    <!-- ===================================== -->
+    <select id="findAllUsers" parameterType="UserSearchDTO" resultType="UserDTO">
+        SELECT *
+        FROM (
+            SELECT inner_table.*, ROWNUM AS rnum
+            FROM (
+                SELECT * FROM users
+                WHERE 1=1
+                <if test="userId != null and userId != ''">
+                    AND user_id LIKE '%' || #{userId} || '%'
+                </if>
+                <if test="userEmail != null and userEmail != ''">
+                    AND user_email LIKE '%' || #{userEmail} || '%'
+                </if>
+                <if test="userTel != null and userTel != ''">
+                    AND user_tel LIKE '%' || #{userTel} || '%'
+                </if>
+                ORDER BY user_regdate DESC
+            ) inner_table
+            WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rnum &gt; #{offset}
+    </select>
 </mapper>

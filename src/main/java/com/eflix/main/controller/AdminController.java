@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  */
 
 @Controller
-@RequestMapping("/erp/admin")
+@RequestMapping("/admin")
 public class AdminController {
 
     @GetMapping()

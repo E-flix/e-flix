@@ -1,9 +1,12 @@
 package com.eflix.main.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.main.dto.CompanyDTO;
+import com.eflix.main.dto.etc.CompanySearchDTO;
 import com.eflix.main.mapper.CompanyMapper;
 import com.eflix.main.service.CompanyService;
 
@@ -32,6 +35,20 @@ public class CompanyServiceImpl implements CompanyService {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'updateCompany'");
         return companyMapper.updateCompany(companyDTO);
+    }
+
+    @Override
+    public int findAllCompanyCount(CompanySearchDTO companySearchDTO) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'findAllCompanyCount'");
+        return companyMapper.findAllCompanyCount(companySearchDTO);
+    }
+
+    @Override
+    public List<CompanyDTO> findAllCompany(CompanySearchDTO companySearchDTO) {
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method 'findAllCompany'");
+        return companyMapper.findAllCompany(companySearchDTO);
     }
 
 }

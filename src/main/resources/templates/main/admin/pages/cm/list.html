@@ -79,21 +79,9 @@
 							<th>정보</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody id="companyTableBody">
 						<tr>
-							<td><input type="checkbox"></td>
-							<td>001</td>
-							<td>OO기업</td>
-							<td>홍길동</td>
-							<td>김대리</td>
-							<td>010-1234-5678</td>
-							<td>test@co.com</td>
-							<td>123-45-67890</td>
-							<td>정상</td>
-							<td>30일</td>
-							<td>2025-12-31</td>
-							<td><button class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
-                                    data-bs-target="#subscriptionModal">보기</button></td>
+							<td colspan="6">로딩 중...</td>
 						</tr>
 					</tbody>
 				</table>
@@ -107,12 +95,9 @@
 							style="width: 200px;">
 						<button class="btn btn-sm btn-primary">검색</button>
 					</div>
-					<nav>
-						<ul class="pagination pagination-sm mb-0">
-							<li class="page-item disabled"><a class="page-link">&laquo;</a></li>
-							<li class="page-item active"><a class="page-link">1</a></li>
-							<li class="page-item"><a class="page-link">&raquo;</a></li>
-						</ul>
+					<!-- 페이지네이션 -->
+					<nav class="mt-3">
+						<ul class="pagination justify-content-center mb-0" id="paginationArea"></ul>
 					</nav>
 				</div>
 			</div>
@@ -170,4 +155,119 @@
 			</div>
 		</div>
 	</div>
+	<script>
+		let currentPage = 1;
+
+		// 데이터 로딩
+		function loadUsers(page = 1) {
+			currentPage = page;
+
+			let params = $("#searchForm").serialize();
+			params += "&page=" + page;
+
+			$.ajax({
+				url: "/admin/api/companies",
+				method: "GET",
+				data: params,
+				dataType: "json",
+				success: function (res) {
+					const data = res.body;
+					renderTable(data.companies);
+					renderPagination(data.page, data.pageSize, data.total);
+				},
+				error: function (xhr, status, err) {
+					console.log(err);
+				}
+			})
+		}
+
+		// 테이블 렌더링
+		function renderTable(companies) {
+			const $tbody = $("#companyTableBody");
+			$tbody.empty();
+
+			if (companies.length === 0) {
+				$tbody.append(`<tr><td colspan="6" class="text-muted">회사 정보가 없습니다.</td></tr>`);
+				return;
+			}
+
+			$.each(companies, function (i, company) {
+				$tbody.append(`
+					<tr>
+						<td><input type="checkbox" value="${company.coIdx}"></td>
+						<td>${company.coIdx}</td>
+						<td>${company.coName}</td>
+						<td>${company.ceoName}</td>
+						<td>${company.pschName}</td>
+						<td>${company.ceoTel}</td>
+						<td>${company.pschEmail}</td>
+						<td>${company.bizrNo}</td>
+						<td>
+							<span class="badge bg-${company.svcStatus === 'ES02' ? 'success' : 'secondary'}">
+								${company.svcStatus === 'ES01' ? '구독 전' :
+								company.svcStatus === 'ES02' ? '구독 중' :
+								company.svcStatus === 'ES03' ? '만료' : '기타'}
+							</span>
+						</td>
+						<td>${company.spiPeriod}일</td>
+						<td>${company.spiEnd ? company.spiEnd.substring(0, 10) : ''}</td>
+						<td>
+							<button class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
+									data-bs-target="#subscriptionModal"
+									data-co-idx="${company.coIdx}">
+								보기
+							</button>
+						</td>
+					</tr>
+				`);
+			});
+		}
+
+		// 페이지네이션 렌더링
+		function renderPagination(page, pageSize, total) {
+			const totalPages = Math.ceil(total / pageSize);
+			const $pagination = $("#paginationArea");
+			$pagination.empty();
+
+			// 이전 버튼
+			$pagination.append(`
+				<li class="page-item ${page === 1 ? 'disabled' : ''}">
+					<a class="page-link" href="#" data-page="${page - 1}">&laquo;</a>
+				</li>
+			`);
+
+			for (let i = 1; i <= totalPages; i++) {
+				$pagination.append(`
+					<li class="page-item ${i === page ? 'active' : ''}">
+						<a class="page-link" href="#" data-page="${i}">${i}</a>
+					</li>
+				`);
+			}
+
+			// 다음 버튼
+			$pagination.append(`
+				<li class="page-item ${page === totalPages ? 'disabled' : ''}">
+					<a class="page-link" href="#" data-page="${page + 1}">&raquo;</a>
+				</li>
+			`);
+		}
+
+		// 검색 폼 제출
+		$("#searchBtn").on("click", function (e) {
+			console.log("test")
+			loadUsers(1); // 검색 시 1페이지부터
+		});
+
+		// 페이지 클릭 이벤트
+		$("#paginationArea").on("click", "a.page-link", function (e) {
+			e.preventDefault();
+			const page = $(this).data("page");
+			if (page) loadUsers(page);
+		});
+
+		// 초기 데이터 로딩
+		$(document).ready(function () {
+			loadUsers();
+		});
+	</script>
 </div>
