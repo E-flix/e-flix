@@ -18,7 +18,8 @@ import lombok.RequiredArgsConstructor;
  * -----------------------------------------------
  * [ 변경 이력 ]
  * - 2025-06-23 (김희정): AccController에서 분리 => 거래처원장Controller 생성
- * - 2025-06-26 (김희정): 전체조회 작성
+ * - 2025-06-26 (김희정): 잔액 조건 전체 조회 작성
+ * - 2025-06-27 (김희정): 내용 조건 전체 조회 작성
  * ============================================
  */
 @Controller
@@ -36,7 +37,7 @@ public class AccClientsLedgerController {
     return "acc/clientsLedger";
   }
 
-  // 전체 조회
+  // 잔액 조건 전체 조회
   @ResponseBody
   @GetMapping("/cl/list")
   public List<EntryMasterDTO> getList( @RequestParam String startDate,
@@ -44,5 +45,15 @@ public class AccClientsLedgerController {
                                        @RequestParam(required = false) String accountCode,
                                        @RequestParam(required = false) String partnerCode) {
     return clientsLedgerService.getList(startDate, endDate, accountCode, partnerCode);
+  }
+
+  // 내용 조건 전체 조회
+  @ResponseBody
+  @GetMapping("/cl/listDetail")
+  public List<EntryMasterDTO> getListDetail( @RequestParam String startDate,
+                                             @RequestParam String endDate,
+                                             @RequestParam String accountCode,
+                                             @RequestParam String partnerCode) {
+    return clientsLedgerService.getListDetail(startDate, endDate, accountCode, partnerCode);
   }
 }

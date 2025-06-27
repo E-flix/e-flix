@@ -29,6 +29,7 @@ public class EntryDetailDTO {
   private Date updatedAt;
 
   private String accountName; // 계정과목명
+  private String majorCategory; // 계정과목 대분류
   //private String partner_name, 
   private String businessNumber; // 사업자등록번호
   private String residentNumber; // 주민등록번호
