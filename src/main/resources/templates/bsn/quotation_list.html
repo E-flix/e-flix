@@ -4,45 +4,184 @@
 
 <head>
   <title>견적서 조회</title>
-</head>
-<div layout:fragment="content">
-  <div class="w-100" id="account">
-    <div class="d-flex justify-content-between align-items-center mb-1">
-      <h3>견적서 조회</h3>
-    </div>
-    <div class="table-responsive">
-      <button onclick="showAlert()">알림창 띄우기</button>
-      <div class="my-3">
-        <div id="myGrid" class="ag-theme-alpine" style="width:100%; height:400px;"></div>
-      </div>
-    </div>
-  </div>
-  <script th:inline="javascript">
-    let gridApi;
-    let quotationList = /*[[${quotationList}]]*/ [];
-    const gridOptions = {
-      rowData: quotationList,
-      columnDefs: [
-        { headerName: '견적번호', field: 'quotationNo' },
-        { headerName: '견적일자', field: 'quotationDt' },
-        { headerName: '유효기간', field: 'validPeriod' },
-        { headerName: '거래처명', field: 'customerName' },
-        { headerName: '담당자', field: 'empCd' },
-        { headerName: '연락처', field: 'phone' },
-        { headerName: '예상납기일', field: 'expectedDeliveryDt' },
-        { headerName: '결제조건', field: 'paymentTerms' },
-      ],
-      defaultColDef: { flex: 1 },
-    };
-    gridApi = agGrid.createGrid(document.querySelector("#myGrid"), gridOptions);
 
-    function showAlert() {
-      Swal.fire({
-        title: '성공!',
-        text: '작업이 성공적으로 완료되었습니다.',
-        icon: 'success',
-        confirmButtonText: '확인'
-      });
+  <!-- 페이지 전용 스타일 -->
+  <style>
+    /* 회색 필터 박스 */
+    .filter-box {
+      background: #c9c9c9;
+      padding: 18px 12px;
+      border-radius: 4px;
+      margin-bottom: 14px;
+      font-size: 14px;
     }
+
+    .filter-box label {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .filter-box .form-select,
+    .filter-box .form-control {
+      height: 30px;
+      font-size: .9rem;
+    }
+  </style>
+</head>
+
+<div layout:fragment="content" class="w-100">
+  <h3 class="mb-2">견적서 조회</h3>
+
+  <!-- ────────── 필터 영역 ────────── -->
+  <!-- ────────── 필터 영역 (Bootstrap 5) ────────── -->
+  <form id="filterForm" class="filter-box">
+    <div class="row g-4 justify-content-center">
+  
+      <!-- ① 견적번호 / 견적일자 -->
+      <div class="col-12 col-sm-6 col-md-4">
+        <label for="fQNo" class="form-label">견적서 번호</label>
+        <input id="fQNo" type="text"
+              class="form-control form-control-sm" placeholder="예: QT-20250627-001">
+  
+        <label for="fQDate" class="form-label mt-3">견적일자</label>
+        <input id="fQDate" type="date" class="form-control form-control-sm">
+      </div>
+  
+      <!-- ② 거래처 / 대표명 -->
+      <div class="col-12 col-sm-6 col-md-4">
+        <label for="fCustomer" class="form-label">거래처</label>
+        <input id="fCustomer" type="text"
+              class="form-control form-control-sm" placeholder="거래처명 입력">
+  
+        <label for="fRep" class="form-label mt-3">대표명</label>
+        <input id="fRep" type="text"
+              class="form-control form-control-sm" placeholder="대표명 입력">
+      </div>
+  
+      <!-- ③ 전화번호 / 유효기간(From~To) -->
+      <div class="col-12 col-sm-6 col-md-4">
+        <label for="fPhone" class="form-label">전화번호</label>
+        <input id="fPhone" type="text"
+              class="form-control form-control-sm" placeholder="'-' 없이 입력">
+  
+        <label class="form-label mt-3">견적 유효기간</label>
+        <div class="d-flex gap-2">
+          <input id="fValidFrom" type="date" class="form-control form-control-sm">
+          <input id="fValidTo"   type="date" class="form-control form-control-sm">
+        </div>
+      </div>
+  
+      <!-- 버튼 -->
+      <div class="col-12 text-center pt-2">
+        <button type="button" class="btn btn-primary btn-sm px-4 me-2"
+                onclick="applyFilters()">조회</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm px-3"
+                onclick="resetFilters()">초기화</button>
+      </div>
+  
+    </div>
+  </form>
+
+  <!-- ────────── 그리드 ────────── -->
+  <div id="myGrid" class="ag-theme-alpine w-100" style="height:430px;"></div>
+
+
+  <!-- ② 상세(견적서 상세) ― 최초엔 높이 0 → 행 클릭 시 280px 로 확장  -->
+  <div id="gridDetailWrap" style="height:0; overflow:hidden; transition:height .25s">
+    <h6 class="mt-3 mb-1 fw-bold">견적서 상세</h6>
+    <div id="gridDetail" class="ag-theme-alpine w-100" style="height:250px;"></div>
+  </div>
+
+
+  <!-- ────────── 스크립트 ────────── -->
+  <script th:inline="javascript">
+    /** ───── ① 서버-사이드 데이터 ───── */
+    const quotationRaw = /*[[${quotationList}]]*/ [];
+    console.log('[masterData]', masterData);
+
+    /** ───── ② ag-Grid 옵션 ───── */
+    const gridOptions = {
+      rowData: quotationRaw,
+      columnDefs: [
+        { headerName: '견적번호', field: 'quotationNo', width: 150},
+        { headerName: '견적일자', field: 'quotationDt',width: 120},
+        { headerName: '거래처',field: 'customerName'},
+        { headerName: '대표명',     field: 'representativeNm', width: 110 },
+        { headerName: '연락처',field: 'phone',width: 130},
+        { headerName: '유효기간',field: 'validPeriod',width: 120  }
+      ],
+      defaultColDef: { flex: 1, resizable: true},
+      localeText: { noRowsToShow: '데이터가 없습니다.' }};
+
+  
+  function buildGrid() {
+    let gridApi;
+    const eGrid = document.getElementById('myGrid');
+    gridApi = agGrid.createGrid           // v29+
+            ? agGrid.createGrid(eGrid, gridOptions)
+             : new agGrid.Grid(eGrid, gridOptions); // v28↓
+    gridApi.sizeColumnsToFit();
+  }
+
+
+
+    /** ───── ④ 셀렉트 옵션 채우기 ───── */
+    function fillSelect(id, field) {
+      const sel = document.getElementById(id);
+      const uniq = [...new Set(quotationRaw.map(r => r[field]).filter(Boolean))];
+      uniq.forEach(v => sel.add(new Option(v, v)));
+    }
+
+
+
+
+    /* ④ 필터 적용 함수 – 새 입력란에 맞춤 */
+  function applyFilters() {
+    const f = {
+      qNo     : fQNo.value.trim(),
+      qDate   : fQDate.value,          // yyyy-MM-dd 또는 ''
+      cust    : fCustomer.value.trim(),
+      rep     : fRep.value.trim(),
+      phone   : fPhone.value.trim(),
+      vFrom   : fValidFrom.value,
+      vTo     : fValidTo.value
+    };
+  
+    const data = quotationRaw.filter(r => {
+      if (f.qNo   && !r.quotationNo.includes(f.qNo))         return false;
+      if (f.qDate && r.quotationDt?.substring(0,10) !== f.qDate) return false;
+      if (f.cust  && !r.customerName?.includes(f.cust))      return false;
+      if (f.rep   && !r.representativeNm?.includes(f.rep))   return false;
+      if (f.phone && !r.phone?.includes(f.phone))            return false;
+    
+      if (f.vFrom || f.vTo) {
+        const vDate = r.validPeriod ? r.validPeriod.substring(0,10) : null;
+        if (!vDate) return false;
+        if (f.vFrom && vDate < f.vFrom) return false;
+        if (f.vTo   && vDate > f.vTo)   return false;
+      }
+      return true;
+    });
+  
+    gridApi.setRowData(data);
+    gridApi.sizeColumnsToFit();
+  }
+
+    function resetFilters() {
+    document.getElementById('filterForm').reset();
+    gridApi.setRowData(quotationRaw);
+    gridApi.sizeColumnsToFit();
+    }
+
+    /** ───── ⑦ SweetAlert 데모 ───── */
+    function showAlert() {
+      Swal.fire('성공!', '작업이 성공적으로 완료되었습니다.', 'success');
+    }
+
+    /* ⑥ DOMContentLoaded */
+    let gridApi;
+    document.addEventListener('DOMContentLoaded', () => {
+    gridApi = buildGrid();
+    });
   </script>
 </div>
