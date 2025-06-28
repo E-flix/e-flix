@@ -1,6 +1,7 @@
 package com.eflix.bsn.controller;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.eflix.bsn.service.QuotationService;
 import com.eflix.bsn.dto.QuotationDTO;
@@ -45,6 +48,15 @@ public class BsnController {
     model.addAttribute("quotationList", list);
     return "bsn/quotation_list";
   }
+
+  /** 견적서 상세(품목) 목록 */
+  @GetMapping("/quotation/details")
+  @ResponseBody
+  public List<QuotationDetailDTO> getQuotationDetails(
+      @RequestParam("quotationNo") String quotationNo) {
+    return quotationService.getQuotationDetails(quotationNo);
+  }
+
 
   //견적서 입력
   @GetMapping("/qot")

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{common/layouts/default}">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{common/layouts/default}">
 
 <head>
   <title>견적서 조회</title>
@@ -33,155 +34,262 @@
   <h3 class="mb-2">견적서 조회</h3>
 
   <!-- ────────── 필터 영역 ────────── -->
-  <!-- ────────── 필터 영역 (Bootstrap 5) ────────── -->
   <form id="filterForm" class="filter-box">
     <div class="row g-4 justify-content-center">
-  
+
       <!-- ① 견적번호 / 견적일자 -->
       <div class="col-12 col-sm-6 col-md-4">
         <label for="fQNo" class="form-label">견적서 번호</label>
-        <input id="fQNo" type="text"
-              class="form-control form-control-sm" placeholder="예: QT-20250627-001">
-  
+        <input id="fQNo" type="text" class="form-control form-control-sm" placeholder="예: QT-20250627-001">
+
         <label for="fQDate" class="form-label mt-3">견적일자</label>
         <input id="fQDate" type="date" class="form-control form-control-sm">
       </div>
-  
+
       <!-- ② 거래처 / 대표명 -->
       <div class="col-12 col-sm-6 col-md-4">
         <label for="fCustomer" class="form-label">거래처</label>
-        <input id="fCustomer" type="text"
-              class="form-control form-control-sm" placeholder="거래처명 입력">
-  
+        <input id="fCustomer" type="text" class="form-control form-control-sm" placeholder="거래처명 입력">
+
         <label for="fRep" class="form-label mt-3">대표명</label>
-        <input id="fRep" type="text"
-              class="form-control form-control-sm" placeholder="대표명 입력">
+        <input id="fRep" type="text" class="form-control form-control-sm" placeholder="대표명 입력">
       </div>
-  
+
       <!-- ③ 전화번호 / 유효기간(From~To) -->
       <div class="col-12 col-sm-6 col-md-4">
         <label for="fPhone" class="form-label">전화번호</label>
-        <input id="fPhone" type="text"
-              class="form-control form-control-sm" placeholder="'-' 없이 입력">
-  
+        <input id="fPhone" type="text" class="form-control form-control-sm" placeholder="'-' 없이 입력">
+
         <label class="form-label mt-3">견적 유효기간</label>
         <div class="d-flex gap-2">
           <input id="fValidFrom" type="date" class="form-control form-control-sm">
           <input id="fValidTo"   type="date" class="form-control form-control-sm">
         </div>
       </div>
-  
+
       <!-- 버튼 -->
       <div class="col-12 text-center pt-2">
-        <button type="button" class="btn btn-primary btn-sm px-4 me-2"
-                onclick="applyFilters()">조회</button>
-        <button type="button" class="btn btn-outline-secondary btn-sm px-3"
-                onclick="resetFilters()">초기화</button>
+        <button type="button" class="btn btn-primary btn-sm px-4 me-2" onclick="applyFilters()">조회</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="resetFilters()">초기화</button>
       </div>
-  
+
     </div>
   </form>
 
-  <!-- ────────── 그리드 ────────── -->
-  <div id="myGrid" class="ag-theme-alpine w-100" style="height:430px;"></div>
+  <!-- ────────── 그리드 영역 ────────── -->
+  <div id="gridMaster" class="ag-theme-alpine w-100" style="height: 430px;"></div>
 
-
-  <!-- ② 상세(견적서 상세) ― 최초엔 높이 0 → 행 클릭 시 280px 로 확장  -->
-  <div id="gridDetailWrap" style="height:0; overflow:hidden; transition:height .25s">
+  <div id="gridDetailWrap" style="height: 0; overflow: hidden; transition: height .25s;">
     <h6 class="mt-3 mb-1 fw-bold">견적서 상세</h6>
-    <div id="gridDetail" class="ag-theme-alpine w-100" style="height:250px;"></div>
+    <div id="gridDetail" class="ag-theme-alpine w-100" style="height: 250px;"></div>
   </div>
-
 
   <!-- ────────── 스크립트 ────────── -->
   <script th:inline="javascript">
-    /** ───── ① 서버-사이드 데이터 ───── */
-    const quotationRaw = /*[[${quotationList}]]*/ [];
-    console.log('[masterData]', masterData);
+    // ① 서버 데이터
+    const masterData = /*[[${quotationList}]]*/ [];
 
-    /** ───── ② ag-Grid 옵션 ───── */
-    const gridOptions = {
-      rowData: quotationRaw,
+    // ② API 레퍼런스
+    let gridApiMaster, gridApiDetail;
+
+    // ③ 마스터 그리드 옵션
+    const masterOptions = {
+      rowData: masterData,
       columnDefs: [
-        { headerName: '견적번호', field: 'quotationNo', width: 150},
-        { headerName: '견적일자', field: 'quotationDt',width: 120},
-        { headerName: '거래처',field: 'customerName'},
-        { headerName: '대표명',     field: 'representativeNm', width: 110 },
-        { headerName: '연락처',field: 'phone',width: 130},
-        { headerName: '유효기간',field: 'validPeriod',width: 120  }
+        { headerName:'견적서 번호', field:'quotationNo',    width:150 },
+        { headerName:'견적일자',    field:'quotationDt',     width:110 },
+        { headerName:'거래처',      field:'customerName'        },
+        { headerName:'대표명',      field:'representativeNm',  width:110 },
+        { headerName:'연락처',      field:'phone',           width:130 },
+        { headerName:'유효기간',    field:'validPeriod',     width:110 }
       ],
-      defaultColDef: { flex: 1, resizable: true},
-      localeText: { noRowsToShow: '데이터가 없습니다.' }};
-
-  
-  function buildGrid() {
-    let gridApi;
-    const eGrid = document.getElementById('myGrid');
-    gridApi = agGrid.createGrid           // v29+
-            ? agGrid.createGrid(eGrid, gridOptions)
-             : new agGrid.Grid(eGrid, gridOptions); // v28↓
-    gridApi.sizeColumnsToFit();
-  }
-
-
-
-    /** ───── ④ 셀렉트 옵션 채우기 ───── */
-    function fillSelect(id, field) {
-      const sel = document.getElementById(id);
-      const uniq = [...new Set(quotationRaw.map(r => r[field]).filter(Boolean))];
-      uniq.forEach(v => sel.add(new Option(v, v)));
-    }
-
-
-
-
-    /* ④ 필터 적용 함수 – 새 입력란에 맞춤 */
-  function applyFilters() {
-    const f = {
-      qNo     : fQNo.value.trim(),
-      qDate   : fQDate.value,          // yyyy-MM-dd 또는 ''
-      cust    : fCustomer.value.trim(),
-      rep     : fRep.value.trim(),
-      phone   : fPhone.value.trim(),
-      vFrom   : fValidFrom.value,
-      vTo     : fValidTo.value
-    };
-  
-    const data = quotationRaw.filter(r => {
-      if (f.qNo   && !r.quotationNo.includes(f.qNo))         return false;
-      if (f.qDate && r.quotationDt?.substring(0,10) !== f.qDate) return false;
-      if (f.cust  && !r.customerName?.includes(f.cust))      return false;
-      if (f.rep   && !r.representativeNm?.includes(f.rep))   return false;
-      if (f.phone && !r.phone?.includes(f.phone))            return false;
-    
-      if (f.vFrom || f.vTo) {
-        const vDate = r.validPeriod ? r.validPeriod.substring(0,10) : null;
-        if (!vDate) return false;
-        if (f.vFrom && vDate < f.vFrom) return false;
-        if (f.vTo   && vDate > f.vTo)   return false;
+      defaultColDef: { flex:1, resizable:true },
+      localeText: { noRowsToShow:'데이터가 없습니다.' },
+      onRowClicked: e => loadDetails(e.data.quotationNo),
+      // 마스터 그리드 준비 완료 콜백
+      onGridReady: function(params) {
+        gridApiMaster = params.api;
+        // 그리드가 준비된 후 컬럼 크기 조정
+        setTimeout(() => {
+          if (gridApiMaster && gridApiMaster.sizeColumnsToFit) {
+            gridApiMaster.sizeColumnsToFit();
+          }
+        }, 100);
       }
-      return true;
-    });
-  
-    gridApi.setRowData(data);
-    gridApi.sizeColumnsToFit();
-  }
+    };
 
-    function resetFilters() {
-    document.getElementById('filterForm').reset();
-    gridApi.setRowData(quotationRaw);
-    gridApi.sizeColumnsToFit();
+    // ④ 디테일 그리드 옵션
+    const detailOptions = {
+      rowData: [],
+      columnDefs: [
+        { headerName:'순번',     valueGetter:'node.rowIndex+1', width:80 },
+        { headerName:'품목코드',  field:'itemCode',               width:130 },
+        { headerName:'품목명',    field:'itemName'                     },
+        { headerName:'규격',      field:'spec'                         },
+        { headerName:'수량',      field:'qty',        width:90,  type:'numericColumn' },
+        { headerName:'단가',      field:'unitPrice',  width:110, type:'numericColumn' },
+        { headerName:'공급가액',  field:'supplyAmt',  width:120, type:'numericColumn' },
+        { headerName:'부가세',    field:'taxAmt',     width:110, type:'numericColumn' },
+        { headerName:'합계',      field:'totalMoney', width:110, type:'numericColumn' },
+        { headerName:'비고',      field:'remarks',    width:150 }
+      ],
+      defaultColDef: { flex:1, resizable:true },
+      localeText: { noRowsToShow:'상세 데이터가 없습니다.' },
+      // 디테일 그리드 준비 완료 콜백
+      onGridReady: function(params) {
+        gridApiDetail = params.api;
+        setTimeout(() => {
+          if (gridApiDetail && gridApiDetail.sizeColumnsToFit) {
+            gridApiDetail.sizeColumnsToFit();
+          }
+        }, 100);
+      }
+    };
+
+    // ⑤ DOMContentLoaded → 그리드 생성
+    document.addEventListener('DOMContentLoaded', () => {
+      // ▶ 마스터 그리드
+      const masterEl = document.getElementById('gridMaster');
+      if (agGrid.createGrid) {
+        agGrid.createGrid(masterEl, masterOptions);
+      } else {
+        new agGrid.Grid(masterEl, masterOptions);
+      }
+
+      // ▶ 디테일 그리드
+      const detailEl = document.getElementById('gridDetail');
+      if (agGrid.createGrid) {
+        agGrid.createGrid(detailEl, detailOptions);
+      } else {
+        new agGrid.Grid(detailEl, detailOptions);
+      }
+    });
+
+    // ⑥ 상세 AJAX 호출
+    async function loadDetails(quotationNo) {
+      if (!gridApiDetail) {
+        console.error('Detail grid API not ready');
+        return;
+      }
+      
+      // API 메서드 존재 여부 확인
+      console.log('gridApiDetail methods:', Object.getOwnPropertyNames(gridApiDetail));
+      
+      try {
+        const res = await fetch(
+          '/bsn/quotation/details?quotationNo='
+          + encodeURIComponent(quotationNo)
+        );
+        if (!res.ok) throw new Error(res.statusText);
+        const items = await res.json();
+        
+        // AG-Grid 버전별 대응
+        if (typeof gridApiDetail.setRowData === 'function') {
+          gridApiDetail.setRowData(items);
+        } else if (typeof gridApiDetail.setGridOption === 'function') {
+          gridApiDetail.setGridOption('rowData', items);
+        } else {
+          console.error('setRowData and setGridOption methods not found');
+          return;
+        }
+        
+        if (gridApiDetail.sizeColumnsToFit) {
+          gridApiDetail.sizeColumnsToFit();
+        }
+        document.getElementById('gridDetailWrap').style.height = '280px';
+      } catch (e) {
+        console.error(e);
+        Swal.fire('오류', '상세 데이터를 불러올 수 없습니다.', 'error');
+      }
     }
 
-    /** ───── ⑦ SweetAlert 데모 ───── */
+    // ⑦ 필터 적용
+    function applyFilters() {
+      if (!gridApiMaster) {
+        console.error('Master grid API not ready');
+        return;
+      }
+
+      const f = {
+        qNo:       document.getElementById('fQNo').value.trim(),
+        qDt:       document.getElementById('fQDate').value,
+        cust:      document.getElementById('fCustomer').value.trim(),
+        rep:       document.getElementById('fRep').value.trim(),
+        phone:     document.getElementById('fPhone').value.trim(),
+        validFrom: document.getElementById('fValidFrom').value,
+        validTo:   document.getElementById('fValidTo').value
+      };
+
+      const filtered = masterData.filter(r => {
+        if (f.qNo     && !r.quotationNo.includes(f.qNo))          return false;
+        if (f.qDt     && r.quotationDt.substring(0,10) !== f.qDt)  return false;
+        if (f.cust    && !r.customerName.includes(f.cust))        return false;
+        if (f.rep     && !r.representativeNm.includes(f.rep))     return false;
+        if (f.phone   && !r.phone.includes(f.phone))              return false;
+        if (f.validFrom || f.validTo) {
+          const v = r.validPeriod.substring(0,10);
+          if (f.validFrom && v < f.validFrom) return false;
+          if (f.validTo   && v > f.validTo)   return false;
+        }
+        return true;
+      });
+
+      // AG-Grid 버전별 대응
+      if (typeof gridApiMaster.setRowData === 'function') {
+        gridApiMaster.setRowData(filtered);
+      } else if (typeof gridApiMaster.setGridOption === 'function') {
+        gridApiMaster.setGridOption('rowData', filtered);
+      }
+      
+      if (gridApiMaster.sizeColumnsToFit) {
+        gridApiMaster.sizeColumnsToFit();
+      }
+
+      // 디테일 초기화
+      if (gridApiDetail) {
+        if (typeof gridApiDetail.setRowData === 'function') {
+          gridApiDetail.setRowData([]);
+        } else if (typeof gridApiDetail.setGridOption === 'function') {
+          gridApiDetail.setGridOption('rowData', []);
+        }
+      }
+      document.getElementById('gridDetailWrap').style.height = '0';
+    }
+
+    // ⑧ 필터 초기화
+    function resetFilters() {
+      if (!gridApiMaster) {
+        console.error('Master grid API not ready');
+        return;
+      }
+
+      document.getElementById('filterForm').reset();
+      
+      // AG-Grid 버전별 대응
+      if (typeof gridApiMaster.setRowData === 'function') {
+        gridApiMaster.setRowData(masterData);
+      } else if (typeof gridApiMaster.setGridOption === 'function') {
+        gridApiMaster.setGridOption('rowData', masterData);
+      }
+      
+      if (gridApiMaster.sizeColumnsToFit) {
+        gridApiMaster.sizeColumnsToFit();
+      }
+      
+      if (gridApiDetail) {
+        if (typeof gridApiDetail.setRowData === 'function') {
+          gridApiDetail.setRowData([]);
+        } else if (typeof gridApiDetail.setGridOption === 'function') {
+          gridApiDetail.setGridOption('rowData', []);
+        }
+      }
+      document.getElementById('gridDetailWrap').style.height = '0';
+    }
+
+    // ⑨ SweetAlert 데모
     function showAlert() {
       Swal.fire('성공!', '작업이 성공적으로 완료되었습니다.', 'success');
     }
-
-    /* ⑥ DOMContentLoaded */
-    let gridApi;
-    document.addEventListener('DOMContentLoaded', () => {
-    gridApi = buildGrid();
-    });
   </script>
 </div>
+</html>
