@@ -22,9 +22,6 @@ import com.eflix.common.res.result.ResStatus;
 import com.eflix.common.security.dto.UserDTO;
 import com.eflix.main.service.UserService;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-
 /**
  * <p>
  * ERP 관리자 기능을 제공하는 컨트롤러입니다.
@@ -63,14 +60,12 @@ public class LoginController {
         this.accAccountController = accAccountController;
     }
     
-    @PostMapping("/erp/signup")
+    @PostMapping("/signup")
     @ResponseBody
     public ResponseEntity<ResResult> postMethodName(@RequestBody UserDTO userDTO, RedirectAttributes rttr) {
         //TODO: process POST request
 
         ResResult result;
-
-        System.out.println(userDTO.toString());
         
         userDTO.setUserPw(passwordEncoder.encode(userDTO.getUserPw()));
 

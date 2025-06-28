@@ -176,7 +176,8 @@
 					renderPagination(data.page, data.pageSize, data.total);
 				},
 				error: function (xhr, status, err) {
-					console.log(err);
+					console.error(err);
+					Swal.fire("실패", "서버와 통신 중 문제가 발생했습니다.", "error");
 				}
 			})
 		}

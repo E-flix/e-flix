@@ -3,7 +3,6 @@ package com.eflix.common.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -73,7 +72,7 @@ public class SecurityConfig {
 	public SecurityFilterChain erpSecurityFilterChain(HttpSecurity http) throws Exception {
 		http.securityMatcher("/**")
 				.authorizeHttpRequests(auth -> auth
-					.requestMatchers("/", "/erp", "/erp/login", "/erp/signup", "/erp/inquiry/**", "/main/error/**", "/main/assets/**", "/main/css/**", "/main/js/**", "/bootstrap/**", "/common/**",
+					.requestMatchers("/", "/erp", "/login", "/signup", "/inquiry/**", "/main/error/**", "/main/assets/**", "/main/css/**", "/main/js/**", "/bootstrap/**", "/common/**",
 						"/bootstrap/**", "/img/**").permitAll()
 					.requestMatchers("/erp/**").authenticated()
 					.requestMatchers("/**").authenticated())

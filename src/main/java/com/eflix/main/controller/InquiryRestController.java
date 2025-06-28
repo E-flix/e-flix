@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
-@RequestMapping("/erp/inquiry")
+@RequestMapping("/inquiry")
 public class InquiryRestController {
     
     @Autowired

@@ -1,7 +1,11 @@
 package com.eflix.main.service;
 
+import java.util.List;
+
 import com.eflix.main.dto.AnswerDTO;
+import com.eflix.main.dto.InquiryDTO;
 import com.eflix.main.dto.QuestionDTO;
+import com.eflix.main.dto.etc.InquirySearchDTO;
 
 /**
  * ERP 고객 문의 관리를 위한 Service 클래스
@@ -38,5 +42,13 @@ public interface InquiryService {
     public int insertQst(QuestionDTO questionDTO);
 
     public int insertAns(AnswerDTO answerDTO);
+
+    public int findAllInquiryCount(InquirySearchDTO inquirySearchDTO);
+
+    public List<InquiryDTO> findAllInquiry(InquirySearchDTO inquirySearchDTO);
+
+    public QuestionDTO findQstByIdx(String qstIdx);
+
+    public AnswerDTO findAnsByQstIdx(String qstIdx);
     
 }
