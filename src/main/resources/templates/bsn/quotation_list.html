@@ -79,8 +79,8 @@
   <!-- ────────── 그리드 영역 ────────── -->
   <div id="gridMaster" class="ag-theme-alpine w-100" style="height: 430px;"></div>
 
-  <div id="gridDetailWrap" style="height: 0; overflow: hidden; transition: height .25s;">
-    <h6 class="mt-3 mb-1 fw-bold">견적서 상세</h6>
+  <div id="gridDetailWrap" style="margin-top: 20px;">
+    <h6 class="mb-2 fw-bold">견적서 상세 <span id="selectedQuotationNo" class="text-muted fs-6"></span></h6>
     <div id="gridDetail" class="ag-theme-alpine w-100" style="height: 250px;"></div>
   </div>
 
@@ -118,33 +118,63 @@
       }
     };
 
-    // ④ 디테일 그리드 옵션
+    /* ④ 디테일 그리드 옵션 */
     const detailOptions = {
       rowData: [],
       columnDefs: [
-        { headerName:'순번',     valueGetter:'node.rowIndex+1', width:80 },
-        { headerName:'품목코드',  field:'itemCode',               width:130 },
-        { headerName:'품목명',    field:'itemName'                     },
-        { headerName:'규격',      field:'spec'                         },
-        { headerName:'수량',      field:'qty',        width:90,  type:'numericColumn' },
-        { headerName:'단가',      field:'unitPrice',  width:110, type:'numericColumn' },
-        { headerName:'공급가액',  field:'supplyAmt',  width:120, type:'numericColumn' },
-        { headerName:'부가세',    field:'taxAmt',     width:110, type:'numericColumn' },
-        { headerName:'합계',      field:'totalMoney', width:110, type:'numericColumn' },
-        { headerName:'비고',      field:'remarks',    width:150 }
+        // ▶ 순번을 실제 lineNo 로 쓰고 싶다면:
+        { headerName: '순번', field: 'lineNo', width: 80 },
+        //   혹은 그대로 auto-index 를 쓰려면:
+        // { headerName: '순번', valueGetter: 'node.rowIndex + 1', width: 80 },
+    
+        { headerName: '품목코드', field: 'itemCode',  width: 130 },
+        { headerName: '품목명',   field: 'itemName'               },
+        { headerName: '규격',     field: 'spec'                   },
+        {
+          headerName: '수량',
+          field: 'qty',
+          width: 90,
+          type: 'numericColumn',
+          valueFormatter: p => Number(p.value || 0).toLocaleString()
+        },
+        {
+          headerName: '단가',
+          field: 'unitPrice',
+          width: 110,
+          type: 'numericColumn',
+          valueFormatter: p => Number(p.value || 0).toLocaleString()
+        },
+        {
+          headerName: '공급가액',
+          field: 'supplyAmount',
+          width: 120,
+          type: 'numericColumn',
+          valueFormatter: p => Number(p.value || 0).toLocaleString()
+        },
+        {
+          headerName: '부가세',
+          field: 'taxAmount',
+          width: 110,
+          type: 'numericColumn',
+          valueFormatter: p => Number(p.value || 0).toLocaleString()
+        },
+        {
+          headerName: '합계',
+          field: 'totalMoney',
+          width: 110,
+          type: 'numericColumn',
+          valueFormatter: p => Number(p.value || 0).toLocaleString()
+        },
+        { headerName: '비고', field: 'remarks', width: 150 }
       ],
-      defaultColDef: { flex:1, resizable:true },
-      localeText: { noRowsToShow:'상세 데이터가 없습니다.' },
-      // 디테일 그리드 준비 완료 콜백
-      onGridReady: function(params) {
-        gridApiDetail = params.api;
-        setTimeout(() => {
-          if (gridApiDetail && gridApiDetail.sizeColumnsToFit) {
-            gridApiDetail.sizeColumnsToFit();
-          }
-        }, 100);
+      defaultColDef: { flex: 1, resizable: true },
+      localeText: { noRowsToShow: '상세 데이터가 없습니다.' },
+      onGridReady: p => {
+        gridApiDetail = p.api;
+        setTimeout(() => gridApiDetail?.sizeColumnsToFit(), 100);
       }
     };
+
 
     // ⑤ DOMContentLoaded → 그리드 생성
     document.addEventListener('DOMContentLoaded', () => {
@@ -172,8 +202,8 @@
         return;
       }
       
-      // API 메서드 존재 여부 확인
-      console.log('gridApiDetail methods:', Object.getOwnPropertyNames(gridApiDetail));
+      // 선택된 견적서 번호 표시
+      document.getElementById('selectedQuotationNo').textContent = `(${quotationNo})`;
       
       try {
         const res = await fetch(
@@ -183,11 +213,30 @@
         if (!res.ok) throw new Error(res.statusText);
         const items = await res.json();
         
+        // 데이터 로깅으로 확인
+        console.log('Received detail data:', items);
+        
+        // 데이터 전처리 (다양한 필드명 대응)
+        const processedItems = items.map(item => {
+          console.log('Processing item:', item);
+          return {
+            ...item,
+            qty: item.qty || item.QTY || 0,
+            unitPrice: item.unitPrice || item.UNIT_PRICE || 0,
+            // 데이터베이스 컬럼명 기준으로 매핑
+            supplyAmount: item.supplyAmount || item.SUPPLY_AMOUNT || item.supply_amount || 0,
+            taxAmount: item.taxAmount || item.TAX_AMOUNT || item.tax_amount || 0,
+            totalMoney: item.totalMoney || item.TOTAL_MONEY || item.total_money || item.totalAmount || item.TOTAL_AMOUNT || 0
+          };
+        });
+        
+        console.log('Processed items:', processedItems);
+        
         // AG-Grid 버전별 대응
         if (typeof gridApiDetail.setRowData === 'function') {
-          gridApiDetail.setRowData(items);
+          gridApiDetail.setRowData(processedItems);
         } else if (typeof gridApiDetail.setGridOption === 'function') {
-          gridApiDetail.setGridOption('rowData', items);
+          gridApiDetail.setGridOption('rowData', processedItems);
         } else {
           console.error('setRowData and setGridOption methods not found');
           return;
@@ -196,10 +245,16 @@
         if (gridApiDetail.sizeColumnsToFit) {
           gridApiDetail.sizeColumnsToFit();
         }
-        document.getElementById('gridDetailWrap').style.height = '280px';
+        
       } catch (e) {
         console.error(e);
         Swal.fire('오류', '상세 데이터를 불러올 수 없습니다.', 'error');
+        // 오류 시에도 빈 데이터로 초기화
+        if (typeof gridApiDetail.setRowData === 'function') {
+          gridApiDetail.setRowData([]);
+        } else if (typeof gridApiDetail.setGridOption === 'function') {
+          gridApiDetail.setGridOption('rowData', []);
+        }
       }
     }
 
@@ -245,7 +300,7 @@
         gridApiMaster.sizeColumnsToFit();
       }
 
-      // 디테일 초기화
+      // 디테일 초기화 (상세창은 항상 표시)
       if (gridApiDetail) {
         if (typeof gridApiDetail.setRowData === 'function') {
           gridApiDetail.setRowData([]);
@@ -253,7 +308,8 @@
           gridApiDetail.setGridOption('rowData', []);
         }
       }
-      document.getElementById('gridDetailWrap').style.height = '0';
+      // 선택된 견적서 번호 초기화
+      document.getElementById('selectedQuotationNo').textContent = '';
     }
 
     // ⑧ 필터 초기화
@@ -283,7 +339,8 @@
           gridApiDetail.setGridOption('rowData', []);
         }
       }
-      document.getElementById('gridDetailWrap').style.height = '0';
+      // 선택된 견적서 번호 초기화
+      document.getElementById('selectedQuotationNo').textContent = '';
     }
 
     // ⑨ SweetAlert 데모

@@ -55,55 +55,55 @@
           <tr>
             <th class="bg-cell">견적서 번호</th>
             <td><input type="text" th:field="*{quotationNo}"
-                       class="form-control form-control-sm" readonly></td>
+                      class="form-control form-control-sm" readonly></td>
             <th class="bg-cell">일자</th>
             <td><input type="date" th:field="*{quotationDt}"
-                       class="form-control form-control-sm"></td>
+                      class="form-control form-control-sm"></td>
           </tr>
           <tr>
             <th class="bg-cell">거래처</th>
             <td>
               <input id="customerDisplay" type="text"
-                     class="form-control form-control-sm"
-                     placeholder="거래처 코드/이름" readonly>
+                    class="form-control form-control-sm"
+                    placeholder="거래처 코드/이름" readonly>
               <input type="hidden" th:field="*{customerCd}"  id="customerCd">
               <input type="hidden" th:field="*{customerName}">
             </td>
             <th class="bg-cell">대표명</th>
             <td><input type="text" th:field="*{representativeNm}"
-                       id="repName" class="form-control form-control-sm" readonly></td>
+                      id="repName" class="form-control form-control-sm" readonly></td>
           </tr>
           <tr>
             <th class="bg-cell">발신담당자</th>
             <td><input type="text" th:field="*{sender}"
-                       id="sender" class="form-control form-control-sm"></td>
+                      id="sender" class="form-control form-control-sm"></td>
             <th class="bg-cell">전화번호</th>
             <td><input type="text" th:field="*{phone}"
-                       id="phone" class="form-control form-control-sm" readonly></td>
+                      id="phone" class="form-control form-control-sm" readonly></td>
           </tr>
           <tr>
             <th class="bg-cell">할인율(%)</th>
             <td>
               <div class="input-group input-group-sm">
                 <input type="number" th:field="*{discountRate}"
-                       id="discountRate" step="0.01" min="0" max="100"
-                       class="form-control">
+                      id="discountRate" step="0.01" min="0" max="100"
+                      class="form-control">
                 <span class="input-group-text">%</span>
               </div>
             </td>
             <th class="bg-cell">유효기간</th>
             <td><input type="date" th:field="*{validPeriod}"
-                       id="validUntil" class="form-control form-control-sm"></td>
+                      id="validUntil" class="form-control form-control-sm"></td>
           </tr>
           <tr>
             <th class="bg-cell">납기예정일</th>
             <td><input type="date" th:field="*{expectedDeliveryDt}"
-                       id="deliveryDate" class="form-control form-control-sm"></td>
+                      id="deliveryDate" class="form-control form-control-sm"></td>
             <th class="bg-cell">첨부</th>
             <td>
               <a href="#" id="attachmentLink">개인파일함</a>
               <input type="file" name="attachFile"
-                     id="attachmentInput" multiple class="d-none">
+                    id="attachmentInput" multiple class="d-none">
               <div id="attachmentList" class="small text-body mt-1"></div>
             </td>
           </tr>
@@ -135,39 +135,37 @@
           </tr>
         </thead>
         <tbody>
-          <tr th:each="d,idx : *{details}">
+          <!-- 첫 행 템플릿: name 은 0번, data-field 로 키 지정 -->
+          <tr>
             <td><input type="checkbox"></td>
             <td>▶</td>
-
-            <td><input th:field="*{details[__${idx.index}__].itemCode}"
-                      class="form-control form-control-sm item-code" readonly></td>
-            <td><input th:field="*{details[__${idx.index}__].itemName}"
-                      class="form-control form-control-sm item-name" readonly></td>
-            <td><input th:field="*{details[__${idx.index}__].spec}"
-                      class="form-control form-control-sm item-spec" readonly></td>
-
-            <td><input type="number"
-                      th:field="*{details[__${idx.index}__].qty}"
-                      class="form-control form-control-sm item-qty" min="1" value="1"></td>
-            <td><input th:field="*{details[__${idx.index}__].unitPrice}"
-                      class="form-control form-control-sm item-price" readonly></td>
-
-            <!-- 공급가액 -->
-            <td><input th:field="*{details[__${idx.index}__].supplyAmount}"
-                      class="form-control form-control-sm item-supply" readonly></td>
-
-            <!-- 부가세 -->
+  
+            <td><input name="details[0].itemCode"  data-field="itemCode"
+                       class="form-control form-control-sm item-code"  readonly></td>
+            <td><input name="details[0].itemName"  data-field="itemName"
+                       class="form-control form-control-sm item-name"  readonly></td>
+            <td><input name="details[0].spec"      data-field="spec"
+                       class="form-control form-control-sm item-spec"  readonly></td>
+  
+            <td><input type="number" name="details[0].qty" data-field="qty"
+                       class="form-control form-control-sm item-qty" value="1" min="1"></td>
+            <td><input name="details[0].unitPrice" data-field="unitPrice"
+                       class="form-control form-control-sm item-price" readonly></td>
+  
+            <td><input name="details[0].supplyAmount" data-field="supplyAmount"
+                       class="form-control form-control-sm item-supply" readonly></td>
             <td>
-              <input th:field="*{details[__${idx.index}__].taxAmount}"
-                    class="form-control form-control-sm item-tax" readonly>
-              <input type="hidden"
-                    th:field="*{details[__${idx.index}__].totalMoney}"
-                    class="item-total">
+              <input name="details[0].taxAmount"   data-field="taxAmount"
+                     class="form-control form-control-sm item-tax" readonly>
+              <input type="hidden" name="details[0].totalMoney" data-field="totalMoney"
+                     class="item-total">
             </td>
-            <td><input th:field="*{details[__${idx.index}__].remarks}"
-                      class="form-control form-control-sm item-remark"></td>
+            <td><input name="details[0].remarks"   data-field="remarks"
+                       class="form-control form-control-sm item-remark"></td>
           </tr>
         </tbody>
+
+
         <tfoot class="table-light fw-bold">
           <tr>
             <!-- 앞쪽 7칸 묶음 -->
@@ -246,38 +244,39 @@
     </div>
   </div>
 
-  <!-- Bootstrap JS -->
   <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', () => {
+    
+      /* ───── 상수 ───── */
       const VAT_RATE = 10;
-
+    
       /* ───── 공용 요소 ───── */
-      const tbody = document.querySelector('.detail-table tbody');
-      const discountInput = document.getElementById('discountRate');
-
-      /* ───── 모달 ───── */
-      const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
+      const tbody          = document.querySelector('.detail-table tbody');
+      const discountInput  = document.getElementById('discountRate');
+    
+      /* ───── 부트스트랩 모달 ───── */
+      const itemModal     = new bootstrap.Modal(document.getElementById('itemModal'));
       const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
-
+    
       /* ───── 계산 유틸 ───── */
       function recalcRow(row) {
         const price = +row.querySelector('.item-price').value || 0;
-        const qty = +row.querySelector('.item-qty').value || 0;
-        const discPct = +discountInput.value || 0;
-
-        const supply = Math.round(price * qty * (1 - discPct / 100)); // 공급가액
-        const tax = Math.round(supply * (VAT_RATE / 100)); // 부가세
-        const total = supply + tax; // 총합계
-
+        const qty   = +row.querySelector('.item-qty').value   || 0;
+        const disc  = +discountInput.value || 0;
+    
+        const supply = Math.round(price * qty * (1 - disc / 100)); // 공급가액
+        const tax    = Math.round(supply * (VAT_RATE / 100));      // 부가세
+        const total  = supply + tax;
+    
         row.querySelector('.item-supply').value = supply;
-        row.querySelector('.item-tax').value = tax;
-        row.querySelector('.item-total').value = total; // hidden
+        row.querySelector('.item-tax').value    = tax;
+        row.querySelector('.item-total').value  = total;            // hidden
       }
-
+    
       function recalcAllRows() {
         tbody.querySelectorAll('tr').forEach(recalcRow);
       }
-
+    
       function updateTotals() {
         let sumSupply = 0, sumTax = 0;
         tbody.querySelectorAll('tr').forEach(r => {
@@ -285,14 +284,23 @@
           sumTax    += +r.querySelector('.item-tax').value    || 0;
         });
         const sumTotal = sumSupply + sumTax;
-      
         document.getElementById('sum-supply').textContent = sumSupply.toLocaleString();
         document.getElementById('sum-tax').textContent    = sumTax.toLocaleString();
-        /* 총합계 셀은 ‘총 합계: ’ 레이블 포함 */
-        document.getElementById('sum-total').textContent  =
-            `총 합계: ${sumTotal.toLocaleString()}`;
+        document.getElementById('sum-total').textContent  = `총 합계: ${sumTotal.toLocaleString()}`;
       }
-
+    
+      /* ───── 행 인덱스 재정렬 ───── */
+      function renumberRows() {
+        tbody.querySelectorAll('tr').forEach((tr, idx) => {
+          tr.querySelectorAll('[data-field]').forEach(inp => {
+            const fld = inp.dataset.field;              // itemCode, qty, …
+            inp.name = `details[${idx}].${fld}`;        // details[0].itemCode …
+          });
+          // 체크박스는 파라미터 전송 대상 아님
+          tr.querySelector('input[type="checkbox"]').name = '';
+        });
+      }
+    
       /* ───── 할인율 / 수량 변경 ───── */
       discountInput.addEventListener('input', () => {
         recalcAllRows();
@@ -304,7 +312,7 @@
           updateTotals();
         }
       });
-
+    
       /* ───── 행 추가 / 삭제 ───── */
       document.querySelector('.add-row').addEventListener('click', () => {
         const tr = tbody.querySelector('tr').cloneNode(true);
@@ -314,22 +322,24 @@
           else i.value = '';
         });
         tbody.appendChild(tr);
+        renumberRows();          // ★ 추가 후 인덱스 재정렬
       });
-
+    
       document.querySelector('.delete-row').addEventListener('click', () => {
         tbody.querySelectorAll('input[type="checkbox"]:checked')
-          .forEach(cb => cb.closest('tr').remove());
+             .forEach(cb => cb.closest('tr').remove());
+        renumberRows();          // ★ 삭제 후 인덱스 재정렬
         updateTotals();
       });
-
+    
       /* ───── 거래처 모달 로직 ───── */
-      const custInput = document.getElementById('customerDisplay');
-      const hiddenCd = document.getElementById('customerCd');
+      const custInput  = document.getElementById('customerDisplay');
+      const hiddenCd   = document.getElementById('customerCd');
       const hiddenName = document.querySelector('input[name="customerName"]');
-      const repInput = document.getElementById('repName');
+      const repInput   = document.getElementById('repName');
       const phoneInput = document.getElementById('phone');
-      const custTbody = document.querySelector('#customerModal tbody');
-
+      const custTbody  = document.querySelector('#customerModal tbody');
+    
       document.getElementById('btnCustomerSearch')
         .addEventListener('click', () =>
           loadCustomers(document.getElementById('customerSearch').value.trim())
@@ -338,7 +348,7 @@
         loadCustomers();
         customerModal.show();
       });
-
+    
       function loadCustomers(name = '') {
         let url = '/bsn/customer/list';
         if (name) url += `?customerName=${encodeURIComponent(name)}`;
@@ -347,29 +357,31 @@
           list.forEach(c => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-          <td><button class="btn btn-sm btn-outline-primary selCust">선택</button></td>
-          <td>${c.customerCd}</td>
-          <td>${c.customerNm}</td>
-          <td>${c.representativeNm}</td>
-          <td>${c.phoneNo}</td>
-          <td>${c.discountRate}</td>`;
+              <td><button class="btn btn-sm btn-outline-primary selCust">선택</button></td>
+              <td>${c.customerCd}</td>
+              <td>${c.customerNm}</td>
+              <td>${c.representativeNm}</td>
+              <td>${c.phoneNo}</td>
+              <td>${c.discountRate}</td>`;
             custTbody.appendChild(tr);
           });
-          custTbody.querySelectorAll('.selCust').forEach(btn => btn.addEventListener('click', () => {
-            const r = btn.closest('tr');
-            custInput.value = `${r.children[1].textContent} / ${r.children[2].textContent}`;
-            hiddenCd.value = r.children[1].textContent;
-            hiddenName.value = r.children[2].textContent;
-            repInput.value = r.children[3].textContent;
-            phoneInput.value = r.children[4].textContent;
-            discountInput.value = r.children[5].textContent;
-            customerModal.hide();
-            recalcAllRows();
-            updateTotals();
-          }));
+          custTbody.querySelectorAll('.selCust').forEach(btn =>
+            btn.addEventListener('click', () => {
+              const r = btn.closest('tr');
+              custInput.value   = `${r.children[1].textContent} / ${r.children[2].textContent}`;
+              hiddenCd.value    = r.children[1].textContent;
+              hiddenName.value  = r.children[2].textContent;
+              repInput.value    = r.children[3].textContent;
+              phoneInput.value  = r.children[4].textContent;
+              discountInput.value = r.children[5].textContent;
+              customerModal.hide();
+              recalcAllRows();
+              updateTotals();
+            })
+          );
         });
       }
-
+    
       /* ───── 품목 모달 로직 ───── */
       let currentRow;
       tbody.addEventListener('click', e => {
@@ -379,7 +391,7 @@
           itemModal.show();
         }
       });
-
+    
       function loadItems() {
         fetch('/bsn/item/list').then(r => r.json()).then(list => {
           const body = document.querySelector('#itemModal tbody');
@@ -388,39 +400,46 @@
             const tr = document.createElement('tr');
             tr.dataset.taxRate = it.taxRate;
             tr.innerHTML = `
-          <td><button class="btn btn-sm btn-outline-primary selItem">선택</button></td>
-          <td>${it.itemCode}</td><td>${it.itemName}</td><td>${it.spec}</td>
-          <td>${it.unit}</td><td>${it.salePrice}</td>`;
+              <td><button class="btn btn-sm btn-outline-primary selItem">선택</button></td>
+              <td>${it.itemCode}</td><td>${it.itemName}</td><td>${it.spec}</td>
+              <td>${it.unit}</td><td>${it.salePrice}</td>`;
             body.appendChild(tr);
           });
-          body.querySelectorAll('.selItem').forEach(btn => btn.addEventListener('click', () => {
-            const r = btn.closest('tr');
-            currentRow.dataset.taxRate = r.dataset.taxRate;
-            currentRow.querySelector('.item-code').value = r.children[1].textContent;
-            currentRow.querySelector('.item-name').value = r.children[2].textContent;
-            currentRow.querySelector('.item-spec').value = r.children[3].textContent;
-            currentRow.querySelector('.item-price').value = r.children[5].textContent;
-            recalcRow(currentRow);
-            updateTotals();
-            itemModal.hide();
-          }));
+          body.querySelectorAll('.selItem').forEach(btn =>
+            btn.addEventListener('click', () => {
+              const r = btn.closest('tr');
+              currentRow.dataset.taxRate = r.dataset.taxRate;
+              currentRow.querySelector('.item-code').value  = r.children[1].textContent;
+              currentRow.querySelector('.item-name').value  = r.children[2].textContent;
+              currentRow.querySelector('.item-spec').value  = r.children[3].textContent;
+              currentRow.querySelector('.item-price').value = r.children[5].textContent;
+              recalcRow(currentRow);
+              updateTotals();
+              itemModal.hide();
+            })
+          );
         });
       }
-
-      /* ───── 초기 합계 계산 ───── */
+    
+      /* ───── 초기 계산 및 인덱스 정리 ───── */
       recalcAllRows();
       updateTotals();
-
+      renumberRows();
+    
       /* ───── 초기화 / 목록 버튼 ───── */
       document.querySelector('.btn-reset').addEventListener('click', () => {
         document.querySelectorAll('input:not([readonly])').forEach(el => el.value = '');
         tbody.querySelectorAll('.item-qty').forEach(i => i.value = 1);
         recalcAllRows();
         updateTotals();
+        renumberRows();
       });
       document.querySelector('.btn-list').addEventListener('click', () => {
         window.location.href = '/bsn/qot_list';
       });
+    
+      /* ───── 폼 제출 직전 인덱스 보정 ───── */
+      document.querySelector('form').addEventListener('submit', renumberRows);
     });
-  </script>
+    </script>
 </div>

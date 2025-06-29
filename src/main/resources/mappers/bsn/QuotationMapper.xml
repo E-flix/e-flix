@@ -70,8 +70,8 @@ ORDER BY QUOTATION_NO DESC
     SPEC          AS spec,
     QTY           AS qty,
     UNIT_PRICE    AS unitPrice,
-    SUPPLY_AMOUNT    AS supplyAmt,
-    TAX_AMOUNT       AS taxAmt,
+    SUPPLY_AMOUNT,
+    TAX_AMOUNT,
     TOTAL_MONEY   AS totalMoney,
     REMARKS       AS remarks
     FROM QUOTATION_DETAIL
