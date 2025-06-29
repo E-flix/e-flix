@@ -10,9 +10,9 @@
   - 2025-06-27 (김희정): 대분류까지 불러오기 => loadLedger함수의 잔액 필터 수정
                        : 계정과목코드(필수조회조건)를 반드시 입력해야 데이터 나오도록 수정
                        : 거래처원장 탭 구분 (잔액/내용)
+  - 2025-06-29 (김희정): 검색조건 (계정과목/거래처) 코드 입력시 계정과목명/거래처명 자동 불러오기
+                       : 검색조건 (계정과목/거래처) 모달 연동하기
   [ to-do ]
-  - 검색조건 (계정과목/거래처) 코드 입력시 계정과목명/거래처명 자동 불러오기
-  - 검색조건 (계정과목/거래처) 모달 연동하기
   - 월 소계 및 누계 행 추가
   - 거래처 없는 거래도 내역 조회 추가 (계정과목코드o 거래처코드x)
   - pdf기능 추가
@@ -54,14 +54,14 @@
       <div class="d-flex align-items-center me-2">
         <label class="me-2 mb-0" style="white-space:nowrap;">계정과목</label>
         <input type="text" id="accountCode" class="form-control form-control-sm d-inline-block me-1" style="width:45px;">
-        <button class="btn btn-outline-secondary btn-sm me-1"><i class="bi bi-search"></i></button>
-        <input type="text" id="accountName" class="form-control form-control-sm d-inline-block" style="width:120px;">
+        <button class="btn btn-outline-secondary btn-sm me-1" id="accountBtn"><i class="bi bi-search"></i></button>
+        <input type="text" id="accountName" class="form-control form-control-sm d-inline-block" style="width:120px;" readonly>
       </div>
       <div class="d-flex align-items-center me-2">
         <label class="me-2 mb-0" style="white-space:nowrap;">거래처</label>
         <input type="text" id="partnerCode" class="form-control form-control-sm d-inline-block me-1" style="width:60px;">
-        <button class="btn btn-outline-secondary btn-sm me-1"><i class="bi bi-search"></i></button>
-        <input type="text" id="partnerName" class="form-control form-control-sm d-inline-block" style="min-width:120px;">
+        <button class="btn btn-outline-secondary btn-sm me-1" id="partnerBtn"><i class="bi bi-search"></i></button>
+        <input type="text" id="partnerName" class="form-control form-control-sm d-inline-block" style="min-width:120px;" readonly>
       </div>
     </div>
     <!-- 탭 버튼 -->
@@ -172,6 +172,7 @@
       $('#tab-detail').addClass('active');
       $('#tab-balance').removeClass('active');
       $('#partnerCode').val(event.data.partnerCode);
+      $('#partnerName').val(event.data.partnerName); 
       // 상세 데이터 조회 (선택한 거래처코드로) 
       const partnerCode = String(event.data.partnerCode || '');
       const accountCode = String($('#accountCode').val() || '');
@@ -359,5 +360,249 @@
       console.log("그리드에 적용할 rowData", rowData);
       detailApi.updateGridOptions({ rowData: rowData });
     }
+
+    // ------------------------▼ 모달 ▼------------------------------
+    function loadAccountData() {
+      fetch('/acc/act/list')
+        .then(res => {
+          if (!res.ok) throw new Error('계정과목 API 호출 실패');
+          return res.json();
+        })
+        .then(data => {
+          if (accountGridOptions.api) {
+            accountGridOptions.api.applyTransaction({ add: data }); // 예전 방식으로 복원
+            accountGridOptions.api.sizeColumnsToFit();
+          } else {
+            console.warn('Account Grid API not ready; data load deferred');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('계정과목 데이터를 불러오는데 실패했습니다.');
+        });
+    }
+
+    function loadPartnerData() {
+      fetch('/acc/pt/list')
+        .then(res => {
+          if (!res.ok) throw new Error('거래처 API 호출 실패');
+          return res.json();
+        })
+        .then(data => {
+          if (partnerGridOptions.api) {
+            partnerGridOptions.api.applyTransaction({ add: data }); // 예전 방식으로 복원
+            partnerGridOptions.api.sizeColumnsToFit();
+          } else {
+            console.warn('Grid API not ready; data load deferred');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('거래처 데이터를 불러오는데 실패했습니다.');
+        });
+    }
+    // 계정과목 모달
+    let accountModalInstance = null;
+    // 계정과목 모달 AG Grid
+    const accountGridOptions = {
+      headerHeight: 35,
+      rowHeight: 35,
+      columnDefs: [
+        { headerName: "코드", field: "account_code", sortable: true, filter: true },
+        { headerName: "계정과목명", field: "account_name", sortable: true, filter: true }
+      ],
+      rowSelection: { mode: 'singleRow' },
+      defaultColDef: {
+        flex: 1,
+        minWidth: 100,
+        resizable: true,
+      },
+      onRowDoubleClicked: (event) => {
+        selectAccount(event.data.account_code, event.data.account_name);
+      }
+    };
+    window.accountGridOptions = accountGridOptions;
+    accountGridOptions.onGridReady = function(params) {
+      accountGridOptions.api = params.api;
+      loadAccountData(); // 최초 1회만
+    };
+    function openAccountModal() {
+      if (!accountGridOptions.api) {
+        agGrid.createGrid(document.getElementById('accountGrid'), accountGridOptions);
+        // onGridReady에서 loadAccountData 호출됨
+      } else {
+        loadAccountData(); // 항상 데이터 새로고침
+      }
+      if (!accountModalInstance) {
+        accountModalInstance = new bootstrap.Modal(document.getElementById('accountModal'));
+      }
+      accountModalInstance.show();
+    }
+    function selectAccount(code, name) {
+      $('#accountCode').val(code);
+      $('#accountName').val(name);
+      if (accountModalInstance) accountModalInstance.hide();
+      loadLedger(); // 계정과목 선택 후 잔액 조회
+    }
+    // 거래처 모달
+    let partnerModalInstance = null;
+    const partnerGridOptions = {
+        headerHeight: 35,
+      rowHeight: 35,
+      columnDefs: [
+        { headerName: "코드", field: "partnerCode", sortable: true, filter: true },
+        { headerName: "거래처명", field: "partnerName", sortable: true, filter: true }
+      ],
+      rowSelection: { mode: 'singleRow' },
+      defaultColDef: {
+        flex: 1,
+        minWidth: 100,
+        resizable: true,
+      },
+      onRowDoubleClicked: (event) => {
+        selectPartner(event.data.partnerCode, event.data.partnerName);
+      }
+    };
+    window.partnerGridOptions = partnerGridOptions;
+    partnerGridOptions.onGridReady = function(params) {
+      partnerGridOptions.api = params.api;
+      loadPartnerData(); // 최초 1회만
+    };
+    function openPartnerModal() {
+      if (!partnerGridOptions.api) {
+        agGrid.createGrid(document.getElementById('partnerGrid'), partnerGridOptions);
+      } else {
+        loadPartnerData(); // 항상 데이터 새로고침
+      }
+      if (!partnerModalInstance) {
+        partnerModalInstance = new bootstrap.Modal(document.getElementById('partnerModal'));
+      }
+      partnerModalInstance.show();
+    }
+    function selectPartner(code, name) {
+      $('#partnerCode').val(code);
+      $('#partnerName').val(name);
+      if (partnerModalInstance) partnerModalInstance.hide();
+      loadLedger()
+    }
+    // ------------------------▲ 모달 ▲------------------------------
+
+    // 계정과목 input에서 F4 누르면 계정과목 모달 오픈
+    $('#accountCode').on('keydown', function(e) {
+      if (e.key === 'F4' || e.keyCode === 115) {
+        e.preventDefault();
+        openAccountModal();
+      }
+    });
+    // 거래처 input에서 F4 누르면 거래처 모달 오픈
+    $('#partnerCode').on('keydown', function(e) {
+      if (e.key === 'F4' || e.keyCode === 115) {
+        e.preventDefault();
+        openPartnerModal();
+      }
+    });
+    // 계정과목 검색 버튼 클릭 시 모달 오픈
+    $('#accountBtn').on('click', function(e) {
+      e.preventDefault();
+      openAccountModal();
+    });
+    // 거래처 검색 버튼 클릭 시 모달 오픈
+    $('#partnerBtn').on('click', function(e) {
+      e.preventDefault();
+      openPartnerModal();
+    });
+
+    // 마지막 유효 계정과목/거래처 코드 저장 변수
+    let lastValidAccountCode = '';
+    let lastValidPartnerCode = '';
+
+    // 계정과목번호 입력 시 계정과목명 자동 조회 및 롤백 처리
+    $('#accountCode').on('change blur', function() {
+      const code = $(this).val();
+      if (!code) {
+        $('#accountName').val('');
+        lastValidAccountCode = '';
+        return;
+      }
+      fetch('/acc/act/' + code)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data && data.account_name) {
+            $('#accountName').val(data.account_name);
+            lastValidAccountCode = code; // 유효값 저장
+          } else {
+            // 유효하지 않으면 이전 값으로 롤백
+            if (lastValidAccountCode) {
+              $('#accountCode').val(lastValidAccountCode);
+              // 이전 값으로 복원 후 이름도 다시 조회
+              fetch('/acc/act/' + lastValidAccountCode)
+                .then(res => res.ok ? res.json() : null)
+                .then(data2 => {
+                  $('#accountName').val(data2 && data2.account_name ? data2.account_name : '');
+                });
+            } else {
+              $('#accountCode').val('');
+              $('#accountName').val('');
+            }
+          }
+        })
+        .catch(() => {
+          if (lastValidAccountCode) {
+            $('#accountCode').val(lastValidAccountCode);
+            fetch('/acc/act/' + lastValidAccountCode)
+              .then(res => res.ok ? res.json() : null)
+              .then(data2 => {
+                $('#accountName').val(data2 && data2.account_name ? data2.account_name : '');
+              });
+          } else {
+            $('#accountCode').val('');
+            $('#accountName').val('');
+          }
+        });
+    });
+    // 거래처번호 입력 시 거래처명 자동 조회 및 롤백 처리
+    $('#partnerCode').on('change blur', function() {
+      const code = $(this).val();
+      if (!code) {
+        $('#partnerName').val('');
+        lastValidPartnerCode = '';
+        return;
+      }
+      fetch('/acc/pt/' + code)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data && data.partnerName) {
+            $('#partnerName').val(data.partnerName);
+            lastValidPartnerCode = code; // 유효값 저장
+          } else {
+            // 유효하지 않으면 이전 값으로 롤백
+            if (lastValidPartnerCode) {
+              $('#partnerCode').val(lastValidPartnerCode);
+              fetch('/acc/pt/' + lastValidPartnerCode)
+                .then(res => res.ok ? res.json() : null)
+                .then(data2 => {
+                  $('#partnerName').val(data2 && data2.partnerName ? data2.partnerName : '');
+                });
+            } else {
+              $('#partnerCode').val('');
+              $('#partnerName').val('');
+            }
+          }
+        })
+        .catch(() => {
+          if (lastValidPartnerCode) {
+            $('#partnerCode').val(lastValidPartnerCode);
+            fetch('/acc/pt/' + lastValidPartnerCode)
+              .then(res => res.ok ? res.json() : null)
+              .then(data2 => {
+                $('#partnerName').val(data2 && data2.partnerName ? data2.partnerName : '');
+              });
+          } else {
+            $('#partnerCode').val('');
+            $('#partnerName').val('');
+          }
+        });
+    });
+
   </script>
 </div>

@@ -1018,6 +1018,8 @@
     let accountModalInstance = null;
     // 계정과목 모달 AG Grid
     const accountGridOptions = {
+      headerHeight: 35,
+      rowHeight: 35,
       columnDefs: [
         { headerName: "코드", field: "account_code", sortable: true, filter: true },
         { headerName: "계정과목명", field: "account_name", sortable: true, filter: true }
@@ -1090,6 +1092,8 @@
     let partnerModalInstance = null;
     // 거래처 모달 AG Grid
     const partnerGridOptions = {
+      headerHeight: 35,
+      rowHeight: 35,
       columnDefs: [
         { headerName: "코드", field: "partnerCode", sortable: true, filter: true },
         { headerName: "거래처명", field: "partnerName", sortable: true, filter: true }
