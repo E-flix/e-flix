@@ -127,10 +127,9 @@
     LEFT JOIN account a ON d.account_code = a.account_code
   <where>
     <choose>
-      <!-- accountCode와 partnerCode가 있는 경우 조건 추가 -->
-      <when test="accountCode != null and accountCode != '' and partnerCode != null and partnerCode != ''">
+      <!-- accountCode가 있는 경우 조건 추가 -->
+      <when test="accountCode != null and accountCode != ''">
         d.account_code = #{accountCode}
-        AND d.partner_code = #{partnerCode}
         <if test="startDate != null and startDate != ''">
           <![CDATA[
             AND m.entry_date >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
@@ -141,8 +140,11 @@
             AND m.entry_date <= TO_DATE(#{endDate}, 'YYYY-MM-DD')
           ]]>
         </if>
+        <if test="partnerCode != null and partnerCode != ''">
+            AND d.partner_code = #{partnerCode}
+        </if>
       </when>
-      <!-- accountCode와 partnerCode가 없으면 결과 없음 -->
+      <!-- accountCode가 없으면 결과 없음 -->
       <otherwise>
         1 = 0
       </otherwise>

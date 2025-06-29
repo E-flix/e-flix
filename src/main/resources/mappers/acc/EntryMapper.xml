@@ -161,7 +161,6 @@
         entry_date = #{entryDate},
         entry_status = #{entryStatus},
         creator = #{creator},
-        created_at = #{createdAt},
         updated_at = #{updatedAt},
         transaction_type = #{transactionType},
         partner_code = #{partnerCode},
@@ -185,7 +184,6 @@
         resentmen_type = #{resentmenType},
         amount = #{amount},
         description = #{description},
-        created_at = #{createdAt},
         updated_at = #{updatedAt}
     WHERE entry_number = #{entryNumber} AND line_number = #{lineNumber}
   </update>

@@ -7,76 +7,511 @@
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
   - 2025-06-20 (김희정): 임시 레이아웃
+  - 2025-06-30 (김희정): ag-Grid 기반 매입매출전표 구현 (entry.html 참고)
 ============================================ -->
 
 <head>
   <title>매입매출전표</title>
+  <style>
+    .ag-theme-alpine .ag-row-even, 
+    .ag-theme-alpine .ag-row-odd {
+      background: white !important;
+    }
+    .ag-row-total .ag-cell {
+      background-color: #fff3cd !important;
+      color: #856404 !important;
+      font-weight: bold !important;
+    }
+    .subtotal-row .ag-cell {
+      background: #f3f6fa !important;
+      font-weight: bold !important;
+      text-align: center;
+    }
+    /* 같은 전표번호 강조 표시 */
+    .ag-row-highlighted .ag-cell {
+      background-color: #e3f2fd !important;
+    }
+    .ag-row-highlighted .ag-cell:first-child {
+      border-left: 3px solid #2196f3 !important;
+    }
+    .ag-row-highlighted.ag-row-selected .ag-cell {
+      background-color: #bbdefb !important;
+    }
+    /* 설명 패널 스타일 */
+    .info-panel {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 1rem;
+    }
+    .info-title {
+      background-color: #6c757d;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+    .numbered-list {
+      list-style: none;
+      padding-left: 0;
+    }
+    .numbered-list li {
+      margin-bottom: 0.5rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+    .numbered-list li::before {
+      content: counter(item);
+      counter-increment: item;
+      position: absolute;
+      left: 0;
+      background-color: #007bff;
+      color: white;
+      border-radius: 50%;
+      width: 1.2rem;
+      height: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .numbered-list {
+      counter-reset: item;
+    }
+    /* 매출/매입 헤더 스타일 */
+    .ag-header-cell-centered .ag-header-cell-text {
+      text-align: center;
+      font-weight: bold;
+      background-color: #6c9bd1;
+      color: white;
+      padding: 5px;
+    }
+    .ag-theme-alpine .ag-header-group-cell {
+      background-color: #6c9bd1;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+    }
+    .ag-header-group-blue {
+      background-color: #6c9bd1 !important;
+      color: white !important;
+      text-align: center !important;
+      font-weight: bold !important;
+    }
+    .ag-theme-alpine .ag-header-group-cell.ag-header-group-blue {
+      background-color: #6c9bd1 !important;
+      color: white !important;
+      text-align: center !important;
+    }
+    .ag-theme-alpine .ag-header-group-cell .ag-header-group-text {
+      text-align: center !important;
+      justify-content: center !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+    /* ag-Grid 그룹 헤더 중앙정렬 강제 적용 */
+    .ag-theme-alpine .ag-header-group-cell-with-group {
+      text-align: center !important;
+    }
+    .ag-theme-alpine .ag-header-group-cell-with-group .ag-header-cell-text {
+      text-align: center !important;
+      width: 100% !important;
+      justify-content: center !important;
+      display: flex !important;
+    }
+    .ag-theme-alpine .ag-header-group-cell .ag-header-cell-text {
+      text-align: center !important;
+      width: 100% !important;
+      justify-content: center !important;
+      display: flex !important;
+    }
+    .ag-cell-center {
+      text-align: center !important;
+    }
+    /* 하단 그리드 컨테이너 높이 제한 */
+    #combinedGrid {
+      height: 161px;
+      font-size: 12px; /* 글씨 크기 줄이기 */
+    }
+    #combinedGrid .ag-cell {
+      font-size: 12px !important;
+    }
+    #combinedGrid .ag-header-cell {
+      font-size: 12px !important;
+    }
+    #combinedGrid .ag-header-group-cell {
+      font-size: 13px !important; /* 그룹 헤더는 조금 더 크게 */
+    }
+    /* 그룹 헤더 텍스트 중앙정렬 */
+    .ag-theme-alpine .ag-header-group-cell .ag-cell-label-container {
+      justify-content: center !important;
+      text-align: center !important;
+      display: flex !important;
+      align-items: center !important;
+      width: 100% !important;
+    }
+    .ag-theme-alpine .ag-header-group-cell .ag-header-cell-text {
+      text-align: center !important;
+      display: block !important;
+      width: 100% !important;
+    }
+    /* 추가 중앙정렬 강제 적용 */
+    #combinedGrid .ag-header-group-cell {
+      text-align: center !important;
+    }
+    #combinedGrid .ag-header-group-cell > div {
+      text-align: center !important;
+      justify-content: center !important;
+      display: flex !important;
+      align-items: center !important;
+      width: 100% !important;
+    }
+    #combinedGrid .ag-header-group-cell span {
+      text-align: center !important;
+      width: 100% !important;
+      display: block !important;
+    }
+    /* 그룹 헤더의 방향키(expand/collapse 아이콘) 숨기기 */
+    #combinedGrid .ag-header-group-cell .ag-header-expand-icon {
+      display: none !important;
+    }
+    #combinedGrid .ag-header-group-cell .ag-icon {
+      display: none !important;
+    }
+    #combinedGrid .ag-header-group-cell .ag-header-group-button {
+      display: none !important;
+    }
+    /* 모든 그룹 헤더 아이콘 숨기기 */
+    .ag-theme-alpine .ag-header-group-cell .ag-icon,
+    .ag-theme-alpine .ag-header-group-cell .ag-header-expand-icon,
+    .ag-theme-alpine .ag-header-group-cell .ag-group-expanded,
+    .ag-theme-alpine .ag-header-group-cell .ag-group-contracted,
+    .ag-theme-alpine .ag-header-group-cell .ag-header-group-button {
+      display: none !important;
+      visibility: hidden !important;
+    }
+  </style>
 </head>
 <div layout:fragment="content">
-  <!-- 매입매출전표 -->
-  <div id="sales-purchase-voucher" class="content-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>매입매출전표</h2>
-      <button class="btn btn-primary">
-        <i class="bi bi-plus me-1"></i>신규 전표
-      </button>
+  <!-- 모달 불러오기 -->
+  <div th:replace="acc/modal/modal :: modals"></div>
+  
+  <div class="w-100">
+    <!-- 헤더 영역 -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h4 class="mb-0">매입매출전표</h4>
+      <div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="deleteSelectedRow()">삭제</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">인쇄</button>
+      </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover">
-        <thead class="table-light">
-          <tr>
-            <th>거래일자</th>
-            <th>전표번호</th>
-            <th>과세구분</th>
-            <th>품목</th>
-            <th class="text-end">수량</th>
-            <th class="text-end">단가</th>
-            <th class="text-end">공급가액</th>
-            <th class="text-end">세액</th>
-            <th>거래처</th>
-            <th>사업자번호</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>03-06</td>
-            <td>50001</td>
-            <td><span class="badge bg-success">과세</span></td>
-            <td>열심히 공부하는 자바</td>
-            <td class="text-end">2</td>
-            <td class="text-end">₩30,000</td>
-            <td class="text-end">₩60,000</td>
-            <td class="text-end">₩6,000</td>
-            <td>자바유통</td>
-            <td>123-45-78910</td>
-          </tr>
-          <tr>
-            <td>09-03</td>
-            <td>50002</td>
-            <td><span class="badge bg-success">과세</span></td>
-            <td>사무용 볼펜</td>
-            <td class="text-end">20</td>
-            <td class="text-end">₩1,200</td>
-            <td class="text-end">₩24,000</td>
-            <td class="text-end">₩2,400</td>
-            <td>서블릿 문구</td>
-            <td>852-25-64975</td>
-          </tr>
-          <tr>
-            <td>10-25</td>
-            <td>50003</td>
-            <td><span class="badge bg-success">과세</span></td>
-            <td>스프링 부트 처음부터 공부하기</td>
-            <td class="text-end">10</td>
-            <td class="text-end">₩27,500</td>
-            <td class="text-end">₩275,000</td>
-            <td class="text-end">₩27,500</td>
-            <td>자바유통</td>
-            <td>123-45-78910</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- 날짜 필터 영역 -->
+    <div class="mb-3">
+      <span class="me-2">일자</span>
+      <span class="me-1">2025</span> 년
+      <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" style="width:45px;"> 월
+      <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startDay" style="width:45px;"> 일
+      <span class="mx-2">~</span>
+      <span class="me-1">2025</span> 년
+      <input type="number" value="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" style="width:45px;"> 월
+      <input type="number" value="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" style="width:45px;"> 일
+      <small class="text-muted ms-3">*전자세금계산서 및 신용카드매출전표에서 관리하세요.</small>
+    </div>
+
+    <!-- 메인 매입매출전표 그리드 -->
+    <div class="grid-container mb-3" style="height:40vh;">
+      <div id="purchaseSalesGrid" class="ag-theme-alpine" style="width:100%; height:100%;"></div>
+    </div>
+
+    <!-- 중간 상세정보 영역 -->
+    <div class="mb-3" style="height:12vh;">
+      <div id="detailGrid" class="ag-theme-alpine" style="width:100%; height:100%;"></div>
+    </div>
+
+    <!-- 하단 통합 그리드 영역 -->
+    <div class="grid-container" style="height:161px;">
+      <div id="combinedGrid" class="ag-theme-alpine" style="width:100%; height:100%;"></div>
     </div>
   </div>
+
+  <script th:inline="javascript">
+    let purchaseSalesGridApi = null;
+    let combinedGridApi = null;
+    let detailGridApi = null;
+    let highlightedEntryNumber = null;
+    let arrowKeyDebounceTimer = null;
+    
+    // 매입매출 데이터
+    let purchaseSalesData = [
+      {
+        date: '03-06',
+        entryNumber: '50001',
+        taxType: '과세',
+        item: '열심히 공부하는 자바',
+        quantity: 2,
+        unitPrice: 30000,
+        supplyAmount: 60000,
+        taxAmount: 6000,
+        partner: '자바유통',
+        businessNumber: '123-45-78910'
+      },
+      {
+        date: '09-03',
+        entryNumber: '50002',
+        taxType: '과세',
+        item: '사무용 볼펜',
+        quantity: 20,
+        unitPrice: 1200,
+        supplyAmount: 24000,
+        taxAmount: 2400,
+        partner: '서블릿 문구',
+        businessNumber: '852-25-64975'
+      },
+      {
+        date: '10-25',
+        entryNumber: '50003',
+        taxType: '과세',
+        item: '스프링 부트 처음부터 공부하기',
+        quantity: 10,
+        unitPrice: 27500,
+        supplyAmount: 275000,
+        taxAmount: 27500,
+        partner: '자바유통',
+        businessNumber: '123-45-78910'
+      }
+    ];
+
+    // 상세정보 데이터 (초기에는 빈 상태)
+    let detailData = [];
+
+    // 통합 데이터 (매출 + 매입을 한 행에 표시)
+    let combinedData = [
+      { saleCode: '11', saleName: '과세', saleDetail: '과세매출', saleNum: '16', saleType: '수출', saleValue: '수출', buyCode: '21', buyName: '전자', buyDetail: '전자화폐', buyNum: '31', buyType: '수입', buyValue: '수입' },
+      { saleCode: '12', saleName: '영세', saleDetail: '영세율', saleNum: '17', saleType: '기타', saleValue: '카드과세', buyCode: '22', buyName: '현과', buyDetail: '현금과세', buyNum: '32', buyType: '면세', buyValue: '면세매입' },
+      { saleCode: '13', saleName: '면세', saleDetail: '계산서', saleNum: '18', saleType: '기타', saleValue: '카드면세', buyCode: '23', buyName: '현면', buyDetail: '현금면세', buyNum: '33', buyType: '기타', buyValue: '카드면세' },
+      { saleCode: '14', saleName: '건물', saleDetail: '유흥업', saleNum: '19', saleType: '기타', saleValue: '카드영세', buyCode: '24', buyName: '현영', buyDetail: '현금영세', buyNum: '34', buyType: '기타', buyValue: '카드영세' },
+      { saleCode: '15', saleName: '간이', saleDetail: '간이과세', saleNum: '20', saleType: '면세', saleValue: '유흥업', buyCode: '25', buyName: '기장', buyDetail: '카드영세', buyNum: '35', buyType: '금전', buyValue: '금전등록' },
+    ];
+
+    // 매입매출전표 그리드 설정
+    const purchaseSalesGridOptions = {
+      suppressClickEdit: true,
+      singleClickEdit: false,
+      headerHeight: 30,
+      rowHeight: 28,
+      rowData: purchaseSalesData,
+      columnDefs: [
+        { headerName: "일자", field: "date", minWidth: 80 },
+        { headerName: "번호", field: "entryNumber", minWidth: 80 },
+        { 
+          headerName: "과세", 
+          field: "taxType", 
+          minWidth: 80,
+          cellRenderer: params => {
+            if (params.value === '과세') {
+              return '<span class="badge bg-success">과세</span>';
+            }
+            return params.value || '';
+          }
+        },
+        { headerName: "품목", field: "item", minWidth: 200 },
+        { 
+          headerName: "수량", 
+          field: "quantity", 
+          minWidth: 80, 
+          cellClass: 'ag-right-aligned-cell',
+          valueFormatter: params => params.value?.toLocaleString() || ''
+        },
+        { 
+          headerName: "단가", 
+          field: "unitPrice", 
+          minWidth: 100, 
+          cellClass: 'ag-right-aligned-cell',
+          valueFormatter: params => params.value?.toLocaleString() || ''
+        },
+        { 
+          headerName: "공급가액", 
+          field: "supplyAmount", 
+          minWidth: 120, 
+          cellClass: 'ag-right-aligned-cell',
+          valueFormatter: params => params.value?.toLocaleString() || ''
+        },
+        { 
+          headerName: "세액", 
+          field: "taxAmount", 
+          minWidth: 100, 
+          cellClass: 'ag-right-aligned-cell',
+          valueFormatter: params => params.value?.toLocaleString() || ''
+        },
+        { headerName: "거래처", field: "partner", minWidth: 120 },
+        { headerName: "사업자번호", field: "businessNumber", minWidth: 120 }
+      ],
+      rowSelection: { mode: 'multiRow' },
+      onGridReady: (params) => {
+        purchaseSalesGridApi = params.api;
+      },
+      onRowClicked: (event) => {
+        // 선택된 행의 상세정보를 중간 그리드에 표시
+        showDetailInfo(event.data);
+      }
+    };
+
+    // 상세정보 그리드 설정
+    const detailGridOptions = {
+      headerHeight: 28,
+      rowHeight: 28,
+      rowData: detailData,
+      suppressHorizontalScroll: false,
+      suppressClickEdit: true,
+      singleClickEdit: false,
+      columnDefs: [
+        { headerName: "구분", field: "category", width: 80, cellClass: 'ag-cell-center' },
+        { headerName: "출력", field: "output", width: 60, cellClass: 'ag-cell-center' },
+        { headerName: "분류", field: "classification", width: 60, cellClass: 'ag-cell-center' },
+        { headerName: "문서", field: "document", width: 80, cellClass: 'ag-cell-center' },
+        { headerName: "구분", field: "type", width: 80, cellClass: 'ag-cell-center' },
+        { headerName: "코드", field: "code", width: 80, cellClass: 'ag-cell-center' },
+        { headerName: "계정과목", field: "account", width: 200 },
+        { headerName: "거래처", field: "partner", width: 120 },
+        { headerName: "차변", field: "debit", width: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '0' },
+        { headerName: "대변", field: "credit", width: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '0' },
+        { headerName: "적요", field: "memo", flex: 1 }
+      ],
+      suppressRowClickSelection: true,
+      suppressCellSelection: true,
+      suppressRowSelection: true,
+      onGridReady: (params) => {
+        detailGridApi = params.api;
+      }
+    };
+
+    // 통합 그리드 설정
+    const combinedGridOptions = {
+      headerHeight: 24,
+      rowHeight: 22,
+      rowData: combinedData,
+      suppressHorizontalScroll: false,
+      // 편집 및 정렬 비활성화
+      suppressClickEdit: true,
+      singleClickEdit: false,
+      readOnlyEdit: true,
+      columnDefs: [
+        // 매출 영역
+        { 
+          headerName: "매출(판매)", 
+          headerClass: 'ag-header-group-blue',
+          headerGroupComponent: 'agGroupCellRenderer',
+          headerGroupComponentParams: {
+            template: '<div class="ag-cell-label-container" style="text-align: center; justify-content: center; display: flex; width: 100%;"><span class="ag-header-cell-text">매출(판매)</span></div>'
+          },
+          children: [
+            { headerName: "코드", field: "saleCode", width: 70, cellClass: 'ag-cell-center', sortable: false, editable: false, resizable: false },
+            { headerName: "구분", field: "saleName", width: 70, cellClass: 'ag-cell-center', sortable: false, editable: false, resizable: false },
+            { headerName: "세부내용", field: "saleDetail", width: 110, sortable: false, editable: false, resizable: false },
+            { headerName: "코드", field: "saleNum", width: 70, cellClass: 'ag-cell-center', sortable: false, editable: false, resizable: false },
+            { headerName: "구분", field: "saleType", width: 70, cellClass: 'ag-cell-center', sortable: false, editable: false, resizable: false },
+            { headerName: "세부내용", field: "saleValue", width: 110, sortable: false, editable: false, resizable: false }
+          ]
+        },
+        // 매입 영역
+        { 
+          headerName: "매입(구매)", 
+          headerClass: 'ag-header-group-blue',
+          headerGroupComponent: 'agGroupCellRenderer',
+          headerGroupComponentParams: {
+            template: '<div class="ag-cell-label-container" style="text-align: center; justify-content: center; display: flex; width: 100%;"><span class="ag-header-cell-text">매입(구매)</span></div>'
+          },
+          children: [
+            { headerName: "코드", field: "buyCode", width: 70, cellClass: 'ag-cell-center', sortable: false, editable: false, resizable: false },
+            { headerName: "구분", field: "buyName", width: 70, cellClass: 'ag-cell-center', sortable: false, editable: false, resizable: false },
+            { headerName: "세부내용", field: "buyDetail", width: 110, sortable: false, editable: false, resizable: false },
+            { headerName: "코드", field: "buyNum", width: 70, cellClass: 'ag-cell-center', sortable: false, editable: false, resizable: false },
+            { headerName: "구분", field: "buyType", width: 70, cellClass: 'ag-cell-center', sortable: false, editable: false, resizable: false },
+            { headerName: "세부내용", field: "buyValue", width: 110, sortable: false, editable: false, resizable: false }
+          ]
+        }
+      ],
+      // 선택 및 상호작용 비활성화
+      suppressRowClickSelection: true,
+      suppressCellSelection: true,
+      suppressRowSelection: true,
+      suppressMultiSort: true,
+      suppressColumnMoveAnimation: true,
+      suppressMovableColumns: true,
+      suppressColumnFilter: true,
+      suppressMenuHide: true,
+      suppressColumnResize: true,
+      onGridReady: (params) => {
+        combinedGridApi = params.api;
+        // sizeColumnsToFit 제거하여 고정 너비 유지
+      }
+    };
+
+    // 그리드 생성
+    agGrid.createGrid(document.querySelector("#purchaseSalesGrid"), purchaseSalesGridOptions);
+    agGrid.createGrid(document.querySelector("#detailGrid"), detailGridOptions);
+    agGrid.createGrid(document.querySelector("#combinedGrid"), combinedGridOptions);
+
+    // 상세정보 표시 함수
+    function showDetailInfo(selectedRowData) {
+      // 선택된 전표의 상세 정보를 생성 (예시 데이터)
+      const detailInfo = [
+        {
+          category: '전표 소계',
+          output: '',
+          classification: '',
+          document: '',
+          type: '차액',
+          code: '',
+          account: '',
+          partner: '',
+          debit: 0,
+          credit: 0,
+          memo: '차액'
+        }
+      ];
+
+      // 상세정보 그리드에 데이터 설정
+      detailGridApi.setGridOption('rowData', detailInfo);
+    }
+
+    // 삭제 함수
+    function deleteSelectedRow() {
+      const selectedNodes = purchaseSalesGridApi.getSelectedNodes();
+      if (selectedNodes.length === 0) {
+        alert("삭제할 행을 선택하세요.");
+        return;
+      }
+
+      const confirmMessage = selectedNodes.length === 1
+        ? "선택된 행을 삭제하시겠습니까?"
+        : `선택된 ${selectedNodes.length}개 행을 삭제하시겠습니까?`;
+
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+
+      const deleteData = selectedNodes.map(node => node.data);
+      purchaseSalesGridApi.applyTransaction({ remove: deleteData });
+    }
+
+    // 날짜 필터
+    function filterByDate() {
+      const startMonth = Number(document.querySelector('input[name="startMonth"]').value);
+      const startDay = Number(document.querySelector('input[name="startDay"]').value);
+      const endMonth = Number(document.querySelector('input[name="endMonth"]').value);
+      const endDay = Number(document.querySelector('input[name="endDay"]').value);
+      
+      console.log('Date filter:', { startMonth, startDay, endMonth, endDay });
+    }
+
+    // 이벤트 리스너
+    ['startMonth', 'startDay', 'endMonth', 'endDay'].forEach(name => {
+      document.querySelector(`input[name="${name}"]`).addEventListener('input', filterByDate);
+    });
+  </script>
 </div>
