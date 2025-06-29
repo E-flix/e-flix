@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.common.code.mapper.CommonMapper">
+  <select id="getCommon" resultType="CommonDTO">
+      SELECT common_code_name, common_code
+      FROM common_code
+      WHERE group_code = #{groupCode}
+  </select>
+</mapper>

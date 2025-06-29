@@ -1,8 +1,20 @@
 package com.eflix.bsn.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.eflix.bsn.service.QuotationService;
+import com.eflix.bsn.dto.QuotationDTO;
+import com.eflix.bsn.service.OrdersService;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.RequiredArgsConstructor;
 
 /** ============================================
   - 작성자   : 이용진
@@ -11,7 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 ============================================  */
 @Controller
 @RequestMapping("/bsn")
+@RequiredArgsConstructor
 public class BsnController {
+
+  private final QuotationService quotationService;
+  private final OrdersService ordersService;
 
   //영업 관리 메인 
   @GetMapping()
@@ -21,19 +37,35 @@ public class BsnController {
 
   //견적서 조회
   @GetMapping("/qot_list")
-  public String quotation_list(){
+  public String quotation_list(Model model) throws JsonProcessingException {
+    var list = quotationService.getQuotationList();
+    model.addAttribute("quotationList", list);
     return "bsn/quotation_list";
   }
 
-  //견적서 등록
+  //견적서 입력
   @GetMapping("/qot")
-  public String quotation(){
+  public String quotation(Model model){
+    String nextNo = quotationService.generateNextQuotationNo();
+    model.addAttribute("nextQuotationNo", nextNo);
     return "bsn/quotation";
+  }
+
+  /** 견적서 등록 처리 */
+  @PostMapping("/qot")
+  public String createQuotation(@ModelAttribute QuotationDTO quotation) {
+    quotationService.createQuotation(quotation);
+    return "redirect:/bsn/qot_list";  // 등록 후 목록으로
   }
 
   //주문서 조회
   @GetMapping("/sorlist")
-  public String salesorder_list(){
+
+  public String salesorder_list(Model model) throws JsonProcessingException {
+    var list = ordersService.getOrdersList();
+    String json = new ObjectMapper().writeValueAsString(list);
+    model.addAttribute("ordersList", json);
+
     return "bsn/salesorder_list";
   }
 
@@ -46,13 +78,13 @@ public class BsnController {
   //출고 조회
   @GetMapping("/obound_list")
   public String outbound_list(){
-    return "bsn/outbound_list";
+    return "bsn/soutbound_list";
   }
 
   //출고 의뢰
   @GetMapping("/obound")
   public String outbound(){
-    return "bsn/outbound";
+    return "bsn/soutbound";
   }
 }
 

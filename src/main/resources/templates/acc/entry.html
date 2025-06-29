@@ -6,13 +6,679 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-06-20 (김희정): 레이아웃 및 ag-grid 세팅(enter 이동/ 삭제(view))
+  - 2025-06-23 (김희정): DB 연결 (select)
+                       : 구분 field 번호로 입력하면 자동으로 매칭 1:출금 2:입금 3:차변 4:대변
+                       : 숫자 천단위 데이터 포맷
+                       : editable가 flase인 셀은 포커스 제외
+                       : 필수 값 입력 안하면 행 저장 불가 (날짜,차대변,계정과목코드,금액)
+                       : 가장 아래 입력할수 있는 칸 추가
+                       : 코드(거래처/계정과목) 입력하면 이름(거래처/계정과목) 불러오기 
+                       : resentmenType 변경 감지해서 값 위치 변경
+                       : 코드 field에서 F4를 누르면 모달창(계정과목 / 거래처) 띄워주고 데이터받아서 해당 셀의 value값 변경
+  -----------------------------------------------
+  [ TODO ] 
+  1. DB 연결 (update/ delete/ insert)
+  2. 같은 전표번호 내에서 차대변 차액 발생하면 차액 표시하는 기능 구현 (전표 소계 열/ 합계 열)
+  5. 날짜 검색 필터
+  7. 클릭한 줄과 같은 number field의 값을 가지고 있다면 배경색 강조 표시 (2번과 연결)
+  10. 전표번호 자동부여
+  11. 다 하면 자주 사용되는 ag-grid 세팅은 별도의 class만들고 import해서 사용하기
 ============================================ -->
+
 <head>
   <title>일반전표</title>
 </head>
 <div layout:fragment="content">
-  <div id="entry">
-    <h2>일반전표</h2>
-    <p>일반전표 화면입니다.</p>
+  <!-- 모달 불러오기 -->
+  <div th:replace="acc/modal/modal :: modals"></div>
+  <div class="w-100" id="account">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <!-- 왼쪽: 일반전표 제목 -->
+      <h3 class="mb-0">일반전표</h3>
+      <!-- 오른쪽: 버튼 모음 -->
+      <div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="location.href='/voucher/excel-template'">엑셀 서식 내려받기</button>
+        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#excelUploadModal">엑셀 업로드하기</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="deleteSelected()">삭제</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">인쇄</button>
+      </div>
+    </div>
+    <!-- 엑셀 업로드 모달 -->
+    <div class="modal fade" id="excelUploadModal" tabindex="-1">
+      <div class="modal-dialog">
+        <form class="modal-content" enctype="multipart/form-data" method="post" action="/voucher/upload">
+          <div class="modal-header">
+            <h5 class="modal-title">엑셀 업로드</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="file" name="excelFile" accept=".xlsx,.xls" class="form-control">
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">업로드</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- 검색/필터 영역 -->
+    <form class="row g-2 mb-2 align-items-end" method="get" action="/voucher/list">
+      <div class="col-auto">
+        <label class="form-label mb-0">일자</label>
+        2025 년
+        <input type="number" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:45px;"> 월
+        <input type="number" class="form-control form-control-sm d-inline-block" name="startDay" style="width:45px;"> 일 ~
+        2025 년
+        <input type="number" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:45px;"> 월
+        <input type="number" class="form-control form-control-sm d-inline-block" name="endDay" style="width:45px;"> 일
+      </div>
+    </form>
+    <!-- 본문 ag-Grid -->
+    <div class="grid-container" style="height:100vh;">
+      <div id="entryGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
+    </div>
   </div>
+  
+  <script th:inline="javascript">
+    // 전체조회 API
+    let entryList = /*[[${entryList}]]*/[]; // DB 조회
+    let rowData = []; // 실제 List만들 배열
+    entryList.forEach(master => {
+      if (master.entryType !== '일반') return; // entryType이 일반이 아닌 것은 건너뜀
+      master.details.forEach(detail => {
+        rowData.push({
+          year: new Date(master.entryDate).getFullYear(),               // 년
+          month: new Date(master.entryDate).getMonth() + 1,             // 월
+          day: new Date(master.entryDate).getDate(),                    // 일
+          entryNumber: master.entryNumber,                              // 전표번호
+          resentmenType: detail.resentmenType,                          // 구분
+          accountCode: detail.accountCode,                              // 계정코드
+          accountName: detail.accountName,                              // 계정과목명
+          partnerCode: detail.partnerCode,                              // 코드 
+          partnerName: detail.partnerName,                              // 거래처명
+          debit: detail.resentmenType === 'g3' ? detail.amount : null,  // 차변
+          credit: detail.resentmenType === 'g4' ? detail.amount : null, // 대변
+          description: detail.description                               // 적요
+        });
+      });
+    });
+    // rowData 초기값 만들 때 맨 끝에 빈 행 추가
+    rowData.push({
+      month: null,
+      day: null,
+      entryNumber: null,
+      resentmenType: '',
+      accountCode: '',
+      accountName: '',
+      partnerCode: '',
+      partnerName: '',
+      debit: null,
+      credit: null,
+      description: ''
+    });
+
+    // 필수 값 체크 (입력 및 수정시 사용)
+    const requiredFields = new Set(['month', 'day', 'resentmenType', 'accountCode']);
+    function isRowValid(rowData, currentField) {
+      if (currentField && !requiredFields.has(currentField)) return true;
+
+      // 현재 필드별 단계적 검증
+      switch (currentField) {
+        case 'month':
+          return validateMonth(rowData);
+        case 'day':
+          return validateMonth(rowData) && validateDay(rowData);
+        case 'resentmenType':
+          return validateMonth(rowData) && validateDay(rowData) && !!rowData.resentmenType;
+        case 'accountCode':
+          return validateMonth(rowData) && validateDay(rowData) && !!rowData.resentmenType && !!rowData.accountCode;
+      }
+
+      // 전체 행 검증 (저장 시)
+      return validateFullRow(rowData);
+    }
+
+    // 월 검증 (1~12)
+    function validateMonth(rowData) {
+      const month = Number(rowData.month);
+      return !isNaN(month) && month >= 1 && month <= 12;
+    }
+
+    // 일 검증 (1~31)
+    function validateDay(rowData) {
+      const day = Number(rowData.day);
+      return !isNaN(day) && day >= 1 && day <= 31;
+    }
+
+    // 전체 행 검증
+    function validateFullRow(rowData) {
+      if (!validateMonth(rowData) || !validateDay(rowData)) return false;
+      if (!rowData.resentmenType || !rowData.accountCode) return false;
+
+      const debit = Number(rowData.debit) || 0;
+      const credit = Number(rowData.credit) || 0;
+
+      if (rowData.resentmenType === 'g3') return debit >= 1;
+      if (rowData.resentmenType === 'g4') return credit >= 1;
+      return debit >= 1 || credit >= 1;
+    }
+    // ag-Grid 세팅
+    const gridOptions = {
+      // 헤더 높이 지정
+      headerHeight: 35,
+      // 행 높이 지정
+      rowHeight: 35,
+      // 그리드 values 배열
+      rowData: rowData,
+      // 그리드 필드명 정의
+      columnDefs: [
+        { headerName: "월", field: "month", editable: true, minWidth: 55, maxWidth: 55 },
+        { headerName: "일", field: "day", editable: true, minWidth: 55, maxWidth: 55 },
+        { headerName: "번호", field: "entryNumber", editable: true, minWidth: 75, maxWidth: 75 },
+        {
+          headerName: "구분", field: "resentmenType", editable: true, minWidth: 70, maxWidth: 70,
+          valueFormatter: params => {
+            // g1~g4 -> 한글 표시
+            const map = { g1: '출금', g2: '입금', g3: '차변', g4: '대변' };
+            return map[params.value] || params.value;
+          },
+          valueParser: params => {
+            // 사용자 입력값 숫자 -> g 코드로 변환
+            const map = { '1': 'g1', '2': 'g2', '3': 'g3', '4': 'g4' };
+            const trim = params.newValue?.toString().trim();
+            return map[trim] || params.newValue; // 변환 불가 시 원래값 반환
+          },
+          valueSetter: params => {
+            const map = { '1': 'g1', '2': 'g2', '3': 'g3', '4': 'g4' };
+            let newVal = params.newValue;
+            if (map[newVal]) newVal = map[newVal];
+            if (params.newValue && params.newValue.startsWith('g')) {
+              params.data.resentmenType = params.newValue;
+              return true; // 허용
+            }
+            return false; // 변경 거부 (기존 값 유지)
+          }
+        },
+        { headerName: "코드", field: "accountCode", editable: true, minWidth: 70, maxWidth: 70 },
+        { headerName: "계정과목", field: "accountName", editable: false, minWidth: 100, maxWidth: 100 },
+        { headerName: "코드", field: "partnerCode", editable: true, minWidth: 80, maxWidth: 80 },
+        { headerName: "거래처", field: "partnerName", editable: true, initialWidth: 250 },
+        {
+          headerName: "차변", field: "debit", editable: params => params.data.resentmenType !== 'g4', initialWidth: 135, minWidth: 100, valueFormatter: p => p.value?.toLocaleString(),
+          valueSetter: params => {
+            const val = Number(params.newValue);
+            if (!isNaN(val) && val >= 1) {
+              params.data.debit = val;
+              return true;
+            } else {
+              alert("차변은 0 이상의 숫자만 입력 가능합니다.");
+              return false; // 입력 거부
+            }
+          }
+        },
+        {
+          headerName: "대변", field: "credit", editable: params => params.data.resentmenType !== 'g3', initialWidth: 135, minWidth: 100, valueFormatter: p => p.value?.toLocaleString(),
+          valueSetter: params => {
+            const val = Number(params.newValue);
+            if (!isNaN(val) && val >= 1) {
+              params.data.credit = val;
+              return true;
+            } else {
+              alert("대변은 0 이상의 숫자만 입력 가능합니다.");
+              return false; // 입력 거부
+            }
+          }
+        },
+        { headerName: "적요", field: "description", editable: true, minWidth: 400 },
+      ],
+      // 행 선택 방식을 지정
+      rowSelection: {
+        mode: 'multiRow', // 'single'==> 단일 선택, 'multiRow' ==> 다중 선택
+      },
+      onGridReady: (params) => {
+        gridOptions.api = params.api; // AG Grid에서 제공하는 API 객체들을 gridOptions에 저장 => 필터나 정렬 등 그리드 조작
+      },
+      // Enter 키 입력 시 다음 셀로 포커스를 이동하는 로직
+      onCellKeyDown: (event) => {
+        const api = event.api;
+        // 현재 포커스된 행의 인덱스 반환 (전체 행들 중 인덱스)
+        const currentRowIndex = event.node.rowIndex;
+        // 현재 포커스된 컬럼의 필드명 반환
+        const currentCol = event.colDef.field;
+        // 전체 columnDefs로부터 현재 컬럼의 인덱스를 찾아냄 (행 내에서 인덱스)
+        const allColumns = gridOptions.columnDefs; // 모든 컬럼 객체
+        const currentColIndex = allColumns.findIndex(col => col.field === currentCol); // 컬럼 인덱스
+        const currentRowNode = api.getDisplayedRowAtIndex(currentRowIndex); // 행 인덱스 객체
+
+        // --------------- ▼ F4 모달 ▼ ------------------
+        if (event.event.key === 'F4') {
+          if (currentCol === 'accountCode'){
+            openAccountModal(currentRowIndex);
+            event.event.preventDefault();
+            return;
+          } else if (currentCol ==='partnerCode') {
+            openPartnerModal(currentRowIndex);
+            event.event.preventDefault();
+            return;
+          }
+        }
+        // --------------- ▲ F4 모달 ▲ ------------------
+
+        // Enter 키인지 체크
+        if (event.event.key === 'Enter') {
+
+          // 차변/대변 필드에서 Enter 시 1 이상 값인지 확인
+          if (currentCol === 'debit' || currentCol === 'credit') {
+            const val = currentRowNode.data[currentCol];
+            if (!(val >= 1)) {
+              alert("차변/대변 값은 1 이상의 숫자여야 합니다.");
+              event.event.preventDefault();
+              return;
+            }
+          }
+
+          // 다음 컬럼과 다음 행 인덱스를 계산
+          let nextColIndex = currentColIndex + 1; // 다음 셀
+          let nextRowIndex = currentRowIndex; // 현재 행
+
+          // 현재 셀 유효성 검사
+          if (!isRowValid(currentRowNode.data, currentCol)) {
+            const fieldNameMap = {
+              month: "월", 
+              day: "일",
+              resentmenType: "구분",
+              accountCode: "계정코드"
+            };
+            alert(`[${fieldNameMap[currentCol]}] 필드에 유효하지 않은 값이 있습니다.`);
+            event.event.preventDefault();
+            return;
+          }
+          // description 셀은 특수 처리: 다음 행 첫 셀로 이동
+          if (currentCol === 'description') {
+            console.log('row:', currentRowNode.data);
+            console.log('isRowValid:', isRowValid(currentRowNode.data, null));
+            if (!isRowValid(currentRowNode.data, null)) {
+              alert("필수 값이 누락된 행입니다. 확인해주세요.");
+              event.event.preventDefault();
+              return;
+            }
+            moveToNextRowFirstCell(api, currentRowIndex);
+            event.event.preventDefault();
+            return;
+          }
+          // 나머지 컬럼은 다음 editable 셀로 이동
+          moveToNextEditableCell(api, currentRowIndex, currentColIndex);
+          event.event.preventDefault();
+        }
+      },
+      onCellValueChanged: async (params) => {
+        const api = params.api;
+        const currentRowIndex = params.node.rowIndex;
+        const currentField = params.colDef.field;
+        // ---------------- resentmenType 변경 감지▼ ---------------- 
+        if (currentField === 'resentmenType') {
+          const newType = params.newValue;
+          const data = params.data;
+
+          if (newType === 'g3') { // 차변이면
+            // credit 값을 debit으로 옮기고 credit 초기화
+            if (data.credit > 0) {
+              data.debit = data.credit;
+              data.credit = 0;
+            }
+          } else if (newType === 'g4') { // 대변이면
+            // debit 값을 credit으로 옮기고 debit 초기화
+            if (data.debit > 0) {
+              data.credit = data.debit;
+              data.debit = 0;
+            }
+          }
+          // 변경된 값으로 셀 강제 리프레시
+          api.refreshCells({
+            rowNodes: [params.node],
+            columns: ['debit', 'credit'],
+            force: true
+          });
+        }
+        // ---------------- ▲resentmenType 변경 감지▲ ---------------- 
+
+        // ---------------- ▼거래처코드 => 거래처명 매핑▼ ---------------- 
+        if (currentField === 'partnerCode') {
+          const partnerCode = params.newValue;
+          params.data.partnerName = '';  // 기본 초기화
+          if (partnerCode) {
+            try {
+              const response = await fetch(`/acc/pt/${partnerCode}`);
+              if (response.ok) {
+                const partner = await response.json();
+                console.log(partner);
+                if (partner?.partnerName) {
+                  params.data.partnerName = partner.partnerName;
+                } else {
+                  alert("해당 거래처명을 찾을 수 없습니다.");
+                }
+              } else {
+                alert("거래처 조회 중 오류가 발생했습니다.");
+              }
+            } catch (e) {
+              console.error(e);
+              alert("서버와 통신 중 오류가 발생했습니다.");
+            }
+          }
+          api.refreshCells({
+            rowNodes: [params.node],
+            columns: ['partnerName'],
+            force: true
+          });
+        }
+        // ---------------- ▲거래처코드 => 거래처명 매핑▲ ---------------- 
+
+        // ---------------- ▼계정과목코드 => 계정과목명 매핑▼ ---------------- 
+        if (currentField === 'accountCode') {
+          const accountCode = params.newValue;
+          params.data.partnerName = '';  // 기본 초기화
+          if (accountCode) {
+            try {
+              const response = await fetch(`/acc/act/${accountCode}`);
+              if (response.ok) {
+                const account = await response.json();
+                if (account?.account_name) {
+                  params.data.accountName = account.account_name;
+                } else {
+                  alert("해당 계정과목을 찾을 수 없습니다.");
+                }
+              } else {
+                alert("계정과목 조회 중 오류가 발생했습니다.");
+              }
+            } catch (e) {
+              console.error(e);
+              alert("서버와 통신 중 오류가 발생했습니다.");
+            }
+          }
+          api.refreshCells({
+            rowNodes: [params.node],
+            columns: ['accountName'],
+            force: true
+          });
+        }
+        // ---------------- ▲계정과목코드 => 계정과목명 매핑▲ ---------------- 
+
+        // 마지막 셀 유지
+        const lastRowIndex = api.getDisplayedRowCount() - 1; // 마지막 행의 인덱스 = 행 갯수 - 1
+        // 엔터로 다음 셀 이동할 때 마지막 행에서 입력 완료되면
+        if (currentRowIndex === lastRowIndex) {
+          const lastRowNode = api.getDisplayedRowAtIndex(currentRowIndex);
+          if (isRowValid(lastRowNode.data, null)) {
+            // 새 빈 행 추가
+            api.applyTransaction({
+              add: [{
+                month: null,
+                day: null,
+                entryNumber: null,
+                resentmenType: '',
+                accountCode: '',
+                accountName: '',
+                partnerCode: '',
+                partnerName: '',
+                debit: null,
+                credit: null,
+                description: ''
+              }]
+            });
+            // 갱신된 row count
+            nextRowIndex = api.getDisplayedRowCount() - 1;
+          }
+        }
+      }
+    };
+    // 그리드 생성
+    agGrid.createGrid(document.querySelector("#entryGrid"), gridOptions);
+    function moveToNextRowFirstCell(api, currentRowIndex) {
+      let nextRowIndex = currentRowIndex + 1;
+
+      if (nextRowIndex >= api.getDisplayedRowCount()) {
+        api.applyTransaction({
+          add: [getEmptyRow()]
+        });
+        nextRowIndex = api.getDisplayedRowCount() - 1;
+        setTimeout(() => {
+          api.setFocusedCell(nextRowIndex, gridOptions.columnDefs[0].field);
+          api.startEditingCell({ rowIndex: nextRowIndex, colKey: gridOptions.columnDefs[0].field });
+        }, 0);
+        return;
+      }
+      api.setFocusedCell(nextRowIndex, gridOptions.columnDefs[0].field);
+      api.startEditingCell({ rowIndex: nextRowIndex, colKey: gridOptions.columnDefs[0].field });
+    }
+
+    function moveToNextEditableCell(api, currentRowIndex, currentColIndex) {
+      const allColumns = gridOptions.columnDefs;
+      let nextColIndex = currentColIndex + 1;
+      let nextRowIndex = currentRowIndex;
+
+      while (true) {
+        if (nextColIndex >= allColumns.length) {
+          nextColIndex = 0;
+          nextRowIndex++;
+
+          if (nextRowIndex >= api.getDisplayedRowCount()) {
+            api.applyTransaction({
+              add: [getEmptyRow()]
+            });
+            nextRowIndex = api.getDisplayedRowCount() - 1;
+          }
+        }
+
+        const nextCol = allColumns[nextColIndex];
+        const nextRowNode = api.getDisplayedRowAtIndex(nextRowIndex);
+
+        let editable = false;
+        if (typeof nextCol.editable === 'function') {
+          editable = nextCol.editable({ data: nextRowNode.data });
+        } else {
+          editable = nextCol.editable;
+        }
+
+        if (editable) break;
+        nextColIndex++;
+      }
+
+      api.setFocusedCell(nextRowIndex, allColumns[nextColIndex].field);
+    }
+
+    function getEmptyRow() {
+      return {
+        month: null,
+        day: null,
+        entryNumber: null,
+        resentmenType: '',
+        accountCode: '',
+        accountName: '',
+        partnerCode: '',
+        partnerName: '',
+        debit: null,
+        credit: null,
+        description: ''
+      };
+    }
+    // ------------------------삭제 ▼------------------------------
+    // 체크한 행 삭제
+    function deleteSelected() {
+      // 현재 선택된 행 데이터를 가져오기
+      const selectedRows = gridOptions.api.getSelectedRows();
+      if (selectedRows.length === 0) {
+        alert("삭제할 행을 선택해주세요.");
+        return;
+      }
+      // AG Grid 데이터에서 선택된 행 삭제
+      gridOptions.api.applyTransaction({ remove: selectedRows });
+    }
+    // ------------------------삭제 ▲------------------------------
+
+    // ------------------------저장 ▼------------------------------
+    function saveEntries() {
+      const allRows = [];
+      gridOptions.api.forEachNode(node => {
+        allRows.push(node.data);
+      });
+      for (const row of allRows) {
+        if (!isRowValid(row)) {
+          alert("필수 값이 누락된 행이 있습니다. 확인해주세요.");
+          return;
+        }
+      }
+        console.log("저장될 데이터:", allRows);
+    }
+    // ------------------------저장 ▲------------------------------
+
+    // ------------------------모달 ▼------------------------------
+    let currentCellForModal = null; // 현재 F4로 열린 셀 정보
+    // 계정과목 모달
+    let accountModalInstance = null;
+    // 계정과목 모달 AG Grid
+    const accountGridOptions = {
+      columnDefs: [
+        { headerName: "코드", field: "account_code", sortable: true, filter: true },
+        { headerName: "계정과목명", field: "account_name", sortable: true, filter: true }
+      ],
+      rowSelection: { mode: 'singleRow' },
+      defaultColDef: {
+        flex: 1,
+        minWidth: 100,
+        resizable: true,
+      },
+      onRowDoubleClicked: (event) => {
+        selectAccount(event.data.account_code, event.data.account_name);
+      }
+    };
+    // 계정과목 모달 열기
+    function openAccountModal(rowIndex) {
+      currentCellForModal = { rowIndex };
+      if (!accountGridOptions.api) {
+        agGrid.createGrid(document.getElementById('accountGrid'), accountGridOptions);
+        // loadAccountData() 는 onGridReady 에서 호출
+      } else {
+        loadAccountData(); // 이미 준비되었으면 새로 데이터 로드
+      }
+
+      if (!accountModalInstance) {
+        accountModalInstance = new bootstrap.Modal(document.getElementById('accountModal'));
+      }
+      accountModalInstance.show();
+    }
+    // 계정과목 데이터 로드
+    function loadAccountData() {
+      fetch('/acc/act/list')
+        .then(res => {
+          if (!res.ok) throw new Error('계정과목 API 호출 실패');
+          return res.json();
+        })
+        .then(data => {
+          if (accountGridOptions.api) {
+            // 기존 데이터 제거하고 새 데이터 추가
+            accountGridOptions.api.applyTransaction({
+              add: data
+            });
+            accountGridOptions.api.sizeColumnsToFit();
+          } else {
+            console.warn('Account Grid API not ready; data load deferred');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('계정과목 데이터를 불러오는데 실패했습니다.');
+        });
+    }
+    // 계정과목 onGridReady
+    accountGridOptions.onGridReady = function(params) {
+      accountGridOptions.api = params.api;
+      loadAccountData(); // onGridReady 시점에 데이터 로드
+    };
+    // 계정과목 선택 시 메인 그리드에 값 세팅
+    function selectAccount(code, name) {
+      if (currentCellForModal && gridOptions.api) {
+        const node = gridOptions.api.getDisplayedRowAtIndex(currentCellForModal.rowIndex);
+        if (node) {
+          node.setDataValue('accountCode', code);
+          node.setDataValue('accountName', name);
+        }
+      }
+      if (accountModalInstance) accountModalInstance.hide();
+    }
+    // 거래처 모달 
+    let partnerModalInstance = null;
+    // 거래처 모달 AG Grid
+    const partnerGridOptions = {
+      columnDefs: [
+        { headerName: "코드", field: "partnerCode", sortable: true, filter: true },
+        { headerName: "거래처명", field: "partnerName", sortable: true, filter: true }
+      ],
+      rowSelection: { mode: 'singleRow' },
+      defaultColDef: {
+        flex: 1,
+        minWidth: 100,
+        resizable: true,
+      },
+      onRowDoubleClicked: (event) => {
+        selectPartner(event.data.partnerCode, event.data.partnerName);
+      }
+    };
+    // 거래처 모달 열기
+    function openPartnerModal(rowIndex) {
+      currentCellForModal = { rowIndex };
+      if (!partnerGridOptions.api) {
+        agGrid.createGrid(document.getElementById('partnerGrid'), partnerGridOptions);
+        // loadPartnerData() 는 onGridReady 안에서 호출되도록 이미 처리됨
+      } else {
+        loadPartnerData();  // 이미 준비된 경우에만 로드
+      }
+
+      if (!partnerModalInstance) {
+        partnerModalInstance = new bootstrap.Modal(document.getElementById('partnerModal'));
+      }
+      partnerModalInstance.show();
+    }
+    // 거래처 데이터 로드
+    function loadPartnerData() {
+      fetch('/acc/pt/list')
+        .then(res => {
+          if (!res.ok) throw new Error('거래처 API 호출 실패');
+          return res.json();
+        })
+        .then(data => {
+          if (partnerGridOptions.api) {
+            // 기존 데이터는 제거하고 새 데이터 추가
+            partnerGridOptions.api.setRowData?.([]);  // 구버전 호환용, 있으면 초기화
+            partnerGridOptions.api.applyTransaction({
+              add: data
+            });
+            partnerGridOptions.api.sizeColumnsToFit();
+          } else {
+            console.warn('Grid API not ready; data load deferred');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('거래처 데이터를 불러오는데 실패했습니다.');
+        });
+    }
+    // 거래처 onGridReady
+    partnerGridOptions.onGridReady = function(params) {
+      partnerGridOptions.api = params.api;
+      loadPartnerData();  // onGridReady 시점에서 데이터 로드
+    };
+    // 거래처 선택 시 메인 그리드에 값 세팅
+    function selectPartner(code, name) {
+      if (currentCellForModal && gridOptions.api) {
+        const node = gridOptions.api.getDisplayedRowAtIndex(currentCellForModal.rowIndex);
+        if (node) {
+          node.setDataValue('partnerCode', code);
+          node.setDataValue('partnerName', name);
+        }
+      }
+      if (partnerModalInstance) partnerModalInstance.hide();
+    }
+    // ------------------------모달 ▲------------------------------
+
+  </script>
 </div>

@@ -3,9 +3,32 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.eflix.purchs.mapper.InboundMapper">
-
+  <!--입고(제품)조회-->
   <select id="getInbound" resultType="InboundDTO">
+      select * from prod order by prod_id
+  </select>
+  <!--입고가능한 창고조회-->
+  <select id= "getCurrentScale" resultType="warehouseDTO">
+      select
+        i.warehouse_id,
+        w.warehouse_scale, 
+        i.current_quantity, 
+        (w.warehouse_scale - i.current_quantity) AS current_scale
+      from
+        inventory i join warehouse w on (i.warehouse_id = w.warehouse_id)
+  </select>
+<!--생산입력-->
+  <insert id="insertProd" parameterType="inboundDTO">
+    INSERT INTO prod (prod_id, prod_name, make_prod_date, prod_quantity, safety_stock_amount, product_type) 
+    VALUES (#{prodId}, #{prodName}, #{makeProdDate}, #{prodQuantity}, #{safetyStockAmount}, #{productType})
+  </insert>
 
+  <!--가장 마지막 prod_id 가져오기-->
+  <select id="getNextProdId" resultType="String">
+    SELECT
+      'p-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(prod_id, 3))), 100) + 1) 
+    FROM 
+      prod
   </select>
 
 </mapper>

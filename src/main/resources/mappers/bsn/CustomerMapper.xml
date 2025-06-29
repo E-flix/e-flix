@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.bsn.mapper.CustomerMapper">
+
+  <resultMap id="CustomerResult" type="com.eflix.bsn.dto.CustomerDTO">
+    <result property="customerCd" column="CUSTOMER_CD"/>
+    <result property="customerNm" column="CUSTOMER_NM"/>
+    <result property="salesEmpCd" column="SALES_EMP_CD"/>
+    <result property="phoneNo"    column="PHONE_NO"/>
+  </resultMap>
+
+  <!-- 전체 조회 -->
+  <select id="selectAll" resultMap="CustomerResult">
+    SELECT CUSTOMER_CD, CUSTOMER_NM, SALES_EMP_CD, PHONE_NO
+    FROM CUSTOMERS
+    WHERE USE_YN = 'Y'
+  </select>
+
+  <!-- 이름 검색 -->
+  <select id="selectByName" parameterType="string" resultMap="CustomerResult">
+    SELECT CUSTOMER_CD, CUSTOMER_NM, SALES_EMP_CD, PHONE_NO
+    FROM CUSTOMERS
+    WHERE USE_YN = 'Y'
+      AND CUSTOMER_NM LIKE '%' || #{name} || '%'
+  </select>
+
+</mapper>

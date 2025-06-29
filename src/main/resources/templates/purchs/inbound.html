@@ -1,3 +1,13 @@
+<!-- ============================================
+  - 작성자   : 이혁진
+  - 최초작성 : 2025-06-23
+  - 설명     : 입고 화면 (AG Grid 적용)
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-23 (이혁진): AG Grid, 레이아웃 통일 적용
+  - 2025-06-24 (이혁진): 조회 완료 수동등록 작업중 및 프로시저 자동 생성 기능 예정
+  - 2025-06-24 (이혁진): 취소기능 준비중
+============================================ -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{common/layouts/default}">
@@ -7,125 +17,201 @@
 		<div class="radio-group">
 			<input type="radio" class="btn-check" name="accountFilter" id="ibd" autocomplete="off" checked>
 			<label class="btn btn-outline-secondary btn-sm me-1" for="ibd">입고</label>
-
 			<input type="radio" class="btn-check" name="accountFilter" id="obd" autocomplete="off">
 			<label class="btn btn-outline-secondary btn-sm me-1" for="obd">출고</label>
-			<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#inquiryModal">입고요청</button>
 		</div>
 	</div>
-
-	<div class="card shadow mb-4">
+	<div class="card border-0 mt-3">
 		<div class="card-body">
-			<h5 class="text-center mb-4">입고 요청</h5>
-			<div class="row mb-3">
+			<!-- <h5 class="text-center mb-4">입고 요청</h5> -->
+			<div class="row mb-3 align-items-end">
+				<div class="col-md-2">
+					<label class="form-label" for="todayDate">생산날짜</label>
+					<!--보이는 날짜 yyyy-MM-dd -->
+					<input type="text" class="form-control form-control-sm" id="todayDate" readonly>
+					<!--서버 전송용 날짜 yyyy-MM-dd:HH:mm:ss -->
+					<input type="hidden" id="fullDateTime" hidden>
+				</div>
+				<div class="col-md-2">
+					<label class="form-label">제품명</label>
+					<input type="text" class="form-control form-control-sm" id="prodName" placeholder="제품명">
+				</div>
+				<div class="col-md-2">
+					<label class="form-label">제품분류</label>
+							<select class="form-control form-control-sm" id="productType">
+								<option selected>제품분류선택</option>
+								<option th:each="cd: ${ibdp} " th:value="${cd.commonCode}" th:text="${cd.commonCodeName}">완제품</option>
+							</select>
+				</div>
+				<div class="col-md-2">
+					<label class="form-label">제품수량</label>
+					<input type="text" class="form-control form-control-sm" id="prodQuantity" placeholder="제품수량">
+				</div>
+				<div class="col-md-2">
+					<label class="form-label">안전재고량</label>
+					<input type="text" class="form-control form-control-sm" id="safetyStockAmount" placeholder="안전재고량">
+				</div>
+				<div class="col-md-2">
+  					<div class="d-flex gap-2">
+    					<button type="button" class="btn btn-success btn-sm" id="makeBtn">생산요청</button>
+    					<button type="button" class="btn btn-danger btn-sm" id="deleteBtn">삭제</button>
+    					<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#inquiryModal">입고요청</button>
+  					</div>
+				</div>
 			</div>
-			<form class="row g-3">
-				<div class="col-lg-2 col-md-4 col-sm-6">
-					<label for="date" class="form-label">입고날짜</label>
-					<input type="date" class="form-control" id="date" readonly>
-				</div>
-				<div class="col-lg-2 col-md-4 col-sm-6">
-					<label for="prodName" class="form-label">제품명</label>
-					<input type="text" class="form-control" id="prodName" placeholder="제품명">
-				</div>
-				<div class="col-lg-2 col-md-4 col-sm-6">
-					<label for="prod" class="form-label">제품분류</label>
-					<select class="form-control" id="prod">
-						<option selected>제품분류선택</option>
-						<option value="1">완제품</option>
-						<option value="2">반제품</option>
-					</select>
-				</div>
-				<div class="col-lg-2 col-md-4 col-sm-6">
-					<label for="prodAmount" class="form-label">제품수량</label>
-					<input type="text" class="form-control" id="prodAmount" placeholder="제품수량">
-				</div>
-				<div class="col-lg-2 col-md-4 col-sm-6">
-					<label for="safeyStockAmount" class="form-label">안전재고량</label>
-					<input type="text" class="form-control" id="safeyStockAmount" placeholder="안전재고량">
-				</div>
-			</form>
+			<!-- 제품 테이블 (AG Grid) -->
+			<div class="grid-container mb-4" style="height: 40vh; width: 100%;">
+				<div id="inboundGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
+			</div>
+			<!-- 창고 테이블 (AG Grid) -->
+			<div class="grid-container" style="height: 30vh; width: 100%;">
+				<div id="warehouseGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
+			</div>
 		</div>
-	</div>
-
-	<!-- 반응형 테이블 -->
-	<div class="table-responsive">
-		<table class="table table-striped table-bordered w-100">
-			<thead>
-				<tr>
-					<th scope="col">no</th>
-					<th scope="col">제품생성일자</th>
-					<th scope="col">제품명</th>
-					<th scope="col">제품수량</th>
-					<th scope="col">제품분류</th>
-					<th scope="col">안전재고량</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<th scope="row">1</th>
-					<td>2025-06-18</td>
-					<td>비누</td>
-					<td>500</td>
-					<td>완제품</td>
-					<td>300</td>
-				</tr>
-				<tr>
-					<th scope="row">2</th>
-					<td>2025-06-18</td>
-					<td>비누</td>
-					<td>500</td>
-					<td>완제품</td>
-					<td>300</td>
-				</tr>
-				<tr>
-					<th scope="row">3</th>
-					<td>2025-06-18</td>
-					<td>비누</td>
-					<td>500</td>
-					<td>완제품</td>
-					<td>300</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-
-	<div class="table-responsive">
-		<table class="table table-striped table-bordered w-100">
-			<thead>
-				<tr>
-					<th scope="col">no</th>
-					<th scope="col">창고번호</th>
-					<th scope="col">창고위치</th>
-					<th scope="col">제품부피</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<th scope="row">1</th>
-					<td>WH001</td>
-					<td>대구</td>
-					<td>400</td>
-				</tr>
-			</tbody>
-		</table>
 	</div>
 </div>
-
 </html>
-
+<!-- AG Grid 및 페이지 스크립트 -->
+<script th:inline="javascript">
+	// 데이터 가져오기
+	let inboundList =  /*[[${ibdList}]]*/[];
+	let warehouseList = [];
+	// AG Grid: 제품
+	const ibdGridOptions = {
+		headerHeight: 35,
+		rowHeight: 35,
+		rowData: inboundList,
+		// defaultColDef: { resizable: true },
+		columnDefs: [
+			{ headerName: "제품ID", field: "prodId", editable: false},
+			{ headerName: "제품명", field: "prodName", editable: false},
+			{ headerName: "생산일자", field: "makeProdDate", editable: false},
+			{ headerName: "제품분류", field: "productType", editable: false, 
+				valueFormatter: (params) => {
+    				if (params.value === 'p01') return '반제품';
+    				if (params.value === 'p02') return '완제품';
+    				return params.value;
+  				}
+			},
+			{ headerName: "제품수량", field: "prodQuantity", editable: false},
+			{ headerName: "안전재고량 지정", field: "safetyStockAmount", editable: false},
+		],
+		rowSelection: {
+			mode: "multiRow"
+		},
+		onGridReady: (params) => {
+			ibdGridOptions.api = params.api;
+			params.api.sizeColumnsToFit();
+		}
+	};
+		// 창 크기 바뀔 때도 다시 꽉 채우기
+	window.addEventListener('resize', () => {
+  		if (ibdGridOptions.api) {
+    		ibdGridOptions.api.sizeColumnsToFit();
+  		}
+	});
+	// AG Grid: 창고
+	const whGridOptions = {
+		rowData: warehouseList,
+		rowHeight: 35,
+		headerHeight: 35,
+		defaultColDef: { resizable: true },
+		columnDefs: [
+			{ headerName: "창고ID", field: "warehouseId", editable: false},
+			{ headerName: "창고위치", field: "warehouseLocation", editable: false},
+			{ headerName: "창고크기", field: "warehouseScale", editable: false},
+			{ headerName: "담당자", field: "warehouseManager", editable: false}
+		],
+		rowSelection: {
+			mode: "multiRow"
+		},
+		onGridReady: (params) => {
+			whGridOptions.api = params.api;
+			params.api.sizeColumnsToFit();
+		}
+	};
+	// 그리드 초기화
+	document.addEventListener("DOMContentLoaded", () => {
+		agGrid.createGrid(document.querySelector("#inboundGrid"), ibdGridOptions);
+		agGrid.createGrid(document.querySelector("#warehouseGrid"), whGridOptions);
+		// 창 크기 변화 대응
+		window.addEventListener("resize", () => {
+			productGridOptions.api?.sizeColumnsToFit();
+			warehouseGridOptions.api?.sizeColumnsToFit();
+		});
+	});
+</script>
 <script>
-	const today = new Date();
-	const year = today.getFullYear();
-	const month = String(today.getMonth() + 1).padStart(2, '0');
-	const day = String(today.getDate()).padStart(2, '0');
-	const formattedDate = `${year}-${month}-${day}`;
-	document.getElementById('date').value = formattedDate;
+	// 오늘 날짜 자동 세팅(표시용)
+		const today = new Date();
+		const year = today.getFullYear();
+		const month = String(today.getMonth() + 1).padStart(2, '0');
+		const day = String(today.getDate()).padStart(2, '0');
+		const formattedDate = `${year}-${month}-${day}`;
+		$('#todayDate').val(formattedDate);
+	// 서버 전송용 (yyyy-MM-dd HH:mm:ss)
+		const hour = String(today.getHours()).padStart(2, '0');
+		const minute = String(today.getMinutes()).padStart(2, '0');
+		const second = String(today.getSeconds()).padStart(2, '0');
+		const fullFormattedDate = `${formattedDate} ${hour}:${minute}:${second}`;
+		document.getElementById('fullDateTime').value = fullFormattedDate;
 
-	//입고 - 출고 이동
+	// 입고 → 출고 전환
 	document.getElementById('obd').addEventListener('change', function () {
 		if (this.checked) {
-			window.location.href = '/purchs/outbound';
+			window.location.href = '/purchs/obd';
 		}
-	})
+	});
+
+	// 등록(생산요청)
+$("#makeBtn").on("click", () => {
+  const prodName = $("#prodName").val();
+  const makeProdDate = $("#fullDateTime").val();
+  const prodQuantity = $("#prodQuantity").val();
+  const safetyStockAmount = $("#safetyStockAmount").val();
+  const productType = $("#productType").val();
+  
+  $.ajax({
+    type: 'GET',
+    url: '/purchs/lprd',
+    success: function (prodId) {
+      const data = {
+        prodId,
+        prodName,
+        makeProdDate,
+        prodQuantity,
+        safetyStockAmount,
+        productType
+      };
+      $.ajax({
+        type: 'POST',
+        url: '/purchs/ibdp',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function () {
+          Swal.fire({
+            icon: "success",
+            title: "성공",
+            text: "제품입고요청 되었습니다.",
+            showConfirmButton: false,
+            timer: 1000
+          }).then(() => window.location.reload());
+        },
+        error: function () {
+          console.log(data); // 여기도 오타 수정: conso → console
+          Swal.fire({
+            icon: "error",
+            title: "경고",
+            text: "입고할 제품 정보를 입력하세요.",
+            showConfirmButton: false,
+            timer: 1500
+          });
+        }
+      });
+    },
+    error: function () {
+      alert("제품 ID를 받아오는 데 실패했습니다.");
+    }
+  });
+});
 </script>

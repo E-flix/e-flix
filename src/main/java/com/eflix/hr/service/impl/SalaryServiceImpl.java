@@ -20,31 +20,26 @@ public class SalaryServiceImpl implements SalaryService {
 
   @Override
   public List<SalaryDTO> getAllSalaries() {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllSalaries'");
   }
 
   @Override
   public SalaryDTO getSalaryById(String salaryIdx) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getSalaryById'");
   }
 
   @Override
   public int createSalary(SalaryDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createSalary'");
   }
 
   @Override
   public int updateSalary(SalaryDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateSalary'");
   }
 
   @Override
   public int deleteSalary(String salaryIdx) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'deleteSalary'");
   }
 
