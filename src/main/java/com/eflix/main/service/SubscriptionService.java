@@ -1,6 +1,9 @@
 package com.eflix.main.service;
 
+import java.util.List;
+
 import com.eflix.main.dto.MasterDTO;
+import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
 import com.eflix.main.dto.SubscriptionPackageDetailDTO;
@@ -45,4 +48,8 @@ public interface SubscriptionService {
     public SubscriptionInfoDTO test(String coIdx);
 
     public SubscriptionInfoDTO findSubscriptionByCoIdx(String userIdx);
+
+    public List<SubscriptionInfoDTO> findAllSubscriptionByCoIdx(String coIdx);
+
+    public List<SubscriptionBillDTO> findAllSubscriptionBillByCoIdx(String spiIdx);
 }

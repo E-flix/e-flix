@@ -3,7 +3,9 @@ package com.eflix.main.service;
 import java.util.List;
 
 import com.eflix.main.dto.CompanyDTO;
+import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
+import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 
 /**
  * ERP 회사 관리를 위한 Service 클래스
@@ -45,4 +47,6 @@ public interface CompanyService {
     public int findAllCompanyCount(CompanySearchDTO companySearchDTO);
 
     public List<CompanyDTO> findAllCompany(CompanySearchDTO companySearchDTO);
+
+    public CompanyDTO findByCoIdx(String coIdx);
 }

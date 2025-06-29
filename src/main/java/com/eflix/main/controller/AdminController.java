@@ -42,23 +42,28 @@ public class AdminController {
     public String home() {
         return "main/admin/home";
     }
+
+    @GetMapping("/sp")
+    public String getMethodName() {
+        return "main/admin/pages/sp/list";
+    }
     
-    @GetMapping("/cs/list")
+    @GetMapping("/cs")
     public String csList() {
         return "main/admin/pages/cs/list";
     }
 
-    @GetMapping("/cm/list")
+    @GetMapping("/cm")
     public String cmList() {
         return "main/admin/pages/cm/list";
     }
 
-    @GetMapping("/user/list")
+    @GetMapping("/user")
     public String spList() {
         return "main/admin/pages/user/list";
     }
 
-    @GetMapping("/emp/list")
+    @GetMapping("/emp")
     public String empList() {
         return "main/admin/pages/emp/list";
     }

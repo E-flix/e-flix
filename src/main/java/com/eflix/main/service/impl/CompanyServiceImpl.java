@@ -18,37 +18,31 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public int insertCompany(CompanyDTO companyDTO) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'updateCompany'");
         return companyMapper.insert(companyDTO);
     }
 
     @Override
     public CompanyDTO findByUserIdx(String userIdx) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'findByUserId'");
         return companyMapper.findByUserIdx(userIdx);
     }
 
     @Override
     public int updateCompany(CompanyDTO companyDTO) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'updateCompany'");
         return companyMapper.updateCompany(companyDTO);
     }
 
     @Override
     public int findAllCompanyCount(CompanySearchDTO companySearchDTO) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'findAllCompanyCount'");
         return companyMapper.findAllCompanyCount(companySearchDTO);
     }
 
     @Override
     public List<CompanyDTO> findAllCompany(CompanySearchDTO companySearchDTO) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'findAllCompany'");
         return companyMapper.findAllCompany(companySearchDTO);
     }
 
+    @Override
+    public CompanyDTO findByCoIdx(String coIdx) {
+        return companyMapper.findByCoIdx(coIdx);
+    }
 }

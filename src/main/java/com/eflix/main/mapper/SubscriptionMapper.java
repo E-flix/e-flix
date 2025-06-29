@@ -1,5 +1,8 @@
 package com.eflix.main.mapper;
 
+import java.util.List;
+
+import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
 import com.eflix.main.dto.SubscriptionPackageDetailDTO;
@@ -47,4 +50,8 @@ public interface SubscriptionMapper {
     public int insertSubscriptionPackageDetail(SubscriptionPackageDetailDTO subscriptionPackageDetailDTO);
 
     public SubscriptionInfoDTO findSubscriptionByCoIdx(String coIdx);
+
+    public List<SubscriptionInfoDTO> findAllSubscriptionByCoIdx(String coIdx);
+
+    public List<SubscriptionBillDTO> findAllSubscriptionBillByCoIdx(String spiIdx);
 }

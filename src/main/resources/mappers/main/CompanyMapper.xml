@@ -136,4 +136,15 @@
         )
         WHERE rnum &gt; #{offset}
     </select>
+
+    <!-- ===================================== -->
+    <!-- 회사 상세 정보 조회                     -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-29 -->
+    <!-- ===================================== -->
+    <select id="findByCoIdx" parameterType="String" resultType="CompanyDTO">
+        SELECT *
+        FROM companies
+        WHERE co_idx = #{coIdx}
+    </select>
 </mapper>
