@@ -571,7 +571,6 @@
               if (nextRowData && !nextRowData.isSummary) {
                 setTimeout(() => {
                   api.setFocusedCell(nextRowIndex, gridOptions.columnDefs[0].field);
-                  api.startEditingCell({ rowIndex: nextRowIndex, colKey: gridOptions.columnDefs[0].field });
                 }, 50);
                 return;
               }
@@ -590,7 +589,6 @@
               
               if (lastRowData && !lastRowData.isSummary) {
                 api.setFocusedCell(lastRowIndex, gridOptions.columnDefs[0].field);
-                api.startEditingCell({ rowIndex: lastRowIndex, colKey: gridOptions.columnDefs[0].field });
               }
             }, 100);
             return;
@@ -631,7 +629,6 @@
                   
                   if (lastRowData && !lastRowData.isSummary) {
                     api.setFocusedCell(lastRowIndex, gridOptions.columnDefs[0].field);
-                    api.startEditingCell({ rowIndex: lastRowIndex, colKey: gridOptions.columnDefs[0].field });
                   }
                 }, 100);
                 return;
@@ -657,7 +654,6 @@
             if (editable) {
               setTimeout(() => {
                 api.setFocusedCell(nextRowIndex, allColumns[nextColIndex].field);
-                api.startEditingCell({ rowIndex: nextRowIndex, colKey: allColumns[nextColIndex].field });
               }, 50);
               break;
             }
@@ -1276,7 +1272,6 @@
             api.forEachNode(node => {
               if (node.data && isEmptyRow(node.data) && !focusSet) {
                 api.setFocusedCell(node.rowIndex, gridOptions.columnDefs[0].field);
-                api.startEditingCell({ rowIndex: node.rowIndex, colKey: gridOptions.columnDefs[0].field });
                 console.log('저장 후 빈 행에 포커스 설정:', node.rowIndex);
                 focusSet = true;
               }
