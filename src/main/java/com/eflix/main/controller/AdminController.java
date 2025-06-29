@@ -3,6 +3,8 @@ package com.eflix.main.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 /**
  * ERP 회사 관리를 위한 Service 클래스
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  * <ul>
  *   <li>관리자 홈 대시보드</li>
  *   <li>CS 부서/직원 관리</li>
- *   <li>CM (조직 또는 고객사?) 관리</li>
+ *   <li>CM 회사 관리</li>
  *   <li>사용자 계정 조회 및 관리</li>
  *   <li>임직원 목록 조회 및 관리</li>
  * </ul>
@@ -42,23 +44,29 @@ public class AdminController {
     public String home() {
         return "main/admin/home";
     }
+
+    @GetMapping("/sp")
+    public String getMethodName() {
+        return "main/admin/pages/sp/home";
+    }
     
-    @GetMapping("/cs/list")
+    
+    @GetMapping("/cs")
     public String csList() {
         return "main/admin/pages/cs/list";
     }
 
-    @GetMapping("/cm/list")
+    @GetMapping("/cm")
     public String cmList() {
         return "main/admin/pages/cm/list";
     }
 
-    @GetMapping("/user/list")
+    @GetMapping("/user")
     public String spList() {
         return "main/admin/pages/user/list";
     }
 
-    @GetMapping("/emp/list")
+    @GetMapping("/emp")
     public String empList() {
         return "main/admin/pages/emp/list";
     }

@@ -1,5 +1,7 @@
 package com.eflix.main.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eflix.common.exception.Exception;
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.MasterDTO;
+import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
 import com.eflix.main.dto.SubscriptionPackageDetailDTO;
@@ -81,11 +84,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public SubscriptionInfoDTO findSubscriptionByCoIdx(String userIdx) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'getSubscriptionInfoByCoIdx'");
         CompanyDTO companyDTO = companyMapper.findByUserIdx(userIdx);
 
         return subscriptionMapper.findSubscriptionByCoIdx(companyDTO.getCoIdx());
+    }
+
+    @Override
+    public List<SubscriptionInfoDTO> findAllSubscriptionByCoIdx(String coIdx) {
+        return subscriptionMapper.findAllSubscriptionByCoIdx(coIdx);
+    }
+
+    @Override
+    public List<SubscriptionBillDTO> findAllSubscriptionBillByCoIdx(String spiIdx) {
+        return subscriptionMapper.findAllSubscriptionBillByCoIdx(spiIdx);
     }
 
 }

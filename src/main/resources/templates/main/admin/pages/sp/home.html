@@ -1,0 +1,264 @@
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-28
+	- 설명    : E-FLIX 관리자 구독 관리 페이지
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-28 (복성민): 최초 생성
+============================================
+-->
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/main/admin/layouts/default}">
+
+<head>
+    <title>관리자</title>
+</head>
+<div layout:fragment="content">
+    <div class="row">
+
+        <!-- 🔹 왼쪽: 구독 회사 목록 -->
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header fw-bold">구독 회사 목록</div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered table-hover text-center mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>회사번호</th>
+                                <th>회사명</th>
+                                <th>대표자</th>
+                                <th>담당자</th>
+                                <th>연락처</th>
+                                <th>이메일</th>
+                                <th>상태</th>
+                                <th>남은기간</th>
+                                <th>만료일</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="companyTableBody">
+                            <tr>
+                                <td>45</td>
+                                <td>뷰티인사이드</td>
+                                <td>나코코</td>
+                                <td>나담당</td>
+                                <td>010-1111-1111</td>
+                                <td>dj5odvjfo@djslkf.com</td>
+                                <td><span class="badge bg-success">서비스</span></td>
+                                <td>37일 남음</td>
+                                <td>2026-03-20</td>
+                                <td><button class="btn btn-sm btn-outline-info">보기</button></td>
+                            </tr>
+                            <!-- 추가 항목 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-center">
+                    <nav>
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔸 오른쪽: 회사 상세 정보 + 구독 내역 -->
+        <div class="col-md-4">
+
+            <!-- 회사 상세 정보 -->
+            <div class="card mb-3">
+                <div class="card-header fw-bold">회사 상세 정보</div>
+                <div class="card-body">
+                    <div class="mb-2"><strong>회사명:</strong> 뷰티인사이드</div>
+                    <div class="mb-2"><strong>대표자:</strong> 나코코</div>
+                    <div class="mb-2"><strong>연락처:</strong> 010-1111-1111</div>
+                    <div class="mb-2"><strong>이메일:</strong> dj5odvjfo@djslkf.com</div>
+                    <div class="mb-2"><strong>사업자등록번호:</strong> 123-45-67890</div>
+                    <div class="mb-2"><strong>주소:</strong> 서울시 어딘가 1길 23-72</div>
+                    <div class="mb-2">
+                        <strong>상태:</strong> <span class="badge bg-success">서비스</span>
+                    </div>
+                    <div class="mb-2"><strong>계약기간:</strong> 2024-06-01 ~ 2026-03-20</div>
+                    <div class="mb-2"><strong>남은기간:</strong> 37일</div>
+                </div>
+            </div>
+
+            <!-- 구독 내역 -->
+            <div class="card">
+                <div class="card-header fw-bold">📋 구독 내역</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-striped text-center mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>번호</th>
+                                <th>구독일시</th>
+                                <th>금액</th>
+                                <th>서류</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subscriptionTableBody">
+                            <tr>
+                                <td>09</td>
+                                <td>2025-03-16</td>
+                                <td>1,080,000</td>
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm">계약서</button>
+                                    <button class="btn btn-outline-secondary btn-sm">명세서</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>75</td>
+                                <td>2025-03-01</td>
+                                <td>15,000</td>
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm">계약서</button>
+                                    <button class="btn btn-outline-secondary btn-sm">명세서</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-center">
+                    <small>총 2건</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+		let currentPage = 1;
+        $(function () {
+            // 회사 목록 로딩
+            function loadCompanyList(page = 1) {
+                currentPage = page;
+
+                let params = $("#searchForm").serialize();
+			    params += "&page=" + page;
+
+                $.ajax({
+                    url: '/admin/api/companies',
+                    method: 'GET',
+                    data: params,
+                    dataType: "json",
+                    success: function (res) {
+                        const data = res.body;
+                        if (res.head.res_code === '200') {
+                            const list = data.companies;
+                            const tbody = $('#companyTableBody').empty();
+                            list.forEach(company => {
+                                const row = `
+                                <tr data-coidx="${company.coIdx}" data-co-name="${company.coName}" data-ceo="${company.ceoName}" data-tel="${company.pschTel}" data-email="${company.pschEmail}">
+                                    <td>${company.coIdx}</td>
+                                    <td>${company.coName}</td>
+                                    <td>${company.ceoName}</td>
+                                    <td>${company.pschName}</td>
+                                    <td>${company.pschTel}</td>
+                                    <td>${company.pschEmail}</td>
+                                    <td><span class="badge bg-success">${company.svcStatus}</span></td>
+                                    <td>${company.leftDays || '-'}</td>
+                                    <td>${company.endDate || '-'}</td>
+                                    <td><button class="btn btn-sm btn-outline-info">보기</button></td>
+                                </tr>`;
+                                tbody.append(row);
+                            });
+                        } else {
+                            alert('회사 목록을 불러오지 못했습니다.');
+                        }
+                    }
+                });
+            }
+
+            // 회사 선택 시 오른쪽 영역 업데이트
+            $(document).on('click', '#companyTableBody tr', function () {
+                const coIdx = $(this).data('coidx');
+
+                // 회사 상세 정보 조회
+                 $.ajax({
+                    type: 'GET',
+                    url: `/admin/api/company/${coIdx}`,
+                    success: function(res) {
+                        const data = res.body;
+                        if(res.head.res_code === "200") {
+                            // 회사 상세 정보 업데이트
+                            $('.card-body:has(strong:contains("회사명"))').html(`
+                                    <div class="mb-2"><strong>회사명:</strong> ${data.company.coName}</div>
+                                    <div class="mb-2"><strong>대표자:</strong> ${data.company.ceo}</div>
+                                    <div class="mb-2"><strong>연락처:</strong> ${data.company.tel}</div>
+                                    <div class="mb-2"><strong>이메일:</strong> ${data.company.email}</div>
+                                    <div class="mb-2"><strong>사업자등록번호:</strong> ${data.company.bizrNo}</div>
+                                    <div class="mb-2"><strong>주소:</strong> ${data.company.coAddr}</div>
+                                    <div class="mb-2"><strong>상태:</strong> <span class="badge bg-success"> ${data.company.svcStatus}</span></div>
+                                    <div class="mb-2"><strong>계약기간:</strong> ${data.subscription.spiPeriod}</div>
+                                    <div class="mb-2"><strong>남은기간:</strong> ${data.email}</div>
+                                `);
+                        } else {
+
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                    }
+                });
+
+                // 구독 내역 조회
+                $.ajax({
+                    type: 'GET',
+                    url: '/admin/api/subscription',
+                    data: { coIdx: coIdx },
+                    success: function (res) {
+                        const data = res.body;
+                        const tbody = $('#subscriptionTableBody').empty();
+
+                        if (res.head.res_code === '200') {
+                            data.forEach((subscription, i) => {
+                                const row = `
+                                    <tr data-spiidx="${subscription.spiIdx}">
+                                        <td>${i + 1}</td>
+                                        <td>${subscription.spiStart}</td>
+                                        <td>${subscription.spkPrice}</td>
+                                        <td>
+                                        <button class="btn btn-outline-primary btn-sm bill-btn" data-type="계약서" data-spiidx="${subscription.spiIdx}">계약서</button>
+                                        <button class="btn btn-outline-secondary btn-sm bill-btn" data-type="명세서" data-spiidx="${subscription.spiIdx}">명세서</button>
+                                        </td>
+                                    </tr>`;
+                                tbody.append(row);
+                            });
+                            $('.card-footer small').text(`총 ${res.body.length}건`);
+                        } else {
+                            tbody.append(`<tr><td colspan="4">구독 내역 없음</td></tr>`);
+                        }
+                    }
+                });
+            });
+
+            // 청구서/계약서 버튼 클릭 시 파일 로딩
+            $(document).on('click', '.bill-btn', function () {
+                const spiIdx = $(this).data('spiidx');
+                const type = $(this).data('type');
+
+                $.ajax({
+                    url: '/admin/api/subscription-bill',
+                    method: 'GET',
+                    data: { spiIdx: spiIdx },
+                    success: function (res) {
+                        if (res.status === '200') {
+                            const file = res.data.find(b => b.spbType === type);
+                            if (file) {
+                                window.open(file.spbFile, '_blank');
+                            } else {
+                                alert(`${type} 파일이 존재하지 않습니다.`);
+                            }
+                        } else {
+                            alert('파일 정보를 가져오지 못했습니다.');
+                        }
+                    }
+                });
+            });
+
+            // 초기 회사 목록 로딩
+            loadCompanyList();
+        });
+    </script>
+</div>

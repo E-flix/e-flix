@@ -11,6 +11,7 @@ import org.springframework.security.access.method.P;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,11 +25,15 @@ import com.eflix.main.dto.AnswerDTO;
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.InquiryDTO;
 import com.eflix.main.dto.QuestionDTO;
+import com.eflix.main.dto.SubscriptionBillDTO;
+import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
 import com.eflix.main.dto.etc.InquirySearchDTO;
+import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 import com.eflix.main.dto.etc.UserSearchDTO;
 import com.eflix.main.service.CompanyService;
 import com.eflix.main.service.InquiryService;
+import com.eflix.main.service.SubscriptionService;
 import com.eflix.main.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,33 +54,13 @@ public class AdminRestController {
     @Autowired
     private InquiryService inquiryService;
 
-    @GetMapping("/api/users")
-    public ResponseEntity<ResResult> getUsers(@ModelAttribute UserSearchDTO userSearchDTO) {
+    @Autowired
+    private SubscriptionService subscriptionService;
 
-        ResResult result = null;
-
-        int userCount = userService.findAllUsersCount(userSearchDTO);
-
-        userSearchDTO.setTotalRecord(userCount);
-
-        List<UserDTO> userDTO = userService.findAllUsers(userSearchDTO);
-
-        if(userDTO != null) {
-            Map<String, Object> searchResult = new HashMap<>();
-            searchResult.put("users", userDTO);
-            searchResult.put("total", userCount);
-            searchResult.put("page", userSearchDTO.getPage());
-            searchResult.put("startPage", userSearchDTO.getStartPage());
-            searchResult.put("endPage", userSearchDTO.getEndPage());
-            searchResult.put("lastPage", userSearchDTO.getLastPage());
-            result = ResUtil.makeResult(ResStatus.OK, searchResult);
-        } else {
-            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
-        }
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
+    /**
+     * 회사 목록 조회
+     * GET /api/companies
+     */
     @GetMapping("/api/companies")
     public ResponseEntity<ResResult> getCompanies(@ModelAttribute CompanySearchDTO companySearchDTO) {
         ResResult result = null;
@@ -103,6 +88,122 @@ public class AdminRestController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    /**
+     * 회사 상세 조회
+     * GET /api/companies/{coIdx}
+     */
+    // @GetMapping("/api/company/{coIdx}")
+    // public ResponseEntity<ResResult> getCompanyDetail(@PathVariable("coIdx") String coIdx) {
+    //     ResResult result = null;
+
+    //     CompanyDTO companyDTO = companyService.findByCoIdx(coIdx);
+
+    //     if(companyDTO != null) {
+    //         result = ResUtil.makeResult(ResStatus.OK, companyDTO);
+    //     } else {
+    //         result = ResUtil.makeResult("404", "회사 정보를 불러 오던 중 오류가 발생했습니다.", null);
+    //     }
+
+    //     return new ResponseEntity<>(result, HttpStatus.OK);
+    // }
+
+    /**
+     * 회사 상세 + 구독 조회
+     * GET /api/companies/{coIdx}
+     */
+    @GetMapping("/api/company/{coIdx}")
+    public ResponseEntity<ResResult> getCompanySbuscription(@PathVariable("coIdx") String coIdx) {
+        ResResult result = null;
+
+        CompanyDTO companyDTO = companyService.findByCoIdx(coIdx);
+
+        List<SubscriptionInfoDTO> subscriptionDTOs = subscriptionService.findAllSubscriptionByCoIdx(coIdx);
+
+        if(companyDTO != null && subscriptionDTOs != null) {
+            Map<String, Object> searchResult = new HashMap<>();
+            searchResult.put("company", companyDTO);
+            searchResult.put("subscription", subscriptionDTOs);
+            result = ResUtil.makeResult(ResStatus.OK, searchResult);
+        } else {
+            result = ResUtil.makeResult("404", "회사 정보를 불러 오던 중 오류가 발생했습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    /**
+     * 구독 싱세 조회
+     * GET /api/subscription
+     */
+    @GetMapping("/api/subscription")
+    public ResponseEntity<ResResult> getSubscription(@RequestParam("coIdx") String coIdx) {
+        ResResult result = null;
+
+        List<SubscriptionInfoDTO> subscriptionDTOs = subscriptionService.findAllSubscriptionByCoIdx(coIdx);
+
+        if(subscriptionDTOs != null) {
+            result = ResUtil.makeResult(ResStatus.OK, subscriptionDTOs);
+        } else {
+            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    /**
+     * 영수증 조회
+     * GET /api/subscription-bill
+     */
+    @GetMapping("/api/subscription-bill")
+    public ResponseEntity<ResResult> getSubscriptionBill(@RequestParam("spiIdx") String spiIdx) {
+        ResResult result = null;
+
+        List<SubscriptionBillDTO> billDTOs = subscriptionService.findAllSubscriptionBillByCoIdx(spiIdx);
+
+        if(billDTOs != null) {
+            result = ResUtil.makeResult(ResStatus.OK, billDTOs);
+        } else {
+            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    
+    /**
+     * 유저 목록 조회
+     * GET /api/users
+     */
+    @GetMapping("/api/users")
+    public ResponseEntity<ResResult> getUsers(@ModelAttribute UserSearchDTO userSearchDTO) {
+
+        ResResult result = null;
+
+        int userCount = userService.findAllUsersCount(userSearchDTO);
+
+        userSearchDTO.setTotalRecord(userCount);
+
+        List<UserDTO> userDTO = userService.findAllUsers(userSearchDTO);
+
+        if(userDTO != null) {
+            Map<String, Object> searchResult = new HashMap<>();
+            searchResult.put("users", userDTO);
+            searchResult.put("total", userCount);
+            searchResult.put("page", userSearchDTO.getPage());
+            searchResult.put("startPage", userSearchDTO.getStartPage());
+            searchResult.put("endPage", userSearchDTO.getEndPage());
+            searchResult.put("lastPage", userSearchDTO.getLastPage());
+            result = ResUtil.makeResult(ResStatus.OK, searchResult);
+        } else {
+            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    /**
+     * 문의 목록 조회
+     * GET /api/inquirys
+     */
     @GetMapping("/api/inquirys")
     public ResponseEntity<ResResult> getInquiry(@ModelAttribute InquirySearchDTO inquirySearchDTO) {
         ResResult result = null;
@@ -129,7 +230,10 @@ public class AdminRestController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
     
-    // 문의 상세 조회
+    /**
+     * 문의 상세 조회
+     * GET /api/inquiry-detail
+     */
     @GetMapping("/api/inquiry-detail")
     public ResponseEntity<ResResult> getInquiryDetail(@RequestParam String qstIdx) {
         ResResult result = null;
@@ -151,7 +255,10 @@ public class AdminRestController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    // 문의 답변 등록
+    /**
+     * 문의 답변 등록
+     * GET /api/companies
+     */
     @PostMapping("/api/inquiry-answer")
     public ResponseEntity<ResResult> postAnswer(@RequestBody AnswerDTO answerDTO, @AuthenticationPrincipal SecurityUserDetails securityUserDetails) {
         ResResult result = null;

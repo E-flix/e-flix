@@ -45,4 +45,6 @@ public interface CompanyService {
     public int findAllCompanyCount(CompanySearchDTO companySearchDTO);
 
     public List<CompanyDTO> findAllCompany(CompanySearchDTO companySearchDTO);
+
+    public CompanyDTO findByCoIdx(String coIdx);
 }

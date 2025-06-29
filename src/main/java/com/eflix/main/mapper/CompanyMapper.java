@@ -16,4 +16,6 @@ public interface CompanyMapper {
     public int findAllCompanyCount(CompanySearchDTO companySearchDTO);
 
     public List<CompanyDTO> findAllCompany(CompanySearchDTO companySearchDTO);
+
+    public CompanyDTO findByCoIdx(String coIdx);
 }

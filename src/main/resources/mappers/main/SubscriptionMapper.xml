@@ -108,4 +108,20 @@
         LEFT JOIN modules mou ON spd.module_idx = mou.module_idx
         WHERE spi.co_idx = #{coIdx}
     </select>
+
+
+    <!-- 0629 -->
+    <select id="findAllSubscriptionByCoIdx" resultType="SubscriptionDTO" parameterType="string">
+        SELECT s.spi_idx, s.spi_pay, s.spi_status, s.spi_start, s.spi_end,
+            s.spi_ctrt, s.spi_uid, p.spk_name, p.spk_price
+        FROM subscription s
+        JOIN subscription_packages p ON s.spk_idx = p.spk_idx
+        WHERE s.co_idx = #{coIdx}
+    </select>
+
+    <select id="findAllSubscriptionBillByCoIdx" resultType="SubscriptionBillDTO" parameterType="string">
+        SELECT spb_idx, spb_file, spb_type, spb_issued
+        FROM subscription_bill
+        WHERE spi_idx = #{spiIdx}
+    </select>
 </mapper>
