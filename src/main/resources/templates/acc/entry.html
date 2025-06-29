@@ -22,10 +22,10 @@
   - 2025-06-26 (김희정): DB 연결 (insert)
   - 2025-06-26 (김희정): 같은 전표번호 내에서 차대변 차액 발생하면 차액 표시하는 기능 구현 (전표 소계 열/ 합계 열)
   - 2025-06-26 (김희정): 전표번호 자동부여 = select max+1 or 전표내 차액있으면 차액 있는 전표번호
+  - 2025-06-30 (김희정): 클릭한 줄과 같은 number field의 값을 가지고 있다면 배경색 강조 표시
   -----------------------------------------------
   [ TODO ] 
-  1. 클릭한 줄과 같은 number field의 값을 가지고 있다면 배경색 강조 표시 (2번과 연결)
-  2. 다 하면 자주 사용되는 ag-grid 세팅은 별도의 class만들고 import해서 사용하기
+  1. 다 하면 자주 사용되는 ag-grid 세팅은 별도의 class만들고 import해서 사용하기
 ============================================ -->
 
 <head>
@@ -44,6 +44,16 @@
       background: #f3f6fa !important;
       font-weight: bold !important;
       text-align: center;
+    }
+    /* 같은 전표번호 강조 표시 */
+    .ag-row-highlighted .ag-cell {
+      background-color: #e3f2fd !important;
+    }
+    .ag-row-highlighted .ag-cell:first-child {
+      border-left: 3px solid #2196f3 !important;
+    }
+    .ag-row-highlighted.ag-row-selected .ag-cell {
+      background-color: #bbdefb !important;
     }
   </style>
 </head>
@@ -103,6 +113,8 @@
     let debounceTimer = null;
     let enterPressedForMove = false;
     let firstDiffEntryNumber = null;
+    let highlightedEntryNumber = null; // 강조 표시할 전표번호
+    let arrowKeyDebounceTimer = null; // 방향키 디바운스 타이머
     // select max(entryNumber)+1 (신규 전표번호)
     let enNo = 1; // 행 추가시 초기화
     selectEnNo();
@@ -274,15 +286,26 @@
         return undefined;
       },
       getRowClass: params => {
+        let classes = [];
+        
         if (params.data?.isSummary) {
           if (params.data.isSummaryType === 'subtotal') {
-            return 'subtotal-row';
+            classes.push('subtotal-row');
           } else if (params.data.isSummaryType === 'total') {
-            return 'ag-row-total';
+            classes.push('ag-row-total');
+          } else {
+            classes.push('ag-row-summary');
           }
-          return 'ag-row-summary';
         }
-        return null;
+        
+        // 같은 전표번호 강조 표시
+        if (highlightedEntryNumber && 
+            params.data?.entryNumber === highlightedEntryNumber &&
+            !params.data?.isSummary) {
+          classes.push('ag-row-highlighted');
+        }
+        
+        return classes.length > 0 ? classes.join(' ') : null;
       },
       getRowStyle: params => {
         if (params.data?.isSummary && params.data.isSummaryType !== 'subtotal') {
@@ -458,6 +481,18 @@
           return;
         }
 
+        // 같은 전표번호 강조 표시 업데이트
+        const focusedEntryNumber = focusedRowData.entryNumber;
+        if (focusedEntryNumber && focusedEntryNumber !== highlightedEntryNumber) {
+          highlightedEntryNumber = focusedEntryNumber;
+          // 모든 행의 클래스를 다시 계산하여 강조 표시 업데이트
+          api.redrawRows();
+        } else if (!focusedEntryNumber && highlightedEntryNumber) {
+          // 빈 행에 포커스된 경우 강조 표시 해제
+          highlightedEntryNumber = null;
+          api.redrawRows();
+        }
+
         const currentEntryNumber = focusedRowData.entryNumber;
 
         if (!currentEntryNumber) {
@@ -521,25 +556,43 @@
         }
         // --------------- ▲ Ctrl+S 수동 저장 ▲ ------------------
 
+        // --------------- ▼ Escape 키로 강조 표시 해제 ▼ ------------------
+        if (event.event.key === 'Escape') {
+          event.event.preventDefault();
+          clearHighlight();
+          return;
+        }
+        // --------------- ▲ Escape 키로 강조 표시 해제 ▲ ------------------
+
         // 방향키 ↓, ↑ summary row 이동 처리만 (summary row 추가/삭제 X)
         if (event.event.key === 'ArrowDown' || event.event.key === 'ArrowUp') {
-          const direction = event.event.key === 'ArrowDown' ? 1 : -1;
-          let nextRowIndex = currentRowIndex + direction;
-          const colKey = currentCol;
-          while (
-            nextRowIndex >= 0 &&
-            nextRowIndex < api.getDisplayedRowCount() &&
-            api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary
-          ) {
-            nextRowIndex += direction;
+          event.event.preventDefault();
+          
+          // 기존 타이머가 있으면 취소
+          if (arrowKeyDebounceTimer) {
+            clearTimeout(arrowKeyDebounceTimer);
           }
-          if (nextRowIndex >= 0 && nextRowIndex < api.getDisplayedRowCount() &&
-              !api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary) {
-            api.setFocusedCell(nextRowIndex, colKey);
-            event.event.preventDefault();
-          } else {
-            event.event.preventDefault();
-          }
+          
+          // 디바운스 타이머 설정 (50ms 지연)
+          arrowKeyDebounceTimer = setTimeout(() => {
+            const direction = event.event.key === 'ArrowDown' ? 1 : -1;
+            let nextRowIndex = currentRowIndex + direction;
+            const colKey = currentCol;
+            
+            while (
+              nextRowIndex >= 0 &&
+              nextRowIndex < api.getDisplayedRowCount() &&
+              api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary
+            ) {
+              nextRowIndex += direction;
+            }
+            
+            if (nextRowIndex >= 0 && nextRowIndex < api.getDisplayedRowCount() &&
+                !api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary) {
+              api.setFocusedCell(nextRowIndex, colKey);
+            }
+          }, 50);
+          
           return;
         }
         // Enter 키인지 체크
@@ -1078,6 +1131,15 @@
       if (selectedNodes.length === 0) { 
         alert("삭제할 행을 선택하세요.");
         return;
+      }
+
+      // 삭제 확인 대화상자
+      const confirmMessage = selectedNodes.length === 1 
+        ? "선택된 행을 삭제하시겠습니까?" 
+        : `선택된 ${selectedNodes.length}개 행을 삭제하시겠습니까?`;
+      
+      if (!confirm(confirmMessage)) {
+        return; // 사용자가 취소를 선택한 경우 삭제 중단
       }
 
       // 삭제할 데이터만 추출 (selectedNodes.data 배열)
@@ -1722,19 +1784,30 @@
     function updateFirstDiffEntryNumber() {
       firstDiffEntryNumber = findFirstDiffEntryNumber();
     }
-    function isEmptyRow(row) {
-      // _emptyRowId가 있으면 빈 행으로 간주하거나, 주요 필드들이 모두 비어있으면 빈 행으로 간주
-      return (
-        row._emptyRowId ||
-        (
-          (!row.entryNumber && !row.lineNumber) &&
-          (!row.month || row.month === "") &&
-          (!row.day || row.day === "") &&
-          (!row.resentmenType || row.resentmenType === "") &&
-          (!row.accountCode || row.accountCode === "") &&
-          !row.isSummary
-        )
-      );
+    // 같은 전표번호를 가진 행들 강조 표시
+    function highlightSameEntryNumber(entryNumber) {
+      if (entryNumber && entryNumber !== highlightedEntryNumber) {
+        highlightedEntryNumber = entryNumber;
+        if (gridOptions.api) {
+          gridOptions.api.redrawRows();
+        }
+      }
+    }
+    
+    // 강조 표시 해제
+    function clearHighlight() {
+      if (highlightedEntryNumber) {
+        highlightedEntryNumber = null;
+        if (gridOptions.api) {
+          gridOptions.api.redrawRows();
+        }
+      }
+    }
+    
+    // 빈 행인지 확인하는 함수
+    function isEmptyRow(rowData) {
+      return !rowData.entryNumber && !rowData.lineNumber && 
+             (!rowData.month || !rowData.day || !rowData.resentmenType || !rowData.accountCode);
     }
   </script>
 </div>
