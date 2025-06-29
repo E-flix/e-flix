@@ -68,4 +68,9 @@ public class QuotationServiceImpl implements QuotationService {
     public List<QuotationDTO> getQuotationList() {
         return quotationMapper.getQuotationList();
     }
+
+	@Override
+	public List<QuotationDetailDTO> getQuotationDetails(String quotationNo) {
+        return quotationMapper.selectQuotationDetails(quotationNo);
+	}
 }

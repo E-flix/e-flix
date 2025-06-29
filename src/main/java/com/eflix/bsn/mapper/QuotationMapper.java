@@ -5,6 +5,7 @@ import java.util.List;
 import com.eflix.bsn.dto.QuotationDTO;
 import com.eflix.bsn.dto.QuotationDetailDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface QuotationMapper {
@@ -20,4 +21,7 @@ public interface QuotationMapper {
 
     /** 견적서 목록 조회 */
     List<QuotationDTO> getQuotationList();
+
+    // 견적서 상세 조회
+    List<QuotationDetailDTO> selectQuotationDetails(@Param("quotationNo") String quotationNo);
 }
