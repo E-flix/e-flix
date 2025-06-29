@@ -1,5 +1,6 @@
 package com.eflix.acc.service.impl;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,12 +38,21 @@ public class EntryServiceImpl implements EntryService {
   @Override
   @Transactional(rollbackFor = Exception.class)
   public EntryMasterDTO insertEntry(EntryMasterDTO entryMaster) {
+    Date now = new Date(); // 현재 시각
+    
     // detail Count가 1이상이라면 이미 master가 있다는 뜻이므로 master insert는 생략
     int count = entryMapper.selectCountDetailByEntryNumber(entryMaster.getEntryNumber()); 
     if (count == 0) entryMapper.insertEntryMaster(entryMaster); // master update
     if (entryMaster.getDetails() != null) { // detail 테이블 insert위해서 추출
       for (EntryDetailDTO detail : entryMaster.getDetails()) {
         detail.setEntryNumber(entryMaster.getEntryNumber()); // FK 설정 => master.entry == detail.entry
+        // created_at, updated_at 필드가 null인 경우 현재 시각으로 설정
+        if (detail.getCreatedAt() == null) {
+          detail.setCreatedAt(now);
+        }
+        if (detail.getUpdatedAt() == null) {
+          detail.setUpdatedAt(now);
+        }
         entryMapper.insertEntryDetail(detail); // detail insert
       }
     }
@@ -53,12 +63,21 @@ public class EntryServiceImpl implements EntryService {
   @Override
   @Transactional(rollbackFor = Exception.class) 
   public EntryMasterDTO updateEntry(EntryMasterDTO entryMaster) {
+    Date now = new Date(); // 현재 시각
+    
     entryMapper.updateEntryMaster(entryMaster); // master insert
     // 기존 상세는 모두 삭제 후 다시 삽입
     entryMapper.deleteEntryDetailsByEntryNumber(entryMaster.getEntryNumber()); // detail delete
     if (entryMaster.getDetails() != null) {
       for (EntryDetailDTO detail : entryMaster.getDetails()) {
         detail.setEntryNumber(entryMaster.getEntryNumber()); // FK 설정 => master.entry == detail.entry
+        // created_at, updated_at 필드가 null인 경우 현재 시각으로 설정
+        if (detail.getCreatedAt() == null) {
+          detail.setCreatedAt(now);
+        }
+        if (detail.getUpdatedAt() == null) {
+          detail.setUpdatedAt(now);
+        }
         entryMapper.insertEntryDetail(detail); // detail insert
       }
     }
