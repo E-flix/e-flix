@@ -1,8 +1,13 @@
 package com.eflix.purchs.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.eflix.purchs.service.WarehouseService;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * ============================================
@@ -18,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/purchs")
 public class PurchsController {
-
 	// 재고관리목록
 	@GetMapping("/cgy")
 	public String category() {

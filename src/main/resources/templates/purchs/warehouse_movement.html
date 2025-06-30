@@ -1,4 +1,5 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 이혁진
   - 최초작성 : 2025-00-00
@@ -7,6 +8,7 @@
   [ 변경 이력 ]
   - 2025-00-00 (이혁진): 페이지 완성
 ============================================ -->
+
 <head>
 	<title>창고이동관리</title>
 </head>
@@ -34,101 +36,60 @@
 	<!-- 테이블 -->
 	<div class="table-responsive">
 		<table class="table table-bordered table-sm text-center align-middle">
-			<thead class="table-primary">
-				<tr>
-					<th>NO</th>
-					<th><input type="checkbox" onclick="toggleAll(this)" /></th>
-					<th>제품코드</th>
-					<th>제품명</th>
-					<th>창고명</th>
-					<th colspan="3">이동전 재고량</th>
-					<th>창고명</th>
-					<th colspan="3">이동후 재고량</th>
-				</tr>
-				<tr class="table-light">
-					<th colspan="5"></th>
-					<th>이동전 재고량</th>
-					<th>이동후 재고량</th>
-					<th>이동수량</th>
-					<th></th>
-					<th>이동전 재고량</th>
-					<th>이동후 재고량</th>
-				</tr>
-			</thead>
-			<!-- <tbody>
-        <tr th:each="item, stat : ${moveList}">
-          <td th:text="${stat.count}">1</td>
-          <td><input type="checkbox" th:name="'check_' + ${item.id}"/></td>
-          <td th:text="${item.productCode}">003214wa1</td>
-          <td th:text="${item.productName}">제품1</td>
-          <td th:text="${item.sourceWarehouse}">기본창고</td>
-
-          
-          <td th:text="${item.beforeQty}">400</td>
-          <td th:text="${item.afterQty}">335</td>
-          <td><input type="number" class="form-control form-control-sm text-danger" th:value="${item.moveQty}" /></td>
-
-         
-          <td>
-            <select class="form-select form-select-sm">
-              <option th:each="w : ${warehouseList}" th:value="${w.code}" th:text="${w.name}"
-                      th:selected="${w.code == item.targetWarehouse}"></option>
-            </select>
-          </td>
-          <td th:text="${item.toBeforeQty}">0</td>
-          <td th:text="${item.toAfterQty}">45</td>
-        </tr>
-      </tbody> -->
-			<tbody>
-				<!-- 더미 데이터 1 -->
-				<tr>
-					<td>1</td>
-					<td><input type="checkbox" name="check_1" /></td>
-					<td>PRD001</td>
-					<td>샴푸</td>
-					<td>기본창고</td>
-					<td>500</td> <!-- 이동전 재고량 -->
-					<td>450</td> <!-- 이동후 재고량 -->
-					<td><input type="number" class="form-control form-control-sm text-danger" value="50" /></td>
-
-					<td>
-						<select class="form-select form-select-sm">
-							<option selected>창고2</option>
-							<option>창고3</option>
-						</select>
-					</td>
-					<td>0</td> <!-- 이동전 재고량 (창고2) -->
-					<td>50</td> <!-- 이동후 재고량 (창고2) -->
-				</tr>
-
-				<!-- 더미 데이터 2 -->
-				<tr>
-					<td>2</td>
-					<td><input type="checkbox" name="check_2" /></td>
-					<td>PRD002</td>
-					<td>린스</td>
-					<td>기본창고</td>
-					<td>800</td>
-					<td>700</td>
-					<td><input type="number" class="form-control form-control-sm text-danger" value="100" /></td>
-
-					<td>
-						<select class="form-select form-select-sm">
-							<option selected>창고2</option>
-							<option>창고3</option>
-						</select>
-					</td>
-					<td>30</td>
-					<td>130</td>
-				</tr>
-			</tbody>
+			<!-- 창고 테이블 (AG Grid) -->
+			<div class="grid-container" style="height: 30vh; width: 100%;">
+				<div id="whMovementGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
+			</div>
 		</table>
 	</div>
-
 </div>
 
 </html>
+<!--Grid Script-->
+<script th:inline="javascript">
+	let whMovementList = /*[[${}]]*/[];
+	// AG Grid: 창고
+	const whmGridOptions = {
+		rowData: whMovementList,
+		rowHeight: 35,
+		headerHeight: 35,
+		defaultColDef: { resizable: true },
+		columnDefs: [
+			{ headerName: "제품코드", field: "prodId", editable: false },
+			{ headerName: "제품명", field: "prodName", editable: false },
+			{ headerName: "창고코드", field: "warehouseId", editable: false },
+			{ headerName: "이동전 재고량", field: "이동전", editable: false },
+			{ headerName: "이동후 재고량", field: "이동후", editable: false },
+			{ headerName: "이동수량", field: "이동수량", editable: false },
+			{ headerName: "창고코드", field: "warehouseId", editable: false },
+			{ headerName: "이동전 재고량", field: "이동전", editable: false },
+			{ headerName: "이동후 재고량", field: "이동후", editable: false },
+		],
+		rowSelection: {
+			mode: "multiRow"
+		},
+		onGridReady: (params) => {
+			whmGridOptions.api = params.api;
+			params.api.sizeColumnsToFit();
+		}
+	};
+	// 창 크기 바뀔 때도 다시 꽉 채우기
+	window.addEventListener('resize', () => {
+		if (whmGridOptions.api) {
+			whmGridOptions.api.sizeColumnsToFit();
+		}
+	});
+	// 그리드 초기화
+	document.addEventListener("DOMContentLoaded", () => {
+		agGrid.createGrid(document.querySelector("#whMovementGrid"), whmGridOptions);
+		// 창 크기 변화 대응
+		window.addEventListener("resize", () => {
+			whmGridOptions.api?.sizeColumnsToFit();
+		});
+	});
+</script>
 
+<!--기능 Script-->
 <script>
 	function toggleAll(checkbox) {
 		const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
