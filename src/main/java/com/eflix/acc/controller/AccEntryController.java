@@ -107,4 +107,27 @@ public class AccEntryController {
   public String entryPurchaseSales() {
     return "acc/entryPurchaseSales";
   }
+
+  /**
+   * 매입매출전표 master 목록 조회
+   * 
+   * @return : 매입매출전표 master 목록
+   */
+  @ResponseBody
+  @GetMapping("/enps/ma") 
+  public List<EntryMasterDTO> getPSMasterList() {
+    return entryService.getPSMasterList(); // 매입매출전표 master 목록 조회
+  }
+
+  /**
+   * 매입매출전표 detail 목록 조회
+   * 
+   * @param entryNumber : 전표번호
+   * @return : 매입매출전표 detail 목록
+   */
+  @ResponseBody
+  @GetMapping("/enps/de/{entryNumber}")
+  public List<EntryDetailDTO> getPSDetailList(@PathVariable int entryNumber) {
+    return entryService.getPSDetailList(entryNumber); // 매입매출전표 detail 목록 조회
+  }
 }
