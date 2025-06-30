@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.bsn.mapper.CreditMapper">
+
+  <select id="getCreditInfo" resultType="com.eflix.bsn.dto.CreditInfoDTO">
+    SELECT
+      CREDIT_LIMIT       AS creditLimit,
+      CREDIT_USED        AS creditUsed,
+      CREDIT_STATUS      AS creditStatus,
+      CREDIT_HOLD_FLG    AS creditHoldFlg,
+      CREDIT_HOLD_REASON AS creditHoldReason,
+      CREDIT_HOLD_UNTIL  AS nextPaymentDate
+    FROM CREDIT_MANAGEMENT
+    WHERE CUSTOMER_CD = #{customerCd}
+  </select>
+
+  <select id="getAvailableCredit" resultType="java.math.BigDecimal">
+    SELECT GET_AVAILABLE_CREDIT(#{customerCd}) FROM DUAL
+  </select>
+
+  <select id="selectByCustomerCd"
+          parameterType="string"
+          resultType="com.eflix.bsn.dto.CreditInfoDTO">
+    SELECT
+      CUSTOMER_CD         AS customerCd,
+      CREDIT_LIMIT        AS creditLimit,
+      CREDIT_USED         AS creditUsed,
+      PAYMENT_TERMS       AS paymentTerms,
+      OVERDUE_AMOUNT      AS overdueAmount,
+      CREDIT_STATUS       AS creditStatus,
+      CREDIT_HOLD_FLG     AS creditHoldFlg,
+      CREDIT_HOLD_REASON  AS creditHoldReason,
+      CREDIT_HOLD_UNTIL   AS creditHoldUntil,
+      CREDIT_RATING       AS creditRating,
+      GUARANTEE_AMOUNT    AS guaranteeAmount,
+      LOCK_ORDER_THRESHOLD AS lockOrderThreshold,
+      EFFECTIVE_FROM      AS effectiveFrom,
+      EFFECTIVE_TO        AS effectiveTo,
+      GRACE_PERIOD        AS gracePeriod,
+      LAST_SETTLE_DT      AS lastSettleDt
+    FROM CREDIT_MANAGEMENT
+    WHERE CUSTOMER_CD = #{customerCd}
+  </select>
+</mapper>

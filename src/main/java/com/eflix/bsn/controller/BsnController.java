@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.eflix.bsn.service.QuotationService;
+import com.eflix.bsn.dto.CreditInfoDTO;
+import com.eflix.bsn.dto.OrdersDTO;
 import com.eflix.bsn.dto.QuotationDTO;
 import com.eflix.bsn.dto.QuotationDetailDTO;
+import com.eflix.bsn.service.CreditService;
 import com.eflix.bsn.service.OrdersService;
-
+import com.eflix.bsn.service.QuotationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,6 +36,8 @@ public class BsnController {
 
   private final QuotationService quotationService;
   private final OrdersService ordersService;
+  private final CreditService creditService;
+  private final ObjectMapper    objectMapper;
 
   //영업 관리 메인 
   @GetMapping()
@@ -87,16 +91,31 @@ public class BsnController {
 
   public String salesorder_list(Model model) throws JsonProcessingException {
     var list = ordersService.getOrdersList();
-    String json = new ObjectMapper().writeValueAsString(list);
-    model.addAttribute("ordersList", json);
+    String json = new ObjectMapper().findAndRegisterModules().writeValueAsString(list);
 
+    model.addAttribute("ordersList", json);
     return "bsn/salesorder_list";
   }
 
-  //주문서 등록
+    /** 주문서 등록 화면 */
   @GetMapping("/sorder")
-  public String salesorder(){
+  public String salesorder(Model model) {
+    // 1) 빈 DTO 세팅
+    OrdersDTO order = new OrdersDTO();
+    model.addAttribute("order", order);
+
+    // 2) 여신 정보 조회 
+    CreditInfoDTO credit = creditService.getCreditByCustomer(order.getCustomerCd());
+    model.addAttribute("credit", credit);
+
     return "bsn/salesorder";
+  }
+
+  // 주문서 저장 처리
+  @PostMapping("/sorder")
+  public String createOrder(@ModelAttribute OrdersDTO order) {
+    ordersService.createOrder(order);
+    return "redirect:/bsn/sorlist";
   }
 
   //출고 조회
