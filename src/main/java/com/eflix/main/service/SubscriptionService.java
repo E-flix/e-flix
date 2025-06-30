@@ -52,4 +52,6 @@ public interface SubscriptionService {
     public List<SubscriptionInfoDTO> findAllSubscriptionByCoIdx(String coIdx);
 
     public List<SubscriptionBillDTO> findAllSubscriptionBillByCoIdx(String spiIdx);
+
+    public int findActiveSubscriptionByCoIdx(String coIdx);
 }

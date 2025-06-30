@@ -38,19 +38,6 @@
                             </tr>
                         </thead>
                         <tbody id="companyTableBody">
-                            <tr>
-                                <td>45</td>
-                                <td>test</td>
-                                <td>test</td>
-                                <td>test</td>
-                                <td>test</td>
-                                <td>test</td>
-                                <td><span class="badge bg-success">서비스</span></td>
-                                <td>test</td>
-                                <td>test</td>
-                                <td><button class="btn btn-sm btn-outline-info">보기</button></td>
-                            </tr>
-                            <!-- 추가 항목 -->
                         </tbody>
                     </table>
                 </div>
@@ -126,8 +113,8 @@
                                     <td>${company.pschTel}</td>
                                     <td>${company.pschEmail}</td>
                                     <td><span class="badge bg-success">${company.svcStatus}</span></td>
-                                    <td>${company.spiPeriod} 개월</td>
-                                    <td>${company.remainingDays} 일</td>
+                                    <td>${company.totalPeriod} 개월</td>
+                                    <td>${company.totalRemaining} 일</td>
                                     <td><button class="btn btn-sm btn-outline-info">보기</button></td>
                                 </tr>`;
                                 tbody.append(row);
@@ -141,19 +128,29 @@
 
             // 회사 선택 시 오른쪽 영역 업데이트
             $(document).on('click', '#companyTableBody tr', function () {
-                const coIdx = $(this).data('coidx');
+                const $row = $(this);
 
+                const coIdx = $row.data('coidx');
+                const coName = $row.data('coname');
+                const pschName = $row.data('pschname');
+                const pschTel = $row.data('pschtel');
+                const pschEmail = $row.data('pschemail');
+
+                const ceoName = $row.find('td').eq(2).text();
+                const svcStatus = $row.find('td').eq(6).text().trim();
+                const spiPeriod = $row.find('td').eq(7).text();
+                const remainingDays = $row.find('td').eq(8).text();
+                
                 // 회사 상세 정보
                 $('#companyDetail').html(`
-                    <div class="mb-2"><strong>회사명:</strong> ${$(this).data('coName')}</div>
-                    <div class="mb-2"><strong>담당자:</strong> ${data.company.pschName}</div>
-                    <div class="mb-2"><strong>담당자 연락처:</strong> ${data.company.pschTel}</div>
-                    <div class="mb-2"><strong>담당자 이메일:</strong> ${data.company.pschEmail}</div>
-                    <div class="mb-2"><strong>사업자등록번호:</strong> ${data.company.bizrNo}</div>
-                    <div class="mb-2"><strong>주소:</strong> ${data.company.coAddr}</div>
-                    <div class="mb-2"><strong>상태:</strong> <span class="badge bg-success"> ${data.company.svcStatus}</span></div>
-                    <div class="mb-2"><strong>계약기간:</strong> ${data.subscription.spiPeriod}</div>
-                    <div class="mb-2"><strong>남은기간:</strong> ${data.email}</div>
+                    <div class="mb-2"><strong>회사명:</strong> ${coName}</div>
+                    <div class="mb-2"><strong>대표자:</strong> ${ceoName}</div>
+                    <div class="mb-2"><strong>담당자:</strong> ${pschName}</div>
+                    <div class="mb-2"><strong>담당자 연락처:</strong> ${pschTel}</div>
+                    <div class="mb-2"><strong>담당자 이메일:</strong> ${pschEmail}</div>
+                    <div class="mb-2"><strong>상태:</strong> <span class="badge bg-success">${svcStatus}</span></div>
+                    <div class="mb-2"><strong>계약기간:</strong> ${spiPeriod}</div>
+                    <div class="mb-2"><strong>남은기간:</strong> ${remainingDays}</div>
                 `);
                 
 
@@ -172,7 +169,7 @@
                                     <tr data-spiidx="${subscription.spiIdx}">
                                         <td>${i + 1}</td>
                                         <td>${subscription.spiStart}</td>
-                                        <td>${subscription.spkPrice}</td>
+                                        <td>${subscription.spkPrice.toLocaleString('ko-KR', { style: 'currency', currency: 'KRW' })}</td>
                                         <td>
                                         <button class="btn btn-outline-primary btn-sm bill-btn" data-type="계약서" data-spiidx="${subscription.spiIdx}">계약서</button>
                                         <button class="btn btn-outline-secondary btn-sm bill-btn" data-type="명세서" data-spiidx="${subscription.spiIdx}">명세서</button>

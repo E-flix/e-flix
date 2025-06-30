@@ -45,6 +45,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Transactional
     public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO, MasterDTO masterDTO) {
 
+        int activeSubscription = subscriptionMapper.findActiveSubscriptionByCoIdx(subscriptionDTO.getCoIdx());
+
+        if(activeSubscription > 0) {
+            throw new Exception("이미 구독 중입니다.");
+        }
+
         subscriptionDTO.setSpiStatus("SS01");
 
         if(subscriptionMapper.insertSubscription(subscriptionDTO) <= 0) {
@@ -89,5 +95,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public List<SubscriptionBillDTO> findAllSubscriptionBillByCoIdx(String spiIdx) {
         return subscriptionMapper.findAllSubscriptionBillByCoIdx(spiIdx);
+    }
+
+    @Override
+    public int findActiveSubscriptionByCoIdx(String coIdx) {
+        return subscriptionMapper.findActiveSubscriptionByCoIdx(coIdx);
     }
 }

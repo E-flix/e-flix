@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 7.2.0.final using JasperReports Library version 6.6.0  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="subscription_invoice" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="30" bottomMargin="25" uuid="c068b97b-1408-4462-8257-7ca467abadb4">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="COMPANY_NAME" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["주식회사 예시"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="COMPANY_ADDRESS" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["서울시 강남구 테헤란로 123"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="COMPANY_PHONE" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["02-1234-5678"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="CUSTOMER_NAME" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["담당자명"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="CUSTOMER_PHONE" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["010-0000-0000"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="CUSTOMER_EMAIL" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["customer@example.com"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="EMP_NAME" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["담당자명"]]></defaultValueExpression>
+	</parameter>
+	<field name="spiIdx" class="java.lang.String"/>
+	<field name="coIdx" class="java.lang.String"/>
+	<field name="coName" class="java.lang.String"/>
+	<field name="ceoName" class="java.lang.String"/>
+	<field name="pschName" class="java.lang.String"/>
+	<field name="pschTel" class="java.lang.String"/>
+	<field name="pschEmail" class="java.lang.String"/>
+	<field name="spkIdx" class="java.lang.String"/>
+	<field name="empIdx" class="java.lang.String"/>
+	<field name="spiPay" class="java.lang.String"/>
+	<field name="spiStatus" class="java.lang.String"/>
+	<field name="spiStart" class="java.util.Date"/>
+	<field name="spiEnd" class="java.util.Date"/>
+	<field name="spiPeriod" class="java.lang.Integer"/>
+	<field name="spiCtrt" class="java.lang.String"/>
+	<field name="spiUid" class="java.lang.String"/>
+	<field name="spkName" class="java.lang.String"/>
+	<field name="spkPrice" class="java.lang.String"/>
+	<field name="checkedModules" class="java.util.List"/>
+	<variable name="paymentMethod" class="java.lang.String">
+		<variableExpression><![CDATA[$F{spiPay} != null ? (
+                $F{spiPay}.equals("SP01") ? "무통장입금" :
+                $F{spiPay}.equals("SP02") ? "신용카드" :
+                $F{spiPay}.equals("SP03") ? "계좌이체" :
+                $F{spiPay}.equals("SP04") ? "카카오페이" :
+                $F{spiPay}.equals("SP05") ? "네이버페이" : "기타"
+            ) : "미설정"]]></variableExpression>
+	</variable>
+	<variable name="statusText" class="java.lang.String">
+		<variableExpression><![CDATA[$F{spiStatus} != null ? (
+                $F{spiStatus}.equals("SS01") ? "정상 서비스" :
+                $F{spiStatus}.equals("SS02") ? "서비스 해지" :
+                $F{spiStatus}.equals("SS03") ? "일시정지" : "상태미확인"
+            ) : "상태미확인"]]></variableExpression>
+	</variable>
+	<variable name="statusColor" class="java.awt.Color">
+		<variableExpression><![CDATA[$F{spiStatus} != null ? (
+                $F{spiStatus}.equals("SS01") ? new java.awt.Color(34, 139, 34) :
+                $F{spiStatus}.equals("SS02") ? new java.awt.Color(220, 20, 60) :
+                $F{spiStatus}.equals("SS03") ? new java.awt.Color(255, 140, 0) : 
+                new java.awt.Color(128, 128, 128)
+            ) : new java.awt.Color(128, 128, 128)]]></variableExpression>
+	</variable>
+	<variable name="remainingDays" class="java.lang.Long">
+		<variableExpression><![CDATA[$F{spiEnd} != null ? 
+            ((($F{spiEnd}.getTime() - new java.util.Date().getTime()) / (1000 * 60 * 60 * 24)) + 1) : 0L]]></variableExpression>
+	</variable>
+	<variable name="moduleList" class="java.lang.String">
+		<variableExpression><![CDATA[$F{checkedModules} != null && !$F{checkedModules}.isEmpty() ? 
+            String.join(", ", $F{checkedModules}) : "기본 패키지"]]></variableExpression>
+	</variable>
+	<pageHeader>
+		<band height="140">
+			<staticText>
+				<reportElement x="0" y="0" width="300" height="30" uuid="0911909d-a169-4afb-a222-8e00e2aa8026"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[구독 서비스 명세서]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="350" y="0" width="205" height="18" uuid="2e2834eb-5aa7-4353-8610-84b8b9ce4af2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{COMPANY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="350" y="18" width="205" height="15" uuid="7bcf8868-2386-440e-b403-7761ad4457a8"/>
+				<textElement textAlignment="Right">
+					<font fontName="Malgun Gothic" size="9" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{COMPANY_ADDRESS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="350" y="33" width="205" height="15" uuid="4e2cc123-1b1b-42ad-b289-015abb5f4bce"/>
+				<textElement textAlignment="Right">
+					<font fontName="Malgun Gothic" size="9" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Tel: " + $P{COMPANY_PHONE}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="0" y="60" width="555" height="30" forecolor="#E0E0E0" backcolor="#F8F9FA" uuid="05f9f044-4731-4282-84c8-88c980b43835"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="10" y="67" width="80" height="16" uuid="e73815e6-7590-45c3-9011-a92dfd57abfa"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[명세서 번호:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="90" y="67" width="150" height="16" uuid="caaf28f0-ff72-4e73-a0fd-3cda9c4165f2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{spiIdx} != null ? $F{spiIdx} : "N/A"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="370" y="67" width="60" height="16" uuid="70813928-3ebc-4ec4-bc54-7bcaa6cf6934"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[발행일자:]]></text>
+			</staticText>
+			<textField pattern="yyyy년 MM월 dd일">
+				<reportElement x="430" y="67" width="115" height="16" uuid="cd66f362-02df-438a-a40b-98c4b098570c"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="0" y="100" width="200" height="35" uuid="ec5e3fd2-c6d4-4900-afdc-d7ae18f64c70">
+					<printWhenExpression><![CDATA[$F{spiStatus} != null]]></printWhenExpression>
+				</reportElement>
+				<graphicElement>
+					<pen lineWidth="2.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="10" y="107" width="80" height="20" uuid="da14ba6c-56bf-4514-b4d9-8fd0c48b614e"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="13" isBold="true"/>
+				</textElement>
+				<text><![CDATA[현재 상태:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="90" y="107" width="100" height="20" uuid="b61604f5-4ba1-4b65-83b8-2d48600238a7"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="13" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{statusText}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="350" y="105" width="205" height="25" uuid="a19b1c20-f758-4e4c-80ff-89688adda5f2">
+					<printWhenExpression><![CDATA[$F{spiStatus} != null && $F{spiStatus}.equals("SS01") && $V{remainingDays} > 0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["만료까지 " + $V{remainingDays} + "일 남음"]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="500">
+			<staticText>
+				<reportElement x="0" y="10" width="100" height="25" uuid="156e1dc7-010d-4ebf-b77b-506d6fddf43c"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[정보]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="0" y="40" width="270" height="130" forecolor="#D0D0D0" backcolor="#FAFAFA" uuid="bf267666-7d8a-42fa-ae0e-48c1b0e157fd"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="15" y="55" width="80" height="18" uuid="4b7a9f6a-72a7-4fc3-9023-4d9c58253456"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[회사명]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="55" width="160" height="18" uuid="749e1d97-01ff-44c1-b55b-c037f883e436"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{coName} != null ? $F{coName} : "N/A"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="15" y="147" width="80" height="18" uuid="e779d98a-a635-49ed-be44-5893d6efce5f"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[대표자]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="147" width="160" height="18" uuid="16eee5e0-d17d-4513-8840-3267fc6406b6"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{EMP_NAME} + " (" + ($F{ceoName} != null ? $F{ceoName} : "N/A") + ")"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="15" y="78" width="80" height="18" uuid="1cc85ecc-2881-454b-8018-0d7d9b8d3bf9"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[담당자]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="78" width="160" height="18" uuid="94bd9746-bd4e-4664-ba09-42e27b734c04"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CUSTOMER_NAME} + " (" + ($F{pschName} != null ? $F{pschName} : "N/A") + ")"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="15" y="101" width="80" height="18" uuid="0c9c9c17-ed3d-4075-b96f-929188715c1c"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[담당자 연락처]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="101" width="160" height="18" uuid="4bd7bfa9-da9a-4d50-abaa-03a5e4af3dee"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CUSTOMER_PHONE} + " (" + ($F{pschTel} != null ? $F{pschTel} : "N/A") + ")"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="15" y="124" width="80" height="18" uuid="1fddc7e8-d7ea-4f20-ac80-bb5d8188dada"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[담당자 이메일]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="124" width="160" height="18" uuid="8f4f9266-2b91-4cee-981e-78b1c4ecff9d"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CUSTOMER_EMAIL} + " (" + ($F{pschEmail} != null ? $F{pschEmail} : "N/A") + ")"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="285" y="10" width="100" height="25" uuid="b9f98624-ef72-46bb-8ee8-cd190de58bdc"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[서비스 정보]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="285" y="40" width="270" height="130" forecolor="#D0D0D0" backcolor="#FAFAFA" uuid="16398fc3-2548-4817-b65b-9c98a9c45036"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="300" y="55" width="80" height="18" uuid="a5fbdfae-a940-48be-8f5e-76a293f9581f"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[패키지 코드]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="385" y="55" width="160" height="18" uuid="0b997b09-4cce-4a79-bef0-3aef26bd7d97"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{spkIdx} != null ? $F{spkIdx} : "N/A"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="300" y="78" width="80" height="18" uuid="af358f23-b599-47b4-b126-7375b7d4a431"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[서비스명]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="385" y="78" width="160" height="18" uuid="040294e4-5b61-4256-975d-28209c3d99e6"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{spkName} != null ? $F{spkName} : "기본 패키지"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="300" y="101" width="80" height="18" uuid="56b85eb2-1016-45ec-ae24-6a35e61372bd"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[월 이용료]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="385" y="101" width="160" height="18" uuid="f35acab1-1c23-4494-9e88-0d4a12e0e131"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{spkPrice} != null ? $F{spkPrice} + "원" : "가격 미정"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="300" y="124" width="80" height="18" uuid="cd92714b-2f4c-4d18-afff-135c0177f110"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="Malgun Gothic" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[선택 모듈]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="385" y="124" width="160" height="36" uuid="2e673730-cd50-4bb3-b83e-2c3462a48fb3"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="Malgun Gothic" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{moduleList}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="185" width="100" height="25" uuid="1b10f2f6-6e14-4615-9f3d-b7e6369031de"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[구독 기간]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="0" y="215" width="555" height="90" forecolor="#D0D0D0" backcolor="#F0F8FF" uuid="dff24713-ef81-4764-9b13-8250da12f2fa"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="20" y="235" width="80" height="20" uuid="984c5426-b265-4a14-aef3-af17e1e7b9bc"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[시작일]]></text>
+			</staticText>
+			<textField pattern="yyyy년 MM월 dd일 (E)">
+				<reportElement x="100" y="235" width="150" height="20" uuid="025eaf9c-c47d-4135-ba15-8ed0baa1dc83"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{spiStart} != null ? $F{spiStart} : new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="270" y="235" width="80" height="20" uuid="4c4faf63-e746-43ea-94ad-62c1b3dc5af1"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[종료일]]></text>
+			</staticText>
+			<textField pattern="yyyy년 MM월 dd일 (E)">
+				<reportElement x="350" y="235" width="180" height="20" uuid="b3dde54a-2c71-4793-9bd5-6b7a9c6e66c6"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{spiEnd} != null ? $F{spiEnd} : new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="265" width="80" height="20" uuid="d5c6c155-b37e-434d-994f-9e089bfa0e46"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[구독 기간]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="265" width="150" height="20" uuid="68f039f8-e041-46bc-8cda-a2e4de676bac"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{spiPeriod} != null ? $F{spiPeriod} : 0) + "개월"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="320" width="100" height="25" uuid="c013c2b5-4fed-4d54-bf0b-21248bb89c82"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[결제 정보]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="0" y="350" width="555" height="80" forecolor="#D0D0D0" backcolor="#FFFAF0" uuid="3c79de99-0aa2-4f91-9d93-c11b6887892c"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="20" y="365" width="80" height="18" uuid="6eaffb29-04b8-40a4-a55b-835b367152c0"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[결제수단]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="365" width="120" height="18" uuid="6801ad3b-3da3-468d-805d-f0d99ab558c0"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{paymentMethod}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="250" y="365" width="100" height="18" uuid="8ed35a3e-824b-42ef-82fb-37fcfa9fce9a"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[결제 고유번호]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="350" y="365" width="190" height="18" uuid="ab0b98fb-115c-48ed-b24e-ed01b520fe27"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{spiUid} != null ? $F{spiUid} : "미설정"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="390" width="80" height="18" uuid="126cf09d-7947-4e80-a330-54a665c6622e"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[계약서]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="390" width="440" height="18" uuid="745a0529-7a38-4429-8a0a-5e802aacebaf"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{spiCtrt} != null ? $F{spiCtrt} : "계약서 파일 없음"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="445" width="100" height="20" uuid="cf3efe20-917f-4d55-94db-26c7d5534d53"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[이용 안내]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="470" width="555" height="25" uuid="0f64059d-5459-434c-bbf6-e77e47199d48"/>
+				<textElement>
+					<font fontName="Malgun Gothic" size="9"/>
+				</textElement>
+				<text><![CDATA[• 구독 서비스 문의: 고객센터 1588-0000 | • 서비스 해지는 최소 7일 전 통보 필요 | • 본 명세서는 구독 계약 증빙자료입니다]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="40">
+			<line>
+				<reportElement x="0" y="5" width="555" height="1" uuid="09cc4f1a-80af-4271-b3db-c54c829de7d5"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineColor="#CCCCCC"/>
+				</graphicElement>
+			</line>
+			<textField>
+				<reportElement x="0" y="15" width="300" height="15" uuid="b9255a1a-0bf0-44c9-88bc-cee207afcbea"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["발행일시: " + new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="450" y="15" width="80" height="15" uuid="5d98db2b-e06d-4e71-b577-5ad893466b74"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["페이지 " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="530" y="15" width="25" height="15" uuid="fc53157f-3c03-45cd-b5a4-a0c45d72ead4"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Malgun Gothic" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" / " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

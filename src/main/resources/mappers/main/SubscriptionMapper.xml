@@ -110,7 +110,7 @@
     </select>
 
     <!-- 0629 -->
-    <select id="findAllSubscriptionByCoIdx" resultType="SubscriptionDTO" parameterType="string">
+    <select id="findAllSubscriptionByCoIdx" parameterType="String" resultType="SubscriptionDTO">
         SELECT s.spi_idx, s.spk_idx, s.co_idx, s.emp_idx, s.spi_pay, s.spi_status, s.spi_start, s.spi_end, s.spi_period,
             s.spi_ctrt, s.spi_uid, p.spk_name, p.spk_price
         FROM subscription s
@@ -118,9 +118,34 @@
         WHERE s.co_idx = #{coIdx}
     </select>
 
-    <select id="findAllSubscriptionBillByCoIdx" resultType="SubscriptionBillDTO" parameterType="string">
+    <select id="findAllSubscriptionBillByCoIdx" parameterType="String" resultType="SubscriptionBillDTO">
         SELECT spb_idx, spb_file, spb_type, spb_issued
         FROM subscription_bill
         WHERE spi_idx = #{spiIdx}
+    </select>
+
+    <!-- 0630 -->
+    <select id="findActiveSubscriptionByCoIdx" parameterType="String" resultType="int">
+        SELECT COUNT(spi_idx)
+        FROM subscription
+        WHERE co_idx = #{coIdx} AND spi_status = 'SS01';
+    </select>
+
+    <select id="findSubscriptionBySpiIdx" parameterType="String" resultType="subscriptionDTO">
+        SELECT *
+        FROM subscription
+        WHERE spi_idx = #{spiIdx}
+    </select>
+
+    <select id="findSubscriptionInvoiceBySpiIdx" parameterType="String" resultType="InvoiceDTO">
+        SELECT s.spi_idx, s.spk_idx, s.co_idx, s.spi_start, s.spi_end, s.spi_pay, s.spi_period,
+            spk.spk_name, spk.spk_price,
+            LISTAGG(mou.module_name, ', ') WITHIN GROUP (ORDER BY mou.module_name) AS module_names
+        FROM subscription s
+            JOIN subscription_packages spk ON s.spk_idx = spk.spk_idx
+            JOIN subscription_package_details spd ON s.spi_idx = spd.spi_idx
+            JOIN modules mou ON spd.module_idx = mou.module_idx
+        WHERE s.spi_idx = #{spiIdx}
+        GROUP BY s.spi_idx, s.spk_idx, s.co_idx, s.spi_start, s.spi_end, s.spi_pay, s.spi_period, spk.spk_name, spk.spk_price
     </select>
 </mapper>

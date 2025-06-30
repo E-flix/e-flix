@@ -162,15 +162,17 @@
             c.psch_tel,
             c.psch_email,
             c.svc_status,
+
             s.spi_idx,
             s.spi_status,
             s.spi_start,
             s.spi_end,
-            s.spi_period,
-            TRUNC(s.spi_end - SYSDATE) AS remaining_days
+
+            p.total_period,
+            p.total_remaining
         FROM companies c
         INNER JOIN (
-            SELECT s1.*
+            SELECT *
             FROM subscription s1
             WHERE (s1.spi_idx, s1.co_idx) IN (
                 SELECT MAX(s2.spi_idx), s2.co_idx
@@ -178,6 +180,19 @@
                 GROUP BY s2.co_idx
             )
         ) s ON c.co_idx = s.co_idx
+        INNER JOIN (
+            SELECT 
+                co_idx, 
+                SUM(spi_period) AS total_period,
+                SUM(
+                    CASE 
+                        WHEN spi_end &gt; SYSDATE THEN TRUNC(spi_end - SYSDATE)
+                        ELSE 0
+                    END
+                ) AS total_remaining
+            FROM subscription
+            GROUP BY co_idx
+        ) p ON c.co_idx = p.co_idx
         ORDER BY c.co_regdate DESC
     </select>
 </mapper>

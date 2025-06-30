@@ -40,5 +40,14 @@ public class SubscriptionDTO {
     private String spiCtrt;     // 계약서 파일
     private String spiUid;      // PortOne UID
 
+    private String spkName;
+    private String spkPrice;
+
+    private String coName;
+    private String ceoName;
+    private String pschName;
+    private String pschTel;
+    private String pschEmail;
+
     private List<String> checkedModules;
 }

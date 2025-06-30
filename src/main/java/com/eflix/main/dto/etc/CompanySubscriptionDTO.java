@@ -18,7 +18,8 @@ public class CompanySubscriptionDTO {
     private String spiStatus;
     private Date spiStart;
     private Date spiEnd;
-    private Integer spiPeriod;
+    private int spiPeriod;
 
-    private Integer remainingDays;
+    private Integer totalPeriod;
+    private Integer totalRemaining;
 }
