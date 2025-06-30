@@ -135,4 +135,141 @@ public class AccEntryController {
   public List<EntryDetailDTO> getPSDetailList(@PathVariable int entryNumber) {
     return entryService.getPSDetailList(entryNumber); // 매입매출전표 detail 목록 조회
   }
+
+  /**
+   * 매입매출전표 저장 (신규)
+   * 
+   * @param entryMaster : 매입매출전표 마스터 + 상세 데이터
+   * @return : 저장된 매입매출전표 데이터
+   */
+  @PostMapping("/enps")
+  public ResponseEntity<EntryMasterDTO> createPurchaseSalesEntry(@RequestBody EntryMasterDTO entryMaster) {
+    try {
+      EntryMasterDTO savedEntry = entryService.insertPurchaseSalesEntry(entryMaster);
+      return ResponseEntity.ok(savedEntry);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(500).body(null);
+    }
+  }
+
+  /**
+   * 매입매출전표 수정
+   * 
+   * @param entryMaster : 매입매출전표 마스터 + 상세 데이터
+   * @return : 수정된 매입매출전표 데이터
+   */
+  @PutMapping("/enps")
+  public ResponseEntity<EntryMasterDTO> updatePurchaseSalesEntry(@RequestBody EntryMasterDTO entryMaster) {
+    try {
+      entryService.updatePurchaseSalesEntry(entryMaster);
+      return ResponseEntity.ok(entryMaster);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(500).body(null);
+    }
+  }
+
+  /**
+   * 매입매출전표용 신규 전표번호 조회
+   * 
+   * @return : 신규 전표번호 (max+1)
+   */
+  @ResponseBody
+  @GetMapping("/enps/enNo")
+  public int getPSEntryNumber() {
+    return entryService.selectMaxPlusOneEntryNumberPS();
+  }
+
+  /**
+   * 매입매출전표 삭제
+   * 
+   * @param entryMasters : 삭제할 매입매출전표 마스터 리스트
+   * @return : 삭제 결과
+   */
+  @PutMapping("/enps/del")
+  public ResponseEntity<String> deletePurchaseSalesEntry(@RequestBody List<EntryMasterDTO> entryMasters) {
+    try {
+      entryService.deletePurchaseSalesEntry(entryMasters);
+      return ResponseEntity.ok("Delete success");
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(500).body("Delete failed: " + e.getMessage());
+    }
+  }
+
+  /**
+   * 매입매출전표 상세 저장 (신규)
+   * 
+   * @param entryDetails : 저장할 상세 데이터 리스트
+   * @return : 저장 결과
+   */
+  @PostMapping("/enps/detail")
+  public ResponseEntity<?> insertPurchaseSalesDetail(@RequestBody List<EntryDetailDTO> entryDetails) {
+    try {
+      List<EntryDetailDTO> savedDetails = entryService.insertPurchaseSalesDetail(entryDetails);
+      return ResponseEntity.ok(savedDetails);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(500).body("Detail insert failed: " + e.getMessage());
+    }
+  }
+
+  /**
+   * 매입매출전표 상세 수정
+   * 
+   * @param entryDetails : 수정할 상세 데이터 리스트
+   * @return : 수정 결과
+   */
+  @PutMapping("/enps/detail")
+  public ResponseEntity<?> updatePurchaseSalesDetail(@RequestBody List<EntryDetailDTO> entryDetails) {
+    try {
+      List<EntryDetailDTO> updatedDetails = entryService.updatePurchaseSalesDetail(entryDetails);
+      return ResponseEntity.ok(updatedDetails);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(500).body("Detail update failed: " + e.getMessage());
+    }
+  }
+
+  /**
+   * 매입매출전표 상세 삭제
+   * 
+   * @param entryDetails : 삭제할 상세 데이터 리스트
+   * @return : 삭제 결과
+   */
+  @PutMapping("/enps/detail/del")
+  public ResponseEntity<String> deletePurchaseSalesDetail(@RequestBody List<EntryDetailDTO> entryDetails) {
+    try {
+      entryService.deletePurchaseSalesDetail(entryDetails);
+      return ResponseEntity.ok("Detail delete success");
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(500).body("Detail delete failed: " + e.getMessage());
+    }
+  }
+
+  /**
+   * 매입매출전표 상세 라인번호 조회 (max+1)
+   * 
+   * @param entryNumber : 전표번호
+   * @return : 다음 라인번호
+   */
+  @GetMapping("/enps/detail/lineNo/{entryNumber}")
+  @ResponseBody
+  public int getPSDetailLineNumber(@PathVariable int entryNumber) {
+    return entryService.selectMaxPlusOneLineNumber(entryNumber);
+  }
+
+  /**
+   * 매입매출전표 상세 데이터 조회
+   * 
+   * @param entryNumber : 전표번호
+   * @return : 매입매출전표 상세 데이터
+   */
+  @ResponseBody
+  @GetMapping("/enps/detail/{entryNumber}")
+  public List<EntryDetailDTO> getPSDetailData(@PathVariable int entryNumber) {
+    return entryService.getPSDetailList(entryNumber);
+  }
 }

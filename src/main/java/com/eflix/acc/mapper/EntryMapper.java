@@ -42,4 +42,6 @@ public interface EntryMapper {
   public List<EntryMasterDTO> getPSMasterList();
   // detail 전표 조회 
   public List<EntryDetailDTO> getPSDetailList(int entryNumber);
+  // 매입매출전표용 전표번호 조회 (max+1)
+  public int selectMaxPlusOneEntryNumberPS();
 }

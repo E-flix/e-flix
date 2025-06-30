@@ -126,4 +126,120 @@ public class EntryServiceImpl implements EntryService {
   public List<EntryDetailDTO> getPSDetailList(int entryNumber) {
     return entryMapper.getPSDetailList(entryNumber);
   }
+
+  // 매입매출전표 신규 저장
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public EntryMasterDTO insertPurchaseSalesEntry(EntryMasterDTO entryMaster) {
+    Date now = new Date();
+    
+    // 매입매출전표 master 저장
+    if (entryMaster.getCreatedAt() == null) {
+      entryMaster.setCreatedAt(now);
+    }
+    if (entryMaster.getUpdatedAt() == null) {
+      entryMaster.setUpdatedAt(now);
+    }
+    
+    // 전표번호가 없으면 매입매출전표용 전표번호로 새로 발번
+    if (entryMaster.getEntryNumber() == 0) {
+      entryMaster.setEntryNumber(selectMaxPlusOneEntryNumberPS());
+    }
+    
+    entryMapper.insertEntryMaster(entryMaster);
+    
+    // 매입매출전표에는 상세 데이터가 없으므로 master만 저장
+    return entryMaster;
+  }
+
+  // 매입매출전표 수정
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public EntryMasterDTO updatePurchaseSalesEntry(EntryMasterDTO entryMaster) {
+    Date now = new Date();
+    
+    if (entryMaster.getUpdatedAt() == null) {
+      entryMaster.setUpdatedAt(now);
+    }
+    
+    entryMapper.updateEntryMaster(entryMaster);
+    return entryMaster;
+  }
+
+  // 매입매출전표용 전표번호 조회 (max+1)
+  @Override
+  public int selectMaxPlusOneEntryNumberPS() {
+    return entryMapper.selectMaxPlusOneEntryNumberPS();
+  }
+
+  // 매입매출전표 삭제
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void deletePurchaseSalesEntry(List<EntryMasterDTO> entryMasters) {
+    if (entryMasters == null || entryMasters.isEmpty()) return;
+    
+    for (EntryMasterDTO master : entryMasters) {
+      // 매입매출전표는 마스터만 있으므로 마스터만 삭제
+      entryMapper.deleteEntryMasterByEntryNumber(master.getEntryNumber());
+    }
+  }
+
+  // 매입매출전표 상세 저장
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public List<EntryDetailDTO> insertPurchaseSalesDetail(List<EntryDetailDTO> entryDetails) {
+    if (entryDetails == null || entryDetails.isEmpty()) return entryDetails;
+    
+    Date now = new Date();
+    
+    for (EntryDetailDTO detail : entryDetails) {
+      // 라인번호가 없으면 새로 발번
+      if (detail.getLineNumber() == 0) {
+        detail.setLineNumber(selectMaxPlusOneLineNumber(detail.getEntryNumber()));
+      }
+      
+      // 생성/수정 시간 설정
+      if (detail.getCreatedAt() == null) {
+        detail.setCreatedAt(now);
+      }
+      if (detail.getUpdatedAt() == null) {
+        detail.setUpdatedAt(now);
+      }
+      
+      entryMapper.insertEntryDetail(detail);
+    }
+    
+    return entryDetails;
+  }
+
+  // 매입매출전표 상세 수정
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public List<EntryDetailDTO> updatePurchaseSalesDetail(List<EntryDetailDTO> entryDetails) {
+    if (entryDetails == null || entryDetails.isEmpty()) return entryDetails;
+    
+    Date now = new Date();
+    
+    for (EntryDetailDTO detail : entryDetails) {
+      // 수정 시간 설정
+      if (detail.getUpdatedAt() == null) {
+        detail.setUpdatedAt(now);
+      }
+      
+      entryMapper.updateEntryDetail(detail);
+    }
+    
+    return entryDetails;
+  }
+
+  // 매입매출전표 상세 삭제
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void deletePurchaseSalesDetail(List<EntryDetailDTO> entryDetails) {
+    if (entryDetails == null || entryDetails.isEmpty()) return;
+    
+    for (EntryDetailDTO detail : entryDetails) {
+      entryMapper.deleteEntryDetailsByLineNumber(detail);
+    }
+  }
 }
