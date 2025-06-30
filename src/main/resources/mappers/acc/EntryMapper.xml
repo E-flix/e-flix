@@ -279,5 +279,8 @@
     WHERE d.entry_number = #{entryNumber}
     ORDER BY d.line_number
   </select>
-
+  <!-- select max+1 entry_number -->
+  <select id="selectMaxPlusOneEntryNumberPS" resultType="int">
+    SELECT COALESCE(MAX(entry_number)+1, 50001) AS enNo FROM entry_master
+  </select>
 </mapper>

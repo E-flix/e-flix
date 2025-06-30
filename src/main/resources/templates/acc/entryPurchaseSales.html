@@ -57,6 +57,7 @@
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h4 class="mb-0">매입매출전표</h4>
       <div>
+        <button class="btn btn-outline-primary btn-sm" onclick="addEmptyRow()">추가</button>
         <button class="btn btn-outline-secondary btn-sm" onclick="deleteSelectedRow()">삭제</button>
         <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">인쇄</button>
       </div>
@@ -82,7 +83,14 @@
 
     <!-- 중간 상세정보 영역 -->
     <div class="mb-2" style="height:12vh;">
-      <div id="detailGrid" class="ag-theme-alpine" style="width:100%; height:100%;"></div>
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <h6 class="mb-0 text-muted">상세 전표 내용</h6>
+        <div>
+          <button class="btn btn-outline-primary btn-sm" onclick="addDetailRow()" id="addDetailBtn" disabled>상세 추가</button>
+          <small class="text-muted ms-2">마스터 행을 선택하면 해당 전표의 상세내용을 편집할 수 있습니다.</small>
+        </div>
+      </div>
+      <div id="detailGrid" class="ag-theme-alpine" style="width:100%; height:calc(100% - 25px);"></div>
     </div>
 
     <!-- 하단 통합 그리드 영역 -->
@@ -110,6 +118,61 @@
     // 상세정보 데이터 (초기에는 빈 상태)
     let detailData = [];
 
+    // 빈 행 생성 함수
+    function getEmptyRow() {
+      const emptyRow = {
+        entryDate: null, // 빈 상태로 초기화 (사용자가 직접 입력)
+        month: null,     // 월 필드 추가
+        day: null,       // 일 필드 추가
+        entryNumber: null,
+        transactionType: '',
+        itemName: '',
+        quantity: null,
+        unitPrice: null,
+        totalSupplyAmount: null,
+        totalTaxAmount: null,
+        partnerCode: '',
+        partnerName: '',
+        businessNumber: '',
+        electronicType: '',
+        resentmenType: '',
+        debitAmount: null,
+        creditAmount: null,
+        description: ''
+      };
+      // 유니크한 ID 미리 할당
+      emptyRow._emptyRowId = `empty_row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      return emptyRow;
+    }
+
+    // 빈 행인지 확인하는 함수
+    function isEmptyRow(rowData) {
+      return !rowData.entryNumber && (!rowData.entryDate || !rowData.transactionType || !rowData.itemName);
+    }
+
+    // 상세정보용 빈 행 생성 함수
+    function getEmptyDetailRow() {
+      const emptyRow = {
+        entryNumber: null,  // 이후에 선택된 마스터의 전표번호로 설정됨
+        resentmenType: '',
+        accountCode: '',
+        accountName: '',
+        partnerCode: '',
+        partnerName: '',
+        debitAmount: null,
+        creditAmount: null,
+        description: '',
+        lineNumber: null
+      };
+      emptyRow._emptyRowId = `empty_detail_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      return emptyRow;
+    }
+
+    // 상세정보 빈 행인지 확인하는 함수
+    function isEmptyDetailRow(rowData) {
+      return !rowData.lineNumber && (!rowData.resentmenType || !rowData.accountCode);
+    }
+
     // 통합 데이터 (매출 + 매입을 한 행에 표시)
     let combinedData = [
       { saleCode: '11', saleName: '과세', saleDetail: '과세매출', saleNum: '16', saleType: '수출', saleValue: '수출', buyCode: '21', buyName: '전자', buyDetail: '전자화폐', buyNum: '31', buyType: '수입', buyValue: '수입' },
@@ -125,12 +188,23 @@
         const response = await fetch('/acc/enps/ma');
         const data = await response.json();
         if (purchaseSalesGridApi && typeof purchaseSalesGridApi.applyTransaction === 'function') {
+          // 기존 데이터에 month, day 필드 추가
+          data.forEach(item => {
+            if (item.entryDate) {
+              const date = new Date(item.entryDate);
+              item.month = date.getMonth() + 1;
+              item.day = date.getDate();
+            }
+          });
+          
           // 전체 기존 데이터 제거 후 새 데이터 추가
           const currentData = [];
           purchaseSalesGridApi.forEachNode(node => currentData.push(node.data));
           purchaseSalesGridApi.applyTransaction({ remove: currentData, add: data });
           console.log('Master list load 성공:', data);
-          console.log('Master 거래처명:', data[0].partnerName);
+          if (data.length > 0) {
+            console.log('Master 거래처명:', data[0].partnerName);
+          }
         } else {
           console.log('Grid API 미지원 또는 applyTransaction 없음');
         }
@@ -142,6 +216,16 @@
     // 상세정보 표시 함수: 선택한 master의 detail 가져오기
     function showDetailInfo(master) {
       const entryNo = master.entryNumber;
+      if (!entryNo) {
+        // 빈 마스터 행인 경우 상세정보 그리드 초기화
+        if (detailGridApi) {
+          const current = [];
+          detailGridApi.forEachNode(node => current.push(node.data));
+          detailGridApi.applyTransaction({ remove: current });
+        }
+        return;
+      }
+      
       fetch(`/acc/enps/de/${entryNo}`)
         .then(res => {
           return res.json();
@@ -153,6 +237,25 @@
             const current = [];
             detailGridApi.forEachNode(node => current.push(node.data));
             detailGridApi.applyTransaction({ remove: current, add: data });
+            
+            // 빈 행이 있는지 확인하고 없으면 추가
+            setTimeout(() => {
+              let hasEmptyRow = false;
+              for (let i = 0; i < detailGridApi.getDisplayedRowCount(); i++) {
+                const row = detailGridApi.getDisplayedRowAtIndex(i)?.data;
+                if (row && isEmptyDetailRow(row)) {
+                  hasEmptyRow = true;
+                  break;
+                }
+              }
+              if (!hasEmptyRow) {
+                const newEmptyRow = getEmptyDetailRow();
+                // 선택된 마스터의 전표번호를 빈 행에 설정
+                newEmptyRow.entryNumber = master.entryNumber;
+                detailGridApi.applyTransaction({ add: [newEmptyRow] });
+              }
+            }, 100);
+            
             detailGridApi.refreshCells({ force: true });
           } else {
             console.log('Grid API 준비 안됨 또는 applyTransaction 미지원');
@@ -160,21 +263,76 @@
         })
         .catch(err => {
           console.log('상세 리스트 로드 실패:', err);
+          // 오류 발생 시에도 빈 행 추가
+          if (detailGridApi) {
+            const current = [];
+            detailGridApi.forEachNode(node => current.push(node.data));
+            detailGridApi.applyTransaction({ remove: current });
+            
+            const newEmptyRow = getEmptyDetailRow();
+            newEmptyRow.entryNumber = master.entryNumber;
+            detailGridApi.applyTransaction({ add: [newEmptyRow] });
+          }
         });
     }
 
     // 매입매출전표 그리드 설정
     const purchaseSalesGridOptions = {
-      suppressClickEdit: true,
-      singleClickEdit: false,
+      suppressClickEdit: false,
+      singleClickEdit: true,
       headerHeight: 30,
       rowHeight: 28,
       rowData: purchaseSalesData,
+      getRowId: params => {
+        const data = params.data;
+        // 일반 데이터 행 (entryNumber로 고유 ID 생성)
+        if (data.entryNumber) {
+          return `entry_${data.entryNumber}`;
+        }
+        // 빈 행 (신규 행) 처리
+        if (!data.entryNumber) {
+          // _emptyRowId가 없으면 새로 생성하여 할당
+          if (!data._emptyRowId) {
+            data._emptyRowId = `empty_row_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          }
+          return data._emptyRowId;
+        }
+        return undefined;
+      },
       columnDefs: [
-        { headerName: "월", valueGetter: params => params.data.entryDate ? new Date(params.data.entryDate).getMonth() + 1 : '', initialWidth: 75, cellClass: 'ag-cell-center' },
-        { headerName: "일", valueGetter: params => params.data.entryDate ? new Date(params.data.entryDate).getDate() : '', initialWidth: 75, cellClass: 'ag-cell-center' },
-        { headerName: "번호", field: "entryNumber", initialWidth: 95 },
-        { headerName: "유형", field: "transactionType", initialWidth: 90, cellRenderer: params => {
+        { headerName: "월", field: "month", initialWidth: 75, cellClass: 'ag-cell-center', editable: true,
+          valueSetter: params => {
+            const month = Number(params.newValue);
+            if (month >= 1 && month <= 12) {
+              params.data.month = month;
+              // 월과 일이 모두 있으면 entryDate 생성
+              if (params.data.month && params.data.day) {
+                const date = new Date(2025, params.data.month - 1, params.data.day);
+                params.data.entryDate = date.toISOString().split('T')[0];
+              }
+              return true;
+            }
+            return false;
+          }
+        },
+        { 
+          headerName: "일", field: "day", initialWidth: 75, cellClass: 'ag-cell-center', editable: true,
+          valueSetter: params => {
+            const day = Number(params.newValue);
+            if (day >= 1 && day <= 31) {
+              params.data.day = day;
+              // 월과 일이 모두 있으면 entryDate 생성
+              if (params.data.month && params.data.day) {
+                const date = new Date(2025, params.data.month - 1, params.data.day);
+                params.data.entryDate = date.toISOString().split('T')[0];
+              }
+              return true;
+            }
+            return false;
+          }
+        },
+        { headerName: "번호", field: "entryNumber", initialWidth: 95, editable: false },
+        { headerName: "유형", field: "transactionType", initialWidth: 90, editable: true, cellRenderer: params => {
             const code = params.value;
             const mapping = code0H.find(item => item.commonCode === code);
             if (mapping) {
@@ -183,17 +341,21 @@
             }
             return code || '';
           } },
-        { headerName: "품명", field: "itemName", minWidth: 200 },
-        { headerName: "수량", field: "quantity", initialWidth: 90, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '' },
-        { headerName: "단가", field: "unitPrice", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '' },
-        { headerName: "공급가액", field: "totalSupplyAmount", minWidth: 120, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '' },
-        { headerName: "부가세", field: "totalTaxAmount", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '' },
-        { headerName: "코드", field: "partnerCode", initialWidth: 90 },
-        { headerName: "공급처명", field: "partnerName", minWidth: 120 },
-        { headerName: "등록번호", field: "businessNumber", minWidth: 150 },
-        { headerName: "전자", field: "electronicType", minWidth: 50,
-            cellRenderer: params => { const code = params.value;
-            if (code === 'a1') { return '○'; } else if (code === 'a2') { return ''; } return code || '';}
+        { headerName: "품명", field: "itemName", minWidth: 200, editable: true },
+        { headerName: "수량", field: "quantity", initialWidth: 90, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '', editable: true },
+        { headerName: "단가", field: "unitPrice", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '', editable: true },
+        { headerName: "공급가액", field: "totalSupplyAmount", minWidth: 120, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '', editable: true },
+        { headerName: "부가세", field: "totalTaxAmount", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '', editable: true },
+        { headerName: "코드", field: "partnerCode", initialWidth: 90, editable: true },
+        { headerName: "공급처명", field: "partnerName", minWidth: 120, editable: true },
+        { headerName: "등록번호", field: "businessNumber", minWidth: 150, editable: true },
+        { headerName: "전자", field: "electronicType", minWidth: 50, editable: true,
+            cellRenderer: params => { 
+              const code = params.value;
+              if (code === 'a1') { return '○'; } 
+              else if (code === 'a2') { return ''; } 
+              return code || '';
+            }
         }
       ],
       rowSelection: { mode: 'multiRow' },
@@ -211,11 +373,55 @@
           });
           resizeEventRegistered = true;
         }
+        
+        // 빈 행 추가
+        setTimeout(() => {
+          let hasEmptyRow = false;
+          for (let i = 0; i < params.api.getDisplayedRowCount(); i++) {
+            const row = params.api.getDisplayedRowAtIndex(i)?.data;
+            if (row && isEmptyRow(row)) {
+              hasEmptyRow = true;
+              break;
+            }
+          }
+          if (!hasEmptyRow) {
+            const newEmptyRow = getEmptyRow();
+            params.api.applyTransaction({ add: [newEmptyRow] });
+          }
+        }, 100);
       },
       onRowClicked: (event) => {
         selectedMaster = event.data;  // 클릭된 마스터 저장
-        // 선택된 행의 상세정보를 중간 그리드에 표시
-        showDetailInfo(event.data);
+        // 상세 추가 버튼 상태 업데이트
+        updateDetailButtonState();
+        // 등록된 마스터 행(전표번호가 있는 행)만 상세정보 표시
+        if (event.data.entryNumber) {
+          showDetailInfo(event.data);
+        } else {
+          // 빈 행 클릭 시 상세정보 그리드 초기화
+          if (detailGridApi) {
+            const current = [];
+            detailGridApi.forEachNode(node => current.push(node.data));
+            detailGridApi.applyTransaction({ remove: current });
+          }
+        }
+      },
+      onCellValueChanged: (event) => {
+        // 셀 값이 변경될 때 빈 행이 있는지 확인하고 없으면 추가
+        setTimeout(() => {
+          let hasEmptyRow = false;
+          for (let i = 0; i < event.api.getDisplayedRowCount(); i++) {
+            const row = event.api.getDisplayedRowAtIndex(i)?.data;
+            if (row && isEmptyRow(row)) {
+              hasEmptyRow = true;
+              break;
+            }
+          }
+          if (!hasEmptyRow) {
+            const newEmptyRow = getEmptyRow();
+            event.api.applyTransaction({ add: [newEmptyRow] });
+          }
+        }, 50);
       }
     };
 
@@ -225,8 +431,23 @@
       rowHeight: 28,
       rowData: detailData,
       suppressHorizontalScroll: false,
-      suppressClickEdit: true,
-      singleClickEdit: false,
+      suppressClickEdit: false,
+      singleClickEdit: true,
+      getRowId: params => {
+        const data = params.data;
+        // 일반 데이터 행
+        if (data.entryNumber && data.lineNumber) {
+          return `detail_${data.entryNumber}_${data.lineNumber}`;
+        }
+        // 빈 행 처리
+        if (!data.entryNumber) {
+          if (!data._emptyRowId) {
+            data._emptyRowId = `empty_detail_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          }
+          return data._emptyRowId;
+        }
+        return undefined;
+      },
       columnDefs: [
         { headerName: "일자", cellRenderer: params => {
             if (!selectedMaster || !selectedMaster.entryDate) return '';
@@ -235,22 +456,42 @@
             const dd = String(d.getDate()).padStart(2, '0');
             return `${mm}-${dd}`;
           }, minWidth: 80, cellClass: 'ag-cell-center' },
-        { headerName: "전표번호", field: "entryNumber", minWidth: 100 },
-        { headerName: "구분", field: "resentmenType", minWidth: 80, cellRenderer: params => {
+        { headerName: "전표번호", field: "entryNumber", minWidth: 100, editable: false },
+        { headerName: "구분", field: "resentmenType", minWidth: 80, editable: true, cellRenderer: params => {
             return code0G.find(v => String(v.commonCode) === String(params.value))?.commonCodeName || params.value || '';
           }},
-        { headerName: "코드", field: "accountCode", minWidth: 80 },
-        { headerName: "계정과목", field: "accountName", minWidth: 120 },
-        { headerName: "코드", field: "partnerCode", minWidth: 80 },
-        { headerName: "거래처명", field: "partnerName", minWidth: 120 },
-        { headerName: "차변", field: "debitAmount", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value ? params.value.toLocaleString() : '' },
-        { headerName: "대변", field: "creditAmount", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value ? params.value.toLocaleString() : '' },
-        { headerName: "적요", field: "description", minWidth: 150 }
+        { headerName: "코드", field: "accountCode", minWidth: 80, editable: true },
+        { headerName: "계정과목", field: "accountName", minWidth: 120, editable: false },
+        { headerName: "코드", field: "partnerCode", minWidth: 80, editable: true },
+        { headerName: "거래처명", field: "partnerName", minWidth: 120, editable: true },
+        { headerName: "차변", field: "debitAmount", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value ? params.value.toLocaleString() : '', editable: true },
+        { headerName: "대변", field: "creditAmount", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value ? params.value.toLocaleString() : '', editable: true },
+        { headerName: "적요", field: "description", minWidth: 150, editable: true }
       ],
       onGridReady: (params) => {
         detailGridApi = params.api;
         // 컬럼 너비 자동맞춤
         params.api.sizeColumnsToFit();
+      },
+      onCellValueChanged: (event) => {
+        // 셀 값이 변경될 때 빈 행이 있는지 확인하고 없으면 추가
+        setTimeout(() => {
+          if (!selectedMaster || !selectedMaster.entryNumber) return;
+          
+          let hasEmptyRow = false;
+          for (let i = 0; i < event.api.getDisplayedRowCount(); i++) {
+            const row = event.api.getDisplayedRowAtIndex(i)?.data;
+            if (row && isEmptyDetailRow(row)) {
+              hasEmptyRow = true;
+              break;
+            }
+          }
+          if (!hasEmptyRow) {
+            const newEmptyRow = getEmptyDetailRow();
+            newEmptyRow.entryNumber = selectedMaster.entryNumber;
+            event.api.applyTransaction({ add: [newEmptyRow] });
+          }
+        }, 50);
       }
     };
 
@@ -327,6 +568,53 @@
 
       const deleteData = selectedNodes.map(node => node.data);
       purchaseSalesGridApi.applyTransaction({ remove: deleteData });
+    }
+
+    // 빈 행 추가 함수
+    function addEmptyRow() {
+      if (purchaseSalesGridApi) {
+        const newEmptyRow = getEmptyRow();
+        purchaseSalesGridApi.applyTransaction({ add: [newEmptyRow] });
+        
+        // 새로 추가된 행으로 포커스 이동
+        setTimeout(() => {
+          const rowCount = purchaseSalesGridApi.getDisplayedRowCount();
+          if (rowCount > 0) {
+            purchaseSalesGridApi.setFocusedCell(rowCount - 1, 'itemName');
+          }
+        }, 100);
+      }
+    }
+
+    // 상세 행 추가 함수
+    function addDetailRow() {
+      if (detailGridApi && selectedMaster && selectedMaster.entryNumber) {
+        const newEmptyRow = getEmptyDetailRow();
+        newEmptyRow.entryNumber = selectedMaster.entryNumber;
+        detailGridApi.applyTransaction({ add: [newEmptyRow] });
+        
+        // 새로 추가된 행으로 포커스 이동
+        setTimeout(() => {
+          const rowCount = detailGridApi.getDisplayedRowCount();
+          if (rowCount > 0) {
+            detailGridApi.setFocusedCell(rowCount - 1, 'resentmenType');
+          }
+        }, 100);
+      }
+    }
+
+    // 상세 추가 버튼 활성화/비활성화
+    function updateDetailButtonState() {
+      const addDetailBtn = document.getElementById('addDetailBtn');
+      if (addDetailBtn) {
+        if (selectedMaster && selectedMaster.entryNumber) {
+          addDetailBtn.disabled = false;
+          addDetailBtn.textContent = `상세 추가 (전표번호: ${selectedMaster.entryNumber})`;
+        } else {
+          addDetailBtn.disabled = true;
+          addDetailBtn.textContent = '상세 추가';
+        }
+      }
     }
 
     // 날짜 필터
