@@ -8,10 +8,10 @@
   <select id="getWarehouse" resultType="WarehouseDTO">
       SELECT
         warehouse_id, 
-        warehouse_location, 
-        warehouse_scale, 
+        warehouse_location,
+        warehouse_scale,
         warehouse_manager
-      FROM 
+      FROM
         warehouse
       ORDER BY 
         warehouse_id
@@ -27,8 +27,8 @@
 
   <!-- 등록 -->
   <insert id="insertWarehouse" parameterType="WarehouseDTO">
-      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager, warehouse_status) 
-      VALUES (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager}, 's01')
+      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager, warehouse_status, warehouse_current) 
+      VALUES (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager}, 's01', 0)
   </insert>
 
   <!-- 삭제 -->
@@ -40,13 +40,22 @@
 
     <!--입고가능한 창고조회-->
   <select id="warehouseState" resultType="WarehouseDTO">
-      select
+      <!-- select
         w.warehouse_id AS warehouse_id,
         w.warehouse_location AS warehouse_location,
         warehouse_scale AS warehouse_scale,
         i.current_quantity AS current_quantity,
         (w.warehouse_scale - i.current_quantity) AS available_capacity
       from
-        warehouse w join inventory i on w.warehouse_id = i.warehouse_id
+        warehouse w join inventory i on w.warehouse_id = i.warehouse_id -->
+         SELECT 
+            warehouse_id, 
+            warehouse_location, 
+            warehouse_scale,
+            warehouse_current,
+            (warehouse_scale - warehouse_current) AS conf
+         FROM 
+            warehouse
+         WHERE warehouse_status = 's01'
   </select>
 </mapper>

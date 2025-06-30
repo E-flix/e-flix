@@ -53,7 +53,7 @@
     WHERE prod_id = #{prodId}
   </delete>
 
-  <!--'제품 => 창고' 입고 후 제품 상태 값 update-->
+  <!--'제품 => 창고' 입고 후 제품 상태 값 update  프로시저 사용 -->
   <insert id="prodToWarehouse" parameterType="InboundDTO">
     BEGIN
       PROD_TO_WAREHOUSE(#{inboundId}, #{prodId}, #{inboundQuantity}, #{inboundLot},#{inboundDate}, #{inboundManager}, #{warehouseId});
@@ -81,4 +81,6 @@
     FROM
       inbound
   </select>
+
+  
   </mapper>

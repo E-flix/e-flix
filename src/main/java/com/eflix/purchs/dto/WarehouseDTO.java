@@ -14,8 +14,8 @@ import lombok.Data;
 public class WarehouseDTO {
   String warehouseId;
   String warehouseLocation;
-  int warehouseScale; //       사용전 기존 용량 100L
+  int warehouseScale;
   String warehouseManager;
-  int currentQuantity; //      사용중인 용량    30L
-  int availableCapacity; //    사용가능 용량    70L
+  int warehouseCurrent;
+  int conf;
 }
