@@ -3,9 +3,8 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.eflix.purchs.mapper.InboundMapper">
-
-  <!--입고(제품)조회-->
-  <select id="getInbound" resultType="InboundDTO">
+	<!--입고(제품)조회-->
+	<select id="getInbound" resultType="InboundDTO">
       select 
          prod_id, 
          prod_name, 
@@ -19,8 +18,8 @@
         prod_inbound_status = 'pis02'
       order by prod_id
   </select>
-  <!--생산입력-->
-  <insert id="insertProd" parameterType="InboundDTO">
+	<!--생산입력-->
+	<insert id="insertProd" parameterType="InboundDTO">
     INSERT INTO prod
                      (prod_id, 
                       prod_name, 
@@ -38,49 +37,36 @@
                        #{productType}, 
                        'pis02')
   </insert>
-
-  <!--가장 마지막 prod_id 가져오기-->
-  <select id="getNextProdId" resultType="String">
+	<!--가장 마지막 prod_id 가져오기-->
+	<select id="getNextProdId" resultType="String">
     SELECT
       'p-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(prod_id, 3))), 100) + 1) 
     FROM 
       prod 
   </select>
-
-  <!--반품-->
-  <delete id="deleteProd" parameterType="InboundDTO">
+	<!--반품-->
+	<delete id="deleteProd" parameterType="InboundDTO">
     DELETE FROM prod
     WHERE prod_id = #{prodId}
   </delete>
-
-  <!--'제품 => 창고' 입고 후 제품 상태 값 update  프로시저 사용 -->
-  <insert id="prodToWarehouse" parameterType="InboundDTO">
+	<!--'제품 => 창고' 입고 후 제품 상태 값 update  프로시저 사용 -->
+	<insert id="prodToWarehouse" parameterType="InboundDTO">
     BEGIN
       PROD_TO_WAREHOUSE(#{inboundId}, #{prodId}, #{inboundQuantity}, #{inboundLot},#{inboundDate}, #{inboundManager}, #{warehouseId});
     END;
   </insert>
-
-  <!-- <insert id="prodToWarehouse" parameterType="InboundDTO">
-    INSERT INTO inbound
-    (inbound_id, prod_id, inbound_quantity, inbound_lot, inbound_date, inbound_manager, warehouse_id)
-    VALUES(#{inboundId}, #{prodId}, #{inboundQuantity}, #{inboundLot},#{inboundDate}, #{inboundManager}, #{warehouseId})
-  </insert> -->
-
-    <!--가장 마지막 inbound_id 가져오기-->
-  <select id="getNextInboundId" resultType="String">
+	<!--가장 마지막 inbound_id 가져오기-->
+	<select id="getNextInboundId" resultType="String">
     SELECT
       'I-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(inbound_id, 3))), 100) + 1)
     FROM
       inbound
   </select>
-  
-    <!--가장 마지막 inbound_lot 가져오기-->
-  <select id="getNextInboundLot" resultType="String">
+	<!--가장 마지막 inbound_lot 가져오기-->
+	<select id="getNextInboundLot" resultType="String">
     SELECT
       'L-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(inbound_id, 3))), 100) + 1)
     FROM
       inbound
   </select>
-
-  
-  </mapper>
+</mapper>
