@@ -1,8 +1,8 @@
 package com.eflix.common.payment.service;
 
 import com.eflix.common.payment.Entity.PaymentEntity;
-import com.eflix.erp.dto.SubscriptionDTO;
-import com.eflix.erp.dto.SubscriptionPackageDetailDTO;
+import com.eflix.main.dto.SubscriptionDTO;
+import com.eflix.main.dto.SubscriptionPackageDetailDTO;
 
 /**
  * 결제 처리를 담당하는 서비스

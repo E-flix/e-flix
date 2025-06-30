@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+===========================================
+  - 파일명   : InquiryMapper.xml
+  - 설명     : 문의 관련 SQL 정의
+===========================================
+  [작성 정보]
+  - 작성자   : 복성민 (bokseongmin@gmail.com)
+  - 최초작성 : 2025-06-20
+===========================================
+  [변경 이력]
+  - 2025-06-20 : 최초 생성 (복성민)
+===========================================
+-->
+<mapper namespace="com.eflix.main.mapper.InquiryMapper">
+    <!-- ===================================== -->
+    <!-- 문의 전체 조회                        -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-20 -->
+    <!-- ===================================== -->
+    <select id="findAllQuestions" resultType="QuestionDTO">
+        SELECT * FROM questions
+    </select>
+
+    <!-- ===================================== -->
+    <!-- 답변 전체 조회                        -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-20 -->
+    <!-- ===================================== -->
+    <select id="findAllAnswers" resultType="AnswerDTO">
+        SELECT * FROM answers
+    </select>
+
+    <!-- ===================================== -->
+    <!-- 문의 등록                        -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-26 -->
+    <!-- ===================================== -->
+    <insert id="insertQst" parameterType="QuestionDTO">
+        <selectKey resultType="String" keyProperty="qstIdx" order="BEFORE">
+            SELECT 'qst-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(qst_idx, 5))), 100) + 1) FROM questions
+        </selectKey>
+        INSERT INTO questions(qst_idx, qst_title, qst_writer, qst_content, qst_email, qst_tel, qst_regdate)
+        VALUES(#{qstIdx}, #{qstTitle}, #{qstWriter}, #{qstContent}, #{qstEmail}, #{qstTel}, SYSDATE)
+    </insert>
+
+    <!-- ===================================== -->
+    <!-- 답변 등록                        -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-28 -->
+    <!-- ===================================== -->
+    <insert id="insertAns" parameterType="AnswerDTO">
+        <selectKey resultType="String" keyProperty="ansrIdx" order="BEFORE">
+            SELECT 'ansr-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(ansr_idx, 6))), 100) + 1) FROM answers
+        </selectKey>
+        INSERT INTO answers(ansr_idx, qst_idx, emp_idx, ansr_title, ansr_content, ansr_regdate)
+        VALUES(#{ansrIdx}, #{qstIdx}, #{empIdx}, #{ansrTitle}, #{ansrContent}, SYSDATE)
+    </insert>
+
+    <!-- ===================================== -->
+    <!-- 문의 검색 수                        -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-28 -->
+    <!-- ===================================== -->
+    <select id="findAllInquiryCount" parameterType="InquirySearchDTO" resultType="int">
+        SELECT COUNT(*)
+        FROM questions q
+        LEFT JOIN answers a ON q.qst_idx = a.qst_idx
+        WHERE 1=1
+        <if test="qstIdx != null and qstIdx != ''">
+            AND q.qst_idx LIKE '%' || #{qstIdx} || '%'
+        </if>
+        <if test="qstWriter != null and qstWriter != ''">
+            AND q.qst_writer LIKE '%' || #{qstWriter} || '%'
+        </if>
+        <if test="qstEmail != null and qstEmail != ''">
+            AND q.qst_email LIKE '%' || #{qstEmail} || '%'
+        </if>
+        <if test="qstTel != null and qstTel != ''">
+            AND q.qst_tel LIKE '%' || #{qstTel} || '%'
+        </if>
+        <if test="qstTitle != null and qstTitle != ''">
+            AND q.qst_title LIKE '%' || #{qstTitle} || '%'
+        </if>
+        <if test="qstContent != null and qstContent != ''">
+            AND q.qst_content LIKE '%' || #{qstContent} || '%'
+        </if>
+        <if test="qstRegdate != null and qstRegdate != ''">
+            AND TO_CHAR(q.qst_regdate, 'YYYY-MM-DD') = #{qstRegdate}
+        </if>
+        <if test="answered != null and answered == false">
+            AND a.ansr_idx IS NULL
+        </if>
+    </select>
+
+    <select id="findAllInquiry" parameterType="InquirySearchDTO" resultType="InquiryDTO">
+        SELECT *
+        FROM (
+            SELECT ROWNUM rn, inner_query.*
+            FROM (
+                SELECT 
+                    q.qst_idx,
+                    q.qst_title,
+                    q.qst_writer,
+                    q.qst_content,
+                    q.qst_email,
+                    q.qst_tel,
+                    q.qst_regdate,
+                    CASE WHEN a.ansr_idx IS NOT NULL THEN 1 ELSE 0 END AS answered
+                FROM questions q
+                LEFT JOIN answers a ON q.qst_idx = a.qst_idx
+                WHERE 1=1
+                <if test="qstIdx != null and qstIdx != ''">
+                    AND q.qst_idx LIKE '%' || #{qstIdx} || '%'
+                </if>
+                <if test="qstWriter != null and qstWriter != ''">
+                    AND q.qst_writer LIKE '%' || #{qstWriter} || '%'
+                </if>
+                <if test="qstEmail != null and qstEmail != ''">
+                    AND q.qst_email LIKE '%' || #{qstEmail} || '%'
+                </if>
+                <if test="qstTel != null and qstTel != ''">
+                    AND q.qst_tel LIKE '%' || #{qstTel} || '%'
+                </if>
+                <if test="qstTitle != null and qstTitle != ''">
+                    AND q.qst_title LIKE '%' || #{qstTitle} || '%'
+                </if>
+                <if test="qstContent != null and qstContent != ''">
+                    AND q.qst_content LIKE '%' || #{qstContent} || '%'
+                </if>
+                <if test="qstRegdate != null and qstRegdate != ''">
+                    AND TO_CHAR(q.qst_regdate, 'YYYY-MM-DD') = #{qstRegdate}
+                </if>
+                <if test="answered != null and answered == false">
+                    AND a.ansr_idx IS NULL
+                </if>
+                ORDER BY q.qst_regdate DESC
+            ) inner_query
+            WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rn &gt; #{offset}
+    </select>
+
+    <!-- 6 28 -->
+    <select id="findQstByIdx" parameterType="String" resultType="QuestionDTO">
+        SELECT qst_idx, qst_title, qst_writer, qst_content, qst_regdate, qst_email, qst_tel
+        FROM questions
+        WHERE qst_idx = #{qstIdx}
+    </select>
+
+    <select id="findAnsByQstIdx" parameterType="String" resultType="AnswerDTO">
+        SELECT ansr_idx, qst_idx, emp_idx, ansr_title, ansr_content, ansr_regdate
+        FROM answers
+        WHERE qst_idx = #{qstIDx}
+    </select>
+</mapper>

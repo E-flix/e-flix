@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-import com.eflix.common.security.details.CustomUserDetails;
+import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.common.security.dto.UserDTO;
 import com.eflix.hr.dto.EmployeeDTO;
 
@@ -50,7 +50,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             Authentication authentication) throws IOException, ServletException {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method 'onAuthenticationSuccess'");
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        SecurityUserDetails userDetails = (SecurityUserDetails) authentication.getPrincipal();
         
         if (userDetails.getEmployeeDTO() != null) {
 			EmployeeDTO empDTO = userDetails.getEmployeeDTO();
@@ -59,12 +59,13 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             request.getSession().setAttribute("empName", empDTO.getEmpName());
             request.getSession().setAttribute("coIdx", empDTO.getCoIdx());
             request.getSession().setAttribute("authorities", userDetails.getAuthorities());
-			response.sendRedirect("/");
+			response.sendRedirect("/erp");
 		} else {
 			UserDTO userDTO = userDetails.getUserDTO();
+            request.getSession().setAttribute("userIdx", userDTO.getUserIdx());
 			request.getSession().setAttribute("userId", userDTO.getUserId());
 			request.getSession().setAttribute("userName", userDTO.getUserName());
-			response.sendRedirect("/erp");
+			response.sendRedirect("/");
 		}
     }
 

@@ -1,10 +1,7 @@
 package com.eflix.common.exception;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -63,11 +60,5 @@ public class GlobalModelAttribute {
         }
 
         return "home";
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(SyncPaymentException.class)
-    public void handleSyncPaymentException() {
-        // 예외 처리 로직
     }
 }

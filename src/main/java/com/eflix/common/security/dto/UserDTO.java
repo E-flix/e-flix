@@ -1,8 +1,6 @@
 package com.eflix.common.security.dto;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import lombok.Data;
 
@@ -39,5 +37,5 @@ public class UserDTO {
     private Date userRegdate;
     private Date userModdate;
 
-    private String role;
+    private String userRole;
 }
