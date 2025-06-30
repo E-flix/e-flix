@@ -3,50 +3,47 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.eflix.purchs.mapper.WarehouseMapper">
-
-  <!-- 조회 -->
-  <select id="getWarehouse" resultType="WarehouseDTO">
+	<!-- 조회 -->
+	<select id="getWarehouse" resultType="WarehouseDTO">
       SELECT
         warehouse_id, 
-        warehouse_location, 
-        warehouse_scale, 
+        warehouse_location,
+        warehouse_scale,
         warehouse_manager
-      FROM 
+      FROM
         warehouse
       ORDER BY 
         warehouse_id
   </select>
-
-  <!-- 마지막 창고번호 가져오기 -->
-  <select id="getNextWarehouseId" resultType="string">
+	<!-- 마지막 창고번호 가져오기 -->
+	<select id="getNextWarehouseId" resultType="string">
       SELECT
         'wh-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(warehouse_id, 4))), 100) + 1)
       FROM
         warehouse
   </select>
-
-  <!-- 등록 -->
-  <insert id="insertWarehouse" parameterType="WarehouseDTO">
-      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager, warehouse_status) 
-      VALUES (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager}, 's01')
+	<!-- 등록 -->
+	<insert id="insertWarehouse" parameterType="WarehouseDTO">
+      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager, warehouse_status, warehouse_current) 
+      VALUES (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager}, 's01', 0)
   </insert>
-
-  <!-- 삭제 -->
-  <delete id="deleteWarehouse" parameterType="WarehouseDTO">
+	<!-- 삭제 -->
+	<delete id="deleteWarehouse" parameterType="WarehouseDTO">
       BEGIN
         DELETE_WAREHOUSE_PROCEDURE(#{warehouseId});
       END;
   </delete>
-
-    <!--입고가능한 창고조회-->
-  <select id="warehouseState" resultType="WarehouseDTO">
-      select
-        w.warehouse_id AS warehouse_id,
-        w.warehouse_location AS warehouse_location,
-        warehouse_scale AS warehouse_scale,
-        i.current_quantity AS current_quantity,
-        (w.warehouse_scale - i.current_quantity) AS available_capacity
-      from
-        warehouse w join inventory i on w.warehouse_id = i.warehouse_id
-  </select>
+	<!--입고가능한 창고조회-->
+	<select id="warehouseState" resultType="WarehouseDTO">
+         SELECT 
+            warehouse_id, 
+            warehouse_location, 
+            warehouse_scale,
+            warehouse_current,
+            (warehouse_scale - warehouse_current) AS conf
+         FROM 
+            warehouse
+         WHERE warehouse_status = 's01'
+  
+	</select>
 </mapper>
