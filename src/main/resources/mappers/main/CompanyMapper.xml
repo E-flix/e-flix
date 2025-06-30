@@ -147,4 +147,37 @@
         FROM companies
         WHERE co_idx = #{coIdx}
     </select>
+
+    <!-- ===================================== -->
+    <!-- 회사 상세 정보 조회                     -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-06-30 -->
+    <!-- ===================================== -->
+    <select id="findAllCompanyWithSubscription" resultType="CompanySubscriptionDTO">
+        SELECT 
+            c.co_idx,
+            c.co_name,
+            c.ceo_name,
+            c.psch_name,
+            c.psch_tel,
+            c.psch_email,
+            c.svc_status,
+            s.spi_idx,
+            s.spi_status,
+            s.spi_start,
+            s.spi_end,
+            s.spi_period,
+            TRUNC(s.spi_end - SYSDATE) AS remaining_days
+        FROM companies c
+        INNER JOIN (
+            SELECT s1.*
+            FROM subscription s1
+            WHERE (s1.spi_idx, s1.co_idx) IN (
+                SELECT MAX(s2.spi_idx), s2.co_idx
+                FROM subscription s2
+                GROUP BY s2.co_idx
+            )
+        ) s ON c.co_idx = s.co_idx
+        ORDER BY c.co_regdate DESC
+    </select>
 </mapper>

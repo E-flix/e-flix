@@ -7,7 +7,6 @@ import com.eflix.common.exception.Exception;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
-import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.SubMasterDTO;
 import com.eflix.main.service.SubscriptionService;
 

@@ -111,7 +111,7 @@
 
     <!-- 0629 -->
     <select id="findAllSubscriptionByCoIdx" resultType="SubscriptionDTO" parameterType="string">
-        SELECT s.spi_idx, s.spi_pay, s.spi_status, s.spi_start, s.spi_end,
+        SELECT s.spi_idx, s.spk_idx, s.co_idx, s.emp_idx, s.spi_pay, s.spi_status, s.spi_start, s.spi_end, s.spi_period,
             s.spi_ctrt, s.spi_uid, p.spk_name, p.spk_price
         FROM subscription s
         JOIN subscription_packages p ON s.spk_idx = p.spk_idx

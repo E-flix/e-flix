@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
+import com.eflix.main.dto.etc.CompanySubscriptionDTO;
 import com.eflix.main.mapper.CompanyMapper;
 import com.eflix.main.service.CompanyService;
 
@@ -44,5 +45,10 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public CompanyDTO findByCoIdx(String coIdx) {
         return companyMapper.findByCoIdx(coIdx);
+    }
+
+    @Override
+    public List<CompanySubscriptionDTO> findAllCompanyWithSubscription() {
+        return companyMapper.findAllCompanyWithSubscription();
     }
 }

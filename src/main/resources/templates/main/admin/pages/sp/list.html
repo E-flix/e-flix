@@ -71,7 +71,7 @@
             <!-- 회사 상세 정보 -->
             <div class="card mb-3">
                 <div class="card-header fw-bold">회사 상세 정보</div>
-                <div class="card-body">
+                <div class="card-body" id="companyDetail">
                 </div>
             </div>
 
@@ -110,18 +110,15 @@
 			    params += "&page=" + page;
 
                 $.ajax({
-                    url: '/admin/api/companies',
+                    url: '/admin/api/company-subscription',
                     method: 'GET',
-                    data: params,
-                    dataType: "json",
                     success: function (res) {
                         const data = res.body;
                         if (res.head.res_code === '200') {
-                            const list = data.companies;
                             const tbody = $('#companyTableBody').empty();
-                            list.forEach(company => {
+                            data.forEach(company => {
                                 const row = `
-                                <tr data-coidx="${company.coIdx}" data-co-name="${company.coName}" data-ceo="${company.ceoName}" data-tel="${company.pschTel}" data-email="${company.pschEmail}">
+                                <tr data-coidx="${company.coIdx}" data-coName="${company.coName}" data-pschName="${company.pschName}" data-pschTel="${company.pschTel}" data-pschEmail="${company.pschEmail}">
                                     <td>${company.coIdx}</td>
                                     <td>${company.coName}</td>
                                     <td>${company.ceoName}</td>
@@ -129,8 +126,8 @@
                                     <td>${company.pschTel}</td>
                                     <td>${company.pschEmail}</td>
                                     <td><span class="badge bg-success">${company.svcStatus}</span></td>
-                                    <td>${company.leftDays || '-'}</td>
-                                    <td>${company.endDate || '-'}</td>
+                                    <td>${company.spiPeriod} 개월</td>
+                                    <td>${company.remainingDays} 일</td>
                                     <td><button class="btn btn-sm btn-outline-info">보기</button></td>
                                 </tr>`;
                                 tbody.append(row);
@@ -146,33 +143,19 @@
             $(document).on('click', '#companyTableBody tr', function () {
                 const coIdx = $(this).data('coidx');
 
-                // 회사 상세 정보 조회
-                 $.ajax({
-                    type: 'GET',
-                    url: `/admin/api/company/${coIdx}`,
-                    success: function(res) {
-                        const data = res.body;
-                        if(res.head.res_code === "200") {
-                            // 회사 상세 정보 업데이트
-                            $('.card-body:has(strong:contains("회사명"))').html(`
-                                    <div class="mb-2"><strong>회사명:</strong> ${data.company.coName}</div>
-                                    <div class="mb-2"><strong>대표자:</strong> ${data.company.ceo}</div>
-                                    <div class="mb-2"><strong>연락처:</strong> ${data.company.tel}</div>
-                                    <div class="mb-2"><strong>이메일:</strong> ${data.company.email}</div>
-                                    <div class="mb-2"><strong>사업자등록번호:</strong> ${data.company.bizrNo}</div>
-                                    <div class="mb-2"><strong>주소:</strong> ${data.company.coAddr}</div>
-                                    <div class="mb-2"><strong>상태:</strong> <span class="badge bg-success"> ${data.company.svcStatus}</span></div>
-                                    <div class="mb-2"><strong>계약기간:</strong> ${data.subscription.spiPeriod}</div>
-                                    <div class="mb-2"><strong>남은기간:</strong> ${data.email}</div>
-                                `);
-                        } else {
-
-                        }
-                    },
-                    error: function(xhr, status, err) {
-                        console.error(err);
-                    }
-                });
+                // 회사 상세 정보
+                $('#companyDetail').html(`
+                    <div class="mb-2"><strong>회사명:</strong> ${$(this).data('coName')}</div>
+                    <div class="mb-2"><strong>담당자:</strong> ${data.company.pschName}</div>
+                    <div class="mb-2"><strong>담당자 연락처:</strong> ${data.company.pschTel}</div>
+                    <div class="mb-2"><strong>담당자 이메일:</strong> ${data.company.pschEmail}</div>
+                    <div class="mb-2"><strong>사업자등록번호:</strong> ${data.company.bizrNo}</div>
+                    <div class="mb-2"><strong>주소:</strong> ${data.company.coAddr}</div>
+                    <div class="mb-2"><strong>상태:</strong> <span class="badge bg-success"> ${data.company.svcStatus}</span></div>
+                    <div class="mb-2"><strong>계약기간:</strong> ${data.subscription.spiPeriod}</div>
+                    <div class="mb-2"><strong>남은기간:</strong> ${data.email}</div>
+                `);
+                
 
                 // 구독 내역 조회
                 $.ajax({

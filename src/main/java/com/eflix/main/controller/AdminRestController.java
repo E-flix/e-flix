@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.method.P;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -26,8 +25,8 @@ import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.InquiryDTO;
 import com.eflix.main.dto.QuestionDTO;
 import com.eflix.main.dto.SubscriptionBillDTO;
-import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
+import com.eflix.main.dto.etc.CompanySubscriptionDTO;
 import com.eflix.main.dto.etc.InquirySearchDTO;
 import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 import com.eflix.main.dto.etc.UserSearchDTO;
@@ -58,37 +57,6 @@ public class AdminRestController {
     private SubscriptionService subscriptionService;
 
     /**
-     * 회사 목록 조회
-     * GET /api/companies
-     */
-    @GetMapping("/api/companies")
-    public ResponseEntity<ResResult> getCompanies(@ModelAttribute CompanySearchDTO companySearchDTO) {
-        ResResult result = null;
-
-        int companyCount = companyService.findAllCompanyCount(companySearchDTO);
-
-        companySearchDTO.setTotalRecord(companyCount);
-
-        List<CompanyDTO> companyDTO = companyService.findAllCompany(companySearchDTO);
-
-        if(companyDTO != null) {
-            Map<String, Object> searchResult = new HashMap<>();
-            searchResult.put("companies", companyDTO);
-            searchResult.put("total", companyCount);
-            searchResult.put(("page"), companySearchDTO.getPage());
-            searchResult.put("startPage", companySearchDTO.getStartPage());
-            searchResult.put("endPage", companySearchDTO.getEndPage());
-            searchResult.put("lastPage", companySearchDTO.getLast());
-
-            result = ResUtil.makeResult(ResStatus.OK, searchResult);
-        } else {
-            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
-        }
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
-    /**
      * 회사 상세 조회
      * GET /api/companies/{coIdx}
      */
@@ -108,22 +76,17 @@ public class AdminRestController {
     // }
 
     /**
-     * 회사 상세 + 구독 조회
+     * 회사 + 구독 조회
      * GET /api/companies/{coIdx}
      */
-    @GetMapping("/api/company/{coIdx}")
-    public ResponseEntity<ResResult> getCompanySbuscription(@PathVariable("coIdx") String coIdx) {
+    @GetMapping("/api/company-subscription")
+    public ResponseEntity<ResResult> getCompanySbuscription() {
         ResResult result = null;
 
-        CompanyDTO companyDTO = companyService.findByCoIdx(coIdx);
+        List<CompanySubscriptionDTO> companySubscriptionDTOs = companyService.findAllCompanyWithSubscription();
 
-        List<SubscriptionInfoDTO> subscriptionDTOs = subscriptionService.findAllSubscriptionByCoIdx(coIdx);
-
-        if(companyDTO != null && subscriptionDTOs != null) {
-            Map<String, Object> searchResult = new HashMap<>();
-            searchResult.put("company", companyDTO);
-            searchResult.put("subscription", subscriptionDTOs);
-            result = ResUtil.makeResult(ResStatus.OK, searchResult);
+        if(companySubscriptionDTOs != null) {
+            result = ResUtil.makeResult(ResStatus.OK, companySubscriptionDTOs);
         } else {
             result = ResUtil.makeResult("404", "회사 정보를 불러 오던 중 오류가 발생했습니다.", null);
         }
@@ -192,6 +155,37 @@ public class AdminRestController {
             searchResult.put("startPage", userSearchDTO.getStartPage());
             searchResult.put("endPage", userSearchDTO.getEndPage());
             searchResult.put("lastPage", userSearchDTO.getLastPage());
+            result = ResUtil.makeResult(ResStatus.OK, searchResult);
+        } else {
+            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    /**
+     * 회사 목록 조회
+     * GET /api/companies
+     */
+    @GetMapping("/api/companies")
+    public ResponseEntity<ResResult> getCompanies(@ModelAttribute CompanySearchDTO companySearchDTO) {
+        ResResult result = null;
+
+        int companyCount = companyService.findAllCompanyCount(companySearchDTO);
+
+        companySearchDTO.setTotalRecord(companyCount);
+
+        List<CompanyDTO> companyDTO = companyService.findAllCompany(companySearchDTO);
+
+        if(companyDTO != null) {
+            Map<String, Object> searchResult = new HashMap<>();
+            searchResult.put("companies", companyDTO);
+            searchResult.put("total", companyCount);
+            searchResult.put(("page"), companySearchDTO.getPage());
+            searchResult.put("startPage", companySearchDTO.getStartPage());
+            searchResult.put("endPage", companySearchDTO.getEndPage());
+            searchResult.put("lastPage", companySearchDTO.getLast());
+
             result = ResUtil.makeResult(ResStatus.OK, searchResult);
         } else {
             result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
