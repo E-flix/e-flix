@@ -22,10 +22,10 @@
   - 2025-06-26 (김희정): DB 연결 (insert)
   - 2025-06-26 (김희정): 같은 전표번호 내에서 차대변 차액 발생하면 차액 표시하는 기능 구현 (전표 소계 열/ 합계 열)
   - 2025-06-26 (김희정): 전표번호 자동부여 = select max+1 or 전표내 차액있으면 차액 있는 전표번호
-  - 2025-06-30 (김희정): 클릭한 줄과 같은 number field의 값을 가지고 있다면 배경색 강조 표시
   -----------------------------------------------
   [ TODO ] 
-  1. 다 하면 자주 사용되는 ag-grid 세팅은 별도의 class만들고 import해서 사용하기
+  1. 클릭한 줄과 같은 number field의 값을 가지고 있다면 배경색 강조 표시 (2번과 연결)
+  2. 다 하면 자주 사용되는 ag-grid 세팅은 별도의 class만들고 import해서 사용하기
 ============================================ -->
 
 <head>
@@ -150,10 +150,14 @@
     entryList.forEach(master => {
       if (master.entryType !== '일반') return; // entryType이 일반이 아닌 것은 건너뜀
       master.details.forEach(detail => {
+        // 날짜 안전하게 파싱
+        const entryDate = new Date(master.entryDate);
+        const isValidDate = !isNaN(entryDate.getTime());
+        
         rowData.push({
-          year: new Date(master.entryDate).getFullYear(),               // 년
-          month: new Date(master.entryDate).getMonth() + 1,             // 월
-          day: new Date(master.entryDate).getDate(),                    // 일
+          year: isValidDate ? entryDate.getFullYear() : new Date().getFullYear(),               // 년
+          month: isValidDate ? entryDate.getMonth() + 1 : new Date().getMonth() + 1,             // 월
+          day: isValidDate ? entryDate.getDate() : new Date().getDate(),                    // 일
           entryNumber: master.entryNumber,                              // 전표번호
           resentmenType: detail.resentmenType,                          // 구분
           accountCode: detail.accountCode,                              // 계정코드
@@ -507,14 +511,16 @@
           return;
         }
 
-        try {
-          await removeSummaryRows(api);
-          await generateAndAddSummaryRow(currentEntryNumber);
-          lastSummaryEntryNumber = currentEntryNumber;
-        } catch (error) {
-          console.error('Summary row 처리 중 오류 발생:', error);
-          lastSummaryEntryNumber = null;
-        }
+        setTimeout(async () => {
+          try {
+            await removeSummaryRows(api);
+            await generateAndAddSummaryRow(currentEntryNumber);
+            lastSummaryEntryNumber = currentEntryNumber;
+          } catch (error) {
+            console.error('Summary row 처리 중 오류 발생:', error);
+            lastSummaryEntryNumber = null;
+          }
+        }, 0);
       },
       // Enter 키 입력 시 다음 셀로 포커스를 이동하는 로직
       onCellKeyDown: async (event) => {
@@ -556,43 +562,25 @@
         }
         // --------------- ▲ Ctrl+S 수동 저장 ▲ ------------------
 
-        // --------------- ▼ Escape 키로 강조 표시 해제 ▼ ------------------
-        if (event.event.key === 'Escape') {
-          event.event.preventDefault();
-          clearHighlight();
-          return;
-        }
-        // --------------- ▲ Escape 키로 강조 표시 해제 ▲ ------------------
-
         // 방향키 ↓, ↑ summary row 이동 처리만 (summary row 추가/삭제 X)
         if (event.event.key === 'ArrowDown' || event.event.key === 'ArrowUp') {
-          event.event.preventDefault();
-          
-          // 기존 타이머가 있으면 취소
-          if (arrowKeyDebounceTimer) {
-            clearTimeout(arrowKeyDebounceTimer);
+          const direction = event.event.key === 'ArrowDown' ? 1 : -1;
+          let nextRowIndex = currentRowIndex + direction;
+          const colKey = currentCol;
+          while (
+            nextRowIndex >= 0 &&
+            nextRowIndex < api.getDisplayedRowCount() &&
+            api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary
+          ) {
+            nextRowIndex += direction;
           }
-          
-          // 디바운스 타이머 설정 (50ms 지연)
-          arrowKeyDebounceTimer = setTimeout(() => {
-            const direction = event.event.key === 'ArrowDown' ? 1 : -1;
-            let nextRowIndex = currentRowIndex + direction;
-            const colKey = currentCol;
-            
-            while (
-              nextRowIndex >= 0 &&
-              nextRowIndex < api.getDisplayedRowCount() &&
-              api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary
-            ) {
-              nextRowIndex += direction;
-            }
-            
-            if (nextRowIndex >= 0 && nextRowIndex < api.getDisplayedRowCount() &&
-                !api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary) {
-              api.setFocusedCell(nextRowIndex, colKey);
-            }
-          }, 50);
-          
+          if (nextRowIndex >= 0 && nextRowIndex < api.getDisplayedRowCount() &&
+              !api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary) {
+            api.setFocusedCell(nextRowIndex, colKey);
+            event.event.preventDefault();
+          } else {
+            event.event.preventDefault();
+          }
           return;
         }
         // Enter 키인지 체크
@@ -1133,18 +1121,15 @@
         return;
       }
 
-      // 삭제 확인 대화상자
-      const confirmMessage = selectedNodes.length === 1 
-        ? "선택된 행을 삭제하시겠습니까?" 
-        : `선택된 ${selectedNodes.length}개 행을 삭제하시겠습니까?`;
-      
+      // 삭제 확인 다이얼로그
+      const confirmMessage = `선택된 ${selectedNodes.length}개 행을 삭제하시겠습니까?`;
       if (!confirm(confirmMessage)) {
-        return; // 사용자가 취소를 선택한 경우 삭제 중단
+        return; // 사용자가 취소한 경우
       }
 
       // 삭제할 데이터만 추출 (selectedNodes.data 배열)
       const deleteData = selectedNodes.map(node => node.data);
-      console.log(JSON.stringify(deleteData));
+      console.log('삭제할 데이터:', JSON.stringify(deleteData));
 
       fetch(`/acc/en/del`, {
         method: 'PUT',
@@ -1153,14 +1138,33 @@
       })
       .then(response => { // DB 처리 응답 결과
         if (response.ok) { 
-          // DB 삭제 성공시 화면에서 삭제
-          gridOptions.api.applyTransaction({ remove: deleteData }); // remove 는 삭제할 행 데이터들의 배열
-          updateFirstDiffEntryNumber();
+          console.log('DB 삭제 성공, 그리드에서 행 제거 시작');
+          
+          // DB 삭제 성공시 화면에서 삭제 - setTimeout으로 안전하게 처리
+          setTimeout(() => {
+            try {
+              // 선택된 노드들을 직접 제거 (데이터가 아닌 노드 기준으로)
+              const nodesToRemove = selectedNodes.map(node => node.data);
+              console.log('제거할 노드 데이터:', nodesToRemove);
+              
+              gridOptions.api.applyTransaction({ remove: nodesToRemove });
+              console.log('그리드에서 행 제거 완료');
+              
+              updateFirstDiffEntryNumber();
+            } catch (removeError) {
+              console.error('그리드에서 행 제거 중 오류:', removeError);
+              // 오류가 발생하면 전체 데이터를 다시 로드
+              location.reload();
+            }
+          }, 0);
         } else {
           return Promise.reject(response.statusText);
         }
       })
-      .catch(err => alert("Delete failed: " + err));
+      .catch(err => {
+        console.error('삭제 실패:', err);
+        alert("Delete failed: " + err);
+      });
     }
     // ------------------------▲ 삭제 ▲------------------------------
 
@@ -1277,6 +1281,7 @@
       })
       .then(savedMaster => {
         console.log('서버 응답 데이터:', savedMaster);
+        console.log('서버 응답 entryDate:', savedMaster.entryDate, '타입:', typeof savedMaster.entryDate);
         const api = gridOptions.api;
 
         if (!savedMaster || !savedMaster.details || !Array.isArray(savedMaster.details)) {
@@ -1284,21 +1289,27 @@
           return;
         }
 
-        const receivedRows = savedMaster.details.map(d => ({
-          year: new Date(savedMaster.entryDate).getFullYear(),
-          month: new Date(savedMaster.entryDate).getMonth() + 1,
-          day: new Date(savedMaster.entryDate).getDate(),
-          entryNumber: savedMaster.entryNumber,
-          resentmenType: d.resentmenType,
-          accountCode: d.accountCode,
-          accountName: d.accountName || '',  // 서버에서 받은 값 사용 (이제 매핑값이 포함됨)
-          partnerCode: d.partnerCode || '',
-          partnerName: d.partnerName || '',  // 서버에서 받은 값 사용 (이제 매핑값이 포함됨)
-          debit: d.resentmenType === 'g3' ? d.amount : null,
-          credit: d.resentmenType === 'g4' ? d.amount : null,
-          description: d.description || '',
-          lineNumber: d.lineNumber
-        }));
+        const receivedRows = savedMaster.details.map(d => {
+          // 날짜 안전하게 파싱
+          const entryDate = new Date(savedMaster.entryDate);
+          const isValidDate = !isNaN(entryDate.getTime());
+          
+          return {
+            year: isValidDate ? entryDate.getFullYear() : new Date().getFullYear(),
+            month: isValidDate ? entryDate.getMonth() + 1 : new Date().getMonth() + 1,
+            day: isValidDate ? entryDate.getDate() : new Date().getDate(),
+            entryNumber: savedMaster.entryNumber,
+            resentmenType: d.resentmenType,
+            accountCode: d.accountCode,
+            accountName: d.accountName || '',  // 서버에서 받은 값 사용 (이제 매핑값이 포함됨)
+            partnerCode: d.partnerCode || '',
+            partnerName: d.partnerName || '',  // 서버에서 받은 값 사용 (이제 매핑값이 포함됨)
+            debit: d.resentmenType === 'g3' ? d.amount : null,
+            credit: d.resentmenType === 'g4' ? d.amount : null,
+            description: d.description || '',
+            lineNumber: d.lineNumber
+          };
+        });
 
         if (isNew) {
           const newRowDataFromServer = receivedRows[0];
@@ -1524,82 +1535,84 @@
         return;
       }
       
-      try {
-        // 1. 먼저 현재 그리드에 해당 전표번호의 summary row가 이미 있는지 확인
-        let existingSummaryCount = 0;
-        for (let i = 0; i < currentApi.getDisplayedRowCount(); i++) {
-          const rowData = currentApi.getDisplayedRowAtIndex(i)?.data;
-          if (rowData && rowData.isSummary === true && rowData._summaryEntryNumber === entryNumber) {
-            existingSummaryCount++;
-            console.warn('이미 존재하는 summary row 발견:', {
-              index: i,
-              entryNumber: entryNumber,
-              isSummaryType: rowData.isSummaryType,
-              month: rowData.month
-            });
-          }
-        }
-        
-        if (existingSummaryCount > 0) {
-          console.warn(`전표번호 ${entryNumber}의 summary row가 이미 ${existingSummaryCount}개 존재함. 생성 중단.`);
-          return;
-        }
-        
-        // 2. 전체 데이터 수집 (summary row 제외, 빈 행 포함)
-        let allRowData = [];
-        for (let i = 0; i < currentApi.getDisplayedRowCount(); i++) {
-          const rowData = currentApi.getDisplayedRowAtIndex(i)?.data;
-          if (rowData && !rowData.isSummary) {
-            allRowData.push(rowData);
-          }
-        }
-        
-        console.log('수집된 전체 데이터 수:', allRowData.length);
-        
-        // 3. summary row 생성
-        const summaryRows = generateSummaryRow(allRowData, entryNumber);
-        console.log('생성된 summary rows:', summaryRows);
-        
-        if (summaryRows && summaryRows.length > 0) {
-          // 4. 해당 전표번호의 마지막 위치 찾기
-          let insertPosition = -1;
+      setTimeout(() => {
+        try {
+          // 1. 먼저 현재 그리드에 해당 전표번호의 summary row가 이미 있는지 확인
+          let existingSummaryCount = 0;
           for (let i = 0; i < currentApi.getDisplayedRowCount(); i++) {
             const rowData = currentApi.getDisplayedRowAtIndex(i)?.data;
-            if (rowData && !rowData.isSummary && rowData.entryNumber === entryNumber) {
-              insertPosition = i + 1;
-            }
-          }
-          
-          console.log('삽입 위치:', insertPosition);
-          
-          // 5. summary row 추가
-          try {
-            if (insertPosition >= 0 && insertPosition <= currentApi.getDisplayedRowCount()) {
-              console.log('Summary row 추가 시도 - addIndex 사용:', insertPosition);
-              currentApi.applyTransaction({ 
-                add: summaryRows, 
-                addIndex: insertPosition 
+            if (rowData && rowData.isSummary === true && rowData._summaryEntryNumber === entryNumber) {
+              existingSummaryCount++;
+              console.warn('이미 존재하는 summary row 발견:', {
+                index: i,
+                entryNumber: entryNumber,
+                isSummaryType: rowData.isSummaryType,
+                month: rowData.month
               });
-            } else {
-              // 전표번호 행을 찾지 못한 경우 맨 끝에 추가
-              console.log('Summary row 추가 시도 - 맨 끝에 추가');
-              currentApi.applyTransaction({ add: summaryRows });
             }
-            console.log('Summary row 추가 완료');
-            
-            // 추가 후 그리드 상태 확인
-            console.log('추가 후 그리드 상태:', {
-              totalRows: currentApi.getDisplayedRowCount(),
-              addedEntryNumber: entryNumber
-            });
-          } catch (addError) {
-            console.error('Summary row 추가 중 오류:', addError);
           }
+          
+          if (existingSummaryCount > 0) {
+            console.warn(`전표번호 ${entryNumber}의 summary row가 이미 ${existingSummaryCount}개 존재함. 생성 중단.`);
+            return;
+          }
+          
+          // 2. 전체 데이터 수집 (summary row 제외, 빈 행 포함)
+          let allRowData = [];
+          for (let i = 0; i < currentApi.getDisplayedRowCount(); i++) {
+            const rowData = currentApi.getDisplayedRowAtIndex(i)?.data;
+            if (rowData && !rowData.isSummary) {
+              allRowData.push(rowData);
+            }
+          }
+          
+          console.log('수집된 전체 데이터 수:', allRowData.length);
+          
+          // 3. summary row 생성
+          const summaryRows = generateSummaryRow(allRowData, entryNumber);
+          console.log('생성된 summary rows:', summaryRows);
+          
+          if (summaryRows && summaryRows.length > 0) {
+            // 4. 해당 전표번호의 마지막 위치 찾기
+            let insertPosition = -1;
+            for (let i = 0; i < currentApi.getDisplayedRowCount(); i++) {
+              const rowData = currentApi.getDisplayedRowAtIndex(i)?.data;
+              if (rowData && !rowData.isSummary && rowData.entryNumber === entryNumber) {
+                insertPosition = i + 1;
+              }
+            }
+            
+            console.log('삽입 위치:', insertPosition);
+            
+            // 5. summary row 추가
+            try {
+              if (insertPosition >= 0 && insertPosition <= currentApi.getDisplayedRowCount()) {
+                console.log('Summary row 추가 시도 - addIndex 사용:', insertPosition);
+                currentApi.applyTransaction({ 
+                  add: summaryRows, 
+                  addIndex: insertPosition 
+                });
+              } else {
+                // 전표번호 행을 찾지 못한 경우 맨 끝에 추가
+                console.log('Summary row 추가 시도 - 맨 끝에 추가');
+                currentApi.applyTransaction({ add: summaryRows });
+              }
+              console.log('Summary row 추가 완료');
+              
+              // 추가 후 그리드 상태 확인
+              console.log('추가 후 그리드 상태:', {
+                totalRows: currentApi.getDisplayedRowCount(),
+                addedEntryNumber: entryNumber
+              });
+            } catch (addError) {
+              console.error('Summary row 추가 중 오류:', addError);
+            }
+          }
+          
+        } catch (error) {
+          console.error('generateAndAddSummaryRow 중 오류:', error);
         }
-        
-      } catch (error) {
-        console.error('generateAndAddSummaryRow 중 오류:', error);
-      }
+      }, 0);
     }
       // Summary row 제거 헬퍼 함수
     function removeSummaryRows(api) {
@@ -1618,77 +1631,79 @@
       }
       
       return new Promise((resolve) => {
-        let summaryRowsToRemove = [];
-        
-        try {
-          // 한 번 더 API 메서드 유효성 확인 (실행 직전)
-          if (typeof api.getDisplayedRowCount !== 'function') {
-            console.error('removeSummaryRows: getDisplayedRowCount가 함수가 아닙니다.');
+        setTimeout(() => {
+          let summaryRowsToRemove = [];
+          
+          try {
+            // 한 번 더 API 메서드 유효성 확인 (실행 직전)
+            if (typeof api.getDisplayedRowCount !== 'function') {
+              console.error('removeSummaryRows: getDisplayedRowCount가 함수가 아닙니다.');
+              resolve();
+              return;
+            }
+            
+            const rowCount = api.getDisplayedRowCount();
+            console.log('현재 표시된 행 수:', rowCount);
+            
+            for (let i = 0; i < rowCount; i++) {
+              const rowNode = api.getDisplayedRowAtIndex(i);
+              if (!rowNode || !rowNode.data) continue;
+              
+              const rowData = rowNode.data;
+              // isSummary === true이고 빈 행이 아닌 경우만 제거 대상으로 선정
+              if (rowData.isSummary === true && 
+                  (rowData.isSummaryType === 'subtotal' || rowData.isSummaryType === 'total')) {
+                summaryRowsToRemove.push(rowData);
+                console.log('제거 대상 summary row 발견:', i, {
+                  isSummary: rowData.isSummary,
+                  isSummaryType: rowData.isSummaryType,
+                  month: rowData.month,
+                  _summaryEntryNumber: rowData._summaryEntryNumber
+                });
+              }
+            }
+          } catch (error) {
+            console.error('Summary row 검색 중 오류:', error);
             resolve();
             return;
           }
           
-          const rowCount = api.getDisplayedRowCount();
-          console.log('현재 표시된 행 수:', rowCount);
-          
-          for (let i = 0; i < rowCount; i++) {
-            const rowNode = api.getDisplayedRowAtIndex(i);
-            if (!rowNode || !rowNode.data) continue;
-            
-            const rowData = rowNode.data;
-            // isSummary === true이고 빈 행이 아닌 경우만 제거 대상으로 선정
-            if (rowData.isSummary === true && 
-                (rowData.isSummaryType === 'subtotal' || rowData.isSummaryType === 'total')) {
-              summaryRowsToRemove.push(rowData);
-              console.log('제거 대상 summary row 발견:', i, {
-                isSummary: rowData.isSummary,
-                isSummaryType: rowData.isSummaryType,
-                month: rowData.month,
-                _summaryEntryNumber: rowData._summaryEntryNumber
+          if (summaryRowsToRemove.length > 0) {
+            console.log('제거할 summary row 수:', summaryRowsToRemove.length);
+            try {
+              // 모든 summary row를 한 번에 제거
+              api.applyTransaction({ remove: summaryRowsToRemove });
+              console.log('모든 summary row 제거 완료');
+              
+              // ag-Grid가 제거 작업을 완전히 처리할 시간을 주기 위해 약간의 지연
+              setTimeout(() => {
+                resolve();
+              }, 50);
+            } catch (error) {
+              console.error('Summary row 제거 중 오류:', error);
+              // 제거 실패 시 개별 제거 시도
+              let removeCount = 0;
+              summaryRowsToRemove.forEach((row, index) => {
+                try {
+                  api.applyTransaction({ remove: [row] });
+                  console.log(`Summary row ${index + 1} 개별 제거 완료`);
+                  removeCount++;
+                } catch (individualError) {
+                  console.error(`Summary row ${index + 1} 개별 제거 실패:`, individualError);
+                }
               });
+              
+              // 개별 제거 완료 후 지연
+              setTimeout(() => {
+                console.log(`총 ${removeCount}개 summary row 개별 제거 완료`);
+                resolve();
+              }, 50);
             }
+          } else {
+            console.log('제거할 summary row가 없음');
+            resolve();
           }
-        } catch (error) {
-          console.error('Summary row 검색 중 오류:', error);
-          resolve();
-          return;
-        }
-        
-        if (summaryRowsToRemove.length > 0) {
-          console.log('제거할 summary row 수:', summaryRowsToRemove.length);
-          try {
-            // 모든 summary row를 한 번에 제거
-            api.applyTransaction({ remove: summaryRowsToRemove });
-            console.log('모든 summary row 제거 완료');
-            
-            // ag-Grid가 제거 작업을 완전히 처리할 시간을 주기 위해 약간의 지연
-            setTimeout(() => {
-              resolve();
-            }, 50);
-          } catch (error) {
-            console.error('Summary row 제거 중 오류:', error);
-            // 제거 실패 시 개별 제거 시도
-            let removeCount = 0;
-            summaryRowsToRemove.forEach((row, index) => {
-              try {
-                api.applyTransaction({ remove: [row] });
-                console.log(`Summary row ${index + 1} 개별 제거 완료`);
-                removeCount++;
-              } catch (individualError) {
-                console.error(`Summary row ${index + 1} 개별 제거 실패:`, individualError);
-              }
-            });
-            
-            // 개별 제거 완료 후 지연
-            setTimeout(() => {
-              console.log(`총 ${removeCount}개 summary row 개별 제거 완료`);
-              resolve();
-            }, 50);
-          }
-        } else {
-          console.log('제거할 summary row가 없음');
-          resolve();
-        }
+        }, 0);
       });
     }
     
@@ -1784,7 +1799,7 @@
     function updateFirstDiffEntryNumber() {
       firstDiffEntryNumber = findFirstDiffEntryNumber();
     }
-    // 같은 전표번호를 가진 행들 강조 표시
+// 같은 전표번호를 가진 행들 강조 표시
     function highlightSameEntryNumber(entryNumber) {
       if (entryNumber && entryNumber !== highlightedEntryNumber) {
         highlightedEntryNumber = entryNumber;
