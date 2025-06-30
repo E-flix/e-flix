@@ -1,167 +1,282 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
   layout:decorate="~{common/layouts/default}">
+
 <head>
   <meta charset="UTF-8" />
   <title>주문서 등록</title>
+  <style>
+    .bg-cell {
+      background-color: #f5f5f5;
+    }
+
+    .detail-table thead th {
+      background: #f5f5f5;
+    }
+
+    .detail-table input {
+      height: 28px;
+    }
+
+    .section-box {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
+
 <div layout:fragment="content" class="container-fluid px-3 py-2">
-  <div class="container-fluid mt-4">
-    <!-- 상단 버튼 -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <button class="btn btn-primary">견적서 선택</button>
+
+  <form th:action="@{/bsn/sorder}" <!-- 백엔드 POST 매핑과 동일 -->
+    th:object="${order}"
+    method="post">
+
+    <!-- 히든 필드(주문 생성 시 서버에서 세팅) -->
+    <input type="hidden" th:field="*{quotationNo}">
+    <input type="hidden" th:field="*{empCd}">
+    <input type="hidden" th:field="*{expectedPaymentDt}">
+
+    <!-- ── 타이틀 / 버튼 ─────────────────────────────────────────────── -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h5 class="mb-0">주문서 등록</h5>
       <div>
-        <button class="btn btn-info me-2">초기화</button>
-        <button class="btn btn-danger me-2">목록</button>
-        <button class="btn btn-success">등록</button>
+        <button type="submit" class="btn btn-primary btn-sm me-1">등록</button>
+        <button type="reset" class="btn btn-light btn-sm border btn-reset me-1">초기화</button>
+        <button type="button" class="btn btn-light btn-sm border btn-list">목록</button>
       </div>
     </div>
 
-    <!-- 페이지 제목 -->
-    <h2 class="mb-4">주문서 등록</h2>
-
-    <!-- 헤더·여신 정보 -->
-    <div class="row mb-4">
-      <!-- 주문서 헤더 -->
-      <div class="col-md-6">
-        <div class="card bg-light mb-3">
-          <div class="card-header">
-            주문서 헤더
-            <span class="float-end">작성자</span>
-          </div>
-          <div class="card-body">
-            <div class="row mb-2">
-              <div class="col-6">
-                <label class="form-label">주문서 번호</label>
-                <input type="text" class="form-control form-control-sm" />
-              </div>
-              <div class="col-6">
-                <label class="form-label">주문일자</label>
-                <input type="date" class="form-control form-control-sm" />
-              </div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-6">
-                <label class="form-label">거래처명</label>
-                <input type="text" class="form-control form-control-sm" />
-              </div>
-              <div class="col-6">
-                <label class="form-label">연락처</label>
-                <input type="text" class="form-control form-control-sm" />
-              </div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-6">
-                <label class="form-label">배송지</label>
-                <input type="text" class="form-control form-control-sm" />
-              </div>
-              <div class="col-6">
-                <label class="form-label">출고창고</label>
-                <input type="text" class="form-control form-control-sm" />
-              </div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-6">
-                <label class="form-label">납기일자</label>
-                <input type="date" class="form-control form-control-sm" />
-              </div>
-              <div class="col-6">
-                <label class="form-label">결제조건</label>
-                <input type="text" class="form-control form-control-sm" />
-              </div>
-            </div>
-            <div class="mb-2">
-              <label class="form-label">세금계산서 발행여부</label>
-              <select class="form-select form-select-sm">
-                <option>예</option>
-                <option>아니오</option>
-              </select>
-            </div>
-          </div>
+    <!-- ── 주문 헤더 / 여신정보 ──────────────────────────────────────── -->
+    <div class="row gx-3 mb-3">
+      <!-- 주문 헤더 -->
+      <div class="col-md-7 section-box">
+        <h6>주문서 헤더</h6>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0">
+            <colgroup>
+              <col style="width:20%">
+              <col style="width:30%">
+              <col style="width:20%">
+              <col style="width:30%">
+            </colgroup>
+            <tbody>
+              <tr>
+                <th class="bg-cell">주문서 번호</th>
+                <td><input th:field="*{orderNo}" class="form-control form-control-sm" readonly></td>
+                <th class="bg-cell">주문일자</th>
+                <td><input th:field="*{orderDate}" class="form-control form-control-sm" type="date"></td>
+              </tr>
+              <tr>
+                <th class="bg-cell">견적번호</th>
+                <td><input th:field="*{quotationNo}" class="form-control form-control-sm" readonly></td>
+                <th class="bg-cell">거래처 코드</th>
+                <td><input th:field="*{customerCd}" class="form-control form-control-sm"></td>
+              </tr>
+              <tr>
+                <th class="bg-cell">연락처</th>
+                <td><input th:field="*{phoneNumber}" class="form-control form-control-sm"></td>
+                <th class="bg-cell">배송지</th>
+                <td><input th:field="*{deliveryAddr}" class="form-control form-control-sm"></td>
+              </tr>
+              <tr>
+                <th class="bg-cell">출고창고</th>
+                <td><input th:field="*{warehouseCd}" class="form-control form-control-sm"></td>
+                <th class="bg-cell">출고예정일</th>
+                <td><input th:field="*{deliveryDt}" class="form-control form-control-sm" type="date"></td>
+              </tr>
+              <tr>
+                <th class="bg-cell">결제조건</th>
+                <td><input th:field="*{paymentTerms}" class="form-control form-control-sm"></td>
+                <th class="bg-cell">세금계산서 발행</th>
+                <td>
+                  <select th:field="*{taxInvoiceYn}" class="form-select form-select-sm">
+                    <option value="Y">예</option>
+                    <option value="N">아니오</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       <!-- 여신 정보 -->
-      <div class="col-md-6">
-        <div class="card bg-light mb-3">
-          <div class="card-header">여신 정보</div>
-          <div class="card-body">
-            <div class="row mb-2">
-              <div class="col-4">
-                <label class="form-label">여신한도</label>
-                <input type="number" class="form-control form-control-sm" />
-              </div>
-              <div class="col-4">
-                <label class="form-label">여신잔액</label>
-                <input type="number" class="form-control form-control-sm" />
-              </div>
-              <div class="col-4">
-                <label class="form-label">여신사용액</label>
-                <input type="number" class="form-control form-control-sm" />
-              </div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-4">
-                <label class="form-label">여신상태코드</label>
-                <input type="text" class="form-control form-control-sm" />
-              </div>
-              <div class="col-4">
-                <label class="form-label">여신보류여부</label>
-                <input type="text" class="form-control form-control-sm" />
-              </div>
-              <div class="col-4">
-                <label class="form-label">여신보류사유</label>
-                <input type="text" class="form-control form-control-sm" />
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-4">
-                <label class="form-label">입금예정일</label>
-                <input type="date" class="form-control form-control-sm" />
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="col-md-5 section-box">
+        <h6>여신 정보</h6>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle mb-0">
+            <colgroup>
+              <col style="width:30%">
+              <col style="width:35%">
+              <col style="width:35%">
+            </colgroup>
+            <tbody>
+              <tr>
+                <th class="bg-cell">여신한도</th>
+                <td colspan="2"><input th:value="${credit.creditLimit}" class="form-control form-control-sm" readonly>
+                </td>
+              </tr>
+              <tr>
+                <th class="bg-cell">여신잔액</th>
+                <td><input th:value="${credit.remainingCredit}" class="form-control form-control-sm" readonly></td>
+                <th class="bg-cell">여신사용액</th>
+                <td><input th:value="${credit.creditUsed}" class="form-control form-control-sm" readonly></td>
+              </tr>
+              <tr>
+                <th class="bg-cell">여신상태</th>
+                <td><input th:value="${credit.creditStatus}" class="form-control form-control-sm" readonly></td>
+                <th class="bg-cell">보류여부</th>
+                <td><input th:value="${credit.creditHoldFlg}" class="form-control form-control-sm" readonly></td>
+              </tr>
+              <tr>
+                <th class="bg-cell">보류사유</th>
+                <td colspan="2"><input th:value="${credit.creditHoldReason}" class="form-control form-control-sm"
+                    readonly></td>
+              </tr>
+              <tr>
+                <th class="bg-cell">보류해제 예정일</th>
+                <td colspan="2"><input th:value="${#temporals.format(credit.creditHoldUntil,'yyyy-MM-dd')}" type="date" class="form-control form-control-sm" readonly></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
 
-    <!-- 품목 테이블 -->
-    <div class="table-responsive">
-      <table class="table table-bordered">
-        <thead class="table-primary text-center">
-          <tr>
-            <th>순번</th>
-            <th>품목코드</th>
-            <th>품목명</th>
-            <th>규격</th>
-            <th>수량</th>
-            <th>단가</th>
-            <th>공급가액</th>
-            <th>부가세</th>
-            <th>비고</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td></td><td></td><td></td><td></td>
-            <td></td><td></td><td></td><td></td><td></td>
-          </tr>
-          <tr>
-            <td></td><td></td><td></td><td></td>
-            <td></td><td></td><td></td><td></td><td></td>
-          </tr>
-          <tr>
-            <td></td><td></td><td></td><td></td>
-            <td></td><td></td><td></td><td></td><td></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  
+  <!-- ── 상세내역 그리드 ─────────────────────────────────────────── -->
+  <div class="mb-2">
+    <button type="button" class="btn btn-secondary btn-sm add-row me-1">행 추가</button>
+    <button type="button" class="btn btn-danger   btn-sm delete-row">행 삭제</button>
+  </div>
 
-  <!-- Bootstrap 5 Bundle JS -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+  <div class="table-responsive">
+    <table class="table table-bordered text-center detail-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox"></th>
+          <th>▶</th>
+          <th>순번</th>
+          <th>품목코드</th>
+          <th>품목명</th>
+          <th>규격</th>
+          <th>수량</th>
+          <th>단가</th>
+          <th>공급가액</th>
+          <th>부가세</th>
+          <th>합계</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>▶</td>
+          <td><input th:field="*{details[0].lineNo}"      class="form-control form-control-sm" readonly></td>
+          <td><input th:field="*{details[0].itemCode}"    class="form-control form-control-sm item-code"></td>
+          <td><input th:field="*{details[0].itemName}"    class="form-control form-control-sm item-name"  readonly></td>
+          <td><input th:field="*{details[0].spec}"        class="form-control form-control-sm item-spec"  readonly></td>
+          <td><input th:field="*{details[0].qty}"         class="form-control form-control-sm item-qty"   type="number" min="1" value="1"></td>
+          <td><input th:field="*{details[0].unitPrice}"   class="form-control form-control-sm item-price" readonly></td>
+          <td><input th:field="*{details[0].supplyAmount}"class="form-control form-control-sm item-supply"readonly></td>
+          <td><input th:field="*{details[0].taxAmount}"   class="form-control form-control-sm item-tax"   readonly></td>
+          <td><input th:field="*{details[0].totalAmount}" class="form-control form-control-sm item-total" readonly></td>
+          <td><input th:field="*{details[0].remarks}"     class="form-control form-control-sm item-remark"></td>
+        </tr>
+      </tbody>
+      <tfoot class="table-light fw-bold">
+        <tr>
+          <td colspan="8" class="text-end">계산</td>
+          <td id="sum-supply">0</td>
+          <td id="sum-tax">0</td>
+          <td id="sum-total">총 합계:&nbsp;0</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  </form>
+
+  <!-- ── 스크립트 ─────────────────────────────────────────────────── -->
+  <script th:inline="javascript">
+  /*<![CDATA[*/
+  $(function(){
+
+  /* 목록 / 초기화 */
+  $('.btn-list').click(()=> location.href = /*[[@{/bsn/sorlist}]]*/'');
+  $('.btn-reset').click(()=> location.reload());
+
+  /* 행 추가 */
+  $('.add-row').click(function(){
+    const $tb = $('.detail-table tbody');
+    const idx = $tb.find('tr').length;
+    const $new = $tb.find('tr:first').clone(true);
+
+    $new.find(':input').each(function(){
+      const $i   = $(this);
+      const name = $i.attr('name')||'';
+      $i.attr('name', name.replace(/\d+/, idx))
+        .val('');
+
+      if(name.includes('.lineNo')) $i.val(idx+1);
+      if(name.includes('.qty'))    $i.val(1);
+    });
+    $tb.append($new);
+  });
+
+  /* 행 삭제 */
+  $('.delete-row').click(function(){
+    $('.detail-table tbody input[type=checkbox]:checked')
+      .closest('tr').remove();
+    recalcAll();
+  });
+
+  /* 계산 로직 */
+  function recalcRow($tr){
+    const qty   = parseFloat($tr.find('.item-qty').val())   || 0;
+    const price = parseFloat($tr.find('.item-price').val()) || 0;
+    const supply = qty*price;
+    const tax    = Math.round(supply*0.1);
+    $tr.find('.item-supply').val(supply);
+    $tr.find('.item-tax').val(tax);
+    $tr.find('.item-total').val(supply+tax);
+  }
+  function recalcAll(){
+    let s=0,t=0,tot=0;
+    $('.detail-table tbody tr').each(function(){
+      recalcRow($(this));
+      s   += +($(this).find('.item-supply').val()||0);
+      t   += +($(this).find('.item-tax').val()||0);
+      tot += +($(this).find('.item-total').val()||0);
+    });
+    $('#sum-supply').text(s);
+    $('#sum-tax').text(t);
+    $('#sum-total').text('총 합계: '+tot);
+  }
+
+  /* 수량 변경 시 */
+  $('.detail-table').on('input change','.item-qty',function(){
+    recalcRow($(this).closest('tr'));
+    recalcAll();
+  });
+
+  /* 품목코드 조회 */
+  $('.detail-table').on('blur','.item-code',function(){
+    const code = $(this).val();
+    if(!code) return;
+    const $row = $(this).closest('tr');
+    $.getJSON(/*[[@{/bsn/item/info}]]*/'',{code:code}, function(d){
+      $row.find('.item-name') .val(d.itemName);
+      $row.find('.item-spec') .val(d.spec);
+      $row.find('.item-price').val(d.unitPrice);
+      recalcRow($row);
+      recalcAll();
+    });
+  });
+
+  recalcAll();          // 초기 계산
+  });
+  /*]]>*/
   </script>
-</div>
 </div>

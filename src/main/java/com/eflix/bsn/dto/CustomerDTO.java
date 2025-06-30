@@ -43,3 +43,7 @@ public class CustomerDTO {
         this.discountRate = discountRate;
     }
 }
+
+
+
+

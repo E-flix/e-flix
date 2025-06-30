@@ -1,21 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.eflix.bsn.mapper.OrdersMapper">
-    <select id="getOrdersList" resultType="com.eflix.bsn.dto.OrdersDTO">
-        SELECT
-            ORDER_NO            AS orderNo,
-            QUOTATION_NO        AS quotationNo,
-            TO_CHAR(ORDER_DT, 'YYYY-MM-DD') AS orderDt,
-            EMP_CD              AS empCd,
-            PHONE_NUMBER        AS phoneNumber,
-            DELIVERY_ADDR       AS deliveryAddr,
-            WAREHOUSE_CD        AS warehouseCd,
-            TO_CHAR(DELIVERY_DT, 'YYYY-MM-DD') AS deliveryDt,
-            TO_CHAR(EXPECTED_PAYMENT_DT, 'YYYY-MM-DD') AS expectedPaymentDt,
-            PAYMENT_TERMS       AS paymentTerms,
-            TAX_INVOICE_ISSUE_YN AS taxInvoiceIssueYn,
-            CUSTOMER_CD         AS customerCd
-        FROM ORDERS
-        ORDER BY ORDER_NO
-    </select>
+
+  <!-- 결과 매핑 정의 (DTO 필드명과 칼럼명을 1:1 매핑) -->
+  <resultMap id="OrdersResultMap" type="com.eflix.bsn.dto.OrdersDTO">
+    <id     property="orderNo"           column="ORDER_NO"            />
+    <result property="quotationNo"       column="QUOTATION_NO"        />
+    <result property="orderDate"         column="ORDER_DT"            />
+    <result property="empCd"             column="EMP_CD"              />
+    <result property="phoneNumber"       column="PHONE_NUMBER"        />
+    <result property="deliveryAddr"      column="DELIVERY_ADDR"       />
+    <result property="warehouseCd"       column="WAREHOUSE_CD"        />
+    <result property="deliveryDt"        column="DELIVERY_DT"         />
+    <result property="expectedPaymentDt" column="EXPECTED_PAYMENT_DT" />
+    <result property="paymentTerms"      column="PAYMENT_TERMS"       />
+    <result property="taxInvoiceYn"      column="TAX_INVOICE_ISSUE_YN" />
+    <result property="customerCd"        column="CUSTOMER_CD"         />
+  </resultMap>
+
+  <!-- 전체 주문 조회 -->
+  <select id="selectAllOrders" resultMap="OrdersResultMap">
+    SELECT
+      ORDER_NO,
+      QUOTATION_NO,
+      ORDER_DT,
+      EMP_CD,
+      PHONE_NUMBER,
+      DELIVERY_ADDR,
+      WAREHOUSE_CD,
+      DELIVERY_DT,
+      EXPECTED_PAYMENT_DT,
+      PAYMENT_TERMS,
+      TAX_INVOICE_ISSUE_YN,
+      CUSTOMER_CD
+    FROM ORDERS
+    ORDER BY ORDER_DT DESC
+  </select>
+
+  <!-- 주문 헤더 INSERT -->
+  <insert id="insertOrder" parameterType="com.eflix.bsn.dto.OrdersDTO">
+    INSERT INTO ORDERS
+    ( ORDER_NO
+    , QUOTATION_NO
+    , ORDER_DT
+    , EMP_CD
+    , PHONE_NUMBER
+    , DELIVERY_ADDR
+    , WAREHOUSE_CD
+    , DELIVERY_DT
+    , EXPECTED_PAYMENT_DT
+    , PAYMENT_TERMS
+    , TAX_INVOICE_ISSUE_YN
+    , CUSTOMER_CD
+    )
+    VALUES
+    ( #{orderNo}
+    , #{quotationNo}
+    , #{orderDate}
+    , #{empCd}
+    , #{phoneNumber}
+    , #{deliveryAddr}
+    , #{warehouseCd}
+    , #{deliveryDt}
+    , #{expectedPaymentDt}
+    , #{paymentTerms}
+    , #{taxInvoiceYn}
+    , #{customerCd}
+    )
+  </insert>
+
+  <!-- 주문 상세 INSERT -->
+  <insert id="insertOrderDetail" parameterType="com.eflix.bsn.dto.OrdersDetailDTO">
+    INSERT INTO ORDER_DETAIL
+    ( ORDER_NO
+    , LINE_NO
+    , ITEM_CODE
+    , QTY
+    , UNIT_PRICE
+    , SUPPLY_AMOUNT
+    , TAX_AMOUNT
+    , TOTAL_AMOUNT
+    , REMARKS
+    )
+    VALUES
+    ( #{orderNo}
+    , #{lineNo}
+    , #{itemCode}
+    , #{qty}
+    , #{unitPrice}
+    , #{supplyAmount}
+    , #{taxAmount}
+    , #{totalAmount}
+    , #{remarks}
+    )
+  </insert>
+
+  <!-- 여신 사용액 누적 UPDATE -->
+  <update id="updateCreditUsed" parameterType="map">
+    UPDATE CREDIT_MANAGEMENT
+       SET CREDIT_USED = CREDIT_USED + #{amount}
+     WHERE CUSTOMER_CD = #{customerCd}
+  </update>
+
 </mapper>
