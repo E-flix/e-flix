@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.eflix.acc.dto.EntryDetailDTO;
 import com.eflix.acc.dto.EntryMasterDTO;
 import com.eflix.acc.service.EntryService;
+import com.eflix.common.code.service.CommonService;
 import lombok.RequiredArgsConstructor;
 /**
  * ============================================
@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class AccEntryController {
 
   private final EntryService entryService;
+  private final CommonService commonService;
 
   /**
    * 전표 목록 조회
@@ -104,9 +105,13 @@ public class AccEntryController {
    * 매입매출전표 화면 요청 처리
    */
   @GetMapping("/enps")
-  public String entryPurchaseSales() {
+  public String entryPurchaseSales(Model model) {
+    model.addAttribute("code0A", commonService.getCommon("0A")); // 여부
+    model.addAttribute("code0H", commonService.getCommon("0H")); // 과세유형
+    model.addAttribute("code0G", commonService.getCommon("0G")); // 차변대변
     return "acc/entryPurchaseSales";
   }
+
 
   /**
    * 매입매출전표 master 목록 조회

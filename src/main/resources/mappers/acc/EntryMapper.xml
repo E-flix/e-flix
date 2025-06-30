@@ -222,7 +222,7 @@
 
   <!-- select max+1 entry_number -->
   <select id="selectMaxPlusOneEntryNumber" resultType="int">
-    SELECT COALESCE(MAX(entry_number)+1, 1) AS enNo FROM entry_master
+    SELECT COALESCE(MAX(entry_number)+1, 1) AS enNo FROM entry_master WHERE entry_type = '일반'
   </select>
 
   <!-- select max+1 line_number -->
@@ -257,7 +257,7 @@
       p.resident_number,
       p.partner_name
     FROM entry_master m LEFT OUTER JOIN partner_detail p ON m.partner_code = p.partner_code
-    WHERE m.transaction_type != 'h27'
+    WHERE m.transaction_type != '63'
     ORDER BY entry_date
   </select>
   <!-- detail 전표 조회 -->

@@ -37,169 +37,14 @@
     .ag-row-highlighted.ag-row-selected .ag-cell {
       background-color: #bbdefb !important;
     }
-    /* 설명 패널 스타일 */
-    .info-panel {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 0.375rem;
-      padding: 1rem;
-    }
-    .info-title {
-      background-color: #6c757d;
-      color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
-      display: inline-block;
-    }
-    .numbered-list {
-      list-style: none;
-      padding-left: 0;
-    }
-    .numbered-list li {
-      margin-bottom: 0.5rem;
-      padding-left: 1.5rem;
-      position: relative;
-    }
-    .numbered-list li::before {
-      content: counter(item);
-      counter-increment: item;
-      position: absolute;
-      left: 0;
-      background-color: #007bff;
-      color: white;
-      border-radius: 50%;
-      width: 1.2rem;
-      height: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: bold;
-    }
-    .numbered-list {
-      counter-reset: item;
-    }
-    /* 매출/매입 헤더 스타일 */
-    .ag-header-cell-centered .ag-header-cell-text {
-      text-align: center;
-      font-weight: bold;
-      background-color: #6c9bd1;
-      color: white;
-      padding: 5px;
-    }
-    .ag-theme-alpine .ag-header-group-cell {
-      background-color: #6c9bd1;
-      color: white;
-      text-align: center;
-      font-weight: bold;
-    }
-    .ag-header-group-blue {
-      background-color: #6c9bd1 !important;
-      color: white !important;
-      text-align: center !important;
-      font-weight: bold !important;
-    }
-    .ag-theme-alpine .ag-header-group-cell.ag-header-group-blue {
-      background-color: #6c9bd1 !important;
-      color: white !important;
-      text-align: center !important;
-    }
-    .ag-theme-alpine .ag-header-group-cell .ag-header-group-text {
+    /* 모든 AG Grid 헤더 중앙정렬 */
+    .ag-header-cell .ag-header-cell-text {
       text-align: center !important;
       justify-content: center !important;
-      display: flex !important;
-      align-items: center !important;
     }
-    /* ag-Grid 그룹 헤더 중앙정렬 강제 적용 */
-    .ag-theme-alpine .ag-header-group-cell-with-group {
-      text-align: center !important;
-    }
-    .ag-theme-alpine .ag-header-group-cell-with-group .ag-header-cell-text {
-      text-align: center !important;
-      width: 100% !important;
-      justify-content: center !important;
-      display: flex !important;
-    }
-    .ag-theme-alpine .ag-header-group-cell .ag-header-cell-text {
-      text-align: center !important;
-      width: 100% !important;
-      justify-content: center !important;
-      display: flex !important;
-    }
-    .ag-cell-center {
-      text-align: center !important;
-    }
-    /* 하단 그리드 컨테이너 높이 제한 */
-    #combinedGrid {
-      height: 161px;
-      font-size: 12px; /* 글씨 크기 줄이기 */
-    }
-    #combinedGrid .ag-cell {
-      font-size: 12px !important;
-    }
-    #combinedGrid .ag-header-cell {
-      font-size: 12px !important;
-    }
-    #combinedGrid .ag-header-group-cell {
-      font-size: 13px !important; /* 그룹 헤더는 조금 더 크게 */
-    }
-    /* 그룹 헤더 텍스트 중앙정렬 */
-    .ag-theme-alpine .ag-header-group-cell .ag-cell-label-container {
-      justify-content: center !important;
-      text-align: center !important;
-      display: flex !important;
-      align-items: center !important;
-      width: 100% !important;
-    }
-    .ag-theme-alpine .ag-header-group-cell .ag-header-cell-text {
-      text-align: center !important;
-      display: block !important;
-      width: 100% !important;
-    }
-    /* 추가 중앙정렬 강제 적용 */
-    #combinedGrid .ag-header-group-cell {
-      text-align: center !important;
-    }
-    #combinedGrid .ag-header-group-cell > div {
+    .ag-header-group-cell .ag-header-group-text {
       text-align: center !important;
       justify-content: center !important;
-      display: flex !important;
-      align-items: center !important;
-      width: 100% !important;
-    }
-    #combinedGrid .ag-header-group-cell span {
-      text-align: center !important;
-      width: 100% !important;
-      display: block !important;
-    }
-    /* 그룹 헤더의 방향키(expand/collapse 아이콘) 숨기기 */
-    #combinedGrid .ag-header-group-cell .ag-header-expand-icon {
-      display: none !important;
-    }
-    #combinedGrid .ag-header-group-cell .ag-icon {
-      display: none !important;
-    }
-    #combinedGrid .ag-header-group-cell .ag-header-group-button {
-      display: none !important;
-    }
-    /* 모든 그룹 헤더 아이콘 숨기기 */
-    .ag-theme-alpine .ag-header-group-cell .ag-icon,
-    .ag-theme-alpine .ag-header-group-cell .ag-header-expand-icon,
-    .ag-theme-alpine .ag-header-group-cell .ag-group-expanded,
-    .ag-theme-alpine .ag-header-group-cell .ag-group-contracted,
-    .ag-theme-alpine .ag-header-group-cell .ag-header-group-button {
-      display: none !important;
-      visibility: hidden !important;
-    }
-    /* 모든 테이블 헤더 텍스트 가운데 정렬 */
-    .ag-theme-alpine .ag-header-cell-label {
-      justify-content: center !important;
-    }
-    .ag-theme-alpine .ag-header-cell-text {
-      text-align: center !important;
-      width: 100% !important;
     }
   </style>
 </head>
@@ -247,12 +92,17 @@
   </div>
 
   <script th:inline="javascript">
+    // 공통 코드(과세유형) 매핑
+    const code0H = /*[[${code0H}]]*/ [];
+    const code0A = /*[[${code0A}]]*/ [];
+    const code0G = /*[[${code0G}]]*/ [];
     let purchaseSalesGridApi = null;
     let combinedGridApi = null;
     let detailGridApi = null;
     let highlightedEntryNumber = null;
     let arrowKeyDebounceTimer = null;
     let selectedMaster = null;  // 선택된 마스터 로우 저장
+    let resizeEventRegistered = false;  // resize 이벤트 중복 등록 방지
     
     // 매입매출 데이터 (backend에서 로드)
     let purchaseSalesData = [];
@@ -324,7 +174,15 @@
         { headerName: "월", valueGetter: params => params.data.entryDate ? new Date(params.data.entryDate).getMonth() + 1 : '', initialWidth: 75, cellClass: 'ag-cell-center' },
         { headerName: "일", valueGetter: params => params.data.entryDate ? new Date(params.data.entryDate).getDate() : '', initialWidth: 75, cellClass: 'ag-cell-center' },
         { headerName: "번호", field: "entryNumber", initialWidth: 95 },
-        { headerName: "유형", field: "transactionType", initialWidth: 90, cellRenderer: params => { if (params.value === '과세') { return '<span class="badge bg-success">과세</span>'; } return params.value || ''; } },
+        { headerName: "유형", field: "transactionType", initialWidth: 90, cellRenderer: params => {
+            const code = params.value;
+            const mapping = code0H.find(item => item.commonCode === code);
+            if (mapping) {
+              const badgeColor = parseInt(mapping.commonCode) <= 50 ? 'bg-danger' : 'bg-primary';
+              return `<span class="badge ${badgeColor}">${mapping.commonCodeName}</span>`;
+            }
+            return code || '';
+          } },
         { headerName: "품명", field: "itemName", minWidth: 200 },
         { headerName: "수량", field: "quantity", initialWidth: 90, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '' },
         { headerName: "단가", field: "unitPrice", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value?.toLocaleString() || '' },
@@ -333,7 +191,10 @@
         { headerName: "코드", field: "partnerCode", initialWidth: 90 },
         { headerName: "공급처명", field: "partnerName", minWidth: 120 },
         { headerName: "등록번호", field: "businessNumber", minWidth: 150 },
-        { headerName: "전자", field: "electronicType", minWidth: 50 }
+        { headerName: "전자", field: "electronicType", minWidth: 50,
+            cellRenderer: params => { const code = params.value;
+            if (code === 'a1') { return '○'; } else if (code === 'a2') { return ''; } return code || '';}
+        }
       ],
       rowSelection: { mode: 'multiRow' },
       onGridReady: (params) => {
@@ -341,8 +202,15 @@
         loadMasterData();
         // 컬럼 너비 자동맞춤
         params.api.sizeColumnsToFit();
-        // 창 크기 변경 시 자동맞춤 유지
-        window.addEventListener('resize', () => params.api.sizeColumnsToFit());
+        // 창 크기 변경 시 모든 그리드 자동맞춤 (한 번만 등록)
+        if (!resizeEventRegistered) {
+          window.addEventListener('resize', () => {
+            if (purchaseSalesGridApi) purchaseSalesGridApi.sizeColumnsToFit();
+            if (detailGridApi) detailGridApi.sizeColumnsToFit();
+            if (combinedGridApi) combinedGridApi.sizeColumnsToFit();
+          });
+          resizeEventRegistered = true;
+        }
       },
       onRowClicked: (event) => {
         selectedMaster = event.data;  // 클릭된 마스터 저장
@@ -366,19 +234,23 @@
             const mm = String(d.getMonth() + 1).padStart(2, '0');
             const dd = String(d.getDate()).padStart(2, '0');
             return `${mm}-${dd}`;
-          }, minWidth: 100, cellClass: 'ag-cell-center' },
-        { headerName: "전표번호", field: "entryNumber", minWidth: 120 },
-        { headerName: "계정코드", field: "accountCode", minWidth: 120 },
-        { headerName: "계정명", field: "accountName", minWidth: 150 },
-        { headerName: "거래처코드", field: "partnerCode", minWidth: 120 },
-        { headerName: "거래처명", field: "partnerName", minWidth: 150 },
-        { headerName: "금액", field: "amount", minWidth: 120, cellClass: 'ag-cell-right', valueFormatter: params => params.value ? params.value.toLocaleString() : '0' },
-        { headerName: "설명", field: "description", minWidth: 200 },
-        { headerName: "생성일", field: "createdAt", minWidth: 150, cellRenderer: params => params.value ? new Date(params.value).toLocaleString('ko-KR') : '' },
-        { headerName: "수정일", field: "updatedAt", minWidth: 150, cellRenderer: params => params.value ? new Date(params.value).toLocaleString('ko-KR') : '' }
+          }, minWidth: 80, cellClass: 'ag-cell-center' },
+        { headerName: "전표번호", field: "entryNumber", minWidth: 100 },
+        { headerName: "구분", field: "resentmenType", minWidth: 80, cellRenderer: params => {
+            return code0G.find(v => String(v.commonCode) === String(params.value))?.commonCodeName || params.value || '';
+          }},
+        { headerName: "코드", field: "accountCode", minWidth: 80 },
+        { headerName: "계정과목", field: "accountName", minWidth: 120 },
+        { headerName: "코드", field: "partnerCode", minWidth: 80 },
+        { headerName: "거래처명", field: "partnerName", minWidth: 120 },
+        { headerName: "차변", field: "debitAmount", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value ? params.value.toLocaleString() : '' },
+        { headerName: "대변", field: "creditAmount", minWidth: 100, cellClass: 'ag-right-aligned-cell', valueFormatter: params => params.value ? params.value.toLocaleString() : '' },
+        { headerName: "적요", field: "description", minWidth: 150 }
       ],
       onGridReady: (params) => {
         detailGridApi = params.api;
+        // 컬럼 너비 자동맞춤
+        params.api.sizeColumnsToFit();
       }
     };
 
@@ -427,7 +299,8 @@
       suppressMenuHide: true,
       onGridReady: (params) => {
         combinedGridApi = params.api;
-        // sizeColumnsToFit 제거하여 고정 너비 유지
+        // 컬럼 너비 자동맞춤
+        params.api.sizeColumnsToFit();
       }
     };
 

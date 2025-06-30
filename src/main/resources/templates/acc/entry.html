@@ -683,90 +683,6 @@
           }
           return;
         }
-        // if (event.event.key === 'Enter') {
-        //   // summary row면 Enter 이동/검증 모두 건너뜀 (다음 일반행으로 이동)
-        //   if (currentRowNode.data?.isSummary) {
-        //     let nextRowIndex = currentRowIndex + 1;
-        //     // summary row를 모두 건너뜀
-        //     while (nextRowIndex < api.getDisplayedRowCount() &&
-        //           api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary) {
-        //       nextRowIndex++;
-        //     }
-        //     // 일반행이 있으면 그 첫 컬럼으로 포커스/편집
-        //     if (nextRowIndex < api.getDisplayedRowCount()) {
-        //       api.setFocusedCell(nextRowIndex, allColumns[0].field);
-        //       api.startEditingCell({ rowIndex: nextRowIndex, colKey: allColumns[0].field });
-        //     } else {
-        //       // 일반행이 없으면 새 빈행 추가
-        //       api.applyTransaction({ add: [getEmptyRow()] });
-        //       setTimeout(() => {
-        //         const lastIdx = api.getDisplayedRowCount() - 1;
-        //         api.setFocusedCell(lastIdx, allColumns[0].field);
-        //         api.startEditingCell({ rowIndex: lastIdx, colKey: allColumns[0].field });
-        //       }, 0);
-        //     }
-        //     event.event.preventDefault();
-        //     return;
-        //   }
-        //   // 마지막 행이 빈 행이면(즉, entryNumber/lineNumber 모두 null) 엔터 시 아무 동작 안함
-        //   if (!currentRowNode.data.entryNumber && !currentRowNode.data.lineNumber) {
-        //     event.event.preventDefault();
-        //     return;
-        //   }
-
-        //   // 차변/대변 필드에서 Enter 시 1 이상 값인지 확인
-        //   if (currentCol === 'debit' || currentCol === 'credit') {
-        //     const val = currentRowNode.data[currentCol];
-        //     if (!(val >= 1)) {
-        //       alert("차변/대변 값은 1 이상의 숫자여야 합니다.");
-        //       event.event.preventDefault();
-        //       return;
-        //     }
-        //   }
-        //   // 현재 셀 유효성 검사
-        //   // if (!isRowValid(currentRowNode.data, currentCol)) {
-        //   //   const fieldNameMap = {
-        //   //     month: "월", 
-        //   //     day: "일",
-        //   //     resentmenType: "구분",
-        //   //     accountCode: "계정코드"
-        //   //   };
-        //   //   alert(`[${fieldNameMap[currentCol]}] 필드에 유효하지 않은 값이 있습니다.`);
-        //   //   event.event.preventDefault();
-        //   //   return;
-        //   // }
-        //   // description 셀은 특수 처리: 다음 행 첫 셀로 이동
-        //   if (currentCol === 'description') {
-        //     if (!isRowValid(currentRowNode.data, null)) {
-        //       alert("필수 값이 누락된 행입니다. 확인해주세요.");
-        //       event.event.preventDefault();
-        //       return;
-        //     }
-        //     // 다음 행이 summary row면 일반행이 나올 때까지 건너뜀
-        //     let nextRowIndex = currentRowIndex + 1;
-        //     while (nextRowIndex < api.getDisplayedRowCount() &&
-        //           api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary) {
-        //       nextRowIndex++;
-        //     }
-        //     if (nextRowIndex < api.getDisplayedRowCount()) {
-        //       api.setFocusedCell(nextRowIndex, allColumns[0].field);
-        //       api.startEditingCell({ rowIndex: nextRowIndex, colKey: allColumns[0].field });
-        //     } else {
-        //       // 일반행이 없으면 새 빈행 추가
-        //       api.applyTransaction({ add: [getEmptyRow()] });
-        //       setTimeout(() => {
-        //         const lastIdx = api.getDisplayedRowCount() - 1;
-        //         api.setFocusedCell(lastIdx, allColumns[0].field);
-        //         api.startEditingCell({ rowIndex: lastIdx, colKey: allColumns[0].field });
-        //       }, 0);
-        //     }
-        //     event.event.preventDefault();
-        //     return;
-        //   }
-        //   // 나머지 컬럼은 다음 editable 셀로 이동
-        //   moveToNextEditableCell(api, currentRowIndex, currentColIndex);
-        //   event.event.preventDefault();
-        // }
       },
       onCellEditingStopped: (event) => {
         if (enterPressedForMove) {
@@ -1043,7 +959,6 @@
       if (found) {
         setTimeout(() => {
           api.setFocusedCell(nextRowIndex, allColumns[nextColIndex].field);
-          // api.startEditingCell({ rowIndex: nextRowIndex, colKey: allColumns[nextColIndex].field }); // 이 줄 삭제
         }, 0);
       } else {
         for (let i = 0; i < api.getDisplayedRowCount(); i++) {
@@ -1160,7 +1075,7 @@
         entryStatus: 'a2', // 마감여부 부
         creator: loginUser, // 작성자
         updatedAt: now,
-        transactionType: 'h27', // 과세구분 일반
+        transactionType: 63, // 과세구분 일반
         electronicType: 'a2', // 전자여부 부
         totalSupplyAmount: 0, // 공급가액
         totalTaxAmount: 0, // 부가세
