@@ -26,4 +26,9 @@ public interface EntryService {
   public int selectMaxPlusOneEntryNumber();
   // select max+1 line_number
   public int selectMaxPlusOneLineNumber(int entryNumber);
+  // ========= 아래부터 매입매출전표 ==========
+  // master 전표 조회 
+  public List<EntryMasterDTO> getPSMasterList();
+  // detail 전표 조회
+  public List<EntryDetailDTO> getPSDetailList(int entryNumber);
 }

@@ -37,4 +37,7 @@ public class EntryMasterDTO {
   private String remarks;
   
   private List<EntryDetailDTO> details;
+  private String partnerName; // 거래처명
+  private String businessNumber; // 사업자번호
+  private String residentNumber; // 주민번호
 }

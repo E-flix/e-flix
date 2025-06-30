@@ -114,4 +114,16 @@ public class EntryServiceImpl implements EntryService {
   public int selectMaxPlusOneLineNumber(int entryNumber) {
     return entryMapper.selectMaxPlusOneLineNumber(entryNumber);
   }
+
+  // ========= 아래부터 매입매출전표 ==========
+  // master 전표 조회
+  @Override
+  public List<EntryMasterDTO> getPSMasterList() {
+    return entryMapper.getPSMasterList();
+  }
+  // detail 전표 조회
+  @Override
+  public List<EntryDetailDTO> getPSDetailList(int entryNumber) {
+    return entryMapper.getPSDetailList(entryNumber);
+  }
 }

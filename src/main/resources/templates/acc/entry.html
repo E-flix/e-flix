@@ -22,10 +22,10 @@
   - 2025-06-26 (김희정): DB 연결 (insert)
   - 2025-06-26 (김희정): 같은 전표번호 내에서 차대변 차액 발생하면 차액 표시하는 기능 구현 (전표 소계 열/ 합계 열)
   - 2025-06-26 (김희정): 전표번호 자동부여 = select max+1 or 전표내 차액있으면 차액 있는 전표번호
-  - 2025-06-30 (김희정): 클릭한 줄과 같은 number field의 값을 가지고 있다면 배경색 강조 표시
   -----------------------------------------------
   [ TODO ] 
-  1. 다 하면 자주 사용되는 ag-grid 세팅은 별도의 class만들고 import해서 사용하기
+  1. 클릭한 줄과 같은 number field의 값을 가지고 있다면 배경색 강조 표시 (2번과 연결)
+  2. 다 하면 자주 사용되는 ag-grid 세팅은 별도의 class만들고 import해서 사용하기
 ============================================ -->
 
 <head>
@@ -150,10 +150,14 @@
     entryList.forEach(master => {
       if (master.entryType !== '일반') return; // entryType이 일반이 아닌 것은 건너뜀
       master.details.forEach(detail => {
+        // 날짜 안전하게 파싱
+        const entryDate = new Date(master.entryDate);
+        const isValidDate = !isNaN(entryDate.getTime());
+        
         rowData.push({
-          year: new Date(master.entryDate).getFullYear(),               // 년
-          month: new Date(master.entryDate).getMonth() + 1,             // 월
-          day: new Date(master.entryDate).getDate(),                    // 일
+          year: isValidDate ? entryDate.getFullYear() : new Date().getFullYear(),               // 년
+          month: isValidDate ? entryDate.getMonth() + 1 : new Date().getMonth() + 1,             // 월
+          day: isValidDate ? entryDate.getDate() : new Date().getDate(),                    // 일
           entryNumber: master.entryNumber,                              // 전표번호
           resentmenType: detail.resentmenType,                          // 구분
           accountCode: detail.accountCode,                              // 계정코드
@@ -218,35 +222,27 @@
     }
     // 전체 행 검증
     function validateFullRow(rowData) {
-      // console.log('validateFullRow 호출됨:', rowData); // 로그 간소화
-      
       if (!validateMonth(rowData) || !validateDay(rowData)) {
-        // console.log('월/일 검증 실패');
         return false;
       }
       
       if (!rowData.resentmenType || !rowData.accountCode) {
-        // console.log('구분/계정코드 검증 실패:', { resentmenType: rowData.resentmenType, accountCode: rowData.accountCode });
         return false;
       }
 
       const debit = Number(rowData.debit) || 0;
       const credit = Number(rowData.credit) || 0;
-      // console.log('차변/대변 값:', { debit, credit, resentmenType: rowData.resentmenType });
 
       if (rowData.resentmenType === 'g3') {
         const result = debit >= 1;
-        // console.log('g3(차변) 검증 결과:', result);
         return result;
       }
       if (rowData.resentmenType === 'g4') {
         const result = credit >= 1;
-        // console.log('g4(대변) 검증 결과:', result);
         return result;
       }
       
       const result = debit >= 1 || credit >= 1;
-      // console.log('일반 금액 검증 결과:', result);
       return result;
     }
     // --------------- ▲ 필수 값 검증 (입력 및 수정시 사용) ▲ ------------------ 
@@ -429,7 +425,6 @@
         isRowSelectable: rowNode => !rowNode.data?.isSummary
       },
       onGridReady: (params) => {
-        console.log('onGridReady: 그리드 초기화 시작');
         gridOptions.api = params.api;
         gridOptions.columnApi = params.columnApi;
         
@@ -441,14 +436,12 @@
             return;
           }
           
-          console.log('onGridReady: 초기 포커스 설정 시작');
           let hasEmptyRow = false;
           
           for (let i = 0; i < params.api.getDisplayedRowCount(); i++) {
             const row = params.api.getDisplayedRowAtIndex(i)?.data;
             if (row && isEmptyRow(row)) {
               params.api.setFocusedCell(i, gridOptions.columnDefs[0].field);
-              console.log('onGridReady: 초기 포커스 설정 완료 (행 인덱스:', i, ')');
               hasEmptyRow = true;
               break;
             }
@@ -456,14 +449,12 @@
           
           // 빈 행이 없으면 하나 추가
           if (!hasEmptyRow) {
-            console.log('onGridReady: 빈 행이 없어서 새로 추가합니다.');
             const newEmptyRow = getEmptyRow();
             params.api.applyTransaction({ add: [newEmptyRow] });
             
             setTimeout(() => {
               const lastRowIndex = params.api.getDisplayedRowCount() - 1;
               params.api.setFocusedCell(lastRowIndex, gridOptions.columnDefs[0].field);
-              console.log('onGridReady: 새 빈 행 추가 후 포커스 설정 완료');
             }, 50);
           }
         }, 100);
@@ -507,14 +498,16 @@
           return;
         }
 
-        try {
-          await removeSummaryRows(api);
-          await generateAndAddSummaryRow(currentEntryNumber);
-          lastSummaryEntryNumber = currentEntryNumber;
-        } catch (error) {
-          console.error('Summary row 처리 중 오류 발생:', error);
-          lastSummaryEntryNumber = null;
-        }
+        setTimeout(async () => {
+          try {
+            await removeSummaryRows(api);
+            await generateAndAddSummaryRow(currentEntryNumber);
+            lastSummaryEntryNumber = currentEntryNumber;
+          } catch (error) {
+            console.error('Summary row 처리 중 오류 발생:', error);
+            lastSummaryEntryNumber = null;
+          }
+        }, 0);
       },
       // Enter 키 입력 시 다음 셀로 포커스를 이동하는 로직
       onCellKeyDown: async (event) => {
@@ -547,7 +540,6 @@
           event.event.preventDefault();
           const currentRowData = currentRowNode.data;
           if (validateFullRow(currentRowData)) {
-            console.log('Ctrl+S로 수동 저장:', currentRowData);
             saveRow(currentRowData);
           } else {
             alert('필수 필드를 모두 입력해주세요.');
@@ -556,43 +548,25 @@
         }
         // --------------- ▲ Ctrl+S 수동 저장 ▲ ------------------
 
-        // --------------- ▼ Escape 키로 강조 표시 해제 ▼ ------------------
-        if (event.event.key === 'Escape') {
-          event.event.preventDefault();
-          clearHighlight();
-          return;
-        }
-        // --------------- ▲ Escape 키로 강조 표시 해제 ▲ ------------------
-
         // 방향키 ↓, ↑ summary row 이동 처리만 (summary row 추가/삭제 X)
         if (event.event.key === 'ArrowDown' || event.event.key === 'ArrowUp') {
-          event.event.preventDefault();
-          
-          // 기존 타이머가 있으면 취소
-          if (arrowKeyDebounceTimer) {
-            clearTimeout(arrowKeyDebounceTimer);
+          const direction = event.event.key === 'ArrowDown' ? 1 : -1;
+          let nextRowIndex = currentRowIndex + direction;
+          const colKey = currentCol;
+          while (
+            nextRowIndex >= 0 &&
+            nextRowIndex < api.getDisplayedRowCount() &&
+            api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary
+          ) {
+            nextRowIndex += direction;
           }
-          
-          // 디바운스 타이머 설정 (50ms 지연)
-          arrowKeyDebounceTimer = setTimeout(() => {
-            const direction = event.event.key === 'ArrowDown' ? 1 : -1;
-            let nextRowIndex = currentRowIndex + direction;
-            const colKey = currentCol;
-            
-            while (
-              nextRowIndex >= 0 &&
-              nextRowIndex < api.getDisplayedRowCount() &&
-              api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary
-            ) {
-              nextRowIndex += direction;
-            }
-            
-            if (nextRowIndex >= 0 && nextRowIndex < api.getDisplayedRowCount() &&
-                !api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary) {
-              api.setFocusedCell(nextRowIndex, colKey);
-            }
-          }, 50);
-          
+          if (nextRowIndex >= 0 && nextRowIndex < api.getDisplayedRowCount() &&
+              !api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary) {
+            api.setFocusedCell(nextRowIndex, colKey);
+            event.event.preventDefault();
+          } else {
+            event.event.preventDefault();
+          }
           return;
         }
         // Enter 키인지 체크
@@ -606,7 +580,6 @@
             // 현재 행의 데이터가 완전하면 저장
             const currentRowData = currentRowNode.data;
             if (validateFullRow(currentRowData)) {
-              console.log('적요 필드 Enter 시 현재 행 저장:', currentRowData);
               await saveRow(currentRowData);
             }
             
@@ -631,14 +604,12 @@
             
             // 다음 일반 행이 없으면 새 빈 행 추가
             const newEmptyRow = getEmptyRow();
-            console.log('Adding new empty row:', newEmptyRow);
             api.applyTransaction({ add: [newEmptyRow] });
             
             setTimeout(() => {
               // 마지막 행(새로 추가된 행)에 포커스
               const lastRowIndex = api.getDisplayedRowCount() - 1;
               const lastRowData = api.getDisplayedRowAtIndex(lastRowIndex)?.data;
-              console.log('Setting focus to last row:', lastRowIndex, lastRowData);
               
               if (lastRowData && !lastRowData.isSummary) {
                 api.setFocusedCell(lastRowIndex, gridOptions.columnDefs[0].field);
@@ -671,14 +642,12 @@
               if (nextRowIndex >= api.getDisplayedRowCount()) {
                 // 마지막 행을 넘어가면 새 빈 행 추가
                 const newEmptyRow = getEmptyRow();
-                console.log('Adding new empty row at end:', newEmptyRow);
                 api.applyTransaction({ add: [newEmptyRow] });
                 
                 setTimeout(() => {
                   // 마지막 행(새로 추가된 행)에 포커스
                   const lastRowIndex = api.getDisplayedRowCount() - 1;
                   const lastRowData = api.getDisplayedRowAtIndex(lastRowIndex)?.data;
-                  console.log('Setting focus to new last row:', lastRowIndex, lastRowData);
                   
                   if (lastRowData && !lastRowData.isSummary) {
                     api.setFocusedCell(lastRowIndex, gridOptions.columnDefs[0].field);
@@ -714,90 +683,6 @@
           }
           return;
         }
-        // if (event.event.key === 'Enter') {
-        //   // summary row면 Enter 이동/검증 모두 건너뜀 (다음 일반행으로 이동)
-        //   if (currentRowNode.data?.isSummary) {
-        //     let nextRowIndex = currentRowIndex + 1;
-        //     // summary row를 모두 건너뜀
-        //     while (nextRowIndex < api.getDisplayedRowCount() &&
-        //           api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary) {
-        //       nextRowIndex++;
-        //     }
-        //     // 일반행이 있으면 그 첫 컬럼으로 포커스/편집
-        //     if (nextRowIndex < api.getDisplayedRowCount()) {
-        //       api.setFocusedCell(nextRowIndex, allColumns[0].field);
-        //       api.startEditingCell({ rowIndex: nextRowIndex, colKey: allColumns[0].field });
-        //     } else {
-        //       // 일반행이 없으면 새 빈행 추가
-        //       api.applyTransaction({ add: [getEmptyRow()] });
-        //       setTimeout(() => {
-        //         const lastIdx = api.getDisplayedRowCount() - 1;
-        //         api.setFocusedCell(lastIdx, allColumns[0].field);
-        //         api.startEditingCell({ rowIndex: lastIdx, colKey: allColumns[0].field });
-        //       }, 0);
-        //     }
-        //     event.event.preventDefault();
-        //     return;
-        //   }
-        //   // 마지막 행이 빈 행이면(즉, entryNumber/lineNumber 모두 null) 엔터 시 아무 동작 안함
-        //   if (!currentRowNode.data.entryNumber && !currentRowNode.data.lineNumber) {
-        //     event.event.preventDefault();
-        //     return;
-        //   }
-
-        //   // 차변/대변 필드에서 Enter 시 1 이상 값인지 확인
-        //   if (currentCol === 'debit' || currentCol === 'credit') {
-        //     const val = currentRowNode.data[currentCol];
-        //     if (!(val >= 1)) {
-        //       alert("차변/대변 값은 1 이상의 숫자여야 합니다.");
-        //       event.event.preventDefault();
-        //       return;
-        //     }
-        //   }
-        //   // 현재 셀 유효성 검사
-        //   // if (!isRowValid(currentRowNode.data, currentCol)) {
-        //   //   const fieldNameMap = {
-        //   //     month: "월", 
-        //   //     day: "일",
-        //   //     resentmenType: "구분",
-        //   //     accountCode: "계정코드"
-        //   //   };
-        //   //   alert(`[${fieldNameMap[currentCol]}] 필드에 유효하지 않은 값이 있습니다.`);
-        //   //   event.event.preventDefault();
-        //   //   return;
-        //   // }
-        //   // description 셀은 특수 처리: 다음 행 첫 셀로 이동
-        //   if (currentCol === 'description') {
-        //     if (!isRowValid(currentRowNode.data, null)) {
-        //       alert("필수 값이 누락된 행입니다. 확인해주세요.");
-        //       event.event.preventDefault();
-        //       return;
-        //     }
-        //     // 다음 행이 summary row면 일반행이 나올 때까지 건너뜀
-        //     let nextRowIndex = currentRowIndex + 1;
-        //     while (nextRowIndex < api.getDisplayedRowCount() &&
-        //           api.getDisplayedRowAtIndex(nextRowIndex)?.data?.isSummary) {
-        //       nextRowIndex++;
-        //     }
-        //     if (nextRowIndex < api.getDisplayedRowCount()) {
-        //       api.setFocusedCell(nextRowIndex, allColumns[0].field);
-        //       api.startEditingCell({ rowIndex: nextRowIndex, colKey: allColumns[0].field });
-        //     } else {
-        //       // 일반행이 없으면 새 빈행 추가
-        //       api.applyTransaction({ add: [getEmptyRow()] });
-        //       setTimeout(() => {
-        //         const lastIdx = api.getDisplayedRowCount() - 1;
-        //         api.setFocusedCell(lastIdx, allColumns[0].field);
-        //         api.startEditingCell({ rowIndex: lastIdx, colKey: allColumns[0].field });
-        //       }, 0);
-        //     }
-        //     event.event.preventDefault();
-        //     return;
-        //   }
-        //   // 나머지 컬럼은 다음 editable 셀로 이동
-        //   moveToNextEditableCell(api, currentRowIndex, currentColIndex);
-        //   event.event.preventDefault();
-        // }
       },
       onCellEditingStopped: (event) => {
         if (enterPressedForMove) {
@@ -818,17 +703,13 @@
         const currentField = params.colDef.field;
         const rowData = params.data;
         // ---------------- ▼ 필수값 모두 입력시 자동 저장 ▼ ----------------
-        console.log('onCellValueChanged - 필드:', currentField, '값:', params.newValue, '행 데이터:', rowData);
         
         // 계정코드나 거래처코드 매핑 시에는 자동 저장 하지 않음 (매핑 완료 후 개별 처리)
         if (currentField === 'accountCode' || currentField === 'partnerCode') {
-          console.log('계정코드/거래처코드 매핑 중이므로 자동 저장을 건너뜁니다.');
         } else if (validateFullRow(rowData)) {
-          console.log('필수값이 모두 입력되어 자동 저장을 실행합니다:', rowData);
           saveRow(rowData);
           return; // 자동 저장 후 다른 처리는 건너뜀
         } else {
-          console.log('아직 필수값이 모두 입력되지 않았습니다. 저장하지 않습니다.');
         }
         // ---------------- ▲ 필수값 모두 입력시 자동 저장 ▲ ----------------
 
@@ -869,7 +750,6 @@
                 if (partner?.partnerName) {
                   // 데이터 직접 설정 후 강제 업데이트
                   params.node.setDataValue('partnerName', partner.partnerName);
-                  console.log('거래처명 매핑 완료:', partner.partnerName);
                 } else {
                   params.node.setDataValue('partnerName', '');
                   alert("해당 거래처명을 찾을 수 없습니다.");
@@ -902,7 +782,6 @@
                 if (account?.account_name) {
                   // 데이터 직접 설정 후 강제 업데이트
                   params.node.setDataValue('accountName', account.account_name);
-                  console.log('계정과목명 매핑 완료:', account.account_name);
                 } else {
                   params.node.setDataValue('accountName', '');
                   alert("해당 계정과목을 찾을 수 없습니다.");
@@ -1080,7 +959,6 @@
       if (found) {
         setTimeout(() => {
           api.setFocusedCell(nextRowIndex, allColumns[nextColIndex].field);
-          // api.startEditingCell({ rowIndex: nextRowIndex, colKey: allColumns[nextColIndex].field }); // 이 줄 삭제
         }, 0);
       } else {
         for (let i = 0; i < api.getDisplayedRowCount(); i++) {
@@ -1133,18 +1011,14 @@
         return;
       }
 
-      // 삭제 확인 대화상자
-      const confirmMessage = selectedNodes.length === 1 
-        ? "선택된 행을 삭제하시겠습니까?" 
-        : `선택된 ${selectedNodes.length}개 행을 삭제하시겠습니까?`;
-      
+      // 삭제 확인 다이얼로그
+      const confirmMessage = `선택된 ${selectedNodes.length}개 행을 삭제하시겠습니까?`;
       if (!confirm(confirmMessage)) {
-        return; // 사용자가 취소를 선택한 경우 삭제 중단
+        return; // 사용자가 취소한 경우
       }
 
       // 삭제할 데이터만 추출 (selectedNodes.data 배열)
       const deleteData = selectedNodes.map(node => node.data);
-      console.log(JSON.stringify(deleteData));
 
       fetch(`/acc/en/del`, {
         method: 'PUT',
@@ -1153,21 +1027,35 @@
       })
       .then(response => { // DB 처리 응답 결과
         if (response.ok) { 
-          // DB 삭제 성공시 화면에서 삭제
-          gridOptions.api.applyTransaction({ remove: deleteData }); // remove 는 삭제할 행 데이터들의 배열
-          updateFirstDiffEntryNumber();
+          // DB 삭제 성공시 화면에서 삭제 - setTimeout으로 안전하게 처리
+          setTimeout(() => {
+            try {
+              // 선택된 노드들을 직접 제거 (데이터가 아닌 노드 기준으로)
+              const nodesToRemove = selectedNodes.map(node => node.data);
+              
+              gridOptions.api.applyTransaction({ remove: nodesToRemove });
+              
+              updateFirstDiffEntryNumber();
+            } catch (removeError) {
+              console.error('그리드에서 행 제거 중 오류:', removeError);
+              // 오류가 발생하면 전체 데이터를 다시 로드
+              location.reload();
+            }
+          }, 0);
         } else {
           return Promise.reject(response.statusText);
         }
       })
-      .catch(err => alert("Delete failed: " + err));
+      .catch(err => {
+        console.error('삭제 실패:', err);
+        alert("Delete failed: " + err);
+      });
     }
     // ------------------------▲ 삭제 ▲------------------------------
 
     // ------------------------▼ 저장 ▼------------------------------
     // ag-Grid 데이터 파싱 -> EntryMasterDTO + details 변환
     function parseGridDataForSave(rows, isNew) {
-      console.log('parseGridDataForSave 호출됨:', { rows, isNew });
       
       if (!rows || rows.length === 0) {
         console.error('parseGridDataForSave: rows가 비어있음');
@@ -1175,7 +1063,6 @@
       }
 
       const firstRow = rows[0];
-      console.log('firstRow:', firstRow);
       
       const entryNumber = firstRow.entryNumber || 0; // 전표번호
       const now = new Date(); // 오늘날짜 
@@ -1188,7 +1075,7 @@
         entryStatus: 'a2', // 마감여부 부
         creator: loginUser, // 작성자
         updatedAt: now,
-        transactionType: 'h27', // 과세구분 일반
+        transactionType: 63, // 과세구분 일반
         electronicType: 'a2', // 전자여부 부
         totalSupplyAmount: 0, // 공급가액
         totalTaxAmount: 0, // 부가세
@@ -1200,7 +1087,6 @@
 
       rows.forEach(value => {
         const amount = Number(value.debit) > 0 ? Number(value.debit) : Number(value.credit); // 금액
-        console.log('상세 처리 중:', { value, amount });
         
         const detail = {
           lineNumber: value.lineNumber, // 순번
@@ -1220,15 +1106,11 @@
         entryMaster.details.push(detail);
       });
       
-      console.log('생성된 entryMaster:', entryMaster);
       return entryMaster;
     }
     // 자동 DB 저장
     async function saveRow(rowData) {
-      console.log('saveRow 호출됨:', rowData);
-      
       const isNew = !rowData.lineNumber;
-      console.log('isNew:', isNew);
       
       let method = isNew ? 'POST' : 'PUT';
       let data;
@@ -1239,10 +1121,8 @@
         } else {
           rowData.entryNumber = enNo;
         }
-        console.log('신규 행 - entryNumber 설정:', rowData.entryNumber);
         
         rowData.lineNumber = await selectLineNo(rowData.entryNumber);
-        console.log('신규 행 - lineNumber 설정:', rowData.lineNumber);
         
         data = parseGridDataForSave([rowData], isNew);
       } else {
@@ -1253,7 +1133,6 @@
             rowsToUpdate.push(node.data);
           }
         });
-        console.log('기존 행 업데이트 - rowsToUpdate:', rowsToUpdate);
         data = parseGridDataForSave(rowsToUpdate, isNew);
       }
 
@@ -1262,8 +1141,6 @@
         return;
       }
       
-      console.log('서버로 전송할 데이터:', data);
-
       fetch('/acc/en', {
         method: method,
         headers: { 'Content-Type': 'application/json' },
@@ -1276,7 +1153,6 @@
         return response.json();
       })
       .then(savedMaster => {
-        console.log('서버 응답 데이터:', savedMaster);
         const api = gridOptions.api;
 
         if (!savedMaster || !savedMaster.details || !Array.isArray(savedMaster.details)) {
@@ -1284,21 +1160,27 @@
           return;
         }
 
-        const receivedRows = savedMaster.details.map(d => ({
-          year: new Date(savedMaster.entryDate).getFullYear(),
-          month: new Date(savedMaster.entryDate).getMonth() + 1,
-          day: new Date(savedMaster.entryDate).getDate(),
-          entryNumber: savedMaster.entryNumber,
-          resentmenType: d.resentmenType,
-          accountCode: d.accountCode,
-          accountName: d.accountName || '',  // 서버에서 받은 값 사용 (이제 매핑값이 포함됨)
-          partnerCode: d.partnerCode || '',
-          partnerName: d.partnerName || '',  // 서버에서 받은 값 사용 (이제 매핑값이 포함됨)
-          debit: d.resentmenType === 'g3' ? d.amount : null,
-          credit: d.resentmenType === 'g4' ? d.amount : null,
-          description: d.description || '',
-          lineNumber: d.lineNumber
-        }));
+        const receivedRows = savedMaster.details.map(d => {
+          // 날짜 안전하게 파싱
+          const entryDate = new Date(savedMaster.entryDate);
+          const isValidDate = !isNaN(entryDate.getTime());
+          
+          return {
+            year: isValidDate ? entryDate.getFullYear() : new Date().getFullYear(),
+            month: isValidDate ? entryDate.getMonth() + 1 : new Date().getMonth() + 1,
+            day: isValidDate ? entryDate.getDate() : new Date().getDate(),
+            entryNumber: savedMaster.entryNumber,
+            resentmenType: d.resentmenType,
+            accountCode: d.accountCode,
+            accountName: d.accountName || '',  // 서버에서 받은 값 사용 (이제 매핑값이 포함됨)
+            partnerCode: d.partnerCode || '',
+            partnerName: d.partnerName || '',  // 서버에서 받은 값 사용 (이제 매핑값이 포함됨)
+            debit: d.resentmenType === 'g3' ? d.amount : null,
+            credit: d.resentmenType === 'g4' ? d.amount : null,
+            description: d.description || '',
+            lineNumber: d.lineNumber
+          };
+        });
 
         if (isNew) {
           const newRowDataFromServer = receivedRows[0];
@@ -1324,7 +1206,6 @@
           });
           
           if (!hasEmptyRow) {
-            console.log('저장 후 빈 행이 없어서 새로 추가합니다.');
             api.applyTransaction({ add: [getEmptyRow()] });
           }
 
@@ -1334,13 +1215,11 @@
             api.forEachNode(node => {
               if (node.data && isEmptyRow(node.data) && !focusSet) {
                 api.setFocusedCell(node.rowIndex, gridOptions.columnDefs[0].field);
-                console.log('저장 후 빈 행에 포커스 설정:', node.rowIndex);
                 focusSet = true;
               }
             });
             
             if (!focusSet) {
-              console.log('저장 후 빈 행을 찾지 못했습니다.');
             }
           }, 100);
         } else {
@@ -1429,7 +1308,6 @@
           // 데이터 타입 에러를 방지하기 위해 문자열로 변환
           node.setDataValue('accountCode', String(code));
           node.setDataValue('accountName', String(name));
-          console.log('모달에서 계정과목 선택:', { code: String(code), name: String(name) });
         }
       }
       if (accountModalInstance) accountModalInstance.hide();
@@ -1506,7 +1384,6 @@
           // 데이터 타입 에러를 방지하기 위해 문자열로 변환
           node.setDataValue('partnerCode', String(code));
           node.setDataValue('partnerName', String(name));
-          console.log('모달에서 거래처 선택:', { code: String(code), name: String(name) });
         }
       }
       if (partnerModalInstance) partnerModalInstance.hide();
@@ -1515,8 +1392,6 @@
 
     // Summary row 즉시 생성 및 추가 함수
     function generateAndAddSummaryRow(entryNumber) {
-      console.log('generateAndAddSummaryRow 호출:', entryNumber);
-      
       const currentApi = gridOptions.api;
       if (!currentApi || typeof currentApi.getDisplayedRowCount !== 'function' || 
           typeof currentApi.applyTransaction !== 'function') {
@@ -1524,82 +1399,72 @@
         return;
       }
       
-      try {
-        // 1. 먼저 현재 그리드에 해당 전표번호의 summary row가 이미 있는지 확인
-        let existingSummaryCount = 0;
-        for (let i = 0; i < currentApi.getDisplayedRowCount(); i++) {
-          const rowData = currentApi.getDisplayedRowAtIndex(i)?.data;
-          if (rowData && rowData.isSummary === true && rowData._summaryEntryNumber === entryNumber) {
-            existingSummaryCount++;
-            console.warn('이미 존재하는 summary row 발견:', {
-              index: i,
-              entryNumber: entryNumber,
-              isSummaryType: rowData.isSummaryType,
-              month: rowData.month
-            });
-          }
-        }
-        
-        if (existingSummaryCount > 0) {
-          console.warn(`전표번호 ${entryNumber}의 summary row가 이미 ${existingSummaryCount}개 존재함. 생성 중단.`);
-          return;
-        }
-        
-        // 2. 전체 데이터 수집 (summary row 제외, 빈 행 포함)
-        let allRowData = [];
-        for (let i = 0; i < currentApi.getDisplayedRowCount(); i++) {
-          const rowData = currentApi.getDisplayedRowAtIndex(i)?.data;
-          if (rowData && !rowData.isSummary) {
-            allRowData.push(rowData);
-          }
-        }
-        
-        console.log('수집된 전체 데이터 수:', allRowData.length);
-        
-        // 3. summary row 생성
-        const summaryRows = generateSummaryRow(allRowData, entryNumber);
-        console.log('생성된 summary rows:', summaryRows);
-        
-        if (summaryRows && summaryRows.length > 0) {
-          // 4. 해당 전표번호의 마지막 위치 찾기
-          let insertPosition = -1;
+      setTimeout(() => {
+        try {
+          // 1. 먼저 현재 그리드에 해당 전표번호의 summary row가 이미 있는지 확인
+          let existingSummaryCount = 0;
           for (let i = 0; i < currentApi.getDisplayedRowCount(); i++) {
             const rowData = currentApi.getDisplayedRowAtIndex(i)?.data;
-            if (rowData && !rowData.isSummary && rowData.entryNumber === entryNumber) {
-              insertPosition = i + 1;
-            }
-          }
-          
-          console.log('삽입 위치:', insertPosition);
-          
-          // 5. summary row 추가
-          try {
-            if (insertPosition >= 0 && insertPosition <= currentApi.getDisplayedRowCount()) {
-              console.log('Summary row 추가 시도 - addIndex 사용:', insertPosition);
-              currentApi.applyTransaction({ 
-                add: summaryRows, 
-                addIndex: insertPosition 
+            if (rowData && rowData.isSummary === true && rowData._summaryEntryNumber === entryNumber) {
+              existingSummaryCount++;
+              console.warn('이미 존재하는 summary row 발견:', {
+                index: i,
+                entryNumber: entryNumber,
+                isSummaryType: rowData.isSummaryType,
+                month: rowData.month
               });
-            } else {
-              // 전표번호 행을 찾지 못한 경우 맨 끝에 추가
-              console.log('Summary row 추가 시도 - 맨 끝에 추가');
-              currentApi.applyTransaction({ add: summaryRows });
             }
-            console.log('Summary row 추가 완료');
-            
-            // 추가 후 그리드 상태 확인
-            console.log('추가 후 그리드 상태:', {
-              totalRows: currentApi.getDisplayedRowCount(),
-              addedEntryNumber: entryNumber
-            });
-          } catch (addError) {
-            console.error('Summary row 추가 중 오류:', addError);
           }
+          
+          if (existingSummaryCount > 0) {
+            console.warn(`전표번호 ${entryNumber}의 summary row가 이미 ${existingSummaryCount}개 존재함. 생성 중단.`);
+            return;
+          }
+          
+          // 2. 전체 데이터 수집 (summary row 제외, 빈 행 포함)
+          let allRowData = [];
+          for (let i = 0; i < currentApi.getDisplayedRowCount(); i++) {
+            const rowData = currentApi.getDisplayedRowAtIndex(i)?.data;
+            if (rowData && !rowData.isSummary) {
+              allRowData.push(rowData);
+            }
+          }
+          
+          // 3. summary row 생성
+          const summaryRows = generateSummaryRow(allRowData, entryNumber);
+          
+          if (summaryRows && summaryRows.length > 0) {
+            // 4. 해당 전표번호의 마지막 위치 찾기
+            let insertPosition = -1;
+            for (let i = 0; i < currentApi.getDisplayedRowCount(); i++) {
+              const rowData = currentApi.getDisplayedRowAtIndex(i)?.data;
+              if (rowData && !rowData.isSummary && rowData.entryNumber === entryNumber) {
+                insertPosition = i + 1;
+              }
+            }
+            
+            // 5. summary row 추가
+            try {
+              if (insertPosition >= 0 && insertPosition <= currentApi.getDisplayedRowCount()) {
+                currentApi.applyTransaction({ 
+                  add: summaryRows, 
+                  addIndex: insertPosition 
+                });
+              } else {
+                // 전표번호 행을 찾지 못한 경우 맨 끝에 추가
+                currentApi.applyTransaction({ add: summaryRows });
+              }
+              
+              // 추가 후 그리드 상태 확인
+            } catch (addError) {
+              console.error('Summary row 추가 중 오류:', addError);
+            }
+          }
+          
+        } catch (error) {
+          console.error('generateAndAddSummaryRow 중 오류:', error);
         }
-        
-      } catch (error) {
-        console.error('generateAndAddSummaryRow 중 오류:', error);
-      }
+      }, 0);
     }
       // Summary row 제거 헬퍼 함수
     function removeSummaryRows(api) {
@@ -1618,84 +1483,72 @@
       }
       
       return new Promise((resolve) => {
-        let summaryRowsToRemove = [];
-        
-        try {
-          // 한 번 더 API 메서드 유효성 확인 (실행 직전)
-          if (typeof api.getDisplayedRowCount !== 'function') {
-            console.error('removeSummaryRows: getDisplayedRowCount가 함수가 아닙니다.');
+        setTimeout(() => {
+          let summaryRowsToRemove = [];
+          
+          try {
+            // 한 번 더 API 메서드 유효성 확인 (실행 직전)
+            if (typeof api.getDisplayedRowCount !== 'function') {
+              console.error('removeSummaryRows: getDisplayedRowCount가 함수가 아닙니다.');
+              resolve();
+              return;
+            }
+            
+            const rowCount = api.getDisplayedRowCount();
+            
+            for (let i = 0; i < rowCount; i++) {
+              const rowNode = api.getDisplayedRowAtIndex(i);
+              if (!rowNode || !rowNode.data) continue;
+              
+              const rowData = rowNode.data;
+              // isSummary === true이고 빈 행이 아닌 경우만 제거 대상으로 선정
+              if (rowData.isSummary === true && 
+                  (rowData.isSummaryType === 'subtotal' || rowData.isSummaryType === 'total')) {
+                summaryRowsToRemove.push(rowData);
+              }
+            }
+          } catch (error) {
+            console.error('Summary row 검색 중 오류:', error);
             resolve();
             return;
           }
           
-          const rowCount = api.getDisplayedRowCount();
-          console.log('현재 표시된 행 수:', rowCount);
-          
-          for (let i = 0; i < rowCount; i++) {
-            const rowNode = api.getDisplayedRowAtIndex(i);
-            if (!rowNode || !rowNode.data) continue;
-            
-            const rowData = rowNode.data;
-            // isSummary === true이고 빈 행이 아닌 경우만 제거 대상으로 선정
-            if (rowData.isSummary === true && 
-                (rowData.isSummaryType === 'subtotal' || rowData.isSummaryType === 'total')) {
-              summaryRowsToRemove.push(rowData);
-              console.log('제거 대상 summary row 발견:', i, {
-                isSummary: rowData.isSummary,
-                isSummaryType: rowData.isSummaryType,
-                month: rowData.month,
-                _summaryEntryNumber: rowData._summaryEntryNumber
+          if (summaryRowsToRemove.length > 0) {
+            try {
+              // 모든 summary row를 한 번에 제거
+              api.applyTransaction({ remove: summaryRowsToRemove });
+              
+              // ag-Grid가 제거 작업을 완전히 처리할 시간을 주기 위해 약간의 지연
+              setTimeout(() => {
+                resolve();
+              }, 50);
+            } catch (error) {
+              console.error('Summary row 제거 중 오류:', error);
+              // 제거 실패 시 개별 제거 시도
+              let removeCount = 0;
+              summaryRowsToRemove.forEach((row, index) => {
+                try {
+                  api.applyTransaction({ remove: [row] });
+                  removeCount++;
+                } catch (individualError) {
+                  console.error(`Summary row ${index + 1} 개별 제거 실패:`, individualError);
+                }
               });
+              
+              // 개별 제거 완료 후 지연
+              setTimeout(() => {
+                resolve();
+              }, 50);
             }
+          } else {
+            resolve();
           }
-        } catch (error) {
-          console.error('Summary row 검색 중 오류:', error);
-          resolve();
-          return;
-        }
-        
-        if (summaryRowsToRemove.length > 0) {
-          console.log('제거할 summary row 수:', summaryRowsToRemove.length);
-          try {
-            // 모든 summary row를 한 번에 제거
-            api.applyTransaction({ remove: summaryRowsToRemove });
-            console.log('모든 summary row 제거 완료');
-            
-            // ag-Grid가 제거 작업을 완전히 처리할 시간을 주기 위해 약간의 지연
-            setTimeout(() => {
-              resolve();
-            }, 50);
-          } catch (error) {
-            console.error('Summary row 제거 중 오류:', error);
-            // 제거 실패 시 개별 제거 시도
-            let removeCount = 0;
-            summaryRowsToRemove.forEach((row, index) => {
-              try {
-                api.applyTransaction({ remove: [row] });
-                console.log(`Summary row ${index + 1} 개별 제거 완료`);
-                removeCount++;
-              } catch (individualError) {
-                console.error(`Summary row ${index + 1} 개별 제거 실패:`, individualError);
-              }
-            });
-            
-            // 개별 제거 완료 후 지연
-            setTimeout(() => {
-              console.log(`총 ${removeCount}개 summary row 개별 제거 완료`);
-              resolve();
-            }, 50);
-          }
-        } else {
-          console.log('제거할 summary row가 없음');
-          resolve();
-        }
+        }, 0);
       });
     }
     
     //소계/차액 계산 함수
     function generateSummaryRow(rowData, entryNumber) {
-      console.log('generateSummaryRow 호출:', { rowDataLength: rowData.length, entryNumber });
-      
       // partnerName열에 차액 표시
       let subtotal = { partnerName: 0, debit: 0, credit: 0 }; // 전표 소계
       let grandTotal = { partnerName: 0, debit: 0, credit: 0 }; // 합계
@@ -1714,14 +1567,6 @@
       // 차액(절댓값 차이) 계산
       const subtotalDiff = Math.abs(subtotal.debit - subtotal.credit);
       const grandTotalDiff = Math.abs(grandTotal.debit - grandTotal.credit);
-
-      console.log('소계 계산 결과:', { 
-        entryNumber, 
-        subtotal: subtotal, 
-        subtotalDiff: subtotalDiff,
-        grandTotal: grandTotal, 
-        grandTotalDiff: grandTotalDiff 
-      });
 
       // 소계행만 반환 (합계행은 임시로 제거하여 ID 충돌 문제 해결)
       const summaryRowsResult = [
@@ -1762,7 +1607,6 @@
         // }
       ];
       
-      console.log('생성된 summary rows:', summaryRowsResult);
       return summaryRowsResult;
     }
     function findFirstDiffEntryNumber() {
@@ -1784,7 +1628,7 @@
     function updateFirstDiffEntryNumber() {
       firstDiffEntryNumber = findFirstDiffEntryNumber();
     }
-    // 같은 전표번호를 가진 행들 강조 표시
+// 같은 전표번호를 가진 행들 강조 표시
     function highlightSameEntryNumber(entryNumber) {
       if (entryNumber && entryNumber !== highlightedEntryNumber) {
         highlightedEntryNumber = entryNumber;

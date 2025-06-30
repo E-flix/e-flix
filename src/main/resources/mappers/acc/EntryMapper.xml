@@ -25,6 +25,8 @@
     <result property="updatedAt" column="updated_at" />
     
     <result property="accountName" column="account_name"/>
+    <result property="businessNumber" column="business_number"/>
+    <result property="residentNumber" column="resident_number"/>
   </resultMap>
 
   <!-- EntryMasterDTO + details 매핑 정의 -->
@@ -38,6 +40,10 @@
     <result property="updatedAt" column="updated_at" />
     <result property="transactionType" column="transaction_type" />
     <result property="partnerCode" column="partner_code" />
+    <!-- master의 partner 정보 매핑 -->
+    <result property="businessNumber" column="business_number" />
+    <result property="residentNumber" column="resident_number" />
+    <result property="partnerName" column="partner_name" />
     <result property="electronicType" column="electronic_type" />
     <result property="approvalNumber" column="approval_number" />
     <result property="itemName" column="item_name" />
@@ -216,7 +222,7 @@
 
   <!-- select max+1 entry_number -->
   <select id="selectMaxPlusOneEntryNumber" resultType="int">
-    SELECT COALESCE(MAX(entry_number)+1, 1) AS enNo FROM entry_master
+    SELECT COALESCE(MAX(entry_number)+1, 1) AS enNo FROM entry_master WHERE entry_type = '일반'
   </select>
 
   <!-- select max+1 line_number -->
@@ -224,5 +230,57 @@
     SELECT COALESCE(MAX(line_number)+1, 1) AS lineNo 
     FROM entry_detail
     WHERE entry_number = #{entry_number}
+  </select>
+
+<!-- ======================== 아래부터 매입매출전표 =======================-->
+  <!-- master 전표 조회 -->
+  <select id="getPSMasterList" resultMap="entryMasterResultMap">
+    SELECT 
+      m.entry_number, 
+      m.entry_type,
+      m.entry_date, 
+      m.entry_status, 
+      m.creator, 
+      m.created_at, 
+      m.updated_at, 
+      m.remarks, 
+      m.transaction_type,
+      m.partner_code, 
+      m.electronic_type, 
+      m.approval_number, 
+      m.item_name, 
+      m.quantity, 
+      m.unit_price,
+      m.total_supply_amount, 
+      m.total_tax_amount,
+      p.business_number,
+      p.resident_number,
+      p.partner_name
+    FROM entry_master m LEFT OUTER JOIN partner_detail p ON m.partner_code = p.partner_code
+    WHERE m.transaction_type != '63'
+    ORDER BY entry_date
+  </select>
+  <!-- detail 전표 조회 -->
+  <select id="getPSDetailList" resultMap="entryDetailResultMap">
+    SELECT 
+      d.line_number, 
+      d.entry_number AS d_entry_number, 
+      d.partner_code AS d_partner_code, 
+      d.partner_name, 
+      d.account_code,
+      d.resentmen_type, 
+      d.amount, 
+      d.description, 
+      d.created_at, 
+      d.updated_at,
+      a.account_name
+    FROM entry_detail d
+    LEFT JOIN account a ON d.account_code = a.account_code
+    WHERE d.entry_number = #{entryNumber}
+    ORDER BY d.line_number
+  </select>
+  <!-- select max+1 entry_number -->
+  <select id="selectMaxPlusOneEntryNumberPS" resultType="int">
+    SELECT COALESCE(MAX(entry_number)+1, 50001) AS enNo FROM entry_master
   </select>
 </mapper>
