@@ -289,7 +289,7 @@
 		})).then(() => {
 			Swal.fire({
 				icon: "success",
-				title: "삭제 완료",
+				title: "반려 완료",
 				text: "선택된 제품이 반려되었습니다.",
 				timer: 1000,
 				showConfirmButton: false
@@ -334,7 +334,7 @@
 		});
 	});
 
-
+	// 입고버튼
 	$("#inboundBtn").on("click", async () => {
 		const selectedProducts = ibdGridOptions.api.getSelectedRows();
 		const selectedWarehouse = whGridOptions.api.getSelectedRows();
@@ -356,7 +356,7 @@
 				$.get('/purchs/gnpl')
 			]);
 
-			const inboundManager = "admin"; // 또는 서버에서 받은 값
+			const inboundManager = "admin"; // 임시 값 서버에서 받아와야 함 (로그인된 사람)
 
 			const payload = {
 				inboundId,
@@ -379,7 +379,8 @@
 				icon: "success",
 				title: "입고 완료",
 				text: "제품이 창고에 입고되었습니다.",
-				showConfirmButton: false
+				showConfirmButton: false,
+				timer: 1500
 			}).then(() => window.location.reload());
 
 		} catch (error) {
@@ -409,7 +410,7 @@
 			const warehouseCurrent = selectedWarehouse[0]?.warehouseCurrent || ""; // 현재용량
 			const conf = selectedWarehouse[0]?.conf || "" // 사용가능용량
 			// 계산
-			const result = warehouseScale - quantities;
+			const result = conf - quantities;
 			// 출력
 			document.getElementById("summaryProdId").value = prodIds; // 제품ID
 			document.getElementById("summaryQuantity").value = quantities; // 입고요청량
