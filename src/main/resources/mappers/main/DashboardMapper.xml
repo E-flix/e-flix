@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+===========================================
+  - 파일명   : DashboardMapper.xml
+  - 설명     : 관리자 페이지 - 대시보드 관련 정의
+===========================================
+  [작성 정보]
+  - 작성자   : 복성민 (bokseongmin@gmail.com)
+  - 최초작성 : 2025-07-01
+===========================================
+  [변경 이력]
+  - 2025-07-01: 최초 생성 (복성민)
+===========================================
+-->
+<mapper namespace="com.eflix.main.mapper.DashboardMapper">
+    <select id="countActiveSubscribers" resultType="int">
+        SELECT COUNT(*) FROM subscription WHERE spi_status = 'SS01'
+    </select>
+
+    <select id="countSubscriptionRequests" resultType="int">
+        SELECT COUNT(*) FROM subscription WHERE spi_status = 'SS02'
+    </select>
+
+    <select id="countUnansweredQuestions" resultType="int">
+        SELECT COUNT(*) 
+        FROM questions q 
+        WHERE NOT EXISTS (
+            SELECT 1 FROM answers a WHERE a.qst_idx = q.qst_idx
+        )
+    </select>
+
+    <select id="countTodayAnswers" resultType="int">
+        SELECT COUNT(*) 
+        FROM answers 
+        WHERE TRUNC(ansr_regdate) = TRUNC(SYSDATE)
+    </select>
+
+    <select id="selectTodaySubscriptions" resultType="SubscriptionDTO">
+        SELECT spi_idx, co_idx, spi_start 
+        FROM subscription 
+        WHERE TRUNC(spi_start) = TRUNC(SYSDATE)
+    </select>
+
+    <select id="selectTodayAnswers" resultType="InquirySummaryDTO">
+        SELECT ansr_idx, qst_idx, ansr_title, ansr_regdate 
+        FROM answers 
+        WHERE TRUNC(ansr_regdate) = TRUNC(SYSDATE)
+    </select>
+</mapper>

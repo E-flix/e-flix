@@ -19,22 +19,22 @@
         <!-- 통계 요약 -->
         <div class="row mb-4 text-center">
             <div class="col-md-3 mb-2">
-                <div class="bg-light border rounded py-3">
+                <div class="bg-light border rounded py-3" id="subscriber">
                     <h5>구독자 수</h5>
                 </div>
             </div>
             <div class="col-md-3 mb-2">
-                <div class="bg-light border rounded py-3">
+                <div class="bg-light border rounded py-3" id="subscription_req">
                     <h5>구독 요청 수</h5>
                 </div>
             </div>
             <div class="col-md-3 mb-2">
-                <div class="bg-light border rounded py-3">
+                <div class="bg-light border rounded py-3" id="unAnswered">
                     <h5>미 답변</h5>
                 </div>
             </div>
             <div class="col-md-3 mb-2">
-                <div class="bg-light border rounded py-3">
+                <div class="bg-light border rounded py-3" id="Answered">
                     <h5>금일 답변</h5>
                 </div>
             </div>
@@ -44,21 +44,87 @@
         <div class="row">
             <!-- 새 구독 알림 -->
             <div class="col-md-6 mb-3">
-                <div class="bg-light border rounded p-3 h-100">
+                <div class="bg-light border rounded p-3 h-100" id="subscription-alerts">
                     <h6 class="mb-3">새 구독 알림</h6>
                     <div class="bg-white border rounded p-2 mb-2">알림 내용 1</div>
-                    <div class="text-center text-muted">...</div>
                 </div>
             </div>
 
             <!-- 새 답변 알림 -->
             <div class="col-md-6 mb-3">
-                <div class="bg-light border rounded p-3 h-100">
+                <div class="bg-light border rounded p-3 h-100" id="answer-alerts">
                     <h6 class="mb-3">새 답변 알림</h6>
                     <div class="bg-white border rounded p-2 mb-2">알림 내용 1</div>
-                    <div class="text-center text-muted">...</div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        $(document).ready(function () {
+            // 통계 요약 데이터 불러오기
+            $.ajax({
+                url: "/admin/api/summary",
+                type: "GET",
+                success: function (res) {
+                    const data = res.body
+                    $("#subscriber").append(data.subscriberCount);
+                    $("#subscription_req").append(data.subscriptionRequestCount);
+                    $("#unAnswered").append(data.unansweredCount);
+                    $("#Answered").append(data.todayAnsweredCount);
+                },
+                error: function () {
+                    Swal.fire("")
+                    console.error("통계 데이터를 불러오는 중 오류 발생");
+                }
+            });
+
+            // 새 구독 알림
+            $.ajax({
+                url: "/admin/api/alerts/subscription",
+                type: "GET",
+                success: function (data) {
+                    const container = $("#subscription-alerts");
+                    container.empty();
+                    if (data.length === 0) {
+                        container.append("<div class='text-muted'>오늘 신규 구독 없음</div>");
+                    } else {
+                        $.each(data, function (i, item) {
+                            container.append(
+                                `<div class='bg-white border rounded p-2 mb-2'>
+                            [${item.coIdx}] 구독 시작일: ${item.spiStart}
+                        </div>`
+                            );
+                        });
+                    }
+                },
+                error: function () {
+                    console.error("새 구독 알림 로딩 실패");
+                }
+            });
+
+            // 새 답변 알림
+            $.ajax({
+                url: "/admin/api/alerts/answers",
+                type: "GET",
+                success: function (data) {
+                    const container = $("#answer-alerts");
+                    container.empty();
+                    if (data.length === 0) {
+                        container.append("<div class='text-muted'>오늘 신규 답변 없음</div>");
+                    } else {
+                        $.each(data, function (i, item) {
+                            container.append(
+                                `<div class='bg-white border rounded p-2 mb-2'>
+                            Q${item.qstIdx}에 대한 답변: ${item.ansrTitle}
+                        </div>`
+                            );
+                        });
+                    }
+                },
+                error: function () {
+                    console.error("새 답변 알림 로딩 실패");
+                }
+            });
+        });
+    </script>
 </div>

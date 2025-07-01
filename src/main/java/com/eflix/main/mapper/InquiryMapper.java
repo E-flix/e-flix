@@ -9,16 +9,15 @@ import com.eflix.main.dto.etc.InquirySearchDTO;
 
 public interface InquiryMapper {
 
-    int insertQst(QuestionDTO questionDTO);
+    public int insertQst(QuestionDTO questionDTO);
 
-    int insertAns(AnswerDTO answerDTO);
+    public int insertAns(AnswerDTO answerDTO);
 
-    int findAllInquiryCount(InquirySearchDTO inquirySearchDTO);
+    public int findAllInquiryCount(InquirySearchDTO inquirySearchDTO);
 
-    List<InquiryDTO> findAllInquiry(InquirySearchDTO inquirySearchDTO);
+    public List<InquiryDTO> findAllInquiry(InquirySearchDTO inquirySearchDTO);
 
-    QuestionDTO findQstByIdx(String qstIdx);
+    public QuestionDTO findQstByIdx(String qstIdx);
 
-    AnswerDTO findAnsByQstIdx(String qstIdx);
-    
+    public AnswerDTO findAnsByQstIdx(String qstIdx);
 }
