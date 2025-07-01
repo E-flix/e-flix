@@ -27,21 +27,23 @@
             </div>
 
             <div class="card-body">
-                <!-- 검색 조건 -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" id="searchUserId" placeholder="아이디">
+                <form id="searchForm">
+                    <!-- 검색 조건 -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="userId" id="searchUserId" placeholder="아이디">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="userEmail" id="searchUserEmail" placeholder="이메일">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="userTel" id="searchUserTel" placeholder="연락처">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" id="searchBtn" class="btn btn-primary w-100">검색</button>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" id="searchUserEmail" placeholder="이메일">
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" id="searchUserTel" placeholder="연락처">
-                    </div>
-                    <div class="col-md-3">
-                        <button type="button" id="searchBtn" class="btn btn-primary w-100">검색</button>
-                    </div>
-                </div>
+                </form>
 
                 <!-- 회원 목록 테이블 -->
                 <div class="table-responsive">
@@ -80,6 +82,7 @@
         currentPage = page;
 
         let params = $("#searchForm").serialize();
+        console.log(params);
         params += "&page=" + page;
 
         $.ajax({

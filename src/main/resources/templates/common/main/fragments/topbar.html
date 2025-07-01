@@ -22,6 +22,10 @@
 					<li class="nav-item"><a class="nav-link me-lg-3" href="/#price">요금제 및 가격</a></li>
 				</ul>
 			</div>
+			<button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0" data-bs-toggle="modal" data-bs-target="#qnaModal">
+				<span class="d-flex align-items-center"> <i class="bi-chat-text-fill me-2"></i> <span class="small">문의</span>
+				</span>
+			</button>
 			<div class="d-flex justify-content-between mx-2" sec:authorize="!isAuthenticated()">
 				<div class="mx-2">
 					<button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0" data-bs-toggle="modal"
@@ -43,15 +47,17 @@
 					</button>
 				</div>
 				<div>
-					<button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0" data-bs-toggle="modal"
-						data-bs-target="#signupModal">
+					<button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0">
 						<span class="d-flex align-items-center"><a class="text-decoration-none text-white" href="/mypage_info">내정보</a></span>
 					</button>
 				</div>
 			</div>
-			<button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0" data-bs-toggle="modal" data-bs-target="#qnaModal">
-				<span class="d-flex align-items-center"> <i class="bi-chat-text-fill me-2"></i> <span class="small">문의</span>
-				</span>
-			</button>
+			<div class="d-flex justify-content-between mx-2" sec:authorize="isAuthenticated()">
+				<div>
+					<button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0">
+						<span class="d-flex align-items-center"><a class="text-decoration-none text-white" href="/admin">관리자</a></span>
+					</button>
+				</div>
+			</div>
 		</div>
 	</nav>

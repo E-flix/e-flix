@@ -15,55 +15,21 @@
     <title>관리자</title>
 </head>
 <div layout:fragment="content">
-    <div class="row">
-
-        <!-- 왼쪽 - 구독 회사 목록 -->
-        <div class="col-md-8">
-            <div class="card mb-3">
-                <div class="card-header fw-bold">구독 회사 목록</div>
-                <div class="card-body p-0">
-                    <table class="table table-bordered table-hover text-center mb-0 align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>회사번호</th>
-                                <th>회사명</th>
-                                <th>대표자</th>
-                                <th>담당자</th>
-                                <th>연락처</th>
-                                <th>이메일</th>
-                                <th>상태</th>
-                                <th>남은기간</th>
-                                <th>만료일</th>
-                                <th>관리</th>
-                            </tr>
-                        </thead>
-                        <tbody id="companyTableBody">
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer text-center">
-                    <nav>
-                        <ul class="pagination pagination-sm justify-content-center mb-0">
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        </ul>
-                    </nav>
+    <!-- 상단 영역 - 회사 정보 + 구독 목록 -->
+    <div class="row mb-4">
+        <!-- 왼쪽 - 회사 상세 정보 -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header fw-bold">회사 상세 정보</div>
+                <div class="card-body" id="companyDetail">
+                    <p class="text-muted">회사를 선택하면 상세 정보가 표시됩니다.</p>
                 </div>
             </div>
         </div>
 
-        <!-- 오른쪽 - 회사 상세 정보 + 구독 내역 -->
-        <div class="col-md-4">
-
-            <!-- 회사 상세 정보 -->
-            <div class="card mb-3">
-                <div class="card-header fw-bold">회사 상세 정보</div>
-                <div class="card-body" id="companyDetail">
-                </div>
-            </div>
-
-            <!-- 구독 내역 -->
-            <div class="card">
+        <!-- 오른쪽 - 구독 내역 -->
+        <div class="col-md-6">
+            <div class="card h-100">
                 <div class="card-header fw-bold">📋 구독 내역</div>
                 <div class="card-body p-0">
                     <table class="table table-sm table-striped text-center mb-0">
@@ -72,29 +38,74 @@
                                 <th>번호</th>
                                 <th>구독일시</th>
                                 <th>금액</th>
-                                <th>서류</th>
+                                <th>계약서</th>
+                                <th>거래 명세서</th>
+                                <th>세금 계산서</th>
                             </tr>
                         </thead>
                         <tbody id="subscriptionTableBody">
-                            
+                            <tr>
+                                <td colspan="6" class="text-muted">회사를 선택하면 구독 내역이 표시됩니다.</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="card-footer text-center">
-                    <small>총 2건</small>
+                    <small>총 0건</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 하단 영역 - 구독 회사 목록 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header fw-bold">구독 회사 목록</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover text-center mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>회사번호</th>
+                                    <th>회사명</th>
+                                    <th>대표자</th>
+                                    <th>담당자</th>
+                                    <th>연락처</th>
+                                    <th>이메일</th>
+                                    <th>상태</th>
+                                    <th>남은기간</th>
+                                    <th>만료일</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="companyTableBody">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <nav>
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
     </div>
     <script>
-		let currentPage = 1;
+        let currentPage = 1;
         $(function () {
             // 회사 목록 로딩
             function loadCompanyList(page = 1) {
                 currentPage = page;
 
                 let params = $("#searchForm").serialize();
-			    params += "&page=" + page;
+                params += "&page=" + page;
 
                 $.ajax({
                     url: '/admin/api/company-subscription',
@@ -140,7 +151,7 @@
                 const svcStatus = $row.find('td').eq(6).text().trim();
                 const spiPeriod = $row.find('td').eq(7).text();
                 const remainingDays = $row.find('td').eq(8).text();
-                
+
                 // 회사 상세 정보
                 $('#companyDetail').html(`
                     <div class="mb-2"><strong>회사명:</strong> ${coName}</div>
@@ -152,7 +163,7 @@
                     <div class="mb-2"><strong>계약기간:</strong> ${spiPeriod}</div>
                     <div class="mb-2"><strong>남은기간:</strong> ${remainingDays}</div>
                 `);
-                
+
 
                 // 구독 내역 조회
                 $.ajax({
@@ -171,8 +182,16 @@
                                         <td>${subscription.spiStart}</td>
                                         <td>${subscription.spkPrice.toLocaleString('ko-KR', { style: 'currency', currency: 'KRW' })}</td>
                                         <td>
-                                        <button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement" data-idx="${subscription.spiIdx}">거래 명세서</button>
-                                        <button class="btn btn-outline-secondary btn-sm bill-btn" data-type="invoice" data-idx="${subscription.spiIdx}">세금 계산서</button>
+                                            <button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_preview" data-idx="${subscription.spiIdx}">미리보기</button>
+                                            <button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_download" data-idx="${subscription.spiIdx}">다운로드</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_preview" data-idx="${subscription.spiIdx}">미리보기</button>
+                                            <button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_download" data-idx="${subscription.spiIdx}">다운로드</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-outline-secondary btn-sm bill-btn" data-type="invoice_preview" data-idx="${subscription.spiIdx}">미리보기</button>
+                                            <button class="btn btn-outline-secondary btn-sm bill-btn" data-type="invoice_download" data-idx="${subscription.spiIdx}">다운로드</button>
                                         </td>
                                     </tr>`;
                                 tbody.append(row);
@@ -188,14 +207,14 @@
             // 청구서/계약서 버튼 클릭 시 파일 로딩
             $(document).on('click', '.bill-btn', function () {
                 const spiIdx = $(this).data('idx');
-                const type = $(this).data('type');
+                const [docType, type] = $(this).data('type').split('_');
                 console.log(spiIdx, type)
 
                 let url = "";
-                if(type === "statement") {
-                    url = `/subscription/report/statement/preview/${spiIdx}`;
-                } else if (type === "invoice") {
-                    url = `/subscription/report/invoice/preview/${spiIdx}`;
+                if (type === "download") {
+                    url = `/subscription/report/${docType}/${spiIdx}`;
+                } else if (type === "preview") {
+                    url = `/subscription/report/${docType}/preview/${spiIdx}`;
                 }
 
                 // 팝업 창 옵션
