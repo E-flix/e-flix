@@ -31,4 +31,18 @@ public interface EntryService {
   public List<EntryMasterDTO> getPSMasterList();
   // detail 전표 조회
   public List<EntryDetailDTO> getPSDetailList(int entryNumber);
+  // 매입매출전표 신규 저장
+  public EntryMasterDTO insertPurchaseSalesEntry(EntryMasterDTO entryMaster);
+  // 매입매출전표 수정
+  public EntryMasterDTO updatePurchaseSalesEntry(EntryMasterDTO entryMaster);
+  // 매입매출전표용 전표번호 조회 (max+1)
+  public int selectMaxPlusOneEntryNumberPS();
+  // 매입매출전표 삭제
+  public void deletePurchaseSalesEntry(List<EntryMasterDTO> entryMasters);
+  // 매입매출전표 상세 저장
+  public List<EntryDetailDTO> insertPurchaseSalesDetail(List<EntryDetailDTO> entryDetails);
+  // 매입매출전표 상세 수정
+  public List<EntryDetailDTO> updatePurchaseSalesDetail(List<EntryDetailDTO> entryDetails);
+  // 매입매출전표 상세 삭제
+  public void deletePurchaseSalesDetail(List<EntryDetailDTO> entryDetails);
 }
