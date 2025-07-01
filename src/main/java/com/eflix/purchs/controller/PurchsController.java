@@ -1,14 +1,8 @@
 package com.eflix.purchs.controller;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import com.eflix.purchs.service.WarehouseService;
-
-import lombok.RequiredArgsConstructor;
-
 /**
  * ============================================
  * - 작성자 : 이혁진
@@ -24,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/purchs")
 public class PurchsController {
 	// 재고관리목록
-	@GetMapping("/cgy")
+	@GetMapping("")
 	public String category() {
 		return "purchs/category";
 	}
@@ -33,12 +27,6 @@ public class PurchsController {
 	@GetMapping("/obd")
 	public String outbound() {
 		return "purchs/outbound";
-	}
-
-	// 창고이동
-	@GetMapping("/whm")
-	public String warehouse_mnt() {
-		return "purchs/warehouse_movement";
 	}
 
 	// 입고조회

@@ -19,13 +19,13 @@
 	<select id="getNextWarehouseId" resultType="string">
       SELECT
         'wh-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(warehouse_id, 4))), 100) + 1)
-      FROM
+      FROM`
         warehouse
   </select>
 	<!-- 등록 -->
 	<insert id="insertWarehouse" parameterType="WarehouseDTO">
-      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager, warehouse_status, warehouse_current) 
-      VALUES (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager}, 's01', 0)
+      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager, warehouse_status, warehouse_current, co_idx) 
+      VALUES (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager}, 's01', 0, 'co-101')  <!--회사코드 삽입 'co-101' -->
   </insert>
 	<!-- 삭제 -->
 	<delete id="deleteWarehouse" parameterType="WarehouseDTO">
