@@ -93,8 +93,7 @@
 </head>
 
 <div layout:fragment="content" class="container-fluid px-3 py-2">
-
-  <form th:action="@{/bsn/sorder}"  
+  <form th:action="@{/bsn/sorder}"
     th:object="${order}"
     method="post">
 
@@ -122,6 +121,7 @@
     <!-- ── 주문 헤더 / 여신정보 ──────────────────────────────────────── -->
     <div class="row gx-3 mb-3">
       <!-- 주문 헤더 -->
+      <!-- 주문 헤더 -->
       <div class="col-lg-8 col-md-7">
         <div class="section-box">
           <h6>주문서 헤더</h6>
@@ -137,31 +137,66 @@
                 <tr>
                   <th class="bg-cell">주문서 번호</th>
                   <td><input th:field="*{orderNo}" class="form-control form-control-sm" readonly></td>
-                  <th class="bg-cell">주문일자</th>
+                  <th class="bg-cell">주문서 작성일자</th>
                   <td><input th:field="*{orderDate}" class="form-control form-control-sm" type="date"></td>
                 </tr>
                 <tr>
-                  <th class="bg-cell">납기일</th>
-                  <td><input th:field="*{deliveryDt}" class="form-control form-control-sm" type="date"></td>
                   <th class="bg-cell">거래처</th>
-                  <td><input th:field="*{customerCd}" class="form-control form-control-sm"></td>
+                  <td><input th:field="*{customerCd}" class="form-control form-control-sm customer-cd"></td>
+                  <th class="bg-cell">거래처 대표명</th>
+                  <td><input id="customerRepresentative" class="form-control form-control-sm" readonly></td>
                 </tr>
                 <tr>
-                  <th class="bg-cell">연락처</th>
+                  <th class="bg-cell">거래처 이메일</th>
+                  <td><input id="customerEmail" class="form-control form-control-sm" readonly></td>
+                  <th class="bg-cell">거래처 영업담당자</th>
+                  <td><input id="salesEmp" class="form-control form-control-sm" readonly></td>
+                </tr>
+                <tr>
+                  <th class="bg-cell">거래처 할인율</th>
+                  <td><input id="discountRate" class="form-control form-control-sm" readonly></td>
+                  <th class="bg-cell">거래처 연락처</th>
                   <td><input th:field="*{phoneNumber}" class="form-control form-control-sm"></td>
+                </tr>
+                <tr>
                   <th class="bg-cell">배송지</th>
                   <td><input th:field="*{deliveryAddr}" class="form-control form-control-sm"></td>
-                </tr>
-                <tr>
                   <th class="bg-cell">출고창고</th>
                   <td><input th:field="*{warehouseCd}" class="form-control form-control-sm"></td>
-                  <th class="bg-cell">출고예정일</th>
+                </tr>
+                <tr>
+                  <th class="bg-cell">출고일</th>
                   <td><input th:field="*{deliveryDt}" class="form-control form-control-sm" type="date"></td>
+                  <th class="bg-cell">납기일</th>
+                  <td><input id="expectedDeliveryDate" class="form-control form-control-sm" type="date"></td>
+                </tr>
+                <tr>
+                  <th class="bg-cell">배송방법</th>
+                  <td>
+                    <select id="deliveryMethod" class="form-select form-select-sm">
+                      <option value="">선택하세요</option>
+                      <option value="직접배송">직접배송</option>
+                      <option value="택배">택배</option>
+                      <option value="화물">화물</option>
+                      <option value="고객직접수령">고객직접수령</option>
+                    </select>
+                  </td>
+                  <th class="bg-cell">운송업체</th>
+                  <td>
+                    <select id="shippingCompany" class="form-select form-select-sm">
+                      <option value="">선택하세요</option>
+                      <option value="CJ대한통운">CJ대한통운</option>
+                      <option value="한진택배">한진택배</option>
+                      <option value="롯데택배">롯데택배</option>
+                      <option value="우체국택배">우체국택배</option>
+                      <option value="기타">기타</option>
+                    </select>
+                  </td>
                 </tr>
                 <tr>
                   <th class="bg-cell">결제조건</th>
                   <td><input th:field="*{paymentTerms}" class="form-control form-control-sm"></td>
-                  <th class="bg-cell">세금계산서</th>
+                  <th class="bg-cell">세금계산서 발행</th>
                   <td>
                     <select th:field="*{taxInvoiceYn}" class="form-select form-select-sm">
                       <option value="Y">예</option>
