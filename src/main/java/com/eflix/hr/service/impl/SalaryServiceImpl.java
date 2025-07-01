@@ -10,42 +10,47 @@ package com.eflix.hr.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.SalaryDTO;
+import com.eflix.hr.mapper.SalaryMapper;
 import com.eflix.hr.service.SalaryService;
 
 @Service
 public class SalaryServiceImpl implements SalaryService {
 
+  @Autowired
+  private SalaryMapper salaryMapper;
+
   @Override
   public List<SalaryDTO> getAllSalaries() {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllSalaries'");
   }
 
   @Override
   public SalaryDTO getSalaryById(String salaryIdx) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getSalaryById'");
   }
 
   @Override
   public int createSalary(SalaryDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createSalary'");
   }
 
   @Override
   public int updateSalary(SalaryDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateSalary'");
   }
 
   @Override
   public int deleteSalary(String salaryIdx) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'deleteSalary'");
+  }
+
+  @Override
+  public List<SalaryDTO> bankList() {
+    return salaryMapper.bankList();
   }
 
 }

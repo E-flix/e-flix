@@ -6,13 +6,210 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-06-20 (김희정): 임시 레이아웃
+  - 2025-06-23 (김희정): 일반거래처 전체조회 테스트
 ============================================ -->
+
 <head>
   <title>거래처관리</title>
 </head>
 <div layout:fragment="content">
-  <div id="partner">
-    <h2>거래처관리</h2>
-    <p>거래처관리 화면입니다.</p>
+  <!-- 거래처관리 -->
+  <div id="clients" class="content-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>거래처관리</h2>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal">
+        <i class="bi bi-plus me-1"></i>신규 거래처
+      </button>
+    </div>
+
+    <ul class="nav nav-tabs mb-3" id="clientTabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#general-clients">일반거래처</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#banks">금융기관</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#cards">카드</a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="general-clients">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-header">
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="거래처명 검색">
+                  <button class="btn btn-outline-secondary">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                  <a href="#" class="list-group-item list-group-item-action client-item active" data-client="00100">
+                    <div class="d-flex justify-content-between">
+                      <div>
+                        <h6 class="mb-1">자바유통</h6>
+                        <small class="text-muted">123-45-78910</small>
+                      </div>
+                      <span class="badge bg-primary">전체</span>
+                    </div>
+                  </a>
+                  <a href="#" class="list-group-item list-group-item-action client-item" data-client="00101">
+                    <div class="d-flex justify-content-between">
+                      <div>
+                        <h6 class="mb-1">스트링베어링</h6>
+                        <small class="text-muted">111-22-33333</small>
+                      </div>
+                      <span class="badge bg-success">매입</span>
+                    </div>
+                  </a>
+                  <a href="#" class="list-group-item list-group-item-action client-item" data-client="00102">
+                    <div class="d-flex justify-content-between">
+                      <div>
+                        <h6 class="mb-1">서블릿 문구</h6>
+                        <small class="text-muted">852-25-64975</small>
+                      </div>
+                      <span class="badge bg-warning">매출</span>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between">
+                <h5>거래처 상세정보</h5>
+                <div>
+                  <button class="btn btn-sm btn-outline-primary me-1">수정</button>
+                  <button class="btn btn-sm btn-outline-danger">삭제</button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="client-detail">
+                  <div class="row mb-3">
+                    <div class="col-md-3"><strong>거래처코드:</strong></div>
+                    <div class="col-md-3">00100</div>
+                    <div class="col-md-3"><strong>거래처명:</strong></div>
+                    <div class="col-md-3">자바유통</div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-3"><strong>사업자번호:</strong></div>
+                    <div class="col-md-3">123-45-78910</div>
+                    <div class="col-md-3"><strong>구분:</strong></div>
+                    <div class="col-md-3">전체</div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-3"><strong>대표자:</strong></div>
+                    <div class="col-md-3">김자바</div>
+                    <div class="col-md-3"><strong>연락처:</strong></div>
+                    <div class="col-md-3">053-111-2222</div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-3"><strong>주소:</strong></div>
+                    <div class="col-md-9">대구광역시 동구 동대구로 550</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="banks">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>코드</th>
+                <th>금융기관명</th>
+                <th>계좌번호</th>
+                <th>구분</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>80100</td>
+                <td>대구은행대출(1억)</td>
+                <td>1235-4105-111152</td>
+                <td><span class="badge bg-danger">일반</span></td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary">수정</button>
+                  <button class="btn btn-sm btn-outline-danger ms-1">삭제</button>
+                </td>
+              </tr>
+              <tr>
+                <td>80101</td>
+                <td>대구은행 보통예금</td>
+                <td>5247-422-41855</td>
+                <td><span class="badge bg-info">적금</span></td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary">수정</button>
+                  <button class="btn btn-sm btn-outline-danger ms-1">삭제</button>
+                </td>
+              </tr>
+              <tr>
+                <td>80102</td>
+                <td>중소기업은행 마이너스통장</td>
+                <td>500-47789-6632</td>
+                <td><span class="badge bg-success">예금</span></td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary">수정</button>
+                  <button class="btn btn-sm btn-outline-danger ms-1">삭제</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="cards">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>코드</th>
+                <th>카드명</th>
+                <th>카드번호</th>
+                <th>구분</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>90100</td>
+                <td>농협카드(1052)</td>
+                <td>9441-1672-7077-1052</td>
+                <td><span class="badge bg-success">매입</span></td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary">수정</button>
+                  <button class="btn btn-sm btn-outline-danger ms-1">삭제</button>
+                </td>
+              </tr>
+              <tr>
+                <td>90101</td>
+                <td>비씨카드(5284)</td>
+                <td>1847-0001-2997-5284</td>
+                <td><span class="badge bg-warning">매출</span></td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary">수정</button>
+                  <button class="btn btn-sm btn-outline-danger ms-1">삭제</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
+  <script th:inline="javascript">
+    let partnerList = /*[[${partnerList}]]*/[]; // DB 조회
+    console.log(partnerList);
+  </script>
 </div>

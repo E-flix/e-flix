@@ -1,13 +1,10 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-    layout:decorate="~{common/layouts/default}">
-
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
 <head>
     <title>재고관리목록</title>
 </head>
-<div layout:fragment="content">
-    <div class="container" id="acc-main">
+<div layout:fragment="content" class="container-fluid">
+    <div class="container" id="purchs-main">
         <h2 class="text-center mb-4 text-white bg-secondary py-3 rounded">재고관리</h2>
-
         <div class="row g-4">
             <!-- 창고 -->
             <div class="col-md-6 col-lg-4 mb-3">
@@ -17,8 +14,8 @@
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0">
-                            <li><a href="/purchs/warehouse" class="text-decoration-none text-dark">• 창고관리</a></li>
-                            <li><a href="/purchs/warehouse_mnt" class="text-decoration-none text-dark">• 창고이동</a></li>
+                            <li><a href="/purchs/wh" class="text-decoration-none text-dark">• 창고관리</a></li>
+                            <li><a href="/purchs/whm" class="text-decoration-none text-dark">• 창고이동</a></li>
                         </ul>
                     </div>
                 </div>
@@ -32,8 +29,8 @@
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0">
-                            <li><a href="/purchs/inbound" class="text-decoration-none text-dark">• 입고관리</a></li>
-                            <li><a href="/purchs/outbound" class="text-decoration-none text-dark">• 출고관리</a></li>
+                            <li><a href="/purchs/ibd" class="text-decoration-none text-dark">• 입고관리</a></li>
+                            <li><a href="/purchs/obd" class="text-decoration-none text-dark">• 출고관리</a></li>
                         </ul>
                     </div>
                 </div>
@@ -47,10 +44,10 @@
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0">
-                            <li><a href="/purchs/inbound_view" class="text-decoration-none text-dark">• 입고조회</a></li>
-                            <li><a href="/purchs/outbound_view" class="text-decoration-none text-dark">• 출고조회</a></li>
-                            <li><a href="/purchs/warehouse_view" class="text-decoration-none text-dark">• 창고조회</a></li>
-                            <li><a href="/purchs/inventory_view" class="text-decoration-none text-dark">• 재고조회</a></li>
+                            <li><a href="/purchs/ibdv" class="text-decoration-none text-dark">• 입고조회</a></li>
+                            <li><a href="/purchs/obdv" class="text-decoration-none text-dark">• 출고조회</a></li>
+                            <li><a href="/purchs/whv" class="text-decoration-none text-dark">• 창고조회</a></li>
+                            <li><a href="/purchs/ivyv" class="text-decoration-none text-dark">• 재고조회</a></li>
 
                         </ul>
                     </div>

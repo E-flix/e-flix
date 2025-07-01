@@ -1,6 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
   layout:decorate="~{common/layouts/default}">
-
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
@@ -9,6 +8,10 @@
   [ 변경 이력 ]
   - 2025-06-18 (김어진): title 및 내용 추가
   - 2025-06-19 (김어진): layout 구성 및 모달창 생성
+  - 2025-06-20 (김어진): 사원 전체조회 구현
+  - 2025-06-23 (김어진): 조건별 검색 구현
+  - 2025-06-24 (김어진): 사원등록 구현 중
+  - 2025-06-26 (김어진): 사원등록 구현완료 및 사원수정 구현
 ============================================ -->
 
 <head>
@@ -16,205 +19,584 @@
 </head>
 
 <div layout:fragment="content">
-  <div id="empList">
-    <h2>사원관리</h2>
-  </div>
-  <div class="py-4">
-
-    <!-- 사원등록 / 수정 버튼 -->
-    <div class="d-flex justify-content-end mb-2 gap-2">
-      <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#employeeModal">
-        사원등록
-      </button>
-      <button class="btn btn-primary">사원수정</button>
+  <div class="w-100" id="empList">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <h3>사원관리</h3>
     </div>
-
-    <!-- 검색 필터 -->
-    <div class="p-4 bg-light rounded mb-4">
-      <h5 class="fw-bold mb-3">사원관리</h5>
-
-      <div class="row g-3 align-items-center mb-3">
-        <div class="col-md-2"><label class="form-label">검색 기준</label></div>
-        <div class="col-md-2">
-          <select class="form-select"><option>전체</option></select>
-        </div>
-        <div class="col-md-4">
-          <input type="text" class="form-control" placeholder="검색어 입력 후 [enter]">
-        </div>
+    <div class="py-4">
+      <!-- 사원등록 / 수정 버튼 -->
+      <div class="d-flex justify-content-end mb-2 gap-2">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#employeeModal">
+          사원등록
+        </button>
+        <button id="editBtn" class="btn btn-primary">사원수정</button>
       </div>
 
-      <div class="row g-3 mb-3">
-        <div class="col-md-2"><label class="form-label">부서</label></div>
-        <div class="col-md-2"><select class="form-select"><option>선택</option></select></div>
-        <div class="col-md-2"><label class="form-label">직급</label></div>
-        <div class="col-md-2"><select class="form-select"><option>선택</option></select></div>
-      </div>
-
-      <div class="row g-3 mb-3">
-        <div class="col-md-2"><label class="form-label">재직 상태</label></div>
-        <div class="col-md-2"><select class="form-select"><option>선택</option></select></div>
-        <div class="col-md-2"><label class="form-label">근무 유형</label></div>
-        <div class="col-md-2"><select class="form-select"><option>선택</option></select></div>
-      </div>
-
-      <div class="d-flex gap-2">
-        <button class="btn btn-primary">조회</button>
-        <button class="btn btn-secondary">초기화</button>
-      </div>
-    </div>
-
-    <!-- 2. 사원 테이블 -->
-    <div class="table-responsive">
-      <table class="table table-bordered text-center align-middle">
-        <thead class="table-light">
-          <tr>
-            <th><input type="checkbox"></th>
-            <th>사원ID</th>
-            <th>사원명</th>
-            <th>부서</th>
-            <th>직급</th>
-            <th>재직 상태</th>
-            <th>근무 유형</th>
-            <th>입사일</th>
-            <th>연락처</th>
-            <th>이메일</th>
-            <th>근로계약서</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td colspan="11">데이터가 없습니다.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- 3. 페이지네이션 -->
-    <nav aria-label="Page navigation">
-      <ul class="pagination justify-content-center">
-        <li class="page-item"><a class="page-link" href="#">«</a></li>
-        <li class="page-item"><a class="page-link" href="#">‹</a></li>
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">›</a></li>
-        <li class="page-item"><a class="page-link" href="#">»</a></li>
-      </ul>
-    </nav>
-  </div>
-
-  <!-- 4. 사원등록 모달 -->
-  <div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-      <div class="modal-content p-3">
-        <div class="modal-header">
-          <h5 class="modal-title fw-bold">사원등록 (Modal)</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-        </div>
-
-        <div class="modal-body">
-          <!-- 탭 메뉴 -->
-          <ul class="nav nav-tabs mb-3">
-            <li class="nav-item">
-              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#basicInfo">기본정보</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#extraInfo">추가정보</button>
-            </li>
-          </ul>
-
-          <div class="tab-content">
-            <!-- 기본정보 -->
-            <div class="tab-pane fade show active" id="basicInfo">
-              <div class="row">
-                <div class="col-md-3 text-center">
-                  <img src="https://via.placeholder.com/100x140?text=사진" class="img-thumbnail mb-2" alt="사원사진">
-                  <div class="mb-3">
-                    <label class="form-label">파일선택</label>
-                    <input class="form-control" type="file">
-                  </div>
-                  <div>
-                    <label class="form-label">근로계약서*</label>
-                    <input class="form-control" type="file">
-                  </div>
-                </div>
-
-                <div class="col-md-9">
-                  <div class="row g-2 mb-2">
-                    <div class="col-md-3"><label class="form-label">사원번호</label></div>
-                    <div class="col-md-3"><input type="text" class="form-control"></div>
-                    <div class="col-md-3"><label class="form-label">사원명</label></div>
-                    <div class="col-md-3"><input type="text" class="form-control" placeholder="사원명을 입력하세요"></div>
-                  </div>
-
-                  <div class="row g-2 mb-2">
-                    <div class="col-md-3"><label class="form-label">주민번호</label></div>
-                    <div class="col-md-3"><input type="text" class="form-control" placeholder="앞 6자리"></div>
-                    <div class="col-md-1 text-center">-</div>
-                    <div class="col-md-3"><input type="text" class="form-control" placeholder="뒤 7자리"></div>
-                  </div>
-
-                  <div class="row g-2 mb-2">
-                    <div class="col-md-3"><label class="form-label">이메일(ID)</label></div>
-                    <div class="col-md-3"><input type="email" class="form-control" placeholder="이메일을 입력하세요"></div>
-                    <div class="col-md-3"><label class="form-label">연락처</label></div>
-                    <div class="col-md-3"><input type="text" class="form-control" placeholder="'-' 없이 입력"></div>
-                  </div>
-
-                  <div class="row g-2 mb-2">
-                    <div class="col-md-3"><label class="form-label">비밀번호</label></div>
-                    <div class="col-md-3"><input type="password" class="form-control"></div>
-                    <div class="col-md-3"><label class="form-label">입사일</label></div>
-                    <div class="col-md-3"><input type="date" class="form-control"></div>
-                  </div>
-
-                  <div class="row g-2 mb-2">
-                    <div class="col-md-3"><label class="form-label">부서</label></div>
-                    <div class="col-md-3"><select class="form-select"><option>선택</option></select></div>
-                    <div class="col-md-3"><label class="form-label">직급</label></div>
-                    <div class="col-md-3"><select class="form-select"><option>선택</option></select></div>
-                  </div>
-
-                  <div class="row g-2 mb-2">
-                    <div class="col-md-3"><label class="form-label">권한</label></div>
-                    <div class="col-md-3"><select class="form-select"><option>선택</option></select></div>
-                    <div class="col-md-3"><label class="form-label">근무유형</label></div>
-                    <div class="col-md-3"><select class="form-select"><option>선택</option></select></div>
-                  </div>
-                </div>
-              </div>
+      <!-- 검색 필터 -->
+      <form>
+        <div class="p-4 bg-light rounded mb-4">
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-md-2"><label class="form-label">검색 기준</label></div>
+            <div class="col-md-2">
+              <select name="option" class="form-select" id="searchSelect">
+                <option>전체</option>
+                <option value="empName" th:selected="${option=='empName'}">사원명</option>
+                <option value="empIdx" th:selected="${option=='empIdx'}">사원ID</option>
+              </select>
             </div>
-
-            <!-- 추가정보 -->
-            <div class="tab-pane fade" id="extraInfo">
-              <div class="row mb-3">
-                <div class="col-md-2"><label class="form-label">급여계좌</label></div>
-                <div class="col-md-4"><select class="form-select"><option>선택</option></select></div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">주소</label>
-                <div class="d-flex gap-2 mb-2">
-                  <button class="btn btn-outline-danger">📍 우편번호 검색</button>
-                  <input type="text" class="form-control w-25" placeholder="우편번호">
-                </div>
-                <input type="text" class="form-control mb-2" placeholder="기본 주소">
-                <input type="text" class="form-control" placeholder="상세주소 입력">
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">메모</label>
-                <textarea class="form-control" rows="5" placeholder="필요시 입력하세요"></textarea>
-              </div>
+            <div class="col-md-4">
+              <input type="text" name="keyword" class="form-control" id="searchInput" placeholder="검색어 입력 후 [enter]">
             </div>
           </div>
-        </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-2">
+              <label class="form-label">부서</label>
+            </div>
+            <div class="col-md-2">
+              <select id="deptSelect" name="deptUpIdx" class="form-select">
+                <option>선택</option>
+                <!-- 최상위 부서 목록 바인딩 -->
+                <option th:each="d : ${depts}" th:value="${d.deptIdx}" th:text="${d.deptName}">
+                </option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">상세 부서</label>
+            </div>
+            <div class="col-md-2">
+              <select id="detailDeptSelect" name="deptIdx" class="form-select">
+                <option>선택</option>
+              </select>
+            </div>
+          </div>
+          <div class="row g-3 mb-3 align-items-center">
+            <div class="col-md-2">
+              <label class="form-label">직급</label>
+            </div>
+            <div class="col-md-2">
+              <select name="empGrade" class="form-select">
+                <option value="">선택</option>
+                <option th:each="g : ${gradeList}" th:value="${g.empGrade}" th:text="${g.empGrade}"
+                  th:selected="${option=='empGrade' and keyword==empGrade}">
+                </option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">재직 상태</label>
+            </div>
+            <div class="col-md-2">
+              <select name="empStatusType" class="form-select">
+                <option value="">선택</option>
+                <option th:each="es : ${empStatusList}" th:value="${es.empIdx}" th:text="${es.empStatus}"
+                  th:selected="${option== 'empStatusType' and keyword==es.empIdx}">
+                </option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">근무 유형</label>
+            </div>
+            <div class="col-md-2">
+              <select name="empType" class="form-select">
+                <option value="">선택</option>
+                <option th:each="w : ${workList}" th:value="${w.workTypeId}" th:text="${w.workTypeNm}"
+                  th:selected="${option=='empType' and keyword==w.workTypeId}">
+                </option>
+              </select>
+            </div>
+          </div>
 
-        <!-- 모달 하단 버튼 -->
-        <div class="modal-footer justify-content-end">
-          <button type="button" class="btn btn-primary">등록</button>
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
-          <button type="reset" class="btn btn-secondary">초기화</button>
+          <div class="d-flex justify-content-center gap-3">
+            <button type="submit" class="btn btn-primary" id="searchBtn">조회</button>
+            <button class="btn btn-secondary">초기화</button>
+          </div>
+        </div>
+      </form>
+      <!-- 사원등록 모달 -->
+      <div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content p-3">
+
+            <!-- 1) 헤더 -->
+            <div class="modal-header">
+              <h5 class="modal-title" id="employeeModalLabel">사원등록</h5>
+              <button type="button" id="employeeModalCloseX" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- 2) 바디 -->
+            <div class="modal-body">
+              <form id="employeeForm">
+                <!-- 사원번호 / 사원명 -->
+                <div class="row mb-3 align-items-center">
+                  <label for="empIdx" class="col-md-2 col-form-label">사원번호</label>
+                  <div class="col-md-4">
+                    <input type="text" id="empIdx" name="empIdx" class="form-control" placeholder="사원번호는 자동생성 됩니다." readonly>
+                  </div>
+                  <label for="empName" class="col-md-2 col-form-label">사원명</label>
+                  <div class="col-md-4">
+                    <input type="text" id="empName" name="empName" class="form-control" placeholder="사원명을 입력하세요">
+                  </div>
+                </div>
+
+                <!-- 주민번호: 앞6 / - / 뒤7 -->
+                <div class="row mb-3 align-items-center">
+                  <!-- 1) 라벨 -->
+                  <label class="col-md-2 col-form-label">주민번호</label>
+
+                  <!-- 2) 앞6-–-뒤7을 한 Input Group 안에 -->
+                  <div class="col-md-4">
+                    <div class="input-group">
+                      <input type="text" name="rrnPfx" class="form-control" placeholder="앞 6자리" maxlength="6">
+                      <span class="input-group-text">-</span>
+                      <input type="password" name="rrnSfx" class="form-control" placeholder="뒤 7자리" maxlength="7">
+                    </div>
+                  </div>
+                  <div class="col-md-2"></div>
+                  <div class="col-md-4"></div>
+                </div>
+
+                <!-- 이메일 / 연락처 -->
+                <div class="row mb-3 align-items-center">
+                  <label for="empEmail" class="col-md-2 col-form-label">이메일(ID)</label>
+                  <div class="col-md-4">
+                    <input type="email" id="empEmail" name="empEmail" class="form-control" placeholder="이메일을 입력하세요">
+                  </div>
+                  <label for="empPhone" class="col-md-2 col-form-label">연락처</label>
+                  <div class="col-md-4">
+                    <input type="text" id="empPhone" name="empPhone" class="form-control" placeholder="'-' 없이 입력">
+                  </div>
+                </div>
+
+                <!-- 비밀번호 / 입사일 -->
+                <div class="row mb-3 align-items-center">
+                  <label for="empPassword" class="col-md-2 col-form-label">비밀번호</label>
+                  <div class="col-md-4">
+                    <input type="password" id="empPassword" name="empPw" class="form-control">
+                  </div>
+                  <label for="hireDate" class="col-md-2 col-form-label">입사일</label>
+                  <div class="col-md-4">
+                    <input type="date" id="hireDate" name="empRegdate" class="form-control">
+                  </div>
+                </div>
+
+                <!-- <div class="col-md-2">
+              <select id="detailDeptSelect" name="deptIdx" class="form-select">
+                <option>선택</option>
+              </select>
+            </div> -->
+
+
+                <!-- 부서 / 직급 -->
+                <div class="row mb-3 align-items-center">
+                  <div class="row mb-3 align-items-center gx-4">
+                    <label for="deptIdx" class="col-md-2 col-form-label">부서</label>
+                    <div class="col-md-4">
+                      <select id="insertDeptSelect" name="deptUpIdx" class="form-select">
+                        <option value="">선택</option>
+                        <option th:each="d : ${depts}" th:value="${d.deptIdx}" th:text="${d.deptName}"
+                          th:selected="${option=='deptUpIdx' and keyword==d.deptIdx}">
+                        </option>
+                      </select>
+                    </div>
+
+                    <label class="col-md-2 col-form-label">상세 부서</label>
+                    <div class="col-md-4">
+                      <select id="insertDetailDeptSelect" name="deptIdx" class="form-select">
+                        <option value="">선택</option>
+                        <option th:each="sd : ${detailDepts}" th:value="${sd.deptIdx}" th:text="${sd.deptName}"
+                          th:selected="${sd.deptIdx == deptIdx}">
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <label for="empGrade" class="col-md-2 col-form-label">직급</label>
+                  <div class="col-md-4">
+                    <select name="empGrade" class="form-select">
+                      <option value="">선택</option>
+                      <option th:each="g : ${gradeList}" th:value="${g.empGrade}" th:text="${g.empGrade}"
+                        th:selected="${option=='empGrade' and keyword==empGrade}">
+                      </option>
+                    </select>
+                    <!-- <option>…</option> -->
+                    </select>
+
+                  </div>
+                </div>
+
+                <!-- 권한 / 근무유형 -->
+                <div class="row mb-3 align-items-center">
+                  <label for="authority" class="col-md-2 col-form-label">권한</label>
+                  <div class="col-md-4">
+                    <select name="roleName" class="form-select">
+                      <option value="">선택</option>
+                      <option th:each="r : ${roleList}" th:value="${r.roleId}" th:text="${r.roleName}"
+                        th:selected="${option=='roleName' and keyword==roleName}">
+                      </option>
+                    </select>
+                  </div>
+                  <label for="empType" class="col-md-2 col-form-label">근무유형</label>
+                  <div class="col-md-4">
+                    <select name="empType" class="form-select">
+                      <option value="">선택</option>
+                      <option th:each="w : ${workList}" th:value="${w.workTypeId}" th:text="${w.workTypeNm}"
+                        th:selected="${option=='empType' and keyword==w.workTypeId}">
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <!-- 급여계좌 -->
+                <div class="row mb-3 align-items-center">
+                  <label for="bankListSelect" class="col-md-2 col-form-label">
+                    급여계좌
+                  </label>
+                  <div class="col-md-4">
+                    <select id="bankListSelect" name="bankListSelect" class="form-select">
+                      <option value="">선택</option>
+                      <option th:each="bank : ${bankList}" th:value="${bank.commonCode}"
+                        th:text="${bank.commonCodeName}">
+                      </option>
+                    </select>
+                  </div>
+                  <label for="empAccount" class="col-md-2 col-form-label">
+                    계좌번호
+                  </label>
+                  <div class="col-md-4">
+                    <input type="text" id="empAccount" name="empAccount" class="form-control">
+                  </div>
+                </div>
+                <!-- 주소 -->
+                <div class="row mb-3">
+                  <label class="col-md-2 col-form-label">주소</label>
+                  <div class="col-md-8">
+                    <div class="input-group mb-2">
+                      <button class="btn btn-outline-danger" type="button" onclick="sample6_execDaumPostcode()">📍 우편번호 검색</button>
+                      <input type="text" name="empAddrZip" id="addEmpAddrZip" class="form-control" placeholder="우편번호">
+                    </div>
+                    <input type="text" name="empAddr" id="addEmpAddr" class="form-control mb-2" placeholder="기본 주소">
+                    <input type="text" name="empAddrDetail" id="addEmpAddrDetail" class="form-control" placeholder="상세주소 입력">
+                  </div>
+                </div>
+                <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+									<script>
+										function sample6_execDaumPostcode() {
+											new daum.Postcode({
+												oncomplete: function (data) {
+													// 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+													// 각 주소의 노출 규칙에 따라 주소를 조합한다.
+													// 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+													var addr = ''; // 주소 변수
+													var extraAddr = ''; // 참고항목 변수
+
+													//사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+													if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+														addr = data.roadAddress;
+													} else { // 사용자가 지번 주소를 선택했을 경우(J)
+														addr = data.jibunAddress;
+													}
+
+													// 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+													if (data.userSelectedType === 'R') {
+														// 법정동명이 있을 경우 추가한다. (법정리는 제외)
+														// 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+														if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+															extraAddr += data.bname;
+														}
+														// 건물명이 있고, 공동주택일 경우 추가한다.
+														if (data.buildingName !== '' && data.apartment === 'Y') {
+															extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+														}
+														// 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+														if (extraAddr !== '') {
+															extraAddr = ' (' + extraAddr + ')';
+														}
+														// 조합된 참고항목을 해당 필드에 넣는다.
+														// document.getElementById("sample6_extraAddress").value = extraAddr;
+
+													} else {
+														// document.getElementById("sample6_extraAddress").value = '';
+													}
+
+													// 우편번호와 주소 정보를 해당 필드에 넣는다.
+													document.getElementById('addEmpAddrZip').value = data.zonecode;
+													document.getElementById("addEmpAddr").value = addr;
+													// 커서를 상세주소 필드로 이동한다.
+													document.getElementById("addEmpAddrDetail").focus();
+												}
+											}).open();
+										}
+									</script>
+                <!-- 메모 -->
+                <div class="row mb-3">
+                  <label for="empMemo" class="col-md-2 col-form-label">메모</label>
+                  <div class="col-md-8">
+                    <textarea id="empMemo" name="empMemo" class="form-control" rows="4"
+                      placeholder="필요시 입력하세요"></textarea>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- 3) 푸터 -->
+            <div class="modal-footer justify-content-end">
+              <button type="submit" form="employeeForm" class="btn btn-primary" id="modalbtn">저장</button>
+              <button type="button" id="employeeModalCloseBtn" class="btn btn-secondary"
+                data-bs-dismiss="modal">취소</button>
+            </div>
+
+          </div>
         </div>
       </div>
+      <!-- 2. 사원 테이블 -->
+      <div class="container-fluid px-0" style="height:100vh;">
+        <div id="myGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
+      </div>
     </div>
+    <script th:inline="javascript">
+      document.addEventListener('DOMContentLoaded', () => {
+        // Thymeleaf empList → JS
+        var rowData = /*[[${empList}]]*/ [];
+        console.log(rowData);
+
+        // 컬럼 정의
+        const columnDefs = [{
+            headerName: "",
+            checkboxSelection: true,
+            headerCheckboxSelection: true,
+            width: 50
+          },
+          {
+            headerName: "사원ID",
+            field: "empIdx",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "사원명",
+            field: "empName",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "부서",
+            field: "deptName",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "직급",
+            field: "empGrade",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "재직 상태",
+            field: "empStatus",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "근무 유형",
+            field: "empType",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "입사일",
+            field: "empRegdate",
+            sortable: true,
+            filter: 'agDateColumnFilter',
+            valueFormatter: params => new Date(params.value).toISOString().slice(0, 10)
+          },
+          {
+            headerName: "연락처",
+            field: "empAccount",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "이메일",
+            field: "empEmail",
+            sortable: true,
+            filter: true,
+            resizable: true
+          },
+          {
+            headerName: "근로계약서",
+            field: "empIdx",
+            cellRenderer: params => `<a href="/employees/${params.value}/contract" target="_blank">다운로드</a>`,
+            resizable: true
+          }
+        ];
+
+        // 그리드 옵션
+        const gridOptions = {
+          columnDefs,
+          rowData,
+          defaultColDef: {
+            flex: 1,
+            minWidth: 100
+          },
+          pagination: true,
+          paginationPageSize: 20,
+          rowSelection: 'multiple',
+          onGridReady: params => {
+            gridApi = params.api;
+            columnApi = params.columnApi;
+          }
+        };
+
+        // 1) ag-Grid 생성
+        agGrid.createGrid(document.querySelector("#myGrid"), gridOptions);
+
+        // 2) 부서 → 상세부서 AJAX (조회 & 등록 모달 모두)
+        const bindDept = (parentId, childSelectId) => {
+          document.getElementById(parentId).addEventListener('change', function () {
+            const detail = document.getElementById(childSelectId);
+            detail.innerHTML = '<option value="">선택</option>';
+            if (!this.value) return;
+            fetch(`/hr/${this.value}/children`)
+              .then(r => r.json())
+              .then(list => {
+                list.forEach(d => {
+                  const opt = document.createElement('option');
+                  opt.value = d.deptIdx;
+                  opt.textContent = d.deptName;
+                  detail.append(opt);
+                });
+              });
+          });
+        };
+        bindDept('deptSelect', 'detailDeptSelect');
+        bindDept('insertDeptSelect', 'insertDetailDeptSelect');
+        // 3) 수정 버튼 클릭
+        document.getElementById('editBtn').addEventListener('click', () => {
+          console.log('사원수정 클릭'); // ← 바인딩 확인용 로그
+          if (!gridApi) return console.error('Grid API가 아직 준비되지 않았습니다.');
+          const selected = gridApi.getSelectedRows();
+          if (selected.length !== 1) return alert('수정할 사원을 하나만 선택하세요.');
+          const emp = selected[0];
+
+          console.log(emp);
+
+          $.ajax({
+            type: "GET",
+            url: `/hr/findEmp?empIdx=${emp.empIdx}`,
+            success: function (res) {
+              console.log(res)
+              $('#empIdx').val();
+              $('#empName').val();
+              $('input[name=empPhone]').val(res.empPhone);
+              $('#hireDate').val();
+              $('input[name=rrnPfx]').val(res.rrnPfx);
+              $('input[name=rrnSfx]').val(res.rrnSfx);
+              $('input[name=empPw]').val(res.empPw);
+              $('select[name=empGrade]').val(res.empGrade);
+              $('select[name=empType]').val(res.empType);
+              $('select[name=deptUpIdx]').val(res.deptUpIdx);
+              // $('select[name=deptIdx]').val(res.deptIdx);
+              $('input[name=empAccount]').val(res.empAccount);
+              $('textarea[name=empMemo]').val(res.empMemo);
+              $('input[name=empAddr]').val(res.empAddr);
+              $('input[name=empAddrDetail]').val(res.empAddrDetail);
+              $('input[name=empAddrZip').val(res.empAddrZip);
+            },
+            error: function (xhr, status, err) {
+
+            }
+          });
+
+          // 폼 필드 채우기 (예시 일부)
+          document.getElementById('empIdx').value = emp.empIdx;
+          document.getElementById('empName').value = emp.empName;
+          document.getElementById('empEmail').value = emp.empEmail;
+          document.getElementById('empPhone').value = emp.empPhone;
+          document.getElementById('hireDate').value = new Date(emp.empRegdate).toISOString().slice(0, 10);
+          // 부서/상세부서
+          document.getElementById('insertDeptSelect').value = emp.deptUpIdx;
+          document.getElementById('insertDeptSelect').dispatchEvent(new Event('change'));
+          setTimeout(() => {
+          document.getElementById('insertDetailDeptSelect').value = emp.deptIdx;
+          }, 200);
+          // 직급, 권한, 근무유형, 계좌 등…
+
+          // 모달 타이틀·폼 액션 변경
+          document.getElementById('employeeModalLabel').textContent = '사원수정';
+          const form = document.getElementById('employeeForm');
+          form.action = '/updateEmp';
+          form.method = 'post';
+          // hidden mode 필드
+          let modeInput = form.querySelector('input[name="mode"]');
+          if (!modeInput) {
+            modeInput = document.createElement('input');
+            modeInput.type = 'hidden';
+            modeInput.name = 'mode';
+            form.append(modeInput);
+          }
+          modeInput.value = 'update';
+
+          // 모달 열기
+          new bootstrap.Modal(document.getElementById('employeeModal')).show();
+        });
+      }); // DOMContentLoaded
+
+
+
+
+      $('#employeeForm').on('submit', function (e) {
+        e.preventDefault(); // 기본 submit 방지
+
+        var $form = $(this);
+        var formData = new FormData(this);
+
+        $.ajax({
+          url: "insertEmp",
+          type: 'POST',
+          data: formData,
+          processData: false, // jQuery가 data를 문자열로 변환하지 않도록
+          contentType: false, // multipart/form-data 헤더를 자동 세팅하도록
+          success: function (code) {
+            if (code === '200') {
+              alert('등록 성공!');
+              // window.location.href = '/empList';
+              resetForm();
+              closeEmpModal();
+            } else {
+              resetForm();
+              alert('등록 실패: 저장에 문제가 발생했습니다.');
+            }
+          },
+          error: function (xhr, status, error) {
+            console.error(error);
+            resetForm();
+            alert('서버 통신 중 에러가 발생했습니다.');
+          }
+        });
+      });
+
+      $('#employeeModalCloseBtn').on('click', function () {
+        closeEmpModal();
+      });
+
+      $('#employeeModalCloseX').on('click', function () {
+        closeEmpModal();
+      })
+
+      function closeEmpModal() {
+        resetForm();
+        $('#employeeModal').hide();
+        $('.modal-backdrop').remove();
+      }
+
+      function resetForm() {
+        $('#employeeForm')[0].reset();
+      }
+    </script>
   </div>
-</div>

@@ -21,4 +21,7 @@ public class SalaryMappingDTO {
     private String salaryType;       // salary_type
     private String alName;           // al_name
     private String type;             // type
+
+    private String coIdx;
+
 }

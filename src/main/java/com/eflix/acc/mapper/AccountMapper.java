@@ -1,6 +1,7 @@
 package com.eflix.acc.mapper;
 
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 import com.eflix.acc.dto.AccountDTO;
 
 /* ============================================
@@ -10,20 +11,11 @@ import com.eflix.acc.dto.AccountDTO;
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김희정): 계정과목 전체조회 작성
+  - 2025-06-23 (김희정): 단건 조회(accountCode) 작성
 =============================================== */
 public interface AccountMapper {
   // 계정과목 전체조회
   public List<AccountDTO> getList();
-
-  // public Long getTotal(Criteria cri);
-
-  // public List<BoardVO> findAll(BoardVO boardVO);
-
-  // public BoardVO findById(int bno);
-
-  // public int insert(BoardVO boardVO);
-
-  // public int update(BoardVO boardVO);
-
-  // public int delete(int bno);
+  // 계정과목 코드로 계정과목 조회
+  AccountDTO getListByCode(@Param("accountCode") int accountCode);
 }

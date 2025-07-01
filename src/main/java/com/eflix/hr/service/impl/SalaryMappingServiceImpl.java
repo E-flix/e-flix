@@ -20,31 +20,26 @@ public class SalaryMappingServiceImpl implements SalaryMappingService {
 
   @Override
   public List<SalaryMappingDTO> getAllSalaryMappings() {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllSalaryMappings'");
   }
 
   @Override
   public SalaryMappingDTO getSalaryMappingById(String mpIdx) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getSalaryMappingById'");
   }
 
   @Override
   public int createSalaryMapping(SalaryMappingDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createSalaryMapping'");
   }
 
   @Override
   public int updateSalaryMapping(SalaryMappingDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateSalaryMapping'");
   }
 
   @Override
   public int deleteSalaryMapping(String mpIdx) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'deleteSalaryMapping'");
   }
 

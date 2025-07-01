@@ -21,4 +21,7 @@ public class HolidayDTO {
     private String hdDate;           // hd_date (string format)
     private String hdType;           // hd_type
     private String field;            // field
+
+    private String coIdx;
+
 }

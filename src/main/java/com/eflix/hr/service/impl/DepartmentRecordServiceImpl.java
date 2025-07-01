@@ -20,31 +20,26 @@ public class DepartmentRecordServiceImpl implements DepartmentRecordService{
 
   @Override
   public List<DepartmentRecordDTO> getAllDepartmentRecords() {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getAllDepartmentRecords'");
   }
 
   @Override
   public DepartmentRecordDTO getDepartmentRecordById(String deptHistId) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'getDepartmentRecordById'");
   }
 
   @Override
   public int createDepartmentRecord(DepartmentRecordDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'createDepartmentRecord'");
   }
 
   @Override
   public int updateDepartmentRecord(DepartmentRecordDTO dto) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateDepartmentRecord'");
   }
 
   @Override
   public int deleteDepartmentRecord(String deptHistId) {
-    // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'deleteDepartmentRecord'");
   }
 

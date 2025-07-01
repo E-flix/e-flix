@@ -1,0 +1,26 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<head>
+  <title>영업관리</title>
+</head>
+<div layout:fragment="content">
+  <div class="container" id="acc-main">
+    <h2 class="text-center mb-4 text-white bg-secondary py-3 rounded">영업관리</h2>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-dark text-white">
+            관리
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              <li><a href="/bsn/qot_list" class="text-decoration-none text-dark">• 견적서 관리</a></li>
+              <li><a href="/bsn/sorlist" class="text-decoration-none text-dark">• 주문서 관리</a></li>
+              <li><a href="/bsn/obound_list" class="text-decoration-none text-dark">• 출고 관리</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

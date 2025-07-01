@@ -1,0 +1,102 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<head>
+  <title>출고 등록</title>
+  <style>
+    .quote-card {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: .25rem;
+      padding: 1.5rem;
+    }
+
+    .detail-table th {
+      background: #4da2f1;
+      color: #fff;
+      text-align: center;
+    }
+
+    .detail-table td,
+    .detail-table th {
+      vertical-align: middle;
+    }
+
+    .btn-cyan {
+      background: #009fb2;
+      color: #fff;
+    }
+
+    .btn-pink {
+      background: #c81d64;
+      color: #fff;
+    }
+
+    .btn-green {
+      background: #1cab26;
+      color: #fff;
+    }
+  </style>
+</head>
+<div layout:fragment="content" class="container-fluid py-4">
+  <div class="float-right">
+    <button type="reset" class="btn btn-cyan me-2">초기화</button>
+    <button type="button" class="btn btn-pink me-2">목록</button>
+    <button type="button" class="btn btn-green">등록</button>
+  </div>
+  <h3 class="mb-4">출고 의뢰서</h3>
+  <div class="quote-card mb-4">
+    <form id="quoteForm" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">출고번호</label>
+        <input type="text" class="form-control" placeholder="입력">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">출고의뢰일자</label>
+        <input type="date" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">거래처</label>
+        <input type="text" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">납기일</label>
+        <input type="date" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">출하일자</label>
+        <input type="date" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">출하창고</label>
+        <input type="text" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">전표 발행 여부</label>
+        <div class="form-check">
+          <input id="voucherIssued" class="form-check-input" type="checkbox" name="voucher_issued" value="Y">
+          <label class="form-check-label" for="voucherIssued">발행 완료</label>
+        </div>
+      </div>      
+      <div class="col-md-3">
+        <label class="form-label">비고</label>
+        <input type="text" class="form-control">
+      </div>
+    </form>
+  </div>
+
+  <!-- 품목입력 -->
+  <div class="table-responsive mb-4">
+    <table class="table table-bordered detail-table">
+      <thead>
+        <tr>
+          <th style="width:5%;">순번</th>
+          <th style="width:20%;">품목코드</th>
+          <th style="width:10%;">품목명</th>
+          <th style="width:15%;">규격</th>
+          <th style="width:10%;">수량</th>
+          <th style="width:10%;">단위</th>
+          <th style="width:15%;">비고</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+</div>

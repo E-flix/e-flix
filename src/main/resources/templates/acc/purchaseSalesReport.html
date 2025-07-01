@@ -1,4 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+
 <!-- ============================================
   - 작성자   : 김희정
   - 최초작성 : 2025-06-18
@@ -6,8 +7,9 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-06-24 (김희정): ag-grid 소계 테스트
 ============================================ -->
-<head>
+<!-- <head>
   <title>매입매출장</title>
 </head>
 <div layout:fragment="content">
@@ -15,4 +17,92 @@
     <h2>매입매출장</h2>
     <p>매입매출장 화면입니다.</p>
   </div>
+</div> -->
+<head>
+  <title>매입매출장</title>
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css" />
+</head>
+
+<div layout:fragment="content">
+  <div id="myGrid" class="ag-theme-quartz" style="height: 400px; width: 600px;"></div>
+  <script>
+  const rawData = [
+      { country: 'USA', year: '2020', gold: 10, silver: 5, bronze: 3 },
+      { country: 'USA', year: '2021', gold: 7, silver: 3, bronze: 4 },
+      { country: 'Korea', year: '2020', gold: 5, silver: 3, bronze: 2 },
+      { country: 'Korea', year: '2021', gold: 6, silver: 4, bronze: 1 }
+    ];
+
+    function generateDataWithTotals(data) {
+      const grouped = {};
+      const result = [];
+      let grandTotal = { gold: 0, silver: 0, bronze: 0 };
+
+      data.forEach(row => {
+        if (!grouped[row.country]) {
+          grouped[row.country] = { gold: 0, silver: 0, bronze: 0, rows: [] };
+        }
+        grouped[row.country].gold += row.gold;
+        grouped[row.country].silver += row.silver;
+        grouped[row.country].bronze += row.bronze;
+        grouped[row.country].rows.push(row);
+
+        // accumulate grand total
+        grandTotal.gold += row.gold;
+        grandTotal.silver += row.silver;
+        grandTotal.bronze += row.bronze;
+      });
+
+      for (const country in grouped) {
+        result.push(...grouped[country].rows);
+        result.push({
+          country: `${country} 소계`,
+          year: '',
+          gold: grouped[country].gold,
+          silver: grouped[country].silver,
+          bronze: grouped[country].bronze,
+          isSummary: true
+        });
+      }
+
+      // Add grand total row at the end
+      result.push({
+        country: '총계',
+        year: '',
+        gold: grandTotal.gold,
+        silver: grandTotal.silver,
+        bronze: grandTotal.bronze,
+        isGrandTotal: true
+      });
+
+      return result;
+    }
+
+    const rowData = generateDataWithTotals(rawData);
+
+    const columnDefs = [
+      { field: 'country', headerName: 'Country / Group' },
+      { field: 'year' },
+      { field: 'gold' },
+      { field: 'silver' },
+      { field: 'bronze' }
+    ];
+
+    const gridOptions = {
+      columnDefs,
+      rowData,
+      theme: 'quartz',
+      getRowStyle: params => {
+        if (params.data?.isGrandTotal) {
+          return { fontWeight: 'bold', backgroundColor: '#d9edf7' };
+        }
+        if (params.data?.isSummary) {
+          return { fontWeight: 'bold', backgroundColor: '#f0f0f0' };
+        }
+      }
+    };
+
+    agGrid.createGrid(document.getElementById('myGrid'), gridOptions);
+  </script>
 </div>
