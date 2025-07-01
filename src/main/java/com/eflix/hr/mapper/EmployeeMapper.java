@@ -30,7 +30,7 @@ public interface EmployeeMapper {
     // 사원수정
     int update(EmployeeDTO dto);
 
-    EmployeeDTO selectById(@Param("empIdx") String empIdx);
+    EmployeeDTO selectById(String coIdx, @Param("empIdx") String empIdx);
 
     // 사원관리 페이지 직급 드롭다운 조회
     List<EmployeeDTO> gradeList();

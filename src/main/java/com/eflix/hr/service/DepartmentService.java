@@ -15,7 +15,7 @@ import java.util.List;
 import com.eflix.hr.dto.DepartmentDTO;
 
 public interface DepartmentService {
-    public List<DepartmentDTO> selectAll();
+    public List<DepartmentDTO> selectAll(DepartmentDTO departmentDTO);
     public DepartmentDTO getDepartmentById(String deptIdx);
     int createDepartment(DepartmentDTO dto);
     int updateDepartment(DepartmentDTO dto);

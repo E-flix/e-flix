@@ -3,6 +3,10 @@ package com.eflix.hr.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +16,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.service.DepartmentService;
+
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -27,10 +34,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/hr")
 public class HrDepartController {
-
   @Autowired
   private DepartmentService departmentService;
-
   
   // 부서 등록 화면(관리자)
   // @GetMapping("/da")
@@ -40,8 +45,9 @@ public class HrDepartController {
 
   // 부서조회
   @GetMapping("/da")
-  public String deptList(DepartmentDTO dept, Model model) {
-    List<DepartmentDTO> deptList = departmentService.selectAll();
+  public String deptList(DepartmentDTO dept, Model model, HttpSession session) {
+    dept.setCoIdx((String)session.getAttribute("co_idx"));
+    List<DepartmentDTO> deptList = departmentService.selectAll(dept);
     model.addAttribute("deptList", deptList);
       return "hr/deptAdd";
   }
