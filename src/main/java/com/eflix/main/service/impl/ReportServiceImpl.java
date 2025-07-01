@@ -156,14 +156,14 @@ public class ReportServiceImpl implements ReportService {
     private Map<String, Object> buildParameters(CompanyDTO companyDTO) {
         Map<String, Object> params = new HashMap<>();
         params.put("COMPANY_NAME", "E-FLIX");
-        params.put("COMPANY_ADDRESS", "서울시 강남구 테헤란로 123");
-        params.put("COMPANY_PHONE", "02-1234-5678");
+        params.put("COMPANY_ADDRESS", "대구광역시 중구 중앙대로 403 (남일동 135-1, 5층)");
+        params.put("COMPANY_PHONE", "053-421-2460");
 
-        params.put("CUSTOMER_NAME", companyDTO != null ? companyDTO.getPschName() : "담당자명");
-        params.put("CUSTOMER_PHONE", companyDTO != null ? companyDTO.getPschTel() : "053-421-2460");
-        params.put("CUSTOMER_EMAIL", companyDTO != null ? companyDTO.getPschEmail() : "ask@yedam.ac");
+        params.put("CUSTOMER_NAME", "담당자명");
+        params.put("CUSTOMER_PHONE", "053-421-2460");
+        params.put("CUSTOMER_EMAIL", "ask@yedam.ac");
 
-        params.put("EMP_NAME", companyDTO != null ? companyDTO.getCeoName() : "대표자명");
+        params.put("EMP_NAME", "대표자명");
 
         return params;
     }

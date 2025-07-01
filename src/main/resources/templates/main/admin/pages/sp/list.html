@@ -166,13 +166,13 @@
                         if (res.head.res_code === '200') {
                             data.forEach((subscription, i) => {
                                 const row = `
-                                    <tr data-spiidx="${subscription.spiIdx}">
+                                    <tr data-idx="${subscription.spiIdx}">
                                         <td>${i + 1}</td>
                                         <td>${subscription.spiStart}</td>
                                         <td>${subscription.spkPrice.toLocaleString('ko-KR', { style: 'currency', currency: 'KRW' })}</td>
                                         <td>
-                                        <button class="btn btn-outline-primary btn-sm bill-btn" data-type="계약서" data-spiidx="${subscription.spiIdx}">계약서</button>
-                                        <button class="btn btn-outline-secondary btn-sm bill-btn" data-type="명세서" data-spiidx="${subscription.spiIdx}">명세서</button>
+                                        <button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement" data-idx="${subscription.spiIdx}">거래 명세서</button>
+                                        <button class="btn btn-outline-secondary btn-sm bill-btn" data-type="invoice" data-idx="${subscription.spiIdx}">세금 계산서</button>
                                         </td>
                                     </tr>`;
                                 tbody.append(row);
@@ -187,26 +187,22 @@
 
             // 청구서/계약서 버튼 클릭 시 파일 로딩
             $(document).on('click', '.bill-btn', function () {
-                const spiIdx = $(this).data('spiidx');
+                const spiIdx = $(this).data('idx');
                 const type = $(this).data('type');
+                console.log(spiIdx, type)
 
-                $.ajax({
-                    url: '/admin/api/subscription-bill',
-                    method: 'GET',
-                    data: { spiIdx: spiIdx },
-                    success: function (res) {
-                        if (res.status === '200') {
-                            const file = res.data.find(b => b.spbType === type);
-                            if (file) {
-                                window.open(file.spbFile, '_blank');
-                            } else {
-                                alert(`${type} 파일이 존재하지 않습니다.`);
-                            }
-                        } else {
-                            alert('파일 정보를 가져오지 못했습니다.');
-                        }
-                    }
-                });
+                let url = "";
+                if(type === "statement") {
+                    url = `/subscription/report/statement/preview/${spiIdx}`;
+                } else if (type === "invoice") {
+                    url = `/subscription/report/invoice/preview/${spiIdx}`;
+                }
+
+                // 팝업 창 옵션
+                const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+
+                // 새 창 열기
+                window.open(url, "_blank", popupOptions);
             });
 
             // 초기 회사 목록 로딩
