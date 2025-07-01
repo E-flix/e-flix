@@ -17,7 +17,6 @@ public class OrdersDTO {
     private LocalDate orderDate;
     private String  empCd;        // 영업사원 코드
     private String   phoneNumber;     // ← PHONE_NUMBER 컬럼 매핑
-
     private String   deliveryAddr;    // DELIVERY_ADDR 컬럼
     private String   warehouseCd;     // WAREHOUSE_CD 컬럼
     private LocalDate deliveryDt;     // DELIVERY_DT 컬럼
