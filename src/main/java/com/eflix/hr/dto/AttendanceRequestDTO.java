@@ -28,4 +28,7 @@ public class AttendanceRequestDTO {
     private Date requestDate;   // request_date
     private String approvalStatus;   // approval_status
     private Date approvedDate;  // approved_date
+
+    private String coIdx;
+
 }

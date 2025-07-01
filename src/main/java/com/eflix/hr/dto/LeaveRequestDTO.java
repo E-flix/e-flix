@@ -29,4 +29,7 @@ public class LeaveRequestDTO {
     private String approvalStatus;   // approval_status
     private Date approvedDate;  // approved_date
     private String attFile;          // att_file
+
+    private String coIdx;
+
 }

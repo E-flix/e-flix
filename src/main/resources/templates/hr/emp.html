@@ -129,7 +129,7 @@
                 <div class="row mb-3 align-items-center">
                   <label for="empIdx" class="col-md-2 col-form-label">사원번호</label>
                   <div class="col-md-4">
-                    <input type="text" id="empIdx" name="empIdx" class="form-control">
+                    <input type="text" id="empIdx" name="empIdx" class="form-control" placeholder="사원번호는 자동생성 됩니다." readonly>
                   </div>
                   <label for="empName" class="col-md-2 col-form-label">사원명</label>
                   <div class="col-md-4">
@@ -178,7 +178,7 @@
                   </div>
                 </div>
 
-                    <!-- <div class="col-md-2">
+                <!-- <div class="col-md-2">
               <select id="detailDeptSelect" name="deptIdx" class="form-select">
                 <option>선택</option>
               </select>
@@ -195,14 +195,13 @@
                         <option th:each="d : ${depts}" th:value="${d.deptIdx}" th:text="${d.deptName}"
                           th:selected="${option=='deptUpIdx' and keyword==d.deptIdx}">
                         </option>
-                    </select>
+                      </select>
                     </div>
 
                     <label class="col-md-2 col-form-label">상세 부서</label>
                     <div class="col-md-4">
                       <select id="insertDetailDeptSelect" name="deptIdx" class="form-select">
                         <option value="">선택</option>
-                        <!-- detailDepts 는 페이지 로드 시 한 번만 채워지거나, 비워둬도 됩니다 -->
                         <option th:each="sd : ${detailDepts}" th:value="${sd.deptIdx}" th:text="${sd.deptName}"
                           th:selected="${sd.deptIdx == deptIdx}">
                         </option>
@@ -270,19 +269,69 @@
                   <label class="col-md-2 col-form-label">주소</label>
                   <div class="col-md-8">
                     <div class="input-group mb-2">
-                      <button class="btn btn-outline-danger" type="button">📍 우편번호 검색</button>
-                      <input type="text" name="empAddrZip" class="form-control" placeholder="우편번호">
+                      <button class="btn btn-outline-danger" type="button" onclick="sample6_execDaumPostcode()">📍 우편번호 검색</button>
+                      <input type="text" name="empAddrZip" id="addEmpAddrZip" class="form-control" placeholder="우편번호">
                     </div>
-                    <input type="text" name="empAddr" class="form-control mb-2" placeholder="기본 주소">
-                    <input type="text" name="empAddrDetail" class="form-control" placeholder="상세주소 입력">
+                    <input type="text" name="empAddr" id="addEmpAddr" class="form-control mb-2" placeholder="기본 주소">
+                    <input type="text" name="empAddrDetail" id="addEmpAddrDetail" class="form-control" placeholder="상세주소 입력">
                   </div>
                 </div>
+                <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+									<script>
+										function sample6_execDaumPostcode() {
+											new daum.Postcode({
+												oncomplete: function (data) {
+													// 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
 
+													// 각 주소의 노출 규칙에 따라 주소를 조합한다.
+													// 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+													var addr = ''; // 주소 변수
+													var extraAddr = ''; // 참고항목 변수
+
+													//사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+													if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+														addr = data.roadAddress;
+													} else { // 사용자가 지번 주소를 선택했을 경우(J)
+														addr = data.jibunAddress;
+													}
+
+													// 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+													if (data.userSelectedType === 'R') {
+														// 법정동명이 있을 경우 추가한다. (법정리는 제외)
+														// 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+														if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+															extraAddr += data.bname;
+														}
+														// 건물명이 있고, 공동주택일 경우 추가한다.
+														if (data.buildingName !== '' && data.apartment === 'Y') {
+															extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+														}
+														// 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+														if (extraAddr !== '') {
+															extraAddr = ' (' + extraAddr + ')';
+														}
+														// 조합된 참고항목을 해당 필드에 넣는다.
+														// document.getElementById("sample6_extraAddress").value = extraAddr;
+
+													} else {
+														// document.getElementById("sample6_extraAddress").value = '';
+													}
+
+													// 우편번호와 주소 정보를 해당 필드에 넣는다.
+													document.getElementById('addEmpAddrZip').value = data.zonecode;
+													document.getElementById("addEmpAddr").value = addr;
+													// 커서를 상세주소 필드로 이동한다.
+													document.getElementById("addEmpAddrDetail").focus();
+												}
+											}).open();
+										}
+									</script>
                 <!-- 메모 -->
                 <div class="row mb-3">
                   <label for="empMemo" class="col-md-2 col-form-label">메모</label>
                   <div class="col-md-8">
-                    <textarea id="empMemo" name="empMemo" class="form-control" rows="4" placeholder="필요시 입력하세요"></textarea>
+                    <textarea id="empMemo" name="empMemo" class="form-control" rows="4"
+                      placeholder="필요시 입력하세요"></textarea>
                   </div>
                 </div>
               </form>
@@ -291,7 +340,8 @@
             <!-- 3) 푸터 -->
             <div class="modal-footer justify-content-end">
               <button type="submit" form="employeeForm" class="btn btn-primary" id="modalbtn">저장</button>
-              <button type="button" id="employeeModalCloseBtn" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+              <button type="button" id="employeeModalCloseBtn" class="btn btn-secondary"
+                data-bs-dismiss="modal">취소</button>
             </div>
 
           </div>
@@ -435,7 +485,7 @@
           const emp = selected[0];
 
           console.log(emp);
-          
+
           $.ajax({
             type: "GET",
             url: `/hr/findEmp?empIdx=${emp.empIdx}`,
@@ -473,7 +523,7 @@
           document.getElementById('insertDeptSelect').value = emp.deptUpIdx;
           document.getElementById('insertDeptSelect').dispatchEvent(new Event('change'));
           setTimeout(() => {
-            document.getElementById('insertDetailDeptSelect').value = emp.deptIdx;
+          document.getElementById('insertDetailDeptSelect').value = emp.deptIdx;
           }, 200);
           // 직급, 권한, 근무유형, 계좌 등…
 
@@ -531,11 +581,11 @@
         });
       });
 
-      $('#employeeModalCloseBtn').on('click', function() {
+      $('#employeeModalCloseBtn').on('click', function () {
         closeEmpModal();
       });
 
-      $('#employeeModalCloseX').on('click', function() {
+      $('#employeeModalCloseX').on('click', function () {
         closeEmpModal();
       })
 

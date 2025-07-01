@@ -31,27 +31,33 @@
             <th>부서코드</th>
             <th>부서명</th>
             <th>상위부서</th>
-            <th>유형</th>
             <th>전화번호</th>
             <th>사용여부</th>
             <th>수정</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>D001</td>
-            <td>인사팀</td>
-            <td>경영지원실</td>
-            <td>본사</td>
-            <td>02-123-4567</td>
-            <td><span class="badge bg-success">Y</span></td>
-            <td><button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#deptModal">수정</button>
+          <!-- 여기서 반복 -->
+          <tr th:each="dept : ${deptList}">
+            <td th:text="${dept.deptIdx}"></td>
+            <td th:text="${dept.deptName}"></td>
+            <td th:text="${dept.deptUpName}"></td>
+            <td th:text="${dept.deptTel}"></td>
+            <td>
+              <span th:classappend="${dept.deptStatus == 'Y'} ? 'badge bg-success' : 'badge bg-secondary'"
+                th:text="${dept.deptStatus}"></span>
+            </td>
+            <td>
+              <button type="button" class="btn btn-sm btn-primary editBtn" th:data-dept-idx="${dept.deptIdx}"
+                th:data-dept-name="${dept.deptName}" th:data-dept-up-idx="${dept.deptUpIdx}"
+                th:data-dept-status="${dept.deptStatus}" th:data-dept-tel="${dept.deptTel}"
+                th:data-dept-memo="${dept.deptMemo}">수정</button>
             </td>
           </tr>
-          <!-- 추가 행 -->
         </tbody>
       </table>
     </div>
+
 
     <!-- 등록/수정 모달 -->
     <div class="modal fade" id="deptModal" tabindex="-1">
@@ -65,102 +71,132 @@
             <form>
               <div class="row mb-3">
                 <div class="col-md-6">
-                  <label class="form-label">부서코드 *</label>
-                  <input type="text" class="form-control" placeholder="예: D001">
+                  <label for="deptIdx" class="form-label">부서코드 *</label>
+                  <input type="text" id="deptIdx" name="deptIdx" class="form-control" placeholder="부서코드는 자동생성됩니다."
+                    readonly>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">부서명 *</label>
-                  <input type="text" class="form-control" placeholder="예: 인사팀">
+                  <label for="deptName" class="form-label">부서명 *</label>
+                  <input type="text" id="deptName" name="deptName" class="form-control" placeholder="예: 인사팀">
                 </div>
               </div>
               <div class="row mb-3">
                 <div class="col-md-6">
                   <label class="form-label">상위 부서</label>
-                  <select class="form-select">
-                    <option>(없음)</option>
-                    <option>경영지원실</option>
-                    <option>영업본부</option>
+                  <select id="deptUpIdx" name="option" class="form-select">
+                    <option>선택</option>
+                    <option th:each="dt : ${deptList.?[deptUpIdx == null]}" th:value="${dt.deptIdx}"
+                      th:text="${dt.deptName}">
+                    </option>
                   </select>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">사용여부 *</label>
-                  <select class="form-select">
-                    <option>Y</option>
-                    <option>N</option>
+                  <select class="form-select" id="deptStatusSelect">
+                    <option value="Y">Y</option>
+                    <option value="N">N</option>
                   </select>
                 </div>
               </div>
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label class="form-label">부서 유형</label>
-                  <select class="form-select">
-                    <option>본사</option>
-                    <option>공장</option>
-                    <option>외부</option>
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">전화번호</label>
-                  <input type="text" class="form-control" placeholder="예: 02-123-4567">
+              <!-- 전화번호 -->
+              <div class="row mb-3 align-items-center">
+                <label for="deptTel" class="col-md-2 col-form-label">전화번호</label>
+                <div class="col-md-4">
+                  <input id="deptTel" name="deptTel" type="text" class="form-control" placeholder="예: 02-123-4567">
                 </div>
               </div>
-              <div class="row mb-3">
-                <div class="col-md-12">
-                  <label class="form-label">위치정보 / 비고</label>
-                  <input type="text" class="form-control" placeholder="예: 본사 2층, 선택사항">
+
+              <!-- 위치정보 / 비고 -->
+              <div class="row mb-3 align-items-center">
+                <label for="deptMemo" class="col-md-2 col-form-label">위치 / 비고</label>
+                <div class="col-md-8">
+                  <input id="deptMemo" name="deptMemo" type="text" class="form-control" placeholder="예: 본사 2층, 선택사항">
                 </div>
               </div>
+
             </form>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-primary">저장</button>
+            <button class="btn btn-primary" id="deptAddBtn">저장</button>
             <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+  <script>
+    // 부서등록
+    $("#deptAddBtn").on("click", function (e) {
+      data = {
+        deptIdx: $("#deptIdx").val(),
+        deptName: $("#deptName").val(),
+        deptUpIdx: $("#selectAll").val(),
+        deptStatus: $("#deptStatusSelect").val(),
+        deptTel: $("#deptTel").val(),
+        deptMemo: $("#deptMemo").val(),
 
-</html>
-<!-- <script th:inline="javascript">
-  $('#employeeForm').on('submit', function (e) {
-    e.preventDefault(); // 기본 submit 방지
-
-    var $form = $(this);
-    var formData = new FormData(this);
-    $.ajax({
-      url: "insertDept",
-      type: 'POST',
-      data: formData,
-      processData: false, // jQuery가 data를 문자열로 변환하지 않도록
-      contentType: false, // multipart/form-data 헤더를 자동 세팅하도록
-      success: function (code) {
-        if (code === '200') {
-          alert('등록 성공!');
-          resetForm();
-          closeEmpModal();
-        } else {
-          resetForm();
-          alert('등록 실패: 저장에 문제가 발생했습니다.');
-        }
-      },
-      error: function (xhr, status, error) {
-        console.error(error);
-        resetForm();
-        alert('서버 통신 중 에러가 발생했습니다.');
       }
+
+      console.log(data);
+      $.ajax({
+        type: "POST",
+        url: "/hr/insertDept",
+        data: JSON.stringify(data),
+        contentType: "application/json",
+        success: function (res) {
+          if (res === "200") {
+            $("deptModal").hide();
+            $('.modal-backdrop').remove();
+            window.location.reload();
+          } else {
+            alert("부서 등록에 실패했습니다.")
+          }
+        },
+        error: function (xhr, status, err) {
+          console.error(err);
+        }
+      });
     });
-  });
 
-  // 초기화
-  function closeEmpModal() {
-    resetForm();
-    $('#employeeModal').hide();
-    $('.modal-backdrop').remove();
-  }
+    // 부서수정
+    $(document).ready(function () {
+      // 1) 테이블에 있는 .editBtn 클릭 잡기 (delegation)
+      $(document).on('click', '.editBtn', function () {
+        const d = $(this).data();
+        console.log(d);
 
-  function resetForm() {
-    $('#employeeForm')[0].reset();
-  }
-</script> -->
+        // 2) 폼 필드에 값 세팅 (id 와 일치해야 합니다)
+        $('#deptIdx').val(d.deptIdx);
+        $('#deptName').val(d.deptName);
+        $('#deptUpIdx').val(d.deptUpIdx || '');
+        $('#deptStatusSelect').val(d.deptStatus);
+        $('#deptTel').val(d.deptTel);
+        $('#deptMemo').val(d.deptMemo);
+
+        // 3) 모달 제목 교체
+        $('#deptModal .modal-title').text('[부서수정] ' + d.deptName);
+
+        // 4) 모달 띄우기
+        new bootstrap.Modal(document.getElementById('deptModal')).show();
+        // $.ajax({
+        //   type: "GET",
+        //   url: "/hr/insertDept",
+        //   data: JSON.stringify(),
+        //   contentType: "application/json",
+        //   success: function (res) {
+        //     if (res === "200") {
+        //       $("deptModal").hide();
+        //       $('.modal-backdrop').remove();
+        //       window.location.reload();
+        //     } else {
+        //       alert("부서 수정에 실패했습니다.")
+        //     }
+        //   },
+        //   error: function (xhr, status, err) {
+        //     console.error(error);
+        //   }
+        // })
+      });
+    });
+  </script>
+</div>

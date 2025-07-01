@@ -17,7 +17,12 @@ import org.springframework.data.repository.query.Param;
 import com.eflix.hr.dto.DepartmentDTO;
 
 public interface DepartmentMapper {
+    // 부서조회
     List<DepartmentDTO> selectAll();
+
+    // 부서등록
+    public int insertDept(DepartmentDTO dept);
+    
     DepartmentDTO selectById(@Param("deptIdx") String deptIdx);
     int insert(DepartmentDTO dto);
     int update(DepartmentDTO dto);
@@ -26,5 +31,4 @@ public interface DepartmentMapper {
     List<DepartmentDTO> findAllDepts();
     List<DepartmentDTO> findAllDeptsUp(String dpetIdx);
 
-  // public int insertDept(DepartmentDTO dept);
 }

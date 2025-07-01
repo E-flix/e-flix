@@ -23,6 +23,12 @@ public class DepartmentDTO {
     private String deptName;         // dept_name
     private String deptStatus;       // dept_status
     private String deptMemo;         // dept_memo
+    private String deptTel;         // dept_memo
     private Date deptRegdate;   // dept_regdate
     private Date deptModdate;   // dept_moddate
+
+    private String deptUpName;  // 상위 부서 이름
+
+    private String coIdx;
+
 }

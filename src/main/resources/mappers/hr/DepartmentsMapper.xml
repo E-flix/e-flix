@@ -14,7 +14,7 @@
         dept_idx   AS deptIdx,
         dept_name  AS deptName
     FROM departments
-    WHERE dept_up_idx IS NULL
+    WHERE dept_up_idx IS NULL AND co_idx = #{coIdx}
     ORDER BY dept_name
   </select>
   
@@ -23,36 +23,49 @@
         dept_idx   AS deptIdx,
         dept_name  AS deptName
     FROM departments
-    WHERE dept_up_idx = #{deptIdx}
+    WHERE dept_up_idx = #{deptIdx} AND co_idx = #{coIdx}
     ORDER BY dept_name
   </select>
   
+  <!-- 부서 전체조회 -->
+  <select id="selectAll" resultType="DepartmentDTO">
+    SELECT d1.*, d2.dept_name AS dept_up_name
+    FROM departments d1
+    LEFT JOIN departments d2 ON d1.dept_up_idx = d2.dept_idx
+    WHERE d1.co_idx = #{coIdx}
+  </select>
+
   <!-- 부서등록 -->
-  <!-- <insert id="insertDepartment" parameterType="com.eflix.hr.dto.DepartmentDTO">
+  <insert id="insertDept" parameterType="DepartmentDTO">
+    <selectKey resultType="String" keyProperty="deptIdx" order="BEFORE">
+      SELECT 'dept-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(dept_idx, 6))), 100) + 1) FROM departments
+    </selectKey>
     INSERT INTO departments
       (dept_idx,
         dept_up_idx,
         dept_name,
         dept_status,
-        dept_memo,
         dept_regdate,
-        dept_moddate)
+        dept_tel,
+        dept_memo,
+        co_idx)
     VALUES
       (
         #{deptIdx},
         <choose>
           <when test="deptUpIdx != null and deptUpIdx != ''">
             #{deptUpIdx}
-          </when>
+          </when> 
           <otherwise>
             NULL
           </otherwise>
         </choose>,
         #{deptName},
         #{deptStatus},
-        #{deptMemo},
         SYSDATE,
-        NULL
+        #{deptTel},
+        #{deptMemo},
+        #{coIdx}
       )
-  </insert> -->
+  </insert>
 </mapper>

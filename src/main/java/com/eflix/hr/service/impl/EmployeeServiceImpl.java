@@ -71,15 +71,9 @@ public class EmployeeServiceImpl implements EmployeeService{
         return employeeMapper.selectAll(params);
     }
 
+  // 사원등록 
     @Override
     public int insertEmp(EmployeeDTO emp) {
-      // TODO Auto-generated method stub
-      throw new UnsupportedOperationException("Unimplemented method 'insertEmp'");
+      return employeeMapper.insertEmp(emp);
     }
-
-  //  // 사원등록 
-  //   @Override
-  //   public int insertEmp(EmployeeDTO emp) {
-  //     return employeeMapper.insertEmp(emp);
-  //   }
 }

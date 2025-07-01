@@ -21,22 +21,21 @@ import com.eflix.hr.dto.EmployeeDTO;
 public interface EmployeeMapper {
 
     public EmployeeDTO findByEmpEmailAndCompany(String empEmail, String coIdx);
-    
+    // 사원조회
     List<EmployeeDTO> selectAll(Map<String, Object> params);
-    
+
+    // 사원등록
+    int insertEmp(EmployeeDTO dto);
+
+    // 사원수정
+    int update(EmployeeDTO dto);
+
     EmployeeDTO selectById(@Param("empIdx") String empIdx);
 
     // 사원관리 페이지 직급 드롭다운 조회
     List<EmployeeDTO> gradeList();
 
-    int insert(EmployeeDTO dto);
-    int update(EmployeeDTO dto);
-    int deleteById(@Param("empIdx") String empIdx);
-
     // 재직 상태 드롭다운 조회
     public List<EmployeeDTO> empStatusList();
-
-    // // 사원등록
-    // public int insertEmp(EmployeeDTO emp);
 
 }
