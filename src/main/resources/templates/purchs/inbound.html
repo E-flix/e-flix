@@ -96,13 +96,13 @@
 								<td><input id="summaryProdId" type="text" readonly
 										class="form-control form-control-sm mx-auto" /></td>
 								<td><input id="summaryQuantity" type="text" readonly
-										class="form-control form-control-sm mx-auto" /></td>
+										class="form-control form-control-sm mx-auto" style="color: red;" /></td>
 								<td><input id="summaryWarehouseId" type="text" readonly
 										class="form-control form-control-sm mx-auto" /></td>
 								<td><input id="summaryWarehouseAmount" type="text" readonly
-										class="form-control form-control-sm mx-auto" /></td>
+										class="form-control form-control-sm mx-auto" style="color: green;"/></td>
 								<td><input id="summaryAmountAfter" type="text" readonly
-										class="form-control form-control-sm mx-auto" /></td>
+										class="form-control form-control-sm mx-auto" style="color: blue;"/></td>
 							</tr>
 						</tbody>
 					</table>
@@ -162,9 +162,9 @@
 		columnDefs: [
 			{ headerName: "창고ID", field: "warehouseId", editable: false },
 			{ headerName: "창고위치", field: "warehouseLocation", editable: false },
-			{ headerName: "최대용량", field: "warehouseScale", editable: false },
-			{ headerName: "현재용량", field: "warehouseCurrent", editable: false },
-			{ headerName: "입고가능용량", field: "conf", editable: false },
+			{ headerName: "최대용량", field: "warehouseScale", editable: false, cellStyle: { color: 'orange'}  },
+			{ headerName: "현재용량", field: "warehouseCurrent", editable: false, cellStyle: { color: 'green'} },
+			{ headerName: "입고가능용량", field: "conf", editable: false, cellStyle: { color: 'blue' } },
 		],
 		rowSelection: {
 			mode: "multiRow"

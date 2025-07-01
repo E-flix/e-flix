@@ -1,23 +1,41 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{common/layouts/default}">
-<!-- ============================================
-  - 작성자   : 이혁진
-  - 최초작성 : 2025-00-00
-  - 설명     : 창고간 제품 이동 관리 (AG Grid 적용)
-  -----------------------------------------------
-  [ 변경 이력 ]
-  - 2025-00-00 (이혁진): 페이지 완성
-============================================ -->
 
 <head>
 	<title>창고이동관리</title>
+	<!-- AG Grid CDN -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css" />
+	<style>
+		.ag-header-group-cell-label {
+			justify-content: center;
+		}
+
+		/* ✅ 셀 구분선 명확히 */
+		.ag-theme-alpine .ag-cell {
+			border-right: 1px solid #ccc;
+			border-bottom: 1px solid #ccc;
+		}
+
+		.ag-theme-alpine .ag-header-cell,
+		.ag-theme-alpine .ag-header-group-cell {
+			border-right: 1px solid #ccc;
+			border-bottom: 1px solid #ccc;
+		}
+
+		.ag-theme-alpine .ag-root-wrapper {
+			border: 1px solid #aaa;
+		}
+	</style>
 </head>
+
 <div layout:fragment="content" class="container-fluid">
 	<div class="d-flex justify-content-between align-items-center mb-4">
 		<h2>창고이동관리</h2>
 	</div>
+
 	<!-- 상단 탭 -->
-	<div class="col-md-12">
+	<div class="col-md-12 mb-2">
 		<div class="radio-group">
 			<input type="radio" class="btn-check" name="accountFilter" id="warehouse" autocomplete="off">
 			<label class="btn btn-outline-secondary btn-sm me-1" for="warehouse">창고관리</label>
@@ -33,69 +51,132 @@
 		<button type="button" class="btn btn-success btn-sm" onclick="saveTransfer()">저장</button>
 	</div>
 
-	<!-- 테이블 -->
-	<div class="table-responsive">
-		<table class="table table-bordered table-sm text-center align-middle">
-			<!-- 창고 테이블 (AG Grid) -->
-			<div class="grid-container" style="height: 30vh; width: 100%;">
-				<div id="whMovementGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
-			</div>
-		</table>
+	<!-- AG Grid 테이블 영역 -->
+	<div class="grid-container mb-4" style="height: 45vh; width: 100%;">
+		<div id="whMovementGrid" class="ag-theme-alpne" style="width: 100%; height: 100%;"></div>
 	</div>
 </div>
 
 </html>
-<!--Grid Script-->
-<script th:inline="javascript">
 
-	// AG Grid: 창고
+<script th:inline="javascript">
+	let prdList = /*[[${prdList}]]*/[];
+	// 더미데이터
+	const whMovementList = [
+		{
+			prodCode: "B001",
+			// prodName: "B-001.a",
+			prodSpec: "규격1",
+			sendWh: "기본창고",
+			sendBeforeQty: 9999,
+			sendAfterQty: 4999,
+			sendMoveQty: 5000,
+			recvWh: "구매창고",
+			recvBeforeQty: 0,
+			recvAfterQty: 5000,
+			recvMoveQty: 5000,
+			note: ""
+		},
+		{
+			prodCode: "C.BODY-0001-15",
+			// prodName: "C.BODY-0001-15",
+			prodSpec: "",
+			sendWh: "기본창고",
+			sendBeforeQty: 9999,
+			sendAfterQty: 4999,
+			sendMoveQty: 5000,
+			recvWh: "매출창고",
+			recvBeforeQty: 0,
+			recvAfterQty: 5000,
+			recvMoveQty: 5000,
+			note: ""
+		},
+		{
+			prodCode: "C.BODY-PC06-004+",
+			// prodName: "DDD",
+			prodSpec: "규격3",
+			sendWh: "기본창고",
+			sendBeforeQty: 9999,
+			sendAfterQty: 8999,
+			sendMoveQty: 1000,
+			recvWh: "구매창고",
+			recvBeforeQty: 0,
+			recvAfterQty: 1000,
+			recvMoveQty: 1000,
+			note: ""
+		}
+	];
+	
+
 	const whmGridOptions = {
 		rowData: whMovementList,
 		rowHeight: 35,
 		headerHeight: 35,
 		defaultColDef: { resizable: true },
+
 		columnDefs: [
-			{ headerName: "제품코드", field: "prodId", editable: false },
-			{ headerName: "제품명", field: "prodName", editable: false },
-			{ headerName: "창고코드", field: "warehouseId", editable: false },
-			{ headerName: "이동전 재고량", field: "이동전", editable: false },
-			{ headerName: "이동후 재고량", field: "이동후", editable: false },
-			{ headerName: "이동수량", field: "이동수량", editable: false },
-			{ headerName: "창고코드", field: "warehouseId", editable: false },
-			{ headerName: "이동전 재고량", field: "이동전", editable: false },
-			{ headerName: "이동후 재고량", field: "이동후", editable: false },
+			{ headerName: "No", valueGetter: "node.rowIndex + 1", width: 60, pinned: 'left' },
+			{ headerName: "품목코드", field: "prodCode" },
+			{
+				headerName: "품목명",
+				field: "prodName",
+				editable: true,
+				cellEditor: 'agSelectCellEditor',
+				cellEditorParams: {
+					values: prdList
+				}
+			},
+			{ headerName: "규격", field: "prodSpec" },
+
+			{
+				headerName: "보내는 창고 정보",
+				children: [
+					{
+						headerName: "창고명",
+						field: "sendWh",
+						editable: true,
+						cellEditor: 'agSelectCellEditor',
+						cellEditorParams: {
+							values: ["기본창고", "구매창고", "매출창고"] // 창고명 리스트
+						},
+						cellStyle: { color: 'blue' }
+					},
+					{ headerName: "이동전", field: "sendBeforeQty", cellStyle: { color: 'blue' } },
+					{ headerName: "이동후", field: "sendAfterQty", cellStyle: { color: 'blue' } },
+					{ headerName: "이동수량", field: "sendMoveQty", editable: true }
+				]
+			},
+
+			{
+				headerName: "받는 창고 정보",
+				children: [
+					{ headerName: "창고명", field: "recvWh", cellStyle: { color: 'red' } },
+					{ headerName: "이동전", field: "recvBeforeQty", cellStyle: { color: 'red' } },
+					{ headerName: "이동후", field: "recvAfterQty", cellStyle: { color: 'red' } },
+					{ headerName: "이동수량", field: "recvMoveQty", cellStyle: { color: 'red' } }
+				]
+			},
+
+			{ headerName: "비고", field: "note" }
 		],
-		rowSelection: {
-			mode: "multiRow"
-		},
+
 		onGridReady: (params) => {
 			whmGridOptions.api = params.api;
 			params.api.sizeColumnsToFit();
 		}
 	};
-	// 창 크기 바뀔 때도 다시 꽉 채우기
-	window.addEventListener('resize', () => {
-		if (whmGridOptions.api) {
-			whmGridOptions.api.sizeColumnsToFit();
-		}
-	});
-	// 그리드 초기화
+
+	// ✅ 그리드 생성
 	document.addEventListener("DOMContentLoaded", () => {
 		agGrid.createGrid(document.querySelector("#whMovementGrid"), whmGridOptions);
-		// 창 크기 변화 대응
 		window.addEventListener("resize", () => {
 			whmGridOptions.api?.sizeColumnsToFit();
 		});
 	});
 </script>
 
-<!--기능 Script-->
+<!-- 버튼 기능 -->
 <script>
-	function toggleAll(checkbox) {
-		const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
-		checkboxes.forEach(cb => cb.checked = checkbox.checked);
-	}
-
 	function resetTransfer() {
 		alert("초기화 기능은 개발 중입니다.");
 	}
@@ -108,5 +189,5 @@
 		if (this.checked) {
 			window.location.href = '/purchs/wh';
 		}
-	})
+	});
 </script>
