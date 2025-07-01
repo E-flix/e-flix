@@ -10,7 +10,6 @@
     <id     property="orderNo"           column="ORDER_NO"            />
     <result property="quotationNo"       column="QUOTATION_NO"        />
     <result property="orderDate"         column="ORDER_DT"            />
-    <result property="empCd"             column="EMP_CD"              />
     <result property="phoneNumber"       column="PHONE_NUMBER"        />
     <result property="deliveryAddr"      column="DELIVERY_ADDR"       />
     <result property="warehouseCd"       column="WAREHOUSE_CD"        />
@@ -27,7 +26,6 @@
       ORDER_NO,
       QUOTATION_NO,
       ORDER_DT,
-      EMP_CD,
       PHONE_NUMBER,
       DELIVERY_ADDR,
       WAREHOUSE_CD,
@@ -46,7 +44,6 @@
     ( ORDER_NO
     , QUOTATION_NO
     , ORDER_DT
-    , EMP_CD
     , PHONE_NUMBER
     , DELIVERY_ADDR
     , WAREHOUSE_CD
@@ -60,7 +57,6 @@
     ( #{orderNo}
     , #{quotationNo}
     , #{orderDate}
-    , #{empCd}
     , #{phoneNumber}
     , #{deliveryAddr}
     , #{warehouseCd}
@@ -101,8 +97,8 @@
   <!-- 여신 사용액 누적 UPDATE -->
   <update id="updateCreditUsed" parameterType="map">
     UPDATE CREDIT_MANAGEMENT
-       SET CREDIT_USED = CREDIT_USED + #{amount}
-     WHERE CUSTOMER_CD = #{customerCd}
+    SET CREDIT_USED = CREDIT_USED + #{amount}
+    WHERE CUSTOMER_CD = #{customerCd}
   </update>
 
 </mapper>
