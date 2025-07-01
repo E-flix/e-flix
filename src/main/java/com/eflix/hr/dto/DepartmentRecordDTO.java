@@ -26,4 +26,7 @@ public class DepartmentRecordDTO {
     private String reason;           // reason
     private Date createdAt; // created_at
     private String createdBy;        // created_by
+
+    private String coIdx;
+
 }

@@ -25,11 +25,18 @@ public class DepartmentServiceImpl implements DepartmentService{
   @Autowired
   private DepartmentMapper departmentMapper;
 
+  // 부서조회
   @Override
-  public List<DepartmentDTO> getAllDepartments() {
-    throw new UnsupportedOperationException("Unimplemented method 'getAllDepartments'");
+  public List<DepartmentDTO> selectAll() {
+    return departmentMapper.selectAll();
   }
 
+    // 부서등록
+  @Override
+  public int insertDept(DepartmentDTO dept) {
+    return departmentMapper.insertDept(dept);
+  }
+  
   @Override
   public DepartmentDTO getDepartmentById(String deptIdx) {
     throw new UnsupportedOperationException("Unimplemented method 'getDepartmentById'");
@@ -60,9 +67,5 @@ public class DepartmentServiceImpl implements DepartmentService{
     return departmentMapper.findAllDeptsUp(deptIdx);
   }
 
-  // 부서등록
-  // @Override
-  // public int insertDept(DepartmentDTO dept) {
-  //   return departmentMapper.insertDept(dept);
-  // }
+
 }

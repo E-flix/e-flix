@@ -45,4 +45,7 @@ public class SalaryDTO {
     private String field8;           // field8
     private String field9;           // field9
     private String field10;          // field10
+
+    private String coIdx;
+
 }

@@ -12,7 +12,7 @@
 
     <!-- 근무유형 드롭다운 조회 -->
   <select id ="workList" resultType="HrWorkTypeDTO">
-        SELECT DISTINCT work_type_nm, work_type_id FROM hr_work_types
+        SELECT DISTINCT work_type_nm, work_type_id FROM hr_work_types WHERE co_idx = #{coIdx}
           <!-- 선택한 '근무 유형'만 필터링 -->
         <if test="workTypeNm != null and workTypeNm != '' and workTypeNm != '선택'">
             AND w.work_type_nm = #{workTypeNm}

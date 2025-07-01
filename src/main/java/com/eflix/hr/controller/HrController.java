@@ -97,7 +97,7 @@ public class HrController {
     List<RoleDTO> roleList = roleService.roleList();
     
     // 은행 드롭다운 조회
-      List<CommonDTO> bankList = commonService.getCommon("BK00");
+    List<CommonDTO> bankList = commonService.getCommon("BK00");
 
     Map<String,Object> params = new HashMap<>();
     params.put("option", option);
@@ -154,13 +154,6 @@ public class HrController {
     } else {
       return "404";
     }
-  }
-  
-
-  // 부서 등록 화면(관리자)
-  @GetMapping("/da")
-  public String deptAdd() {
-      return "hr/deptAdd";
   }
   
   // 근태 현황 화면(사원)

@@ -32,7 +32,6 @@ public class EmployeeDTO {
     private String deptName;         // deptName
     private String empAccount;      // emp_account
     private String empPw;           // emp_pw
-    private String coIdx;          // co_idx
     private String rrnPfx;
     private String rrnSfx;
     private String empPhone;
@@ -43,4 +42,7 @@ public class EmployeeDTO {
     
     private String option;
     private String keyword;
+
+    private String coIdx;
+
 }

@@ -71,21 +71,25 @@
                 </otherwise>
             </choose>
         </if>
+        AND e.co_idx = #{coIdx}
     </where>
     ORDER BY e.emp_idx ASC
 </select>
 
   <!-- 직급 드롭다운 조회 -->
     <select id="gradeList" resultType="EmployeeDTO">
-      SELECT DISTINCT emp_grade FROM employees
+      SELECT DISTINCT emp_grade FROM employees WHERE co_idx = #{coIdx}
     </select>
   <!-- 재직 상태 드롭다운 조회 -->
   <select id="empStatusList" resultType="EmployeeDTO">
-    SELECT DISTINCT emp_status FROM employees
+    SELECT DISTINCT emp_status FROM employees WHERE co_idx = #{coIdx}
   </select>
 
 <!-- 사원 등록 -->
 <insert id="insertEmp" parameterType="EmployeeDTO">
+    <selectKey resultType="String" keyProperty="empIdx" order="BEFORE">
+        SELECT 'emp-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(emp_idx, 5))), 100) + 1) FROM employees
+    </selectKey>
     INSERT INTO employees (
         emp_idx,
         emp_name,
@@ -98,24 +102,32 @@
         emp_regdate,
         emp_account,
         emp_phone,
-        emp_pw
+        emp_pw,
+        emp_addr,
+        emp_addr_detail,
+        emp_addr_zip,
+        co_idx
     ) VALUES (
         #{empIdx},
         #{empName},
         #{rrnPfx},
         #{rrnSfx},
         #{empEmail},
-        'test-001',
+        #{deptIdx},
         #{empGrade},
         #{empType},
         #{empRegdate},
         #{empAccount},
         #{empPhone},
-        #{empPw}
+        #{empPw},
+        #{empAddr},
+        #{empAddrDetail},
+        #{empAddrZip},
+        #{coIdx}
     )
 </insert>
 <!-- 단건조회 -->
 <select id="selectById" parameterType="String" resultType="EmployeeDTO">
-    SELECT * FROM employees WHERE emp_idx = #{empIdx}
+    SELECT * FROM employees WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
 </select>
 </mapper>

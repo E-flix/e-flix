@@ -19,4 +19,7 @@ public class RoleDTO {
     private String roleId;           // role_id
     private String roleName;         // role_name
     private String roleDesc;         // role_desc
+
+    private String coIdx;
+
 }

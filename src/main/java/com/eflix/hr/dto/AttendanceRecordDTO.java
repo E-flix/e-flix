@@ -28,5 +28,7 @@ public class AttendanceRecordDTO {
     private String empStatus;        // emp_status
     private String deptName;         // deptName
     private String empAccount;      // emp_account
+
+    private String coIdx;
     
 }

@@ -15,7 +15,7 @@ import java.util.List;
 import com.eflix.hr.dto.DepartmentDTO;
 
 public interface DepartmentService {
-    public List<DepartmentDTO> getAllDepartments();
+    public List<DepartmentDTO> selectAll();
     public DepartmentDTO getDepartmentById(String deptIdx);
     int createDepartment(DepartmentDTO dto);
     int updateDepartment(DepartmentDTO dto);
@@ -25,5 +25,5 @@ public interface DepartmentService {
     public List<DepartmentDTO> findAllDeptsUP(String deptIdx);
     
     // // 부서등록
-    // public int insertDept(DepartmentDTO dept);
+    public int insertDept(DepartmentDTO dept);
 }

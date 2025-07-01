@@ -23,4 +23,7 @@ public class NightRecordDTO {
     private Date ntStart;   // nt_start
     private Date ntEnd;     // nt_end
     private Date ntDate;        // nt_date
+
+    private String coIdx;
+
 }
