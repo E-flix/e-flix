@@ -131,21 +131,39 @@
         WHERE co_idx = #{coIdx} AND spi_status = 'SS01';
     </select>
 
-    <select id="findSubscriptionBySpiIdx" parameterType="String" resultType="subscriptionDTO">
-        SELECT *
-        FROM subscription
-        WHERE spi_idx = #{spiIdx}
+    <select id="findSubscriptionBySpiIdx" parameterType="String" resultType="StatementDTO">
+        SELECT
+            spi.spi_idx, spi.emp_idx, spi.spi_pay, spi.spi_status, spi.spi_start, spi.spi_end, spi.spi_period, spi.spi_ctrt, spi.spi_uid,
+            co.co_idx, co.co_name, co.ceo_name, co.psch_name, co.psch_tel, co.psch_email,
+            spk.spk_idx, spk.spk_name, spk.spk_price,
+            LISTAGG(mou.module_name, ',') WITHIN GROUP (ORDER BY mou.module_name) AS module_names
+        FROM
+            subscription spi
+        JOIN companies co ON spi.co_idx = co.co_idx
+            LEFT JOIN subscription_packages spk ON spi.spk_idx = spk.spk_idx
+            LEFT JOIN subscription_package_details spd ON spi.spi_idx = spd.spi_idx
+            LEFT JOIN modules mou ON spd.module_idx = mou.module_idx
+        WHERE
+            spi.spi_idx = #{spiIdx}
+        GROUP BY
+            spi.spi_idx, spi.emp_idx, spi.spi_pay, spi.spi_status, spi.spi_start, spi.spi_end, spi.spi_period, spi.spi_ctrt, spi.spi_uid,
+            co.co_idx, co.co_name, co.ceo_name, co.psch_name, co.psch_tel, co.psch_email,
+            spk.spk_idx, spk.spk_name, spk.spk_price
     </select>
 
     <select id="findSubscriptionInvoiceBySpiIdx" parameterType="String" resultType="InvoiceDTO">
-        SELECT s.spi_idx, s.spk_idx, s.co_idx, s.spi_start, s.spi_end, s.spi_pay, s.spi_period,
+        SELECT co.co_name, co.bizr_no, co.ceo_name, co.ceo_tel, co.co_addr, co.co_addr_detail, co.co_zip, co.psch_name, co.psch_tel, co.psch_email,
+            s.spi_idx, s.spk_idx, s.co_idx, s.spi_start, s.spi_end, s.spi_pay, s.spi_period,
             spk.spk_name, spk.spk_price,
             LISTAGG(mou.module_name, ', ') WITHIN GROUP (ORDER BY mou.module_name) AS module_names
         FROM subscription s
+            JOIN companies co ON s.co_idx = co.co_idx
             JOIN subscription_packages spk ON s.spk_idx = spk.spk_idx
             JOIN subscription_package_details spd ON s.spi_idx = spd.spi_idx
             JOIN modules mou ON spd.module_idx = mou.module_idx
         WHERE s.spi_idx = #{spiIdx}
-        GROUP BY s.spi_idx, s.spk_idx, s.co_idx, s.spi_start, s.spi_end, s.spi_pay, s.spi_period, spk.spk_name, spk.spk_price
+        GROUP BY co.co_name, co.bizr_no, co.ceo_name, co.ceo_tel, co.co_addr, co.co_addr_detail, co.co_zip, co.psch_name, co.psch_tel, co.psch_email,
+            s.spi_idx, s.spk_idx, s.co_idx, s.spi_start, s.spi_end, s.spi_pay, s.spi_period,
+            spk.spk_name, spk.spk_price
     </select>
 </mapper>

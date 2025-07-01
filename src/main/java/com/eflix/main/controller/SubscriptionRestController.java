@@ -129,12 +129,13 @@ public class SubscriptionRestController {
             byte[] pdf = reportService.generateInvoicePdf(spiIdx);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.builder("inline")
+            headers.setContentDisposition(ContentDisposition.builder("attachment")
                     .filename("subscription_invoice_" + spiIdx + ".pdf", StandardCharsets.UTF_8)
                     .build());
+            headers.setContentLength(pdf.length);
             return ResponseEntity.ok().headers(headers).body(pdf);
         } catch (Exception e) {
-            log.error("PDF 미리보기 생성 오류: {}", e.getMessage(), e);
+            log.error("PDF 생성 오류: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }

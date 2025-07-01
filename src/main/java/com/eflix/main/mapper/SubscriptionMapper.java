@@ -7,6 +7,7 @@ import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
 import com.eflix.main.dto.SubscriptionPackageDetailDTO;
 import com.eflix.main.dto.etc.InvoiceDTO;
+import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 
 /**
@@ -58,9 +59,9 @@ public interface SubscriptionMapper {
 
     public int findActiveSubscriptionByCoIdx(String coIdx);
 
-    public SubscriptionDTO findSubscriptionDetail(Long spiIdx);
+    public SubscriptionDTO findSubscriptionDetail(String spiIdx);
 
-    public SubscriptionDTO findSubscriptionBySpiIdx(String spiIdx);
+    public StatementDTO findSubscriptionBySpiIdx(String spiIdx);
 
     public InvoiceDTO findSubscriptionInvoiceBySpiIdx(String spiIdx);
 }

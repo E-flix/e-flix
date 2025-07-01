@@ -19,6 +19,7 @@ import com.eflix.bsn.dto.CustomerDTO;
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.InvoiceDTO;
+import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.mapper.CompanyMapper;
 import com.eflix.main.mapper.SubscriptionMapper;
 import com.eflix.main.mapper.UserMapper;
@@ -60,7 +61,7 @@ public class ReportServiceImpl implements ReportService {
     private final String INVOICE_REPORT_PATH = "static/reports/invoice_template.jasper";
 
     @Override
-    public byte[] generateContractReport(Long spiIdx) throws Exception {
+    public byte[] generateContractReport(String spiIdx) throws Exception {
         SubscriptionDTO dto = subscriptionMapper.findSubscriptionDetail(spiIdx);
         List<SubscriptionDTO> dataList = List.of(dto);
 
@@ -77,9 +78,26 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public byte[] generateInvoiceReport(Long spiIdx) throws Exception {
+    public byte[] generateInvoiceReport(String spiIdx) throws Exception {
         SubscriptionDTO dto = subscriptionMapper.findSubscriptionDetail(spiIdx);
         List<SubscriptionDTO> dataList = List.of(dto);
+
+        InputStream reportStream = getClass().getResourceAsStream("/static/reports/invoice_template.jasper");
+        if (reportStream == null) {
+            throw new FileNotFoundException("Jasper 파일을 찾을 수 없습니다: /reports/invoice_template.jasper");
+        }
+        JasperReport report = (JasperReport) JRLoader.loadObject(reportStream);
+
+        Map<String, Object> params = Map.of("title", "세금 계산서");
+
+        JasperPrint print = JasperFillManager.fillReport(report, params, new JRBeanCollectionDataSource(dataList));
+        return JasperExportManager.exportReportToPdf(print);
+    }
+
+    @Override
+    public byte[] generateStatementReport(String spiIdx) throws Exception {
+        StatementDTO statementDTO = subscriptionMapper.findSubscriptionBySpiIdx(spiIdx);
+        List<StatementDTO> dataList = List.of(statementDTO);
 
         InputStream reportStream = getClass().getResourceAsStream("/static/reports/invoice_template.jasper");
         if (reportStream == null) {
@@ -95,13 +113,13 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public byte[] generateStatmentPdf(String spiIdx) throws Exception {
-        SubscriptionDTO subscriptionDTO = subscriptionMapper.findSubscriptionBySpiIdx(spiIdx);
-        if (subscriptionDTO == null) throw new RuntimeException("구독 정보를 찾을 수 없습니다: " + spiIdx);
+        StatementDTO statementDTO = subscriptionMapper.findSubscriptionBySpiIdx(spiIdx);
+        if (statementDTO == null) throw new RuntimeException("구독 정보를 찾을 수 없습니다: " + spiIdx);
 
-        CompanyDTO companyDTO = companyMapper.findByCoIdx(subscriptionDTO.getCoIdx());
+        CompanyDTO companyDTO = companyMapper.findByCoIdx(statementDTO.getCoIdx());
 
         Map<String, Object> parameters = buildParameters(companyDTO);
-        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(List.of(subscriptionDTO));
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(List.of(statementDTO));
 
         try (InputStream jasperStream = new ClassPathResource(STATEMENT_REPORT_PATH).getInputStream()) {
             return JasperRunManager.runReportToPdf(jasperStream, parameters, dataSource);
@@ -163,7 +181,7 @@ public class ReportServiceImpl implements ReportService {
         params.put("CUSTOMER_PHONE", "053-421-2460");
         params.put("CUSTOMER_EMAIL", "ask@yedam.ac");
 
-        params.put("EMP_NAME", "대표자명");
+        params.put("EMP_NAME", "팀장");
 
         return params;
     }
