@@ -18,7 +18,7 @@ import com.eflix.hr.dto.DepartmentDTO;
 
 public interface DepartmentMapper {
     // 부서조회
-    List<DepartmentDTO> selectAll();
+    List<DepartmentDTO> selectAll(DepartmentDTO departmentDTO);
 
     // 부서등록
     public int insertDept(DepartmentDTO dept);
@@ -28,7 +28,7 @@ public interface DepartmentMapper {
     int update(DepartmentDTO dto);
     int deleteById(@Param("deptIdx") String deptIdx);
 
-    List<DepartmentDTO> findAllDepts();
-    List<DepartmentDTO> findAllDeptsUp(String dpetIdx);
+    List<DepartmentDTO> findAllDepts(String coIdx);
+    List<DepartmentDTO> findAllDeptsUp(String coIdx, String deptIdx);
 
 }

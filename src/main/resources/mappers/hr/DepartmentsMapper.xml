@@ -9,7 +9,7 @@
   - 2025-06-26 (김어진): 부서등록 쿼리문 작성
 =============================================== -->
 <mapper namespace="com.eflix.hr.mapper.DepartmentMapper">
-  <select id="findAllDepts" resultType="DepartmentDTO">
+  <select id="findAllDepts" parameterType="String" resultType="DepartmentDTO">
     SELECT DISTINCT
         dept_idx   AS deptIdx,
         dept_name  AS deptName
