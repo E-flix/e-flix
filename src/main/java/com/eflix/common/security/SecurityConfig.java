@@ -3,6 +3,8 @@ package com.eflix.common.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -63,6 +65,14 @@ public class SecurityConfig {
 	@Autowired
 	private SecurityUserDetailService customUserDetailService;
 
+	@Autowired
+	private AuthenticationConfiguration authenticationConfiguration;
+
+	@Bean
+    public AuthenticationManager authenticationManager() throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -72,9 +82,13 @@ public class SecurityConfig {
 	public SecurityFilterChain erpSecurityFilterChain(HttpSecurity http) throws Exception {
 		http.securityMatcher("/**")
 				.authorizeHttpRequests(auth -> auth
-					.requestMatchers("/", "/erp", "/login", "/signup", "/inquiry/**", "/main/error/**", "/main/assets/**", "/main/css/**", "/main/js/**", "/bootstrap/**", "/common/**",
+					.requestMatchers("/", "/erp", "/signup", "/inquiry/**", "/main/error/**", "/main/assets/**", "/main/css/**", "/main/js/**", "/bootstrap/**", "/common/**",
 						"/bootstrap/**", "/img/**",
-						"/hr/**", "/acc/**", "/bsn/**", "/purchs/**", "/**").permitAll()
+					"/login", "/erp/login", "/hr/**", "/acc/**", "/bsn/**", "/purchs/**", "/**").permitAll()
+					// .requestMatchers("/hr/**").hasRole("HR")
+					// .requestMatchers("/bnz/**").hasRole("BNZ")
+					// .requestMatchers("/purchs/**").hasRole("PURCHS")
+					// .requestMatchers("/acc/**").hasRole("ACC")
 					.requestMatchers("/erp/**").authenticated()
 					.requestMatchers("/**").authenticated())
 			.formLogin(form -> form

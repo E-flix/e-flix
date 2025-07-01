@@ -6,8 +6,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import com.eflix.common.security.details.SecurityUserDetails;
+import com.eflix.common.security.dto.SecurityEmpDTO;
+import com.eflix.common.security.dto.SecurityMasterDTO;
 import com.eflix.common.security.dto.UserDTO;
-import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.main.dto.MasterDTO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,26 +49,55 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-            Authentication authentication) throws IOException, ServletException {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'onAuthenticationSuccess'");
-        SecurityUserDetails userDetails = (SecurityUserDetails) authentication.getPrincipal();
-        
-        if (userDetails.getEmployeeDTO() != null) {
-			EmployeeDTO empDTO = userDetails.getEmployeeDTO();
+                                        Authentication authentication) throws IOException, ServletException {
 
-            request.getSession().setAttribute("empEmail", empDTO.getEmpEmail());
-            request.getSession().setAttribute("empName", empDTO.getEmpName());
-            request.getSession().setAttribute("coIdx", empDTO.getCoIdx());
+        SecurityUserDetails userDetails = (SecurityUserDetails) authentication.getPrincipal();
+
+        // ERP 사원 로그인
+        if (userDetails.getSecurityEmpDTO() != null) {
+            SecurityEmpDTO securityEmpDTO = userDetails.getSecurityEmpDTO();
+
+            request.getSession().setAttribute("empEmail", securityEmpDTO.getEmpEmail());
+            request.getSession().setAttribute("empName", securityEmpDTO.getEmpName());
+            request.getSession().setAttribute("coIdx", securityEmpDTO.getCoIdx());
             request.getSession().setAttribute("authorities", userDetails.getAuthorities());
-			response.sendRedirect("/erp");
-		} else {
-			UserDTO userDTO = userDetails.getUserDTO();
+
+            log.info("ERP 사원 로그인 성공: {}", securityEmpDTO.getEmpEmail());
+
+            response.sendRedirect("/erp");
+        }
+
+        // ERP 마스터 로그인
+        else if (userDetails.getSecurityMasterDTO() != null) {
+            SecurityMasterDTO masterDTO = userDetails.getSecurityMasterDTO();
+
+            request.getSession().setAttribute("mstId", masterDTO.getMstId());
+            request.getSession().setAttribute("coIdx", masterDTO.getCoIdx());
+            request.getSession().setAttribute("role", "ROLE_MASTER");
+
+            log.info("ERP 마스터 로그인 성공: {}", masterDTO.getMstId());
+
+            response.sendRedirect("/erp/master");
+        }
+
+        // 메인 사용자 로그인
+        else if (userDetails.getUserDTO() != null) {
+            UserDTO userDTO = userDetails.getUserDTO();
+
             request.getSession().setAttribute("userIdx", userDTO.getUserIdx());
-			request.getSession().setAttribute("userId", userDTO.getUserId());
-			request.getSession().setAttribute("userName", userDTO.getUserName());
-			response.sendRedirect("/");
-		}
+            request.getSession().setAttribute("userId", userDTO.getUserId());
+            request.getSession().setAttribute("userName", userDTO.getUserName());
+
+            log.info("메인 사용자 로그인 성공: {}", userDTO.getUserId());
+
+            response.sendRedirect("/");
+        }
+
+        // 예외 또는 기본 홈으로
+        else {
+            log.warn("알 수 없는 사용자 유형 로그인 성공 처리");
+            response.sendRedirect("/");
+        }
     }
 
 }

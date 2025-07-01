@@ -8,42 +8,69 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.eflix.common.security.dto.SecurityEmpDTO;
+import com.eflix.common.security.dto.SecurityMasterDTO;
 import com.eflix.common.security.dto.UserDTO;
-import com.eflix.hr.dto.EmployeeDTO;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 public class SecurityUserDetails implements UserDetails {
 
 	private final UserDTO userDTO;
-	private final EmployeeDTO employeeDTO;
+	private final SecurityEmpDTO securityEmpDTO;
+	private final SecurityMasterDTO securityMasterDTO;
 
 	private final Collection<? extends GrantedAuthority> authorities;
 
+	// 메인 사용자 로그인
 	public SecurityUserDetails(UserDTO user) {
 		this.userDTO = user;
-		this.employeeDTO = null;
+		this.securityEmpDTO = null;
+		this.securityMasterDTO = null;
 		this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserRole()));
 	}
 
-	public SecurityUserDetails(EmployeeDTO employee, List<String> roleCodes) {
-		this.employeeDTO = employee;
+	// ERP 사원 로그인
+	public SecurityUserDetails(SecurityEmpDTO employee, List<String> roleCodes) {
 		this.userDTO = null;
+		this.securityEmpDTO = employee;
+		this.securityMasterDTO = null;
 		this.authorities = roleCodes.stream()
-				.map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-				.collect(Collectors.toList());
+			.map(code -> new SimpleGrantedAuthority("ROLE_" + code))
+			.collect(Collectors.toList());
+	}
+
+	// ERP 마스터 로그인
+	public SecurityUserDetails(SecurityMasterDTO master) {
+		this.userDTO = null;
+		this.securityEmpDTO = null;
+		this.securityMasterDTO = master;
+		this.authorities = List.of(new SimpleGrantedAuthority("ROLE_MASTER"));
+
+		log.info("마스터 계정 - {}", this.securityMasterDTO);
 	}
 
 	@Override
 	public String getPassword() {
-		return userDTO != null ? userDTO.getUserPw() : employeeDTO.getEmpPw();
+		if (userDTO != null) return userDTO.getUserPw();
+		if (securityEmpDTO != null) return securityEmpDTO.getEmpPw();
+		if (securityMasterDTO != null) return securityMasterDTO.getMstPw();
+		return null;
 	}
 
 	@Override
 	public String getUsername() {
-		return userDTO != null ? userDTO.getUserId() : employeeDTO.getEmpEmail();
+		if (userDTO != null) return userDTO.getUserId();
+		if (securityEmpDTO != null) return securityEmpDTO.getEmpEmail();
+		if (securityMasterDTO != null) return securityMasterDTO.getMstId();
+		return null;
 	}
 
-	// 나머지 override 생략
+	@Override public boolean isAccountNonExpired() { return true; }
+	@Override public boolean isAccountNonLocked() { return true; }
+	@Override public boolean isCredentialsNonExpired() { return true; }
+	@Override public boolean isEnabled() { return true; }
 }

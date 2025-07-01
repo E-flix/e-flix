@@ -351,6 +351,10 @@
             }
         }
     </style>
+    
+	<!-- Jquery CDN -->
+	<script src="https://code.jquery.com/jquery-3.7.1.js"
+		integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -399,17 +403,20 @@
                     <div class="form sign-in">
                         <div class="input-group">
                             <i class='bx bxs-user'></i>
-                            <input type="text" placeholder="Compnay">
+                            <input type="text" id="co_idx" placeholder="Compnay">
                         </div>
                         <div class="input-group">
                             <i class='bx bxs-lock-alt'></i>
-                            <input type="text" placeholder="Username">
+                            <input type="text" id="username" placeholder="Username">
                         </div>
                         <div class="input-group">
                             <i class='bx bxs-lock-alt'></i>
-                            <input type="password" placeholder="Password">
+                            <input type="password" id="password" placeholder="Password">
                         </div>
-                        <button>
+                        <div class="input-group">
+                            <input type="checkbox" id="masterCheck">
+                        </div>
+                        <button button id="loginBtn">
                             Sign in
                         </button>
                         <p>
@@ -476,6 +483,34 @@
         setTimeout(() => {
             container.classList.add('sign-in')
         }, 200)
+
+        // $("#loginBtn").on("click", function() {
+        //     loginData = {
+        //         co_idx: $("#co_idx").val(),
+        //         username: $("#username").val(),
+        //         password: $("#password").val(),
+        //         masterCheck: $("#masterCheck").val(),
+        //     }
+
+        //     $.ajax({
+        //         type: "POST",
+        //         url: "/erp/login",
+        //         data: JSON.stringify(loginData),
+        //         contentType: "application/json",
+        //         success: function(res) {
+        //             if(res.head.res_code === "200") {
+        //                 alert("로그인 성공: ", res.username);
+        //                 location.href = res.body.redirectUrl;
+        //             } else {
+        //                 alert("실패: ", res.head.res_result)
+        //             }
+        //         },
+        //         error: function(xhr, status, err) {
+        //             console.error(err);
+
+        //         }
+        //     })
+        // });
     </script>
 </body>
 
