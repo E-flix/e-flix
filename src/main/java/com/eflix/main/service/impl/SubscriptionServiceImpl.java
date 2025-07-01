@@ -6,13 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eflix.common.exception.Exception;
+import com.eflix.common.exception.CommonException;
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.MasterDTO;
 import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
 import com.eflix.main.dto.SubscriptionPackageDetailDTO;
+import com.eflix.main.dto.etc.InvoiceDTO;
+import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 import com.eflix.main.mapper.CompanyMapper;
 import com.eflix.main.mapper.MasterMapper;
@@ -48,13 +50,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         int activeSubscription = subscriptionMapper.findActiveSubscriptionByCoIdx(subscriptionDTO.getCoIdx());
 
         if(activeSubscription > 0) {
-            throw new Exception("이미 구독 중입니다.");
+            throw new CommonException("이미 구독 중입니다.");
         }
 
         subscriptionDTO.setSpiStatus("SS01");
 
         if(subscriptionMapper.insertSubscription(subscriptionDTO) <= 0) {
-            throw new Exception("구독 정보를 등록하지 못했습니다.");
+            throw new CommonException("구독 정보를 등록하지 못했습니다.");
         }
 
         SubscriptionPackageDetailDTO subscriptionPackageDetailDTO = new SubscriptionPackageDetailDTO();
@@ -64,12 +66,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         for(String moduleIdx : subscriptionDTO.getCheckedModules()) {
             subscriptionPackageDetailDTO.setModuleIdx(moduleIdx);
             if(subscriptionMapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO) <= 0) {
-                throw new Exception("구독 모듈 저장 실패: " + moduleIdx);
+                throw new CommonException("구독 모듈 저장 실패: " + moduleIdx);
             }
         }
 
         if(masterMapper.insertMaster(masterDTO) <= 0) {
-            throw new Exception("마스터 계정을 등록하지 못했습니다.");
+            throw new CommonException("마스터 계정을 등록하지 못했습니다.");
         }
         
         return 1;
@@ -100,5 +102,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public int findActiveSubscriptionByCoIdx(String coIdx) {
         return subscriptionMapper.findActiveSubscriptionByCoIdx(coIdx);
+    }
+
+    @Override
+    public StatementDTO findSubscriptionBySpiIdx(String spiIdx) {
+        return subscriptionMapper.findSubscriptionBySpiIdx(spiIdx);
+    }
+
+    @Override
+    public InvoiceDTO findSubscriptionInvoiceBySpiIdx(String spiIdx) {
+        return subscriptionMapper.findSubscriptionInvoiceBySpiIdx(spiIdx);
     }
 }

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import com.eflix.bsn.dto.CustomerDTO;
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.InvoiceDTO;
@@ -23,12 +22,9 @@ import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.mapper.CompanyMapper;
 import com.eflix.main.mapper.SubscriptionMapper;
 import com.eflix.main.mapper.UserMapper;
-import com.eflix.main.service.CompanyService;
 import com.eflix.main.service.ReportService;
-import com.eflix.main.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -99,9 +95,9 @@ public class ReportServiceImpl implements ReportService {
         StatementDTO statementDTO = subscriptionMapper.findSubscriptionBySpiIdx(spiIdx);
         List<StatementDTO> dataList = List.of(statementDTO);
 
-        InputStream reportStream = getClass().getResourceAsStream("/static/reports/invoice_template.jasper");
+        InputStream reportStream = getClass().getResourceAsStream("/static/reports/statement_template.jasper");
         if (reportStream == null) {
-            throw new FileNotFoundException("Jasper 파일을 찾을 수 없습니다: /reports/invoice_template.jasper");
+            throw new FileNotFoundException("Jasper 파일을 찾을 수 없습니다: /reports/statement_template.jasper");
         }
         JasperReport report = (JasperReport) JRLoader.loadObject(reportStream);
 
@@ -171,7 +167,8 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private Map<String, Object> buildParameters(CompanyDTO companyDTO) {
+    @Override
+    public Map<String, Object> buildParameters(CompanyDTO companyDTO) {
         Map<String, Object> params = new HashMap<>();
         params.put("COMPANY_NAME", "E-FLIX");
         params.put("COMPANY_ADDRESS", "대구광역시 중구 중앙대로 403 (남일동 135-1, 5층)");

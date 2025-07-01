@@ -1,6 +1,9 @@
 package com.eflix.main.service;
 
 import java.util.List;
+import java.util.Map;
+
+import com.eflix.main.dto.CompanyDTO;
 
 // 최초 생성 0630
 public interface ReportService {
@@ -17,4 +20,6 @@ public interface ReportService {
     public String compileReport() throws Exception;
 
     public byte[] generateStatmentPdf(String spiIdx) throws Exception;
+
+    public Map<String, Object> buildParameters(CompanyDTO companyDTO);
 }

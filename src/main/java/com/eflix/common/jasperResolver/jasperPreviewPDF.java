@@ -3,10 +3,12 @@ package com.eflix.common.jasperResolver;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.tomcat.util.http.parser.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.view.AbstractView;
@@ -19,33 +21,31 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.util.JRLoader;
 
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+
 // 0701 최초 생성
 
 @Component
-public class jasperPreviewPDF extends AbstractView {
-
-    @Autowired
-    DataSource dataSource;
+public class JasperPreviewPDF extends AbstractView {
 
     @Override
     protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
         HttpServletResponse response) throws Exception {
-        
-        String reportFile = (String) model.get("report"); // 예: "/reports/statement.jasper"
-        @SuppressWarnings("unchecked")
-        Map<String, Object> parameters = (Map<String, Object>) model.get("param");
+
+        String reportFile = (String)model.get("fileName");
+
+        Map<String,Object> map = (Map<String,Object>) model.get("params");
+
+        List<Object> dataList = (List<Object>) model.get("dataList");
 
         InputStream jasperStream = getClass().getResourceAsStream(reportFile);
+
         JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
 
-        Connection conn = null;
-        try {
-            conn = dataSource.getConnection();
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conn);
-            response.setContentType(getContentType());
-            JasperExportManager.exportReportToPdfStream(jasperPrint, response.getOutputStream());
-        } finally {
-            if (conn != null) conn.close();
-        }
+        JasperPrint jasperPrint =  JasperFillManager.fillReport(jasperReport, map, new JRBeanCollectionDataSource(dataList));
+
+        response.setContentType("application/pdf");
+        // response.setHeader("Content-Disposition", "attachment; filename=" + model.get("saveName"));
+        JasperExportManager.exportReportToPdfStream(jasperPrint, response.getOutputStream());
     }
 }
