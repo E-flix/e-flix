@@ -13,12 +13,9 @@ package com.eflix.hr.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.eflix.common.security.auth.AuthContext;
 import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.mapper.DepartmentMapper;
 import com.eflix.hr.service.DepartmentService;
@@ -29,41 +26,19 @@ public class DepartmentServiceImpl implements DepartmentService{
   @Autowired
   private DepartmentMapper departmentMapper;
 
-  private String coIdx = "co-101";
-
-  public void initAuth() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-    // 1) Authentication 자체가 AnonymousAuthenticationToken 이면 비로그인
-    if (auth == null || auth instanceof AnonymousAuthenticationToken) {
-        // 비로그인 처리
-        coIdx = "co-101";
-        System.out.println("로그인 안 함");
-        return;
-    }
-
-    // 2) principal 이 UserDetails 가 아니면 (익명 문자열인 경우) 비로그인
-    Object principal = auth.getPrincipal();
-    if (!(principal instanceof UserDetails)) {
-        // 비로그인 처리
-        System.out.println("로그인 안 함 (principal is " + principal + ")");
-        return;
-    }
-  }
-
+  @Autowired
+  private AuthContext authContext;
   // 부서조회
   @Override
   public List<DepartmentDTO> selectAll(DepartmentDTO departmentDTO) {
-    initAuth();
-    departmentDTO.setCoIdx(coIdx);
+    departmentDTO.setCoIdx(authContext.getCoIdx());
     return departmentMapper.selectAll(departmentDTO);
   }
 
     // 부서등록
   @Override
   public int insertDept(DepartmentDTO dept) {
-    initAuth();
-    dept.setCoIdx(coIdx);
+    dept.setCoIdx(authContext.getCoIdx());
     return departmentMapper.insertDept(dept);
   }
   
@@ -89,14 +64,12 @@ public class DepartmentServiceImpl implements DepartmentService{
 
   @Override
   public List<DepartmentDTO> findAllDepts() {
-    initAuth();
-    return departmentMapper.findAllDepts(coIdx);
+    return departmentMapper.findAllDepts(authContext.getCoIdx());
   }
 
   @Override
   public List<DepartmentDTO> findAllDeptsUP(String deptIdx) {
-    initAuth();
-    return departmentMapper.findAllDeptsUp(coIdx, deptIdx);
+    return departmentMapper.findAllDeptsUp(authContext.getCoIdx(), deptIdx);
   }
 
 

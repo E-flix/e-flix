@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+===========================================
+  - 파일명   : SecurityMapper.xml
+  - 설명     : Spring Security 관련 SQL 정의
+===========================================
+  [작성 정보]
+  - 작성자   : 복성민 (bokseongmin@gmail.com)
+  - 최초작성 : 2025-07-01
+===========================================
+  [변경 이력]
+  - 2025-07-01 : 최초 생성 (복성민)
+===========================================
+-->
+<mapper namespace="com.eflix.common.security.mapper.SecurityMapper">
+    <select id="findEmpForLogin" parameterType="String" resultType="SecurityEmpDTO">
+        SELECT *
+        FROM employees
+        WHERE co_idx = #{coIdx}
+        AND emp_email = #{empEmail}
+    </select>
+
+    <select id="findRoleCodesByEmpIdx" parameterType="String" resultType="String">
+        SELECT er.role_name
+        FROM erp_employee_roles eer
+        JOIN employee_roles er ON eer.er_idx = er.er_idx
+        WHERE eer.emp_idx = #{empIdx}
+    </select>
+
+    <select id="findMasterForLogin" parameterType="String" resultType="SecurityMasterDTO">
+        SELECT *
+        FROM master
+        WHERE co_idx = #{coIdx}
+        AND mst_id = #{mstId}
+    </select>
+
+    <update id="passwordUpdate" parameterType="String">
+        UPDATE master
+        SET mst_pw = #{newPassword}
+        WHERE mst_id = 'af'
+    </update>
+</mapper>

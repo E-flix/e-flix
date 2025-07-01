@@ -25,10 +25,10 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 		log.info("비인증 접근 시도: {}", uri);
 
 		if (uri.startsWith("/erp")) {
-			response.sendRedirect("/erp");
+			response.sendRedirect("/erp/login");
 		} else if (uri.startsWith("/hr") || uri.startsWith("/acc")
 		        || uri.startsWith("/purchs") || uri.startsWith("/bnz")) {
-			response.sendRedirect("/");
+			response.sendRedirect("/erp/login");
 		} else {
 			// 그 외 기본 리다이렉트
 			response.sendRedirect("/");
