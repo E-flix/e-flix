@@ -23,12 +23,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /** ============================================
   - 작성자   : 이용진
   - 최초작성 : 2025-06-18
   - 설명     : 영업 컨트롤러
 ============================================  */
+@Slf4j
 @Controller
 @RequestMapping("/bsn")
 @RequiredArgsConstructor
@@ -47,10 +49,16 @@ public class BsnController {
 
   //견적서 조회
   @GetMapping("/qot_list")
-  public String quotation_list(Model model) throws JsonProcessingException {
-    var list = quotationService.getQuotationList();
-    model.addAttribute("quotationList", list);
-    return "bsn/quotation_list";
+  public String quotation_list(Model model) {
+    try {
+      var list = quotationService.getQuotationList();
+      model.addAttribute("quotationList", list);
+      return "bsn/quotation_list";
+    } catch (Exception e) {
+      log.error("견적서 조회 중 오류 발생", e);
+      model.addAttribute("quotationList", new ArrayList<>());
+      return "bsn/quotation_list";
+    }
   }
 
   /** 견적서 상세(품목) 목록 */
@@ -58,64 +66,108 @@ public class BsnController {
   @ResponseBody
   public List<QuotationDetailDTO> getQuotationDetails(
       @RequestParam("quotationNo") String quotationNo) {
-    return quotationService.getQuotationDetails(quotationNo);
+    try {
+      return quotationService.getQuotationDetails(quotationNo);
+    } catch (Exception e) {
+      log.error("견적서 상세 조회 중 오류 발생: quotationNo = {}", quotationNo, e);
+      return new ArrayList<>();
+    }
   }
-
 
   //견적서 입력
   @GetMapping("/qot")
   public String quotation(Model model) {
-    // 1) 다음 견적번호
-    String nextNo = quotationService.generateNextQuotationNo();
-    model.addAttribute("nextQuotationNo", nextNo);
+    try {
+      // 1) 다음 견적번호
+      String nextNo = quotationService.generateNextQuotationNo();
+      model.addAttribute("nextQuotationNo", nextNo);
 
-    // 2) 빈 DTO + 한 건의 Detail 초기화
-    QuotationDTO dto = new QuotationDTO();
-    dto.setQuotationNo(nextNo);
-    dto.setDetails(new ArrayList<>());
-    dto.getDetails().add(new QuotationDetailDTO());
+      // 2) 빈 DTO + 한 건의 Detail 초기화
+      QuotationDTO dto = new QuotationDTO();
+      dto.setQuotationNo(nextNo);
+      dto.setDetails(new ArrayList<>());
+      dto.getDetails().add(new QuotationDetailDTO());
 
-    model.addAttribute("quotation", dto);
-    return "bsn/quotation";
+      model.addAttribute("quotation", dto);
+      return "bsn/quotation";
+    } catch (Exception e) {
+      log.error("견적서 입력 화면 로딩 중 오류 발생", e);
+      return "redirect:/bsn";
+    }
   }
 
   /** 견적서 등록 처리 */
   @PostMapping("/createQuotation")
   public String createQuotation(@ModelAttribute QuotationDTO quotation) {
-    quotationService.createQuotation(quotation);
-    return "redirect:/bsn/qot_list";  // 등록 후 목록으로
+    try {
+      quotationService.createQuotation(quotation);
+      return "redirect:/bsn/qot_list";  // 등록 후 목록으로
+    } catch (Exception e) {
+      log.error("견적서 등록 중 오류 발생", e);
+      return "redirect:/bsn/qot";
+    }
   }
 
   //주문서 조회
   @GetMapping("/sorlist")
-
-  public String salesorder_list(Model model) throws JsonProcessingException {
-    var list = ordersService.getOrdersList();
-    String json = new ObjectMapper().findAndRegisterModules().writeValueAsString(list);
-
-    model.addAttribute("ordersList", json);
-    return "bsn/salesorder_list";
+  public String salesorder_list(Model model) {
+    try {
+      var list = ordersService.getOrdersList();
+      log.info("주문서 목록 조회 완료: {} 건", list != null ? list.size() : 0);
+      
+      // objectMapper를 사용하여 JSON 직렬화 (중복 생성 방지)
+      String json = objectMapper.writeValueAsString(list);
+      model.addAttribute("ordersList", json);
+      
+      return "bsn/salesorder_list";
+    } catch (JsonProcessingException e) {
+      log.error("주문서 목록 JSON 변환 중 오류 발생", e);
+      model.addAttribute("ordersList", "[]");  // 빈 배열로 기본값 설정
+      return "bsn/salesorder_list";
+    } catch (Exception e) {
+      log.error("주문서 조회 중 오류 발생", e);
+      model.addAttribute("ordersList", "[]");  // 빈 배열로 기본값 설정
+      return "bsn/salesorder_list";
+    }
   }
 
-    /** 주문서 등록 화면 */
+  // 주문서 등록 화면
   @GetMapping("/sorder")
-  public String salesorder(Model model) {
-    // 1) 빈 DTO 세팅
-    OrdersDTO order = new OrdersDTO();
-    model.addAttribute("order", order);
-
-    // 2) 여신 정보 조회 
-    CreditInfoDTO credit = creditService.getCreditByCustomer(order.getCustomerCd());
-    model.addAttribute("credit", credit);
-
-    return "bsn/salesorder";
+  public String salesorder(@RequestParam(value="customerCd", required=false) String customerCd,
+                          Model model) {
+    try {
+      // 1) 빈 주문 DTO
+      OrdersDTO order = new OrdersDTO();
+      order.setCustomerCd(customerCd);      // 쿼리스트링으로 넘어온 경우 미리 세팅
+      model.addAttribute("order", order);
+                          
+      // 2) 여신 정보
+      CreditInfoDTO credit = null;
+      if (customerCd != null && !customerCd.isBlank()) {
+          credit = creditService.getCreditByCustomer(customerCd);
+      }
+      if (credit == null) {                 // 조회 실패하거나 customerCd 가 없을 때
+          credit = new CreditInfoDTO();     // 모든 필드 0 / null 로 기본값
+      }
+      model.addAttribute("credit", credit);
+    
+      return "bsn/salesorder";
+    } catch (Exception e) {
+      log.error("주문서 등록 화면 로딩 중 오류 발생", e);
+      return "redirect:/bsn";
+    }
   }
 
   // 주문서 저장 처리
   @PostMapping("/sorder")
   public String createOrder(@ModelAttribute OrdersDTO order) {
-    ordersService.createOrder(order);
-    return "redirect:/bsn/sorlist";
+    try {
+      ordersService.createOrder(order);
+      return "redirect:/bsn/sorlist";
+    } catch (Exception e) {
+      log.error("주문서 저장 중 오류 발생", e);
+      return "redirect:/bsn/sorder";
+    }
   }
 
   //출고 조회
@@ -130,4 +182,3 @@ public class BsnController {
     return "bsn/soutbound";
   }
 }
-
