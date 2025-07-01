@@ -21,14 +21,14 @@
 	<field name="spiPeriod" class="java.lang.Integer"/>
 	<field name="spiPay" class="java.lang.String"/>
 	<field name="moduleNames" class="java.lang.String"/>
-	<variable name="supplyAmount" class="java.math.BigDecimal">
-		<variableExpression><![CDATA[$V{totalAmount}.subtract($V{taxAmount})]]></variableExpression>
+	<variable name="totalAmount" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[new java.math.BigDecimal(String.valueOf($F{spkPrice}))]]></variableExpression>
 	</variable>
 	<variable name="taxAmount" class="java.math.BigDecimal">
 		<variableExpression><![CDATA[$V{totalAmount}.divide(new java.math.BigDecimal("11"), java.math.RoundingMode.HALF_UP)]]></variableExpression>
 	</variable>
-	<variable name="totalAmount" class="java.math.BigDecimal">
-		<variableExpression><![CDATA[new java.math.BigDecimal($F{spkPrice}.toString())]]></variableExpression>
+	<variable name="supplyAmount" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$V{totalAmount}.subtract($V{taxAmount})]]></variableExpression>
 	</variable>
 	<title>
 		<band height="100">
@@ -79,7 +79,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Malgun Gothic" size="9" isBold="true"/>
 				</textElement>
-				<text><![CDATA[예담]]></text>
+				<text><![CDATA[E-FLIX]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="10" y="52" width="40" height="15" uuid="a84e0d1b-72a7-4520-8719-8b8dc92b9323"/>

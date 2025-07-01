@@ -2,36 +2,55 @@ package com.eflix.main.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
+import com.eflix.common.jasperResolver.JasperDownloadPDF;
+import com.eflix.common.jasperResolver.JasperPreviewPDF;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
+import com.eflix.main.dto.CompanyDTO;
+import com.eflix.main.dto.etc.InvoiceDTO;
+import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.dto.etc.SubMasterDTO;
+import com.eflix.main.service.CompanyService;
 import com.eflix.main.service.ReportService;
 import com.eflix.main.service.SubscriptionService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperRunManager;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.util.JRLoader;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-
 
 
 @Slf4j
@@ -43,10 +62,23 @@ public class SubscriptionRestController {
     private String path;
 
     @Autowired
-    private SubscriptionService suubscriptionService;
+    private SubscriptionService subscriptionService;
 
     @Autowired
     private ReportService reportService;
+
+    @Autowired
+    private CompanyService companyService;
+
+    @Autowired
+    private JasperPreviewPDF jasperPreviewPDF;
+
+    @Autowired
+    private JasperDownloadPDF jasperDownloadPDF;
+
+    private final String STATEMENT_REPORT_PATH = "/reports/statement_template.jasper";
+    private final String INVOICE_REPORT_PATH = "/reports/invoice_template.jasper";
+
 
     @PostMapping("/contract")
     public ResponseEntity<ResResult> postMethodName(@RequestBody Map<String,String> data) {
@@ -82,7 +114,7 @@ public class SubscriptionRestController {
     public ResponseEntity<ResResult> postMethodName(@RequestBody SubMasterDTO subMasterDTO) {
         ResResult result;
         try {
-            suubscriptionService.insertSubscriptionInfo(subMasterDTO.getSubscriptionDTO(), subMasterDTO.getMasterDTO());
+            subscriptionService.insertSubscriptionInfo(subMasterDTO.getSubscriptionDTO(), subMasterDTO.getMasterDTO());
             result = ResUtil.makeResult(ResStatus.OK, null);
         } catch (Exception e) {
             result = ResUtil.makeResult("400", e.getMessage(), null);
@@ -91,68 +123,79 @@ public class SubscriptionRestController {
     }
     
     @GetMapping("/report/statement/{spiIdx}")
-    public ResponseEntity<byte[]> generateStatement(@PathVariable String spiIdx) {
-        try {
-            byte[] pdf = reportService.generateStatmentPdf(spiIdx);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.builder("attachment")
-                    .filename("subscription_statement_" + spiIdx + ".pdf", StandardCharsets.UTF_8)
-                    .build());
-            headers.setContentLength(pdf.length);
-            return ResponseEntity.ok().headers(headers).body(pdf);
-        } catch (Exception e) {
-            log.error("PDF 생성 오류: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    public ModelAndView generateStatement(@PathVariable String spiIdx) {
+        ModelAndView mv = new ModelAndView();
+
+        StatementDTO statementDTO = subscriptionService.findSubscriptionBySpiIdx(spiIdx);
+        List<StatementDTO> dataList = List.of(statementDTO);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("title", "구독 명세서");
+
+        mv.setView(jasperDownloadPDF);
+        mv.addObject("fileName", STATEMENT_REPORT_PATH);
+        mv.addObject("dataList", dataList);
+        mv.addObject("params", params);
+        mv.addObject("saveName", "subscription_statement_" + statementDTO.getSpiUid());
+
+        return mv;
     }
 
     @GetMapping("/report/statement/preview/{spiIdx}")
-    public ResponseEntity<byte[]> previewStatement(@PathVariable String spiIdx) {
-        try {
-            byte[] pdf = reportService.generateStatmentPdf(spiIdx);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.builder("inline")
-                    .filename("subscription_statement_preview_" + spiIdx + ".pdf", StandardCharsets.UTF_8)
-                    .build());
-            return ResponseEntity.ok().headers(headers).body(pdf);
-        } catch (Exception e) {
-            log.error("PDF 미리보기 생성 오류: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    public ModelAndView previewStatement(@PathVariable String spiIdx) throws Exception {
+        ModelAndView mv = new ModelAndView();
+
+        StatementDTO statementDTO = subscriptionService.findSubscriptionBySpiIdx(spiIdx);
+        List<StatementDTO> dataList = List.of(statementDTO);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("title", "구독 명세서");
+
+        mv.setView(jasperPreviewPDF);
+        mv.addObject("fileName", STATEMENT_REPORT_PATH);
+        mv.addObject("dataList", dataList);
+        mv.addObject("params", params);
+        mv.addObject("saveName", "subscription_statement_" + statementDTO.getSpiUid());
+
+        return mv;
     }
     
     @GetMapping("/report/invoice/{spiIdx}")
-    public ResponseEntity<byte[]> generateInvoice(@PathVariable String spiIdx) {
-        try {
-            byte[] pdf = reportService.generateInvoicePdf(spiIdx);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.builder("inline")
-                    .filename("subscription_invoice_" + spiIdx + ".pdf", StandardCharsets.UTF_8)
-                    .build());
-            return ResponseEntity.ok().headers(headers).body(pdf);
-        } catch (Exception e) {
-            log.error("PDF 미리보기 생성 오류: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    public ModelAndView generateInvoice(@PathVariable String spiIdx) {
+        ModelAndView mv = new ModelAndView();
+
+        InvoiceDTO invoiceDTO = subscriptionService.findSubscriptionInvoiceBySpiIdx(spiIdx);
+        List<InvoiceDTO> dataList = List.of(invoiceDTO);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("title", "세금 계산서");
+
+        mv.setView(jasperDownloadPDF);
+        mv.addObject("fileName", INVOICE_REPORT_PATH);
+        mv.addObject("dataList", dataList);
+        mv.addObject("params", params);
+        mv.addObject("saveName", "subscription_invoice_" + invoiceDTO.getSpiUid());
+
+        return mv;
     }
 
     @GetMapping("/report/invoice/preview/{spiIdx}")
-    public ResponseEntity<byte[]> previewInvoice(@PathVariable String spiIdx) {
-        try {
-            byte[] pdf = reportService.generateInvoicePdf(spiIdx);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.builder("inline")
-                    .filename("subscription_invoice_preview_" + spiIdx + ".pdf", StandardCharsets.UTF_8)
-                    .build());
-            return ResponseEntity.ok().headers(headers).body(pdf);
-        } catch (Exception e) {
-            log.error("PDF 미리보기 생성 오류: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    public ModelAndView previewInvoice(@PathVariable String spiIdx) {
+        ModelAndView mv = new ModelAndView();
+
+        InvoiceDTO invoiceDTO = subscriptionService.findSubscriptionInvoiceBySpiIdx(spiIdx);
+        List<InvoiceDTO> dataList = List.of(invoiceDTO);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("title", "세금 계산서");
+
+        mv.setView(jasperPreviewPDF);
+        mv.addObject("fileName", INVOICE_REPORT_PATH);
+        mv.addObject("dataList", dataList);
+        mv.addObject("params", params);
+        mv.addObject("saveName", "subscription_invoice_" + invoiceDTO.getSpiUid());
+
+        return mv;
     }
     
 

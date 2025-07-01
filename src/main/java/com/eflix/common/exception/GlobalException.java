@@ -20,8 +20,8 @@ public class GlobalException {
 		return new ResponseEntity<>("Resource not found", HttpStatus.NOT_FOUND);
 	}
 
-	@ExceptionHandler(Exception.class)
-	public Object handleException(HttpServletRequest request, Exception ex) {
+	@ExceptionHandler(CommonException.class)
+	public Object handleException(HttpServletRequest request, CommonException ex) {
 		if (isAjax(request)) {
 			// JSON 응답
 			Map<String, Object> error = new HashMap<>();

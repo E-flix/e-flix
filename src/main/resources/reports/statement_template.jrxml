@@ -42,6 +42,7 @@
 	<field name="spkName" class="java.lang.String"/>
 	<field name="spkPrice" class="java.lang.String"/>
 	<field name="checkedModules" class="java.util.List"/>
+	<field name="moduleNames" class="java.lang.String"/>
 	<variable name="paymentMethod" class="java.lang.String">
 		<variableExpression><![CDATA[$F{spiPay} != null ? (
                 $F{spiPay}.equals("SP01") ? "무통장입금" :
@@ -122,7 +123,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Malgun Gothic" size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{spiIdx} != null ? $F{spiIdx} : "N/A"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{spiUid} != null ? $F{spiUid} : "N/A"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="370" y="67" width="60" height="16" uuid="70813928-3ebc-4ec4-bc54-7bcaa6cf6934"/>
@@ -323,7 +324,7 @@
 				<textElement verticalAlignment="Top">
 					<font fontName="Malgun Gothic" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{moduleList}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{moduleNames}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="185" width="100" height="25" uuid="1b10f2f6-6e14-4615-9f3d-b7e6369031de"/>
