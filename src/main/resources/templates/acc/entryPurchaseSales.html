@@ -487,20 +487,30 @@
             }
             
             let hasEmptyRow = false;
+            let validEmptyRowCount = 0;
+            
             for (let i = 0; i < focusedGridApi.getDisplayedRowCount(); i++) {
               const row = focusedGridApi.getDisplayedRowAtIndex(i)?.data;
-              if (row && isEmptyDetailRow(row)) {
-                console.log(`행 ${i}는 빈 행입니다.`);
-                hasEmptyRow = true;
-                break;
+              if (row) {
+                const isEmpty = isEmptyDetailRow(row);
+                console.log(`행 ${i} 체크 - isEmpty: ${isEmpty}, entryNumber: ${row.entryNumber}, lineNumber: ${row.lineNumber}`);
+                if (isEmpty) {
+                  console.log(`행 ${i}는 유효한 빈 행입니다.`);
+                  hasEmptyRow = true;
+                  validEmptyRowCount++;
+                }
               }
             }
             
             console.log('빈 행 존재 여부:', hasEmptyRow);
-            console.log('selectedMaster && selectedMaster.entryNumber:', !!(selectedMaster && selectedMaster.entryNumber));
+            console.log('유효한 빈 행 개수:', validEmptyRowCount);
+            console.log('selectedMaster:', selectedMaster);
+            console.log('selectedMaster.entryNumber:', selectedMaster?.entryNumber);
             
-            if (!hasEmptyRow && selectedMaster && selectedMaster.entryNumber) {
-              console.log('빈 행을 추가합니다...');
+            // 빈 행이 없고 선택된 마스터가 있으면 빈 행 추가
+            // 또는 유효한 빈 행이 없는 경우도 추가
+            if ((!hasEmptyRow || validEmptyRowCount === 0) && selectedMaster && selectedMaster.entryNumber) {
+              console.log('빈 행을 추가합니다... (hasEmptyRow:', hasEmptyRow, ', validEmptyRowCount:', validEmptyRowCount, ')');
               const newEmptyRow = getEmptyDetailRow();
               newEmptyRow.entryNumber = selectedMaster.entryNumber;
               console.log('생성된 빈 행:', newEmptyRow);
@@ -534,7 +544,11 @@
                 }
               }, 50);
             } else {
-              console.log('빈 행 추가 조건 불만족 - hasEmptyRow:', hasEmptyRow, ', selectedMaster 유효:', !!(selectedMaster && selectedMaster.entryNumber));
+              console.log('빈 행 추가 조건 불만족');
+              console.log('- hasEmptyRow:', hasEmptyRow);
+              console.log('- validEmptyRowCount:', validEmptyRowCount);
+              console.log('- selectedMaster 유효:', !!(selectedMaster && selectedMaster.entryNumber));
+              console.log('- selectedMaster.entryNumber:', selectedMaster?.entryNumber);
             }
             
             // 빈 행 추가 후 소계 재계산
@@ -575,14 +589,28 @@
 
     // 상세정보 빈 행인지 확인하는 함수
     function isEmptyDetailRow(rowData) {
+      // 소계 행은 빈 행이 아님
+      if (rowData.isSummary === true) {
+        return false;
+      }
+      
+      // lineNumber가 없고, resentmenType과 accountCode가 모두 비어있어야 함
       const isEmpty = !rowData.lineNumber && 
                       (!rowData.resentmenType || rowData.resentmenType === '') && 
-                      (!rowData.accountCode || rowData.accountCode === '');
+                      (!rowData.accountCode || rowData.accountCode === '') &&
+                      // entryNumber가 유효한 번호여야 함 (빈 문자열이나 null이면 안됨)
+                      rowData.entryNumber && 
+                      typeof rowData.entryNumber === 'number' && 
+                      rowData.entryNumber > 0;
+                      
       console.log('isEmptyDetailRow 체크:', {
         rowData: rowData,
         lineNumber: rowData.lineNumber,
         resentmenType: rowData.resentmenType,
         accountCode: rowData.accountCode,
+        entryNumber: rowData.entryNumber,
+        entryNumberType: typeof rowData.entryNumber,
+        isSummary: rowData.isSummary,
         isEmpty: isEmpty
       });
       return isEmpty;
@@ -1888,33 +1916,6 @@
             addDetailSummaryRow(selectedMaster.entryNumber);
           }, 100);
         }
-        
-        // 값이 변경될 때 빈 행이 있는지 확인하고 없으면 추가
-        setTimeout(() => {
-          let hasEmptyRow = false;
-          for (let i = 0; i < event.api.getDisplayedRowCount(); i++) {
-            const row = event.api.getDisplayedRowAtIndex(i)?.data;
-            if (row && isEmptyDetailRow(row)) {
-              hasEmptyRow = true;
-              break;
-            }
-          }
-          if (!hasEmptyRow && selectedMaster && selectedMaster.entryNumber) {
-            const newEmptyRow = getEmptyDetailRow();
-            newEmptyRow.entryNumber = selectedMaster.entryNumber;
-            
-            // 소계 행이 있으면 그 위에 추가, 없으면 마지막에 추가
-            const summaryRowIndex = findSummaryRowIndex();
-            if (summaryRowIndex >= 0) {
-              event.api.applyTransaction({ 
-                add: [newEmptyRow], 
-                addIndex: summaryRowIndex 
-              });
-            } else {
-              event.api.applyTransaction({ add: [newEmptyRow] });
-            }
-          }
-        }, 50);
       }
     };
 
