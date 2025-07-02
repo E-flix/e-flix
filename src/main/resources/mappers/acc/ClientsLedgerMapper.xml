@@ -84,6 +84,7 @@
         <!-- accountCode가 있는 경우 조건 추가 -->
         <when test="accountCode != null and accountCode != ''">
           d.account_code = #{accountCode}
+          AND m.ledger_check = 'a1'
           
           <if test="startDate != null and startDate != ''">
             <![CDATA[
@@ -130,6 +131,7 @@
       <!-- accountCode가 있는 경우 조건 추가 -->
       <when test="accountCode != null and accountCode != ''">
         d.account_code = #{accountCode}
+        AND m.ledger_check = 'a1'
         <if test="startDate != null and startDate != ''">
           <![CDATA[
             AND m.entry_date >= TO_DATE(#{startDate}, 'YYYY-MM-DD')

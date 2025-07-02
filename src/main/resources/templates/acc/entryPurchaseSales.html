@@ -349,6 +349,22 @@
           if (masterData.length === 0) {
             // 실제 데이터가 아닌 빈 행만 선택된 경우
             focusedGridApi.applyTransaction({ remove: dataRows });
+            
+            // 마스터 그리드에 빈 행이 없으면 추가
+            setTimeout(() => {
+              let hasEmptyRow = false;
+              for (let i = 0; i < focusedGridApi.getDisplayedRowCount(); i++) {
+                const row = focusedGridApi.getDisplayedRowAtIndex(i)?.data;
+                if (row && isEmptyRow(row)) {
+                  hasEmptyRow = true;
+                  break;
+                }
+              }
+              if (!hasEmptyRow) {
+                const newEmptyRow = getEmptyRow();
+                focusedGridApi.applyTransaction({ add: [newEmptyRow] });
+              }
+            }, 100);
             return;
           }
 
@@ -364,11 +380,29 @@
           
           // 그리드에서 삭제된 행 제거
           focusedGridApi.applyTransaction({ remove: dataRows });
+          
           // 상세 그리드 초기화
           if (detailGridApi) {
             detailGridApi.setGridOption('rowData', []);
             currentDetailEntryNumber = null;
           }
+          
+          // 마스터 그리드에 빈 행이 없으면 추가
+          setTimeout(() => {
+            let hasEmptyRow = false;
+            for (let i = 0; i < focusedGridApi.getDisplayedRowCount(); i++) {
+              const row = focusedGridApi.getDisplayedRowAtIndex(i)?.data;
+              if (row && isEmptyRow(row)) {
+                hasEmptyRow = true;
+                break;
+              }
+            }
+            if (!hasEmptyRow) {
+              const newEmptyRow = getEmptyRow();
+              focusedGridApi.applyTransaction({ add: [newEmptyRow] });
+            }
+          }, 100);
+          
           alert('선택한 전표가 삭제되었습니다.');
 
         } else if (gridType === 'detail') {
@@ -381,6 +415,33 @@
           if (detailData.length === 0) {
             // 실제 데이터가 아닌 빈 행만 선택된 경우
             focusedGridApi.applyTransaction({ remove: dataRows });
+            
+            // 상세 그리드에 빈 행이 없으면 추가
+            setTimeout(() => {
+              let hasEmptyRow = false;
+              for (let i = 0; i < focusedGridApi.getDisplayedRowCount(); i++) {
+                const row = focusedGridApi.getDisplayedRowAtIndex(i)?.data;
+                if (row && isEmptyDetailRow(row)) {
+                  hasEmptyRow = true;
+                  break;
+                }
+              }
+              if (!hasEmptyRow && selectedMaster && selectedMaster.entryNumber) {
+                const newEmptyRow = getEmptyDetailRow();
+                newEmptyRow.entryNumber = selectedMaster.entryNumber;
+                
+                // 소계 행이 있으면 그 위에 추가, 없으면 일반 추가
+                const summaryRowIndex = findSummaryRowIndex();
+                if (summaryRowIndex >= 0) {
+                  focusedGridApi.applyTransaction({ 
+                    add: [newEmptyRow], 
+                    addIndex: summaryRowIndex 
+                  });
+                } else {
+                  focusedGridApi.applyTransaction({ add: [newEmptyRow] });
+                }
+              }
+            }, 100);
             return;
           }
 
@@ -396,10 +457,94 @@
 
           // 그리드에서 삭제된 행 제거
           focusedGridApi.applyTransaction({ remove: dataRows });
-          // 소계 재계산
-          if (selectedMaster && selectedMaster.entryNumber) {
-            addDetailSummaryRow(selectedMaster.entryNumber);
-          }
+          
+          // 상세 그리드에 빈 행이 없으면 추가
+          setTimeout(() => {
+            console.log('=== 상세 그리드 빈 행 추가 디버그 시작 ===');
+            console.log('focusedGridApi 존재:', !!focusedGridApi);
+            console.log('selectedMaster:', selectedMaster);
+            console.log('전체 행 수:', focusedGridApi.getDisplayedRowCount());
+            
+            // 삭제 전 상태 로그
+            console.log('--- 삭제 후 그리드 상태 ---');
+            const beforeAddRows = [];
+            for (let i = 0; i < focusedGridApi.getDisplayedRowCount(); i++) {
+              const rowNode = focusedGridApi.getDisplayedRowAtIndex(i);
+              const row = rowNode?.data;
+              const isEmpty = row ? isEmptyDetailRow(row) : false;
+              beforeAddRows.push({
+                index: i,
+                isEmpty: isEmpty,
+                isSummary: row?.isSummary || false,
+                entryNumber: row?.entryNumber,
+                lineNumber: row?.lineNumber,
+                itemCode: row?.itemCode,
+                itemName: row?.itemName,
+                quantity: row?.quantity,
+                unitPrice: row?.unitPrice
+              });
+              console.log(`행 ${i} - 빈행여부: ${isEmpty}, 소계여부: ${row?.isSummary || false}`, row);
+            }
+            
+            let hasEmptyRow = false;
+            for (let i = 0; i < focusedGridApi.getDisplayedRowCount(); i++) {
+              const row = focusedGridApi.getDisplayedRowAtIndex(i)?.data;
+              if (row && isEmptyDetailRow(row)) {
+                console.log(`행 ${i}는 빈 행입니다.`);
+                hasEmptyRow = true;
+                break;
+              }
+            }
+            
+            console.log('빈 행 존재 여부:', hasEmptyRow);
+            console.log('selectedMaster && selectedMaster.entryNumber:', !!(selectedMaster && selectedMaster.entryNumber));
+            
+            if (!hasEmptyRow && selectedMaster && selectedMaster.entryNumber) {
+              console.log('빈 행을 추가합니다...');
+              const newEmptyRow = getEmptyDetailRow();
+              newEmptyRow.entryNumber = selectedMaster.entryNumber;
+              console.log('생성된 빈 행:', newEmptyRow);
+              console.log('isEmptyDetailRow 체크:', isEmptyDetailRow(newEmptyRow));
+              
+              // 소계 행이 있으면 그 위에 추가, 없으면 일반 추가
+              const summaryRowIndex = findSummaryRowIndex();
+              console.log('소계 행 인덱스:', summaryRowIndex);
+              
+              let transactionResult;
+              if (summaryRowIndex >= 0) {
+                console.log('소계 행 위에 빈 행 추가');
+                transactionResult = focusedGridApi.applyTransaction({ 
+                  add: [newEmptyRow], 
+                  addIndex: summaryRowIndex 
+                });
+              } else {
+                console.log('마지막에 빈 행 추가');
+                transactionResult = focusedGridApi.applyTransaction({ add: [newEmptyRow] });
+              }
+              console.log('트랜잭션 결과:', transactionResult);
+              console.log('빈 행 추가 완료');
+              
+              // 추가 후 상태 확인
+              setTimeout(() => {
+                console.log('--- 빈 행 추가 후 그리드 상태 ---');
+                for (let i = 0; i < focusedGridApi.getDisplayedRowCount(); i++) {
+                  const row = focusedGridApi.getDisplayedRowAtIndex(i)?.data;
+                  const isEmpty = row ? isEmptyDetailRow(row) : false;
+                  console.log(`행 ${i} - 빈행여부: ${isEmpty}, 소계여부: ${row?.isSummary || false}`, row);
+                }
+              }, 50);
+            } else {
+              console.log('빈 행 추가 조건 불만족 - hasEmptyRow:', hasEmptyRow, ', selectedMaster 유효:', !!(selectedMaster && selectedMaster.entryNumber));
+            }
+            
+            // 빈 행 추가 후 소계 재계산
+            if (selectedMaster && selectedMaster.entryNumber) {
+              console.log('소계 행 재계산 시작');
+              addDetailSummaryRow(selectedMaster.entryNumber);
+              console.log('소계 행 재계산 완료');
+            }
+            console.log('=== 상세 그리드 빈 행 추가 디버그 끝 ===');
+          }, 100);
           alert('선택한 상세항목이 삭제되었습니다.');
         }
       } catch (error) {
@@ -423,12 +568,24 @@
         lineNumber: null
       };
       emptyRow._emptyRowId = `empty_detail_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      console.log('getEmptyDetailRow 생성:', emptyRow);
+      console.log('생성된 빈 행의 isEmptyDetailRow 체크:', isEmptyDetailRow(emptyRow));
       return emptyRow;
     }
 
     // 상세정보 빈 행인지 확인하는 함수
     function isEmptyDetailRow(rowData) {
-      return !rowData.lineNumber && (!rowData.resentmenType || !rowData.accountCode);
+      const isEmpty = !rowData.lineNumber && 
+                      (!rowData.resentmenType || rowData.resentmenType === '') && 
+                      (!rowData.accountCode || rowData.accountCode === '');
+      console.log('isEmptyDetailRow 체크:', {
+        rowData: rowData,
+        lineNumber: rowData.lineNumber,
+        resentmenType: rowData.resentmenType,
+        accountCode: rowData.accountCode,
+        isEmpty: isEmpty
+      });
+      return isEmpty;
     }
 
     // 상세 그리드 소계 행 생성 함수
@@ -1734,8 +1891,6 @@
         
         // 값이 변경될 때 빈 행이 있는지 확인하고 없으면 추가
         setTimeout(() => {
-          if (!selectedMaster || !selectedMaster.entryNumber) return;
-          
           let hasEmptyRow = false;
           for (let i = 0; i < event.api.getDisplayedRowCount(); i++) {
             const row = event.api.getDisplayedRowAtIndex(i)?.data;
@@ -1744,7 +1899,7 @@
               break;
             }
           }
-          if (!hasEmptyRow) {
+          if (!hasEmptyRow && selectedMaster && selectedMaster.entryNumber) {
             const newEmptyRow = getEmptyDetailRow();
             newEmptyRow.entryNumber = selectedMaster.entryNumber;
             
