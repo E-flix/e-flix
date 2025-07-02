@@ -22,7 +22,6 @@ public class OrdersDTO {
     private LocalDate deliveryDt;     // DELIVERY_DT 컬럼
     private LocalDate expectedPaymentDt; // EXPECTED_PAYMENT_DT 컬럼
     private String   paymentTerms;
-    private String   taxInvoiceIssueYn;
     private String   customerCd;
     private String taxInvoiceYn;   // ← Y / N 값 들어올 곳
     private BigDecimal totalAmount;

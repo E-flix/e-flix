@@ -7,9 +7,18 @@
   <resultMap id="CustomerResult" type="com.eflix.bsn.dto.CustomerDTO">
     <result property="customerCd" column="CUSTOMER_CD"/>
     <result property="customerNm" column="CUSTOMER_NM"/>
+    <result property="representativeNm" column="REPRESENTATIVE_NM"/>
+    <result property="businessRegNo" column="BUSINESS_REG_NO"/>
+    <result property="address" column="ADDRESS"/>
+    <result property="phoneNo" column="PHONE_NO"/>
+    <result property="email" column="EMAIL"/>
     <result property="salesEmpCd" column="SALES_EMP_CD"/>
-    <result property="phoneNo"    column="PHONE_NO"/>
-    <result property="discountRate"  column="DISCOUNT_RATE"/>
+    <result property="creditGrade" column="CREDIT_GRADE"/>
+    <result property="useYn" column="USE_YN"/>
+    <result property="regDt" column="REG_DT"/>
+    <result property="updDt" column="UPD_DT"/>
+    <result property="discountRate" column="DISCOUNT_RATE"/>
+    <result property="coIdx" column="CO_IDX"/>
   </resultMap>
 
   <!-- 전체 조회 -->
@@ -37,7 +46,7 @@
       AND CUSTOMER_NM LIKE '%' || #{name} || '%'
   </select>
 
-  <!-- 거래처 코드로 단건 조회 (Optional) -->
+  <!-- 거래처 코드로 단건 조회  -->
   <select id="selectByCode" parameterType="string" resultMap="CustomerResult">
     SELECT
       CUSTOMER_CD,
@@ -49,5 +58,87 @@
     WHERE USE_YN = 'Y'
       AND CUSTOMER_CD = #{customerCd}
   </select>
+
+  <!-- ═══ 주문서 등록용 거래처 상세 정보 조회  ═══ -->
+  <select id="selectByCustomerCd" 
+          parameterType="string" 
+          resultType="com.eflix.bsn.dto.CustomerDTO">
+    SELECT
+        CUSTOMER_CD        AS customerCd,
+        CUSTOMER_NM        AS customerNm,
+        REPRESENTATIVE_NM  AS representativeNm,
+        BUSINESS_REG_NO    AS businessRegNo,
+        ADDRESS            AS address,
+        PHONE_NO           AS phoneNo,
+        EMAIL              AS email,
+        SALES_EMP_CD       AS salesEmpCd,
+        CREDIT_GRADE       AS creditGrade,
+        USE_YN             AS useYn,
+        REG_DT             AS regDt,
+        UPD_DT             AS updDt,
+        DISCOUNT_RATE      AS discountRate,
+        CO_IDX             AS coIdx
+    FROM CUSTOMERS
+    WHERE CUSTOMER_CD = #{customerCd}
+      AND USE_YN = 'Y'
+  </select>
+
+  <!-- ═══ 거래처 + 여신정보 JOIN 조회 ═══ -->
+  <select id="selectCustomerWithCredit" 
+          parameterType="string" 
+          resultType="java.util.HashMap">
+    SELECT
+        /* 거래처 정보 */
+        c.CUSTOMER_CD        AS customerCd,
+        c.CUSTOMER_NM        AS customerNm,
+        c.REPRESENTATIVE_NM  AS representativeNm,
+        c.EMAIL              AS email,
+        c.SALES_EMP_CD       AS salesEmpCd,
+        c.DISCOUNT_RATE      AS discountRate,
+        c.PHONE_NO           AS phoneNo,
+        c.ADDRESS            AS address,
+        
+        /* 여신 정보 */
+        cr.CREDIT_LIMIT      AS creditLimit,
+        cr.CREDIT_USED       AS creditUsed,
+        cr.CREDIT_STATUS     AS creditStatus,
+        cr.CREDIT_HOLD_FLG   AS creditHoldFlg,
+        cr.CREDIT_HOLD_REASON AS creditHoldReason,
+        cr.TRADE_STOP_FLG    AS tradeStopFlg,
+        cr.TRADE_STOP_REASON AS tradeStopReason,
+        cr.PAYMENT_TERMS     AS paymentTerms,
+        
+        /* 계산 필드 */
+        (cr.CREDIT_LIMIT - cr.CREDIT_USED) AS remainingCredit
+        
+    FROM CUSTOMERS c
+    LEFT JOIN CREDIT_MANAGEMENT cr ON c.CUSTOMER_CD = cr.CUSTOMER_CD
+    WHERE c.CUSTOMER_CD = #{customerCd}
+      AND c.USE_YN = 'Y'
+  </select>
+
+  <!-- ═══ 거래처 검색 (자동완성용) ═══ -->
+  <select id="searchCustomers" 
+          parameterType="string" 
+          resultMap="CustomerResult">
+    SELECT
+        CUSTOMER_CD,
+        CUSTOMER_NM,
+        REPRESENTATIVE_NM,
+        PHONE_NO,
+        DISCOUNT_RATE
+    FROM CUSTOMERS
+    WHERE USE_YN = 'Y'
+      AND (
+          CUSTOMER_CD LIKE '%' || #{keyword} || '%'
+          OR CUSTOMER_NM LIKE '%' || #{keyword} || '%'
+          OR REPRESENTATIVE_NM LIKE '%' || #{keyword} || '%'
+      )
+    ORDER BY CUSTOMER_NM
+    FETCH FIRST 10 ROWS ONLY
+  </select>
+
+
+
 
 </mapper>

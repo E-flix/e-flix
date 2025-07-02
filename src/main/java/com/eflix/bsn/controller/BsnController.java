@@ -1,7 +1,9 @@
 package com.eflix.bsn.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,13 +14,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.eflix.bsn.dto.BsnItemDTO;
 import com.eflix.bsn.dto.CreditInfoDTO;
+import com.eflix.bsn.dto.CustomerDTO;
 import com.eflix.bsn.dto.OrdersDTO;
 import com.eflix.bsn.dto.QuotationDTO;
 import com.eflix.bsn.dto.QuotationDetailDTO;
 import com.eflix.bsn.service.CreditService;
+import com.eflix.bsn.service.CustomerService;
+import com.eflix.bsn.service.ItemService;
 import com.eflix.bsn.service.OrdersService;
 import com.eflix.bsn.service.QuotationService;
+// import com.eflix.common.payment.dto.ItemDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -40,6 +47,8 @@ public class BsnController {
   private final OrdersService ordersService;
   private final CreditService creditService;
   private final ObjectMapper    objectMapper;
+  private final CustomerService customerService;
+  private final ItemService itemService; 
 
   //영업 관리 메인 
   @GetMapping()
@@ -167,6 +176,77 @@ public class BsnController {
     } catch (Exception e) {
       log.error("주문서 저장 중 오류 발생", e);
       return "redirect:/bsn/sorder";
+    }
+  }
+
+  /** 거래처 정보 조회 API */
+  @GetMapping("/customer/info")
+  @ResponseBody
+  public CustomerDTO getCustomerInfo(@RequestParam("customerCd") String customerCd) {
+    try {
+      return customerService.getCustomerInfo(customerCd);
+    } catch (Exception e) {
+      log.error("거래처 정보 조회 중 오류 발생: customerCd = {}", customerCd, e);
+      return new CustomerDTO(); // 빈 객체 반환
+    }
+  }
+
+  /** 거래처 + 여신정보 통합 조회 API */
+  @GetMapping("/customer/detail")
+  @ResponseBody
+  public Map<String, Object> getCustomerWithCredit(@RequestParam("customerCd") String customerCd) {
+    try {
+      return customerService.getCustomerWithCredit(customerCd);
+    } catch (Exception e) {
+      log.error("거래처 상세정보 조회 중 오류 발생: customerCd = {}", customerCd, e);
+      return new HashMap<>();
+    }
+  }
+  
+  /** 거래처 검색 API (자동완성용) */
+  @GetMapping("/customer/search")
+  @ResponseBody
+  public List<CustomerDTO> searchCustomers(@RequestParam("keyword") String keyword) {
+    try {
+      if (keyword == null || keyword.trim().length() < 2) {
+        return new ArrayList<>();
+      }
+      return customerService.searchCustomers(keyword.trim());
+    } catch (Exception e) {
+      log.error("거래처 검색 중 오류 발생: keyword = {}", keyword, e);
+      return new ArrayList<>();
+    }
+  }
+  
+  /** 품목 정보 조회 API */
+  @GetMapping("/item/info")
+  @ResponseBody
+  public BsnItemDTO getItemInfo(@RequestParam("code") String itemCode) {
+    try {
+      BsnItemDTO item = itemService.getItemByCode(itemCode);
+      if (item == null) {
+        log.warn("품목 정보를 찾을 수 없습니다: {}", itemCode);
+        return new BsnItemDTO(); // 빈 객체 반환
+      }
+      return item;
+    } catch (Exception e) {
+      log.error("품목 정보 조회 중 오류 발생: itemCode = {}", itemCode, e);
+      return new BsnItemDTO(); // 빈 객체 반환
+    }
+  }
+
+  /** 품목 검색 API (자동완성용) */
+  @GetMapping("/item/search")
+  @ResponseBody
+  public List<BsnItemDTO> searchItems(@RequestParam("keyword") String keyword) {
+    try {
+      if (keyword == null || keyword.trim().length() < 2) {
+        return new ArrayList<>();
+      }
+      return itemService.searchItemsByName(keyword.trim());
+    } catch (Exception e) {
+      log.error("품목 검색 중 오류 발생: keyword = {}", keyword, e);
+      return new ArrayList<>();
     }
   }
 
