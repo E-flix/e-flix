@@ -298,7 +298,7 @@
             }
           }
           
-          console.log('매입매출전표 저장 성공:', savedData);
+
         }
       } catch (error) {
         console.error('매입매출전표 저장 실패:', error);
@@ -460,90 +460,43 @@
           
           // 상세 그리드에 빈 행이 없으면 추가
           setTimeout(() => {
-            console.log('=== 상세 그리드 빈 행 추가 디버그 시작 ===');
-            console.log('focusedGridApi 존재:', !!focusedGridApi);
-            console.log('selectedMaster:', selectedMaster);
-            console.log('전체 행 수:', focusedGridApi.getDisplayedRowCount());
-            
-            // 삭제 전 상태 로그
-            console.log('--- 삭제 후 그리드 상태 ---');
-            const beforeAddRows = [];
-            for (let i = 0; i < focusedGridApi.getDisplayedRowCount(); i++) {
-              const rowNode = focusedGridApi.getDisplayedRowAtIndex(i);
-              const row = rowNode?.data;
-              const isEmpty = row ? isEmptyDetailRow(row) : false;
-              beforeAddRows.push({
-                index: i,
-                isEmpty: isEmpty,
-                isSummary: row?.isSummary || false,
-                entryNumber: row?.entryNumber,
-                lineNumber: row?.lineNumber,
-                itemCode: row?.itemCode,
-                itemName: row?.itemName,
-                quantity: row?.quantity,
-                unitPrice: row?.unitPrice
-              });
-              console.log(`행 ${i} - 빈행여부: ${isEmpty}, 소계여부: ${row?.isSummary || false}`, row);
-            }
-            
             let hasEmptyRow = false;
+            let validEmptyRowCount = 0;
+            
             for (let i = 0; i < focusedGridApi.getDisplayedRowCount(); i++) {
               const row = focusedGridApi.getDisplayedRowAtIndex(i)?.data;
-              if (row && isEmptyDetailRow(row)) {
-                console.log(`행 ${i}는 빈 행입니다.`);
-                hasEmptyRow = true;
-                break;
+              if (row) {
+                const isEmpty = isEmptyDetailRow(row);
+                if (isEmpty) {
+                  hasEmptyRow = true;
+                  validEmptyRowCount++;
+                }
               }
             }
             
-            console.log('빈 행 존재 여부:', hasEmptyRow);
-            console.log('selectedMaster && selectedMaster.entryNumber:', !!(selectedMaster && selectedMaster.entryNumber));
-            
-            if (!hasEmptyRow && selectedMaster && selectedMaster.entryNumber) {
-              console.log('빈 행을 추가합니다...');
+            // 빈 행이 없고 선택된 마스터가 있으면 빈 행 추가
+            // 또는 유효한 빈 행이 없는 경우도 추가
+            if ((!hasEmptyRow || validEmptyRowCount === 0) && selectedMaster && selectedMaster.entryNumber) {
               const newEmptyRow = getEmptyDetailRow();
               newEmptyRow.entryNumber = selectedMaster.entryNumber;
-              console.log('생성된 빈 행:', newEmptyRow);
-              console.log('isEmptyDetailRow 체크:', isEmptyDetailRow(newEmptyRow));
               
               // 소계 행이 있으면 그 위에 추가, 없으면 일반 추가
               const summaryRowIndex = findSummaryRowIndex();
-              console.log('소계 행 인덱스:', summaryRowIndex);
               
-              let transactionResult;
               if (summaryRowIndex >= 0) {
-                console.log('소계 행 위에 빈 행 추가');
-                transactionResult = focusedGridApi.applyTransaction({ 
+                focusedGridApi.applyTransaction({ 
                   add: [newEmptyRow], 
                   addIndex: summaryRowIndex 
                 });
               } else {
-                console.log('마지막에 빈 행 추가');
-                transactionResult = focusedGridApi.applyTransaction({ add: [newEmptyRow] });
+                focusedGridApi.applyTransaction({ add: [newEmptyRow] });
               }
-              console.log('트랜잭션 결과:', transactionResult);
-              console.log('빈 행 추가 완료');
-              
-              // 추가 후 상태 확인
-              setTimeout(() => {
-                console.log('--- 빈 행 추가 후 그리드 상태 ---');
-                for (let i = 0; i < focusedGridApi.getDisplayedRowCount(); i++) {
-                  const row = focusedGridApi.getDisplayedRowAtIndex(i)?.data;
-                  const isEmpty = row ? isEmptyDetailRow(row) : false;
-                  console.log(`행 ${i} - 빈행여부: ${isEmpty}, 소계여부: ${row?.isSummary || false}`, row);
-                }
-              }, 50);
-            } else {
-              console.log('빈 행 추가 조건 불만족 - hasEmptyRow:', hasEmptyRow, ', selectedMaster 유효:', !!(selectedMaster && selectedMaster.entryNumber));
             }
             
             // 빈 행 추가 후 소계 재계산
             if (selectedMaster && selectedMaster.entryNumber) {
-              console.log('소계 행 재계산 시작');
               addDetailSummaryRow(selectedMaster.entryNumber);
-              console.log('소계 행 재계산 완료');
             }
-            console.log('=== 상세 그리드 빈 행 추가 디버그 끝 ===');
           }, 100);
           alert('선택한 상세항목이 삭제되었습니다.');
         }
@@ -568,23 +521,25 @@
         lineNumber: null
       };
       emptyRow._emptyRowId = `empty_detail_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      console.log('getEmptyDetailRow 생성:', emptyRow);
-      console.log('생성된 빈 행의 isEmptyDetailRow 체크:', isEmptyDetailRow(emptyRow));
       return emptyRow;
     }
 
     // 상세정보 빈 행인지 확인하는 함수
     function isEmptyDetailRow(rowData) {
+      // 소계 행은 빈 행이 아님
+      if (rowData.isSummary === true) {
+        return false;
+      }
+      
+      // lineNumber가 없고, resentmenType과 accountCode가 모두 비어있어야 함
       const isEmpty = !rowData.lineNumber && 
                       (!rowData.resentmenType || rowData.resentmenType === '') && 
-                      (!rowData.accountCode || rowData.accountCode === '');
-      console.log('isEmptyDetailRow 체크:', {
-        rowData: rowData,
-        lineNumber: rowData.lineNumber,
-        resentmenType: rowData.resentmenType,
-        accountCode: rowData.accountCode,
-        isEmpty: isEmpty
-      });
+                      (!rowData.accountCode || rowData.accountCode === '') &&
+                      // entryNumber가 유효한 번호여야 함 (빈 문자열이나 null이면 안됨)
+                      rowData.entryNumber && 
+                      typeof rowData.entryNumber === 'number' && 
+                      rowData.entryNumber > 0;
+                      
       return isEmpty;
     }
 
@@ -692,7 +647,7 @@
         });
 
         allPurchaseSalesData = data; // 전체 데이터 저장
-        console.log('Master list load 성공:', allPurchaseSalesData);
+
 
         applyDateFilter(); // 필터 적용하여 그리드 표시
 
@@ -767,11 +722,11 @@
       
       // 같은 전표번호의 상세정보가 이미 로드되어 있으면 중복 호출 방지
       if (currentDetailEntryNumber === entryNo) {
-        console.log('같은 전표번호의 상세정보가 이미 로드되어 있음:', entryNo);
+
         return;
       }
       
-      console.log('상세정보 로드 시작:', entryNo);
+
       currentDetailEntryNumber = entryNo;
       
       fetch(`/acc/enps/de/${entryNo}`)
@@ -781,7 +736,7 @@
         .then(data => {
           if (detailGridApi && typeof detailGridApi.applyTransaction === 'function') {
             // 기존 데이터 제거 후 새 데이터 추가
-            console.log('상세 리스트 로드 성공:', data);
+
             
             // 금액 필드 처리: resentmenType과 amount 값에 따라 debitAmount 또는 creditAmount에 할당
             data.forEach(item => {
@@ -847,11 +802,11 @@
             
             detailGridApi.refreshCells({ force: true });
           } else {
-            console.log('Grid API 준비 안됨 또는 applyTransaction 미지원');
+
           }
         })
         .catch(err => {
-          console.log('상세 리스트 로드 실패:', err);
+
           currentDetailEntryNumber = null; // 오류 시 초기화
           // 오류 발생 시에도 빈 행 추가
           if (detailGridApi) {
@@ -893,14 +848,14 @@
           if (supplyAmount > 0 && currentTotal !== expectedTotal) {
             data.totalAmount = expectedTotal;
             needsRefresh = true;
-            console.log(`합계 보정: 전표번호 ${data.entryNumber}, 공급가액(${supplyAmount}) + 부가세(${taxAmount}) = 합계(${expectedTotal})`);
+
           }
         }
       });
       
       if (needsRefresh) {
         purchaseSalesGridApi.refreshCells({ force: true });
-        console.log('합계 보정 완료 - 그리드 새로고침됨');
+
       }
     }
 
@@ -1586,15 +1541,6 @@
       },
       onSelectionChanged: (event) => {
         const selectedNodes = event.api.getSelectedNodes();
-        console.log('선택 변경됨 - 선택된 행 수:', selectedNodes.length);
-        if (selectedNodes.length > 0) {
-          console.log('선택된 행 데이터:', selectedNodes.map(node => ({
-            lineNumber: node.data.lineNumber,
-            description: node.data.description,
-            debitAmount: node.data.debitAmount,
-            creditAmount: node.data.creditAmount
-          })));
-        }
       },
       onRowClicked: (event) => {
         // 상세 그리드에서는 클릭해도 아무 작업 안함
@@ -1759,16 +1705,13 @@
               if (newType === 'g3' && currentCredit > 0) {
                 event.node.setDataValue('debitAmount', currentCredit);
                 event.node.setDataValue('creditAmount', 0);
-                console.log(`구분 g3 변경: 대변 ${currentCredit} → 차변 ${currentCredit}`);
               }
               // g4(대변)로 변경된 경우: 차변 금액을 대변으로 이동
               else if (newType === 'g4' && currentDebit > 0) {
                 event.node.setDataValue('creditAmount', currentDebit);
                 event.node.setDataValue('debitAmount', 0);
-                console.log(`구분 g4 변경: 차변 ${currentDebit} → 대변 ${currentDebit}`);
               }
               
-
               // 그리드 셀 새로고침
               setTimeout(() => {
                 if (detailGridApi) {
@@ -1786,25 +1729,16 @@
         // 계정과목 코드 매핑 처리
         if (event.colDef.field === 'accountCode') {
           const accountCode = event.newValue;
-          console.log('계정과목 코드 입력됨:', accountCode);
           if (accountCode && !isNaN(accountCode)) {
-            console.log('계정과목 API 호출 시작:', `/acc/act/${accountCode}`);
             try {
               const response = await fetch(`/acc/act/${accountCode}`);
-              console.log('계정과목 API 응답 상태:', response.status, response.statusText);
               if (response.ok) {
                 const responseText = await response.text();
-                console.log('계정과목 API 응답 텍스트:', responseText);
                 if (responseText.trim()) {
                   try {
                     const account = JSON.parse(responseText);
-                    console.log('계정과목 조회 결과:', JSON.stringify(account, null, 2));
-                    console.log('account.account_name 값:', account.account_name);
-                    console.log('account 객체 타입:', typeof account);
                     if (account && account.account_name) {
                       event.node.setDataValue('accountName', account.account_name);
-                      console.log('계정과목명 설정됨:', account.account_name);
-                      console.log('그리드에서 확인 - accountName:', event.data.accountName);
                       
                       // 그리드 셀 새로고침으로 화면 업데이트 확실히 하기
                       setTimeout(() => {
@@ -1818,34 +1752,26 @@
                       }, 50);
                     } else {
                       event.node.setDataValue('accountName', '');
-                      console.log('계정과목명이 없음, account:', JSON.stringify(account, null, 2));
                       alert("해당 계정과목을 찾을 수 없습니다.");
                     }
                   } catch (parseError) {
-                    console.error('JSON 파싱 오류:', parseError, 'Response:', responseText);
                     event.node.setDataValue('accountName', '');
                     alert("계정과목 정보 처리 중 오류가 발생했습니다.");
                   }
                 } else {
-                  console.log('계정과목 API 응답이 비어있음');
                   event.node.setDataValue('accountName', '');
                   alert("계정과목 정보가 비어있습니다.");
                 }
               } else {
-                console.error('계정과목 API 응답 오류:', response.status, response.statusText);
                 event.node.setDataValue('accountName', '');
                 alert(`계정과목 조회 중 오류가 발생했습니다. (${response.status})`);
               }
             } catch (error) {
-              console.error('계정과목 조회 네트워크 오류:', error);
               event.node.setDataValue('accountName', '');
               alert("서버와 통신 중 오류가 발생했습니다.");
             }
           } else if (!accountCode) {
-            console.log('계정과목 코드가 비어있음, accountName 초기화');
             event.node.setDataValue('accountName', '');
-          } else {
-            console.log('유효하지 않은 계정과목 코드:', accountCode);
           }
         }
         
@@ -1888,33 +1814,6 @@
             addDetailSummaryRow(selectedMaster.entryNumber);
           }, 100);
         }
-        
-        // 값이 변경될 때 빈 행이 있는지 확인하고 없으면 추가
-        setTimeout(() => {
-          let hasEmptyRow = false;
-          for (let i = 0; i < event.api.getDisplayedRowCount(); i++) {
-            const row = event.api.getDisplayedRowAtIndex(i)?.data;
-            if (row && isEmptyDetailRow(row)) {
-              hasEmptyRow = true;
-              break;
-            }
-          }
-          if (!hasEmptyRow && selectedMaster && selectedMaster.entryNumber) {
-            const newEmptyRow = getEmptyDetailRow();
-            newEmptyRow.entryNumber = selectedMaster.entryNumber;
-            
-            // 소계 행이 있으면 그 위에 추가, 없으면 마지막에 추가
-            const summaryRowIndex = findSummaryRowIndex();
-            if (summaryRowIndex >= 0) {
-              event.api.applyTransaction({ 
-                add: [newEmptyRow], 
-                addIndex: summaryRowIndex 
-              });
-            } else {
-              event.api.applyTransaction({ add: [newEmptyRow] });
-            }
-          }
-        }, 50);
       }
     };
 
@@ -1941,7 +1840,7 @@
       const endMonth = Number(document.querySelector('input[name="endMonth"]').value);
       const endDay = Number(document.querySelector('input[name="endDay"]').value);
       
-      console.log('Date filter:', { startMonth, startDay, endMonth, endDay });
+
     }
 
     // 이벤트 리스너
@@ -1977,7 +1876,6 @@
           return;
         }
       }
-      
       // 저장할 데이터 준비 (금액 처리)
       const saveData = {
         lineNumber: rowData.lineNumber,
@@ -1991,9 +1889,6 @@
         // amount 필드: 차변이면 양수, 대변이면 음수로 저장
         amount: (rowData.debitAmount || 0) - (rowData.creditAmount || 0)
       };
-      
-      console.log('저장할 상세 데이터:', saveData);
-      
       try {
         const response = await fetch('/acc/enps/detail', {
           method: method,
@@ -2046,11 +1941,8 @@
               }, 100);
             }
           }
-          
-          console.log('상세 저장 성공:', savedDetail);
         }
       } catch (error) {
-        console.error('상세 저장 실패:', error);
         alert((isNew ? "신규 저장" : "수정") + " 실패: " + error.message);
       }
     }
@@ -2095,8 +1987,6 @@
       const supplyAmount = Number(rowData.totalSupplyAmount) || 0;
       const transactionType = rowData.transactionType || '';
       
-      console.log(`자동계산 시작: ${changedField}, 수량=${quantity}, 단가=${unitPrice}, 공급가액=${supplyAmount}, 합계=${totalAmount}, 거래유형=${transactionType}`);
-      
       if (changedField === 'quantity' || changedField === 'unitPrice') {
         // 수량이나 단가가 변경된 경우
         if (quantity > 0 && unitPrice > 0) {
@@ -2106,8 +1996,6 @@
           rowData.totalSupplyAmount = calculatedSupplyAmount;
           rowData.totalTaxAmount = taxAmount;
           rowData.totalAmount = calculateTotalAmount(calculatedSupplyAmount, taxAmount);
-          
-          console.log(`계산결과: 공급가액=${calculatedSupplyAmount}, 부가세=${taxAmount}, 합계=${rowData.totalAmount}`);
         }
       } else if (changedField === 'totalSupplyAmount') {
         // 공급가액이 직접 변경된 경우
@@ -2115,8 +2003,6 @@
           const taxAmount = calculateTaxAmount(supplyAmount, transactionType);
           rowData.totalTaxAmount = taxAmount;
           rowData.totalAmount = calculateTotalAmount(supplyAmount, taxAmount);
-          
-          console.log(`공급가액변경: 공급가액=${supplyAmount}, 부가세=${taxAmount}, 합계=${rowData.totalAmount}`);
         }
       } else if (changedField === 'totalAmount') {
         // 합계가 변경된 경우 (수량*단가가 입력되지 않았을 때만)
@@ -2124,8 +2010,6 @@
           const calculated = calculateFromTotal(totalAmount, transactionType);
           rowData.totalSupplyAmount = calculated.supplyAmount;
           rowData.totalTaxAmount = calculated.taxAmount;
-          
-          console.log(`역계산결과: 공급가액=${calculated.supplyAmount}, 부가세=${calculated.taxAmount}`);
         }
       } else if (changedField === 'transactionType') {
         // 거래유형이 변경된 경우
@@ -2134,8 +2018,6 @@
           const taxAmount = calculateTaxAmount(currentSupplyAmount, transactionType);
           rowData.totalTaxAmount = taxAmount;
           rowData.totalAmount = calculateTotalAmount(currentSupplyAmount, taxAmount);
-          
-          console.log(`거래유형변경: 공급가액=${currentSupplyAmount}, 부가세=${taxAmount}, 합계=${rowData.totalAmount}`);
         }
       }
     }
