@@ -12,6 +12,7 @@
   - 2025-06-24 (이혁진): 반품기능 완료
   - 2025-06-25 (이혁진): 입고기능 개발 중
   - 2025-06-25 (이혁진): 입고기능 개발 완료
+  - 2025-07-01 (이혁진): 2시간 반복 자동입고기능 완성 (페이지 최종완성)
 ============================================ -->
 
 <head>
@@ -52,18 +53,18 @@
 					</select>
 				</div>
 				<div class="col-md-2">
-					<label class="form-label">제품수량</label>
+					<label class="form-label">제품크기</label>
 					<input type="text" class="form-control form-control-sm" id="prodQuantity" placeholder="제품수량">
 				</div>
 				<div class="col-md-2">
-					<label class="form-label">안전재고량</label>
+					<label class="form-label">안전재고유무</label>
 					<input type="text" class="form-control form-control-sm" id="safetyStockAmount" placeholder="안전재고량">
 				</div>
 				<div class="col-md-2">
 					<div class="d-flex gap-2">
-						<button type="button" class="btn btn-outline-secondary btn-sm" id="makeBtn">생산</button>
-						<button type="button" class="btn btn-outline-secondary btn-sm" id="rejectBtn">반려</button>
-						<button type="button" class="btn btn-outline-secondary btn-sm" id="inboundBtn">창고입고</button>
+						<button type="button" class="btn btn-success btn-sm" id="makeBtn">생산</button>
+						<button type="button" class="btn btn-danger btn-sm" id="rejectBtn">반려</button>
+						<button type="button" class="btn btn-primary btn-sm" id="inboundBtn">창고입고</button>
 					</div>
 				</div>
 			</div>

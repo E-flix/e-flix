@@ -5,6 +5,6 @@
 <mapper namespace="com.eflix.purchs.mapper.WhMovementMapper">
 <!-- 제품명 조회 (prod_id)-->
 <select id="searchProdIdList" parameterType="WhMovementDTO">
-  SELECT prod_name FROM prod WHERE prod_inbound_status = 'pis01'
+  SELECT prod_id, prod_name FROM prod WHERE prod_inbound_status = 'pis01' ORDER BY prod_id DESC
 </select>
 </mapper>

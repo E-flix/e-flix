@@ -1,34 +1,17 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 이혁진
+  - 최초작성 : 2025-06-23
+  - 설명     : 입고 이동 (AG Grid 적용)
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-07-02 (이혁진): AG Grid, 레이아웃 통일 적용
+============================================ -->
 
 <head>
 	<title>창고이동관리</title>
-	<!-- AG Grid CDN -->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css" />
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css" />
-	<style>
-		.ag-header-group-cell-label {
-			justify-content: center;
-		}
-
-		/* ✅ 셀 구분선 명확히 */
-		.ag-theme-alpine .ag-cell {
-			border-right: 1px solid #ccc;
-			border-bottom: 1px solid #ccc;
-		}
-
-		.ag-theme-alpine .ag-header-cell,
-		.ag-theme-alpine .ag-header-group-cell {
-			border-right: 1px solid #ccc;
-			border-bottom: 1px solid #ccc;
-		}
-
-		.ag-theme-alpine .ag-root-wrapper {
-			border: 1px solid #aaa;
-		}
-	</style>
 </head>
-
 <div layout:fragment="content" class="container-fluid">
 	<div class="d-flex justify-content-between align-items-center mb-4">
 		<h2>창고이동관리</h2>
@@ -46,9 +29,11 @@
 	</div>
 
 	<!-- 버튼 -->
-	<div class="d-flex justify-content-end mb-2">
-		<button type="button" class="btn btn-secondary btn-sm me-2" onclick="resetTransfer()">초기화</button>
+	<div class="d-flex justify-content-end mb-2 gap-2">
+		<button type="button" class="btn btn-warning btn-sm" onclick="resetTransfer()">초기화</button>
 		<button type="button" class="btn btn-success btn-sm" onclick="saveTransfer()">저장</button>
+		<button type="button" class="btn btn-primary btn-sm" onclick="addTransferRow()">+ 행 추가</button>
+		<button type="button" class="btn btn-danger btn-sm" onclick="deleteSelectedRows()">선택 삭제</button>
 	</div>
 
 	<!-- AG Grid 테이블 영역 -->
@@ -61,52 +46,18 @@
 
 <script th:inline="javascript">
 	let prdList = /*[[${prdList}]]*/[];
-	// 더미데이터
-	const whMovementList = [
-		{
-			prodCode: "B001",
-			// prodName: "B-001.a",
-			prodSpec: "규격1",
-			sendWh: "기본창고",
-			sendBeforeQty: 9999,
-			sendAfterQty: 4999,
-			sendMoveQty: 5000,
-			recvWh: "구매창고",
-			recvBeforeQty: 0,
-			recvAfterQty: 5000,
-			recvMoveQty: 5000,
-			note: ""
-		},
-		{
-			prodCode: "C.BODY-0001-15",
-			// prodName: "C.BODY-0001-15",
-			prodSpec: "",
-			sendWh: "기본창고",
-			sendBeforeQty: 9999,
-			sendAfterQty: 4999,
-			sendMoveQty: 5000,
-			recvWh: "매출창고",
-			recvBeforeQty: 0,
-			recvAfterQty: 5000,
-			recvMoveQty: 5000,
-			note: ""
-		},
-		{
-			prodCode: "C.BODY-PC06-004+",
-			// prodName: "DDD",
-			prodSpec: "규격3",
-			sendWh: "기본창고",
-			sendBeforeQty: 9999,
-			sendAfterQty: 8999,
-			sendMoveQty: 1000,
-			recvWh: "구매창고",
-			recvBeforeQty: 0,
-			recvAfterQty: 1000,
-			recvMoveQty: 1000,
-			note: ""
-		}
-	];
-	
+	let prod = prdList.map(p => p.prodName);
+	console.log("prdList : ", prdList);
+	let updateData = [];
+	// 로컬스토리지 행 저장
+	const STORAGE_KEY = "whMovementData";
+
+	let whMovementList = [];
+	if (localStorage.getItem(STORAGE_KEY)) {
+		whMovementList = JSON.parse(localStorage.getItem(STORAGE_KEY));
+	} else {
+		whMovementList = dummyList;
+	}
 
 	const whmGridOptions = {
 		rowData: whMovementList,
@@ -115,55 +66,56 @@
 		defaultColDef: { resizable: true },
 
 		columnDefs: [
-			{ headerName: "No", valueGetter: "node.rowIndex + 1", width: 60, pinned: 'left' },
-			{ headerName: "품목코드", field: "prodCode" },
 			{
-				headerName: "품목명",
-				field: "prodName",
-				editable: true,
-				cellEditor: 'agSelectCellEditor',
-				cellEditorParams: {
-					values: prdList
-				}
+				headerName: "제품ID",
+				editable: false,
+				field: "prodId",
 			},
-			{ headerName: "규격", field: "prodSpec" },
+			{
+				headerName: "제품명",
+				editable: true,
+				field: "prodName",
+				cellEditor: "agSelectCellEditor",
+				cellEditorParams: {
+					values: prod
+				},
 
+			},
 			{
 				headerName: "보내는 창고 정보",
 				children: [
-					{
-						headerName: "창고명",
-						field: "sendWh",
-						editable: true,
-						cellEditor: 'agSelectCellEditor',
-						cellEditorParams: {
-							values: ["기본창고", "구매창고", "매출창고"] // 창고명 리스트
-						},
-						cellStyle: { color: 'blue' }
-					},
+					{ headerName: "창고ID", field: "sendWh", editable: true },
 					{ headerName: "이동전", field: "sendBeforeQty", cellStyle: { color: 'blue' } },
 					{ headerName: "이동후", field: "sendAfterQty", cellStyle: { color: 'blue' } },
-					{ headerName: "이동수량", field: "sendMoveQty", editable: true }
+					{ headerName: "이동수량 - 값 입력", field: "sendMoveQty", editable: true, cellStyle: { color: 'green' } }
 				]
 			},
-
 			{
 				headerName: "받는 창고 정보",
 				children: [
-					{ headerName: "창고명", field: "recvWh", cellStyle: { color: 'red' } },
+					{ headerName: "창고ID", field: "recvWh" },
 					{ headerName: "이동전", field: "recvBeforeQty", cellStyle: { color: 'red' } },
-					{ headerName: "이동후", field: "recvAfterQty", cellStyle: { color: 'red' } },
-					{ headerName: "이동수량", field: "recvMoveQty", cellStyle: { color: 'red' } }
+					{ headerName: "이동후", field: "recvAfterQty", cellStyle: { color: 'red' } }
 				]
-			},
-
-			{ headerName: "비고", field: "note" }
+			}
 		],
-
+		rowSelection: {
+			mode: "multiRow"
+		},
 		onGridReady: (params) => {
 			whmGridOptions.api = params.api;
 			params.api.sizeColumnsToFit();
-		}
+		},
+		onCellValueChanged: (event) => {
+			if (event.colDef.field === "prodName") {
+				const selectedName = event.newValue;
+				const matched = prdList.find(p => p.prodName === selectedName);
+				if (matched) {
+					event.data.prodId = matched.prodId;
+					event.api.applyTransaction({ update: [event.data] });
+				}
+			}
+		},
 	};
 
 	// ✅ 그리드 생성
@@ -177,14 +129,52 @@
 
 <!-- 버튼 기능 -->
 <script>
+	// 초기화
 	function resetTransfer() {
-		alert("초기화 기능은 개발 중입니다.");
-	}
+		if (!confirm("모든 데이터를 초기화 하시겠습니까?")) return;
 
+		localStorage.removeItem(STORAGE_KEY);
+		location.reload();
+	}
+	// 창고이동 후 저장
 	function saveTransfer() {
 		alert("저장 기능은 개발 중입니다.");
 	}
+	// 행추가
+	function addTransferRow() {
+		const newRow = {
+			prodCode: "",
+			prodName: "",
+			sendWh: "",
+			sendBeforeQty: 0,
+			sendAfterQty: 0,
+			sendMoveQty: 0,
+			recvWh: "",
+			recvBeforeQty: 0,
+			recvAfterQty: 0
+		};
 
+		// 그리드에 새 행 추가
+		whmGridOptions.api.applyTransaction({ add: [newRow] });
+		// 행추가 후 저장
+		updateData = [];
+		whmGridOptions.api.forEachNode(node => updateData.push(node.data));
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(updateData));
+	}
+	// 행삭제
+	function deleteSelectedRows() {
+		const selectedRows = whmGridOptions.api.getSelectedRows();
+		if (selectedRows.length === 0) {
+			alert("삭제할 행을 선택하세요.");
+			return;
+		}
+		whmGridOptions.api.applyTransaction({ remove: selectedRows });
+		// 삭제 후 저장
+		updateData = [];
+		whmGridOptions.api.forEachNode(node => updateData.push(node.data));
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(updateData));
+	}
+	// 페이지 이동
 	document.getElementById('warehouse').addEventListener('change', function () {
 		if (this.checked) {
 			window.location.href = '/purchs/wh';

@@ -3,10 +3,8 @@ package com.eflix.purchs.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-
 import com.eflix.purchs.service.WhMovementService;
 
 
@@ -33,4 +31,10 @@ public class WhMovementController {
 		return "purchs/warehouse_movement";
 	}
     
+    // 	@GetMapping("/whdm")
+    //     @ResponseBody
+	// public List<WhMovementDTO> warehouse_mnt() {
+    //     // 제품명 조회
+    //     return whMovementService.searchProdIdList();
+	// }
 }
