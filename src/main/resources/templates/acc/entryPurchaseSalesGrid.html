@@ -1,0 +1,105 @@
+<div th:fragment="entryPurchaseSalesGridFragment">
+    <!-- 하단 매출/매입 분리 그리드 영역 -->
+    <div class="row" style="height:162px;">
+      <!-- 매출(판매) 그리드 -->
+      <div class="col-6">
+        <div id="saleGrid" class="ag-theme-alpine" style="width:100%; height:calc(100% - 25px);"></div>
+      </div>
+      <!-- 매입(구매) 그리드 -->
+      <div class="col-6">
+        <div id="buyGrid" class="ag-theme-alpine" style="width:100%; height:calc(100% - 25px);"></div>
+      </div>
+    </div>
+
+    <script th:inline="javascript">
+        let saleGridApi = null;
+        let buyGridApi = null;
+
+        // 매출 데이터 (saleCode 기준) - 배열 형태로 변경
+        let saleData = [
+          ['11', '과세', '과세매출', '16', '수출', '수출', '21', '전자', '전자회폐'],
+          ['12', '영세', '영세율', '17', '카과', '카드과세', '22', '현과', '현금과세'],
+          ['13', '면세', '계산서', '18', '카면', '카드면세', '23', '현면', '현금면세'],
+          ['14', '건별', '무증빙', '19', '카영', '카드영세', '24', '현영', '현금영세'],
+          ['15', '간이', '간이과세', '20', '면건', '무증빙', '', '', '']
+        ];
+
+        // 매입 데이터 (buyCode 기준) - 배열 형태로 변경
+        let buyData = [
+          ['51', '과세', '과세매입', '55', '수입', '수입', '59', '카영', '카드영세'],
+          ['52', '영세', '영세율', '56', '금전', '금전등록', '60', '면건', '무증빙'],
+          ['53', '면세', '계산서', '57', '카과', '카드과세', '61', '현과', '현금과세'],
+          ['54', '불공', '불공제', '58', '카면', '카드면세', '62', '현면', '현금면세']
+        ];
+
+        // 매출 그리드 설정
+        const saleGridOptions = {
+          headerHeight: 24,
+          rowHeight: 22,  
+          rowData: saleData,
+          suppressHorizontalScroll: true,
+          suppressClickEdit: true,
+          singleClickEdit: false,
+          readOnlyEdit: true,
+          columnDefs: [
+            {headerName:"코드",valueGetter:params=>params.data[0]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"구분",valueGetter:params=>params.data[1]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"세부내용",valueGetter:params=>params.data[2]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true},
+            {headerName:"코드",valueGetter:params=>params.data[3]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"구분",valueGetter:params=>params.data[4]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"세부내용",valueGetter:params=>params.data[5]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true},
+            {headerName:"코드",valueGetter:params=>params.data[6]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"구분",valueGetter:params=>params.data[7]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"세부내용",valueGetter:params=>params.data[8]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true}
+          ],
+          suppressMultiSort: true,
+          suppressColumnMoveAnimation: true,
+          suppressMovableColumns: true,
+          suppressMenuHide: true,
+          onGridReady: (params) => {
+            saleGridApi = params.api;
+            setTimeout(() => {
+              params.api.sizeColumnsToFit();
+            }, 100);
+          }
+        };
+
+        // 매입 그리드 설정
+        const buyGridOptions = {
+          headerHeight: 24,
+          rowHeight: 22,
+          rowData: buyData,
+          suppressHorizontalScroll: true,
+          suppressClickEdit: true,
+          singleClickEdit: false,
+          readOnlyEdit: true,
+          columnDefs: [
+            {headerName:"코드",valueGetter:params=>params.data[0]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"구분",valueGetter:params=>params.data[1]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"세부내용",valueGetter:params=>params.data[2]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true},
+            {headerName:"코드",valueGetter:params=>params.data[3]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"구분",valueGetter:params=>params.data[4]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"세부내용",valueGetter:params=>params.data[5]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true},
+            {headerName:"코드",valueGetter:params=>params.data[6]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"구분",valueGetter:params=>params.data[7]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
+            {headerName:"세부내용",valueGetter:params=>params.data[8]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true}
+          ],
+          suppressMultiSort: true,
+          suppressColumnMoveAnimation: true,
+          suppressMovableColumns: true,
+          suppressMenuHide: true,
+          onGridReady: (params) => {
+            buyGridApi = params.api;
+            setTimeout(() => {
+              params.api.sizeColumnsToFit();
+            }, 100);
+          }
+        };
+
+        // DOM이 로드된 후 그리드를 생성합니다.
+        document.addEventListener('DOMContentLoaded', (event) => {
+            agGrid.createGrid(document.querySelector("#saleGrid"), saleGridOptions);
+            agGrid.createGrid(document.querySelector("#buyGrid"), buyGridOptions);
+        });
+    </script>
+</div>

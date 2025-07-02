@@ -119,17 +119,8 @@
       <div id="detailGrid" class="ag-theme-alpine" style="width:100%; height:calc(100% - 25px);"></div>
     </div>
 
-    <!-- 하단 매출/매입 분리 그리드 영역 -->
-    <div class="row" style="height:162px;">
-      <!-- 매출(판매) 그리드 -->
-      <div class="col-6">
-        <div id="saleGrid" class="ag-theme-alpine" style="width:100%; height:calc(100% - 25px);"></div>
-      </div>
-      <!-- 매입(구매) 그리드 -->
-      <div class="col-6">
-        <div id="buyGrid" class="ag-theme-alpine" style="width:100%; height:calc(100% - 25px);"></div>
-      </div>
-    </div>
+    <!-- 하단 매출/매입 그리드 영역 (분리된 파일) -->
+    <div th:replace="~{acc/entryPurchaseSalesGrid :: entryPurchaseSalesGridFragment}"></div>
   </div>
 
   <script th:inline="javascript">
@@ -138,8 +129,6 @@
     const code0A = /*[[${code0A}]]*/ [];
     const code0G = /*[[${code0G}]]*/ [];
     let purchaseSalesGridApi = null;
-    let saleGridApi = null;
-    let buyGridApi = null;
     let detailGridApi = null;
     let highlightedEntryNumber = null;
     let arrowKeyDebounceTimer = null;
@@ -424,23 +413,6 @@
       return -1; // 소계 행이 없으면 -1 반환
     }
 
-    // 매출 데이터 (saleCode 기준) - 배열 형태로 변경
-    let saleData = [
-      ['11', '과세', '과세매출', '16', '수출', '수출', '21', '전자', '전자회폐'],
-      ['12', '영세', '영세율', '17', '카과', '카드과세', '22', '현과', '현금과세'],
-      ['13', '면세', '계산서', '18', '카면', '카드면세', '23', '현면', '현금면세'],
-      ['14', '건별', '무증빙', '19', '카영', '카드영세', '24', '현영', '현금영세'],
-      ['15', '간이', '간이과세', '20', '면건', '무증빙', '', '', '']
-    ];
-
-    // 매입 데이터 (buyCode 기준) - 배열 형태로 변경
-    let buyData = [
-      ['51', '과세', '과세매입', '55', '수입', '수입', '59', '카영', '카드영세'],
-      ['52', '영세', '영세율', '56', '금전', '금전등록', '60', '면건', '무증빙'],
-      ['53', '면세', '계산서', '57', '카과', '카드과세', '61', '현과', '현금과세'],
-      ['54', '불공', '불공제', '58', '카면', '카드면세', '62', '현면', '현금면세']
-    ];
-
     // ag-Grid 로드 함수: master 리스트 가져오기
     async function loadMasterData() {
       try {
@@ -576,6 +548,7 @@
                 }
               }
               
+
               // 소계 행 추가
               addDetailSummaryRow(master.entryNumber);
             }, 100);
@@ -842,8 +815,6 @@
           window.addEventListener('resize', () => {
             if (purchaseSalesGridApi) purchaseSalesGridApi.sizeColumnsToFit();
             if (detailGridApi) detailGridApi.sizeColumnsToFit();
-            if (saleGridApi) saleGridApi.sizeColumnsToFit();
-            if (buyGridApi) buyGridApi.sizeColumnsToFit();
           });
           resizeEventRegistered = true;
         }
@@ -1609,81 +1580,9 @@
       }
     };
 
-    // 매출 그리드 설정
-    const saleGridOptions = {
-      headerHeight: 24,
-      rowHeight: 22,  
-      rowData: saleData,
-      suppressHorizontalScroll: true,
-      // 편집 및 정렬 비활성화
-      suppressClickEdit: true,
-      singleClickEdit: false,
-      readOnlyEdit: true,
-      columnDefs: [
-        {headerName:"코드",valueGetter:params=>params.data[0]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"구분",valueGetter:params=>params.data[1]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"세부내용",valueGetter:params=>params.data[2]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true},
-        {headerName:"코드",valueGetter:params=>params.data[3]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"구분",valueGetter:params=>params.data[4]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"세부내용",valueGetter:params=>params.data[5]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true},
-        {headerName:"코드",valueGetter:params=>params.data[6]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"구분",valueGetter:params=>params.data[7]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"세부내용",valueGetter:params=>params.data[8]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true}
-      ],
-      // 선택 및 상호작용 비활성화
-      suppressMultiSort: true,
-      suppressColumnMoveAnimation: true,
-      suppressMovableColumns: true,
-      suppressMenuHide: true,
-      onGridReady: (params) => {
-        saleGridApi = params.api;
-        // 컬럼 너비 자동맞춤 - flex 사용시 sizeColumnsToFit이 더 적합
-        setTimeout(() => {
-          params.api.sizeColumnsToFit();
-        }, 100);
-      }
-    };
-
-    // 매입 그리드 설정
-    const buyGridOptions = {
-      headerHeight: 24,
-      rowHeight: 22,
-      rowData: buyData,
-      suppressHorizontalScroll: true,
-      // 편집 및 정렬 비활성화
-      suppressClickEdit: true,
-      singleClickEdit: false,
-      readOnlyEdit: true,
-      columnDefs: [
-        {headerName:"코드",valueGetter:params=>params.data[0]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"구분",valueGetter:params=>params.data[1]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"세부내용",valueGetter:params=>params.data[2]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true},
-        {headerName:"코드",valueGetter:params=>params.data[3]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"구분",valueGetter:params=>params.data[4]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"세부내용",valueGetter:params=>params.data[5]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true},
-        {headerName:"코드",valueGetter:params=>params.data[6]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"구분",valueGetter:params=>params.data[7]||'',width:70,minWidth:60,maxWidth:90,cellClass:'ag-cell-center',sortable:false,editable:false,resizable:true},
-        {headerName:"세부내용",valueGetter:params=>params.data[8]||'',flex:1,minWidth:100,cellClass:'ag-cell-left',sortable:false,editable:false,resizable:true}
-      ],
-      // 선택 및 상호작용 비활성화
-      suppressMultiSort: true,
-      suppressColumnMoveAnimation: true,
-      suppressMovableColumns: true,
-      suppressMenuHide: true,
-      onGridReady: (params) => {
-        buyGridApi = params.api;
-        // 컬럼 너비 자동맞춤 - flex 사용시 sizeColumnsToFit이 더 적합
-        setTimeout(() => {
-          params.api.sizeColumnsToFit();
-        }, 100);
-      }
-    };
-
     // 그리드 생성
     agGrid.createGrid(document.querySelector("#purchaseSalesGrid"), purchaseSalesGridOptions);
     agGrid.createGrid(document.querySelector("#detailGrid"), detailGridOptions);
-    agGrid.createGrid(document.querySelector("#saleGrid"), saleGridOptions);
-    agGrid.createGrid(document.querySelector("#buyGrid"), buyGridOptions);
 
     // 윈도우 크기 변경 시 그리드 컬럼 자동 맞춤
     window.addEventListener('resize', function() {
@@ -1693,12 +1592,6 @@
         }
         if (detailGridApi) {
           detailGridApi.sizeColumnsToFit();
-        }
-        if (saleGridApi) {
-          saleGridApi.sizeColumnsToFit();
-        }
-        if (buyGridApi) {
-          buyGridApi.sizeColumnsToFit();
         }
       }, 100);
     });
