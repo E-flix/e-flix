@@ -72,12 +72,24 @@
 				headerName: "제품ID",
 				editable: false,
 				field: "prodId",
+				valueGetter: (params) => {
+					return params.data.prodId || "제품ID";
+				},
+				cellStyle: (params) => {
+					return params.value === "제품ID" ? { color: 'gray' } : { color: 'black' };
+				},
 			},
 			{
 				headerName: "제품명",
 				editable: true,
 				field: "prodName",
 				cellEditor: "agSelectCellEditor",
+				valueGetter: (params) => {
+					return params.data.prodName || "제품명 선택";
+				},
+				cellStyle: (params) => {
+					return params.value === "제품명 선택" ? { color: 'gray' } : { color: 'black' };
+				},
 				cellEditorParams: {
 					values: prod
 				},
@@ -86,7 +98,17 @@
 			{
 				headerName: "보내는 창고 정보",
 				children: [
-					{ headerName: "창고ID", field: "sendWh", editable: true },
+					{
+						headerName: "창고ID",
+						ditable: false,
+						field: "sendWh",
+						valueGetter: (params) => {
+							return params.data.sendWh || "창고ID";
+						},
+						cellStyle: (params) => {
+							return params.value === "창고ID" ? { color: 'gray' } : { color: 'black' };
+						},
+					},
 					{ headerName: "이동전", field: "sendBeforeQty", cellStyle: { color: 'blue' } },
 					{ headerName: "이동후", field: "sendAfterQty", cellStyle: { color: 'blue' } },
 					{ headerName: "이동수량 - 값 입력", field: "sendMoveQty", editable: true, cellStyle: { color: 'green' } }
@@ -114,10 +136,11 @@
 				const matched = prdList.find(p => p.prodName === selectedName);
 				if (matched) {
 					event.data.prodId = matched.prodId;
+					event.data.sendWh = matched.sendWh;
 					event.api.applyTransaction({ update: [event.data] });
 				}
 			}
-		},
+		}
 	};
 
 	// ✅ 그리드 생성
