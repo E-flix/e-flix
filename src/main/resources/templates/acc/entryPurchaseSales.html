@@ -93,15 +93,17 @@
 
     <!-- 날짜 필터 영역 -->
     <form class="row g-2 mb-2 align-items-end" method="get" action="/voucher/list">
-      <div class="col-auto">
-        <label class="form-label mb-0">일자</label>
-        2025 년
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:45px;"> 월
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startDay" style="width:45px;"> 일 ~
-        2025 년
-        <input type="number" value="12" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:45px;"> 월
-        <input type="number" value="31" class="form-control form-control-sm d-inline-block" name="endDay" style="width:45px;"> 일
-        <small class="text-muted ms-3">*전자세금계산서 및 신용카드매출전표에서 관리하세요.</small>
+      <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+          <label class="form-label mb-0">일자</label>
+          2025 년
+          <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:45px;"> 월
+          <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startDay" style="width:45px;"> 일 ~
+          2025 년
+          <input type="number" value="12" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:45px;"> 월
+          <input type="number" value="31" class="form-control form-control-sm d-inline-block" name="endDay" style="width:45px;"> 일
+        </div>
+        <small class="text-muted">※전자세금계산서 및 전자계산서는 전자(세금)계산서관리에서 관리하세요.</small>
       </div>
     </form>
     <!-- 메인 매입매출전표 그리드 -->
@@ -110,13 +112,8 @@
     </div>
 
     <!-- 중간 상세정보 영역 -->
-    <div class="mb-0" style="height:21vh;">
-      <div class="d-flex justify-content-between align-items-center mb-1">
-        <div>
-          <!-- 테스트 버튼 제거됨 -->
-        </div>
-      </div>
-      <div id="detailGrid" class="ag-theme-alpine" style="width:100%; height:calc(100% - 25px);"></div>
+    <div class="mb-2" style="height:18.3vh;">
+      <div id="detailGrid" class="ag-theme-alpine" style="width:100%; height:100%"></div>
     </div>
 
     <!-- 하단 매출/매입 그리드 영역 (분리된 파일) -->
@@ -130,6 +127,7 @@
     const code0G = /*[[${code0G}]]*/ [];
     let purchaseSalesGridApi = null;
     let detailGridApi = null;
+    let allPurchaseSalesData = []; // 전체 데이터를 저장할 배열
     let highlightedEntryNumber = null;
     let arrowKeyDebounceTimer = null;
     let selectedMaster = null;  // 선택된 마스터 로우 저장
@@ -418,41 +416,77 @@
       try {
         const response = await fetch('/acc/enps/ma');
         const data = await response.json();
-        if (purchaseSalesGridApi && typeof purchaseSalesGridApi.applyTransaction === 'function') {
-          // 기존 데이터에 month, day 필드 추가 및 합계 계산
-          data.forEach(item => {
-            if (item.entryDate) {
-              const date = new Date(item.entryDate);
-              item.month = date.getMonth() + 1;
-              item.day = date.getDate();
-            }
-            
-            // 합계가 없거나 0인 경우 공급가액 + 부가세로 계산
-            if (!item.totalAmount || item.totalAmount === 0) {
-              const supplyAmount = Number(item.totalSupplyAmount) || 0;
-              const taxAmount = Number(item.totalTaxAmount) || 0;
-              item.totalAmount = supplyAmount + taxAmount;
-            }
-          });
-          
-          // 전체 기존 데이터 제거 후 새 데이터 추가
-          const currentData = [];
-          purchaseSalesGridApi.forEachNode(node => currentData.push(node.data));
-          purchaseSalesGridApi.applyTransaction({ remove: currentData, add: data });
-          console.log('Master list load 성공:', data);
-          if (data.length > 0) {
-            console.log('Master 거래처명:', data[0].partnerName);
+        
+        // 기존 데이터에 month, day 필드 추가 및 합계 계산
+        data.forEach(item => {
+          if (item.entryDate) {
+            const date = new Date(item.entryDate);
+            item.month = date.getMonth() + 1;
+            item.day = date.getDate();
           }
           
-          // 데이터 로드 후 합계 검증 및 보정
-          setTimeout(() => {
-            validateAndFixTotals();
-          }, 200);
-        } else {
-          console.log('Grid API 미지원 또는 applyTransaction 없음');
-        }
+          // 합계가 없거나 0인 경우 공급가액 + 부가세로 계산
+          if (!item.totalAmount || item.totalAmount === 0) {
+            const supplyAmount = Number(item.totalSupplyAmount) || 0;
+            const taxAmount = Number(item.totalTaxAmount) || 0;
+            item.totalAmount = supplyAmount + taxAmount;
+          }
+        });
+
+        allPurchaseSalesData = data; // 전체 데이터 저장
+        console.log('Master list load 성공:', allPurchaseSalesData);
+
+        applyDateFilter(); // 필터 적용하여 그리드 표시
+
+        // 데이터 로드 후 합계 검증 및 보정
+        setTimeout(() => {
+          validateAndFixTotals();
+        }, 200);
+
       } catch (err) {
         console.error('Master 리스트 로드 실패:', err);
+      }
+    }
+
+    // 날짜 필터 함수
+    function applyDateFilter() {
+      if (!purchaseSalesGridApi) {
+        console.warn('applyDateFilter: 그리드 API가 아직 준비되지 않았습니다.');
+        return;
+      }
+
+      // 입력값 읽기
+      const startMonth = Number(document.querySelector('input[name="startMonth"]').value);
+      const startDay = Number(document.querySelector('input[name="startDay"]').value);
+      const endMonth = Number(document.querySelector('input[name="endMonth"]').value);
+      const endDay = Number(document.querySelector('input[name="endDay"]').value);
+
+      // 날짜 범위 계산 (월*100 + 일) -> 201 -> 2월 1일
+      const start = startMonth && startDay ? (startMonth * 100 + startDay) : null;
+      const end = endMonth && endDay ? (endMonth * 100 + endDay) : null;
+
+      // allPurchaseSalesData 필터링
+      const filteredData = allPurchaseSalesData.filter(row => {
+        if (!row.month || !row.day) return false; // 날짜 없는 데이터는 제외
+        const md = row.month * 100 + row.day;
+        if (start && md < start) return false;
+        if (end && md > end) return false;
+        return true;
+      });
+
+      // 그리드에 반영
+      purchaseSalesGridApi.setGridOption('rowData', filteredData);
+
+      // 빈 행이 있는지 확인하고 없으면 추가
+      let hasEmptyRow = false;
+      purchaseSalesGridApi.forEachNode(node => {
+        if (isEmptyRow(node.data)) {
+          hasEmptyRow = true;
+        }
+      });
+
+      if (!hasEmptyRow) {
+        purchaseSalesGridApi.applyTransaction({ add: [getEmptyRow()] });
       }
     }
 
@@ -618,7 +652,6 @@
       singleClickEdit: false,
       headerHeight: 30,
       rowHeight: 28,
-      rowData: purchaseSalesData,
       getRowId: params => {
         const data = params.data;
         // 일반 데이터 행 (entryNumber로 고유 ID 생성)
@@ -808,6 +841,12 @@
       onGridReady: (params) => {
         purchaseSalesGridApi = params.api;
         loadMasterData();
+
+        // 날짜 필터 이벤트 리스너 등록
+        ['startMonth', 'startDay', 'endMonth', 'endDay'].forEach(name => {
+          document.querySelector(`input[name="${name}"]`).addEventListener('input', applyDateFilter);
+        });
+
         // 컬럼 너비 자동맞춤
         params.api.sizeColumnsToFit();
         // 창 크기 변경 시 모든 그리드 자동맞춤 (한 번만 등록)
@@ -1054,13 +1093,16 @@
       rowHeight: 28,
       rowData: detailData,
       suppressHorizontalScroll: false,
-      suppressClickEdit: false,
-      singleClickEdit: true,
-      rowSelection: { mode: 'multiRow' },
-      suppressRowClickSelection: false,
-      isRowSelectable: (params) => {
-        // 소계 행은 선택 불가
-        return !(params.data && params.data.isSummary === true);
+      suppressClickEdit: true,
+      singleClickEdit: false,
+      rowSelection: { 
+        mode: 'multiRow',
+        enableClickSelection: true
+      },
+      selectionOptions: {
+        isRowSelectable: (params) => {
+          return !(params.data && params.data.isSummary === true);
+        }
       },
       localeText: { noRowsToShow: '매입매출전표를 선택하면 해당 전표의 상세내용을 편집할 수 있습니다.' },
       getRowId: params => {
@@ -1429,6 +1471,7 @@
                 console.log(`구분 g4 변경: 차변 ${currentDebit} → 대변 ${currentDebit}`);
               }
               
+
               // 그리드 셀 새로고침
               setTimeout(() => {
                 if (detailGridApi) {
