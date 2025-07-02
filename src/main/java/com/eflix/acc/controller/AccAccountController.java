@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.eflix.acc.dto.AccountDTO;
 import com.eflix.acc.service.AccountService;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -55,6 +53,8 @@ public class AccAccountController {
   @ResponseBody
   @GetMapping("/act/{accountCode}")
   public AccountDTO getListByCode(@PathVariable int accountCode) {
-    return accountService.getListByCode(accountCode);
+    AccountDTO accountDTO = new AccountDTO();
+    accountDTO.setAccountCode(accountCode);
+    return accountService.getListByCode(accountDTO);
   }
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.eflix.acc.dto.AccountDTO;
 import com.eflix.acc.mapper.AccountMapper;
 import com.eflix.acc.service.AccountService;
+import com.eflix.common.security.auth.AuthContext;
 import lombok.RequiredArgsConstructor;
 
 /* ============================================
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
   private final AccountMapper accountMapper;
+  private final AuthContext authContext;
 
   /**
    * 계정과목 전체조회
@@ -29,12 +31,14 @@ public class AccountServiceImpl implements AccountService {
    */
   @Override
   public List<AccountDTO> getList() {
-    return accountMapper.getList();
+    String coIdx = authContext.getCoIdx();
+    return accountMapper.getList(coIdx);
   }
 
   // 계정과목 코드로 계정과목 조회
   @Override
-  public AccountDTO getListByCode(int accountCode) {
-    return accountMapper.getListByCode(accountCode);
+  public AccountDTO getListByCode(AccountDTO accountDTO) {
+    accountDTO.setCoIdx(authContext.getCoIdx());
+    return accountMapper.getListByCode(accountDTO);
   }
 }
