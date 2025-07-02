@@ -156,11 +156,7 @@ public class HrController {
     }
   }
   
-  // 근태 현황 화면(사원)
-  @GetMapping("/al")
-  public String attdList() {
-      return "hr/attdList";
-  }
+
   
   // 근태 관리화면(관리자)
   @GetMapping("/am")

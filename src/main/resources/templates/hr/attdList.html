@@ -86,58 +86,22 @@
           </thead>
           <tbody>
             <!-- 예시 데이터 -->
-            <tr>
-              <td>11월01일(금)</td>
-              <td></td>
-              <td></td>
-              <td>09:00 ~ 18:00</td>
-              <td>08:50</td>
-              <td>19:00</td>
-              <td>01:00</td>
+            <tr th:each="attdList : ${attdList}">
+              <td th:text="${#dates.format(attdList.attdDate, 'M월 d일 (E)')}"></td>
+              <td th:text="${attdList.hdIdx}"></td>
+              <td th:text="${attdList.attdStatus}"></td>
+              <td th:text="${attdList.attdTime}"></td>
+              <td th:text="${attdList.attdStart}"></td>
+              <td th:text="${attdList.attdEnd}"></td>
+              <td th:text="${attdList.overtime}"></td>
             </tr>
-            <tr>
-              <td>11월04일(월)</td>
-              <td></td>
-              <td class="text-success fw-bold">조회</td>
-              <td>09:00 ~ 18:00</td>
-              <td>09:00</td>
-              <td>18:00</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>11월05일(화)</td>
-              <td></td>
-              <td class="text-danger fw-bold">지각</td>
-              <td>09:00 ~ 18:00</td>
-              <td>09:30</td>
-              <td>18:00</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td class="text-primary">11월09일(토)</td>
-              <td class="text-danger">법정공휴일</td>
-              <td></td>
-              <td colspan="4"></td>
-            </tr>
-            <tr>
-              <td>11월10일(일)</td>
-              <td></td>
-              <td class="text-info">외근</td>
-              <td>09:00 ~ 18:00</td>
-              <td>08:50</td>
-              <td>18:00</td>
-              <td>01:50</td>
-            </tr>
-            <tr>
-              <td class="text-primary">11월17일(토)</td>
-              <td class="text-danger">법정공휴일</td>
-              <td></td>
-              <td colspan="4"></td>
-            </tr>
-          </tbody>
         </table>
       </div>
     </div>
-
   </div>
+<script th:inline="javascript">
+  const test = /*[[${attdList}]]*/ "";
+  console.log("asdasdasd");
+  console.log(test);
+</script>
 </div>

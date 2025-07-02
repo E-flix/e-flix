@@ -9,6 +9,7 @@
 package com.eflix.hr.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
@@ -17,9 +18,16 @@ import com.eflix.hr.dto.AttendanceRecordDTO;
 
 @Mapper
 public interface AttendanceRecordMapper {
-    List<AttendanceRecordDTO> selectAll();
-    AttendanceRecordDTO selectById(@Param("attdIdx") String attdIdx);
+
+    // 근태 전체조회
+    List<AttendanceRecordDTO> getAllRecords();
+
+    // 근태 상세조회
+    List<AttendanceRecordDTO> getRecordsByEmpId(AttendanceRecordDTO dto);
+    
     int insert(AttendanceRecordDTO dto);
     int update(AttendanceRecordDTO dto);
     int deleteById(@Param("attdIdx") String attdIdx);
+
+
 }

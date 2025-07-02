@@ -18,17 +18,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AttendanceRecordDTO {
-    private String empIdx;           // emp_idx
-    private String deptIdx;          // dept_idx
-    private String empName;          // emp_name
-    private String empEmail;         // emp_email
-    private Date empRegdate;         // emp_regdate
-    private String empGrade;         // emp_grade
-    private String empType;          // emp_type
-    private String empStatus;        // emp_status
-    private String deptName;         // deptName
-    private String empAccount;      // emp_account
+    private String attdIdx;
+    private String empIdx;       // emp_idx
+    private String deptIdx;      // dept_idx
+    private String empName;      // emp_name
+    private String empEmail;     // emp_email
+    private Date   empRegdate;   // emp_regdate
+    private String empGrade;     // emp_grade
+    private String empType;      // emp_type
+    private String empStatus;    // emp_status
+    private String deptName;     // dept_name
+    private String empAccount;   // emp_account
+    private String coIdx;        // co_idx
 
-    private String coIdx;
+    // Attendance Detail Fields
+    private Date   attdDate;     // attendance_records.attd_date
+    private String hdIdx;        // attendance_records.hd_idx
+    private String attdStatus;   // attendance_records.attd_status
+    private String attdTime;     // formatted attendance_records.attd_time
+    private String attdStart;    // formatted attendance_records.attd_start
+    private String attdEnd;      // formatted attendance_records.attd_end
+    private String overtime;     // calculated overtime
     
 }

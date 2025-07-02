@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-20
+  - 설명     : AttendanceRecordsMapper query xml
+  [ 변경 이력 ]
+  - 2025-06-19 (김어진): 사원 전체조회 작성
+=============================================== -->
+<mapper namespace="com.eflix.hr.mapper.AttendanceRecordMapper">
+  <!-- 근태 전체조회-->
+  <select id="getAllRecords" resultType="AttendanceRecordDTO">
+  SELECT *
+  FROM attendance_records
+  </select>
+
+  <!--근태현황 상세조회-->
+  <select id="getRecordsByEmpId" parameterType="AttendanceRecordDTO" resultType="AttendanceRecordDTO">
+    <![CDATA[
+    SELECT
+        ar.attd_date,
+        ar.hd_idx,
+        ar.attd_status,
+        TO_CHAR(ar.attd_time,  'HH24:MI') AS attd_time,
+        TO_CHAR(ar.attd_start, 'HH24:MI') AS attd_start,
+        TO_CHAR(ar.attd_end,   'HH24:MI') AS attd_end,
+        CASE
+          WHEN (ar.attd_end - ar.attd_start) > (8/24)
+          THEN
+            -- 초과분(시간)
+            FLOOR((ar.attd_end - ar.attd_start)*24 - 9)
+            || '시간 '
+            -- 초과분(분)
+            || TO_CHAR(
+                FLOOR(
+                  MOD((ar.attd_end - ar.attd_start)*24 - 8,1) * 60
+                )
+              ,'FM00')
+            || '분'
+          ELSE NULL
+        END AS overtime
+      FROM attendance_records ar
+      WHERE ar.emp_idx = #{empIdx}
+        AND ar.attd_date BETWEEN TO_DATE(#{attdStart}, 'YYYY-MM-DD') AND TO_DATE(#{attdEnd}, 'YYYY-MM-DD')
+        AND ar.co_idx = #{coIdx}
+      ORDER BY ar.attd_date
+    ]]>
+  </select>
+</mapper>
