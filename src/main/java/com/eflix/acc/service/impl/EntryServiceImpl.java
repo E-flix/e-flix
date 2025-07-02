@@ -172,15 +172,27 @@ public class EntryServiceImpl implements EntryService {
     return entryMapper.selectMaxPlusOneEntryNumberPS();
   }
 
-  // 매입매출전표 삭제
+  // 매입매출전표 마스터 삭제
   @Override
   @Transactional(rollbackFor = Exception.class)
   public void deletePurchaseSalesEntry(List<EntryMasterDTO> entryMasters) {
     if (entryMasters == null || entryMasters.isEmpty()) return;
-    
     for (EntryMasterDTO master : entryMasters) {
-      // 매입매출전표는 마스터만 있으므로 마스터만 삭제
+      // 마스터를 삭제하기 전에 관련된 모든 상세 데이터(분개)를 삭제합니다.
+      entryMapper.deleteEntryDetailsByEntryNumber(master.getEntryNumber());
+      // 매입매출전표 마스터를 삭제합니다.
       entryMapper.deleteEntryMasterByEntryNumber(master.getEntryNumber());
+    }
+  }
+
+  // 매입매출전표 상세 삭제
+  @Override
+  @Transactional(rollbackFor = Exception.class)
+  public void deletePurchaseSalesDetail(List<EntryDetailDTO> entryDetails) {
+    if (entryDetails == null || entryDetails.isEmpty()) return;
+    
+    for (EntryDetailDTO detail : entryDetails) {
+      entryMapper.deleteEntryDetailsByLineNumber(detail);
     }
   }
 
@@ -230,16 +242,5 @@ public class EntryServiceImpl implements EntryService {
     }
     
     return entryDetails;
-  }
-
-  // 매입매출전표 상세 삭제
-  @Override
-  @Transactional(rollbackFor = Exception.class)
-  public void deletePurchaseSalesDetail(List<EntryDetailDTO> entryDetails) {
-    if (entryDetails == null || entryDetails.isEmpty()) return;
-    
-    for (EntryDetailDTO detail : entryDetails) {
-      entryMapper.deleteEntryDetailsByLineNumber(detail);
-    }
   }
 }

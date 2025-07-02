@@ -85,8 +85,7 @@
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h4 class="mb-0">매입매출전표</h4>
       <div>
-        <button class="btn btn-outline-primary btn-sm" onclick="alert('추가 기능이 비활성화되었습니다.')" title="추가 기능 비활성화됨">추가</button>
-        <button class="btn btn-outline-secondary btn-sm" onclick="alert('삭제 기능이 비활성화되었습니다.')" title="삭제 기능 비활성화됨">삭제</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="deleteSelectedRows()">삭제</button>
         <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">인쇄</button>
       </div>
     </div>
@@ -304,6 +303,108 @@
       } catch (error) {
         console.error('매입매출전표 저장 실패:', error);
         alert((isNew ? "신규 저장" : "수정") + " 실패: " + error.message);
+      }
+    }
+
+    // 선택된 행 삭제 함수
+    async function deleteSelectedRows() {
+      // 현재 포커스된 그리드를 결정합니다.
+      let focusedGridApi = null;
+      let gridType = '';
+
+      if (purchaseSalesGridApi && purchaseSalesGridApi.getSelectedRows().length > 0) {
+        focusedGridApi = purchaseSalesGridApi;
+        gridType = 'master';
+      } else if (detailGridApi && detailGridApi.getSelectedRows().length > 0) {
+        focusedGridApi = detailGridApi;
+        gridType = 'detail';
+      }
+
+      if (!focusedGridApi) {
+        alert('삭제할 행을 선택해주세요.');
+        return;
+      }
+
+      const selectedRows = focusedGridApi.getSelectedRows();
+      if (selectedRows.length === 0) {
+        alert('삭제할 행을 선택해주세요.');
+        return;
+      }
+
+      // 소계 행은 삭제 대상에서 제외
+      const dataRows = selectedRows.filter(row => !row.isSummary);
+      if (dataRows.length === 0) {
+        alert('데이터 행을 선택해주세요.');
+        return;
+      }
+
+      if (!confirm(`선택된 ${dataRows.length}개의 항목을 삭제하시겠습니까?`)) {
+        return;
+      }
+
+      try {
+        if (gridType === 'master') {
+          // 마스터 그리드 행 삭제
+          const masterData = dataRows.map(row => ({ entryNumber: row.entryNumber })).filter(item => item.entryNumber);
+          if (masterData.length === 0) {
+            // 실제 데이터가 아닌 빈 행만 선택된 경우
+            focusedGridApi.applyTransaction({ remove: dataRows });
+            return;
+          }
+
+          const response = await fetch(`/acc/enps/del`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(masterData)
+          });
+
+          if (!response.ok) {
+            throw new Error(`전표 삭제 실패: ${response.statusText}`);
+          }
+          
+          // 그리드에서 삭제된 행 제거
+          focusedGridApi.applyTransaction({ remove: dataRows });
+          // 상세 그리드 초기화
+          if (detailGridApi) {
+            detailGridApi.setGridOption('rowData', []);
+            currentDetailEntryNumber = null;
+          }
+          alert('선택한 전표가 삭제되었습니다.');
+
+        } else if (gridType === 'detail') {
+          // 상세 그리드 행 삭제
+          const detailData = dataRows.map(row => ({ 
+              entryNumber: row.entryNumber, 
+              lineNumber: row.lineNumber 
+          })).filter(item => item.lineNumber);
+
+          if (detailData.length === 0) {
+            // 실제 데이터가 아닌 빈 행만 선택된 경우
+            focusedGridApi.applyTransaction({ remove: dataRows });
+            return;
+          }
+
+          const response = await fetch(`/acc/enps/detail/del`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(detailData)
+          });
+
+          if (!response.ok) {
+            throw new Error(`상세 항목 삭제 실패: ${response.statusText}`);
+          }
+
+          // 그리드에서 삭제된 행 제거
+          focusedGridApi.applyTransaction({ remove: dataRows });
+          // 소계 재계산
+          if (selectedMaster && selectedMaster.entryNumber) {
+            addDetailSummaryRow(selectedMaster.entryNumber);
+          }
+          alert('선택한 상세항목이 삭제되었습니다.');
+        }
+      } catch (error) {
+        console.error('삭제 처리 중 오류 발생:', error);
+        alert('삭제 실패: ' + error.message);
       }
     }
 
@@ -888,6 +989,12 @@
           }
         }
       },
+      onRowSelected: (event) => {
+        // 행이 선택되었을 때만 다른 그리드의 선택을 해제합니다.
+        if (event.node.isSelected() && detailGridApi) {
+          detailGridApi.deselectAll();
+        }
+      },
       onCellFocused: (event) => {
         // 셀에 포커스가 맞춰질 때도 상세정보 표시 (단, 클릭이 아닌 키보드 이동 등의 경우만)
         if (event.rowIndex !== null && event.rowIndex >= 0) {
@@ -1330,6 +1437,39 @@
             debitAmount: node.data.debitAmount,
             creditAmount: node.data.creditAmount
           })));
+        }
+      },
+      onRowClicked: (event) => {
+        // 상세 그리드에서는 클릭해도 아무 작업 안함
+      },
+      onRowSelected: (event) => {
+        // 행이 선택되었을 때만 다른 그리드의 선택을 해제합니다.
+        if (event.node.isSelected() && purchaseSalesGridApi) {
+          purchaseSalesGridApi.deselectAll();
+        }
+      },
+      onCellFocused: (event) => {
+        // 셀에 포커스가 맞춰질 때도 상세정보 표시 (단, 클릭이 아닌 키보드 이동 등의 경우만)
+        if (event.rowIndex !== null && event.rowIndex >= 0) {
+          const rowNode = detailGridApi.getDisplayedRowAtIndex(event.rowIndex);
+          if (rowNode && rowNode.data) {
+            // 이미 같은 마스터가 선택되어 있으면 중복 호출 방지
+            if (selectedMaster && selectedMaster.entryNumber === rowNode.data.entryNumber) {
+              return;
+            }
+            
+            selectedMaster = rowNode.data;
+            if (rowNode.data.entryNumber) {
+              showDetailInfo(rowNode.data);
+            } else {
+              // 빈 행 포커스 시 상세정보 그리드 초기화
+              if (purchaseSalesGridApi) {
+                const current = [];
+                purchaseSalesGridApi.forEachNode(node => current.push(node.data));
+                purchaseSalesGridApi.applyTransaction({ remove: current });
+              }
+            }
+          }
         }
       },
       onCellKeyDown: (event) => {
