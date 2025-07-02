@@ -186,16 +186,16 @@
                     <!-- 비밀번호 / 입사일 -->
                     <div class="row mb-2">
                         <div class="col-md-6">
-                            <label for="empPassword" class="col-form-label fw-semibold text-dark">
+                            <label for="empPw" class="col-form-label fw-semibold text-dark">
                                 <i class="bi bi-key text-muted me-1"></i>비밀번호 <span class="text-danger">*</span>
                             </label>
-                            <input type="password" id="empPassword" name="empPw" class="form-control form-control">
+                            <input type="password" id="empPw" name="empPw" class="form-control form-control">
                         </div>
                         <div class="col-md-6">
-                            <label for="hireDate" class="col-form-label fw-semibold text-dark">
+                            <label for="empRegdate" class="col-form-label fw-semibold text-dark">
                                 <i class="bi bi-calendar text-muted me-1"></i>입사일 <span class="text-danger">*</span>
                             </label>
-                            <input type="date" id="hireDate" name="empRegdate" class="form-control form-control">
+                            <input type="date" id="empRegdate" name="empRegdate" class="form-control form-control">
                         </div>
                     </div>
                 
@@ -515,12 +515,12 @@
                         agGrid.createGrid(document.getElementById("userGrid"), userGridOptions);
                         console.log(res);
                     } else {
-                        alert("데이터를 불러오는데 실패했습니다.");
+                        Swal.fire('실패', res.head.res_result, 'success');
                     }
                 },
                 error: function(xhr, status, err) {
                     console.error(err);
-                    alert("서버 오류가 발생했습니다.");
+                    Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
                 }
             });
         }
@@ -528,37 +528,43 @@
         $("#modalBtn").on("click", function() {
 
             const userData = {
-                empIdx: $("#empIdx").val(),
-                empName: $("#empName").val(),
-                rrnPfx: $("#rrnPfx").val(),
-                rrnSfx: $("#rrnSfx").val(),
-                empEmail: $("#empEmail").val(),
-                empTel: $("#empTel").val(),
-                empPw: $("#empPw").val(),
-                empRegdate: $("#empRegdate").val(),
-                deptIdx: $("#deptIdx").val(),
-                empGrade: $("#empGrade").val(),
-                empRole: $("#empRole").val(),
-                empType: $("#empType").val(),
-                empAccount: $("#empAccount").val(),
-                empAddr: $("#empAddr").val(),
-                empAddrDetail: $("#empAddrDetail").val(),
-                empAddrZip: $("#empAddrZip").val()
+                employeeDTO: {
+                    empIdx: $("#empIdx").val(),
+                    empName: $("#empName").val(),
+                    rrnPfx: $("#rrnPfx").val(),
+                    rrnSfx: $("#rrnSfx").val(),
+                    empEmail: $("#empEmail").val(),
+                    empTel: $("#empTel").val(),
+                    empPw: $("#empPw").val(),
+                    empRegdate: $("#empRegdate").val(),
+                    deptIdx: $("#deptIdx").val(),
+                    empGrade: $("#empGrade").val(),
+                    empRole: $("#empRole").val(),
+                    empType: $("#empType").val(),
+                    empAccount: $("#empAccount").val(),
+                    empAddr: $("#empAddr").val(),
+                    empAddrDetail: $("#empAddrDetail").val(),
+                    empAddrZip: $("#empAddrZip").val()
+                }
             }
 
-            console.log(userData);
-
-            // $.ajax({
-            //     type: "POST",
-            //     url: "/mgr/api/user",
-            //     data: JSON.stringify(userData),
-            //     success: function(res) {
-
-            //     },
-            //     error: function(xhr, status, err) {
-            //         console.error(err);
-            //     },
-            // });
+            $.ajax({
+                type: "POST",
+                url: "/mgr/api/user",
+                data: JSON.stringify(userData),
+                contentType: "application/json",
+                success: function(res) {
+                    if(res.head.res_code === "200") {
+                        Swal.fire('성공', '성공적으로 등록되었습니다.', 'success');
+                    } else {
+                        Swal.fire('실패', res.head.res_result, 'success');
+                    }
+                },
+                error: function(xhr, status, err) {
+                    console.error(err);
+                    Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+                },
+            });
         });
 
         function addUser() {

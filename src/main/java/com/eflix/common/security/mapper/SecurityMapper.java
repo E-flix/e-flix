@@ -19,4 +19,6 @@ public interface SecurityMapper {
     public void passwordUpdate(String newPassword);
 
     public SecurityUserDTO findByUserId(String username);
+
+    public List<String> findCompanyRolesByCoIdx(String coIdx);
 }

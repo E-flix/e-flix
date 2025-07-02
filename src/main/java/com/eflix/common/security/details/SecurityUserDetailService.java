@@ -50,8 +50,10 @@ public class SecurityUserDetailService implements UserDetailsService {
 				SecurityEmpDTO securityEmpDTO = securityService.findEmpForLogin(coIdx, username);
 				if (securityEmpDTO == null) throw new UsernameNotFoundException("사원 정보 없음");
 
-				List<String> roleCodes = securityService.findRoleCodesByEmpIdx(securityEmpDTO.getEmpIdx());
-				return new SecurityUserDetails(securityEmpDTO, roleCodes);
+				// List<String> roleCodes = securityService.findRoleCodesByEmpIdx(securityEmpDTO.getEmpIdx());
+				List<String> coRoles = securityService.findCompanyRolesByCoIdx(coIdx);
+
+				return new SecurityUserDetails(securityEmpDTO, coRoles);
 			}
 			// 마스터 로그인
 			else {

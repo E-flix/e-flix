@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.RequestPart;
  */
 
 @RestController
-@RequestMapping("/erp/company")
+@RequestMapping("/company")
 public class CompnayRestController {
 
     @Autowired

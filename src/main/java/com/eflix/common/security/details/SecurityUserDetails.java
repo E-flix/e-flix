@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.eflix.common.security.dto.SecurityEmpDTO;
 import com.eflix.common.security.dto.SecurityMasterDTO;
 import com.eflix.common.security.dto.SecurityUserDTO;
-import com.eflix.common.security.dto.UserDTO;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +41,7 @@ public class SecurityUserDetails implements UserDetails {
 		this.securityEmpDTO = employee;
 		this.securityMasterDTO = null;
 		this.authorities = roleCodes.stream()
-			.map(code -> new SimpleGrantedAuthority("ROLE_" + code))
+			.map(code -> new SimpleGrantedAuthority(code))
 			.collect(Collectors.toList());
 			
 		log.info("사원 계정 - {}", this.securityEmpDTO);

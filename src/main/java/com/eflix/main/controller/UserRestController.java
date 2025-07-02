@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
-@RequestMapping("/erp/user")
+@RequestMapping("/user")
 public class UserRestController {
     
     @Autowired

@@ -45,4 +45,10 @@
         FROM users
         WHERE user_id = #{username}
     </select>
+
+    <select id="findCompanyRolesByCoIdx" resultType="string">
+        SELECT role_code
+        FROM erp_company_roles
+        WHERE co_idx = #{coIdx}
+  </select>
 </mapper>

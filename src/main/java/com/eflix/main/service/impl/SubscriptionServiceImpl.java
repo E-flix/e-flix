@@ -3,11 +3,13 @@ package com.eflix.main.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eflix.common.exception.CommonException;
 import com.eflix.main.dto.CompanyDTO;
+import com.eflix.main.dto.CompanyRoleDTO;
 import com.eflix.main.dto.MasterDTO;
 import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.SubscriptionDTO;
@@ -17,10 +19,14 @@ import com.eflix.main.dto.etc.InvoiceDTO;
 import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 import com.eflix.main.mapper.CompanyMapper;
+import com.eflix.main.mapper.CompanyRoleMapper;
 import com.eflix.main.mapper.MasterMapper;
 import com.eflix.main.mapper.SubscriptionMapper;
 import com.eflix.main.service.SubscriptionService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class SubscriptionServiceImpl implements SubscriptionService {
 
@@ -32,6 +38,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Autowired
     private MasterMapper masterMapper;
+
+    @Autowired
+    private CompanyRoleMapper companyRoleMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public SubscriptionPackageDTO findById(String spkIdx) {
@@ -46,13 +58,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO, MasterDTO masterDTO) {
-
-        int activeSubscription = subscriptionMapper.findActiveSubscriptionByCoIdx(subscriptionDTO.getCoIdx());
+        
+        int activeSubscription = 0;
+        try {
+            activeSubscription = subscriptionMapper.findActiveSubscriptionByCoIdx(subscriptionDTO.getCoIdx());
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            e.printStackTrace();
+        }
 
         if(activeSubscription > 0) {
             throw new CommonException("이미 구독 중입니다.");
         }
-
         subscriptionDTO.setSpiStatus("SS01");
 
         if(subscriptionMapper.insertSubscription(subscriptionDTO) <= 0) {
@@ -68,12 +85,28 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if(subscriptionMapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO) <= 0) {
                 throw new CommonException("구독 모듈 저장 실패: " + moduleIdx);
             }
+
+            CompanyRoleDTO companyRoleDTO = new CompanyRoleDTO();
+            companyRoleDTO.setCoIdx(subscriptionDTO.getCoIdx());
+            if(moduleIdx.equals("mou-101")) {
+                companyRoleDTO.setRoleCode("ROLE_HR");
+            } else if(moduleIdx.equals("mou-102")) {
+                companyRoleDTO.setRoleCode("ROLE_ACC");
+            } else if (moduleIdx.equals("mou-103")) {
+                companyRoleDTO.setRoleCode("ROLE_PURCHS");
+            } else if (moduleIdx.equals("mou-104")) {
+                companyRoleDTO.setRoleCode("ROLE_BNZ");
+            }
+            if(companyRoleMapper.insertCompanyRoleByCoIdx(companyRoleDTO) <= 0) {
+                throw new CommonException("회사 권한 저장 실패: " + companyRoleDTO);
+            }
         }
+
+        masterDTO.setMstPw(passwordEncoder.encode(masterDTO.getMstPw()));
 
         if(masterMapper.insertMaster(masterDTO) <= 0) {
             throw new CommonException("마스터 계정을 등록하지 못했습니다.");
         }
-        
         return 1;
     }
 

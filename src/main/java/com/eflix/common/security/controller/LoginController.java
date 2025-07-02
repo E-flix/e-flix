@@ -1,18 +1,9 @@
 package com.eflix.common.security.controller;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,14 +17,9 @@ import com.eflix.acc.controller.AccAccountController;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
-import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.common.security.dto.UserDTO;
 import com.eflix.common.security.mapper.SecurityMapper;
 import com.eflix.main.service.UserService;
-
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 /**
  * <p>

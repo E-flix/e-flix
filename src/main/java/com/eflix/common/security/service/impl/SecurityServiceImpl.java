@@ -36,5 +36,10 @@ public class SecurityServiceImpl implements SecurityService {
     public SecurityUserDTO findByUserId(String username) {
         return securityMapper.findByUserId(username);
     }
+
+    @Override
+    public List<String> findCompanyRolesByCoIdx(String coIdx) {
+        return securityMapper.findCompanyRolesByCoIdx(coIdx);
+    }
     
 }

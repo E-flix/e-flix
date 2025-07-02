@@ -15,9 +15,9 @@ public class MgrController {
         return "mgr/user";
     }
 
-    @GetMapping("/role")
+    @GetMapping("/srv")
     public String getRole() {
-        return "mgr/role";
+        return "mgr/srv";
     }
     
     

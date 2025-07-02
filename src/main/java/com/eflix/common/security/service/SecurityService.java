@@ -14,4 +14,7 @@ public interface SecurityService {
     public SecurityMasterDTO findMasterForLogin(String coIdx, String username);
 
     public SecurityUserDTO findByUserId(String username);
+
+    // 회사가 구매한 모듈 ERP 권한 목록
+    public List<String> findCompanyRolesByCoIdx(String coIdx);
 }

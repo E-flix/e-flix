@@ -33,7 +33,11 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 
         // 커스텀 정보를 RequestContext에 저장
         request.setAttribute("co_idx", coIdx);
-        request.setAttribute("masterChecked", masterCheck);
+        if(masterCheck != null) {
+            request.setAttribute("masterChecked", masterCheck);
+        } else {
+            request.setAttribute("masterChecked", "off");
+        }
 
         setDetails(request, authRequest);
         return this.getAuthenticationManager().authenticate(authRequest);

@@ -222,7 +222,7 @@
                                             // 체크되었을 때 AJAX로 가입자 정보 가져오기
                                             $.ajax({
                                                 type: 'GET',
-                                                url: `/erp/company/find?userIdx=${userIdx}`,
+                                                url: `/company/find?userIdx=${userIdx}`,
                                                 success: function (res) {
                                                     const data = res.body;
                                                     if(res.head.res_code === "200") {
@@ -1146,7 +1146,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "/erp/contract",
+                    url: "/subscription/contract",
                     data: JSON.stringify(contractData),
                     contentType: "application/json",
                     success: function(res) {
@@ -1190,7 +1190,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "/erp/subscription",
+                    url: "/subscription/insert",
                     data: JSON.stringify(subMasterData),
                     contentType: "application/json",
                     success: function(res) {
