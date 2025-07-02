@@ -32,7 +32,6 @@
       DELIVERY_DT,
       EXPECTED_PAYMENT_DT,
       PAYMENT_TERMS,
-      TAX_INVOICE_ISSUE_YN,
       CUSTOMER_CD
     FROM ORDERS
     ORDER BY ORDER_DT DESC
@@ -50,7 +49,6 @@
     , DELIVERY_DT
     , EXPECTED_PAYMENT_DT
     , PAYMENT_TERMS
-    , TAX_INVOICE_ISSUE_YN
     , CUSTOMER_CD
     )
     VALUES
@@ -63,7 +61,6 @@
     , #{deliveryDt}
     , #{expectedPaymentDt}
     , #{paymentTerms}
-    , #{taxInvoiceYn}
     , #{customerCd}
     )
   </insert>

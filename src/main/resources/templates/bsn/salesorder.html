@@ -122,6 +122,7 @@
     <div class="row gx-3 mb-3">
       <!-- 주문 헤더 -->
       <!-- 주문 헤더 -->
+      <!-- 주문 헤더 -->
       <div class="col-lg-8 col-md-7">
         <div class="section-box">
           <h6>주문서 헤더</h6>
@@ -142,7 +143,17 @@
                 </tr>
                 <tr>
                   <th class="bg-cell">거래처</th>
-                  <td><input th:field="*{customerCd}" class="form-control form-control-sm customer-cd"></td>
+                  <td>
+                    <div class="position-relative">
+                      <input th:field="*{customerCd}" 
+                            class="form-control form-control-sm customer-cd" 
+                            placeholder="거래처코드 입력"
+                            autocomplete="off">
+                      <div class="customer-search-results position-absolute w-100 bg-white border rounded shadow-sm" 
+                          style="display:none; z-index: 1000; max-height: 200px; overflow-y: auto;">
+                      </div>
+                    </div>
+                  </td>
                   <th class="bg-cell">거래처 대표명</th>
                   <td><input id="customerRepresentative" class="form-control form-control-sm" readonly></td>
                 </tr>
@@ -195,14 +206,7 @@
                 </tr>
                 <tr>
                   <th class="bg-cell">결제조건</th>
-                  <td><input th:field="*{paymentTerms}" class="form-control form-control-sm"></td>
-                  <th class="bg-cell">세금계산서 발행</th>
-                  <td>
-                    <select th:field="*{taxInvoiceYn}" class="form-select form-select-sm">
-                      <option value="Y">예</option>
-                      <option value="N">아니오</option>
-                    </select>
-                  </td>
+                  <td colspan="3"><input th:field="*{paymentTerms}" class="form-control form-control-sm"></td>
                 </tr>
               </tbody>
             </table>
@@ -238,7 +242,11 @@
                   <td><input th:value="${credit.creditStatus}" class="form-control form-control-sm" readonly></td>
                 </tr>
                 <tr>
-                  <th class="bg-cell">보류여부</th>
+                  <th class="big-cell">거래정지여부</th>
+                  <td><input class="form-control form-control-sm" readonly></td>
+                </tr>
+                <tr>
+                  <th class="bg-cell">여신보류여부</th>
                   <td><input th:value="${credit.creditHoldFlg}" class="form-control form-control-sm" readonly></td>
                 </tr>
                 <tr>
