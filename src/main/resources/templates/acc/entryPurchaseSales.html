@@ -1737,8 +1737,8 @@
                 if (responseText.trim()) {
                   try {
                     const account = JSON.parse(responseText);
-                    if (account && account.account_name) {
-                      event.node.setDataValue('accountName', account.account_name);
+                    if (account && account.accountName) {
+                      event.node.setDataValue('accountName', account.accountName);
                       
                       // 그리드 셀 새로고침으로 화면 업데이트 확실히 하기
                       setTimeout(() => {

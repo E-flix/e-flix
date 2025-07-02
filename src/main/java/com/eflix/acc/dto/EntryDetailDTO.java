@@ -27,6 +27,7 @@ public class EntryDetailDTO {
   private String description;
   private Date createdAt;
   private Date updatedAt;
+  private String coIdx;
 
   private String accountName; // 계정과목명
   private String majorCategory; // 계정과목 대분류

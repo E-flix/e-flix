@@ -495,8 +495,8 @@
       headerHeight: 35,
       rowHeight: 35,
       columnDefs: [
-        { headerName: "코드", field: "account_code", sortable: true, filter: true },
-        { headerName: "계정과목명", field: "account_name", sortable: true, filter: true }
+        { headerName: "코드", field: "accountCode", sortable: true, filter: true },
+        { headerName: "계정과목명", field: "accountName", sortable: true, filter: true }
       ],
       rowSelection: 'single',
       defaultColDef: {
@@ -510,7 +510,7 @@
         loadAccountData();
       },
       onRowDoubleClicked: (event) => {
-        selectAccount(event.data.account_code, event.data.account_name);
+        selectAccount(event.data.accountCode, event.data.accountName);
       }
     };
 
@@ -674,8 +674,8 @@
       fetch('/acc/act/' + code)
         .then(res => res.ok ? res.json() : Promise.reject())
         .then(data => {
-          if (data && data.account_name) {
-            $('#accountName').val(data.account_name);
+          if (data && data.accountName) {
+            $('#accountName').val(data.accountName);
             lastValidAccountCode = code; // 유효값 저장
           } else {
             throw new Error('Invalid account code');
@@ -689,7 +689,7 @@
             fetch('/acc/act/' + lastValidAccountCode)
               .then(res => res.ok ? res.json() : null)
               .then(data2 => {
-                $('#accountName').val(data2 && data2.account_name ? data2.account_name : '');
+                $('#accountName').val(data2 && data2.accountName ? data2.accountName : '');
               });
           } else {
             $('#accountCode').val('');

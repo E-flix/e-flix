@@ -15,7 +15,7 @@ import com.eflix.acc.dto.EntryMasterDTO;
 =============================================== */
 public interface EntryMapper {
   // 전표 전체조회
-  public List<EntryMasterDTO> getList();
+  public List<EntryMasterDTO> getList(String coIdx);
 
   // insert
   public int insertEntryMaster(EntryMasterDTO entryMaster);
@@ -26,22 +26,22 @@ public interface EntryMapper {
   public int updateEntryDetail(EntryDetailDTO entryDetail);
 
   // delete
+  public int deleteEntryDetailsByEntryNumber(EntryDetailDTO entryDetail);
   public int deleteEntryDetailsByLineNumber(EntryDetailDTO entryDetail);
-  public int deleteEntryDetailsByEntryNumber(int entryNumber);
-  public int deleteEntryMasterByEntryNumber(int entryNumber);
+  public int deleteEntryMasterByEntryNumber(EntryMasterDTO entryMaster);
   // EntryDetail 갯수 => master 삭제할때 Detail < count 1이면 삭제해야 함
-  public int selectCountDetailByEntryNumber(int entryNumber);
+  public int selectCountDetailByEntryNumber(EntryDetailDTO entryDetail);
 
   // select max+1 entry_number
-  public int selectMaxPlusOneEntryNumber();
+  public int selectMaxPlusOneEntryNumber(String coIdx);
   // select max+1 line_number
-  public int selectMaxPlusOneLineNumber(int entryNumber);
+  public int selectMaxPlusOneLineNumber(EntryDetailDTO entryDetail);
 
   // ========= 아래부터 매입매출전표 ==========
   // master 전표 조회
-  public List<EntryMasterDTO> getPSMasterList();
+  public List<EntryMasterDTO> getPSMasterList(String coIdx);
   // detail 전표 조회 
-  public List<EntryDetailDTO> getPSDetailList(int entryNumber);
+  public List<EntryDetailDTO> getPSDetailList(EntryDetailDTO entryDetail);
   // 매입매출전표용 전표번호 조회 (max+1)
-  public int selectMaxPlusOneEntryNumberPS();
+  public int selectMaxPlusOneEntryNumberPS(String coIdx);
 }
