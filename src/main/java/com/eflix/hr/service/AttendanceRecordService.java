@@ -13,9 +13,14 @@ import java.util.List;
 import com.eflix.hr.dto.AttendanceRecordDTO;
 
 public interface AttendanceRecordService {
-    public List<AttendanceRecordDTO> getAllAttendanceRecords();
-    public AttendanceRecordDTO getAttendanceRecordById(String attdIdx);
+    // 근태 전체조회
+    public List<AttendanceRecordDTO> getAllRecords();
+    
+    // 근태 상세조회
+    public List<AttendanceRecordDTO> getRecordsByEmpId(String string);
+    
     int createAttendanceRecord(AttendanceRecordDTO dto);
     int updateAttendanceRecord(AttendanceRecordDTO dto);
     int deleteAttendanceRecord(String attdIdx);
+
 }

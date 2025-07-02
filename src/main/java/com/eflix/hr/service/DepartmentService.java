@@ -24,6 +24,6 @@ public interface DepartmentService {
     public List<DepartmentDTO> findAllDepts();
     public List<DepartmentDTO> findAllDeptsUP(String deptIdx);
     
-    // // 부서등록
+    // 부서등록
     public int insertDept(DepartmentDTO dept);
 }

@@ -8,11 +8,14 @@
 ============================================ */
 package com.eflix.hr.service.impl;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.eflix.common.security.auth.AuthContext;
 import com.eflix.hr.dto.AttendanceRecordDTO;
 import com.eflix.hr.mapper.AttendanceRecordMapper;
 import com.eflix.hr.service.AttendanceRecordService;
@@ -22,16 +25,28 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
 
   @Autowired
   AttendanceRecordMapper attendanceRecordsMapper;
+  
 
-  // @Override
-  // public List<AttendanceRecordDTO> getAllAttendanceRecord(String attdIdxx) {
-  //   throw new UnsupportedOperationException("Unimplemented method 'getAttendanceRecordById'");
-  // }
+    @Autowired
+    AuthContext authContext;
+
+  // 근태 전체조회
+  @Override
+  public List<AttendanceRecordDTO> getAllRecords() {
+    return getAllRecords();
+  }
 
   @Override
-  public AttendanceRecordDTO getAttendanceRecordById(String attdIdx) {
-    throw new UnsupportedOperationException("Unimplemented method 'getAttendanceRecordById'");
+  public List<AttendanceRecordDTO> getRecordsByEmpId(String empIdx) {
+  AttendanceRecordDTO dto = new AttendanceRecordDTO();
+    dto.setEmpIdx(empIdx);;
+    dto.setCoIdx(authContext.getCoIdx());
+
+    dto.setAttdStart("2025-01-01");
+    dto.setAttdEnd(  "2025-06-30");
+    return attendanceRecordsMapper.getRecordsByEmpId(dto);
   }
+
 
   @Override
   public int createAttendanceRecord(AttendanceRecordDTO dto) {
@@ -46,11 +61,6 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
   @Override
   public int deleteAttendanceRecord(String attdIdx) {
     throw new UnsupportedOperationException("Unimplemented method 'deleteAttendanceRecord'");
-  }
-
-  @Override
-  public List<AttendanceRecordDTO> getAllAttendanceRecords() {
-    throw new UnsupportedOperationException("Unimplemented method 'getAllAttendanceRecords'");
   }
 
 }
