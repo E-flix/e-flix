@@ -35,6 +35,7 @@ public class EntryMasterDTO {
   private int totalSupplyAmount;
   private int totalTaxAmount;
   private String remarks;
+  private String coIdx;
   
   private List<EntryDetailDTO> details;
   private String partnerName; // 거래처명

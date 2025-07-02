@@ -23,6 +23,7 @@
     <result property="description" column="description" />
     <result property="createdAt" column="created_at" />
     <result property="updatedAt" column="updated_at" />
+    <result property="coIdx" column="co_idx" />
     
     <result property="accountName" column="account_name"/>
     <result property="businessNumber" column="business_number"/>
@@ -52,13 +53,14 @@
     <result property="totalSupplyAmount" column="total_supply_amount" />
     <result property="totalTaxAmount" column="total_tax_amount" />
     <result property="remarks" column="remarks" />
+    <result property="coIdx" column="co_idx" />
     <!-- 디테일 부분 컬렉션 매핑 => 하위 컬렉션 매핑 (1:N 관계) 
      ofType == collection에서 리스트 안에 들어가는 객체의 타입을 알려주는 속성 -->
     <collection property="details" ofType="com.eflix.acc.dto.EntryDetailDTO" resultMap="entryDetailResultMap" />
   </resultMap>
 
   <!-- 전표 전체 조회 => 마스터 + 디테일 전체 조회 -->
-  <select id="getList" resultMap="entryMasterResultMap"> 
+  <select id="getList" parameterType="String" resultMap="entryMasterResultMap"> 
     SELECT 
       m.entry_number, 
       m.entry_type,
@@ -90,6 +92,7 @@
       a.account_name
     FROM entry_master m LEFT JOIN entry_detail d ON m.entry_number = d.entry_number 
     LEFT JOIN account a ON d.account_code = a.account_code
+    WHERE m.co_idx = #{coIdx}
     ORDER BY m.entry_number
   </select>
 
@@ -113,6 +116,7 @@
       total_supply_amount,
       total_tax_amount, 
       remarks,
+      co_idx,
       ledger_check)
     VALUES
     (
@@ -133,6 +137,7 @@
       #{totalSupplyAmount},
       #{totalTaxAmount}, 
       #{remarks},
+      #{coIdx},
       'a1')
   </insert>
 
@@ -148,7 +153,8 @@
       amount, 
       description, 
       created_at, 
-      updated_at)
+      updated_at,
+      co_idx)
     VALUES ( 
       #{lineNumber}, 
       #{entryNumber}, 
@@ -159,7 +165,8 @@
       #{amount}, 
       #{description}, 
       #{createdAt}, 
-      #{updatedAt})
+      #{updatedAt},
+      #{coIdx})
   </insert>
 
   <!-- EntryMaster Update -->
@@ -181,6 +188,7 @@
         total_tax_amount = #{totalTaxAmount},
         remarks = #{remarks}
     WHERE entry_number = #{entryNumber}
+    AND co_idx = #{coIdx}
   </update>
 
   <!-- EntryDetail Update -->
@@ -193,13 +201,16 @@
         amount = #{amount},
         description = #{description},
         updated_at = #{updatedAt}
-    WHERE entry_number = #{entryNumber} AND line_number = #{lineNumber}
+    WHERE entry_number = #{entryNumber} 
+    AND line_number = #{lineNumber}
+    AND co_idx = #{coIdx}
   </update>
 
   <!-- EntryDetail Delete by EntryNumber -->
-  <delete id="deleteEntryDetailsByEntryNumber" parameterType="int">
+  <delete id="deleteEntryDetailsByEntryNumber" parameterType="com.eflix.acc.dto.EntryDetailDTO">
     DELETE FROM entry_detail 
     WHERE entry_number = #{entryNumber}
+    AND co_idx = #{coIdx}
   </delete>
 
   <!-- EntryDetail Delete by LineNumber -->
@@ -207,36 +218,43 @@
     DELETE FROM entry_detail 
     WHERE entry_number = #{entryNumber}
     AND line_number = #{lineNumber}
+    AND co_idx = #{coIdx}
   </delete>
 
   <!-- EntryMaster Delete -->
-  <delete id="deleteEntryMasterByEntryNumber" parameterType="int">
+  <delete id="deleteEntryMasterByEntryNumber" parameterType="com.eflix.acc.dto.EntryMasterDTO">
     DELETE FROM entry_master 
     WHERE entry_number = #{entryNumber}
+    AND co_idx = #{coIdx}
   </delete>
 
   <!-- EntryDetail 갯수 => master 삭제할때 Detail < count 1이면 삭제해야 함-->
-  <select id="selectCountDetailByEntryNumber" parameterType="int">
+  <select id="selectCountDetailByEntryNumber" parameterType="com.eflix.acc.dto.EntryDetailDTO">
     SELECT COUNT(*) 
     FROM entry_detail
     WHERE entry_number = #{entryNumber}
+    AND co_idx = #{coIdx}
   </select>
 
   <!-- select max+1 entry_number -->
-  <select id="selectMaxPlusOneEntryNumber" resultType="int">
-    SELECT COALESCE(MAX(entry_number)+1, 1) AS enNo FROM entry_master WHERE entry_type = '일반'
+  <select id="selectMaxPlusOneEntryNumber" parameterType="String" resultType="int">
+    SELECT COALESCE(MAX(entry_number)+1, 1) AS enNo 
+    FROM entry_master 
+    WHERE entry_type = '일반'
+    AND co_idx = #{coIdx}
   </select>
 
   <!-- select max+1 line_number -->
-  <select id="selectMaxPlusOneLineNumber" resultType="int" parameterType="int">
+  <select id="selectMaxPlusOneLineNumber" resultType="int" parameterType="com.eflix.acc.dto.EntryDetailDTO">
     SELECT COALESCE(MAX(line_number)+1, 1) AS lineNo 
     FROM entry_detail
     WHERE entry_number = #{entry_number}
+    AND co_idx = #{coIdx}
   </select>
 
 <!-- ======================== 아래부터 매입매출전표 =======================-->
   <!-- master 전표 조회 -->
-  <select id="getPSMasterList" resultMap="entryMasterResultMap">
+  <select id="getPSMasterList" resultMap="entryMasterResultMap" parameterType="String">
     SELECT 
       m.entry_number, 
       m.entry_type,
@@ -260,10 +278,11 @@
       p.partner_name
     FROM entry_master m LEFT OUTER JOIN partner_detail p ON m.partner_code = p.partner_code
     WHERE m.transaction_type != '63'
+    AND m.co_idx = #{coIdx}
     ORDER BY entry_date
   </select>
   <!-- detail 전표 조회 -->
-  <select id="getPSDetailList" resultMap="entryDetailResultMap">
+  <select id="getPSDetailList" parameterType="com.eflix.acc.dto.EntryDetailDTO" resultMap="entryDetailResultMap">
     SELECT 
       d.line_number, 
       d.entry_number AS d_entry_number, 
@@ -279,10 +298,13 @@
     FROM entry_detail d
     LEFT JOIN account a ON d.account_code = a.account_code
     WHERE d.entry_number = #{entryNumber}
+    AND d.co_idx = #{coIdx}
     ORDER BY d.line_number
   </select>
   <!-- select max+1 entry_number -->
-  <select id="selectMaxPlusOneEntryNumberPS" resultType="int">
-    SELECT COALESCE(MAX(entry_number)+1, 50001) AS enNo FROM entry_master
+  <select id="selectMaxPlusOneEntryNumberPS" resultType="int" parameterType="String">
+    SELECT COALESCE(MAX(entry_number)+1, 50001) AS enNo 
+    FROM entry_master
+    WHERE co_idx = #{coIdx}
   </select>
 </mapper>

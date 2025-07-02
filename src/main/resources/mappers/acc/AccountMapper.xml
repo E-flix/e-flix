@@ -10,7 +10,7 @@
 =============================================== -->
 <mapper namespace="com.eflix.acc.mapper.AccountMapper">
 	<!-- 계정과목 전체조회 -->
-	<select id="getList" resultType="com.eflix.acc.dto.AccountDTO">
+	<select id="getList" parameterType="String" resultType="com.eflix.acc.dto.AccountDTO">
 		SELECT
 			account_code,
 			account_name,
@@ -26,14 +26,17 @@
 			remarks
 		FROM
 			account
+		WHERE 
+			co_idx = #{coIdx}
 		ORDER BY
 			account_code
 	</select>
 
 	<!-- 계정과목 코드로 계정과목 조회 -->
-  <select id="getListByCode" parameterType="int" resultType="com.eflix.acc.dto.AccountDTO">
+  <select id="getListByCode" parameterType="com.eflix.acc.dto.AccountDTO" resultType="com.eflix.acc.dto.AccountDTO">
     SELECT * 
     FROM account 
     WHERE account_code = #{accountCode} 
+		AND co_idx = #{coIdx}
   </select>
 </mapper>

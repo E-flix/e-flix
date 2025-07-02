@@ -1,7 +1,6 @@
 package com.eflix.acc.mapper;
 
 import java.util.List;
-import org.apache.ibatis.annotations.Param;
 import com.eflix.acc.dto.AccountDTO;
 
 /* ============================================
@@ -15,7 +14,7 @@ import com.eflix.acc.dto.AccountDTO;
 =============================================== */
 public interface AccountMapper {
   // 계정과목 전체조회
-  public List<AccountDTO> getList();
+  public List<AccountDTO> getList(String coIdx);
   // 계정과목 코드로 계정과목 조회
-  AccountDTO getListByCode(@Param("accountCode") int accountCode);
+  AccountDTO getListByCode(AccountDTO accountDTO);
 }

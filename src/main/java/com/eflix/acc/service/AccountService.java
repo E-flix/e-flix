@@ -1,7 +1,6 @@
 package com.eflix.acc.service;
 
 import java.util.List;
-import org.apache.ibatis.annotations.Param;
 import com.eflix.acc.dto.AccountDTO;
 
 /* ============================================
@@ -17,5 +16,5 @@ public interface AccountService {
 	// 계정과목 전체조회
   public List<AccountDTO> getList();
   // 계정과목 코드로 계정과목 조회
-  AccountDTO getListByCode(@Param("accountCode") int accountCode);
+  AccountDTO getListByCode(AccountDTO accountDTO);
 }

@@ -779,9 +779,9 @@
               const response = await fetch(`/acc/act/${accountCode}`);
               if (response.ok) {
                 const account = await response.json();
-                if (account?.account_name) {
+                if (account?.accountName) {
                   // 데이터 직접 설정 후 강제 업데이트
-                  params.node.setDataValue('accountName', account.account_name);
+                  params.node.setDataValue('accountName', account.accountName);
                 } else {
                   params.node.setDataValue('accountName', '');
                   alert("해당 계정과목을 찾을 수 없습니다.");
@@ -1244,8 +1244,8 @@
       headerHeight: 35,
       rowHeight: 35,
       columnDefs: [
-        { headerName: "코드", field: "account_code", sortable: true, filter: true },
-        { headerName: "계정과목명", field: "account_name", sortable: true, filter: true }
+        { headerName: "코드", field: "accountCode", sortable: true, filter: true },
+        { headerName: "계정과목명", field: "accountName", sortable: true, filter: true }
       ],
       rowSelection: { mode: 'singleRow' },
       defaultColDef: {
@@ -1254,7 +1254,7 @@
         resizable: true,
       },
       onRowDoubleClicked: (event) => {
-        selectAccount(event.data.account_code, event.data.account_name);
+        selectAccount(event.data.accountCode, event.data.accountName);
       }
     };
     // 계정과목 모달 열기
