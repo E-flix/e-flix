@@ -13,9 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import com.eflix.common.security.details.SecurityUserDetailService;
+import com.eflix.common.security.filter.CustomUsernamePasswordAuthenticationFilter;
 import com.eflix.common.security.handler.CustomAuthenticationEntryPoint;
 import com.eflix.common.security.handler.CustomLoginSuccessHandler;
 import com.eflix.common.security.handler.CustomLogoutSuccessHandler;
@@ -82,20 +84,22 @@ public class SecurityConfig {
 	public SecurityFilterChain erpSecurityFilterChain(HttpSecurity http) throws Exception {
 		http.securityMatcher("/**")
 				.authorizeHttpRequests(auth -> auth
-					.requestMatchers("/", "/erp", "/signup", "/inquiry/**", "/main/error/**", "/main/assets/**", "/main/css/**", "/main/js/**", "/bootstrap/**", "/common/**",
-						"/bootstrap/**", "/img/**",
-					"/login", "/erp/login", "/hr/**", "/acc/**", "/bsn/**", "/purchs/**", "/**").permitAll()
+					.requestMatchers("/", "/signup", "/inquiry/**", "/main/error/**", "/main/assets/**", "/main/css/**", "/main/js/**", "/bootstrap/**", "/common/**", "/bootstrap/**", "/img/**"
+					, "/erp/login").permitAll()
+					// , "/login", "/erp/login", "/hr/**", "/acc/**", "/bsn/**", "/purchs/**", "/**").permitAll()
 					// .requestMatchers("/hr/**").hasRole("HR")
 					// .requestMatchers("/bnz/**").hasRole("BNZ")
 					// .requestMatchers("/purchs/**").hasRole("PURCHS")
 					// .requestMatchers("/acc/**").hasRole("ACC")
+					.requestMatchers("/admin/**").hasRole("USER")
 					.requestMatchers("/erp/**").authenticated()
 					.requestMatchers("/**").authenticated())
+			.addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 			.formLogin(form -> form
 				.loginProcessingUrl("/login")
 				// .loginPage("/")
-				.usernameParameter("user_id")
-				.passwordParameter("user_pw")
+				.usernameParameter("username")
+				.passwordParameter("password")
 				.successHandler(authenticationSuccessHandler())
 				.permitAll())
 			// .rememberMe(remember -> remember
@@ -115,6 +119,14 @@ public class SecurityConfig {
 				.authenticationEntryPoint(authenticationEntryPoint()));
 
 		return http.build();
+	}
+
+	@Bean
+	public CustomUsernamePasswordAuthenticationFilter customAuthenticationFilter() throws Exception {
+		CustomUsernamePasswordAuthenticationFilter filter = new CustomUsernamePasswordAuthenticationFilter();
+		filter.setAuthenticationManager(authenticationManager());
+		filter.setAuthenticationSuccessHandler(authenticationSuccessHandler());
+		return filter;
 	}
 
 	@Bean

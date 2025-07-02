@@ -104,72 +104,62 @@ public class LoginController {
     }
     
 
-    @PostMapping("/erp/login")
-    @ResponseBody
-    public ResponseEntity<ResResult> erpLogin(@RequestBody Map<String, String> loginData, HttpServletRequest request) {
-        ResResult result = null;
+    // @PostMapping("/erp/login")
+    // @ResponseBody
+    // public ResponseEntity<ResResult> erpLogin(@RequestBody Map<String, String> loginData, HttpServletRequest request) {
+    //     ResResult result = null;
 
-        String username = loginData.get("username");
-        String password = loginData.get("password");
-        String coIdx = loginData.get("co_idx");
-        String masterChecked = loginData.get("masterCheck");
+    //     String username = loginData.get("username");
+    //     String password = loginData.get("password");
+    //     String coIdx = loginData.get("co_idx");
+    //     String masterChecked = loginData.get("masterCheck");
 
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(username, password);
+    //     UsernamePasswordAuthenticationToken token =
+    //             new UsernamePasswordAuthenticationToken(username, password);
 
-        try {
-            request.setAttribute("co_idx", coIdx);
-            request.setAttribute("masterChecked", masterChecked);
+    //     try {
+    //         request.setAttribute("co_idx", coIdx);
+    //         request.setAttribute("masterChecked", masterChecked);
 
-            Authentication authResult = authenticationManager.authenticate(token);
-            SecurityContextHolder.getContext().setAuthentication(authResult);
+    //         Authentication authResult = authenticationManager.authenticate(token);
+    //         SecurityContextHolder.getContext().setAuthentication(authResult);
 
-            // Principal 객체 확인
-            Object principal = authResult.getPrincipal();
-            log.info("Principal: {}", principal);
+    //         // Principal 객체 확인
+    //         Object principal = authResult.getPrincipal();
+    //         log.info("Principal: {}", principal);
 
-            // 권한 확인
-            Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
-            log.info("권한 목록: {}", authorities);
-            log.info("인증 여부: {}", authResult.isAuthenticated());
-            log.info("전체 Authentication: {}", authResult);
+    //         // 권한 확인
+    //         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
+    //         log.info("권한 목록: {}", authorities);
+    //         log.info("인증 여부: {}", authResult.isAuthenticated());
+    //         log.info("전체 Authentication: {}", authResult);
 
-            SecurityUserDetails userDetails = (SecurityUserDetails) authResult.getPrincipal();
+    //         SecurityUserDetails userDetails = (SecurityUserDetails) authResult.getPrincipal();
 
-            log.info("로그인된 사용자 ID: {}", userDetails.getUsername());
-            log.info("권한 목록: {}", userDetails.getAuthorities());
-            log.info("마스터 여부: {}", userDetails.getSecurityMasterDTO() != null);
-            log.info("사원 여부: {}", userDetails.getSecurityEmpDTO() != null);
-            log.info("메인 사용자 여부: {}", userDetails.getUserDTO() != null);
-            log.info("전체 정보: {}", userDetails);
+    //         log.info("로그인된 사용자 ID: {}", userDetails.getUsername());
+    //         log.info("권한 목록: {}", userDetails.getAuthorities());
+    //         log.info("마스터 여부: {}", userDetails.getSecurityMasterDTO() != null);
+    //         log.info("사원 여부: {}", userDetails.getSecurityEmpDTO() != null);
+    //         log.info("메인 사용자 여부: {}", userDetails.getUserDTO() != null);
+    //         log.info("전체 정보: {}", userDetails);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("username", userDetails.getUsername());
-            response.put("role", userDetails.getAuthorities());
-            response.put("redirectUrl", userDetails.getSecurityMasterDTO() != null ? "/erp" :
-                                        userDetails.getSecurityEmpDTO() != null ? "/erp" : "/");
+    //         Map<String, Object> response = new HashMap<>();
+    //         response.put("username", userDetails.getUsername());
+    //         response.put("role", userDetails.getAuthorities());
+    //         response.put("redirectUrl", userDetails.getSecurityMasterDTO() != null ? "/erp" :
+    //                                     userDetails.getSecurityEmpDTO() != null ? "/erp" : "/");
 
-            result = ResUtil.makeResult(ResStatus.OK, response);
+    //         result = ResUtil.makeResult(ResStatus.OK, response);
 
-            return new ResponseEntity<>(result, HttpStatus.OK);
+    //         return new ResponseEntity<>(result, HttpStatus.OK);
 
-        } catch (BadCredentialsException e) {
-            result = ResUtil.makeResult("401", "아이디 또는 비밀번호 오류", e.getMessage());
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } catch (Exception e) {
-            result = ResUtil.makeResult("500", "서버 오류", e.getMessage());
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        }
-    }
-    
-    
-    // @PostMapping("path")
-    // public String postMethodName(@RequestParam String company, @RequestParam String user_id, @RequestParam String user_pw, HttpServletRequest request) {
-    //     //TODO: process POST request
-
-    //     request.getS
-        
-    //     return entity;
+    //     } catch (BadCredentialsException e) {
+    //         result = ResUtil.makeResult("401", "아이디 또는 비밀번호 오류", e.getMessage());
+    //         return new ResponseEntity<>(result, HttpStatus.OK);
+    //     } catch (Exception e) {
+    //         result = ResUtil.makeResult("500", "서버 오류", e.getMessage());
+    //         return new ResponseEntity<>(result, HttpStatus.OK);
+    //     }
     // }
 
     // @GetMapping("/logout")

@@ -3,7 +3,9 @@ package com.eflix.main.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,8 @@ import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 import com.eflix.main.service.CompanyService;
 import com.eflix.main.service.ModuleService;
 import com.eflix.main.service.SubscriptionService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * ERP 회사 관리를 위한 Service 클래스
@@ -92,7 +96,7 @@ public class MainController {
 	@GetMapping("/mypage_service")
 	public String mypage_service(@AuthenticationPrincipal SecurityUserDetails securityUserDetails, Model model) {
 
-		SubscriptionInfoDTO subscriptionInfo = subscriptionService.findSubscriptionByCoIdx(securityUserDetails.getUserDTO().getUserIdx());
+		SubscriptionInfoDTO subscriptionInfo = subscriptionService.findSubscriptionByCoIdx(securityUserDetails.getSecurityUserDTO().getUserIdx());
 
 		model.addAttribute("info", subscriptionInfo);
 

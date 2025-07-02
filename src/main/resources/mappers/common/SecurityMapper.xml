@@ -35,9 +35,14 @@
         AND mst_id = #{mstId}
     </select>
 
-    <update id="passwordUpdate" parameterType="String">
-        UPDATE master
-        SET mst_pw = #{newPassword}
-        WHERE mst_id = 'af'
-    </update>
+    <!-- ===================================== -->
+    <!-- 유저 정보 조회                       -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-07-02 -->
+    <!-- ===================================== -->
+    <select id="findByUserId" resultType="SecurityUserDTO">
+        SELECT user_idx, user_id, user_pw, user_name, user_tel, user_email, user_regdate, user_role
+        FROM users
+        WHERE user_id = #{username}
+    </select>
 </mapper>

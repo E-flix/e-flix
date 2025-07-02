@@ -7,7 +7,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class AuthContext {
 
@@ -21,7 +23,7 @@ public class AuthContext {
         // Authentication 자체가 AnonymousAuthenticationToken 이면 비로그인
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {
             coIdx = "co-101";
-            System.out.println("로그인 안 함");
+            log.info("로그인 안 함");
             return;
         }
         
@@ -29,15 +31,15 @@ public class AuthContext {
         Object principal = auth.getPrincipal();
         if (!(principal instanceof UserDetails)) {
             coIdx = "co-101";
-            System.out.println("로그인 안 함 (principal is " + principal + ")");
+            log.info("로그인 안 함 (principal is " + principal + ")");
             return;
         }
         
-        // 3) 로그인된 경우 - UserDetails에서 coIdx 추출
+        // 로그인된 경우 - UserDetails에서 coIdx 추출
         // UserDetails userDetails = (UserDetails) principal;
         // coIdx = extractCoIdxFromUserDetails(userDetails);
         coIdx = "co-101"; // 임시값
-        System.out.println("로그인됨 - coIdx: " + coIdx);
+        log.info("로그인됨 - coIdx: " + coIdx);
     }
 
     public String getCoIdx() {

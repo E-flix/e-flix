@@ -31,7 +31,7 @@ public class UserRestController {
     public ResponseEntity<ResResult> me(@AuthenticationPrincipal SecurityUserDetails securityUserDetails) {
         ResResult result = null;
 
-        UserDTO dto = userService.findByUserIdx(securityUserDetails.getUserDTO().getUserIdx());
+        UserDTO dto = userService.findByUserIdx(securityUserDetails.getSecurityUserDTO().getUserIdx());
 
         if(dto != null) {
             result = ResUtil.makeResult(ResStatus.OK, dto);

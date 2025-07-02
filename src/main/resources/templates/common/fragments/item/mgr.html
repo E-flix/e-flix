@@ -1,0 +1,13 @@
+<li th:fragment="mgr" class="" th:class="${activeMenu == 'mgr'} ? 'nav-item active' : 'nav-item'">
+    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMgr" aria-expanded="" th:attr="aria-expanded=${activeMenu == 'mgr'}" aria-controls="collapseMgr">
+        <i class="fas fa-fw fa-folder"></i>
+            <span>관리자</span>
+    </a>
+    <div id="collapseMgr" class="collapse" th:classappend="${activeMenu == 'mgr'} ? ' show' : ''" aria-labelledby="headingMgr" data-parent="#accordionsidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+            <!-- <a class="" th:class="${activeMenu  == 'mgr'} ? 'collapse-item active' : 'collapse-item'" href="/mgr">사용자 관리</a>
+              -->
+            <a class="" th:class="${activeSubMenu == 'mgr'} ? 'collapse-item active' : 'collapse-item'" href="/mgr/user">사용자 관리</a>
+        </div>
+    </div>
+</li>

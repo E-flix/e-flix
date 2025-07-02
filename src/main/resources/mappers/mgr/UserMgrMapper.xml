@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+===========================================
+  - 파일명   : UserMgrMapper.xml
+  - 설명     : 마스터 유저 관리 SQL 정의
+===========================================
+  [작성 정보]
+  - 작성자   : 복성민 (bokseongmin@gmail.com)
+  - 최초작성 : 2025-07-02
+===========================================
+  [변경 이력]
+  - 2025-07-02: 최초 생성 (복성민)
+===========================================
+-->
+<mapper namespace="com.eflix.mgr.mapper.UserMgrMapper">
+    <insert id="insertUser" parameterType="UserMgrDTO">
+        INSERT INTO erp_employee_roles (er_idx, emp_idx)
+        VALUES (#{erIdx}, #{empIdx})
+    </insert>
+
+    <resultMap id="userMgrResultMap" type="UserMgrDTO">
+        <association property="employeeDTO" javaType="EmployeeDTO">
+            <id property="empIdx" column="emp_idx"/>
+            <result property="deptIdx" column="dept_idx"/>
+            <result property="grdIdx" column="grd_idx"/>
+            <result property="roleId" column="role_id"/>
+            <result property="workTypeId" column="work_type_id"/>
+            <result property="empImg" column="emp_img"/>
+            <result property="empName" column="emp_name"/>
+            <result property="rrnPfx" column="rrn_pfx"/>
+            <result property="rrnSfx" column="rrn_sfx"/>
+            <result property="empEmail" column="emp_email"/>
+            <result property="empPw" column="emp_pw"/>
+            <result property="empRegdate" column="emp_regdate"/>
+            <result property="empRole" column="emp_role"/>
+            <result property="empAccount" column="emp_account"/>
+            <result property="empAddr" column="emp_addr"/>
+        </association>
+    </resultMap>
+
+    <select id="findAllUser" resultMap="userMgrResultMap">
+        SELECT *
+        FROM employees
+    </select>
+
+    <select id="findAllEmployeeRole" resultType="EmployeeRoleDTO">
+        SELECT er_idx, role_code, role_name, role_desc
+        FROM employee_roles
+    </select>
+
+    <update id="updateUser" parameterType="UserMgrDTO">
+        UPDATE employees
+        SET
+            empRole = ''
+        WHERE emp_idx = #{empIdx}
+    </update>
+</mapper>

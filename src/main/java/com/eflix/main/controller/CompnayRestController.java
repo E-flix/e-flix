@@ -77,7 +77,7 @@ public class CompnayRestController {
     public ResponseEntity<ResResult> my(@AuthenticationPrincipal SecurityUserDetails securityUserDetails) {
         ResResult result = null;
 
-        CompanyDTO companyDTO = companyService.findByUserIdx(securityUserDetails.getUserDTO().getUserIdx());
+        CompanyDTO companyDTO = companyService.findByUserIdx(securityUserDetails.getSecurityUserDTO().getUserIdx());
 
         if(companyDTO != null) {
             result = ResUtil.makeResult(ResStatus.OK, companyDTO);

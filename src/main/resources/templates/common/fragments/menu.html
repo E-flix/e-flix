@@ -12,6 +12,10 @@
 <div th:fragment="menu">
 	<!-- divider -->
 	<hr class="sidebar-divider d-none d-md-block">
+	<li th:replace="~{common/fragments/item/mgr::mgr}"></li>
+
+	<!-- divider -->
+	<hr class="sidebar-divider d-none d-md-block">
 	<li th:replace="~{common/fragments/item/hr::hr}"></li>
 	<!-- divider -->
 	<hr class="sidebar-divider d-none d-md-block">
