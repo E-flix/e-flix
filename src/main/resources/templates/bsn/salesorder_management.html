@@ -6,6 +6,171 @@
   <meta charset="UTF-8" />  
   <title>주문서 관리</title>
   
+  <style>
+    /* 전체 컨테이너 */
+    .management-container {
+      padding: 10px;
+      min-height: 100vh;
+    }
+    
+    /* 섹션 박스 스타일 */
+    .section-box {
+      padding: 15px;
+      border: 1px solid #e3e6f0;
+      border-radius: 8px;
+      background-color: #ffffff;
+      margin-bottom: 15px;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    
+    .section-box h6 {
+      margin-bottom: 12px;
+      color: #5a5c69;
+      font-weight: 700;
+      border-bottom: 2px solid #4e73df;
+      padding-bottom: 8px;
+      font-size: 1rem;
+    }
+    
+    /* 버튼 색상 (SB Admin 2 스타일에 맞춤) */
+    .btn-create { 
+      background-color: #1cc88a; 
+      border-color: #1cc88a;
+      color: white; 
+    }
+    .btn-create:hover {
+      background-color: #17a673;
+      border-color: #17a673;
+    }
+    
+    .btn-edit { 
+      background-color: #36b9cc; 
+      border-color: #36b9cc;
+      color: white; 
+    }
+    .btn-edit:hover {
+      background-color: #2c9faf;
+      border-color: #2c9faf;
+    }
+    
+    .btn-delete { 
+      background-color: #e74a3b; 
+      border-color: #e74a3b;
+      color: white; 
+    }
+    .btn-delete:hover {
+      background-color: #c0392b;
+      border-color: #c0392b;
+    }
+    
+    .btn-save { 
+      background-color: #4e73df; 
+      border-color: #4e73df;
+      color: white; 
+    }
+    .btn-save:hover {
+      background-color: #2e59d9;
+      border-color: #2e59d9;
+    }
+    
+    /* 그리드 높이 설정 */
+    .header-grid { height: 300px; }
+    .credit-grid { height: 240px; }
+    .detail-grid { height: 350px; }
+    
+    /* 탭 스타일 (SB Admin 2 맞춤) */
+    .nav-tabs {
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .nav-tabs .nav-link {
+      border: 1px solid transparent;
+      border-top-left-radius: 0.35rem;
+      border-top-right-radius: 0.35rem;
+      color: #858796;
+      font-weight: 600;
+    }
+    
+    .nav-tabs .nav-link.active {
+      background-color: #4e73df;
+      border-color: #4e73df;
+      color: white;
+    }
+    
+    /* AG-Grid 커스텀 스타일 (SB Admin 2 테마 맞춤) */
+    .ag-theme-alpine {
+      --ag-background-color: #ffffff;
+      --ag-header-background-color: #f8f9fc;
+      --ag-header-foreground-color: #5a5c69;
+      --ag-border-color: #e3e6f0;
+      --ag-row-hover-color: #f8f9fc;
+      --ag-selected-row-background-color: #eaecf4;
+      --ag-font-size: 14px;
+      --ag-font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    }
+    
+    .ag-theme-alpine .ag-header-cell {
+      font-weight: 700;
+      color: #5a5c69;
+    }
+    
+    .ag-theme-alpine .ag-row-even {
+      background-color: #ffffff;
+    }
+    
+    .ag-theme-alpine .ag-row-odd {
+      background-color: #f8f9fc;
+    }
+    
+    /* 읽기 전용 셀 스타일 */
+    .readonly-cell {
+      background-color: #f8f9fc !important;
+      color: #6c757d !important;
+    }
+    
+    /* 편집 가능한 셀 스타일 */
+    .editable-cell {
+      background-color: #ffffff !important;
+      border: 1px solid #4e73df !important;
+    }
+    
+    /* 제목 헤더 스타일 */
+    .page-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+    }
+    
+    /* 카드 스타일 */
+    .card {
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+      border: 1px solid #e3e6f0;
+    }
+    
+    /* 모달 스타일 */
+    .modal-header {
+      background-color: #4e73df;
+      color: white;
+      border-bottom: none;
+    }
+    
+    .modal-header .btn-close {
+      filter: invert(1);
+    }
+    
+    /* 합계 행 스타일 */
+    .ag-theme-alpine .ag-pinned-bottom-row {
+      background-color: #4e73df !important;
+      color: white !important;
+      font-weight: bold;
+    }
+    
+    .ag-theme-alpine .ag-pinned-bottom-row .ag-cell {
+      border-top: 2px solid #2e59d9;
+    }
+  </style>
 </head>
 
 <div layout:fragment="content" class="management-container">
@@ -38,26 +203,14 @@
     </div>
   </div>
 
-  <!-- 주문서 목록 그리드 -->
-  <div class="card section-box">
-    <div class="card-header py-3">
-      <h6 class="m-0 font-weight-bold text-primary">
-        <i class="fas fa-list mr-2"></i>주문서 목록
-      </h6>
-    </div>
-    <div class="card-body">
-      <div id="masterGrid" class="ag-theme-alpine master-grid"></div>
-    </div>
-  </div>
-
   <!-- 주문서 헤더 + 여신정보 -->
   <div class="row">
-    <!-- 주문서 헤더 그리드 -->
+    <!-- 주문서 헤더 목록 그리드 -->
     <div class="col-lg-8 col-md-7">
       <div class="card section-box">
         <div class="card-header py-3">
           <h6 class="m-0 font-weight-bold text-primary">
-            <i class="fas fa-file-invoice mr-2"></i>주문서 헤더
+            <i class="fas fa-list mr-2"></i>주문서 헤더 목록
           </h6>
         </div>
         <div class="card-body">
@@ -175,13 +328,13 @@
       console.log('AG-Grid 라이브러리 로드 완료:', agGrid);
       
       // =========================== 전역 변수 ===========================
-      let masterGridApi, headerGridApi, creditGridApi, detailGridApi;
+      let headerGridApi, creditGridApi, detailGridApi;
       let currentOrderData = null;
       let editMode = false;
       let currentEditingNode = null;
       
-      // =========================== 마스터 그리드 설정 ===========================
-      const masterColumnDefs = [
+      // =========================== 주문서 헤더 목록 그리드 설정 ===========================
+      const headerColumnDefs = [
         { 
           headerName: '주문번호', 
           field: 'orderNo', 
@@ -191,21 +344,21 @@
         },
         { headerName: '주문일자', field: 'orderDate', width: 100 },
         { headerName: '거래처코드', field: 'customerCd', width: 100 },
-        { headerName: '담당자', field: 'empCd', width: 80 },
-        { headerName: '창고', field: 'warehouseCd', width: 80 },
         { headerName: '결제조건', field: 'paymentTerms', width: 120 },
-        { headerName: '배송지', field: 'deliveryAddr', flex: 1, minWidth: 150 }
+        { headerName: '배송지', field: 'deliveryAddr', flex: 1, minWidth: 150 },
+        { headerName: '배송일', field: 'deliveryDt', width: 100 },
+        { headerName: '창고', field: 'warehouseCd', width: 80 }
       ];
       
-      const masterGridOptions = {
-        columnDefs: masterColumnDefs,
+      const headerGridOptions = {
+        columnDefs: headerColumnDefs,
         rowData: [],
         rowSelection: 'single',
-        onRowClicked: onMasterRowClicked,
+        onRowClicked: onHeaderRowClicked,
         onGridReady: function(params) {
-          masterGridApi = params.api;
-          console.log('마스터 그리드 준비 완료');
-          loadMasterData();
+          headerGridApi = params.api;
+          console.log('헤더 그리드 준비 완료');
+          loadHeaderData();
         },
         defaultColDef: {
           resizable: true,
@@ -215,57 +368,6 @@
         animateRows: true,
         pagination: true,
         paginationPageSize: 10
-      };
-      
-      // =========================== 헤더 그리드 설정 ===========================
-      const headerColumnDefs = [
-        { 
-          headerName: '항목', 
-          field: 'field', 
-          width: 130, 
-          pinned: 'left',
-          cellClass: 'font-weight-bold text-secondary'
-        },
-        { 
-          headerName: '값', 
-          field: 'value', 
-          flex: 1,
-          editable: function(params) {
-            return editMode && params.data.editable;
-          },
-          cellClass: function(params) {
-            return params.data.editable && editMode ? 'editable-cell' : 'readonly-cell';
-          },
-          cellEditor: function(params) {
-            switch(params.data.type) {
-              case 'date': return 'agDateCellEditor';
-              case 'select': return 'agSelectCellEditor';
-              default: return 'agTextCellEditor';
-            }
-          },
-          cellEditorParams: function(params) {
-            if (params.data.type === 'select' && params.data.options) {
-              return { values: params.data.options };
-            }
-            return {};
-          },
-          onCellValueChanged: handleHeaderCellChange
-        }
-      ];
-      
-      const headerGridOptions = {
-        columnDefs: headerColumnDefs,
-        rowData: getInitialHeaderData(),
-        onGridReady: function(params) {
-          headerGridApi = params.api;
-          console.log('헤더 그리드 준비 완료');
-        },
-        defaultColDef: {
-          resizable: true
-        },
-        suppressRowClickSelection: true,
-        suppressCellFocus: false,
-        rowHeight: 32
       };
       
       // =========================== 여신정보 그리드 설정 ===========================
@@ -409,7 +511,6 @@
         // AG-Grid Community 33.x 방식
         if (typeof agGrid.createGrid === 'function') {
           console.log('createGrid 방식 사용');
-          agGrid.createGrid(document.getElementById('masterGrid'), masterGridOptions);
           agGrid.createGrid(document.getElementById('headerGrid'), headerGridOptions);
           agGrid.createGrid(document.getElementById('creditGrid'), creditGridOptions);
           agGrid.createGrid(document.getElementById('detailGrid'), detailGridOptions);
@@ -417,7 +518,6 @@
         // 구버전 호환
         else if (typeof agGrid.Grid === 'function') {
           console.log('Grid 생성자 방식 사용');
-          new agGrid.Grid(document.getElementById('masterGrid'), masterGridOptions);
           new agGrid.Grid(document.getElementById('headerGrid'), headerGridOptions);
           new agGrid.Grid(document.getElementById('creditGrid'), creditGridOptions);
           new agGrid.Grid(document.getElementById('detailGrid'), detailGridOptions);
@@ -435,23 +535,6 @@
       
       // =========================== 초기 데이터 함수들 ===========================
       
-      function getInitialHeaderData() {
-        return [
-          { field: '주문서번호', value: '', editable: false, type: 'text' },
-          { field: '작성일자', value: '', editable: true, type: 'date' },
-          { field: '작성자', value: '', editable: true, type: 'text' },
-          { field: '거래처코드', value: '', editable: true, type: 'text' },
-          { field: '거래처명', value: '', editable: false, type: 'text' },
-          { field: '대표명', value: '', editable: false, type: 'text' },
-          { field: '연락처', value: '', editable: true, type: 'text' },
-          { field: '담당자', value: '', editable: false, type: 'text' },
-          { field: '할인율', value: '', editable: false, type: 'text' },
-          { field: '결제조건', value: '', editable: true, type: 'text' },
-          { field: '배송지', value: '', editable: true, type: 'text' },
-          { field: '배송방법', value: '', editable: true, type: 'select', options: ['', '직접배송', '택배', '화물', '고객직접수령'] }
-        ];
-      }
-      
       function getInitialCreditData() {
         return [
           { field: '여신한도', value: 0, format: 'currency' },
@@ -467,9 +550,9 @@
       
       // =========================== 이벤트 핸들러 ===========================
       
-      // 마스터 그리드 행 클릭
-      function onMasterRowClicked(event) {
-        console.log('마스터 행 클릭:', event.data);
+      // 헤더 그리드 행 클릭 (주문서 선택)
+      function onHeaderRowClicked(event) {
+        console.log('헤더 행 클릭:', event.data);
         currentOrderData = event.data;
         loadOrderDetails(currentOrderData);
       }
@@ -477,23 +560,6 @@
       // 주문서 상세 로드
       function loadOrderDetails(orderData) {
         console.log('주문서 상세 로드:', orderData);
-        
-        // 헤더 그리드 업데이트
-        const headerData = [
-          { field: '주문서번호', value: orderData.orderNo || '', editable: false, type: 'text' },
-          { field: '작성일자', value: orderData.orderDate || '', editable: true, type: 'date' },
-          { field: '작성자', value: orderData.empCd || '', editable: true, type: 'text' },
-          { field: '거래처코드', value: orderData.customerCd || '', editable: true, type: 'text' },
-          { field: '거래처명', value: '', editable: false, type: 'text' },
-          { field: '대표명', value: '', editable: false, type: 'text' },
-          { field: '연락처', value: orderData.phoneNumber || '', editable: true, type: 'text' },
-          { field: '담당자', value: '', editable: false, type: 'text' },
-          { field: '할인율', value: '', editable: false, type: 'text' },
-          { field: '결제조건', value: orderData.paymentTerms || '', editable: true, type: 'text' },
-          { field: '배송지', value: orderData.deliveryAddr || '', editable: true, type: 'text' },
-          { field: '배송방법', value: '', editable: true, type: 'select', options: ['', '직접배송', '택배', '화물', '고객직접수령'] }
-        ];
-        headerGridApi.setRowData(headerData);
         
         // 거래처 정보 로드
         if (orderData.customerCd) {
@@ -511,12 +577,6 @@
         $.get('/bsn/customer/detail', { customerCd: customerCd })
           .done(function(data) {
             console.log('거래처 정보:', data);
-            
-            // 헤더 그리드의 거래처 관련 정보 업데이트
-            updateHeaderValue('거래처명', data.customerNm || '');
-            updateHeaderValue('대표명', data.representativeNm || '');
-            updateHeaderValue('담당자', data.salesEmpCd || '');
-            updateHeaderValue('할인율', (data.discountRate || 0) + '%');
             
             // 여신 정보 그리드 업데이트
             const creditData = [
@@ -536,50 +596,34 @@
           });
       }
       
-      // 헤더 그리드 특정 값 업데이트
-      function updateHeaderValue(fieldName, value) {
-        headerGridApi.forEachNode(function(node) {
-          if (node.data.field === fieldName) {
-            node.setDataValue('value', value);
-          }
-        });
-      }
-      
       // 주문서 상세 데이터 로드
       function loadOrderDetailData(orderNo) {
-        // 실제로는 서버에서 가져와야 하지만, 샘플 데이터로 대체
+        // TODO: 실제로는 서버에서 주문서 상세를 가져와야 함
+        // 현재는 샘플 데이터로 대체
+        console.log('주문서 상세 데이터 로드:', orderNo);
         const detailData = generateSampleDetailData();
         detailGridApi.setRowData(detailData);
         calculateTotals();
       }
       
-      // 마스터 데이터 로드
-      function loadMasterData() {
-        console.log('마스터 데이터 로드 시작');
+      // 헤더 데이터 로드 (주문서 목록)
+      function loadHeaderData() {
+        console.log('헤더 데이터 로드 시작');
         
         $.get('/bsn/sorlist/data')
           .done(function(data) {
-            console.log('마스터 데이터 로드 성공:', data);
-            masterGridApi.setRowData(data);
+            console.log('헤더 데이터 로드 성공:', data);
+            headerGridApi.setRowData(data);
           })
           .fail(function(xhr, status, error) {
             console.error('주문서 목록 로드 실패:', error);
             // 샘플 데이터로 대체
-            const sampleData = generateSampleMasterData();
-            masterGridApi.setRowData(sampleData);
+            const sampleData = generateSampleHeaderData();
+            headerGridApi.setRowData(sampleData);
           });
       }
       
-      // 나머지 함수들...
-      function handleHeaderCellChange(event) {
-        if (event.data.field === '거래처코드') {
-          const customerCd = event.newValue;
-          if (customerCd) {
-            loadCustomerInfo(customerCd);
-          }
-        }
-      }
-      
+      // 품목코드 변경 시
       function onItemCodeChanged(event) {
         const itemCode = event.newValue;
         if (itemCode) {
@@ -596,6 +640,7 @@
         }
       }
       
+      // 행별 합계 계산
       function calculateRowTotal(event) {
         const rowData = event.node.data;
         const qty = Number(rowData.qty || 0);
@@ -609,6 +654,7 @@
         event.node.setDataValue('totalAmount', totalAmount);
       }
       
+      // 전체 합계 계산
       function calculateTotals() {
         let totalSupply = 0, totalTax = 0, totalAmount = 0;
         
@@ -692,9 +738,11 @@
       // =========================== 버튼 이벤트 ===========================
       
       $('#btnNew').click(function() {
-        clearAllGrids();
+        clearDetailGrid();
+        clearCreditGrid();
         generateNewOrderNo();
         setEditMode(true);
+        currentOrderData = null;
         
         Swal.fire({
           icon: 'info',
@@ -814,19 +862,17 @@
       
       // =========================== 유틸리티 함수 ===========================
       
-      function clearAllGrids() {
-        headerGridApi.setRowData(getInitialHeaderData());
-        creditGridApi.setRowData(getInitialCreditData());
+      function clearDetailGrid() {
         detailGridApi.setRowData([]);
         calculateTotals();
-        currentOrderData = null;
+      }
+      
+      function clearCreditGrid() {
+        creditGridApi.setRowData(getInitialCreditData());
       }
       
       function setEditMode(enabled) {
         editMode = enabled;
-        
-        // 헤더 그리드 편집 모드 설정
-        headerGridApi.refreshCells();
         
         // 디테일 그리드 편집 모드 설정
         detailGridApi.refreshCells();
@@ -840,14 +886,24 @@
       function generateNewOrderNo() {
         $.get('/bsn/orders/nextOrderNo')
           .done(function(orderNo) {
-            updateHeaderValue('주문서번호', orderNo);
-            updateHeaderValue('작성일자', new Date().toISOString().split('T')[0]);
+            console.log('새 주문서 번호:', orderNo);
+            // 새 주문서의 경우 임시 데이터로 디테일 그리드 초기화
+            const newDetailData = [{
+              lineNo: 1,
+              itemCode: '',
+              itemName: '',
+              spec: '',
+              qty: 1,
+              unitPrice: 0,
+              supplyAmount: 0,
+              taxAmount: 0,
+              totalAmount: 0,
+              remarks: ''
+            }];
+            detailGridApi.setRowData(newDetailData);
           })
           .fail(function() {
             console.error('주문서 번호 생성 실패');
-            const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            updateHeaderValue('주문서번호', 'SO-' + today + '-0001');
-            updateHeaderValue('작성일자', new Date().toISOString().split('T')[0]);
           });
       }
       
@@ -876,7 +932,10 @@
               text: '주문서가 성공적으로 저장되었습니다.'
             });
             setEditMode(false);
-            loadMasterData();
+            loadHeaderData();
+            clearDetailGrid();
+            clearCreditGrid();
+            currentOrderData = null;
           } else {
             Swal.fire({
               icon: 'error',
@@ -897,21 +956,19 @@
       function extractOrderDataFromGrids() {
         const orderData = { details: [] };
         
-        // 헤더 그리드에서 데이터 추출
-        headerGridApi.forEachNode(function(node) {
-          const field = node.data.field;
-          const value = node.data.value;
-          
-          switch(field) {
-            case '주문서번호': orderData.orderNo = value; break;
-            case '작성일자': orderData.orderDate = value; break;
-            case '작성자': orderData.empCd = value; break;
-            case '거래처코드': orderData.customerCd = value; break;
-            case '연락처': orderData.phoneNumber = value; break;
-            case '결제조건': orderData.paymentTerms = value; break;
-            case '배송지': orderData.deliveryAddr = value; break;
-          }
-        });
+        // 현재 선택된 주문서가 있으면 해당 데이터 사용, 없으면 신규
+        if (currentOrderData) {
+          orderData.orderNo = currentOrderData.orderNo;
+          orderData.orderDate = currentOrderData.orderDate;
+          orderData.customerCd = currentOrderData.customerCd;
+          orderData.paymentTerms = currentOrderData.paymentTerms;
+          orderData.deliveryAddr = currentOrderData.deliveryAddr;
+          orderData.deliveryDt = currentOrderData.deliveryDt;
+          orderData.warehouseCd = currentOrderData.warehouseCd;
+        } else {
+          // 신규인 경우 기본값 설정 필요
+          orderData.orderDate = new Date().toISOString().split('T')[0];
+        }
         
         // 디테일 그리드에서 데이터 추출
         detailGridApi.forEachNode(function(node) {
@@ -953,8 +1010,9 @@
               title: '삭제 완료',
               text: '주문서가 성공적으로 삭제되었습니다.'
             });
-            loadMasterData();
-            clearAllGrids();
+            loadHeaderData();
+            clearDetailGrid();
+            clearCreditGrid();
             currentOrderData = null;
           } else {
             Swal.fire({
@@ -974,25 +1032,25 @@
       }
       
       // =========================== 샘플 데이터 ===========================
-      function generateSampleMasterData() {
+      function generateSampleHeaderData() {
         return [
           {
             orderNo: 'SO-20250702-0001',
             orderDate: '2025-07-02',
             customerCd: 'CUST001',
-            empCd: 'EMP001',
-            warehouseCd: 'WH01',
             paymentTerms: 'Net 30',
-            deliveryAddr: '서울시 강남구 테헤란로 123'
+            deliveryAddr: '서울시 강남구 테헤란로 123',
+            deliveryDt: '2025-07-10',
+            warehouseCd: 'WH01'
           },
           {
             orderNo: 'SO-20250702-0002',
             orderDate: '2025-07-02',
             customerCd: 'CUST002',
-            empCd: 'EMP002',
-            warehouseCd: 'WH02',
             paymentTerms: 'Net 15',
-            deliveryAddr: '부산시 해운대구 마린시티 456'
+            deliveryAddr: '부산시 해운대구 마린시티 456',
+            deliveryDt: '2025-07-12',
+            warehouseCd: 'WH02'
           }
         ];
       }
@@ -1034,3 +1092,4 @@
     /*]]>*/
   </script>
 </div>
+</html>
