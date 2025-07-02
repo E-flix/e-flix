@@ -112,7 +112,8 @@
       unit_price, 
       total_supply_amount,
       total_tax_amount, 
-      remarks)
+      remarks,
+      ledger_check)
     VALUES
     (
       #{entryNumber},
@@ -131,7 +132,8 @@
       #{unitPrice},
       #{totalSupplyAmount},
       #{totalTaxAmount}, 
-      #{remarks})
+      #{remarks},
+      'a1')
   </insert>
 
   <!-- EntryDetailDTO Insert -->
