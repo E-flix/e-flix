@@ -126,6 +126,56 @@
         #{coIdx}
     )
 </insert>
+
+<!-- 사원 수정 -->
+<update id="update" parameterType="EmployeeDTO">
+    UPDATE employees
+    <set>
+        <if test="empName != null and empName != ''">
+            emp_name = #{empName},
+        </if>
+        <if test="rrnPfx != null and rrnPfx != ''">
+            rrn_pfx = #{rrnPfx},
+        </if>
+        <if test="rrnSfx != null and rrnSfx != ''">
+            rrn_sfx = #{rrnSfx},
+        </if>
+        <if test="empEmail != null and empEmail != ''">
+            emp_email = #{empEmail},
+        </if>
+        <if test="deptIdx != null and deptIdx != ''">
+            dept_idx = #{deptIdx},
+        </if>
+        <if test="empGrade != null and empGrade != ''">
+            emp_grade = #{empGrade},
+        </if>
+        <if test="empType != null and empType != ''">
+            emp_type = #{empType},
+        </if>
+        <if test="empRegdate != null">
+            emp_regdate = #{empRegdate},
+        </if>
+        <if test="empAccount != null and empAccount != ''">
+            emp_account = #{empAccount},
+        </if>
+        <if test="empPhone != null and empPhone != ''">
+            emp_phone = #{empPhone},
+        </if>
+        <if test="empPw != null and empPw != ''">
+            emp_pw = #{empPw},
+        </if>
+        <if test="empAddr != null and empAddr != ''">
+            emp_addr = #{empAddr},
+        </if>
+        <if test="empAddrDetail != null and empAddrDetail != ''">
+            emp_addr_detail = #{empAddrDetail},
+        </if>
+        <if test="empAddrZip != null and empAddrZip != ''">
+            emp_addr_zip = #{empAddrZip},
+        </if>
+    </set>
+    WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
+</update>
 <!-- 단건조회 -->
 <select id="selectById" parameterType="String" resultType="EmployeeDTO">
     SELECT * FROM employees WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}

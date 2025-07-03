@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.common.security.auth.AuthContext;
+import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.mapper.EmployeeMapper;
 import com.eflix.hr.service.EmployeeService;
@@ -27,9 +28,6 @@ public class EmployeeServiceImpl implements EmployeeService{
 
   @Autowired
   EmployeeMapper employeeMapper;
-
-  @Autowired
-  private AuthContext authContext;
   
   // // 사원관리 페이지 검색조건 드롭다운 조회
   // @Override
@@ -40,7 +38,7 @@ public class EmployeeServiceImpl implements EmployeeService{
   @Override
   public EmployeeDTO selectById(String empIdx) {
     // throw new UnsupportedOperationException("Unimplemented method 'getEmployeeById'");
-    return employeeMapper.selectById(authContext.getCoIdx(), empIdx);
+    return employeeMapper.selectById(AuthUtil.getCoIdx(), empIdx);
   }
 
   @Override
@@ -50,7 +48,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
   @Override
   public int updateEmployee(EmployeeDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'updateEmployee'");
+    return employeeMapper.update(dto);
   }
 
   @Override
@@ -72,7 +70,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     @Override
     public List<EmployeeDTO> getAllEmployees(Map<String, Object> params) {
-        params.put("coIdx", authContext.getCoIdx());
+        params.put("coIdx", AuthUtil.getCoIdx());
         return employeeMapper.selectAll(params);
     }
 

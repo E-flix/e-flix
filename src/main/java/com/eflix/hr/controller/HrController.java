@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.eflix.common.code.dto.CommonDTO;
 import com.eflix.common.code.service.CommonService;
+import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.dto.HrWorkTypeDTO;
@@ -109,11 +110,9 @@ public class HrController {
     params.put("empType", empType);
     params.put("roleList", roleList);
 
-    System.out.println(params.toString());
     
     List<EmployeeDTO> records = employeeService.getAllEmployees(params);
 
-    System.out.println("사원 리스트 : " + records);
     // 뷰에 넘길 모델
     model.addAttribute("empList",  records);
     model.addAttribute("depts",     depts);
@@ -147,8 +146,20 @@ public class HrController {
   @PostMapping("/insertEmp")
   @ResponseBody
   public String insertEmp(EmployeeDTO emp) {
-    System.out.println(emp.toString());
+    emp.setCoIdx(AuthUtil.getCoIdx());
     int affectedRows = employeeService.insertEmp(emp);
+    if(affectedRows > 0) {
+      return "200";
+    } else {
+      return "404";
+    }
+  }
+
+  @PostMapping("/updateEmp")
+  @ResponseBody
+  public String updateEmp(EmployeeDTO emp) {
+    emp.setCoIdx(AuthUtil.getCoIdx());
+    int affectedRows = employeeService.updateEmployee(emp);
     if(affectedRows > 0) {
       return "200";
     } else {
