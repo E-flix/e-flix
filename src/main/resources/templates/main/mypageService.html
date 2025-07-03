@@ -14,224 +14,177 @@
 
 <div layout:fragment="content">
     <!-- main -->
-    <div class="masthead">
-        <div class="row justify-content-center">
-            <div class="col-12 col-xl-10">
-                <!-- Header Card -->
-                <div class="card shadow-sm mb-4 border-0">
-                    <div class="card-header bg-primary text-white py-3">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h3 class="mb-0 fw-bold">
-                                    <i class="fas fa-clipboard-list me-2"></i>
-                                    구독 정보 관리
-                                </h3>
-                            </div>
-                            <div class="col-auto">
-                                <span class="badge bg-light text-primary fs-6">활성 구독</span>
+    <div class="masthead" style="padding-top: 4rem; padding-bottom: 4rem; background-color: #f8f9fa;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-xl-11">
+                    <div class="card shadow-sm mb-4 border-0">
+                        <div class="card-header bg-primary text-white py-3">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <h3 class="mb-0 fw-bold">
+                                        <i class="fas fa-clipboard-list me-2"></i>
+                                        구독 정보 관리
+                                    </h3>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge bg-light text-primary fs-6 fw-semibold">활성 구독</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Main Content Card -->
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <div class="row g-4">
-                            <!-- Left Column - Service Info -->
-                            <div class="col-lg-3">
-                                <div class="card h-100 bg-light border-0">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-primary mb-3">
-                                            <i class="fas fa-tag me-2"></i>구독명
-                                        </h5>
-                                        <div class="mb-3">
-                                            <input type="text" class="form-control border-0 bg-white shadow-sm" th:value="${info.subscriptionPackageDTO.spkName}"readonly>
-                                        </div>
-                                        
-                                        <h6 class="text-secondary mb-3 mt-4">
-                                            <i class="fas fa-cogs me-2"></i>포함 서비스
-                                        </h6>
-                                        <div class="border rounded p-3 bg-white">
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input" type="checkbox" checked>
-                                                <label class="form-check-label text-muted">
-                                                    서비스명 1
-                                                </label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input" type="checkbox" checked>
-                                                <label class="form-check-label text-muted">
-                                                    서비스명 2
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox">
-                                                <label class="form-check-label text-muted">
-                                                    서비스명 3
-                                                </label>
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-lg-5 p-4">
+                            <div class="row g-4">
+
+                                <div class="col-lg-3">
+                                    <div class="card h-100 bg-light border-0">
+                                        <div class="card-body p-4">
+                                            <h5 class="card-title text-primary mb-3">
+                                                <i class="fas fa-tag me-2"></i>구독 패키지
+                                            </h5>
+                                            <input type="text" class="form-control"
+                                                th:value="${info.subscriptionPackageDTO.spkName}" readonly>
+
+                                            <h6 class="text-secondary mb-3 mt-4">
+                                                <i class="fas fa-cogs me-2"></i>포함 서비스
+                                            </h6>
+                                            <div class="border rounded p-3 bg-white shadow-sm">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" checked disabled>
+                                                    <label class="form-check-label">서비스명 1</label>
+                                                </div>
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="checkbox" checked disabled>
+                                                    <label class="form-check-label">서비스명 2</label>
+                                                </div>
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="checkbox" disabled>
+                                                    <label class="form-check-label">서비스명 3</label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Center Column - Contract Details -->
-                            <div class="col-lg-6">
-                                <div class="row g-3">
-                                    <!-- Duration -->
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold text-dark">
-                                            <i class="fas fa-calendar-alt me-2 text-primary"></i>계약 기간
-                                        </label>
-                                        <div class="input-group">
-                                            <input type="number" class="form-control" th:value="${info.subscriptionDTO.spiPeriod}">
-                                            <span class="input-group-text bg-primary text-white">개월</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Period -->
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold text-dark">
-                                            <i class="fas fa-calendar-week me-2 text-primary"></i>서비스 기간
-                                        </label>
-                                        <div class="row g-2">
-                                            <div class="col">
-                                                <input type="date" class="form-control" th:value="${#dates.format(info.subscriptionDTO.spiStart, 'yyyy-MM-dd')}" readonly>
-                                            </div>
-                                            <div class="col-auto d-flex align-items-center">
-                                                <i class="fas fa-arrow-right text-muted"></i>
-                                            </div>
-                                            <div class="col">
-                                                <input type="date" class="form-control" th:value="${#dates.format(info.subscriptionDTO.spiEnd, 'yyyy-MM-dd')}" readonly>
+                                <div class="col-lg-6">
+                                    <div class="row g-4">
+                                        <div class="col-12">
+                                            <label class="form-label fw-semibold text-dark">
+                                                <i class="fas fa-calendar-alt me-2 text-primary"></i>계약 기간
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control bg-light"
+                                                    th:value="${info.subscriptionDTO.spiPeriod}" readonly>
+                                                <span class="input-group-text bg-primary text-white">개월</span>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <!-- Document Buttons -->
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold text-dark">
-                                            <i class="fas fa-file-alt me-2 text-primary"></i>관련 문서
-                                        </label>
-                                        <div class="row g-2">
-                                            <div class="col">
-                                                <!-- 모달 트리거 버튼 -->
-                                                <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#transactionModal">
+                                        <div class="col-12">
+                                            <label class="form-label fw-semibold text-dark">
+                                                <i class="fas fa-calendar-week me-2 text-primary"></i>서비스 기간
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="date" class="form-control bg-light"
+                                                    th:value="${#dates.format(info.subscriptionDTO.spiStart, 'yyyy-MM-dd')}"
+                                                    readonly>
+                                                <span class="input-group-text">~</span>
+                                                <input type="date" class="form-control bg-light"
+                                                    th:value="${#dates.format(info.subscriptionDTO.spiEnd, 'yyyy-MM-dd')}"
+                                                    readonly>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label fw-semibold text-dark">
+                                                <i class="fas fa-file-alt me-2 text-primary"></i>관련 문서
+                                            </label>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-outline-secondary w-100"
+                                                    data-bs-toggle="modal" data-bs-target="#transactionModal">
                                                     <i class="fas fa-receipt me-2"></i>거래 명세서
                                                 </button>
-                                                <!-- 거래 명세서 모달 -->
-                                                <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
-                                                    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header statement-header">
-                                                                <h5 class="modal-title fw-bold" id="transactionModalLabel">거래 명세서</h5>
-                                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                                                    aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body p-0">
-                                                                <iframe th:src="@{/contract/contract_1750732323931.html}" class="w-100 h-100"></iframe>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-                                                                <button type="button" class="btn btn-primary" onclick="window.print()">
-                                                                    <i class="bi bi-printer me-2"></i>인쇄하기
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <button class="btn btn-outline-primary w-100">
+                                                <button type="button" class="btn btn-outline-secondary w-100">
                                                     <i class="fas fa-file-contract me-2"></i>계약서
                                                 </button>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <!-- Payment & Expiry Dates -->
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold text-dark">
-                                            <i class="fas fa-credit-card me-2 text-success"></i>결제일
-                                        </label>
-                                        <input type="date" class="form-control" th:value="${#dates.format(info.subscriptionDTO.spiStart, 'yyyy-MM-dd')}" readonly>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold text-dark">
-                                            <i class="fas fa-clock me-2 text-warning"></i>만료일
-                                        </label>
-                                        <input type="date" class="form-control" th:value="${#dates.format(info.subscriptionDTO.spiEnd, 'yyyy-MM-dd')}" readonly>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Right Column - Department & Actions -->
-                            <div class="col-lg-3">
-                                <div class="card h-100 border-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-                                    <div class="card-body">
-                                        <h6 class="card-title text-dark mb-4">
-                                            <i class="fas fa-users me-2 text-primary"></i>정보 다운로드
-                                        </h6>
-                                        
-                                        <div class="mb-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="department" id="hr">
-                                                <label class="form-check-label fw-semibold" for="hr">
-                                                    <i class="fas fa-user-tie me-2 text-info"></i>인사
-                                                </label>
-                                            </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold text-dark">
+                                                <i class="fas fa-credit-card me-2 text-success"></i>최근 결제일
+                                            </label>
+                                            <input type="date" class="form-control bg-light"
+                                                th:value="${#dates.format(info.subscriptionDTO.spiStart, 'yyyy-MM-dd')}"
+                                                readonly>
                                         </div>
 
-                                        <div class="mb-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="department" id="inventory">
-                                                <label class="form-check-label fw-semibold" for="inventory">
-                                                    <i class="fas fa-boxes me-2 text-success"></i>재고
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="department" id="accounting" checked>
-                                                <label class="form-check-label fw-semibold" for="accounting">
-                                                    <i class="fas fa-calculator me-2 text-warning"></i>회계
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="mb-4">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="department" id="sales">
-                                                <label class="form-check-label fw-semibold" for="sales">
-                                                    <i class="fas fa-chart-line me-2 text-primary"></i>영업
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="mt-auto">
-                                            <button class="btn btn-danger w-100 fw-semibold shadow-sm">
-                                                <i class="fas fa-times-circle me-2"></i>구독 해지
-                                            </button>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold text-dark">
+                                                <i class="fas fa-clock me-2 text-danger"></i>다음 결제 예정일
+                                            </label>
+                                            <input type="date" class="form-control bg-light"
+                                                th:value="${#dates.format(info.subscriptionDTO.spiEnd, 'yyyy-MM-dd')}"
+                                                readonly>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- Action Buttons -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="d-flex gap-3 justify-content-end">
-                                    <!-- <button class="btn btn-outline-secondary px-4">
-                                        <i class="fas fa-times me-2"></i>취소
-                                    </button>
-                                    <button class="btn btn-success px-4">
-                                        <i class="fas fa-save me-2"></i>저장
-                                    </button>
-                                    <button class="btn btn-primary px-4">
-                                        <i class="fas fa-edit me-2"></i>수정
-                                    </button> -->
+                                <div class="col-lg-3">
+                                    <div class="card h-100 border-0"
+                                        style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                        <div class="card-body p-4 d-flex flex-column">
+                                            <h6 class="card-title text-dark mb-3">
+                                                <i class="fas fa-download me-2 text-primary"></i>정보 다운로드
+                                            </h6>
+                                            <div class="mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="department"
+                                                        id="hr">
+                                                    <label class="form-check-label" for="hr"><i
+                                                            class="fas fa-user-tie me-2 text-info"></i>인사</label>
+                                                </div>
+                                            </div>
+                                            <div class="mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="department"
+                                                        id="inventory">
+                                                    <label class="form-check-label" for="inventory"><i
+                                                            class="fas fa-boxes me-2 text-success"></i>재고</label>
+                                                </div>
+                                            </div>
+                                            <div class="mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="department"
+                                                        id="accounting" checked>
+                                                    <label class="form-check-label" for="accounting"><i
+                                                            class="fas fa-calculator me-2 text-warning"></i>회계</label>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="department"
+                                                        id="sales">
+                                                    <label class="form-check-label" for="sales"><i
+                                                            class="fas fa-chart-line me-2 text-primary"></i>영업</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-auto">
+                                                <button class="btn btn-danger w-100 fw-semibold shadow-sm">
+                                                    <i class="fas fa-times-circle me-2"></i>구독 해지
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-5">
+                                <div class="col-12">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -240,15 +193,38 @@
             </div>
         </div>
     </div>
+
+
+    <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold" id="transactionModalLabel">거래 명세서</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" style="height: 75vh;">
+                    <iframe th:src="@{/contract/contract_1750732323931.html}" class="w-100 h-100 border-0"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>인쇄하기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            const userIdx = /*[[${session.userIdx}]]*/ "";
+
+            function loadUserSubscription() {
+                $.ajax({
+
+                });
+            }
+        });
+    </script>
 </div>
-<script th:inline="javascript">
-    $(document).ready(function() {
-        const userIdx = /*[[${session.userIdx}]]*/ "";
-
-        function loadUserSubscription() {
-            $.ajax({
-
-            });
-        }
-    });
-</script>
