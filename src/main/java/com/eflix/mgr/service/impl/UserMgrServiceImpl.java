@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.eflix.common.security.auth.AuthContext;
+import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.mgr.dto.EmployeeRoleDTO;
 import com.eflix.mgr.dto.UserMgrDTO;
 import com.eflix.mgr.mapper.UserMgrMapper;
@@ -20,9 +22,12 @@ public class UserMgrServiceImpl implements UserMgrService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private AuthContext authContext;
+
     @Override
     public int insertUser(UserMgrDTO mgrUserDTO) {
-        // 회사코드 추가
+        mgrUserDTO.getEmployeeDTO().setCoIdx(AuthUtil.getCoIdx());
         mgrUserDTO.getEmployeeDTO().setEmpPw(passwordEncoder.encode(mgrUserDTO.getEmployeeDTO().getEmpPw()));
         return userMgrMapper.insertUser(mgrUserDTO);
     }

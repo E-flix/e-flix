@@ -13,21 +13,16 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.eflix.common.security.dto.SecurityEmpDTO;
 import com.eflix.common.security.dto.SecurityMasterDTO;
 import com.eflix.common.security.dto.SecurityUserDTO;
-import com.eflix.common.security.service.SecurityService;
-import com.eflix.main.mapper.UserMapper;
+import com.eflix.common.security.mapper.SecurityMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
 public class SecurityUserDetailService implements UserDetailsService {
 
 	@Autowired
-	private SecurityService securityService;;
-
-	@Autowired
-	private UserMapper userMapper;
+	private SecurityMapper securityMapper;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -47,18 +42,18 @@ public class SecurityUserDetailService implements UserDetailsService {
 			if (!masterChecked.equals("on")) {
 			
 				log.info("erp - 사원 로그인 시도");
-				SecurityEmpDTO securityEmpDTO = securityService.findEmpForLogin(coIdx, username);
+				SecurityEmpDTO securityEmpDTO = securityMapper.findEmpForLogin(coIdx, username);
 				if (securityEmpDTO == null) throw new UsernameNotFoundException("사원 정보 없음");
 
 				// List<String> roleCodes = securityService.findRoleCodesByEmpIdx(securityEmpDTO.getEmpIdx());
-				List<String> coRoles = securityService.findCompanyRolesByCoIdx(coIdx);
+				List<String> coRoles = securityMapper.findCompanyRolesByCoIdx(coIdx);
 
 				return new SecurityUserDetails(securityEmpDTO, coRoles);
 			}
 			// 마스터 로그인
 			else {
 				log.info("erp - 마스터 로그인 시도");
-				SecurityMasterDTO securityMasterDTO = securityService.findMasterForLogin(coIdx, username); // username = mst_id
+				SecurityMasterDTO securityMasterDTO = securityMapper.findMasterForLogin(coIdx, username); // username = mst_id
 
 				if (securityMasterDTO == null) throw new UsernameNotFoundException("마스터 계정 없음");
 				return new SecurityUserDetails(securityMasterDTO);
@@ -68,7 +63,7 @@ public class SecurityUserDetailService implements UserDetailsService {
 		// 메인 로그인
 		log.info("메인 로그인 시도");
 		
-		SecurityUserDTO securityUserDTO = securityService.findByUserId(username);
+		SecurityUserDTO securityUserDTO = securityMapper.findByUserId(username);
 		if (securityUserDTO == null) throw new UsernameNotFoundException("일반 사용자 없음");
 
 		return new SecurityUserDetails(securityUserDTO);

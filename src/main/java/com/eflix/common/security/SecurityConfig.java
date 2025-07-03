@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import com.eflix.common.security.details.SecurityUserDetailService;
 import com.eflix.common.security.filter.CustomUsernamePasswordAuthenticationFilter;
 import com.eflix.common.security.handler.CustomAuthenticationEntryPoint;
+import com.eflix.common.security.handler.CustomFailurHandler;
 import com.eflix.common.security.handler.CustomLoginSuccessHandler;
 import com.eflix.common.security.handler.CustomLogoutSuccessHandler;
 
@@ -65,14 +67,17 @@ import lombok.extern.slf4j.Slf4j;
 public class SecurityConfig {
 
 	@Autowired
-	private SecurityUserDetailService customUserDetailService;
-
-	@Autowired
 	private AuthenticationConfiguration authenticationConfiguration;
 
 	@Bean
-    public AuthenticationManager authenticationManager() throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager() {
+		try {
+			return authenticationConfiguration.getAuthenticationManager();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
     }
 
 	@Bean
@@ -81,33 +86,45 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public SecurityFilterChain erpSecurityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityUserDetailService securityUserDetailService() {
+		return new SecurityUserDetailService();  
+	}
+
+	@Bean
+	public SecurityFilterChain erpSecurityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
+		
+		CustomUsernamePasswordAuthenticationFilter customAuthenticationFilter = new CustomUsernamePasswordAuthenticationFilter();
+		customAuthenticationFilter.setAuthenticationManager(authenticationManager);
+		customAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler());
+		customAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
+
 		http.securityMatcher("/**")
 				.authorizeHttpRequests(auth -> auth
 					.requestMatchers("/", "/signup", "/inquiry/**", "/main/error/**", "/main/assets/**", "/main/css/**", "/main/js/**", "/bootstrap/**", "/common/**", "/bootstrap/**", "/img/**"
 					, "/erp/login").permitAll()
 					// , "/login", "/erp/login", "/hr/**", "/acc/**", "/bsn/**", "/purchs/**", "/**").permitAll()
-					// .requestMatchers("/hr/**").hasRole("HR")
-					// .requestMatchers("/bnz/**").hasRole("BNZ")
-					// .requestMatchers("/purchs/**").hasRole("PURCHS")
-					// .requestMatchers("/acc/**").hasRole("ACC")
-					.requestMatchers("/admin/**").hasRole("USER")
+					.requestMatchers("/hr/**").hasRole("HR")
+					.requestMatchers("/bnz/**").hasRole("BNZ")
+					.requestMatchers("/purchs/**").hasRole("PURCHS")
+					.requestMatchers("/acc/**").hasRole("ACC")
+					// .requestMatchers("/admin/**").hasRole("USER")
 					.requestMatchers("/erp/**").authenticated()
 					.requestMatchers("/**").authenticated())
-			.addFilterAt(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+			.addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.formLogin(form -> form
 				.loginProcessingUrl("/login")
 				// .loginPage("/")
 				.usernameParameter("username")
 				.passwordParameter("password")
-				.successHandler(authenticationSuccessHandler())
+				.failureHandler(authenticationFailureHandler())  // 지워도 됨
+				.successHandler(authenticationSuccessHandler())  // 지워도 됨
 				.permitAll())
 			// .rememberMe(remember -> remember
 			// 	.key("eflix")
 			// 	.tokenValiditySeconds(60 * 60 * 24)
 			// 	.rememberMeParameter("user_remember")
-			// 	.userDetailsService(customUserDetailService))
-			.userDetailsService(customUserDetailService)
+				// .userDetailsService(customUserDetailService))
+			.userDetailsService(securityUserDetailService())
 			.logout(logout -> logout
 				.logoutSuccessHandler(logoutSuccessHandler())
 				.deleteCookies("JSESSIONID", "user_remember"))
@@ -121,17 +138,22 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	@Bean
-	public CustomUsernamePasswordAuthenticationFilter customAuthenticationFilter() throws Exception {
-		CustomUsernamePasswordAuthenticationFilter filter = new CustomUsernamePasswordAuthenticationFilter();
-		filter.setAuthenticationManager(authenticationManager());
-		filter.setAuthenticationSuccessHandler(authenticationSuccessHandler());
-		return filter;
-	}
+	// @Bean
+	// public CustomUsernamePasswordAuthenticationFilter customAuthenticationFilter() throws Exception {
+	// 	CustomUsernamePasswordAuthenticationFilter filter = new CustomUsernamePasswordAuthenticationFilter();
+	// 	filter.setAuthenticationManager(authenticationManager());
+	// 	filter.setAuthenticationSuccessHandler(authenticationSuccessHandler());
+	// 	return filter;
+	// }
 
 	@Bean
 	public AuthenticationSuccessHandler authenticationSuccessHandler() {
 		return new CustomLoginSuccessHandler();
+	}
+
+	@Bean
+	public AuthenticationFailureHandler authenticationFailureHandler() {
+		return new CustomFailurHandler();
 	}
 
 	@Bean
@@ -142,10 +164,5 @@ public class SecurityConfig {
 	@Bean
 	public AuthenticationEntryPoint authenticationEntryPoint() {
 		return new CustomAuthenticationEntryPoint();
-	}
-
-	// @Bean
-	public UserDetailsService userDetailsService() {
-		return new SecurityUserDetailService();
 	}
 }
