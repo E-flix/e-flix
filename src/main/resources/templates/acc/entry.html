@@ -107,6 +107,14 @@
         <input type="number" value="12" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:45px;"> 월
         <input type="number" value="31" class="form-control form-control-sm d-inline-block" name="endDay" style="width:45px;"> 일
       </div>
+      <div class="col-auto">
+        <button type="button" id="diffFilterBtn" class="btn btn-outline-warning btn-sm">
+          차액 전표만 보기
+        </button>
+        <button type="button" id="showAllBtn" class="btn btn-outline-secondary btn-sm" style="display: none;">
+          전체 보기
+        </button>
+      </div>
     </form>
     <!-- 본문 ag-Grid -->
     <div class="grid-container" style="height:75vh;">
@@ -842,14 +850,26 @@
       const start = startMonth && startDay ? (startMonth * 100 + startDay) : null;
       const end = endMonth && endDay ? (endMonth * 100 + endDay) : null;
 
-      // rowData 필터링
-      const filtered = rowData.filter(row => {
+      // 기준 데이터 결정 (차액 필터가 활성화되어 있으면 원본 데이터, 아니면 현재 rowData)
+      let baseData = isDiffFilterActive ? originalRowData : rowData;
+
+      // 날짜 필터링
+      const filtered = baseData.filter(row => {
         if (!row.month || !row.day) return false;
         const md = row.month * 100 + row.day;
         if (start && md < start) return false;
         if (end && md > end) return false;
         return true;
       });
+
+      // 차액 필터가 활성화되어 있으면 추가로 차액 전표만 필터링
+      let finalFiltered = filtered;
+      if (isDiffFilterActive) {
+        updateDiffEntryNumbers(); // 최신 차액 전표번호 업데이트
+        finalFiltered = filtered.filter(row => {
+          return row.entryNumber && diffEntryNumbers.includes(String(row.entryNumber));
+        });
+      }
 
       // 그리드에 반영 - applyTransaction 사용
       // 1. 기존 모든 행 제거
@@ -865,14 +885,131 @@
       }
       
       // 2. 필터된 데이터 추가
-      if (filtered.length > 0) {
-        api.applyTransaction({ add: filtered });
+      if (finalFiltered.length > 0) {
+        api.applyTransaction({ add: finalFiltered });
       }
+
+      // 3. 빈 행 추가 (새 데이터 입력용)
+      const newEmptyRow = getEmptyRow();
+      api.applyTransaction({ add: [newEmptyRow] });
     }
 
     // input change 이벤트 연결
     ['startMonth', 'startDay', 'endMonth', 'endDay'].forEach(name => {
       document.querySelector(`input[name="${name}"]`).addEventListener('input', filterByDate);
+    });
+
+    // 차액 전표 필터 변수
+    let isDiffFilterActive = false;
+    let originalRowData = []; // 전체 데이터 백업
+
+    // 차액 전표만 필터링하는 함수
+    function filterDiffEntries() {
+      const api = gridOptions.api;
+      if (!api || typeof api.forEachNode !== 'function' || typeof api.applyTransaction !== 'function') {
+        console.warn('filterDiffEntries: 그리드 API가 아직 준비되지 않았습니다.');
+        return;
+      }
+
+      // 현재 차액 전표번호 업데이트
+      updateDiffEntryNumbers();
+
+      if (diffEntryNumbers.length === 0) {
+        alert('차액이 있는 전표가 없습니다.');
+        return;
+      }
+
+      // 현재 그리드의 모든 데이터 백업 (Summary row 제외)
+      originalRowData = [];
+      api.forEachNode(node => {
+        if (node.data && !node.data.isSummary) {
+          originalRowData.push({ ...node.data });
+        }
+      });
+
+      // 차액이 있는 전표번호에 해당하는 행만 필터링
+      const filteredData = originalRowData.filter(row => {
+        return row.entryNumber && diffEntryNumbers.includes(String(row.entryNumber));
+      });
+
+      // 그리드에서 모든 행 제거
+      const nodesToRemove = [];
+      api.forEachNode(node => {
+        if (node.data) {
+          nodesToRemove.push(node.data);
+        }
+      });
+      
+      if (nodesToRemove.length > 0) {
+        api.applyTransaction({ remove: nodesToRemove });
+      }
+      
+      // 필터된 데이터 추가
+      if (filteredData.length > 0) {
+        api.applyTransaction({ add: filteredData });
+      }
+
+      // 빈 행 추가 (새 데이터 입력용)
+      const newEmptyRow = getEmptyRow();
+      api.applyTransaction({ add: [newEmptyRow] });
+
+      isDiffFilterActive = true;
+    }
+
+    // 전체 보기 함수
+    function showAllEntries() {
+      const api = gridOptions.api;
+      if (!api || typeof api.forEachNode !== 'function' || typeof api.applyTransaction !== 'function') {
+        console.warn('showAllEntries: 그리드 API가 아직 준비되지 않았습니다.');
+        return;
+      }
+
+      // 현재 그리드의 모든 행 제거
+      const nodesToRemove = [];
+      api.forEachNode(node => {
+        if (node.data) {
+          nodesToRemove.push(node.data);
+        }
+      });
+      
+      if (nodesToRemove.length > 0) {
+        api.applyTransaction({ remove: nodesToRemove });
+      }
+      
+      // 백업된 전체 데이터 복원
+      if (originalRowData.length > 0) {
+        api.applyTransaction({ add: originalRowData });
+      }
+
+      // 빈 행이 없으면 추가
+      let hasEmptyRow = false;
+      api.forEachNode(node => {
+        if (node.data && isEmptyRow(node.data)) {
+          hasEmptyRow = true;
+        }
+      });
+      
+      if (!hasEmptyRow) {
+        const newEmptyRow = getEmptyRow();
+        api.applyTransaction({ add: [newEmptyRow] });
+      }
+
+      isDiffFilterActive = false;
+    }
+
+    // 버튼 이벤트 리스너 연결
+    document.getElementById('diffFilterBtn').addEventListener('click', function() {
+      filterDiffEntries();
+      // 버튼 상태 변경
+      document.getElementById('diffFilterBtn').style.display = 'none';
+      document.getElementById('showAllBtn').style.display = 'inline-block';
+    });
+
+    document.getElementById('showAllBtn').addEventListener('click', function() {
+      showAllEntries();
+      // 버튼 상태 변경
+      document.getElementById('showAllBtn').style.display = 'none';
+      document.getElementById('diffFilterBtn').style.display = 'inline-block';
     });
     // 그리드 생성 (초기 포커스 설정은 onGridReady에서 처리)
     const { api, columnApi } = agGrid.createGrid(document.querySelector("#entryGrid"), gridOptions);
@@ -1414,7 +1551,7 @@
             });
             partnerGridOptions.api.sizeColumnsToFit();
           } else {
-            console.warn('Grid API not ready; data load deferred');
+            console.warn('그리드 준비 안됨');
           }
         })
         .catch(err => {

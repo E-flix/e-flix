@@ -14,7 +14,7 @@ import com.eflix.acc.dto.EntryMasterDTO;
 =============================================== */
 public interface ClientsLedgerMapper {
   // 잔액 조건 전체 조회
-  public List<EntryMasterDTO> getList(String startDate, String endDate, String accountCode, String partnerCode);
+  public List<EntryMasterDTO> getList(String startDate, String endDate, String accountCode, String partnerCode, String coIdx);
   // 내용 조건 전체 조회
-  public List<EntryMasterDTO> getListDetail(String startDate, String endDate, String accountCode, String partnerCode);
+  public List<EntryMasterDTO> getListDetail(String startDate, String endDate, String accountCode, String partnerCode, String coIdx);
 }
