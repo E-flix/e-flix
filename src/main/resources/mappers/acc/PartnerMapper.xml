@@ -6,6 +6,7 @@
   - 설명     : parterMapper query xml
   [ 변경 이력 ]
   - 2025-06-23 (김희정): 일반거래처 전체조회 작성
+  - 2025-07-03 (김희정): 조회조건 회사번호(coIdx) 추가
 =============================================== -->
 <mapper namespace="com.eflix.acc.mapper.PartnerMapper">
 
@@ -34,30 +35,34 @@
     <result property="createdAt" column="created_at"/>
     <result property="updatedAt" column="updated_at"/>
     <result property="remarks" column="remarks"/>
+    <result property="coIdx" column="co_idx"/>
   </resultMap>
 
 	<!-- 모든 일반거래처 조회 -->
-  <select id="getList" resultMap="PartnerDetailResultMap">
+  <select id="getList" parameterType="String" resultMap="PartnerDetailResultMap">
     SELECT * 
     FROM partner_detail
     WHERE use_flag = 'a1'
+    AND co_idx = #{coIdx}
     ORDER BY partner_code
   </select>
 
   <!-- 거래처 코드로 일반거래처 조회 -->
-  <select id="getListByCode" parameterType="int" resultMap="PartnerDetailResultMap">
+  <select id="getListByCode" parameterType="PartnerDetailDTO" resultMap="PartnerDetailResultMap">
     SELECT * 
     FROM partner_detail 
     WHERE partner_code = #{partnerCode} 
     AND use_flag = 'a1'
+    AND co_idx = #{coIdx}
   </select>
 
   <!-- 거래처 이름으로 일반거래처 조회 (부분검색) -->
-  <select id="getListByName" parameterType="string" resultMap="PartnerDetailResultMap">
+  <select id="getListByName" parameterType="PartnerDetailDTO" resultMap="PartnerDetailResultMap">
     SELECT * 
     FROM partner_detail 
     WHERE partner_name 
     LIKE CONCAT('%', #{partnerName}, '%') 
     AND use_flag = 'a1'
+    AND co_idx = #{coIdx}
   </select>
 </mapper>

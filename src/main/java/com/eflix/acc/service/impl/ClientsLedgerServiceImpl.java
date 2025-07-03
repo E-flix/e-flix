@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import com.eflix.acc.dto.EntryMasterDTO;
 import com.eflix.acc.mapper.ClientsLedgerMapper;
 import com.eflix.acc.service.ClientsLedgerService;
+import com.eflix.common.security.auth.AuthContext;
+
 import lombok.RequiredArgsConstructor;
 
 /* ============================================
@@ -20,13 +22,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ClientsLedgerServiceImpl implements ClientsLedgerService {
   private final ClientsLedgerMapper clientsLedgerMapper;
+  private final AuthContext authContext;
 
   /**
    * 잔액 조건 전체조회
    */
   @Override
   public List<EntryMasterDTO> getList(String startDate, String endDate, String accountCode, String partnerCode) {
-      return clientsLedgerMapper.getList(startDate, endDate, accountCode, partnerCode);
+    String coIdx = authContext.getCoIdx();
+    return clientsLedgerMapper.getList(startDate, endDate, accountCode, partnerCode, coIdx);
   }
 
   /**
@@ -34,6 +38,7 @@ public class ClientsLedgerServiceImpl implements ClientsLedgerService {
    */
   @Override
   public List<EntryMasterDTO> getListDetail(String startDate, String endDate, String accountCode, String partnerCode) {
-      return clientsLedgerMapper.getListDetail(startDate, endDate, accountCode, partnerCode);
+    String coIdx = authContext.getCoIdx();
+    return clientsLedgerMapper.getListDetail(startDate, endDate, accountCode, partnerCode, coIdx);
   }
 }
