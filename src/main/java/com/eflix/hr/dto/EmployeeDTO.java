@@ -45,4 +45,13 @@ public class EmployeeDTO {
 
     private String coIdx;
 
+    private String grdIdx;
+    private String roleId;
+    private String workTypeId;
+    private String empImg;
+    private String empContract;
+    private String bankCode;
+    private int leaveAllDays;
+    private int leaveDays;
+    private String empRole;
 }

@@ -9,7 +9,6 @@ import com.eflix.common.jasperResolver.JasperPreviewPDF;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
-import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.etc.InvoiceDTO;
 import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.dto.etc.SubMasterDTO;
@@ -17,21 +16,11 @@ import com.eflix.main.service.CompanyService;
 import com.eflix.main.service.ReportService;
 import com.eflix.main.service.SubscriptionService;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.JasperRunManager;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.util.JRLoader;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -39,19 +28,15 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 @Slf4j
 @RestController
@@ -82,6 +67,7 @@ public class SubscriptionRestController {
 
     @PostMapping("/contract")
     public ResponseEntity<ResResult> postMethodName(@RequestBody Map<String,String> data) {
+        log.info(data.toString());
         ResResult result;
 
         String contractHTML = data.get("contractHTML");
@@ -110,8 +96,9 @@ public class SubscriptionRestController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PostMapping("/subscription")
+    @PostMapping("/insert")
     public ResponseEntity<ResResult> postMethodName(@RequestBody SubMasterDTO subMasterDTO) {
+        log.info(subMasterDTO.toString());
         ResResult result;
         try {
             subscriptionService.insertSubscriptionInfo(subMasterDTO.getSubscriptionDTO(), subMasterDTO.getMasterDTO());

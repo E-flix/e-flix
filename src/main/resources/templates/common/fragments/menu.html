@@ -10,20 +10,36 @@
 -->
 <html xmlns:th="http://www.thymeleaf.org">
 <div th:fragment="menu">
+	
 	<!-- divider -->
-	<hr class="sidebar-divider d-none d-md-block">
-	<li th:replace="~{common/fragments/item/hr::hr}"></li>
-	<!-- divider -->
-	<hr class="sidebar-divider d-none d-md-block">
+	<div class="" sec:authorize="hasRole('MASTER')">
+		<hr class="sidebar-divider d-none d-md-block">
+		<li th:replace="~{common/fragments/item/mgr::mgr}"></li>
+	</div>
 
-	<li th:replace="~{common/fragments/item/bsn::bsn}"></li>
 	<!-- divider -->
-	<hr class="sidebar-divider d-none d-md-block">
+	<div class="" sec:authorize="hasAnyRole('HR', 'ACC')">
+		<hr class="sidebar-divider d-none d-md-block">
+		<li th:replace="~{common/fragments/item/hr::hr}"></li>
+	</div>
 
-	<li th:replace="~{common/fragments/item/purchs::purchs}"></li>
 	<!-- divider -->
-	<hr class="sidebar-divider d-none d-md-block">
+	<div class="" sec:authorize="hasAnyRole('HR', 'ACC')">
+		<hr class="sidebar-divider d-none d-md-block">
+		<li th:replace="~{common/fragments/item/acc::acc}"></li>
+	</div>
 
-	<li th:replace="~{common/fragments/item/acc::acc}"></li>
+	<!-- divider -->
+	<div class="" sec:authorize="hasAnyRole('BNZ', 'PURCHS')">
+		<hr class="sidebar-divider d-none d-md-block">
+		<li th:replace="~{common/fragments/item/bsn::bsn}"></li>
+	</div>
+
+	<!-- divider -->
+	<div class="" sec:authorize="hasAnyRole('BNZ', 'PURCHS')">
+		<hr class="sidebar-divider d-none d-md-block">
+		<li th:replace="~{common/fragments/item/purchs::purchs}"></li>
+	</div>
 </div>
+
 </html>

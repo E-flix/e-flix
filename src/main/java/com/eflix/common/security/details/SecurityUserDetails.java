@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.eflix.common.security.dto.SecurityEmpDTO;
 import com.eflix.common.security.dto.SecurityMasterDTO;
-import com.eflix.common.security.dto.UserDTO;
+import com.eflix.common.security.dto.SecurityUserDTO;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,33 +19,37 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class SecurityUserDetails implements UserDetails {
 
-	private final UserDTO userDTO;
+	private final SecurityUserDTO securityUserDTO;
 	private final SecurityEmpDTO securityEmpDTO;
 	private final SecurityMasterDTO securityMasterDTO;
 
 	private final Collection<? extends GrantedAuthority> authorities;
 
 	// 메인 사용자 로그인
-	public SecurityUserDetails(UserDTO user) {
-		this.userDTO = user;
+	public SecurityUserDetails(SecurityUserDTO user) {
+		this.securityUserDTO = user;
 		this.securityEmpDTO = null;
 		this.securityMasterDTO = null;
 		this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserRole()));
+		
+		log.info("일반 계정 - {}", this.securityUserDTO);
 	}
 
 	// ERP 사원 로그인
 	public SecurityUserDetails(SecurityEmpDTO employee, List<String> roleCodes) {
-		this.userDTO = null;
+		this.securityUserDTO = null;
 		this.securityEmpDTO = employee;
 		this.securityMasterDTO = null;
 		this.authorities = roleCodes.stream()
-			.map(code -> new SimpleGrantedAuthority("ROLE_" + code))
+			.map(code -> new SimpleGrantedAuthority(code))
 			.collect(Collectors.toList());
+			
+		log.info("사원 계정 - {}", this.securityEmpDTO);
 	}
 
 	// ERP 마스터 로그인
 	public SecurityUserDetails(SecurityMasterDTO master) {
-		this.userDTO = null;
+		this.securityUserDTO = null;
 		this.securityEmpDTO = null;
 		this.securityMasterDTO = master;
 		this.authorities = List.of(new SimpleGrantedAuthority("ROLE_MASTER"));
@@ -55,7 +59,7 @@ public class SecurityUserDetails implements UserDetails {
 
 	@Override
 	public String getPassword() {
-		if (userDTO != null) return userDTO.getUserPw();
+		if (securityUserDTO != null) return securityUserDTO.getUserPw();
 		if (securityEmpDTO != null) return securityEmpDTO.getEmpPw();
 		if (securityMasterDTO != null) return securityMasterDTO.getMstPw();
 		return null;
@@ -63,7 +67,7 @@ public class SecurityUserDetails implements UserDetails {
 
 	@Override
 	public String getUsername() {
-		if (userDTO != null) return userDTO.getUserId();
+		if (securityUserDTO != null) return securityUserDTO.getUserId();
 		if (securityEmpDTO != null) return securityEmpDTO.getEmpEmail();
 		if (securityMasterDTO != null) return securityMasterDTO.getMstId();
 		return null;

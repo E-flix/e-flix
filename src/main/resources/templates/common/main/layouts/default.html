@@ -112,14 +112,14 @@
 				<div class="modal-body border-0 p-4">
 					<form id="loginForm" action="/login" method="post">
 						<div class="form-floating mb-3">
-							<input class="form-control" id="user_id" name="user_id" type="text" placeholder="아이디..."
-								data-sb-validations="required" /> <label for="user_id">아이디</label>
-							<div class="invalid-login" data-sb-login="user_id:required">아이디를 입력해주세요.</div>
+							<input class="form-control" id="username" name="username" type="text" placeholder="아이디..."
+								data-sb-validations="required" /> <label for="username">아이디</label>
+							<div class="invalid-login" data-sb-login="username:required">아이디를 입력해주세요.</div>
 						</div>
 						<div class="form-floating mb-3">
-							<input class="form-control" id="user_pw" name="user_pw" type="password" placeholder="****"
-								data-sb-validations="required" /> <label for="user_pw">비밀번호</label>
-							<div class="invalid-login" data-sb-login="user_pw:required">비밀번호를 입력해주세요.</div>
+							<input class="form-control" id="password" name="password" type="password" placeholder="****"
+								data-sb-validations="required" /> <label for="password">비밀번호</label>
+							<div class="invalid-login" data-sb-login="password:required">비밀번호를 입력해주세요.</div>
 						</div>
 						<div class="d-grid">
 							<button class="btn btn-primary rounded-pill btn-lg" id="loginBtn"

@@ -8,6 +8,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.common.security.dto.SecurityEmpDTO;
 import com.eflix.common.security.dto.SecurityMasterDTO;
+import com.eflix.common.security.dto.SecurityUserDTO;
 import com.eflix.common.security.dto.UserDTO;
 import com.eflix.main.dto.MasterDTO;
 
@@ -64,6 +65,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
             log.info("ERP 사원 로그인 성공: {}", securityEmpDTO.getEmpEmail());
 
+            request.getSession().setAttribute("authorities", userDetails.getAuthorities());
             response.sendRedirect("/erp");
         }
 
@@ -73,23 +75,27 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
             request.getSession().setAttribute("mstId", masterDTO.getMstId());
             request.getSession().setAttribute("coIdx", masterDTO.getCoIdx());
+            request.getSession().setAttribute("coIdx", masterDTO.getMstName());
             request.getSession().setAttribute("role", "ROLE_MASTER");
 
             log.info("ERP 마스터 로그인 성공: {}", masterDTO.getMstId());
 
-            response.sendRedirect("/erp/master");
+            request.getSession().setAttribute("authorities", userDetails.getAuthorities());
+            response.sendRedirect("/erp");
         }
 
         // 메인 사용자 로그인
-        else if (userDetails.getUserDTO() != null) {
-            UserDTO userDTO = userDetails.getUserDTO();
+        else if (userDetails.getSecurityUserDTO() != null) {
+            SecurityUserDTO securityUserDTO = userDetails.getSecurityUserDTO();
 
-            request.getSession().setAttribute("userIdx", userDTO.getUserIdx());
-            request.getSession().setAttribute("userId", userDTO.getUserId());
-            request.getSession().setAttribute("userName", userDTO.getUserName());
+            request.getSession().setAttribute("userIdx", securityUserDTO.getUserIdx());
+            request.getSession().setAttribute("userId", securityUserDTO.getUserId());
+            request.getSession().setAttribute("userName", securityUserDTO.getUserName());
 
-            log.info("메인 사용자 로그인 성공: {}", userDTO.getUserId());
-
+            log.info("메인 사용자 로그인 성공: {}", securityUserDTO.getUserId());
+            
+            request.getSession().setAttribute("authorities", userDetails.getAuthorities());
+            
             response.sendRedirect("/");
         }
 

@@ -1,21 +1,58 @@
 package com.eflix.bsn.dto;
 
-import java.math.BigDecimal;
-
 import lombok.Data;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
-// 주문서 상세 DTO
+/**
+ * 주문서 상세 DTO
+ * ORDERS_DETAIL 컬럼 기준
+ */
 @Data
 public class OrdersDetailDTO {
-  private String      orderNo;       // FK
-    private Integer     lineNo;        // 순번
-    private String      itemCode;      // 품목코드
-    private String      itemName;      // 품목명 (조회용)
-    private String      spec;          // 규격 (조회용)
-    private BigDecimal  qty;           // 수량
-    private BigDecimal  unitPrice;     // 단가
-    private BigDecimal  supplyAmount;  // 공급가액
-    private BigDecimal  taxAmount;     // 부가세
-    private BigDecimal  totalAmount;   // 합계
-    private String      remarks;       // 비고
+
+    /** FK - 주문번호 */
+    private String orderNo;
+
+    /** 라인번호(순번) */
+    private int lineNo;
+
+    /** 품목 코드 */
+    private String itemCode;
+
+    /** 품목명 */
+    private String itemName;
+
+    /** 규격 */
+    private String spec;
+
+    /** 수량 */
+    private BigDecimal qty;
+
+    /** 단가 */
+    private BigDecimal unitPrice;
+
+    /** 공급가액 */
+    private BigDecimal supplyAmount;
+
+    /** 부가세 */
+    private BigDecimal taxAmount;
+
+    /** 총합계 */
+    private BigDecimal totalAmount;
+
+    /** 비고 */
+    private String remarks;
+
+    /** 회사(조직) 구분 */
+    private String coIdx;
+
+    /** 출고일 */
+    private LocalDate outboundDt;
+
+    /** 적치일 */
+    private LocalDate catchDt;
+
+    /** 출고 상태 */
+    private String outState;
 }

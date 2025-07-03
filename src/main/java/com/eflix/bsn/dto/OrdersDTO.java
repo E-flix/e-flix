@@ -1,30 +1,38 @@
 package com.eflix.bsn.dto;
 
-import java.math.BigDecimal;
+import lombok.Data;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Data;
-
 /**
- * 주문서 DTO
+ * 주문서 헤더 DTO
+ * ORDERS 컬럼 기준
  */
-
 @Data
 public class OrdersDTO {
-    private String  orderNo;
-    private String  quotationNo;
-    private LocalDate orderDate;
-    private String  empCd;        // 영업사원 코드
-    private String   phoneNumber;     // ← PHONE_NUMBER 컬럼 매핑
-    private String   deliveryAddr;    // DELIVERY_ADDR 컬럼
-    private String   warehouseCd;     // WAREHOUSE_CD 컬럼
-    private LocalDate deliveryDt;     // DELIVERY_DT 컬럼
-    private LocalDate expectedPaymentDt; // EXPECTED_PAYMENT_DT 컬럼
-    private String   paymentTerms;
-    private String   customerCd;
-    private String taxInvoiceYn;   // ← Y / N 값 들어올 곳
-    private BigDecimal totalAmount;
-    private BigDecimal orderTotal;
-    private List<OrdersDetailDTO> details;
+
+    /** PK */
+    private String orderNo;
+
+    /** 주문일자 */
+    private LocalDate orderDt;
+
+    /** 결제조건 */
+    private String paymentTerms;
+
+    /** 거래처 코드 */
+    private String customerCd;
+
+    /** 회사(조직) 구분 */
+    private String coIdx;
+
+    /** 주문서 작성자 */
+    private String orderWriter;
+
+    /** 비고 */
+    private String remarks;
+
+    /** 상세 목록 */
+    private List<OrdersDetailDTO> details = new ArrayList<>();
 }
