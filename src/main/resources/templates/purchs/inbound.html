@@ -30,48 +30,70 @@
 			<label class="btn btn-outline-secondary btn-sm me-1" for="obd">출고</label>
 		</div>
 	</div>
-	<div class="card border-0 mt-3">
-		<div class="card-body">
-			<div class="row mb-3 align-items-end">
-				<div class="col-md-2">
-					<label class="form-label" for="todayDate">생산날짜</label>
-					<!--보이는 날짜 yyyy-MM-dd -->
-					<input type="text" class="form-control form-control-sm" id="todayDate" readonly>
-					<!--서버 전송용 날짜 yyyy-MM-dd:HH:mm:ss -->
-					<input type="hidden" id="fullDateTime" hidden>
+
+	<div class="d-flex justify-content-end mb-2 gap-2">
+		<button type="button" class="btn btn-success btn-sm" id="makeBtn">생산</button>
+		<button type="button" class="btn btn-danger btn-sm" id="rejectBtn">반려</button>
+		<button type="button" class="btn btn-primary btn-sm" id="inboundBtn">창고입고</button>
+	</div>
+
+	<div class="card border-0">
+		<div class="card-body" style="padding: 1px;">
+			<div class="row" style="height: 75vh;">
+
+				<!-- 제품 테이블 (AG Grid) -->
+				<div class="col-md-9">
+					<div id="inboundGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 				</div>
-				<div class="col-md-2">
-					<label class="form-label">제품명</label>
-					<input type="text" class="form-control form-control-sm" id="prodName" placeholder="제품명">
-				</div>
-				<div class="col-md-2">
-					<label class="form-label">제품분류</label>
-					<select class="form-control form-control-sm" id="productType">
-						<option selected>제품분류선택</option>
-						<option th:each="cd: ${ibdp} " th:value="${cd.commonCode}" th:text="${cd.commonCodeName}">
-						</option>
-					</select>
-				</div>
-				<div class="col-md-2">
-					<label class="form-label">제품크기</label>
-					<input type="text" class="form-control form-control-sm" id="prodQuantity" placeholder="제품수량">
-				</div>
-				<div class="col-md-2">
-					<label class="form-label">안전재고유무</label>
-					<input type="text" class="form-control form-control-sm" id="safetyStockAmount" placeholder="안전재고량">
-				</div>
-				<div class="col-md-2">
-					<div class="d-flex gap-2">
-						<button type="button" class="btn btn-success btn-sm" id="makeBtn">생산</button>
-						<button type="button" class="btn btn-danger btn-sm" id="rejectBtn">반려</button>
-						<button type="button" class="btn btn-primary btn-sm" id="inboundBtn">창고입고</button>
+
+				<div class="col-md-3">
+
+					<div class="border rounded p-3 shadow-sm bg-gray h-100 d-flex flex-column justify-content-between">
+						<div>
+							<h5 class="mb-3 text-center">제품입고 정보 입력</h5>
+
+							<div class="mb-3">
+								<label class="form-label" for="todayDate">생산날짜</label>
+								<!--보이는 날짜 yyyy-MM-dd -->
+								<input type="text" class="form-control form-control-sm" id="todayDate" readonly>
+								<!--서버 전송용 날짜 yyyy-MM-dd:HH:mm:ss -->
+								<input type="hidden" id="fullDateTime" hidden>
+							</div>
+
+							<div class="mb-3">
+								<label class="form-label">제품명</label>
+								<input type="text" class="form-control form-control-sm" id="prodName" placeholder="제품명">
+							</div>
+
+							<div class="mb-3">
+								<label class="form-label">제품분류</label>
+								<select class="form-control form-control-sm" id="productType">
+									<option selected>제품분류선택</option>
+									<option th:each="cd: ${ibdp} " th:value="${cd.commonCode}"
+										th:text="${cd.commonCodeName}">
+									</option>
+								</select>
+							</div>
+
+							<div class="mb-3">
+								<label class="form-label">제품크기</label>
+								<input type="text" class="form-control form-control-sm" id="prodQuantity"
+									placeholder="제품수량">
+							</div>
+
+							<div class="mb-3">
+								<label class="form-label">안전재고유무</label>
+								<input type="text" class="form-control form-control-sm" id="safetyStockAmount"
+									placeholder="안전재고량">
+							</div>
+
+						</div>
 					</div>
+
 				</div>
+
 			</div>
-			<!-- 제품 테이블 (AG Grid) -->
-			<div class="grid-container mb-4" style="height: 40vh; width: 100%;">
-				<div id="inboundGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
-			</div>
+
 			<!-- 창고 테이블 (AG Grid) -->
 			<div class="grid-container" style="height: 30vh; width: 100%;">
 				<div id="warehouseGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
@@ -101,9 +123,9 @@
 								<td><input id="summaryWarehouseId" type="text" readonly
 										class="form-control form-control-sm mx-auto" /></td>
 								<td><input id="summaryWarehouseAmount" type="text" readonly
-										class="form-control form-control-sm mx-auto" style="color: green;"/></td>
+										class="form-control form-control-sm mx-auto" style="color: green;" /></td>
 								<td><input id="summaryAmountAfter" type="text" readonly
-										class="form-control form-control-sm mx-auto" style="color: blue;"/></td>
+										class="form-control form-control-sm mx-auto" style="color: blue;" /></td>
 							</tr>
 						</tbody>
 					</table>
@@ -163,8 +185,8 @@
 		columnDefs: [
 			{ headerName: "창고ID", field: "warehouseId", editable: false },
 			{ headerName: "창고위치", field: "warehouseLocation", editable: false },
-			{ headerName: "최대용량", field: "warehouseScale", editable: false, cellStyle: { color: 'orange'}  },
-			{ headerName: "현재용량", field: "warehouseCurrent", editable: false, cellStyle: { color: 'green'} },
+			{ headerName: "최대용량", field: "warehouseScale", editable: false, cellStyle: { color: 'orange' } },
+			{ headerName: "현재용량", field: "warehouseCurrent", editable: false, cellStyle: { color: 'green' } },
 			{ headerName: "입고가능용량", field: "conf", editable: false, cellStyle: { color: 'blue' } },
 		],
 		rowSelection: {

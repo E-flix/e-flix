@@ -17,6 +17,7 @@
 <head>
 	<title>창고관리</title>
 </head>
+<!--container-fluid 시작-->
 <div layout:fragment="content" class="container-fluid">
 	<div class="d-flex justify-content-between align-items-center mb-4">
 		<h2>창고관리</h2>
@@ -74,7 +75,7 @@
 		</div>
 	</div>
 </div>
-
+<!--container-fluid 끝-->
 </html>
 
 <!-- AG Grid 설정 -->
@@ -94,8 +95,12 @@
 				headerName: "창고상태",
 				field: "commonCodeName",
 				editable: false,
-				cellStyle: (params) => {
-					return params.value === "비었음" ? { color: 'red' } : { color: 'green' };
+				cellRenderer: (params) => {
+					if(params.value === "비었음") {
+						return `<span class="badge bg-danger">비었음</span>`;
+					} else {
+						return `<span class="badge bg-success">재고존재</span>`;
+					}
 				},
 			}
 		],
