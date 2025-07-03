@@ -1,16 +1,15 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 김희정
-  - 최초작성 : 2025-06-18
-  - 설명     : 재무상태표 화면
+  - 최초작성 : 2025-07-04
+  - 설명     : 합계잔액시산표 화면
   -----------------------------------------------
   [ 변경 이력 ]
-  - 2025-06-18 (김희정): title 및 내용 추가
-  - 2025-07-04 (김희정): 재무상태표 레이아웃
+  - 2025-07-04 (김희정): 합계잔액시산표 레이아웃
 ============================================ -->
 
 <head>
-  <title>재무상태표</title>
+  <title>합계잔액시산표</title>
   <style>
     :root {
       /* Colors */
@@ -1173,11 +1172,11 @@
   </style>
 </head>
 <div layout:fragment="content">
-  <div id="Balance-sheet">
-    <!-- 재무상태표 섹션 -->
-    <section id="balance-sheet" class="content-section active">
+  <div id="cost-statement">
+    <!-- 합계잔액시산표 섹션 -->
+    <section id="trial-balance" class="content-section">
       <div class="section-header">
-        <h1>표준재무상태표 (별지 제40호의6서식)</h1>
+        <h1>표준합계잔액시산표 (별지 제40호의9서식)</h1>
         <p class="section-subtitle">한국제조(주) - 2024년 12월 31일 현재 (단위: 백만원)</p>
       </div>
 
@@ -1185,200 +1184,15 @@
         <table class="standard-table">
           <thead>
             <tr>
-              <th width="10%">계정코드</th>
-              <th width="50%">계정과목</th>
-              <th width="20%">당기말</th>
-              <th width="20%">전기말</th>
+              <th width="40%">계정과목</th>
+              <th width="15%">차변</th>
+              <th width="15%">대변</th>
+              <th width="15%">차변잔액</th>
+              <th width="15%">대변잔액</th>
             </tr>
           </thead>
-          <tbody>
-            <tr class="section-header-row">
-              <td colspan="4"><strong>자 산</strong></td>
-            </tr>
-            <tr class="subsection-header">
-              <td colspan="4"><strong>Ⅰ. 유동자산</strong></td>
-            </tr>
-            <tr>
-              <td>03</td>
-              <td>현금 및 현금성자산</td>
-              <td class="amount-input"><input type="number" value="2500" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>04</td>
-              <td>단기금융상품</td>
-              <td class="amount-input"><input type="number" value="1500" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>10</td>
-              <td>매출채권</td>
-              <td class="amount-input"><input type="number" value="8500" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>11</td>
-              <td>선급비용</td>
-              <td class="amount-input"><input type="number" value="300" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>19</td>
-              <td>상품</td>
-              <td class="amount-input"><input type="number" value="6200" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>20</td>
-              <td>제품</td>
-              <td class="amount-input"><input type="number" value="4800" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>21</td>
-              <td>재공품</td>
-              <td class="amount-input"><input type="number" value="1200" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>22</td>
-              <td>원재료</td>
-              <td class="amount-input"><input type="number" value="3600" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr class="total-row">
-              <td></td>
-              <td><strong>유동자산 소계</strong></td>
-              <td class="amount-total" id="current-assets-total">28,600</td>
-              <td class="amount-total"></td>
-            </tr>
-
-            <tr class="subsection-header">
-              <td colspan="4"><strong>Ⅱ. 비유동자산</strong></td>
-            </tr>
-            <tr>
-              <td>39</td>
-              <td>토지</td>
-              <td class="amount-input"><input type="number" value="12000" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>40</td>
-              <td>건물</td>
-              <td class="amount-input"><input type="number" value="18000" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>42</td>
-              <td>기계장치</td>
-              <td class="amount-input"><input type="number" value="15000" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>45</td>
-              <td>차량운반구</td>
-              <td class="amount-input"><input type="number" value="800" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr class="total-row">
-              <td></td>
-              <td><strong>비유동자산 소계</strong></td>
-              <td class="amount-total" id="non-current-assets-total">53,600</td>
-              <td class="amount-total"></td>
-            </tr>
-            <tr class="grand-total-row">
-              <td></td>
-              <td><strong>자산총계</strong></td>
-              <td class="amount-grand-total" id="total-assets-bs">82,200</td>
-              <td class="amount-grand-total"></td>
-            </tr>
-
-            <tr class="section-header-row">
-              <td colspan="4"><strong>부 채</strong></td>
-            </tr>
-            <tr class="subsection-header">
-              <td colspan="4"><strong>Ⅰ. 유동부채</strong></td>
-            </tr>
-            <tr>
-              <td>64</td>
-              <td>단기차입금</td>
-              <td class="amount-input"><input type="number" value="5000" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>65</td>
-              <td>매입채무</td>
-              <td class="amount-input"><input type="number" value="4200" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>67</td>
-              <td>미지급비용</td>
-              <td class="amount-input"><input type="number" value="1200" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr class="total-row">
-              <td></td>
-              <td><strong>유동부채 소계</strong></td>
-              <td class="amount-total" id="current-liabilities-total">12,100</td>
-              <td class="amount-total"></td>
-            </tr>
-
-            <tr class="subsection-header">
-              <td colspan="4"><strong>Ⅱ. 비유동부채</strong></td>
-            </tr>
-            <tr>
-              <td>74</td>
-              <td>장기차입금</td>
-              <td class="amount-input"><input type="number" value="8000" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>83</td>
-              <td>퇴직급여충당금</td>
-              <td class="amount-input"><input type="number" value="1500" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr class="total-row">
-              <td></td>
-              <td><strong>비유동부채 소계</strong></td>
-              <td class="amount-total" id="non-current-liabilities-total">9,700</td>
-              <td class="amount-total"></td>
-            </tr>
-            <tr class="grand-total-row">
-              <td></td>
-              <td><strong>부채총계</strong></td>
-              <td class="amount-grand-total" id="total-liabilities-bs">21,800</td>
-              <td class="amount-grand-total"></td>
-            </tr>
-
-            <tr class="section-header-row">
-              <td colspan="4"><strong>자 본</strong></td>
-            </tr>
-            <tr>
-              <td>88</td>
-              <td>자본금</td>
-              <td class="amount-input"><input type="number" value="25000" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr>
-              <td>89</td>
-              <td>이익잉여금</td>
-              <td class="amount-input"><input type="number" value="2800" class="financial-input"></td>
-              <td class="amount-input"><input type="number" class="financial-input"></td>
-            </tr>
-            <tr class="grand-total-row">
-              <td></td>
-              <td><strong>자본총계</strong></td>
-              <td class="amount-grand-total" id="total-equity-bs">27,800</td>
-              <td class="amount-grand-total"></td>
-            </tr>
-            <tr class="grand-total-row">
-              <td></td>
-              <td><strong>부채와자본총계</strong></td>
-              <td class="amount-grand-total" id="total-liabilities-equity">49,600</td>
-              <td class="amount-grand-total"></td>
-            </tr>
+          <tbody id="trial-balance-tbody">
+            <!-- 시산표 데이터가 JavaScript로 동적 생성됩니다 -->
           </tbody>
         </table>
       </div>
@@ -1467,185 +1281,185 @@
 
     // 시산표 데이터
     const trialBalanceData = [{
-        account: "현금 및 현금성자산",
-        debit: 2500,
-        credit: 0
-      },
-      {
-        account: "단기금융상품",
-        debit: 1500,
-        credit: 0
-      },
-      {
-        account: "매출채권",
-        debit: 8500,
-        credit: 0
-      },
-      {
-        account: "선급비용",
-        debit: 300,
-        credit: 0
-      },
-      {
-        account: "상품",
-        debit: 6200,
-        credit: 0
-      },
-      {
-        account: "제품",
-        debit: 4800,
-        credit: 0
-      },
-      {
-        account: "재공품",
-        debit: 1200,
-        credit: 0
-      },
-      {
-        account: "원재료",
-        debit: 3600,
-        credit: 0
-      },
-      {
-        account: "저장품",
-        debit: 400,
-        credit: 0
-      },
-      {
-        account: "토지",
-        debit: 12000,
-        credit: 0
-      },
-      {
-        account: "건물",
-        debit: 18000,
-        credit: 0
-      },
-      {
-        account: "기계장치",
-        debit: 15000,
-        credit: 0
-      },
-      {
-        account: "차량운반구",
-        debit: 800,
-        credit: 0
-      },
-      {
-        account: "단기차입금",
-        debit: 0,
-        credit: 5000
-      },
-      {
-        account: "매입채무",
-        debit: 0,
-        credit: 4200
-      },
-      {
-        account: "미지급비용",
-        debit: 0,
-        credit: 1200
-      },
-      {
-        account: "장기차입금",
-        debit: 0,
-        credit: 8000
-      },
-      {
-        account: "퇴직급여충당금",
-        debit: 0,
-        credit: 1500
-      },
-      {
-        account: "자본금",
-        debit: 0,
-        credit: 25000
-      },
-      {
-        account: "이익잉여금",
-        debit: 0,
-        credit: 2800
-      },
-      {
-        account: "상품매출",
-        debit: 0,
-        credit: 8500
-      },
-      {
-        account: "제품매출",
-        debit: 0,
-        credit: 7500
-      },
-      {
-        account: "임대수입",
-        debit: 0,
-        credit: 300
-      },
-      {
-        account: "서비스수입",
-        debit: 0,
-        credit: 1200
-      },
-      {
-        account: "상품매출원가",
-        debit: 5800,
-        credit: 0
-      },
-      {
-        account: "제조ㆍ공사ㆍ분양ㆍ기타원가",
-        debit: 4700,
-        credit: 0
-      },
-      {
-        account: "급여와 임금",
-        debit: 1800,
-        credit: 0
-      },
-      {
-        account: "퇴직급여",
-        debit: 150,
-        credit: 0
-      },
-      {
-        account: "임차료",
-        debit: 450,
-        credit: 0
-      },
-      {
-        account: "감가상각비",
-        debit: 680,
-        credit: 0
-      },
-      {
-        account: "접대비",
-        debit: 200,
-        credit: 0
-      },
-      {
-        account: "광고선전비",
-        debit: 150,
-        credit: 0
-      },
-      {
-        account: "이자수익",
-        debit: 0,
-        credit: 125
-      },
-      {
-        account: "배당금수익",
-        debit: 0,
-        credit: 50
-      },
-      {
-        account: "이자비용",
-        debit: 240,
-        credit: 0
-      },
-      {
-        account: "기부금",
-        debit: 50,
-        credit: 0
-      }
+      account: "현금 및 현금성자산",
+      debit: 2500,
+      credit: 0
+    },
+    {
+      account: "단기금융상품",
+      debit: 1500,
+      credit: 0
+    },
+    {
+      account: "매출채권",
+      debit: 8500,
+      credit: 0
+    },
+    {
+      account: "선급비용",
+      debit: 300,
+      credit: 0
+    },
+    {
+      account: "상품",
+      debit: 6200,
+      credit: 0
+    },
+    {
+      account: "제품",
+      debit: 4800,
+      credit: 0
+    },
+    {
+      account: "재공품",
+      debit: 1200,
+      credit: 0
+    },
+    {
+      account: "원재료",
+      debit: 3600,
+      credit: 0
+    },
+    {
+      account: "저장품",
+      debit: 400,
+      credit: 0
+    },
+    {
+      account: "토지",
+      debit: 12000,
+      credit: 0
+    },
+    {
+      account: "건물",
+      debit: 18000,
+      credit: 0
+    },
+    {
+      account: "기계장치",
+      debit: 15000,
+      credit: 0
+    },
+    {
+      account: "차량운반구",
+      debit: 800,
+      credit: 0
+    },
+    {
+      account: "단기차입금",
+      debit: 0,
+      credit: 5000
+    },
+    {
+      account: "매입채무",
+      debit: 0,
+      credit: 4200
+    },
+    {
+      account: "미지급비용",
+      debit: 0,
+      credit: 1200
+    },
+    {
+      account: "장기차입금",
+      debit: 0,
+      credit: 8000
+    },
+    {
+      account: "퇴직급여충당금",
+      debit: 0,
+      credit: 1500
+    },
+    {
+      account: "자본금",
+      debit: 0,
+      credit: 25000
+    },
+    {
+      account: "이익잉여금",
+      debit: 0,
+      credit: 2800
+    },
+    {
+      account: "상품매출",
+      debit: 0,
+      credit: 8500
+    },
+    {
+      account: "제품매출",
+      debit: 0,
+      credit: 7500
+    },
+    {
+      account: "임대수입",
+      debit: 0,
+      credit: 300
+    },
+    {
+      account: "서비스수입",
+      debit: 0,
+      credit: 1200
+    },
+    {
+      account: "상품매출원가",
+      debit: 5800,
+      credit: 0
+    },
+    {
+      account: "제조ㆍ공사ㆍ분양ㆍ기타원가",
+      debit: 4700,
+      credit: 0
+    },
+    {
+      account: "급여와 임금",
+      debit: 1800,
+      credit: 0
+    },
+    {
+      account: "퇴직급여",
+      debit: 150,
+      credit: 0
+    },
+    {
+      account: "임차료",
+      debit: 450,
+      credit: 0
+    },
+    {
+      account: "감가상각비",
+      debit: 680,
+      credit: 0
+    },
+    {
+      account: "접대비",
+      debit: 200,
+      credit: 0
+    },
+    {
+      account: "광고선전비",
+      debit: 150,
+      credit: 0
+    },
+    {
+      account: "이자수익",
+      debit: 0,
+      credit: 125
+    },
+    {
+      account: "배당금수익",
+      debit: 0,
+      credit: 50
+    },
+    {
+      account: "이자비용",
+      debit: 240,
+      credit: 0
+    },
+    {
+      account: "기부금",
+      debit: 50,
+      credit: 0
+    }
     ];
 
     // DOM이 로드된 후 실행

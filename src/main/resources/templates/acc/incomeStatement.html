@@ -6,13 +6,2025 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-07-04 (김희정): 손익계산서 레이아웃
 ============================================ -->
+
 <head>
   <title>손익계산서</title>
+    <style>
+    :root {
+      /* Colors */
+      --color-background: rgba(252, 252, 249, 1);
+      --color-surface: rgba(255, 255, 253, 1);
+      --color-text: rgba(19, 52, 59, 1);
+      --color-text-secondary: rgba(98, 108, 113, 1);
+      --color-primary: rgba(33, 128, 141, 1);
+      --color-primary-hover: rgba(29, 116, 128, 1);
+      --color-primary-active: rgba(26, 104, 115, 1);
+      --color-secondary: rgba(94, 82, 64, 0.12);
+      --color-secondary-hover: rgba(94, 82, 64, 0.2);
+      --color-secondary-active: rgba(94, 82, 64, 0.25);
+      --color-border: rgba(94, 82, 64, 0.2);
+      --color-btn-primary-text: rgba(252, 252, 249, 1);
+      --color-card-border: rgba(94, 82, 64, 0.12);
+      --color-card-border-inner: rgba(94, 82, 64, 0.12);
+      --color-error: rgba(192, 21, 47, 1);
+      --color-success: rgba(33, 128, 141, 1);
+      --color-warning: rgba(168, 75, 47, 1);
+      --color-info: rgba(98, 108, 113, 1);
+      --color-focus-ring: rgba(33, 128, 141, 0.4);
+      --color-select-caret: rgba(19, 52, 59, 0.8);
+
+      /* Common style patterns */
+      --focus-ring: 0 0 0 3px var(--color-focus-ring);
+      --focus-outline: 2px solid var(--color-primary);
+      --status-bg-opacity: 0.15;
+      --status-border-opacity: 0.25;
+      --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23134252' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      --select-caret-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+      /* RGB versions for opacity control */
+      --color-success-rgb: 33, 128, 141;
+      --color-error-rgb: 192, 21, 47;
+      --color-warning-rgb: 168, 75, 47;
+      --color-info-rgb: 98, 108, 113;
+
+      /* Typography */
+      --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system,
+        BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-family-mono: "Berkeley Mono", ui-monospace, SFMono-Regular, Menlo,
+        Monaco, Consolas, monospace;
+      --font-size-xs: 11px;
+      --font-size-sm: 12px;
+      --font-size-base: 14px;
+      --font-size-md: 14px;
+      --font-size-lg: 16px;
+      --font-size-xl: 18px;
+      --font-size-2xl: 20px;
+      --font-size-3xl: 24px;
+      --font-size-4xl: 30px;
+      --font-weight-normal: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 550;
+      --font-weight-bold: 600;
+      --line-height-tight: 1.2;
+      --line-height-normal: 1.5;
+      --letter-spacing-tight: -0.01em;
+
+      /* Spacing */
+      --space-0: 0;
+      --space-1: 1px;
+      --space-2: 2px;
+      --space-4: 4px;
+      --space-6: 6px;
+      --space-8: 8px;
+      --space-10: 10px;
+      --space-12: 12px;
+      --space-16: 16px;
+      --space-20: 20px;
+      --space-24: 24px;
+      --space-32: 32px;
+
+      /* Border Radius */
+      --radius-sm: 6px;
+      --radius-base: 8px;
+      --radius-md: 10px;
+      --radius-lg: 12px;
+      --radius-full: 9999px;
+
+      /* Shadows */
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04),
+        0 2px 4px -1px rgba(0, 0, 0, 0.02);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04),
+        0 4px 6px -2px rgba(0, 0, 0, 0.02);
+      --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+
+      /* Animation */
+      --duration-fast: 150ms;
+      --duration-normal: 250ms;
+      --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+      /* Layout */
+      --container-sm: 640px;
+      --container-md: 768px;
+      --container-lg: 1024px;
+      --container-xl: 1280px;
+    }
+
+    /* Dark mode colors */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-background: rgba(31, 33, 33, 1);
+        --color-surface: rgba(38, 40, 40, 1);
+        --color-text: rgba(245, 245, 245, 1);
+        --color-text-secondary: rgba(167, 169, 169, 0.7);
+        --color-primary: rgba(50, 184, 198, 1);
+        --color-primary-hover: rgba(45, 166, 178, 1);
+        --color-primary-active: rgba(41, 150, 161, 1);
+        --color-secondary: rgba(119, 124, 124, 0.15);
+        --color-secondary-hover: rgba(119, 124, 124, 0.25);
+        --color-secondary-active: rgba(119, 124, 124, 0.3);
+        --color-border: rgba(119, 124, 124, 0.3);
+        --color-error: rgba(255, 84, 89, 1);
+        --color-success: rgba(50, 184, 198, 1);
+        --color-warning: rgba(230, 129, 97, 1);
+        --color-info: rgba(167, 169, 169, 1);
+        --color-focus-ring: rgba(50, 184, 198, 0.4);
+        --color-btn-primary-text: rgba(19, 52, 59, 1);
+        --color-card-border: rgba(119, 124, 124, 0.2);
+        --color-card-border-inner: rgba(119, 124, 124, 0.15);
+        --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+        --button-border-secondary: rgba(119, 124, 124, 0.2);
+        --color-border-secondary: rgba(119, 124, 124, 0.2);
+        --color-select-caret: rgba(245, 245, 245, 0.8);
+
+        /* Common style patterns - updated for dark mode */
+        --focus-ring: 0 0 0 3px var(--color-focus-ring);
+        --focus-outline: 2px solid var(--color-primary);
+        --status-bg-opacity: 0.15;
+        --status-border-opacity: 0.25;
+        --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23134252' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        --select-caret-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+        /* RGB versions for dark mode */
+        --color-success-rgb: 50, 184, 198;
+        --color-error-rgb: 255, 84, 89;
+        --color-warning-rgb: 230, 129, 97;
+        --color-info-rgb: 167, 169, 169;
+      }
+    }
+
+    /* Data attribute for manual theme switching */
+    [data-color-scheme="dark"] {
+      --color-background: rgba(31, 33, 33, 1);
+      --color-surface: rgba(38, 40, 40, 1);
+      --color-text: rgba(245, 245, 245, 1);
+      --color-text-secondary: rgba(167, 169, 169, 0.7);
+      --color-primary: rgba(50, 184, 198, 1);
+      --color-primary-hover: rgba(45, 166, 178, 1);
+      --color-primary-active: rgba(41, 150, 161, 1);
+      --color-secondary: rgba(119, 124, 124, 0.15);
+      --color-secondary-hover: rgba(119, 124, 124, 0.25);
+      --color-secondary-active: rgba(119, 124, 124, 0.3);
+      --color-border: rgba(119, 124, 124, 0.3);
+      --color-error: rgba(255, 84, 89, 1);
+      --color-success: rgba(50, 184, 198, 1);
+      --color-warning: rgba(230, 129, 97, 1);
+      --color-info: rgba(167, 169, 169, 1);
+      --color-focus-ring: rgba(50, 184, 198, 0.4);
+      --color-btn-primary-text: rgba(19, 52, 59, 1);
+      --color-card-border: rgba(119, 124, 124, 0.15);
+      --color-card-border-inner: rgba(119, 124, 124, 0.15);
+      --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+      --color-border-secondary: rgba(119, 124, 124, 0.2);
+      --color-select-caret: rgba(245, 245, 245, 0.8);
+
+      /* Common style patterns - updated for dark mode */
+      --focus-ring: 0 0 0 3px var(--color-focus-ring);
+      --focus-outline: 2px solid var(--color-primary);
+      --status-bg-opacity: 0.15;
+      --status-border-opacity: 0.25;
+      --select-caret-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23134252' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      --select-caret-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+      /* RGB versions for dark mode */
+      --color-success-rgb: 50, 184, 198;
+      --color-error-rgb: 255, 84, 89;
+      --color-warning-rgb: 230, 129, 97;
+      --color-info-rgb: 167, 169, 169;
+    }
+
+    [data-color-scheme="light"] {
+      --color-background: rgba(252, 252, 249, 1);
+      --color-surface: rgba(255, 255, 253, 1);
+      --color-text: rgba(19, 52, 59, 1);
+      --color-text-secondary: rgba(98, 108, 113, 1);
+      --color-primary: rgba(33, 128, 141, 1);
+      --color-primary-hover: rgba(29, 116, 128, 1);
+      --color-primary-active: rgba(26, 104, 115, 1);
+      --color-secondary: rgba(94, 82, 64, 0.12);
+      --color-secondary-hover: rgba(94, 82, 64, 0.2);
+      --color-secondary-active: rgba(94, 82, 64, 0.25);
+      --color-border: rgba(94, 82, 64, 0.2);
+      --color-btn-primary-text: rgba(252, 252, 249, 1);
+      --color-card-border: rgba(94, 82, 64, 0.12);
+      --color-card-border-inner: rgba(94, 82, 64, 0.12);
+      --color-error: rgba(192, 21, 47, 1);
+      --color-success: rgba(33, 128, 141, 1);
+      --color-warning: rgba(168, 75, 47, 1);
+      --color-info: rgba(98, 108, 113, 1);
+      --color-focus-ring: rgba(33, 128, 141, 0.4);
+
+      /* RGB versions for light mode */
+      --color-success-rgb: 33, 128, 141;
+      --color-error-rgb: 192, 21, 47;
+      --color-warning-rgb: 168, 75, 47;
+      --color-info-rgb: 98, 108, 113;
+    }
+
+    /* Base styles */
+    html {
+      font-size: var(--font-size-base);
+      font-family: var(--font-family-base);
+      line-height: var(--line-height-normal);
+      color: var(--color-text);
+      background-color: var(--color-background);
+      -webkit-font-smoothing: antialiased;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: inherit;
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 0;
+      font-weight: var(--font-weight-semibold);
+      line-height: var(--line-height-tight);
+      color: var(--color-text);
+      letter-spacing: var(--letter-spacing-tight);
+    }
+
+    h1 {
+      font-size: var(--font-size-4xl);
+    }
+
+    h2 {
+      font-size: var(--font-size-3xl);
+    }
+
+    h3 {
+      font-size: var(--font-size-2xl);
+    }
+
+    h4 {
+      font-size: var(--font-size-xl);
+    }
+
+    h5 {
+      font-size: var(--font-size-lg);
+    }
+
+    h6 {
+      font-size: var(--font-size-md);
+    }
+
+    p {
+      margin: 0 0 var(--space-16) 0;
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: color var(--duration-fast) var(--ease-standard);
+    }
+
+    a:hover {
+      color: var(--color-primary-hover);
+    }
+
+    code,
+    pre {
+      font-family: var(--font-family-mono);
+      font-size: calc(var(--font-size-base) * 0.95);
+      background-color: var(--color-secondary);
+      border-radius: var(--radius-sm);
+    }
+
+    code {
+      padding: var(--space-1) var(--space-4);
+    }
+
+    pre {
+      padding: var(--space-16);
+      margin: var(--space-16) 0;
+      overflow: auto;
+      border: 1px solid var(--color-border);
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-8) var(--space-16);
+      border-radius: var(--radius-base);
+      font-size: var(--font-size-base);
+      font-weight: 500;
+      line-height: 1.5;
+      cursor: pointer;
+      transition: all var(--duration-normal) var(--ease-standard);
+      border: none;
+      text-decoration: none;
+      position: relative;
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    .btn--primary {
+      background: var(--color-primary);
+      color: var(--color-btn-primary-text);
+    }
+
+    .btn--primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .btn--primary:active {
+      background: var(--color-primary-active);
+    }
+
+    .btn--secondary {
+      background: var(--color-secondary);
+      color: var(--color-text);
+    }
+
+    .btn--secondary:hover {
+      background: var(--color-secondary-hover);
+    }
+
+    .btn--secondary:active {
+      background: var(--color-secondary-active);
+    }
+
+    .btn--outline {
+      background: transparent;
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+
+    .btn--outline:hover {
+      background: var(--color-secondary);
+    }
+
+    .btn--sm {
+      padding: var(--space-4) var(--space-12);
+      font-size: var(--font-size-sm);
+      border-radius: var(--radius-sm);
+    }
+
+    .btn--lg {
+      padding: var(--space-10) var(--space-20);
+      font-size: var(--font-size-lg);
+      border-radius: var(--radius-md);
+    }
+
+    .btn--full-width {
+      width: 100%;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Form elements */
+    .form-control {
+      display: block;
+      width: 100%;
+      padding: var(--space-8) var(--space-12);
+      font-size: var(--font-size-md);
+      line-height: 1.5;
+      color: var(--color-text);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-base);
+      transition: border-color var(--duration-fast) var(--ease-standard),
+        box-shadow var(--duration-fast) var(--ease-standard);
+    }
+
+    textarea.form-control {
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-base);
+    }
+
+    select.form-control {
+      padding: var(--space-8) var(--space-12);
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: var(--select-caret-light);
+      background-repeat: no-repeat;
+      background-position: right var(--space-12) center;
+      background-size: 16px;
+      padding-right: var(--space-32);
+    }
+
+    /* Add a dark mode specific caret */
+    @media (prefers-color-scheme: dark) {
+      select.form-control {
+        background-image: var(--select-caret-dark);
+      }
+    }
+
+    /* Also handle data-color-scheme */
+    [data-color-scheme="dark"] select.form-control {
+      background-image: var(--select-caret-dark);
+    }
+
+    [data-color-scheme="light"] select.form-control {
+      background-image: var(--select-caret-light);
+    }
+
+    .form-control:focus {
+      border-color: var(--color-primary);
+      outline: var(--focus-outline);
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: var(--space-8);
+      font-weight: var(--font-weight-medium);
+      font-size: var(--font-size-sm);
+    }
+
+    .form-group {
+      margin-bottom: var(--space-16);
+    }
+
+    /* Card component */
+    .card {
+      background-color: var(--color-surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-card-border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: box-shadow var(--duration-normal) var(--ease-standard);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card__body {
+      padding: var(--space-16);
+    }
+
+    .card__header,
+    .card__footer {
+      padding: var(--space-16);
+      border-bottom: 1px solid var(--color-card-border-inner);
+    }
+
+    /* Status indicators - simplified with CSS variables */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-6) var(--space-12);
+      border-radius: var(--radius-full);
+      font-weight: var(--font-weight-medium);
+      font-size: var(--font-size-sm);
+    }
+
+    .status--success {
+      background-color: rgba(var(--color-success-rgb, 33, 128, 141),
+          var(--status-bg-opacity));
+      color: var(--color-success);
+      border: 1px solid rgba(var(--color-success-rgb, 33, 128, 141), var(--status-border-opacity));
+    }
+
+    .status--error {
+      background-color: rgba(var(--color-error-rgb, 192, 21, 47),
+          var(--status-bg-opacity));
+      color: var(--color-error);
+      border: 1px solid rgba(var(--color-error-rgb, 192, 21, 47), var(--status-border-opacity));
+    }
+
+    .status--warning {
+      background-color: rgba(var(--color-warning-rgb, 168, 75, 47),
+          var(--status-bg-opacity));
+      color: var(--color-warning);
+      border: 1px solid rgba(var(--color-warning-rgb, 168, 75, 47), var(--status-border-opacity));
+    }
+
+    .status--info {
+      background-color: rgba(var(--color-info-rgb, 98, 108, 113),
+          var(--status-bg-opacity));
+      color: var(--color-info);
+      border: 1px solid rgba(var(--color-info-rgb, 98, 108, 113), var(--status-border-opacity));
+    }
+
+    /* Container layout */
+    .container {
+      width: 100%;
+      margin-right: auto;
+      margin-left: auto;
+      padding-right: var(--space-16);
+      padding-left: var(--space-16);
+    }
+
+    @media (min-width: 640px) {
+      .container {
+        max-width: var(--container-sm);
+      }
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        max-width: var(--container-md);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .container {
+        max-width: var(--container-lg);
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .container {
+        max-width: var(--container-xl);
+      }
+    }
+
+    /* Utility classes */
+    .flex {
+      display: flex;
+    }
+
+    .flex-col {
+      flex-direction: column;
+    }
+
+    .items-center {
+      align-items: center;
+    }
+
+    .justify-center {
+      justify-content: center;
+    }
+
+    .justify-between {
+      justify-content: space-between;
+    }
+
+    .gap-4 {
+      gap: var(--space-4);
+    }
+
+    .gap-8 {
+      gap: var(--space-8);
+    }
+
+    .gap-16 {
+      gap: var(--space-16);
+    }
+
+    .m-0 {
+      margin: 0;
+    }
+
+    .mt-8 {
+      margin-top: var(--space-8);
+    }
+
+    .mb-8 {
+      margin-bottom: var(--space-8);
+    }
+
+    .mx-8 {
+      margin-left: var(--space-8);
+      margin-right: var(--space-8);
+    }
+
+    .my-8 {
+      margin-top: var(--space-8);
+      margin-bottom: var(--space-8);
+    }
+
+    .p-0 {
+      padding: 0;
+    }
+
+    .py-8 {
+      padding-top: var(--space-8);
+      padding-bottom: var(--space-8);
+    }
+
+    .px-8 {
+      padding-left: var(--space-8);
+      padding-right: var(--space-8);
+    }
+
+    .py-16 {
+      padding-top: var(--space-16);
+      padding-bottom: var(--space-16);
+    }
+
+    .px-16 {
+      padding-left: var(--space-16);
+      padding-right: var(--space-16);
+    }
+
+    .block {
+      display: block;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    :focus-visible {
+      outline: var(--focus-outline);
+      outline-offset: 2px;
+    }
+
+    /* Dark mode specifics */
+    [data-color-scheme="dark"] .btn--outline {
+      border: 1px solid var(--color-border-secondary);
+    }
+
+    @font-face {
+      font-family: 'FKGroteskNeue';
+      src: url('https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2') format('woff2');
+    }
+
+    /* 한국 표준 재무제표 ERP 시스템 스타일 */
+
+    /* 기본 레이아웃 */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* 사이드바 스타일 */
+    .sidebar {
+      width: 280px;
+      background: var(--color-primary);
+      color: var(--color-btn-primary-text);
+      padding: 0;
+      box-shadow: var(--shadow-lg);
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: var(--space-24);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-header h2 {
+      color: var(--color-btn-primary-text);
+      margin-bottom: var(--space-16);
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+    }
+
+    .company-info {
+      font-size: var(--font-size-sm);
+      line-height: 1.4;
+      opacity: 0.9;
+    }
+
+    .company-info p {
+      margin: var(--space-4) 0;
+    }
+
+    .nav-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-menu li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-link {
+      display: block;
+      padding: var(--space-16) var(--space-24);
+      color: var(--color-btn-primary-text);
+      text-decoration: none;
+      font-weight: var(--font-weight-medium);
+      transition: background-color var(--duration-fast) var(--ease-standard);
+    }
+
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--color-btn-primary-text);
+    }
+
+    .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.15);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* 메인 콘텐츠 */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--color-background);
+    }
+
+    .content-section {
+      display: none;
+      padding: var(--space-32);
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    /* 섹션 헤더 */
+    .section-header {
+      margin-bottom: var(--space-32);
+      border-bottom: 2px solid var(--color-primary);
+      padding-bottom: var(--space-16);
+    }
+
+    .section-header h1 {
+      color: var(--color-text);
+      margin-bottom: var(--space-8);
+      font-size: var(--font-size-3xl);
+    }
+
+    .section-subtitle {
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+      margin: 0;
+    }
+
+    /* KPI 카드 그리드 */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-24);
+      margin-bottom: var(--space-32);
+    }
+
+    .kpi-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-card-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-24);
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+      transition: transform var(--duration-fast) var(--ease-standard),
+        box-shadow var(--duration-fast) var(--ease-standard);
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .kpi-card h3 {
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-md);
+      margin-bottom: var(--space-8);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .kpi-value {
+      font-size: var(--font-size-4xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary);
+      margin-bottom: var(--space-4);
+      font-family: var(--font-family-mono);
+    }
+
+    .kpi-unit {
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-sm);
+      margin: 0;
+    }
+
+    /* 차트 그리드 */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: var(--space-24);
+    }
+
+    .chart-container {
+      background: var(--color-surface);
+      border: 1px solid var(--color-card-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-24);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chart-container h3 {
+      margin-bottom: var(--space-16);
+      color: var(--color-text);
+      font-size: var(--font-size-lg);
+      text-align: center;
+    }
+
+    .chart-image {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-base);
+    }
+
+    /* 재무제표 테이블 */
+    .financial-statement {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .standard-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+      background: var(--color-surface);
+    }
+
+    .standard-table th {
+      background: var(--color-primary);
+      color: var(--color-btn-primary-text);
+      padding: var(--space-12) var(--space-8);
+      text-align: center;
+      font-weight: var(--font-weight-semibold);
+      border: 1px solid var(--color-primary);
+    }
+
+    .standard-table td {
+      padding: var(--space-8);
+      border: 1px solid var(--color-border);
+      vertical-align: middle;
+    }
+
+    .standard-table tbody tr:nth-child(even) {
+      background-color: rgba(var(--color-text-secondary), 0.03);
+    }
+
+    .standard-table tbody tr:hover {
+      background-color: rgba(var(--color-primary), 0.05);
+    }
+
+    /* 섹션 헤더 행 */
+    .section-header-row td {
+      background: var(--color-secondary) !important;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+      text-align: center;
+      padding: var(--space-12) var(--space-8);
+    }
+
+    .subsection-header td {
+      background: rgba(var(--color-primary), 0.1) !important;
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text);
+      padding-left: var(--space-16);
+    }
+
+    /* 합계 행 */
+    .total-row td {
+      background: rgba(var(--color-primary), 0.05) !important;
+      font-weight: var(--font-weight-medium);
+    }
+
+    .grand-total-row td {
+      background: var(--color-primary) !important;
+      color: var(--color-btn-primary-text) !important;
+      font-weight: var(--font-weight-semibold);
+    }
+
+    /* 금액 입력 필드 */
+    .financial-input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: right;
+      font-family: var(--font-family-mono);
+      font-size: var(--font-size-sm);
+      padding: var(--space-4);
+      color: var(--color-text);
+    }
+
+    .financial-input:focus {
+      background: var(--color-background);
+      border: 1px solid var(--color-primary);
+      border-radius: var(--radius-sm);
+      outline: none;
+    }
+
+    .amount-input {
+      text-align: right;
+      position: relative;
+    }
+
+    .amount-total,
+    .amount-grand-total {
+      text-align: right;
+      font-family: var(--font-family-mono);
+      font-weight: var(--font-weight-semibold);
+      padding-right: var(--space-8);
+    }
+
+    .amount-grand-total {
+      color: var(--color-btn-primary-text);
+    }
+
+    /* 거래입력 폼 */
+    .journal-entry-form {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--space-24);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .journal-entries {
+      margin: var(--space-24) 0;
+    }
+
+    .account-select {
+      width: 100%;
+    }
+
+    .debit-amount,
+    .credit-amount {
+      text-align: right;
+      font-family: var(--font-family-mono);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: var(--space-12);
+      justify-content: flex-end;
+      margin-top: var(--space-24);
+      padding-top: var(--space-16);
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* 보고서 액션 */
+    .report-actions {
+      display: flex;
+      gap: var(--space-16);
+      flex-wrap: wrap;
+    }
+
+    /* 반응형 디자인 */
+    @media (max-width: 768px) {
+      .app-container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        order: 2;
+      }
+
+      .main-content {
+        order: 1;
+      }
+
+      .content-section {
+        padding: var(--space-16);
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .standard-table {
+        font-size: var(--font-size-xs);
+      }
+
+      .standard-table th,
+      .standard-table td {
+        padding: var(--space-4);
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .report-actions {
+        flex-direction: column;
+      }
+    }
+
+    /* 프린트 스타일 */
+    @media print {
+      .sidebar {
+        display: none;
+      }
+
+      .main-content {
+        margin: 0;
+        padding: 0;
+      }
+
+      .content-section {
+        padding: var(--space-16);
+      }
+
+      .section-header {
+        border-bottom: 2px solid #000;
+        margin-bottom: var(--space-16);
+      }
+
+      .standard-table {
+        border: 2px solid #000;
+      }
+
+      .standard-table th,
+      .standard-table td {
+        border: 1px solid #000;
+        padding: var(--space-8);
+      }
+
+      .kpi-grid,
+      .chart-grid {
+        display: none;
+      }
+
+      .form-actions,
+      .report-actions {
+        display: none;
+      }
+    }
+
+    /* 스크롤바 스타일 */
+    .sidebar::-webkit-scrollbar,
+    .main-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track,
+    .main-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: var(--radius-full);
+    }
+
+    .main-content::-webkit-scrollbar-thumb {
+      background: var(--color-border);
+      border-radius: var(--radius-full);
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover,
+    .main-content::-webkit-scrollbar-thumb:hover {
+      background: var(--color-text-secondary);
+    }
+
+    /* 추가 유틸리티 클래스 */
+    .text-center {
+      text-align: center;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .font-mono {
+      font-family: var(--font-family-mono);
+    }
+
+    .font-semibold {
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .text-primary {
+      color: var(--color-primary);
+    }
+
+    .text-secondary {
+      color: var(--color-text-secondary);
+    }
+
+    /* 데이터 검증 스타일 */
+    .invalid-input {
+      border-color: var(--color-error) !important;
+      background-color: rgba(var(--color-error-rgb), 0.1);
+    }
+
+    .valid-input {
+      border-color: var(--color-success) !important;
+      background-color: rgba(var(--color-success-rgb), 0.1);
+    }
+
+    /* 로딩 스타일 */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--color-border);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+  </style>
 </head>
 <div layout:fragment="content">
-  <div id="income-statement">
-    <h2>손익계산서</h2>
-    <p>손익계산서 화면입니다.</p>
+  <div id="Balance-sheet">
+    <!-- 손익계산서 섹션 -->
+    <section id="income-statement" class="content-section active">
+      <div class="section-header">
+        <h1>표준손익계산서 (별지 제40호의7서식)</h1>
+        <p class="section-subtitle">한국제조(주) - 2024년 1월 1일부터 2024년 12월 31일까지 (단위: 백만원)</p>
+      </div>
+
+      <div class="financial-statement">
+        <table class="standard-table">
+          <thead>
+            <tr>
+              <th width="10%">계정코드</th>
+              <th width="50%">계정과목</th>
+              <th width="20%">당기</th>
+              <th width="20%">전기</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="section-header-row">
+              <td colspan="4"><strong>Ⅰ. 매출액</strong></td>
+            </tr>
+            <tr>
+              <td>02</td>
+              <td>상품매출</td>
+              <td class="amount-input"><input type="number" value="8500" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>03</td>
+              <td>제품매출</td>
+              <td class="amount-input"><input type="number" value="7500" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>06</td>
+              <td>임대수입</td>
+              <td class="amount-input"><input type="number" value="300" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>07</td>
+              <td>서비스수입</td>
+              <td class="amount-input"><input type="number" value="1200" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr class="total-row">
+              <td></td>
+              <td><strong>매출액계</strong></td>
+              <td class="amount-total" id="total-revenue">17,500</td>
+              <td class="amount-total"></td>
+            </tr>
+
+            <tr class="section-header-row">
+              <td colspan="4"><strong>Ⅱ. 매출원가</strong></td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>상품매출원가</td>
+              <td class="amount-input"><input type="number" value="5800" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>제조ㆍ공사ㆍ분양ㆍ기타원가</td>
+              <td class="amount-input"><input type="number" value="4700" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr class="total-row">
+              <td></td>
+              <td><strong>매출원가계</strong></td>
+              <td class="amount-total" id="total-cost-of-sales">10,500</td>
+              <td class="amount-total"></td>
+            </tr>
+            <tr class="total-row">
+              <td></td>
+              <td><strong>매출총이익</strong></td>
+              <td class="amount-total" id="gross-profit">7,000</td>
+              <td class="amount-total"></td>
+            </tr>
+
+            <tr class="section-header-row">
+              <td colspan="4"><strong>Ⅲ. 판매비와관리비</strong></td>
+            </tr>
+            <tr>
+              <td>22</td>
+              <td>급여와 임금</td>
+              <td class="amount-input"><input type="number" value="1800" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>24</td>
+              <td>퇴직급여</td>
+              <td class="amount-input"><input type="number" value="150" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>27</td>
+              <td>임차료</td>
+              <td class="amount-input"><input type="number" value="450" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>35</td>
+              <td>감가상각비</td>
+              <td class="amount-input"><input type="number" value="680" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>39</td>
+              <td>접대비</td>
+              <td class="amount-input"><input type="number" value="200" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>42</td>
+              <td>광고선전비</td>
+              <td class="amount-input"><input type="number" value="150" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr class="total-row">
+              <td></td>
+              <td><strong>판매비와관리비계</strong></td>
+              <td class="amount-total" id="total-operating-expenses">4,230</td>
+              <td class="amount-total"></td>
+            </tr>
+            <tr class="total-row">
+              <td></td>
+              <td><strong>영업손익</strong></td>
+              <td class="amount-total" id="operating-income">2,770</td>
+              <td class="amount-total"></td>
+            </tr>
+
+            <tr class="section-header-row">
+              <td colspan="4"><strong>Ⅳ. 영업외수익</strong></td>
+            </tr>
+            <tr>
+              <td>64</td>
+              <td>이자수익</td>
+              <td class="amount-input"><input type="number" value="125" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>65</td>
+              <td>배당금수익</td>
+              <td class="amount-input"><input type="number" value="50" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr class="total-row">
+              <td></td>
+              <td><strong>영업외수익계</strong></td>
+              <td class="amount-total" id="total-non-operating-income">205</td>
+              <td class="amount-total"></td>
+            </tr>
+
+            <tr class="section-header-row">
+              <td colspan="4"><strong>Ⅴ. 영업외비용</strong></td>
+            </tr>
+            <tr>
+              <td>82</td>
+              <td>이자비용</td>
+              <td class="amount-input"><input type="number" value="240" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr>
+              <td>86</td>
+              <td>기부금</td>
+              <td class="amount-input"><input type="number" value="50" class="financial-input"></td>
+              <td class="amount-input"><input type="number" class="financial-input"></td>
+            </tr>
+            <tr class="total-row">
+              <td></td>
+              <td><strong>영업외비용계</strong></td>
+              <td class="amount-total" id="total-non-operating-expenses">310</td>
+              <td class="amount-total"></td>
+            </tr>
+            <tr class="grand-total-row">
+              <td></td>
+              <td><strong>당기순손익</strong></td>
+              <td class="amount-grand-total" id="net-income-is">2,665</td>
+              <td class="amount-grand-total"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </div>
+  <script th:inline="javascript">
+    // 한국 표준 재무제표 ERP 시스템 JavaScript
+
+    // 회사 정보 및 계정과목 데이터
+    const companyData = {
+      company_name: "한국제조(주)",
+      business_number: "123-45-67890",
+      tax_period: "2024.01.01 ~ 2024.12.31"
+    };
+
+    // 계정과목 마스터 데이터
+    const accountMaster = {
+      "03": "현금 및 현금성자산",
+      "04": "단기금융상품",
+      "05": "단기투자자산",
+      "06": "단기대여금",
+      "10": "매출채권",
+      "11": "선급비용",
+      "12": "기타채권",
+      "16": "선급금",
+      "19": "상품",
+      "20": "제품",
+      "21": "재공품",
+      "22": "원재료",
+      "23": "저장품",
+      "31": "장기금융상품",
+      "32": "장기투자자산",
+      "33": "장기대여금",
+      "39": "토지",
+      "40": "건물",
+      "41": "구축물",
+      "42": "기계장치",
+      "45": "차량운반구",
+      "46": "공구와기구",
+      "47": "비품",
+      "51": "영업권",
+      "52": "산업재산권",
+      "53": "개발비",
+      "64": "단기차입금",
+      "65": "매입채무",
+      "66": "선수금",
+      "67": "미지급비용",
+      "68": "예수금",
+      "69": "미지급금",
+      "74": "장기차입금",
+      "78": "장기매입채무",
+      "79": "장기선수금",
+      "83": "퇴직급여충당금",
+      "84": "기타충당금",
+      "88": "자본금",
+      "89": "이익잉여금"
+    };
+
+    // 손익계정 마스터 데이터
+    const incomeAccountMaster = {
+      "02": "상품매출",
+      "03": "제품매출",
+      "04": "공사수입",
+      "06": "임대수입",
+      "07": "서비스수입",
+      "10": "상품매출원가",
+      "15": "제조ㆍ공사ㆍ분양ㆍ기타원가",
+      "22": "급여와 임금",
+      "23": "일용임금",
+      "24": "퇴직급여",
+      "25": "복리후생비",
+      "26": "여비교통비",
+      "27": "임차료",
+      "28": "통신비",
+      "29": "수도광열비",
+      "35": "감가상각비",
+      "39": "접대비",
+      "42": "광고선전비",
+      "64": "이자수익",
+      "65": "배당금수익",
+      "66": "외환차익",
+      "82": "이자비용",
+      "83": "외환차손",
+      "86": "기부금"
+    };
+
+    // 시산표 데이터
+    const trialBalanceData = [{
+        account: "현금 및 현금성자산",
+        debit: 2500,
+        credit: 0
+      },
+      {
+        account: "단기금융상품",
+        debit: 1500,
+        credit: 0
+      },
+      {
+        account: "매출채권",
+        debit: 8500,
+        credit: 0
+      },
+      {
+        account: "선급비용",
+        debit: 300,
+        credit: 0
+      },
+      {
+        account: "상품",
+        debit: 6200,
+        credit: 0
+      },
+      {
+        account: "제품",
+        debit: 4800,
+        credit: 0
+      },
+      {
+        account: "재공품",
+        debit: 1200,
+        credit: 0
+      },
+      {
+        account: "원재료",
+        debit: 3600,
+        credit: 0
+      },
+      {
+        account: "저장품",
+        debit: 400,
+        credit: 0
+      },
+      {
+        account: "토지",
+        debit: 12000,
+        credit: 0
+      },
+      {
+        account: "건물",
+        debit: 18000,
+        credit: 0
+      },
+      {
+        account: "기계장치",
+        debit: 15000,
+        credit: 0
+      },
+      {
+        account: "차량운반구",
+        debit: 800,
+        credit: 0
+      },
+      {
+        account: "단기차입금",
+        debit: 0,
+        credit: 5000
+      },
+      {
+        account: "매입채무",
+        debit: 0,
+        credit: 4200
+      },
+      {
+        account: "미지급비용",
+        debit: 0,
+        credit: 1200
+      },
+      {
+        account: "장기차입금",
+        debit: 0,
+        credit: 8000
+      },
+      {
+        account: "퇴직급여충당금",
+        debit: 0,
+        credit: 1500
+      },
+      {
+        account: "자본금",
+        debit: 0,
+        credit: 25000
+      },
+      {
+        account: "이익잉여금",
+        debit: 0,
+        credit: 2800
+      },
+      {
+        account: "상품매출",
+        debit: 0,
+        credit: 8500
+      },
+      {
+        account: "제품매출",
+        debit: 0,
+        credit: 7500
+      },
+      {
+        account: "임대수입",
+        debit: 0,
+        credit: 300
+      },
+      {
+        account: "서비스수입",
+        debit: 0,
+        credit: 1200
+      },
+      {
+        account: "상품매출원가",
+        debit: 5800,
+        credit: 0
+      },
+      {
+        account: "제조ㆍ공사ㆍ분양ㆍ기타원가",
+        debit: 4700,
+        credit: 0
+      },
+      {
+        account: "급여와 임금",
+        debit: 1800,
+        credit: 0
+      },
+      {
+        account: "퇴직급여",
+        debit: 150,
+        credit: 0
+      },
+      {
+        account: "임차료",
+        debit: 450,
+        credit: 0
+      },
+      {
+        account: "감가상각비",
+        debit: 680,
+        credit: 0
+      },
+      {
+        account: "접대비",
+        debit: 200,
+        credit: 0
+      },
+      {
+        account: "광고선전비",
+        debit: 150,
+        credit: 0
+      },
+      {
+        account: "이자수익",
+        debit: 0,
+        credit: 125
+      },
+      {
+        account: "배당금수익",
+        debit: 0,
+        credit: 50
+      },
+      {
+        account: "이자비용",
+        debit: 240,
+        credit: 0
+      },
+      {
+        account: "기부금",
+        debit: 50,
+        credit: 0
+      }
+    ];
+
+    // DOM이 로드된 후 실행
+    document.addEventListener('DOMContentLoaded', function () {
+      initializeApp();
+    });
+
+    // 앱 초기화
+    function initializeApp() {
+      setupNavigation();
+      calculateFinancials();
+      populateTrialBalance();
+      setupAccountSelects();
+      setupFormValidation();
+      setCurrentDate();
+    }
+
+    // 네비게이션 설정
+    function setupNavigation() {
+      const navLinks = document.querySelectorAll('.nav-link');
+      const sections = document.querySelectorAll('.content-section');
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+
+          // 모든 링크와 섹션에서 active 클래스 제거
+          navLinks.forEach(l => l.classList.remove('active'));
+          sections.forEach(s => s.classList.remove('active'));
+
+          // 클릭된 링크에 active 클래스 추가
+          this.classList.add('active');
+
+          // 해당 섹션 표시
+          const targetSection = this.getAttribute('data-section');
+          const section = document.getElementById(targetSection);
+          if (section) {
+            section.classList.add('active');
+          }
+        });
+      });
+    }
+
+    // 재무 계산
+    function calculateFinancials() {
+      // 자산 계산
+      const currentAssets = 2500 + 1500 + 8500 + 300 + 6200 + 4800 + 1200 + 3600 + 400;
+      const nonCurrentAssets = 12000 + 18000 + 15000 + 800 + 1200 + 600 + 300 + 200;
+      const totalAssets = currentAssets + nonCurrentAssets;
+
+      // 부채 계산
+      const currentLiabilities = 5000 + 4200 + 1200 + 800 + 300 + 600;
+      const nonCurrentLiabilities = 8000 + 1500 + 200;
+      const totalLiabilities = currentLiabilities + nonCurrentLiabilities;
+
+      // 자본 계산
+      const totalEquity = 25000 + 2800;
+
+      // 손익 계산
+      const totalRevenue = 8500 + 7500 + 300 + 1200;
+      const totalCostOfSales = 5800 + 4700;
+      const grossProfit = totalRevenue - totalCostOfSales;
+      const totalOperatingExpenses = 1800 + 150 + 450 + 680 + 200 + 150 + 100 + 300 + 80 + 120;
+      const operatingIncome = grossProfit - totalOperatingExpenses;
+      const nonOperatingIncome = 125 + 50 + 30;
+      const nonOperatingExpenses = 240 + 20 + 50;
+      const netIncome = operatingIncome + nonOperatingIncome - nonOperatingExpenses;
+
+      // KPI 업데이트
+      updateElement('total-assets', formatNumber(totalAssets));
+      updateElement('total-liabilities', formatNumber(totalLiabilities));
+      updateElement('total-equity', formatNumber(totalEquity));
+      updateElement('net-income', formatNumber(netIncome));
+
+      // 재무상태표 합계 업데이트
+      updateElement('current-assets-total', formatNumber(currentAssets));
+      updateElement('non-current-assets-total', formatNumber(nonCurrentAssets));
+      updateElement('total-assets-bs', formatNumber(totalAssets));
+      updateElement('current-liabilities-total', formatNumber(currentLiabilities));
+      updateElement('non-current-liabilities-total', formatNumber(nonCurrentLiabilities));
+      updateElement('total-liabilities-bs', formatNumber(totalLiabilities));
+      updateElement('total-equity-bs', formatNumber(totalEquity));
+      updateElement('total-liabilities-equity', formatNumber(totalLiabilities + totalEquity));
+
+      // 손익계산서 합계 업데이트
+      updateElement('total-revenue', formatNumber(totalRevenue));
+      updateElement('total-cost-of-sales', formatNumber(totalCostOfSales));
+      updateElement('gross-profit', formatNumber(grossProfit));
+      updateElement('total-operating-expenses', formatNumber(totalOperatingExpenses));
+      updateElement('operating-income', formatNumber(operatingIncome));
+      updateElement('total-non-operating-income', formatNumber(nonOperatingIncome));
+      updateElement('total-non-operating-expenses', formatNumber(nonOperatingExpenses));
+      updateElement('net-income-is', formatNumber(netIncome));
+
+      // 원가명세서 업데이트
+      updateElement('manufacturing-cost', formatNumber(4700));
+    }
+
+    // 합계잔액시산표 생성
+    function populateTrialBalance() {
+      const tbody = document.getElementById('trial-balance-tbody');
+      if (!tbody) return;
+
+      let html = '';
+      let totalDebit = 0;
+      let totalCredit = 0;
+      let totalDebitBalance = 0;
+      let totalCreditBalance = 0;
+
+      trialBalanceData.forEach(item => {
+        const debitBalance = item.debit > item.credit ? item.debit - item.credit : 0;
+        const creditBalance = item.credit > item.debit ? item.credit - item.debit : 0;
+
+        totalDebit += item.debit;
+        totalCredit += item.credit;
+        totalDebitBalance += debitBalance;
+        totalCreditBalance += creditBalance;
+
+        html += `
+            <tr>
+                <td>${item.account}</td>
+                <td class="text-right font-mono">${formatNumber(item.debit)}</td>
+                <td class="text-right font-mono">${formatNumber(item.credit)}</td>
+                <td class="text-right font-mono">${formatNumber(debitBalance)}</td>
+                <td class="text-right font-mono">${formatNumber(creditBalance)}</td>
+            </tr>
+        `;
+      });
+
+      // 합계 행 추가
+      html += `
+        <tr class="grand-total-row">
+            <td class="text-center"><strong>합계</strong></td>
+            <td class="text-right font-mono"><strong>${formatNumber(totalDebit)}</strong></td>
+            <td class="text-right font-mono"><strong>${formatNumber(totalCredit)}</strong></td>
+            <td class="text-right font-mono"><strong>${formatNumber(totalDebitBalance)}</strong></td>
+            <td class="text-right font-mono"><strong>${formatNumber(totalCreditBalance)}</strong></td>
+        </tr>
+    `;
+
+      tbody.innerHTML = html;
+    }
+
+    // 계정과목 선택박스 설정
+    function setupAccountSelects() {
+      const accountSelects = document.querySelectorAll('.account-select');
+
+      accountSelects.forEach(select => {
+        let options = '<option value="">계정과목 선택</option>';
+
+        // 자산 계정
+        options += '<optgroup label="자산">';
+        Object.keys(accountMaster).forEach(code => {
+          if (parseInt(code) < 60) {
+            options += `<option value="${code}">${code} - ${accountMaster[code]}</option>`;
+          }
+        });
+        options += '</optgroup>';
+
+        // 부채 계정
+        options += '<optgroup label="부채">';
+        Object.keys(accountMaster).forEach(code => {
+          if (parseInt(code) >= 60 && parseInt(code) < 88) {
+            options += `<option value="${code}">${code} - ${accountMaster[code]}</option>`;
+          }
+        });
+        options += '</optgroup>';
+
+        // 자본 계정
+        options += '<optgroup label="자본">';
+        Object.keys(accountMaster).forEach(code => {
+          if (parseInt(code) >= 88) {
+            options += `<option value="${code}">${code} - ${accountMaster[code]}</option>`;
+          }
+        });
+        options += '</optgroup>';
+
+        // 손익 계정
+        options += '<optgroup label="손익">';
+        Object.keys(incomeAccountMaster).forEach(code => {
+          options += `<option value="${code}">${code} - ${incomeAccountMaster[code]}</option>`;
+        });
+        options += '</optgroup>';
+
+        select.innerHTML = options;
+      });
+    }
+
+    // 폼 검증 설정
+    function setupFormValidation() {
+      const financialInputs = document.querySelectorAll('.financial-input');
+
+      financialInputs.forEach(input => {
+        input.addEventListener('input', function () {
+          validateFinancialInput(this);
+        });
+
+        input.addEventListener('blur', function () {
+          calculateFinancials();
+        });
+      });
+    }
+
+    // 재무 입력 검증
+    function validateFinancialInput(input) {
+      const value = parseFloat(input.value);
+
+      input.classList.remove('invalid-input', 'valid-input');
+
+      if (isNaN(value) || value < 0) {
+        input.classList.add('invalid-input');
+      } else {
+        input.classList.add('valid-input');
+      }
+    }
+
+    // 현재 날짜 설정
+    function setCurrentDate() {
+      const dateInput = document.getElementById('transaction-date');
+      if (dateInput) {
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0];
+        dateInput.value = formattedDate;
+      }
+    }
+
+    // 분개 행 추가
+    function addJournalRow() {
+      const tbody = document.getElementById('journal-entry-tbody');
+      if (!tbody) return;
+
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td><select class="form-control account-select"></select></td>
+        <td><input type="number" class="form-control debit-amount"></td>
+        <td><select class="form-control account-select"></select></td>
+        <td><input type="number" class="form-control credit-amount"></td>
+    `;
+
+      tbody.appendChild(newRow);
+
+      // 새로 추가된 선택박스에 계정과목 옵션 추가
+      const newSelects = newRow.querySelectorAll('.account-select');
+      setupAccountSelectsForElements(newSelects);
+    }
+
+    // 특정 요소들에 대한 계정과목 설정
+    function setupAccountSelectsForElements(selects) {
+      selects.forEach(select => {
+        let options = '<option value="">계정과목 선택</option>';
+
+        // 자산 계정
+        options += '<optgroup label="자산">';
+        Object.keys(accountMaster).forEach(code => {
+          if (parseInt(code) < 60) {
+            options += `<option value="${code}">${code} - ${accountMaster[code]}</option>`;
+          }
+        });
+        options += '</optgroup>';
+
+        // 부채 계정
+        options += '<optgroup label="부채">';
+        Object.keys(accountMaster).forEach(code => {
+          if (parseInt(code) >= 60 && parseInt(code) < 88) {
+            options += `<option value="${code}">${code} - ${accountMaster[code]}</option>`;
+          }
+        });
+        options += '</optgroup>';
+
+        // 자본 계정
+        options += '<optgroup label="자본">';
+        Object.keys(accountMaster).forEach(code => {
+          if (parseInt(code) >= 88) {
+            options += `<option value="${code}">${code} - ${accountMaster[code]}</option>`;
+          }
+        });
+        options += '</optgroup>';
+
+        // 손익 계정
+        options += '<optgroup label="손익">';
+        Object.keys(incomeAccountMaster).forEach(code => {
+          options += `<option value="${code}">${code} - ${incomeAccountMaster[code]}</option>`;
+        });
+        options += '</optgroup>';
+
+        select.innerHTML = options;
+      });
+    }
+
+    // 분개 저장
+    function saveJournalEntry() {
+      const rows = document.querySelectorAll('#journal-entry-tbody tr');
+      const entries = [];
+      let totalDebit = 0;
+      let totalCredit = 0;
+
+      rows.forEach(row => {
+        const debitAccount = row.querySelector('.account-select').value;
+        const debitAmount = parseFloat(row.querySelector('.debit-amount').value) || 0;
+        const creditAccount = row.querySelectorAll('.account-select')[1].value;
+        const creditAmount = parseFloat(row.querySelector('.credit-amount').value) || 0;
+
+        if (debitAccount && debitAmount > 0) {
+          entries.push({
+            type: 'debit',
+            account: debitAccount,
+            amount: debitAmount
+          });
+          totalDebit += debitAmount;
+        }
+
+        if (creditAccount && creditAmount > 0) {
+          entries.push({
+            type: 'credit',
+            account: creditAccount,
+            amount: creditAmount
+          });
+          totalCredit += creditAmount;
+        }
+      });
+
+      // 차대평형 검증
+      if (Math.abs(totalDebit - totalCredit) > 0.01) {
+        alert('차변과 대변이 일치하지 않습니다.\n차변: ' + formatNumber(totalDebit) + '\n대변: ' + formatNumber(totalCredit));
+        return;
+      }
+
+      if (entries.length === 0) {
+        alert('입력된 분개가 없습니다.');
+        return;
+      }
+
+      alert('분개가 저장되었습니다.');
+
+      // 전표번호 증가
+      const voucherNumber = document.getElementById('voucher-number');
+      if (voucherNumber) {
+        const currentNumber = parseInt(voucherNumber.value.split('-')[1]);
+        voucherNumber.value = `V2024-${String(currentNumber + 1).padStart(3, '0')}`;
+      }
+
+      // 폼 초기화
+      clearJournalForm();
+    }
+
+    // 분개 폼 초기화
+    function clearJournalForm() {
+      const tbody = document.getElementById('journal-entry-tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = `
+        <tr>
+            <td><select class="form-control account-select"></select></td>
+            <td><input type="number" class="form-control debit-amount"></td>
+            <td><select class="form-control account-select"></select></td>
+            <td><input type="number" class="form-control credit-amount"></td>
+        </tr>
+    `;
+
+      const newSelects = tbody.querySelectorAll('.account-select');
+      setupAccountSelectsForElements(newSelects);
+    }
+
+    // 보고서 출력
+    function printReport(reportType) {
+      // 현재 활성 섹션 숨기기
+      const sections = document.querySelectorAll('.content-section');
+      sections.forEach(s => s.classList.remove('active'));
+
+      // 선택된 보고서 표시
+      const targetSection = document.getElementById(reportType);
+      if (targetSection) {
+        targetSection.classList.add('active');
+
+        // 인쇄 실행
+        setTimeout(() => {
+          window.print();
+        }, 100);
+      }
+    }
+
+    // Excel 내보내기
+    function exportToExcel() {
+      alert('Excel 내보내기 기능이 준비 중입니다.');
+    }
+
+    // 유틸리티 함수들
+    function updateElement(id, value) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.textContent = value;
+      }
+    }
+
+    function formatNumber(num) {
+      if (!num && num !== 0) return '';
+      return new Intl.NumberFormat('ko-KR').format(num);
+    }
+
+    // 전역 함수로 내보내기 (HTML에서 사용하기 위해)
+    window.addJournalRow = addJournalRow;
+    window.saveJournalEntry = saveJournalEntry;
+    window.printReport = printReport;
+    window.exportToExcel = exportToExcel;
+  </script>
 </div>
