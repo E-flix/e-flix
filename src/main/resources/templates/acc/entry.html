@@ -1133,9 +1133,36 @@
       let method = isNew ? 'POST' : 'PUT'; // 신규행이면 POST, 기존 행이면 PUT
       let data; // 전송할 데이터
 
-      if (isNew) { // 신규 행인 경우
+      // rowData.entryNumber가 유효한 값인지 확인 (1~50000 사이의 양의 정수)
+      const isValidEntryNumber = rowData.entryNumber !== null && 
+                                 rowData.entryNumber !== undefined && 
+                                 Number.isInteger(Number(rowData.entryNumber)) && 
+                                 Number(rowData.entryNumber) > 0 && 
+                                 Number(rowData.entryNumber) <= 50000;
+
+      if (!isValidEntryNumber && isNew) { // 유효하지 않은 전표번호이고 신규 행인 경우
         if (diffEntryNumbers.length > 0) { // 차액 전표번호가 있다면
-          rowData.entryNumber = Number(diffEntryNumbers[0]); // 숫자로 변환 // 차액 전표번호 사용
+          // 차액 전표번호의 날짜와 현재 행의 날짜 비교
+          const diffEntryNumber = diffEntryNumbers[0];
+          let shouldUseDiffEntry = false;
+          
+          // 차액 전표번호에 해당하는 행의 날짜 찾기
+          gridOptions.api.forEachNode(node => {
+            if (node.data && 
+                node.data.entryNumber === Number(diffEntryNumber) && 
+                !node.data.isSummary) {
+              // 차액 전표번호의 월/일과 현재 행의 월/일 비교
+              if (node.data.month === rowData.month && node.data.day === rowData.day) {
+                shouldUseDiffEntry = true;
+              }
+            }
+          });
+          
+          if (shouldUseDiffEntry) {
+            rowData.entryNumber = Number(diffEntryNumber); // 차액 전표번호 사용
+          } else {
+            rowData.entryNumber = enNo; // 날짜가 다르면 현재 전표번호 사용
+          }
         } else { // 차액 전표번호가 없다면
           rowData.entryNumber = enNo; // 현재 전표번호 사용
         }
@@ -1143,7 +1170,13 @@
         rowData.lineNumber = await selectLineNo(rowData.entryNumber);
         
         data = parseGridDataForSave([rowData], isNew);
+      } else if (isValidEntryNumber && isNew) {
+        // 유효한 전표번호가 이미 있는 신규 행인 경우
+        rowData.lineNumber = await selectLineNo(rowData.entryNumber);
+        
+        data = parseGridDataForSave([rowData], isNew);
       } else {
+        // 기존 행 업데이트인 경우
         const entryNumberToUpdate = rowData.entryNumber;
         const rowsToUpdate = [];
         gridOptions.api.forEachNode(node => {
