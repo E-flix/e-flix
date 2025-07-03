@@ -128,7 +128,7 @@
     <select id="findActiveSubscriptionByCoIdx" parameterType="String" resultType="int">
         SELECT COUNT(spi_idx)
         FROM subscription
-        WHERE co_idx = #{coIdx} AND spi_status = 'SS01';
+        WHERE co_idx = #{coIdx} AND spi_status = 'SS01'
     </select>
 
     <select id="findSubscriptionBySpiIdx" parameterType="String" resultType="StatementDTO">

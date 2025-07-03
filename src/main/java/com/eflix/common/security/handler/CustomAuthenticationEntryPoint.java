@@ -27,7 +27,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 		if (uri.startsWith("/erp")) {
 			response.sendRedirect("/erp/login");
 		} else if (uri.startsWith("/hr") || uri.startsWith("/acc")
-		        || uri.startsWith("/purchs") || uri.startsWith("/bnz")) {
+		        || uri.startsWith("/purchs") || uri.startsWith("/bnz") || uri.startsWith("/mgr")) {
 			response.sendRedirect("/erp/login");
 		} else {
 			// 그 외 기본 리다이렉트

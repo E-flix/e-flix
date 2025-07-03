@@ -92,7 +92,7 @@ public class MainController {
 	@GetMapping("/mypage_service")
 	public String mypage_service(@AuthenticationPrincipal SecurityUserDetails securityUserDetails, Model model) {
 
-		SubscriptionInfoDTO subscriptionInfo = subscriptionService.findSubscriptionByCoIdx(securityUserDetails.getUserDTO().getUserIdx());
+		SubscriptionInfoDTO subscriptionInfo = subscriptionService.findSubscriptionByCoIdx(securityUserDetails.getSecurityUserDTO().getUserIdx());
 
 		model.addAttribute("info", subscriptionInfo);
 

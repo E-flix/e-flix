@@ -12,22 +12,17 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.eflix.common.security.dto.SecurityEmpDTO;
 import com.eflix.common.security.dto.SecurityMasterDTO;
-import com.eflix.common.security.dto.UserDTO;
+import com.eflix.common.security.dto.SecurityUserDTO;
 import com.eflix.common.security.mapper.SecurityMapper;
-import com.eflix.main.mapper.UserMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
 public class SecurityUserDetailService implements UserDetailsService {
 
 	@Autowired
 	private SecurityMapper securityMapper;
-
-	@Autowired
-	private UserMapper userMapper;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -40,7 +35,7 @@ public class SecurityUserDetailService implements UserDetailsService {
 		log.info("로그인 시도 - username: {}, uri: {}, coIdx: {}, masterChecked: {}", username, uri, coIdx, masterChecked);
 
 		// ERP 로그인
-		if (uri.startsWith("/erp")) {
+		if (!(coIdx == null) || uri.startsWith("/erp")) {
 			log.info("erp 로그인 시도");
 			// 사원 로그인
 			// if (masterChecked != null && !masterChecked.isBlank()) {
@@ -50,8 +45,10 @@ public class SecurityUserDetailService implements UserDetailsService {
 				SecurityEmpDTO securityEmpDTO = securityMapper.findEmpForLogin(coIdx, username);
 				if (securityEmpDTO == null) throw new UsernameNotFoundException("사원 정보 없음");
 
-				List<String> roleCodes = securityMapper.findRoleCodesByEmpIdx(securityEmpDTO.getEmpIdx());
-				return new SecurityUserDetails(securityEmpDTO, roleCodes);
+				// List<String> roleCodes = securityService.findRoleCodesByEmpIdx(securityEmpDTO.getEmpIdx());
+				List<String> coRoles = securityMapper.findCompanyRolesByCoIdx(coIdx);
+
+				return new SecurityUserDetails(securityEmpDTO, coRoles);
 			}
 			// 마스터 로그인
 			else {
@@ -66,9 +63,9 @@ public class SecurityUserDetailService implements UserDetailsService {
 		// 메인 로그인
 		log.info("메인 로그인 시도");
 		
-		UserDTO user = userMapper.findByUserId(username);
-		if (user == null) throw new UsernameNotFoundException("일반 사용자 없음");
+		SecurityUserDTO securityUserDTO = securityMapper.findByUserId(username);
+		if (securityUserDTO == null) throw new UsernameNotFoundException("일반 사용자 없음");
 
-		return new SecurityUserDetails(user);
+		return new SecurityUserDetails(securityUserDTO);
 	}
 }
