@@ -6,6 +6,8 @@ import java.util.List;
 import com.eflix.bsn.dto.CreditInfoDTO;
 
 public interface CreditService {
+
+  CreditInfoDTO getCreditInfo(String customerCd);
   
   CreditInfoDTO getCreditByCustomer(String customerCd);
 

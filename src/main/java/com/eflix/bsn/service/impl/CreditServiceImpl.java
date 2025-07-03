@@ -24,6 +24,11 @@ public class CreditServiceImpl implements CreditService {
     }
 
     @Override
+    public CreditInfoDTO getCreditInfo(String customerCd) {
+        return creditMapper.selectCreditInfo(customerCd);
+    }
+
+    @Override
     public void setTradeStop(String customerCd, String reason, LocalDate resumDate) {
         throw new UnsupportedOperationException("Unimplemented method 'setTradeStop'");
     }

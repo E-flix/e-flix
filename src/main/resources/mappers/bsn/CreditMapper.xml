@@ -3,17 +3,20 @@
 <mapper namespace="com.eflix.bsn.mapper.CreditMapper">
 
   <!-- CreditMapper.xml -->
-  <select id="selectCreditInfo" parameterType="string" resultType="com.eflix.bsn.dto.CreditInfoDTO">
-  SELECT
-      CUSTOMER_CD                   AS customerCd,
-      CREDIT_LIMIT                  AS creditLimit,
-      CREDIT_USED                   AS creditUsed,
-      CREDIT_LIMIT - CREDIT_USED    AS remainingCredit,
-      CREDIT_STATUS,
-      CREDIT_HOLD_FLG,
-      TRADE_STOP_FLG
-  FROM   CREDIT_MANAGEMENT
-  WHERE  CUSTOMER_CD = #{customerCd}
+  <select id="selectCreditInfo"
+          parameterType="string"
+          resultType="com.eflix.bsn.dto.CreditInfoDTO">
+    SELECT
+        cm.CUSTOMER_CD                     AS customerCd,
+        cm.CREDIT_LIMIT                    AS creditLimit,
+        cm.CREDIT_USED                     AS creditUsed,
+        (cm.CREDIT_LIMIT - cm.CREDIT_USED) AS remainingCredit,
+        cm.CREDIT_STATUS                   AS creditStatus,
+        cm.CREDIT_HOLD_FLG                 AS creditHoldFlg,
+        cm.CREDIT_HOLD_REASON              AS creditHoldReason,
+        cm.TRADE_STOP_FLG                  AS tradeStopFlg
+    FROM   CREDIT_MANAGEMENT cm
+    WHERE  cm.CUSTOMER_CD = #{customerCd}
   </select>
 
 
@@ -35,26 +38,30 @@
   </select>
 
   <select id="selectByCustomerCd"
-          parameterType="string"
-          resultType="com.eflix.bsn.dto.CreditInfoDTO">
-    SELECT
-      CUSTOMER_CD         AS customerCd,
-      CREDIT_LIMIT        AS creditLimit,
-      CREDIT_USED         AS creditUsed,
-      PAYMENT_TERMS       AS paymentTerms,
-      OVERDUE_AMOUNT      AS overdueAmount,
-      CREDIT_STATUS       AS creditStatus,
-      CREDIT_HOLD_FLG     AS creditHoldFlg,
-      CREDIT_HOLD_REASON  AS creditHoldReason,
-      CREDIT_HOLD_UNTIL   AS creditHoldUntil,
-      CREDIT_RATING       AS creditRating,
-      GUARANTEE_AMOUNT    AS guaranteeAmount,
-      LOCK_ORDER_THRESHOLD AS lockOrderThreshold,
-      EFFECTIVE_FROM      AS effectiveFrom,
-      EFFECTIVE_TO        AS effectiveTo,
-      GRACE_PERIOD        AS gracePeriod,
-      LAST_SETTLE_DT      AS lastSettleDt
-    FROM CREDIT_MANAGEMENT
-    WHERE CUSTOMER_CD = #{customerCd}
-  </select>
+        parameterType="string"
+        resultType="com.eflix.bsn.dto.CreditInfoDTO">
+
+  SELECT
+      CUSTOMER_CD               AS customerCd,
+      CREDIT_LIMIT              AS creditLimit,
+      CREDIT_USED               AS creditUsed,
+      (CREDIT_LIMIT - CREDIT_USED)     AS remainingCredit   <!--★ 추가 -->
+    , PAYMENT_TERMS             AS paymentTerms
+    , OVERDUE_AMOUNT            AS overdueAmount
+    , CREDIT_STATUS             AS creditStatus
+    , CREDIT_HOLD_FLG           AS creditHoldFlg
+    , CREDIT_HOLD_REASON        AS creditHoldReason
+    , CREDIT_HOLD_UNTIL         AS creditHoldUntil
+    , CREDIT_RATING             AS creditRating
+    , GUARANTEE_AMOUNT          AS guaranteeAmount
+    , LOCK_ORDER_THRESHOLD      AS lockOrderThreshold
+    , EFFECTIVE_FROM            AS effectiveFrom
+    , EFFECTIVE_TO              AS effectiveTo
+    , GRACE_PERIOD              AS gracePeriod
+    , LAST_SETTLE_DT            AS lastSettleDt
+    , TRADE_STOP_FLG            AS tradeStopFlg            <!-- 화면에서 쓰면 함께 조회 -->
+  FROM CREDIT_MANAGEMENT
+  WHERE CUSTOMER_CD = #{customerCd}
+
+</select>
 </mapper>
