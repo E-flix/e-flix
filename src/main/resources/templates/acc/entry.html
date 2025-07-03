@@ -55,6 +55,13 @@
     .ag-row-highlighted.ag-row-selected .ag-cell {
       background-color: #bbdefb !important;
     }
+    /* 차액이 있는 전표번호 배경 연한 분홍색 */
+    .ag-theme-alpine .ag-row-diff-entry .ag-cell {
+      background-color: #fce4ec !important;
+    }
+    .ag-theme-alpine .ag-row-diff-entry.ag-row-selected .ag-cell {
+      background-color: #f8bbd9 !important;
+    }
   </style>
 </head>
 <div layout:fragment="content">
@@ -112,7 +119,7 @@
     let lastSummaryEntryNumber = null;
     let debounceTimer = null;
     let enterPressedForMove = false;
-    let firstDiffEntryNumber = null;
+    let diffEntryNumbers = []; // 차액이 있는 전체 전표번호 배열
     let highlightedEntryNumber = null; // 강조 표시할 전표번호
     let arrowKeyDebounceTimer = null; // 방향키 디바운스 타이머
     // select max(entryNumber)+1 (신규 전표번호)
@@ -189,7 +196,7 @@
     // 유니크한 ID 미리 할당
     initialEmptyRow._emptyRowId = `empty_row_${Date.now()}_${Math.random()}`;
     rowData.push(initialEmptyRow);
-    updateFirstDiffEntryNumber();
+    // updateDiffEntryNumbers() 호출을 gridOptions 초기화 후로 이동
     // --------------- ▼ 필수 값 검증 (입력 및 수정시 사용) ▼ ------------------ 
     const requiredFields = new Set(['month', 'day', 'resentmenType', 'accountCode']);
     function isRowValid(rowData, currentField) {
@@ -294,6 +301,14 @@
           }
         }
         
+        // 차액이 있는 전표번호 배경 분홍색
+        if (params.data?.entryNumber && 
+            diffEntryNumbers.includes(String(params.data.entryNumber)) &&
+            !params.data?.isSummary) {
+          console.log('차액 전표번호 감지:', params.data.entryNumber, 'diffEntryNumbers:', diffEntryNumbers);
+          classes.push('ag-row-diff-entry');
+        }
+        
         // 같은 전표번호 강조 표시
         if (highlightedEntryNumber && 
             params.data?.entryNumber === highlightedEntryNumber &&
@@ -343,7 +358,7 @@
           }
         },
         { headerName: "일", field: "day", editable: params => !params.data?.isSummary, minWidth: 55, maxWidth: 55, cellClass: 'ag-center-aligned-cell' },
-        { headerName: "번호", field: "entryNumber", editable: () => false, minWidth: 75, maxWidth: 75, cellClass: 'ag-center-aligned-cell' },
+        { headerName: "번호", field: "entryNumber", editable: params => !params.data?.isSummary, minWidth: 75, maxWidth: 75, cellClass: 'ag-center-aligned-cell' },
         { headerName: "구분", field: "resentmenType", editable: params => !params.data?.isSummary, minWidth: 70, maxWidth: 70, cellClass: 'ag-center-aligned-cell',
           valueFormatter: params => {
             // g1~g4 -> 한글 표시
@@ -427,6 +442,9 @@
       onGridReady: (params) => {
         gridOptions.api = params.api;
         gridOptions.columnApi = params.columnApi;
+        
+        // 그리드 준비 완료 후 차액 전표번호 초기화
+        updateDiffEntryNumbers();
         
         // 그리드 준비 완료 후 빈 행이 있으면 첫 번째 셀에 포커스
         setTimeout(() => {
@@ -1035,7 +1053,7 @@
               
               gridOptions.api.applyTransaction({ remove: nodesToRemove });
               
-              updateFirstDiffEntryNumber();
+              updateDiffEntryNumbers();
             } catch (removeError) {
               console.error('그리드에서 행 제거 중 오류:', removeError);
               // 오류가 발생하면 전체 데이터를 다시 로드
@@ -1109,17 +1127,17 @@
       return entryMaster;
     }
     // 자동 DB 저장
-    async function saveRow(rowData) {
-      const isNew = !rowData.lineNumber;
+    async function saveRow(rowData) { // rowData는 현재 행의 데이터
+      const isNew = !rowData.lineNumber; // 신규 행인지 여부
       
-      let method = isNew ? 'POST' : 'PUT';
-      let data;
+      let method = isNew ? 'POST' : 'PUT'; // 신규행이면 POST, 기존 행이면 PUT
+      let data; // 전송할 데이터
 
-      if (isNew) {
-        if (firstDiffEntryNumber) {
-          rowData.entryNumber = firstDiffEntryNumber;
-        } else {
-          rowData.entryNumber = enNo;
+      if (isNew) { // 신규 행인 경우
+        if (diffEntryNumbers.length > 0) { // 차액 전표번호가 있다면
+          rowData.entryNumber = Number(diffEntryNumbers[0]); // 숫자로 변환 // 차액 전표번호 사용
+        } else { // 차액 전표번호가 없다면
+          rowData.entryNumber = enNo; // 현재 전표번호 사용
         }
         
         rowData.lineNumber = await selectLineNo(rowData.entryNumber);
@@ -1225,7 +1243,7 @@
         } else {
           api.applyTransaction({ update: receivedRows });
         }
-        updateFirstDiffEntryNumber();
+        updateDiffEntryNumbers();
       })
       .catch(err => {
         console.error('Save error:', err);
@@ -1609,24 +1627,54 @@
       
       return summaryRowsResult;
     }
-    function findFirstDiffEntryNumber() {
+    function findDiffEntryNumbers() {
       const entrySums = {};
-      rowData.forEach(row => {
-        if (!row.entryNumber || row.isSummary) return;
+      const diffEntries = [];
+      
+      // 그리드 API가 있고 초기화되었으면 현재 그리드 데이터를 사용, 없으면 rowData 사용
+      let dataToCheck = [];
+      if (typeof gridOptions !== 'undefined' && 
+          gridOptions.api && 
+          typeof gridOptions.api.forEachNode === 'function') {
+        gridOptions.api.forEachNode(node => {
+          if (node.data && !node.data.isSummary) {
+            dataToCheck.push(node.data);
+          }
+        });
+      } else {
+        dataToCheck = rowData.filter(row => !row.isSummary);
+      }
+      
+      dataToCheck.forEach(row => {
+        if (!row.entryNumber) return;
         if (!entrySums[row.entryNumber]) entrySums[row.entryNumber] = { debit: 0, credit: 0 };
         entrySums[row.entryNumber].debit += Number(row.debit) || 0;
         entrySums[row.entryNumber].credit += Number(row.credit) || 0;
       });
+      
       for (const entryNumber of Object.keys(entrySums)) {
         const { debit, credit } = entrySums[entryNumber];
-        if (Math.abs(debit - credit) > 0) {
-          return entryNumber;
+        const diff = Math.abs(debit - credit);
+        if (diff > 0) {
+          diffEntries.push(String(entryNumber)); // 문자열로 변환하여 저장
+          console.log(`차액 발견 - 전표번호: ${entryNumber}, 차변: ${debit}, 대변: ${credit}, 차액: ${diff}`);
         }
       }
-      return null;
+      
+      console.log('전체 차액 전표번호:', diffEntries);
+      return diffEntries;
     }
-    function updateFirstDiffEntryNumber() {
-      firstDiffEntryNumber = findFirstDiffEntryNumber();
+    function updateDiffEntryNumbers() {
+      const prevDiffEntryNumbers = [...diffEntryNumbers];
+      diffEntryNumbers = findDiffEntryNumbers();
+      console.log('차액 전표번호 업데이트:', diffEntryNumbers);
+      
+      // 차액 전표번호가 변경되었으면 그리드 리드로우
+      if (JSON.stringify(prevDiffEntryNumbers) !== JSON.stringify(diffEntryNumbers)) {
+        if (typeof gridOptions !== 'undefined' && gridOptions.api) {
+          gridOptions.api.redrawRows();
+        }
+      }
     }
 // 같은 전표번호를 가진 행들 강조 표시
     function highlightSameEntryNumber(entryNumber) {

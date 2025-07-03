@@ -2,7 +2,8 @@ package com.eflix.acc.dto;
 
 import java.util.Date;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /* ============================================
   - 작성자   : 김희정
@@ -13,7 +14,8 @@ import lombok.Getter;
   - 2025-06-20 (김희정): DTO 생성 
 =============================================== */
 
-@Getter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class PartnerDetailDTO {
   private int partnerCode;
@@ -40,4 +42,5 @@ public class PartnerDetailDTO {
   private Date createdAt;
   private Date updatedAt;
   private String remarks;
+  private String coIdx; // 회사번호 추가
 }

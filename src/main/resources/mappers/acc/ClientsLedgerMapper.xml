@@ -21,6 +21,7 @@
     <result property="resentmenType" column="resentmen_type" />
     <result property="amount" column="amount" />
     <result property="description" column="description" />
+    <result property="coIdx" column="co_idx"/>
     
     <result property="accountName" column="account_name"/>
     <result property="majorCategory" column="major_category"/>
@@ -40,6 +41,7 @@
     <result property="entryDate" column="entry_date" />
     <result property="transactionType" column="transaction_type" />
     <result property="remarks" column="remarks" />
+    <result property="coIdx" column="co_idx"/>
     <!-- 디테일 부분 컬렉션 매핑 => 하위 컬렉션 매핑 (1:N 관계) 
      ofType == collection에서 리스트 안에 들어가는 객체의 타입을 알려주는 속성 -->
     <collection property="details" ofType="com.eflix.acc.dto.EntryDetailDTO" resultMap="entryDetailResultMap" />
@@ -85,7 +87,12 @@
         <when test="accountCode != null and accountCode != ''">
           d.account_code = #{accountCode}
           AND m.ledger_check = 'a1'
-          
+          AND m.co_idx = #{coIdx}
+          AND d.co_idx = #{coIdx}
+          AND a.co_idx = #{coIdx}
+          AND pd.co_idx = #{coIdx}
+          AND fd.co_idx = #{coIdx}
+          AND cd.co_idx = #{coIdx}
           <if test="startDate != null and startDate != ''">
             <![CDATA[
               AND m.entry_date >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
@@ -132,6 +139,9 @@
       <when test="accountCode != null and accountCode != ''">
         d.account_code = #{accountCode}
         AND m.ledger_check = 'a1'
+        AND m.co_idx = #{coIdx}
+        AND d.co_idx = #{coIdx}
+        AND a.co_idx = #{coIdx}
         <if test="startDate != null and startDate != ''">
           <![CDATA[
             AND m.entry_date >= TO_DATE(#{startDate}, 'YYYY-MM-DD')

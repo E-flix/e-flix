@@ -93,6 +93,7 @@
     FROM entry_master m LEFT JOIN entry_detail d ON m.entry_number = d.entry_number 
     LEFT JOIN account a ON d.account_code = a.account_code
     WHERE m.co_idx = #{coIdx}
+    AND a.co_idx = #{coIdx}
     ORDER BY m.entry_number
   </select>
 
@@ -248,7 +249,7 @@
   <select id="selectMaxPlusOneLineNumber" resultType="int" parameterType="com.eflix.acc.dto.EntryDetailDTO">
     SELECT COALESCE(MAX(line_number)+1, 1) AS lineNo 
     FROM entry_detail
-    WHERE entry_number = #{entry_number}
+    WHERE entry_number = #{entryNumber}
     AND co_idx = #{coIdx}
   </select>
 
@@ -276,9 +277,11 @@
       p.business_number,
       p.resident_number,
       p.partner_name
-    FROM entry_master m LEFT OUTER JOIN partner_detail p ON m.partner_code = p.partner_code
+    FROM entry_master m 
+    LEFT OUTER JOIN partner_detail p ON m.partner_code = p.partner_code
     WHERE m.transaction_type != '63'
     AND m.co_idx = #{coIdx}
+    AND p.co_idx = #{coIdx}
     ORDER BY entry_date
   </select>
   <!-- detail 전표 조회 -->
@@ -299,6 +302,7 @@
     LEFT JOIN account a ON d.account_code = a.account_code
     WHERE d.entry_number = #{entryNumber}
     AND d.co_idx = #{coIdx}
+    AND a.co_idx = #{coIdx}
     ORDER BY d.line_number
   </select>
   <!-- select max+1 entry_number -->
