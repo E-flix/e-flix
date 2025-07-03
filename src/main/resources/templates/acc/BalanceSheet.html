@@ -6,13 +6,404 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-07-04 (김희정): 재무상태표 레이아웃
 ============================================ -->
+
 <head>
   <title>재무상태표</title>
+  <style>
+    .financial-header {
+      border-bottom: 3px solid #0d6efd;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .ag-header-cell-style {
+      background-color: #6c757d !important;
+      color: white !important;
+      font-weight: 500;
+    }
+    
+    .ag-subtotal-cell-style {
+      background-color: #f1f3f4 !important;
+      font-weight: 400;
+      border-top: 1px solid #dee2e6;
+    }
+    
+    .ag-total-cell-style {
+      background-color: #f8f9fa !important;
+      font-weight: 500;
+    }
+    
+    .ag-grand-total-cell-style {
+      background-color: #e9ecef !important;
+      font-weight: 600;
+    }
+    
+    @media print {
+      .btn, .d-print-none {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
+
 <div layout:fragment="content">
-  <div id="Balance-sheet">
-    <h2>재무상태표</h2>
-    <p>재무상태표 화면입니다.</p>
+  <div class="container-fluid">
+    <!-- 재무상태표 섹션 -->
+    <div class="row">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <!-- 왼쪽: 일반전표 제목 -->
+          <h3 class="mb-0">재무상태표</h3>
+          <!-- 오른쪽: 버튼 모음 -->
+          <div>
+            <button type="button" id="diffFilterBtn" class="btn btn-outline-secondary btn-sm">조회</button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="출력()">출력</button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="엑셀()">엑셀</button>
+          </div>
+        </div>
+        <!-- 검색/필터 영역 -->
+        <form class="row mb-2 align-items-end" method="get" action="/voucher/list">
+          <div class="col-auto">
+            <label class="form-label mb-0">일자</label>
+            2025 년
+            <select class="form-control form-control-sm d-inline-block" name="startMonth" style="width:70px;">
+              <option value="1">1월</option>
+              <option value="2">2월</option>
+              <option value="3">3월</option>
+              <option value="4">4월</option>
+              <option value="5">5월</option>
+              <option value="6">6월</option>
+              <option value="7">7월</option>
+              <option value="8">8월</option>
+              <option value="9">9월</option>
+              <option value="10">10월</option>
+              <option value="11">11월</option>
+              <option value="12">12월</option>
+            </select>
+          </div>
+        </form>
+        <div class="grid-container" style="height:100vh;">
+          <div id="balanceSheetGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <script th:inline="javascript">
+    // 재무상태표 데이터 (표준재무상태표 양식 기준)
+    const balanceSheetData = [
+      // 자산
+      { section: "자 산", subsection: "", subcategory: "", accountCode: "", accountName: "", amount: "", total: "", isHeader: true, level: 0 },
+      
+      // Ⅰ. 유동자산
+      { section: "", subsection: "Ⅰ. 유동자산", subcategory: "", accountCode: "01", accountName: "", amount: "", total: "2,650,000", isHeader: true, level: 1 },
+      
+      // 1. 당좌자산
+      { section: "", subsection: "", subcategory: "1. 당좌자산", accountCode: "02", accountName: "", amount: "", total: "1,300,000", isHeader: true, level: 2 },
+      { section: "", subsection: "", subcategory: "", accountCode: "03", accountName: "(1) 현금 및 현금성자산", amount: "700,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "04", accountName: "(2) 단기금융상품", amount: "150,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "05", accountName: "(3) 단기투자증권", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "06", accountName: "(4) 단기대여금", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "07", accountName: "① 관계회사", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "08", accountName: "② 임원 및 종업원", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "09", accountName: "③ 기타", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "10", accountName: "(5) 매출채권", amount: "450,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "11", accountName: "(6) 선급금", amount: "100,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "12", accountName: "(7) 미수금", amount: "80,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "13", accountName: "① 공사미수금", amount: "80,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "14", accountName: "② 분양미수금", amount: "80,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "15", accountName: "③ 기타", amount: "80,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "16", accountName: "(8) 선급비용", amount: "(30,000)", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "17", accountName: "(9) 기타", amount: "(30,000)", total: "", isHeader: false, level: 3 },
+      
+      // 2. 재고자산
+      { section: "", subsection: "", subcategory: "2. 재고자산", accountCode: "18", accountName: "", amount: "", total: "1,050,000", isHeader: true, level: 2 },
+      { section: "", subsection: "", subcategory: "", accountCode: "19", accountName: "(1) 상품", amount: "400,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "20", accountName: "(2) 제품", amount: "250,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "21", accountName: "(3) 반제품 및 재공품", amount: "150,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "22", accountName: "(4) 원재료", amount: "200,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "23", accountName: "(5) 부재료", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "24", accountName: "(6) 미착상품 (미착재료)", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "25", accountName: "(7) 건설용지", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "26", accountName: "(8) 완성건물", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "27", accountName: "(9) 미성공사", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "28", accountName: "(10) 기타", amount: "50,000", total: "", isHeader: false, level: 3 },
+      
+      // Ⅱ. 비유동자산
+      { section: "", subsection: "Ⅱ. 비유동자산", subcategory: "", accountCode: "29", accountName: "", amount: "", total: "4,380,000", isHeader: true, level: 1 },
+      
+      // 1. 투자자산
+      { section: "", subsection: "", subcategory: "1. 투자자산", accountCode: "30", accountName: "", amount: "", total: "400,000", isHeader: true, level: 2 },
+      { section: "", subsection: "", subcategory: "", accountCode: "31", accountName: "(1) 장기금융상품", amount: "300,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "32", accountName: "(2) 장기투자증권", amount: "100,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "33", accountName: "(3) 장기대여금", amount: "100,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "34", accountName: "① 관계회사", amount: "100,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "35", accountName: "② 임원 및 종업원", amount: "100,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "36", accountName: "③ 기타", amount: "100,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "37", accountName: "(4) 기타", amount: "100,000", total: "", isHeader: false, level: 3 },
+      
+      // 2. 유형자산
+      { section: "", subsection: "", subcategory: "2. 유형자산", accountCode: "38", accountName: "", amount: "", total: "3,750,000", isHeader: true, level: 2 },
+      { section: "", subsection: "", subcategory: "", accountCode: "39", accountName: "(1) 토지", amount: "1,200,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "40", accountName: "(2) 건물", amount: "1,000,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "41", accountName: "(3) 구축물 (시설장치 포함)", amount: "(200,000)", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "42", accountName: "(4) 기계장치", amount: "2,000,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "43", accountName: "(5) 선박", amount: "(500,000)", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "44", accountName: "(6) 건설용 장비", amount: "300,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "45", accountName: "(7) 차량운반구", amount: "(150,000)", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "46", accountName: "(8) 공구 및 기구", amount: "200,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "47", accountName: "(9) 비품", amount: "(100,000)", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "48", accountName: "(10) 건설 중인 자산", amount: "(100,000)", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "49", accountName: "(11) 기타", amount: "(100,000)", total: "", isHeader: false, level: 3 },
+      
+      // 3. 무형자산
+      { section: "", subsection: "", subcategory: "3. 무형자산", accountCode: "50", accountName: "", amount: "", total: "230,000", isHeader: true, level: 2 },
+      { section: "", subsection: "", subcategory: "", accountCode: "51", accountName: "(1) 영업권", amount: "150,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "52", accountName: "(2) 산업재산권 (특허권, 상표권 등)", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "53", accountName: "(3) 개발비", amount: "30,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "54", accountName: "(4) 기타", amount: "30,000", total: "", isHeader: false, level: 3 },
+
+      // 4. 기타 비유동자산
+      { section: "", subsection: "", subcategory: "4. 기타 비유동자산", accountCode: "55", accountName: "", amount: "", total: "230,000", isHeader: true, level: 2 },
+      { section: "", subsection: "", subcategory: "", accountCode: "56", accountName: "(1) 장기매출채권", amount: "150,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "57", accountName: "(2) 장기선급금", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "58", accountName: "(3) 장기미수금", amount: "30,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "59", accountName: "(4) 임차보증금", amount: "30,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "60", accountName: "(5) 기타보증금", amount: "30,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "61", accountName: "(6) 기타", amount: "30,000", total: "", isHeader: false, level: 3 },
+      
+      { section: "", subsection: "", subcategory: "", accountCode: "62", accountName: "자산총계( Ⅰ+Ⅱ )", amount: "", total: "7,030,000", isHeader: false, level: 0, isGrandTotal: true },
+      
+      // 부채
+      { section: "부 채", subsection: "", subcategory: "", accountCode: "", accountName: "", amount: "", total: "", isHeader: true, level: 0 },
+      
+      // Ⅰ. 유동부채
+      { section: "", subsection: "Ⅰ. 유동부채", subcategory: "", accountCode: "63", accountName: "", amount: "", total: "1,350,000", isHeader: true, level: 1 },
+      
+      { section: "", subsection: "", subcategory: "1. 단기차입금", accountCode: "64", accountName: "1. 단기차입금", amount: "320,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "2. 매입채무", accountCode: "65", accountName: "2. 매입채무", amount: "150,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "3. 선수금", accountCode: "66", accountName: "3. 선수금", amount: "100,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "4. 미지급금", accountCode: "67", accountName: "4. 미지급금", amount: "80,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "5. 예수금", accountCode: "68", accountName: "5. 예수금", amount: "80,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "6. 미지급비용", accountCode: "69", accountName: "6. 미지급비용", amount: "80,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "7. 유동성장기부채", accountCode: "70", accountName: "7. 유동성장기부채", amount: "80,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "8. 유동성충당부채", accountCode: "71", accountName: "8. 유동성충당부채", amount: "80,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "9. 기타", accountCode: "72", accountName: "9. 기타", amount: "80,000", total: "", isHeader: false, level: 3 },
+
+      // Ⅱ. 비유동부채
+      { section: "", subsection: "Ⅱ. 비유동부채", subcategory: "", accountCode: "73", accountName: "", amount: "", total: "1,350,000", isHeader: true, level: 1 },
+      
+      { section: "", subsection: "", subcategory: "1. 장기차입금", accountCode: "74", accountName: "1. 장기차입금", amount: "", total: "1,000,000", isHeader: true, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "75", accountName: "① 관계회사", amount: "1,000,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "76", accountName: "② 임원 및 종업원", amount: "", total: "350,000", isHeader: true, level: 3 },
+      { section: "", subsection: "", subcategory: "", accountCode: "77", accountName: "③ 기타", amount: "300,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "2. 장기매입채무", accountCode: "78", accountName: "2. 장기매입채무", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "3. 장기선수금", accountCode: "79", accountName: "3. 장기선수금", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "4. 장기미지급금", accountCode: "80", accountName: "4. 장기미지급금", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "5. 임대보증금", accountCode: "81", accountName: "5. 임대보증금", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "6. 기타보증금", accountCode: "82", accountName: "6. 기타보증금", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "7. 퇴직급여충당부채", accountCode: "83", accountName: "7. 퇴직급여충당부채", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "8. 기타충당부채", accountCode: "84", accountName: "8. 기타충당부채", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "9. 제준비금", accountCode: "85", accountName: "9. 제준비금", amount: "50,000", total: "", isHeader: false, level: 3 },
+      { section: "", subsection: "", subcategory: "10. 기타", accountCode: "86", accountName: "10. 기타", amount: "50,000", total: "", isHeader: false, level: 3 },
+      
+      { section: "", subsection: "", subcategory: "", accountCode: "87", accountName: "부채총계( Ⅰ+Ⅱ )", amount: "", total: "2,700,000", isHeader: false, level: 0, isGrandTotal: true },
+      
+      // 자본
+      { section: "자 본", subsection: "", subcategory: "", accountCode: "", accountName: "", amount: "", total: "", isHeader: true, level: 0 },
+      
+      // Ⅲ. 자본금
+      { section: "", subsection: "Ⅲ. 자본금", subcategory: "", accountCode: "88", accountName: "", amount: "", total: "2,000,000", isHeader: true, level: 2 },
+
+      // Ⅳ. 당기순손익
+      { section: "", subsection: "Ⅳ. 당기순손익", subcategory: "", accountCode: "89", accountName: "", amount: "", total: "2,000,000", isHeader: true, level: 2 },
+
+      { section: "", subsection: "", subcategory: "", accountCode: "90", accountName: "자본총계( Ⅲ+Ⅳ )", amount: "", total: "4,330,000", isHeader: false, level: 0, isGrandTotal: true },
+      { section: "", subsection: "", subcategory: "", accountCode: "91", accountName: "부채와 자본총계( Ⅰ+Ⅱ+Ⅲ+Ⅳ )", amount: "", total: "7,030,000", isHeader: false, level: 0, isGrandTotal: true }
+    ];
+
+    // ag-Grid 세팅
+    const gridOptions = {
+      headerHeight: 35,
+      rowHeight: 35,
+      rowData: balanceSheetData,
+      suppressMovableColumns: true,  // 컬럼 이동 금지
+      suppressRowDrag: true,         // 행 드래그 금지
+      rowDragManaged: false,         // 행 드래그 관리 비활성화
+      columnDefs: [
+        { 
+          headerName: "계정과목", 
+          field: "accountName",
+          flex: 1,
+          sortable: false,
+          cellRenderer: params => {
+            let displayText = '';
+            
+            // 대분류 (level 0)
+            if (params.data.section) {
+              displayText = `<strong style="font-weight: 600;">${params.data.section}</strong>`;
+            }
+            // 중분류 (level 1)
+            else if (params.data.subsection) {
+              displayText = `<strong style="font-weight: 500;">${params.data.subsection}</strong>`;
+            }
+            // 소분류 (level 2)
+            else if (params.data.subcategory) {
+              displayText = `<span style="font-weight: 500;">${params.data.subcategory}</span>`;
+            }
+            // 계정과목 및 합계 (level 3 및 합계)
+            else if (params.value) {
+              if (params.data.isSubTotal || params.data.isTotal || params.data.isGrandTotal) {
+                displayText = `<strong style="font-weight: 500;">${params.value}</strong>`;
+              } else {
+                displayText = params.value;
+              }
+            }
+            
+            return displayText;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            if (params.data.isSubTotal) return 'ag-subtotal-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "코드", 
+          field: "accountCode", 
+          width: 100,
+          sortable: false,
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "금액", 
+          field: "amount", 
+          width: 120,
+          sortable: false,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "합계", 
+          field: "total", 
+          width: 150,
+          sortable: false,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            return `<span>${params.value}</span>`;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            return '';
+          }
+        }
+      ],
+      suppressRowClickSelection: true,
+      onGridReady: (params) => {
+        gridOptions.api = params.api;
+      }
+    };
+
+    // 그리드 생성
+    agGrid.createGrid(document.querySelector("#balanceSheetGrid"), gridOptions);
+
+    // 자동 계산 함수 - 헤더 행의 합계 필드를 동적으로 계산
+    function calculateTotals() {
+      balanceSheetData.forEach((row, index) => {
+        // 소분류(level 2) 헤더 행의 합계 계산
+        if (row.isHeader && row.level === 2) {
+          row.total = calculateSubcategoryTotal(index);
+        }
+        // 중분류(level 1) 헤더 행의 합계 계산  
+        else if (row.isHeader && row.level === 1) {
+          row.total = calculateSubsectionTotal(index);
+        }
+        // 대분류(level 0) 헤더 행의 합계 계산
+        else if (row.isHeader && row.level === 0) {
+          row.total = calculateSectionTotal(index);
+        }
+      });
+      
+      console.log('재무상태표 합계 계산 완료');
+    }
+
+    // 소분류 합계 계산 (해당 소분류의 모든 level 3 항목들 합계)
+    function calculateSubcategoryTotal(startIndex) {
+      let total = 0;
+      for (let i = startIndex + 1; i < balanceSheetData.length; i++) {
+        const row = balanceSheetData[i];
+        // 다음 소분류나 상위 레벨 도달시 중단
+        if (row.level <= 2) break;
+        
+        if (row.level === 3 && row.amount) {
+          const amount = parseFloat(row.amount.replace(/[,()]/g, ''));
+          total += row.amount.includes('(') ? -amount : amount;
+        }
+      }
+      return total.toLocaleString();
+    }
+
+    // 중분류 합계 계산 (해당 중분류의 모든 소분류 합계들의 합)
+    function calculateSubsectionTotal(startIndex) {
+      let total = 0;
+      for (let i = startIndex + 1; i < balanceSheetData.length; i++) {
+        const row = balanceSheetData[i];
+        // 다음 중분류나 상위 레벨 도달시 중단
+        if (row.level <= 1) break;
+        
+        if (row.level === 2 && row.isHeader && row.total) {
+          const amount = parseFloat(row.total.replace(/,/g, ''));
+          total += amount;
+        }
+      }
+      return total.toLocaleString();
+    }
+
+    // 대분류 합계 계산 (해당 대분류의 모든 중분류 합계들의 합)
+    function calculateSectionTotal(startIndex) {
+      let total = 0;
+      for (let i = startIndex + 1; i < balanceSheetData.length; i++) {
+        const row = balanceSheetData[i];
+        // 다음 대분류 도달시 중단
+        if (row.level === 0) break;
+        
+        if (row.level === 1 && row.isHeader && row.total) {
+          const amount = parseFloat(row.total.replace(/,/g, ''));
+          total += amount;
+        }
+      }
+      return total.toLocaleString();
+    }
+
+    // 초기 계산 실행
+    calculateTotals();
+
+    // 기능 함수들
+    function printReport(reportType) {
+      window.print();
+    }
+
+    function exportToExcel() {
+      alert('Excel 내보내기 기능을 준비 중입니다.');
+    }
+
+    // 전역 함수 등록
+    window.printReport = printReport;
+    window.exportToExcel = exportToExcel;
+  </script>
 </div>

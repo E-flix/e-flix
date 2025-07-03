@@ -1,0 +1,272 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 김희정
+  - 최초작성 : 2025-07-04
+  - 설명     : 합계잔액시산표 화면
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-07-04 (김희정): 합계잔액시산표 레이아웃
+============================================ -->
+
+<head>
+  <title>합계잔액시산표</title>
+  <style>
+    .trial-header {
+      border-bottom: 3px solid #6610f2;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .ag-header-cell-style {
+      background-color: #6c757d !important;
+      color: white !important;
+      font-weight: 500;
+    }
+    
+    .ag-subsection-header {
+      background-color: #adb5bd !important;
+      color: white !important;
+      font-weight: 500;
+    }
+    
+    .ag-total-cell-style {
+      background-color: #f8f9fa !important;
+      font-weight: 500;
+    }
+    
+    .ag-grand-total-cell-style {
+      background-color: #e9ecef !important;
+      font-weight: 600;
+    }
+    
+    @media print {
+      .btn, .d-print-none {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<div layout:fragment="content">
+  <div class="container-fluid">
+    <!-- 합계잔액시산표 섹션 -->
+    <div class="row">
+      <div class="col-12">
+        <div class="trial-header">
+          <h1 class="display-6 fw-bold" style="color: #6610f2;">합계잔액시산표</h1>
+          <p class="text-muted mb-0">한국제조(주) - 2024년 12월 31일 현재 (단위: 백만원)</p>
+        </div>
+
+        <div class="row mb-3 d-print-none">
+          <div class="col-12 d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-primary btn-sm" onclick="printReport('trial-balance')">
+              <i class="bi bi-printer"></i> 출력
+            </button>
+            <button class="btn btn-outline-success btn-sm" onclick="exportToExcel()">
+              <i class="bi bi-file-earmark-excel"></i> Excel
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-container" style="height:100vh;">
+          <div id="trialBalanceGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    // 합계잔액시산표 데이터
+    const trialBalanceData = [
+      { section: "【 자 산 】", accountCode: "", accountName: "", totalDebit: "", totalCredit: "", balanceDebit: "", balanceCredit: "", incomeStatement: "", balanceSheet: "", isHeader: true, level: 0 },
+      { section: "", accountCode: "11010", accountName: "현금", totalDebit: "150,000", totalCredit: "100,000", balanceDebit: "50,000", balanceCredit: "-", incomeStatement: "-", balanceSheet: "50,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "11020", accountName: "당좌예금", totalDebit: "320,000", totalCredit: "200,000", balanceDebit: "120,000", balanceCredit: "-", incomeStatement: "-", balanceSheet: "120,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "12010", accountName: "매출채권", totalDebit: "900,000", totalCredit: "450,000", balanceDebit: "450,000", balanceCredit: "-", incomeStatement: "-", balanceSheet: "450,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "13010", accountName: "재고자산", totalDebit: "1,300,000", totalCredit: "650,000", balanceDebit: "650,000", balanceCredit: "-", incomeStatement: "-", balanceSheet: "650,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "21010", accountName: "토지", totalDebit: "1,200,000", totalCredit: "-", balanceDebit: "1,200,000", balanceCredit: "-", incomeStatement: "-", balanceSheet: "1,200,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "21020", accountName: "건물", totalDebit: "800,000", totalCredit: "-", balanceDebit: "800,000", balanceCredit: "-", incomeStatement: "-", balanceSheet: "800,000", isHeader: false, level: 1 },
+      
+      { section: "【 부 채 】", accountCode: "", accountName: "", totalDebit: "", totalCredit: "", balanceDebit: "", balanceCredit: "", incomeStatement: "", balanceSheet: "", isHeader: true, level: 0 },
+      { section: "", accountCode: "31010", accountName: "매입채무", totalDebit: "640,000", totalCredit: "960,000", balanceDebit: "-", balanceCredit: "320,000", incomeStatement: "-", balanceSheet: "320,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "31030", accountName: "단기차입금", totalDebit: "-", totalCredit: "500,000", balanceDebit: "-", balanceCredit: "500,000", incomeStatement: "-", balanceSheet: "500,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "32010", accountName: "장기차입금", totalDebit: "100,000", totalCredit: "1,100,000", balanceDebit: "-", balanceCredit: "1,000,000", incomeStatement: "-", balanceSheet: "1,000,000", isHeader: false, level: 1 },
+      
+      { section: "【 자 본 】", accountCode: "", accountName: "", totalDebit: "", totalCredit: "", balanceDebit: "", balanceCredit: "", incomeStatement: "", balanceSheet: "", isHeader: true, level: 0 },
+      { section: "", accountCode: "41010", accountName: "자본금", totalDebit: "-", totalCredit: "2,000,000", balanceDebit: "-", balanceCredit: "2,000,000", incomeStatement: "-", balanceSheet: "2,000,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "41020", accountName: "자본잉여금", totalDebit: "-", totalCredit: "500,000", balanceDebit: "-", balanceCredit: "500,000", incomeStatement: "-", balanceSheet: "500,000", isHeader: false, level: 1 },
+      
+      { section: "【 수 익 】", accountCode: "", accountName: "", totalDebit: "", totalCredit: "", balanceDebit: "", balanceCredit: "", incomeStatement: "", balanceSheet: "", isHeader: true, level: 0 },
+      { section: "", accountCode: "51010", accountName: "제품매출액", totalDebit: "-", totalCredit: "8,500,000", balanceDebit: "-", balanceCredit: "8,500,000", incomeStatement: "8,500,000", balanceSheet: "-", isHeader: false, level: 1 },
+      { section: "", accountCode: "51020", accountName: "상품매출액", totalDebit: "-", totalCredit: "1,500,000", balanceDebit: "-", balanceCredit: "1,500,000", incomeStatement: "1,500,000", balanceSheet: "-", isHeader: false, level: 1 },
+      
+      { section: "【 비 용 】", accountCode: "", accountName: "", totalDebit: "", totalCredit: "", balanceDebit: "", balanceCredit: "", incomeStatement: "", balanceSheet: "", isHeader: true, level: 0 },
+      { section: "", accountCode: "52010", accountName: "재료비", totalDebit: "3,500,000", totalCredit: "-", balanceDebit: "3,500,000", balanceCredit: "-", incomeStatement: "3,500,000", balanceSheet: "-", isHeader: false, level: 1 },
+      { section: "", accountCode: "52020", accountName: "노무비", totalDebit: "2,000,000", totalCredit: "-", balanceDebit: "2,000,000", balanceCredit: "-", incomeStatement: "2,000,000", balanceSheet: "-", isHeader: false, level: 1 },
+      { section: "", accountCode: "61010", accountName: "급여", totalDebit: "800,000", totalCredit: "-", balanceDebit: "800,000", balanceCredit: "-", incomeStatement: "800,000", balanceSheet: "-", isHeader: false, level: 1 },
+      
+      { section: "", accountCode: "", accountName: "합 계", totalDebit: "12,610,000", totalCredit: "15,610,000", balanceDebit: "9,270,000", balanceCredit: "12,320,000", incomeStatement: "7,800,000", balanceSheet: "5,270,000", isHeader: false, level: 0, isGrandTotal: true },
+      
+      { section: "", accountCode: "", accountName: "당기순이익", totalDebit: "-", totalCredit: "-", balanceDebit: "-", balanceCredit: "-", incomeStatement: "720,000", balanceSheet: "-", isHeader: false, level: 0, isTotal: true },
+      
+      { section: "", accountCode: "", accountName: "총 계", totalDebit: "12,610,000", totalCredit: "15,610,000", balanceDebit: "9,270,000", balanceCredit: "12,320,000", incomeStatement: "8,520,000", balanceSheet: "5,270,000", isHeader: false, level: 0, isGrandTotal: true, isFinal: true }
+    ];
+
+    // ag-Grid 세팅
+    const gridOptions = {
+      headerHeight: 35,
+      rowHeight: 35,
+      rowData: trialBalanceData,
+      columnDefs: [
+        { 
+          headerName: "계정코드", 
+          field: "accountCode", 
+          width: 80,
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "계정과목", 
+          field: "accountName",
+          flex: 1,
+          cellRenderer: params => {
+            if (params.data.section) return `<strong>${params.data.section}</strong>`;
+            if (params.data.isTotal || params.data.isGrandTotal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "합계 차변", 
+          field: "totalDebit", 
+          width: 100,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            if (params.data.isTotal || params.data.isGrandTotal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "합계 대변", 
+          field: "totalCredit", 
+          width: 100,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            if (params.data.isTotal || params.data.isGrandTotal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "잔액 차변", 
+          field: "balanceDebit", 
+          width: 100,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            if (params.data.isTotal || params.data.isGrandTotal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "잔액 대변", 
+          field: "balanceCredit", 
+          width: 100,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            if (params.data.isTotal || params.data.isGrandTotal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "손익계산서", 
+          field: "incomeStatement", 
+          width: 100,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            if (params.data.isTotal || params.data.isGrandTotal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "재무상태표", 
+          field: "balanceSheet", 
+          width: 100,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            if (params.data.isTotal || params.data.isGrandTotal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        }
+      ],
+      rowSelection: { mode: 'multiRow' },
+      suppressRowClickSelection: true,
+      onGridReady: (params) => {
+        gridOptions.api = params.api;
+      }
+    };
+
+    // 그리드 생성
+    agGrid.createGrid(document.querySelector("#trialBalanceGrid"), gridOptions);
+
+    // 기능 함수들
+    function printReport(reportType) {
+      window.print();
+    }
+
+    function exportToExcel() {
+      alert('Excel 내보내기 기능을 준비 중입니다.');
+    }
+
+    // 전역 함수 등록
+    window.printReport = printReport;
+    window.exportToExcel = exportToExcel;
+  </script>
+</div>
+</html>

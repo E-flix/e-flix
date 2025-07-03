@@ -6,13 +6,207 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-07-04 (김희정): 손익계산서 레이아웃
 ============================================ -->
+
 <head>
   <title>손익계산서</title>
+  <style>
+    .income-header {
+      border-bottom: 3px solid #198754;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .ag-header-cell-style {
+      background-color: #6c757d !important;
+      color: white !important;
+      font-weight: 500;
+    }
+    
+    .ag-subsection-header {
+      background-color: #adb5bd !important;
+      color: white !important;
+      font-weight: 500;
+    }
+    
+    .ag-total-cell-style {
+      background-color: #f8f9fa !important;
+      font-weight: 500;
+    }
+    
+    .ag-grand-total-cell-style {
+      background-color: #e9ecef !important;
+      font-weight: 600;
+    }
+    
+    @media print {
+      .btn, .d-print-none {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
+
 <div layout:fragment="content">
-  <div id="income-statement">
-    <h2>손익계산서</h2>
-    <p>손익계산서 화면입니다.</p>
+  <div class="container-fluid">
+    <!-- 손익계산서 섹션 -->
+    <div class="row">
+      <div class="col-12">
+        <div class="income-header">
+          <h1 class="display-6 fw-bold text-success">손익계산서 (별지 제40호의7서식)</h1>
+          <p class="text-muted mb-0">한국제조(주) - 2024년 1월 1일부터 2024년 12월 31일까지 (단위: 백만원)</p>
+        </div>
+
+        <div class="row mb-3 d-print-none">
+          <div class="col-12 d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-success btn-sm" onclick="printReport('income-statement')">
+              <i class="bi bi-printer"></i> 출력
+            </button>
+            <button class="btn btn-outline-primary btn-sm" onclick="exportToExcel()">
+              <i class="bi bi-file-earmark-excel"></i> Excel
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-container" style="height:100vh;">
+          <div id="incomeStatementGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <script th:inline="javascript">
+    // 손익계산서 데이터
+    const incomeStatementData = [
+      { section: "Ⅰ. 매출액", accountCode: "", accountName: "", currentAmount: "", previousAmount: "", isHeader: true, level: 0 },
+      { section: "", accountCode: "51010", accountName: "제품매출액", currentAmount: "8,500,000", previousAmount: "8,000,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "51020", accountName: "상품매출액", currentAmount: "1,500,000", previousAmount: "1,400,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "", accountName: "매출액 합계", currentAmount: "10,000,000", previousAmount: "9,400,000", isHeader: false, level: 0, isTotal: true },
+      
+      { section: "Ⅱ. 매출원가", accountCode: "", accountName: "", currentAmount: "", previousAmount: "", isHeader: true, level: 0 },
+      { section: "", accountCode: "52010", accountName: "재료비", currentAmount: "3,500,000", previousAmount: "3,300,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "52020", accountName: "노무비", currentAmount: "2,000,000", previousAmount: "1,900,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "52030", accountName: "경비", currentAmount: "1,500,000", previousAmount: "1,400,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "", accountName: "매출원가 합계", currentAmount: "7,000,000", previousAmount: "6,600,000", isHeader: false, level: 0, isTotal: true },
+      
+      { section: "", accountCode: "", accountName: "매출총이익", currentAmount: "3,000,000", previousAmount: "2,800,000", isHeader: false, level: 0, isGrandTotal: true },
+      
+      { section: "Ⅲ. 판매비와관리비", accountCode: "", accountName: "", currentAmount: "", previousAmount: "", isHeader: true, level: 0 },
+      { section: "", accountCode: "61010", accountName: "급여", currentAmount: "800,000", previousAmount: "750,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "61020", accountName: "광고선전비", currentAmount: "300,000", previousAmount: "280,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "61030", accountName: "임차료", currentAmount: "200,000", previousAmount: "200,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "61040", accountName: "감가상각비", currentAmount: "400,000", previousAmount: "380,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "61050", accountName: "기타 판매관리비", currentAmount: "300,000", previousAmount: "290,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "", accountName: "판매비와관리비 합계", currentAmount: "2,000,000", previousAmount: "1,900,000", isHeader: false, level: 0, isTotal: true },
+      
+      { section: "", accountCode: "", accountName: "영업이익", currentAmount: "1,000,000", previousAmount: "900,000", isHeader: false, level: 0, isGrandTotal: true },
+      
+      { section: "Ⅳ. 영업외수익", accountCode: "", accountName: "", currentAmount: "", previousAmount: "", isHeader: true, level: 0, isSubsection: true },
+      { section: "", accountCode: "71010", accountName: "이자수익", currentAmount: "50,000", previousAmount: "45,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "71020", accountName: "배당금수익", currentAmount: "30,000", previousAmount: "25,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "", accountName: "영업외수익 합계", currentAmount: "80,000", previousAmount: "70,000", isHeader: false, level: 0, isTotal: true },
+      
+      { section: "Ⅴ. 영업외비용", accountCode: "", accountName: "", currentAmount: "", previousAmount: "", isHeader: true, level: 0, isSubsection: true },
+      { section: "", accountCode: "72010", accountName: "이자비용", currentAmount: "120,000", previousAmount: "130,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "72020", accountName: "외환손실", currentAmount: "20,000", previousAmount: "15,000", isHeader: false, level: 1 },
+      { section: "", accountCode: "", accountName: "영업외비용 합계", currentAmount: "140,000", previousAmount: "145,000", isHeader: false, level: 0, isTotal: true },
+      
+      { section: "", accountCode: "", accountName: "법인세비용차감전순이익", currentAmount: "940,000", previousAmount: "825,000", isHeader: false, level: 0, isGrandTotal: true },
+      
+      { section: "", accountCode: "81010", accountName: "법인세비용", currentAmount: "220,000", previousAmount: "195,000", isHeader: false, level: 1 },
+      
+      { section: "", accountCode: "", accountName: "당기순이익", currentAmount: "720,000", previousAmount: "630,000", isHeader: false, level: 0, isGrandTotal: true, isFinal: true }
+    ];
+
+    // ag-Grid 세팅
+    const gridOptions = {
+      headerHeight: 35,
+      rowHeight: 35,
+      rowData: incomeStatementData,
+      columnDefs: [
+        { 
+          headerName: "계정코드", 
+          field: "accountCode", 
+          width: 100,
+          cellClass: params => {
+            if (params.data.isHeader) return params.data.isSubsection ? 'ag-subsection-header' : 'ag-header-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "계정과목", 
+          field: "accountName",
+          flex: 1,
+          cellRenderer: params => {
+            if (params.data.section) return `<strong>${params.data.section}</strong>`;
+            if (params.data.isTotal || params.data.isGrandTotal || params.data.isFinal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return params.data.isSubsection ? 'ag-subsection-header' : 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal || params.data.isFinal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "당기", 
+          field: "currentAmount", 
+          width: 150,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            if (params.data.isTotal || params.data.isGrandTotal || params.data.isFinal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return params.data.isSubsection ? 'ag-subsection-header' : 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal || params.data.isFinal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "전기", 
+          field: "previousAmount", 
+          width: 150,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            if (params.data.isTotal || params.data.isGrandTotal || params.data.isFinal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return params.data.isSubsection ? 'ag-subsection-header' : 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal || params.data.isFinal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        }
+      ],
+      rowSelection: { mode: 'multiRow' },
+      suppressRowClickSelection: true,
+      onGridReady: (params) => {
+        gridOptions.api = params.api;
+      }
+    };
+
+    // 그리드 생성
+    agGrid.createGrid(document.querySelector("#incomeStatementGrid"), gridOptions);
+
+    // 기능 함수들
+    function printReport(reportType) {
+      window.print();
+    }
+
+    function exportToExcel() {
+      alert('Excel 내보내기 기능을 준비 중입니다.');
+    }
+
+    // 전역 함수 등록
+    window.printReport = printReport;
+    window.exportToExcel = exportToExcel;
+  </script>
 </div>
+</html>
