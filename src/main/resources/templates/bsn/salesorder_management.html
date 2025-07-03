@@ -109,6 +109,9 @@
       --ag-font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     }
     
+
+    .ag-theme-alpine  { width: 100% !important; }
+
     .ag-theme-alpine .ag-header-cell {
       font-weight: 700;
       color: #5a5c69;
@@ -203,10 +206,8 @@
     </div>
   </div>
 
-  <!-- 주문서 헤더 + 여신정보 -->
   <div class="row">
-    <!-- 주문서 헤더 목록 그리드 -->
-    <div class="col-lg-8 col-md-7">
+    <div class="col-12">
       <div class="card section-box">
         <div class="card-header py-3">
           <h6 class="m-0 font-weight-bold text-primary">
@@ -218,9 +219,11 @@
         </div>
       </div>
     </div>
-
-    <!-- 여신 정보 그리드 -->
-    <div class="col-lg-4 col-md-5">
+  </div>
+  
+  <!-- ────────────── 여신 정보 ──────────────-->
+  <div class="row">
+    <div class="col-12">
       <div class="card section-box">
         <div class="card-header py-3">
           <h6 class="m-0 font-weight-bold text-success">
@@ -314,273 +317,305 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
   <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
     
-      /*──────────────── 전역 변수 ────────────────*/
+      /*─────────────── 전역 변수 ───────────────*/
       let headerGridApi, detailGridApi, creditGridApi;
-      let currentOrder = null;
+      let currentOrder = null;      // 선택(또는 신규) 헤더 레코드
       let editMode     = false;
     
-      /*──────────────── 공통 헬퍼 ────────────────*/
-      /** v28~v32 : setRowData, v33 : setGridOption */
+      /*─────────────── 공통 유틸 ───────────────*/
       function safeSetRowData(api, rows){
         if (!api) return;
-        if (typeof api.setRowData === 'function')          api.setRowData(rows);           // 구버전
-        else if (typeof api.setGridOption === 'function')  api.setGridOption('rowData', rows); // v33
-        else if (api.applyTransaction)                     api.applyTransaction({ setRowData:true, data:rows });
+        if (api.setRowData)            api.setRowData(rows);               // v28-32
+        else if (api.setGridOption)    api.setGridOption('rowData', rows); // v33
+      }
+      function safeSetPinnedBottomRow(api, rows){
+        if (!api) return;
+        if (api.setPinnedBottomRowData) api.setPinnedBottomRowData(rows);          // v28-32
+        else if (api.setGridOption)     api.setGridOption('pinnedBottomRowData', rows); // v33
       }
     
       /*──────────────── 1. 헤더 그리드 ────────────────*/
       const headerGridOptions = {
-        columnDefs: [
-          { headerName:'주문번호', field:'orderNo', pinned:'left', width:140 },
-          { headerName:'주문일자', field:'orderDt', width:110 },
-          { headerName:'거래처',   field:'customerNm', width:150 },   // ← 변경
-          { headerName:'대표',     field:'representativeNm', width:110 },
-          { headerName:'연락처',   field:'phoneNo', width:120 },
-          { headerName:'담당자',   field:'salesEmpCd', width:100 },
-          { headerName:'할인율(%)',field:'discountRate', width:90,
-            valueFormatter:p=> (p.value ?? 0)+'%' },
-          { headerName:'결제조건', field:'paymentTerms', width:100 },
-          { headerName:'작성자',   field:'orderWriter', width:90 }
-        ],
+      columnDefs:[
+        /* 고정 폭이 꼭 필요한 “주문번호”만 width 지정 */
+        { headerName:'주문번호', field:'orderNo', pinned:'left',
+          width:150, cellClass:'font-weight-bold text-primary' },
+
+        /* 나머지는 flex 로 자연스러운 가변 폭 */
+        { headerName:'주문일자',    field:'orderDt',        minWidth:110, flex:1 },
+        { headerName:'거래처',      field:'customerNm',     minWidth:150, flex:1 },
+        { headerName:'대표',        field:'representativeNm',minWidth:110, flex:1 },
+        { headerName:'연락처',      field:'phoneNo',        minWidth:120, flex:1 },
+        { headerName:'담당자',      field:'salesEmpCd',     minWidth:100, flex:1 },
+        { headerName:'할인율(%)',   field:'discountRate',   minWidth:90,  flex:1,
+          valueFormatter:p=> (p.value??0)+'%' },
+        { headerName:'결제조건',    field:'paymentTerms',   minWidth:100, flex:1 },
+        { headerName:'작성자',      field:'orderWriter',    minWidth:90,  flex:1 }
+      ],
+        // 헤더 높이 지정
+        headerHeight: 35,
+        // 행 높이 지정
+        rowHeight: 35,
+        rowSelection:{ mode:'multiRow', checkboxes:true, headerCheckbox:true },
         onRowClicked: handleHeaderRowClicked,
-        defaultColDef:{ resizable:true, sortable:true, filter:true },
-        rowSelection:'single',
         pagination:true,
         paginationPageSize:10,
-        paginationPageSizeSelector:[10,20,50,100],
-        onGridReady:p=>{
-          headerGridApi = p.api;
-          loadHeaderData();
-        }
+        defaultColDef:{ resizable:true, sortable:true, filter:true },
+        onGridReady:p=>{ headerGridApi = p.api; loadHeaderData(); }
       };
     
-      /*──────────────── 2. 여신 그리드 ────────────────*/
+      /*──────────────── 2. 여신 그리드 – “가로” 구조 ───────────────*/
       const creditGridOptions = {
         columnDefs:[
-          { headerName:'항목', field:'field', width:120,
-            cellClass:'font-weight-bold text-secondary' },
-          { headerName:'값', field:'value', flex:1, cellClass:'text-right',
-            valueFormatter:p=> p.data.format==='currency'
-                  ? Number(p.value||0).toLocaleString()+'원' : (p.value||'') }
-        ],
+        { headerName:'여신한도',     field:'creditLimit',     minWidth:110, flex:1,
+          type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
+        { headerName:'여신잔액',     field:'remainingCredit', minWidth:110, flex:1,
+          type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
+        { headerName:'여신사용액',   field:'creditUsed',      minWidth:110, flex:1,
+          type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
+        { headerName:'여신상태',     field:'creditStatus',    minWidth:90,  flex:1 },
+        { headerName:'보류여부',     field:'creditHoldFlg',   minWidth:80,  flex:1 },
+        { headerName:'거래정지',     field:'tradeStopFlg',    minWidth:80,  flex:1 }
+      ],
+        // 헤더 높이 지정
+        headerHeight: 35,
+        // 행 높이 지정
+        rowHeight: 35,
         defaultColDef:{ resizable:true },
-        rowData:getInitCreditRows(),
-        onGridReady:p=> creditGridApi = p.api
+        rowData:[getInitCreditObj()],          // ← 단 일 행
+        suppressRowClickSelection:true,
+        suppressMovableColumns:true,
+        onGridReady:p=> creditGridApi = p.api,
+        domLayout:'autoHeight'
       };
     
-      /*──────────────── 3. 상세 그리드 ────────────────*/
+      /*──────────────── 3. 디테일 그리드 ────────────────*/
+      const detailColDefs = [
+        { checkboxSelection:true, headerCheckboxSelection:true, width:50 },
+        { headerName:'순번',       field:'lineNo', width:60, cellClass:'text-center' },
+        { headerName:'품목코드',   field:'itemCode', width:120 },
+        { headerName:'품목명',     field:'itemName', width:180 },
+        { headerName:'규격',       field:'spec',     width:120 },
+        { headerName:'수량',       field:'qty',      width:90,  type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString() },
+        { headerName:'단가',       field:'unitPrice',width:110, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString() },
+        { headerName:'공급가액',   field:'supplyAmount', width:120, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString() },
+        { headerName:'부가세',     field:'taxAmount',  width:100, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString() },
+        { headerName:'합계',       field:'totalAmount',width:120, type:'numericColumn',
+          cellClass:'font-weight-bold',
+          valueFormatter:p=>Number(p.value||0).toLocaleString() },
+        { headerName:'출고일',     field:'outboundDt', width:110,
+          valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '' },
+        { headerName:'납기일',     field:'catchDt',    width:110,
+          valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '' },
+        { headerName:'출고상태',   field:'outState',   width:100 },
+        { headerName:'비고',       field:'remarks',    flex:1 }
+      ];
+    
       const detailGridOptions = {
-        columnDefs:[
-          { checkboxSelection:true, headerCheckboxSelection:true, width:50 },
-          { headerName:'순번', field:'lineNo', width:60, cellClass:'text-center' },
-          { headerName:'품목코드', field:'itemCode', width:120,
-            editable:()=>editMode,
-            cellClass:p=> editMode?'editable-cell text-primary':'readonly-cell' },
-          { headerName:'품목명', field:'itemName', width:180, cellClass:'readonly-cell' },
-          { headerName:'규격',   field:'spec', width:120, cellClass:'readonly-cell' },
-          { headerName:'수량',   field:'qty',  width:90, editable:()=>editMode,
-            cellEditor:'agNumberCellEditor',
-            cellClass:p=> editMode?'editable-cell text-right':'readonly-cell text-right',
-            valueFormatter:p=>Number(p.value||0).toLocaleString() },
-          { headerName:'단가', field:'unitPrice', width:110,
-            cellClass:'readonly-cell text-right',
-            valueFormatter:p=>Number(p.value||0).toLocaleString() },
-          { headerName:'공급가', field:'supplyAmount', width:120,
-            cellClass:'readonly-cell text-right',
-            valueFormatter:p=>Number(p.value||0).toLocaleString() },
-          { headerName:'부가세', field:'taxAmount', width:100,
-            cellClass:'readonly-cell text-right',
-            valueFormatter:p=>Number(p.value||0).toLocaleString() },
-          { headerName:'합계', field:'totalAmount', width:120,
-            cellClass:'readonly-cell text-right font-weight-bold',
-            valueFormatter:p=>Number(p.value||0).toLocaleString() },
-          { headerName:'출고일',    field:'outboundDt', width:110,
-            valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '' },
-          { headerName:'납기일',    field:'catchDt',    width:110,
-            valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '' },
-          { headerName:'출고상태',  field:'outState',   width:100 },
-          { headerName:'비고', field:'remarks', flex:1,
-            editable:()=>editMode,
-            cellClass:p=> editMode?'editable-cell':'readonly-cell' }
-        ],
+        // 헤더 높이 지정
+        headerHeight: 35,
+        // 행 높이 지정
+        rowHeight: 35,
+        columnDefs : detailColDefs,
         defaultColDef:{ resizable:true },
         rowSelection:'multiple',
         animateRows:true,
-        onGridReady:p=>{
-          detailGridApi = p.api;
-          setEditMode(false);
-        },
-        onCellValueChanged:()=> setTimeout(calcTotals,100)
+        onGridReady:p=>{ detailGridApi = p.api; setEditMode(false); },
+        onCellValueChanged:()=> setTimeout(calcTotals,80)
       };
     
-      function handleHeaderRowClicked(e){
-        const { orderNo, customerCd } = e.data;
+      /*─────────────── 그리드 생성 ───────────────*/
+      headerGridApi = agGrid.createGrid(document.getElementById('headerGrid'),  headerGridOptions).api;
+      detailGridApi = agGrid.createGrid(document.getElementById('detailGrid'),  detailGridOptions).api;
+      creditGridApi = agGrid.createGrid(document.getElementById('creditGrid'),  creditGridOptions).api;
 
-        detailGridApi.showLoadingOverlay();
-
-        const ajaxDetail = $.getJSON(`/bsn/orders/${orderNo}/details`);
-        const ajaxCredit = $.getJSON(`/bsn/customer/${customerCd}/credit`);
-
-        $.when(ajaxDetail, ajaxCredit).done((dRes, cRes)=>{
-            safeSetRowData(detailGridApi, dRes[0]);
-            calcTotals();
-        
-            const creditRows = [
-              { field:'여신한도',   value:cRes[0].creditLimit,     format:'currency'},
-              { field:'여신잔액',   value:cRes[0].remainingCredit,format:'currency'},
-              { field:'여신사용액', value:cRes[0].creditUsed,     format:'currency'},
-              { field:'여신상태',   value:cRes[0].creditStatus,   format:'text'},
-              { field:'거래정지',   value:cRes[0].tradeStopFlg,   format:'text'}
-            ];
-            safeSetRowData(creditGridApi, creditRows);
-        
-        }).fail(()=>{
-            Swal.fire('오류','세부 데이터를 불러오지 못했습니다.','error');
-            safeSetRowData(detailGridApi, []);
-        }).always(()=>{
-            detailGridApi.hideOverlay();
-        });
-      }
-
-
-      /*──────────────── 4. 호환 빌더 ────────────────*/
-      function buildGrid(el, opts){
-        if (agGrid && typeof agGrid.createGrid === 'function') return agGrid.createGrid(el, opts).api;
-        if (agGrid && agGrid.Grid) { new agGrid.Grid(el, opts); return opts.api; }
-        throw new Error('AG-Grid 로드 실패');
-      }
-    
-      headerGridApi = buildGrid(document.getElementById('headerGrid'),  headerGridOptions);
-      creditGridApi = buildGrid(document.getElementById('creditGrid'),  creditGridOptions);
-      detailGridApi = buildGrid(document.getElementById('detailGrid'),  detailGridOptions);
-    
-      /*──────────────── 5. 데이터 로드 ────────────────*/
-      function loadHeaderData(){
-        $.get('/bsn/orders')
-          .done(list => safeSetRowData(headerGridApi, list))
-          .fail(()=> console.error('주문 목록 로드 실패'));
-      }
-    
-      function loadOrder(orderNo){
-        $.get(`/bsn/orders/${orderNo}`)
-          .done(dto=>{
-            currentOrder = dto;
-            safeSetRowData(detailGridApi, dto.details||[]);
-            loadCustomerCredit(dto.customerCd);
-            calcTotals();
-            setEditMode(false);
-          });
-      }
-    
-      function loadCustomerCredit(customerCd){
-        if(!customerCd){ safeSetRowData(creditGridApi, getInitCreditRows()); return; }
-        $.get('/bsn/customer/detail',{customerCd})
-          .done(c=>{
-            safeSetRowData(creditGridApi, [
-              {field:'여신한도',   value:c.creditLimit,    format:'currency'},
-              {field:'여신잔액',   value:c.remainingCredit,format:'currency'},
-              {field:'여신사용액', value:c.creditUsed,    format:'currency'},
-              {field:'여신상태',   value:c.creditStatus,  format:'text'},
-              {field:'거래정지',   value:c.tradeStopFlg,  format:'text'}
-            ]);
-          });
-      }
-    
-      /*──────────────── 6. 버튼 ────────────────*/
+      /*──────────────── 4. “신규” 버튼 ────────────────*/
       $('#btnNew').click(createNew);
-      $('#btnSave').click(saveOrder);
-      $('#btnDelete').click(deleteOrder);
-      $('#btnAddRow').click(()=> editMode && addRow());
-      $('#btnDeleteRow').click(()=> editMode && delRows());
     
       function createNew(){
         $.get('/bsn/orders/nextOrderNo').done(no=>{
-          currentOrder = { orderNo:no, orderDt:new Date().toISOString().slice(0,10) };
-          safeSetRowData(detailGridApi, []);
+          const today = dayjs().format('YYYY-MM-DD');
+          const newHeader = {
+            orderNo   : no,
+            orderDt   : today,
+            customerNm: '',          // 이후 자동 채움
+            paymentTerms:'Net 30'
+          };
+    
+          /* 헤더 그리드 최상단에 추가 */
+          headerGridApi.applyTransaction({ add:[newHeader], addIndex:0 });
+          headerGridApi.ensureIndexVisible(0);
+          headerGridApi.setFocusedCell(0,'customerNm');
+    
+          /* 디테일 그리드 빈 행 1줄 */
+          safeSetRowData(detailGridApi,[{ lineNo:1, qty:1 }]);
+          calcTotals();
+    
+          /* 여신 초기화 & 편집 모드 on */
           safeSetRowData(creditGridApi, getInitCreditRows());
+          currentOrder = newHeader;
           setEditMode(true);
         });
       }
     
+      /*──────────────── 5. 저장 버튼 ────────────────*/
+      $('#btnSave').click(saveOrder);
+    
       function saveOrder(){
-        if(!editMode){ alert('편집 모드가 아닙니다'); return; }
+        if(!editMode){
+          Swal.fire('알림','편집 모드가 아닙니다. “신규” 버튼을 먼저 클릭하세요.','info');
+          return;
+        }
+        headerGridApi.stopEditing();
+    
+        const headerData = currentOrder;
+        if(!headerData){
+          Swal.fire('오류','헤더 정보가 없습니다.','error'); return;
+        }
+    
+        const details=[];
+        detailGridApi.forEachNode(n=>{
+          if(n.data.itemCode) details.push({...n.data});
+        });
+        if(details.length===0){
+          Swal.fire('안내','품목을 한 개 이상 입력해 주세요.','warning'); return;
+        }
+    
+        const dto = {...headerData, details};
+    
+        Swal.showLoading();
         $.ajax({
-          url:'/bsn/orders', method:'POST', contentType:'application/json',
-          data:JSON.stringify(extractDto())
-        })
-        .done(r=>{
-          if(r.success){ alert('저장 완료'); loadHeaderData(); setEditMode(false); }
-          else alert('저장 실패: '+r.message);
-        })
-        .fail(()=> alert('저장 실패'));
+          url:'/bsn/orders',
+          method:'POST',
+          contentType:'application/json',
+          data:JSON.stringify(dto)
+        }).done(r=>{
+          if(r.success){
+            Swal.fire('저장 완료','주문서가 등록되었습니다.','success');
+            setEditMode(false);
+            loadHeaderData();
+          }else{
+            Swal.fire('저장 실패',r.message||'서버 오류','error');
+          }
+        }).fail(()=> Swal.fire('저장 실패','통신 오류가 발생했습니다.','error'));
       }
+    
+      /*──────────────── 헤더 클릭 → 디테일 + 여신 ───────────────*/
+      // ① 헤더 행 클릭 시
+      function handleHeaderRowClicked(e){
+        const { orderNo, customerCd } = e.data;   // ← customerCd 가 이미 헤더에 담겨있음
+        currentOrder = e.data;
+      
+        // 주문 상세
+        const reqDetail = $.getJSON(`/bsn/orders/${orderNo}/details`);
+        // ★ 여신 : 새 API
+        const reqCredit = $.getJSON(`/bsn/customer/${customerCd}/credit`);
+      
+        $.when(reqDetail, reqCredit).done((dRes, cRes)=>{
+            safeSetRowData(detailGridApi, dRes[0]);
+            showCredit(cRes[0]);
+            calcTotals();
+        }).fail(()=> Swal.fire('오류','데이터를 불러오지 못했습니다','error'));
+      }
+      
+      // ② 신규 입력 중 고객을 바꿨을 때도 호출
+      function afterSelectCustomer(cust){          // cust = {customerCd, …}
+        currentOrder.customerCd = cust.customerCd;
+        $('#customerNmInput').val(cust.customerNm);
+        // ★ 고객 선택 즉시 여신 새로 고침
+        $.getJSON(`/bsn/customer/${cust.customerCd}/credit`).done(showCredit);
+      }
+      
+      function showCredit(c){                      // CreditInfoDTO → 그리드 행 1개
+        safeSetRowData(creditGridApi,[{
+          creditLimit     : c.creditLimit     ?? 0,
+          remainingCredit : c.remainingCredit?? 0,
+          creditUsed      : c.creditUsed     ?? 0,
+          creditStatus    : c.creditStatus   ?? '',
+          creditHoldFlg   : c.creditHoldFlg  ?? '',
+          tradeStopFlg    : c.tradeStopFlg   ?? ''
+        }]);
+      }
+      /*──────────────── 여신 정보 채우기 ───────────────*/
+      function fillCredit(c){
+        const row = {
+          creditLimit     : c.creditLimit     ?? 0,
+          remainingCredit : c.remainingCredit?? 0,
+          creditUsed      : c.creditUsed     ?? 0,
+          creditStatus    : c.creditStatus   ?? '',
+          creditHoldFlg   : c.creditHoldFlg  ?? '',
+          tradeStopFlg    : c.tradeStopFlg   ?? ''
+        };
+        safeSetRowData(creditGridApi,[row]);
+      }
+    
+      /*──────────────── 7. 삭제 버튼(다중) ────────────────*/
+      $('#btnDelete').click(deleteOrder);
     
       function deleteOrder(){
-        if(!currentOrder){ alert('선택된 주문이 없습니다'); return; }
-        if(!confirm('삭제하시겠습니까?')) return;
-        $.ajax({ url:`/bsn/orders/${currentOrder.orderNo}`, method:'DELETE'})
-          .done(r=>{
-            if(r.success){
-              alert('삭제 완료');
-              loadHeaderData();
-              safeSetRowData(detailGridApi, []);
-              safeSetRowData(creditGridApi, getInitCreditRows());
-              currentOrder=null;
-            } else alert('삭제 실패: '+r.message);
-          });
+        const sel = headerGridApi.getSelectedRows();
+        if(sel.length===0){
+          Swal.fire('선택 필요','삭제할 주문서를 체크해 주세요.','warning'); return;
+        }
+        Swal.fire({
+          title:'삭제 확인',
+          text:`선택한 ${sel.length}건을 삭제하시겠습니까?`,
+          icon:'warning',
+          showCancelButton:true,
+          confirmButtonColor:'#e74a3b',
+          cancelButtonColor:'#6c757d',
+          confirmButtonText:'삭제',
+          cancelButtonText:'취소'
+        }).then(r=>{
+          if(!r.isConfirmed) return;
+          Swal.showLoading();
+          const jobs=sel.map(o=> $.ajax({url:`/bsn/orders/${o.orderNo}`,method:'DELETE'}));
+          $.when.apply($,jobs).done(()=>{
+            Swal.fire('삭제 완료','삭제되었습니다.','success');
+            loadHeaderData();
+            safeSetRowData(detailGridApi,[]);
+            fillCredit(getInitCreditRows());
+          }).fail(()=> Swal.fire('삭제 실패','서버 오류가 발생했습니다.','error'));
+        });
       }
     
-      /*──────────────── 7. 상세 행 ────────────────*/
-      function addRow(){
-        const idx = detailGridApi.getDisplayedRowCount()+1;
-        detailGridApi.applyTransaction({ add:[{lineNo:idx, qty:1}] });
+      /*──────────────── 8. 데이터 로드/계산 ────────────────*/
+      function loadHeaderData(){
+        $.get('/bsn/sorlist/data')
+          .done(list=> safeSetRowData(headerGridApi,list))
+          .fail(()=> console.error('주문 목록 로드 실패'));
       }
-      function delRows(){
-        detailGridApi.applyTransaction({ remove: detailGridApi.getSelectedRows()});
-        calcTotals();
+      function fillCredit(c){
+        safeSetRowData(creditGridApi,[
+          {field:'여신한도',   value:c.creditLimit,     format:'currency'},
+          {field:'여신잔액',   value:c.remainingCredit,format:'currency'},
+          {field:'여신사용액', value:c.creditUsed,     format:'currency'},
+          {field:'여신상태',   value:c.creditStatus,   format:'text'},
+          {field:'거래정지',   value:c.tradeStopFlg,   format:'text'}
+        ]);
       }
-    
-      /*──────────────── 8. 합계 계산 ────────────────*/
       function calcTotals(){
         let supply=0,tax=0,total=0;
         detailGridApi.forEachNode(n=>{
           supply+=Number(n.data.supplyAmount||0);
-          tax   +=Number(n.data.taxAmount||0);
+          tax   +=Number(n.data.taxAmount  ||0);
           total +=Number(n.data.totalAmount||0);
         });
-        detailGridApi.setPinnedBottomRowData([{
+        safeSetPinnedBottomRow(detailGridApi,[{
           itemCode:'합계', supplyAmount:supply, taxAmount:tax, totalAmount:total
         }]);
       }
     
-      /*──────────────── 9. 편집 모드 ────────────────*/
-      function setEditMode(flag){
-        editMode = flag;
-        detailGridApi.refreshCells({force:true});
-        $('#btnSave,#btnAddRow,#btnDeleteRow').prop('disabled', !flag);
-      }
-    
-      /*──────────────── 10. DTO ────────────────*/
-      function extractDto(){
-        const dto = {
-          orderNo      : currentOrder?.orderNo,
-          orderDt      : currentOrder?.orderDt,
-          customerCd   : currentOrder?.customerCd,
-          paymentTerms : currentOrder?.paymentTerms,
-          orderWriter  : currentOrder?.orderWriter,
-          coIdx        : currentOrder?.coIdx,
-          remarks      : currentOrder?.remarks,
-          details:[]
-        };
-        detailGridApi.forEachNode(n=>{ if(n.data.itemCode) dto.details.push({...n.data}); });
-        return dto;
-      }
-    
-      /*──────────────── 11. 여신 초기값 ────────────────*/
+      /*──────────────── 9. 기타 ────────────────*/
       function getInitCreditRows(){
         return [
           {field:'여신한도',   value:0, format:'currency'},
@@ -590,11 +625,34 @@
           {field:'거래정지',   value:'',format:'text'}
         ];
       }
-    
+      function setEditMode(flag){
+        editMode = flag;
+        detailGridApi.refreshCells({force:true});
+        headerGridApi.refreshCells({force:true});
+        $('#btnSave,#btnAddRow,#btnDeleteRow').prop('disabled', !flag);
+      }
+
+      /*─────────────── 보조 함수 ───────────────*/
+      function getInitCreditObj(){
+        return {
+          creditLimit    :0,
+          remainingCredit:0,
+          creditUsed     :0,
+          creditStatus   :'',
+          creditHoldFlg  :'',
+          tradeStopFlg   :''
+        };
+      }
+      function numFmt(v){ return Number(v||0).toLocaleString()+'원'; }
+      function setEditMode(flag){
+        editMode = flag;
+        detailGridApi.refreshCells({force:true});
+        headerGridApi.refreshCells({force:true});
+        $('#btnSave,#btnAddRow,#btnDeleteRow').prop('disabled', !flag);
+      }
       console.log('주문서 관리 JS 초기화 완료');
     });
     /*]]>*/
     </script>
-    
 </div>
 </html>

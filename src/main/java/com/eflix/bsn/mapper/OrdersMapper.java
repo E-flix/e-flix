@@ -11,12 +11,12 @@ import java.util.List;
 public interface OrdersMapper {
 
     /* ───── 조회 ───── */
-    List<OrdersDTO> selectAllOrders();
-    OrdersDTO      selectOrderHeader(String orderNo);
-    List<OrdersDetailDTO> selectOrderDetails(String orderNo);
+    List<OrdersDTO> selectAllOrders(String coIdx);
+    OrdersDTO      selectOrderHeader(OrdersDTO ordersDTO);
+    List<OrdersDetailDTO> selectOrderDetails(OrdersDetailDTO ordersDetailDTO);
 
     /* ───── 채번 ───── */
-    String selectNextOrderNo();
+    String selectNextOrderNo(String coIdx);
 
     /* ───── 저장 / 수정 ───── */
     int insertOrder(OrdersDTO dto);
@@ -26,6 +26,6 @@ public interface OrdersMapper {
     int insertOrderDetailBatch(@Param("list") List<OrdersDetailDTO> list);
 
     /* ───── 삭제 ───── */
-    int deleteOrder(String orderNo);          // 헤더(ON DELETE CASCADE)
-    int deleteOrderDetailAll(String orderNo); // 상세만
+    void deleteOrderDetailAll(String orderNo, String coIdx);   // ← 신규
+    void deleteOrder(String orderNo, String coIdx);            // 기존
 }
