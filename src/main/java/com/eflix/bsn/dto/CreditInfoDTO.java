@@ -12,6 +12,7 @@ public class CreditInfoDTO {
     private String     customerCd;          // CUSTOMER_CD
     private BigDecimal creditLimit;         // CREDIT_LIMIT
     private BigDecimal creditUsed;          // CREDIT_USED
+    private BigDecimal remainingCredit;
 
     /** 남은 한도 = 한도 - 사용액 (계산용) */
     public BigDecimal getRemainingCredit() {

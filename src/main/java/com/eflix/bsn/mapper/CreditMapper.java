@@ -15,6 +15,8 @@ public interface CreditMapper {
   // 여신 정보 조회
   CreditInfoDTO getCreditInfo(@Param("customerCd") String customerCd);
 
+  CreditInfoDTO selectCreditInfo(@Param("customerCd") String customerCd);
+
   CreditInfoDTO selectByCustomerCd(@Param("customerCd") String customerCd);
 
   // 남은 여신 계산
