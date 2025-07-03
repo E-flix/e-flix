@@ -27,7 +27,10 @@ public class InboundServiceImpl implements InboundService {
     // 생산입력
     @Override
     public int insertProd(InboundDTO inboundDTO) {
-        return inboundMapper.insertProd(inboundDTO);
+        System.out.println(inboundDTO.toString());
+        int test = inboundMapper.insertProd(inboundDTO);
+        System.out.println(test);
+        return test;
     }
 
     // 가장 마지막 prod_id 가져오기

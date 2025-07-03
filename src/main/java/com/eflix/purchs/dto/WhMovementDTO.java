@@ -7,4 +7,5 @@ public class WhMovementDTO {
     String prodId;
     String prodName;
     String sendWh;
+    int sendBeforeQty;
 }

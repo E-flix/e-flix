@@ -8,6 +8,7 @@
   [ 변경 이력 ]
   - 2025-07-02 (이혁진): AG Grid, 레이아웃 통일 적용
   - 2025-07-02 (이혁진): 더미로 진행되고 있음
+  - 2025-07-02 (이혁진): 작업중
 ============================================ -->
 
 <head>
@@ -100,7 +101,7 @@
 				children: [
 					{
 						headerName: "창고ID",
-						ditable: false,
+						editable: false,
 						field: "sendWh",
 						valueGetter: (params) => {
 							return params.data.sendWh || "창고ID";
@@ -137,6 +138,7 @@
 				if (matched) {
 					event.data.prodId = matched.prodId;
 					event.data.sendWh = matched.sendWh;
+					event.data.sendBeforeQty = matched.sendBeforeQty;
 					event.api.applyTransaction({ update: [event.data] });
 				}
 			}
