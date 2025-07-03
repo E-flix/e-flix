@@ -9,39 +9,56 @@
   <!--─────────────────────────────-->
   <!-- 1. 주문 목록 (헤더 그리드)     -->
   <!--─────────────────────────────-->
-  <select id="selectAllOrders" resultType="com.eflix.bsn.dto.OrdersDTO">
-    SELECT
-      ORDER_NO       AS orderNo,
-      ORDER_DT       AS orderDt,
-      PAYMENT_TERMS  AS paymentTerms,
-      CUSTOMER_CD    AS customerCd,
-      CO_IDX         AS coIdx,
-      ORDER_WRITER   AS orderWriter,
-      REMARKS        AS remarks
-    FROM ORDERS
-    ORDER BY ORDER_DT DESC
-  </select>
+  <select id="selectAllOrders" resultType="com.eflix.bsn.dto.OrdersDTO" parameterType="String">
+  SELECT
+        o.ORDER_NO          AS orderNo,
+        o.ORDER_DT          AS orderDt,
+        o.CUSTOMER_CD       AS customerCd,
+        o.PAYMENT_TERMS     AS paymentTerms,
+        o.ORDER_WRITER      AS orderWriter,
+        /* ───────── 조인 컬럼 ───────── */
+        c.CUSTOMER_NM       AS customerNm,
+        c.REPRESENTATIVE_NM AS representativeNm,
+        c.PHONE_NO          AS phoneNo,
+        c.SALES_EMP_CD      AS salesEmpCd,
+        c.DISCOUNT_RATE     AS discountRate
+  FROM   ORDERS o
+  JOIN   CUSTOMERS c
+        ON c.CUSTOMER_CD = o.CUSTOMER_CD
+  WHERE  o.co_idx = #{coIdx}
+  and  c.co_idx = #{coIdx}
+  ORDER  BY o.ORDER_DT DESC
+</select>
 
   <!--─────────────────────────────-->
   <!-- 2. 주문 단건 헤더              -->
   <!--─────────────────────────────-->
-  <select id="selectOrderHeader" resultType="com.eflix.bsn.dto.OrdersDTO">
-    SELECT
-      ORDER_NO       AS orderNo,
-      ORDER_DT       AS orderDt,
-      PAYMENT_TERMS  AS paymentTerms,
-      CUSTOMER_CD    AS customerCd,
-      CO_IDX         AS coIdx,
-      ORDER_WRITER   AS orderWriter,
-      REMARKS        AS remarks
-    FROM ORDERS
-    WHERE ORDER_NO = #{orderNo}
-  </select>
+  <!-- 단건 헤더 (상세 조회용)도 동일하게 JOIN -->
+<select id="selectOrderHeader" resultType="com.eflix.bsn.dto.OrdersDTO" parameterType = "OrdersDTO">
+  SELECT
+        o.ORDER_NO          AS orderNo,
+        o.ORDER_DT          AS orderDt,
+        o.CUSTOMER_CD       AS customerCd,
+        o.PAYMENT_TERMS     AS paymentTerms,
+        o.ORDER_WRITER      AS orderWriter,
+        /* 조인 컬럼 */
+        c.CUSTOMER_NM       AS customerNm,
+        c.REPRESENTATIVE_NM AS representativeNm,
+        c.PHONE_NO          AS phoneNo,
+        c.SALES_EMP_CD      AS salesEmpCd,
+        c.DISCOUNT_RATE     AS discountRate
+  FROM   ORDERS o
+  JOIN   CUSTOMERS c
+        ON c.CUSTOMER_CD = o.CUSTOMER_CD
+  WHERE  o.ORDER_NO = #{orderNo}
+  and o.co_idx = #{coIdx}
+  and c.co_idx = #{coIdx}
+</select>
 
   <!--─────────────────────────────-->
   <!-- 3. 주문 상세 목록              -->
   <!--─────────────────────────────-->
-  <select id="selectOrderDetails" resultType="com.eflix.bsn.dto.OrdersDetailDTO">
+  <select id="selectOrderDetails" resultType="com.eflix.bsn.dto.OrdersDetailDTO" parameterType="OrdersDetailDTO">
     SELECT
       ORDER_NO        AS orderNo,
       LINE_NO         AS lineNo,
@@ -60,14 +77,16 @@
       OUT_STATE       AS outState
     FROM ORDERS_DETAIL
     WHERE ORDER_NO = #{orderNo}
+    and co_idx = #{coIdx}
     ORDER BY LINE_NO
   </select>
 
   <!--─────────────────────────────-->
   <!-- 4. 주문번호 채번               -->
   <!--─────────────────────────────-->
-  <select id="selectNextOrderNo" resultType="string">
+  <select id="selectNextOrderNo" resultType="string" parameterType = "String">
     SELECT FN_NEXT_ORDER_NO FROM DUAL
+    WHERE  co_idx = #{coIdx}
   </select>
 
   <!--─────────────────────────────-->
@@ -76,7 +95,7 @@
   <insert id="insertOrder" parameterType="com.eflix.bsn.dto.OrdersDTO">
     INSERT INTO ORDERS (
       ORDER_NO, ORDER_DT, PAYMENT_TERMS,
-      CUSTOMER_CD, CO_IDX, ORDER_WRITER, REMARKS
+      CUSTOMER_CD, CO_IDX, ORDER_WRITER, REMARKS 
     ) VALUES (
       #{orderNo}, #{orderDt}, #{paymentTerms},
       #{customerCd}, #{coIdx}, #{orderWriter}, #{remarks}
@@ -91,7 +110,6 @@
         SET ORDER_DT       = #{orderDt},
           PAYMENT_TERMS  = #{paymentTerms},
           CUSTOMER_CD    = #{customerCd},
-          CO_IDX         = #{coIdx},
           ORDER_WRITER   = #{orderWriter},
           REMARKS        = #{remarks},
           UPD_DT         = SYSDATE
@@ -101,17 +119,18 @@
   <!--─────────────────────────────-->
   <!-- 7. 주문 DELETE (헤더)          -->
   <!--─────────────────────────────-->
-  <delete id="deleteOrder" parameterType="string">
-    DELETE FROM ORDERS
-    WHERE ORDER_NO = #{orderNo}
-  </delete>
-
-  <!--─────────────────────────────-->
-  <!-- 8. 상세 DELETE ALL             -->
-  <!--─────────────────────────────-->
+  <!-- 디테일 전부 삭제 -->
   <delete id="deleteOrderDetailAll" parameterType="string">
-    DELETE FROM ORDERS_DETAIL
-    WHERE ORDER_NO = #{orderNo}
+      DELETE FROM ORDERS_DETAIL
+      WHERE ORDER_NO = #{orderNo}
+      and co_idx = #{coIdx}
+  </delete>
+  
+  <!-- 헤더 삭제  -->
+  <delete id="deleteOrder" parameterType="string">
+      DELETE FROM ORDERS
+      WHERE ORDER_NO = #{orderNo}
+      and co_idx = #{coIdx}
   </delete>
 
   <!--─────────────────────────────-->
@@ -132,5 +151,4 @@
     </foreach>
     SELECT 1 FROM DUAL
   </insert>
-
 </mapper>

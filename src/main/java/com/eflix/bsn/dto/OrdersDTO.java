@@ -1,9 +1,11 @@
 package com.eflix.bsn.dto;
 
-import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.Data;
 
 /**
  * 주문서 헤더 DTO
@@ -35,4 +37,11 @@ public class OrdersDTO {
 
     /** 상세 목록 */
     private List<OrdersDetailDTO> details = new ArrayList<>();
+
+    /* ── 신규 필드 ── */
+    private String customerNm;        // 거래처명
+    private String representativeNm;  // 대표명
+    private String phoneNo;           // 연락처
+    private String salesEmpCd;        // 영업담당자
+    private BigDecimal discountRate;  // 할인율
 }
