@@ -6,13 +6,14 @@
 	<!-- 조회 -->
 	<select id="getWarehouse" resultType="WarehouseDTO">
       SELECT
-        warehouse_id, 
+        warehouse_id,
         warehouse_location,
         warehouse_scale,
-        warehouse_manager
+        warehouse_manager,
+        c.common_code_name
       FROM
-        warehouse
-      ORDER BY 
+        warehouse w JOIN common_code c ON w.exist_prod = c.common_code
+      ORDER BY
         warehouse_id
   </select>
 	<!-- 마지막 창고번호 가져오기 -->
@@ -24,14 +25,13 @@
   </select>
 	<!-- 등록 -->
 	<insert id="insertWarehouse" parameterType="WarehouseDTO">
-      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager, warehouse_status, warehouse_current, co_idx) 
-      VALUES (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager}, 's01', 0, 'co-101')  <!--회사코드 삽입 'co-101' -->
+      INSERT INTO warehouse (warehouse_id, warehouse_location, warehouse_scale, warehouse_manager, warehouse_status, warehouse_current, co_idx, exist_prod) 
+      VALUES (#{warehouseId},#{warehouseLocation},#{warehouseScale},#{warehouseManager}, 's01', 0, 'co-101', 'ep02')  <!--회사코드 삽입 'co-101' -->
   </insert>
 	<!-- 삭제 -->
 	<delete id="deleteWarehouse" parameterType="WarehouseDTO">
-      BEGIN
-        DELETE_WAREHOUSE_PROCEDURE(#{warehouseId});
-      END;
+    <!-- 프로시저 사용시 mybatis 프로시저 사용가능 CALL -->
+      CALL DELETE_WAREHOUSE_PROCEDURE(#{warehouseId},#{commonCodeName})
   </delete>
 	<!--입고가능한 창고조회-->
 	<select id="warehouseState" resultType="WarehouseDTO">

@@ -16,6 +16,7 @@ public class WarehouseDTO {
   String warehouseLocation;
   int warehouseScale;
   String warehouseManager;
+  String commonCodeName;
   int warehouseCurrent;
   int conf;
 }

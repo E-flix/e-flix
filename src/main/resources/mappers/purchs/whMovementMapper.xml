@@ -6,7 +6,7 @@
 <!-- 제품명 조회 (prod_id)-->
 <select id="searchProdIdList" parameterType="WhMovementDTO">
   SELECT
-    i.prod_id AS prod_id, p.prod_name AS prod_name, i.warehouse_id AS send_wh
+    i.prod_id AS prod_id, p.prod_name AS prod_name, i.warehouse_id AS send_wh, i.iv_current_quantity AS send_before_qty
  FROM
     prod p JOIN inventory i ON p.prod_id = i.prod_id
            JOIN warehouse w ON w.warehouse_id = i.warehouse_id

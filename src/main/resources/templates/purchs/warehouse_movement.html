@@ -100,7 +100,7 @@
 				children: [
 					{
 						headerName: "창고ID",
-						ditable: false,
+						editable: false,
 						field: "sendWh",
 						valueGetter: (params) => {
 							return params.data.sendWh || "창고ID";
@@ -137,6 +137,7 @@
 				if (matched) {
 					event.data.prodId = matched.prodId;
 					event.data.sendWh = matched.sendWh;
+					event.data.sendBeforeQty = matched.sendBeforeQty;
 					event.api.applyTransaction({ update: [event.data] });
 				}
 			}

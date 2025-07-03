@@ -21,21 +21,23 @@
 	<!--생산입력-->
 	<insert id="insertProd" parameterType="InboundDTO">
     INSERT INTO prod
-                     (prod_id, 
-                      prod_name, 
-                      make_prod_date, 
-                      prod_quantity, 
-                      safety_stock_amount, 
-                      product_type, 
-                      prod_inbound_status) 
-    VALUES 
-                      (#{prodId}, 
-                       #{prodName}, 
-                       #{makeProdDate}, 
-                       #{prodQuantity}, 
-                       #{safetyStockAmount}, 
-                       #{productType}, 
-                       'pis02')
+                     (prod_id,
+                      prod_name,
+                      make_prod_date,
+                      prod_quantity,
+                      safety_stock_amount,
+                      product_type,
+                      prod_inbound_status,
+                      co_idx)
+    VALUES
+                      (#{prodId},
+                       #{prodName},
+                       #{makeProdDate},
+                       #{prodQuantity},
+                       #{safetyStockAmount},
+                       #{productType},
+                       'pis02',
+                       'co-101')
   </insert>
 	<!--가장 마지막 prod_id 가져오기-->
 	<select id="getNextProdId" resultType="String">
