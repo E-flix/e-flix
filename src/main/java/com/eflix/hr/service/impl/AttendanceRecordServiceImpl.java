@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.eflix.common.security.auth.AuthContext;
 import com.eflix.hr.dto.AttendanceRecordDTO;
+import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.mapper.AttendanceRecordMapper;
 import com.eflix.hr.service.AttendanceRecordService;
 
@@ -34,33 +35,45 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
   @Override
   public List<AttendanceRecordDTO> getAllRecords() {
     return getAllRecords();
+  }  
+  // 근태 상세조회
+  @Override
+  public List<AttendanceRecordDTO> getRecordsByEmpId(AttendanceRecordDTO attendanceRecordDTO) {
+    attendanceRecordDTO.setEmpIdx(attendanceRecordDTO.getEmpIdx());
+    attendanceRecordDTO.setCoIdx(authContext.getCoIdx());
+    return attendanceRecordsMapper.getRecordsByEmpId(attendanceRecordDTO);
+  }
+
+  // 로그인 사원 근태현황 년월 드롭다운
+  @Override
+  public List<LocalDate> getYearMonthList(String empIdx) {
+    return attendanceRecordsMapper.getJoinDate(empIdx, authContext.getCoIdx());
   }
 
   @Override
-  public List<AttendanceRecordDTO> getRecordsByEmpId(String empIdx) {
-  AttendanceRecordDTO dto = new AttendanceRecordDTO();
-    dto.setEmpIdx(empIdx);;
-    dto.setCoIdx(authContext.getCoIdx());
-
-    dto.setAttdStart("2025-01-01");
-    dto.setAttdEnd(  "2025-06-30");
-    return attendanceRecordsMapper.getRecordsByEmpId(dto);
-  }
-
-
-  @Override
-  public int createAttendanceRecord(AttendanceRecordDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'createAttendanceRecord'");
+  public List<AttendanceRecordDTO> getBasicInfo(AttendanceRecordDTO attendanceRecordDTO) {
+    return attendanceRecordsMapper.getBasicInfo(attendanceRecordDTO);
   }
 
   @Override
-  public int updateAttendanceRecord(AttendanceRecordDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'updateAttendanceRecord'");
+  public List<AttendanceRecordDTO> userInfo(AttendanceRecordDTO attendanceRecordDTO) {
+    return attendanceRecordsMapper.getBasicInfo(attendanceRecordDTO);
   }
 
-  @Override
-  public int deleteAttendanceRecord(String attdIdx) {
-    throw new UnsupportedOperationException("Unimplemented method 'deleteAttendanceRecord'");
-  }
+	@Override
+	public int createAttendanceRecord(AttendanceRecordDTO dto) {
+		throw new UnsupportedOperationException("Unimplemented method 'createAttendanceRecord'");
+	}
+	@Override
+	public int updateAttendanceRecord(AttendanceRecordDTO dto) {
+		throw new UnsupportedOperationException("Unimplemented method 'updateAttendanceRecord'");
+	}
+	@Override
+	public int deleteAttendanceRecord(String attdIdx) {
+		throw new UnsupportedOperationException("Unimplemented method 'deleteAttendanceRecord'");
+	}
+
+
+
 
 }

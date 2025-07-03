@@ -8,6 +8,7 @@
 ============================================ */
 package com.eflix.hr.mapper;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
 import com.eflix.hr.dto.AttendanceRecordDTO;
+import com.eflix.hr.dto.EmployeeDTO;
 
 @Mapper
 public interface AttendanceRecordMapper {
@@ -25,9 +27,10 @@ public interface AttendanceRecordMapper {
     // 근태 상세조회
     List<AttendanceRecordDTO> getRecordsByEmpId(AttendanceRecordDTO dto);
     
-    int insert(AttendanceRecordDTO dto);
-    int update(AttendanceRecordDTO dto);
-    int deleteById(@Param("attdIdx") String attdIdx);
+    // 로그인 사원 근태현황 년월 드롭다운
+    List<LocalDate> getJoinDate(String empIdx, String coIdx);
 
+    // 로그인 사원 근태현황 기본정보
+    List<AttendanceRecordDTO> getBasicInfo(AttendanceRecordDTO dto);
 
 }

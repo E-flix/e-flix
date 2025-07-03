@@ -15,10 +15,12 @@
   </select>
 
   <!--근태현황 상세조회-->
-  <select id="getRecordsByEmpId" parameterType="AttendanceRecordDTO" resultType="AttendanceRecordDTO">
+  <select id="getRecordsByEmpId"
+          parameterType="AttendanceRecordDTO"
+          resultType="AttendanceRecordDTO">
     <![CDATA[
-    SELECT
-        ar.attd_date,
+      SELECT
+        ar.attd_date AS attd_date,
         ar.hd_idx,
         ar.attd_status,
         TO_CHAR(ar.attd_time,  'HH24:MI') AS attd_time,
@@ -27,23 +29,43 @@
         CASE
           WHEN (ar.attd_end - ar.attd_start) > (8/24)
           THEN
-            -- 초과분(시간)
-            FLOOR((ar.attd_end - ar.attd_start)*24 - 9)
+            FLOOR((ar.attd_end - ar.attd_start)*24 - 8)
             || '시간 '
-            -- 초과분(분)
-            || TO_CHAR(
-                FLOOR(
-                  MOD((ar.attd_end - ar.attd_start)*24 - 8,1) * 60
-                )
-              ,'FM00')
+            || LPAD(
+                TO_CHAR(
+                  FLOOR(
+                    MOD((ar.attd_end - ar.attd_start)*24 - 8,1) * 60
+                  )
+                ), 2, '0')
             || '분'
           ELSE NULL
         END AS overtime
       FROM attendance_records ar
       WHERE ar.emp_idx = #{empIdx}
-        AND ar.attd_date BETWEEN TO_DATE(#{attdStart}, 'YYYY-MM-DD') AND TO_DATE(#{attdEnd}, 'YYYY-MM-DD')
+        AND ar.attd_date BETWEEN #{attdStart} AND #{attdEnd}
         AND ar.co_idx = #{coIdx}
       ORDER BY ar.attd_date
     ]]>
+  </select>
+
+  <select id="getJoinDate" parameterType="String" resultType="java.time.LocalDate">
+    SELECT 
+      TRUNC(e.emp_regdate) AS emp_regdate
+    FROM employees e
+    WHERE e.emp_idx = #{empIdx}
+      AND e.co_idx  = #{coIdx}
+  </select>
+  <!-- 로그인 사원 기본정보 조회-->
+  <select id="getBasicInfo" resultType="AttendanceRecordDTO">
+  SELECT 
+    ar.attd_date,
+    h.hd_date AS hd_date,
+    h.hd_type AS hd_type,
+    e.leave_all_days AS leave_all_days,
+    e.leave_days AS leave_days
+  FROM attendance_records ar
+  LEFT JOIN employees e ON ar.emp_idx = e.emp_idx
+  LEFT JOIN holiday h ON ar.hd_idx = h.hd_idx
+  WHERE e.emp_idx = #{empIdx} AND e.co_idx = #{coIdx} AND ar.attd_date BETWEEN #{attdStart} AND #{attdEnd}
   </select>
 </mapper>
