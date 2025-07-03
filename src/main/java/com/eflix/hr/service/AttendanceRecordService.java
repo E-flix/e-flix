@@ -28,7 +28,7 @@ public interface AttendanceRecordService {
     public List<AttendanceRecordDTO> getBasicInfo(AttendanceRecordDTO attendanceRecordDTO);
 
     // 사용자 정보
-    public List<AttendanceRecordDTO> userInfo();
+    public List<AttendanceRecordDTO> userInfo(AttendanceRecordDTO attendanceRecordDTO);
 
 
 
