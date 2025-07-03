@@ -41,8 +41,9 @@
     <!-- @since 2025-07-02 -->
     <!-- ===================================== -->
     <select id="findByUserId" resultType="SecurityUserDTO">
-        SELECT user_idx, user_id, user_pw, user_name, user_tel, user_email, user_regdate, user_role
-        FROM users
+        SELECT u.user_idx, u.user_id, u.user_pw, u.user_name, u.user_tel, u.user_email, u.user_regdate, u.user_role, c.co_idx
+        FROM users u
+            LEFT JOIN companies c ON u.user_idx = c.user_idx
         WHERE user_id = #{username}
     </select>
 

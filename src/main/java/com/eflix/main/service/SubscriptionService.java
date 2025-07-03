@@ -3,6 +3,7 @@ package com.eflix.main.service;
 import java.util.List;
 
 import com.eflix.main.dto.MasterDTO;
+import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
@@ -10,6 +11,7 @@ import com.eflix.main.dto.SubscriptionPackageDetailDTO;
 import com.eflix.main.dto.etc.InvoiceDTO;
 import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.dto.etc.SubscriptionInfoDTO;
+import com.eflix.main.dto.etc.SubscriptionProcedureDTO;
 
 /**
  * ERP 회사 관리를 위한 Service 클래스
@@ -60,4 +62,9 @@ public interface SubscriptionService {
     public StatementDTO findSubscriptionBySpiIdx(String spiIdx);
 
     public InvoiceDTO findSubscriptionInvoiceBySpiIdx(String spiIdx);
+
+    // 0703
+    public void insertSubscriptionByProcedure(SubscriptionProcedureDTO dto);
+
+    public List<ModuleDTO> findAllModuleBySpiIdx(String spiIdx);
 }

@@ -3,6 +3,7 @@ package com.eflix.main.service;
 import java.util.List;
 
 import com.eflix.common.security.dto.UserDTO;
+import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.UserSearchDTO;
 
 /**
@@ -46,4 +47,6 @@ public interface UserService {
     public List<UserDTO> findAllUsers(UserSearchDTO userSearchDTO);
 
     public int findAllUsersCount(UserSearchDTO userSearchDTO);
+
+    
 }

@@ -16,4 +16,5 @@ public class SecurityUserDTO {
     private Date userModdate;
 
     private String userRole;
+    private String coIdx;
 }

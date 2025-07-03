@@ -91,6 +91,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             request.getSession().setAttribute("userIdx", securityUserDTO.getUserIdx());
             request.getSession().setAttribute("userId", securityUserDTO.getUserId());
             request.getSession().setAttribute("userName", securityUserDTO.getUserName());
+            request.getSession().setAttribute("coIdx", securityUserDTO.getCoIdx());
 
             log.info("메인 사용자 로그인 성공: {}", securityUserDTO.getUserId());
             

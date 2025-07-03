@@ -1165,7 +1165,7 @@
             function addSubscription(customer_uid, pg_provider, contractName) {
                 const checkedModules = $('.form-check-input[name=module]:checked').map(function () {
                     return this.value;
-                }).get();
+                }).get().join(",");
 
                 const subMasterData = {
                     subscriptionDTO: {
@@ -1188,10 +1188,28 @@
                     }
                 }
 
+                const subscriptionData = {
+                        spkIdx,
+                        coIdx: coIdx,
+                        empIdx: 'emp-101',
+                        spiPay: pg_provider,
+                        spiPeriod: $('.form-check-input[name=period]:checked').val(),
+                        spiCtrt: contractName,
+                        spiUid: customer_uid,
+                        checkedModules,
+                        coIdx: coIdx,
+                        mstId: $('#mstId').val(),
+                        mstName: $('#mstName').val(),
+                        mstPw: $('#mstPw').val(),
+                        coTel: $('#coTel').val(),
+                        mstTel: $('#mstTel').val(),
+                        mstEmail: $('#mstEmail').val(),
+                }
+
                 $.ajax({
                     type: "POST",
                     url: "/subscription/insert",
-                    data: JSON.stringify(subMasterData),
+                    data: JSON.stringify(subscriptionData),
                     contentType: "application/json",
                     success: function(res) {
                         if(res.head.res_code === "200") {

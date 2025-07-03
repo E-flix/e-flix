@@ -12,6 +12,7 @@ import com.eflix.common.res.result.ResStatus;
 import com.eflix.main.dto.etc.InvoiceDTO;
 import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.dto.etc.SubMasterDTO;
+import com.eflix.main.dto.etc.SubscriptionProcedureDTO;
 import com.eflix.main.service.CompanyService;
 import com.eflix.main.service.ReportService;
 import com.eflix.main.service.SubscriptionService;
@@ -97,14 +98,16 @@ public class SubscriptionRestController {
     }
 
     @PostMapping("/insert")
-    public ResponseEntity<ResResult> postMethodName(@RequestBody SubMasterDTO subMasterDTO) {
-        log.info(subMasterDTO.toString());
-        ResResult result;
+    public ResponseEntity<ResResult> postMethodName(@RequestBody SubscriptionProcedureDTO dto) {
+        ResResult result = null;
+        System.out.println(dto.toString());
         try {
-            subscriptionService.insertSubscriptionInfo(subMasterDTO.getSubscriptionDTO(), subMasterDTO.getMasterDTO());
+            subscriptionService.insertSubscriptionByProcedure(dto);
+            // subscriptionService.insertSubscriptionInfo(subMasterDTO.getSubscriptionDTO(), subMasterDTO.getMasterDTO());
             result = ResUtil.makeResult(ResStatus.OK, null);
         } catch (Exception e) {
             result = ResUtil.makeResult("400", e.getMessage(), null);
+            e.printStackTrace();
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -128,7 +131,7 @@ public class SubscriptionRestController {
         return mv;
     }
 
-    @GetMapping("/report/statement/preview/{spiIdx}")
+    @GetMapping("/report/preview/statement/{spiIdx}")
     public ModelAndView previewStatement(@PathVariable String spiIdx) throws Exception {
         ModelAndView mv = new ModelAndView();
 
@@ -166,7 +169,7 @@ public class SubscriptionRestController {
         return mv;
     }
 
-    @GetMapping("/report/invoice/preview/{spiIdx}")
+    @GetMapping("/report/preview/invoice/{spiIdx}")
     public ModelAndView previewInvoice(@PathVariable String spiIdx) {
         ModelAndView mv = new ModelAndView();
 

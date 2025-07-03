@@ -35,6 +35,8 @@ public class AuthUtil {
             return userDetails.getSecurityEmpDTO().getCoIdx();
         } else if (userDetails != null && userDetails.getSecurityMasterDTO() != null) {
             return userDetails.getSecurityMasterDTO().getCoIdx();
+        } else if (userDetails != null && userDetails.getSecurityUserDTO() != null) {
+            return userDetails.getSecurityUserDTO().getCoIdx();
         }
         return "co-101"; // 기본값
     }

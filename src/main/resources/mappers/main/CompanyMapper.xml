@@ -195,4 +195,25 @@
         ) p ON c.co_idx = p.co_idx
         ORDER BY c.co_regdate DESC
     </select>
+
+    <!-- 0703 -->
+    
+    <!--  -->
+    <select id="findSubscriptionByCoIdx" parameterType="String">
+        SELECT *
+            FROM (
+                SELECT s.spi_idx AS spiIdx, s.spk_idx AS spkIdx, p.spk_name AS spkName, s.spi_start AS spiStart,
+                        NVL(
+                            MAX(e.ext_end), 
+                            s.spi_end) AS spiEnd,
+                        s.spi_period + NVL(SUM(e.ext_period), 0) AS spiPeriod
+                FROM subscription s
+                    JOIN subscription_packages p ON s.spk_idx = p.spk_idx
+                    LEFT JOIN subscription_extension e ON s.spi_idx = e.spi_idx
+                WHERE s.co_idx = #{coIdx} AND s.spi_status = 'SS01'
+                GROUP BY s.spi_idx, s.spk_idx, p.spk_name, s.spi_start, s.spi_end, s.spi_period
+                ORDER BY s.spi_start DESC
+            )
+            WHERE ROWNUM = 1
+    </select>
 </mapper>

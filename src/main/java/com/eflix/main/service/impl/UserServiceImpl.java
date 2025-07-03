@@ -18,37 +18,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int insertUser(UserDTO userDTO) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'insert'");
-
         return userMapper.insert(userDTO);
     }
 
     @Override
     public UserDTO findByUserIdx(String userIdx) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'findByUserIdx'");
         return userMapper.findByUser_idx(userIdx);
     }
 
     @Override
     public int updateUser(UserDTO userDTO) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'updateUser'");
         return userMapper.updateUser(userDTO);
     }
 
     @Override
     public List<UserDTO> findAllUsers(UserSearchDTO userSearchDTO) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'findAllUsers'");
         return userMapper.findAllUsers(userSearchDTO);
     }
 
     @Override
     public int findAllUsersCount(UserSearchDTO userSearchDTO) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'findAllUsersCount'");
         return userMapper.findAllUsersCount(userSearchDTO);
     }
 }

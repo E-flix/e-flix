@@ -14,77 +14,103 @@
 
 <div layout:fragment="content">
 	<!-- main -->
-	<div class="masthead">
-        <div class="card mx-auto" style="max-width: 800px;">
-            <div class="card-body p-4 p-sm-5">
-
-                <ul class="nav nav-tabs" id="myTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="user-tab" data-bs-toggle="tab" data-bs-target="#user-tab-pane" type="button" role="tab" aria-controls="user-tab-pane" aria-selected="true">가입 정보</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="company-tab" data-bs-toggle="tab" data-bs-target="#company-tab-pane" type="button" role="tab" aria-controls="company-tab-pane" aria-selected="false">회사 정보</button>
-                    </li>
-                </ul>
-
-                <div class="tab-content pt-4" id="myTabContent">
-
-                    <div class="tab-pane fade show active" id="user-tab-pane" role="tabpanel" aria-labelledby="user-tab" tabindex="0">
-                        <h3>가입 정보</h3>
-                        <p class="text-muted mb-4">서비스 사용을 위한 기본 정보를 입력해주세요.</p>
-                        <form id="userFrom" data-sb-form-api-token="API_TOKEN">
+	<div class="masthead" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh;">
+        <div class="container">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-lg border-0 gradient-card">
+                        <div class="card-body text-center pb-4">
+                            <i class="fas fa-crown fa-3x mb-3"></i>
+                            <div>
+                                <a href="/mypage/service" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-user"></i>구독 관리
+                                </a>
+                            </div>
+                            <h1 class="display-6 fw-bold mt-2 mb-2">프로필 관리</h1>
+                            <p class="lead mb-0">개인 정보와 회사 정보를 한 곳에서 관리하세요</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center g-4">
+            <!-- 가입 정보 카드 -->
+            <div class="col-lg-6 col-md-12">
+                <div class="card info-card h-100">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="bi bi-person-circle"></i>
+                            가입 정보
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="section-subtitle">서비스 사용을 위한 기본 정보를 입력해주세요.</p>
+                        
+                        <form id="userForm">
                             <div class="form-floating mb-3">
-                                <input class="form-control" id="user_id" type="text" placeholder="아이디..." data-sb-validations="required" />
+                                <input class="form-control" id="user_id" type="text" placeholder="아이디..." required />
                                 <label for="user_id">아이디</label>
-                                <div class="invalid-feedback" data-sb-feedback="user_id:required">아이디를 입력해주세요.</div>
+                                <div class="invalid-feedback">아이디를 입력해주세요.</div>
                             </div>
                             
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input class="form-control" id="user_pw" type="password" placeholder="****" data-sb-validations="required" />
+                                        <input class="form-control" id="user_pw" type="password" placeholder="****" required />
                                         <label for="user_pw">비밀번호</label>
-                                        <div class="invalid-feedback" data-sb-feedback="user_pw:required">비밀번호를 입력해주세요.</div>
+                                        <div class="invalid-feedback">비밀번호를 입력해주세요.</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input class="form-control" id="user_pw_check" type="password" placeholder="****" data-sb-validations="required" />
+                                        <input class="form-control" id="user_pw_check" type="password" placeholder="****" required />
                                         <label for="user_pw_check">비밀번호 확인</label>
-                                        <div class="invalid-feedback" data-sb-feedback="user_pw_check:required">비밀번호를 입력해주세요.</div>
-                                        <div class="invalid-feedback" data-sb-feedback="user_pw_check:user_pw">비밀번호가 서로 일치하지 않습니다.</div>
+                                        <div class="invalid-feedback">비밀번호가 서로 일치하지 않습니다.</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="form-floating mb-3">
-                                <input class="form-control" id="user_tel" type="tel" placeholder="연락처..." data-sb-validations="required" />
+                                <input class="form-control" id="user_tel" type="tel" placeholder="연락처..." required />
                                 <label for="user_tel">연락처</label>
-                                <div class="invalid-feedback" data-sb-feedback="user_tel:required">연락처를 입력해주세요.</div>
+                                <div class="invalid-feedback">연락처를 입력해주세요.</div>
                             </div>
 
-                            <div class="form-floating mb-3">
-                                <input class="form-control" id="user_email" type="email" placeholder="이메일..." data-sb-validations="required" />
+                            <div class="form-floating mb-4">
+                                <input class="form-control" id="user_email" type="email" placeholder="이메일..." required />
                                 <label for="user_email">이메일</label>
-                                <div class="invalid-feedback" data-sb-feedback="user_email:required">이메일을 입력해주세요.</div>
+                                <div class="invalid-feedback">이메일을 입력해주세요.</div>
                             </div>
 
-                            <div class="d-grid mt-4">
-                                <button class="btn btn-primary rounded-pill btn-lg disabled" id="userButton" type="submit">저장</button>
+                            <div class="d-grid">
+                                <button class="btn btn-primary btn-lg" type="submit">
+                                    <i class="bi bi-check-circle me-2"></i>개인정보 저장
+                                </button>
                             </div>
                         </form>
                     </div>
+                </div>
+            </div>
 
-                    <div class="tab-pane fade" id="company-tab-pane" role="tabpanel" aria-labelledby="company-tab" tabindex="0">
-                        <h3>회사 정보</h3>
-                        <p class="text-muted mb-4">사업자 정보를 정확하게 입력해주세요.</p>
+            <!-- 회사 정보 카드 -->
+            <div class="col-lg-6 col-md-12">
+                <div class="card info-card h-100">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="bi bi-building"></i>
+                            회사 정보
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="section-subtitle">사업자 정보를 정확하게 입력해주세요.</p>
+                        
                         <form id="companyForm">
-                            <div class="row g-3">
+                            <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input class="form-control" id="coName" type="text" placeholder="회사명" data-sb-validations="required" />
+                                        <input class="form-control" id="coName" type="text" placeholder="회사명" required />
                                         <label for="coName">회사명</label>
-                                        <div class="invalid-feedback" data-sb-feedback="coName:required">회사명을 입력해주세요.</div>
+                                        <div class="invalid-feedback">회사명을 입력해주세요.</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -93,51 +119,54 @@
                                         <label for="coNameEn">회사 영문명 (선택)</label>
                                     </div>
                                 </div>
+                            </div>
 
+                            <div class="row g-3 mb-3">
                                 <div class="col-md-8">
                                     <div class="form-floating">
-                                        <input class="form-control" id="coZip" type="text" placeholder="우편번호" data-sb-validations="required" readonly />
+                                        <input class="form-control" id="coZip" type="text" placeholder="우편번호" required readonly />
                                         <label for="coZip">우편번호</label>
-                                        <div class="invalid-feedback" data-sb-feedback="coZip:required">우편번호를 입력하세요.</div>
+                                        <div class="invalid-feedback">우편번호를 입력하세요.</div>
                                     </div>
                                 </div>
                                 <div class="col-md-4 d-grid">
-                                    <button type="button" class="btn btn-outline-primary" onclick="sample6_execDaumPostcode()">주소 찾기</button>
+                                    <button type="button" class="btn btn-outline-primary h-100" onclick="sample6_execDaumPostcode()">
+                                        <i class="bi bi-search me-1"></i>주소 찾기
+                                    </button>
                                 </div>
+                            </div>
 
-                                <div class="col-12">
-                                    <div class="form-floating">
-                                        <input class="form-control" id="coAddr" type="text" placeholder="주소" data-sb-validations="required" readonly/>
-                                        <label for="coAddr">주소</label>
-                                        <div class="invalid-feedback" data-sb-feedback="coAddr:required">주소를 입력하세요.</div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                     <div class="form-floating">
-                                        <input class="form-control" id="coAddrDetail" type="text" placeholder="상세 주소" />
-                                        <label for="coAddrDetail">상세주소</label>
-                                    </div>
-                                </div>
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="coAddr" type="text" placeholder="주소" required readonly/>
+                                <label for="coAddr">주소</label>
+                                <div class="invalid-feedback">주소를 입력하세요.</div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="coAddrDetail" type="text" placeholder="상세 주소" />
+                                <label for="coAddrDetail">상세주소</label>
+                            </div>
                                
-                                <div class="col-12">
-                                    <div class="form-floating">
-                                        <input class="form-control" id="bizrNo" type="text" placeholder="000-00-00000" data-sb-validations="required" />
-                                        <label for="bizrNo">사업자등록번호</label>
-                                        <div class="invalid-feedback" data-sb-feedback="bizrNo:required">사업자등록번호를 입력하세요.</div>
-                                    </div>
-                                </div>
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="bizrNo" type="text" placeholder="000-00-00000" required />
+                                <label for="bizrNo">사업자등록번호</label>
+                                <div class="invalid-feedback">사업자등록번호를 입력하세요.</div>
+                            </div>
 
-                                <div class="col-12">
-                                     <label for="bizrCert" class="form-label ms-1">사업자등록증</label>
-                                     <input class="form-control" id="bizrCert" type="file" data-sb-validations="required" />
-                                     <div class="invalid-feedback" data-sb-feedback="bizrCert:required">파일을 등록해주세요.</div>
-                                </div>
+                            <div class="mb-3">
+                                <label for="bizrCert" class="form-label">
+                                    <i class="bi bi-file-earmark-arrow-up me-2"></i>사업자등록증
+                                </label>
+                                <input class="form-control file-input" id="bizrCert" type="file" required />
+                                <div class="invalid-feedback">파일을 등록해주세요.</div>
+                            </div>
 
+                            <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input class="form-control" id="ceoName" type="text" placeholder="대표자명" data-sb-validations="required" />
+                                        <input class="form-control" id="ceoName" type="text" placeholder="대표자명" required />
                                         <label for="ceoName">대표자명</label>
-                                        <div class="invalid-feedback" data-sb-feedback="ceoName:required">대표자명을 입력하세요.</div>
+                                        <div class="invalid-feedback">대표자명을 입력하세요.</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -146,38 +175,40 @@
                                         <label for="ceoTel">대표자 연락처</label>
                                     </div>
                                 </div>
-                                
+                            </div>
+                            
+                            <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input class="form-control" id="pschName" type="text" placeholder="담당자명" data-sb-validations="required" />
+                                        <input class="form-control" id="pschName" type="text" placeholder="담당자명" required />
                                         <label for="pschName">담당자명</label>
-                                        <div class="invalid-feedback" data-sb-feedback="pschName:required">담당자명을 입력하세요.</div>
+                                        <div class="invalid-feedback">담당자명을 입력하세요.</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input class="form-control" id="pschTel" type="tel" placeholder="담당자 연락처" data-sb-validations="required" />
+                                        <input class="form-control" id="pschTel" type="tel" placeholder="담당자 연락처" required />
                                         <label for="pschTel">담당자 연락처</label>
-                                        <div class="invalid-feedback" data-sb-feedback="pschTel:required">담당자 연락처를 입력하세요.</div>
+                                        <div class="invalid-feedback">담당자 연락처를 입력하세요.</div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="col-12">
-                                    <div class="form-floating">
-                                        <input class="form-control" id="pschEmail" type="email" placeholder="abc@example.com" data-sb-validations="required,email" />
-                                        <label for="pschEmail">담당자 이메일</label>
-                                        <div class="invalid-feedback" data-sb-feedback="pschEmail:required">담당자 이메일을 입력하세요.</div>
-                                        <div class="invalid-feedback" data-sb-feedback="pschEmail:email">유효한 이메일 주소를 입력하세요.</div>
-                                    </div>
-                                </div>
+                            <div class="form-floating mb-4">
+                                <input class="form-control" id="pschEmail" type="email" placeholder="abc@example.com" required />
+                                <label for="pschEmail">담당자 이메일</label>
+                                <div class="invalid-feedback">유효한 이메일 주소를 입력하세요.</div>
+                            </div>
 
-                                <div class="col-12 d-grid mt-4">
-                                    <button class="btn btn-primary rounded-pill btn-lg" id="companyBtn" type="button">저장</button>
-                                </div>
+                            <div class="d-grid">
+                                <button class="btn btn-primary btn-lg" type="submit">
+                                    <i class="bi bi-check-circle me-2"></i>회사정보 저장
+                                </button>
                             </div>
                         </form>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </div>
