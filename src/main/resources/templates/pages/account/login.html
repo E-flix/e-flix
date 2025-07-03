@@ -11,50 +11,54 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
         crossorigin="anonymous"></script>
-    
-	<!-- Jquery CDN -->
-	<script src="https://code.jquery.com/jquery-3.7.1.js"
-		integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-    
+
+    <!-- Jquery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
     <link th:href="@{/bootstrap/login.css}" rel="stylesheet" />
 </head>
 
 <body>
-    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
-    <div class="login">
-        <div class="login__content">
-            <div class="login__img">
-                <img th:src="@{/bootstrap/login-background.png}" alt="user login">
-            </div>
-            <div class="login__forms">
-                <!-- login form -->
-                <form action="/login" method="post" class="login__register" id="login-in">
-                    <h1 class="login__title">E-FLIX</h1>
-                    <div class="login__box">
-                        <i class='bx bx-user login__icon'></i>
-                        <input type="text" name="co_idx" id="co_idx" placeholder="회사 코드" class="login__input">
-                    </div>
-                    <div class="login__box">
-                        <i class='bx bx-user login__icon'></i>
-                        <input type="text" name="username" id="username" placeholder="이메일" class="login__input">
-                    </div>
-                    <div class="login__box">
-                        <i class='bx bx-lock login__icon'></i>
-                        <input type="text" name="password" id="password" placeholder="비밀번호" class="login__input">
-                    </div>
-                    <div class="d-flex justify-content-end mb-2 mt-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="masterChecked" id="masterChecked">
-                            <label class="form-check-label" for="masterChecked">
-                                관리자 여부
-                            </label>
+    <div id="form-container">
+        <div id="form-inner-container">
+            <div class="row g-0 h-100">
+                <!-- 왼쪽 폼 영역 -->
+                <div class="col-lg-6 col-12">
+                    <div class="form-section">
+                        <!-- Sign up form -->
+                        <div id="sign-up-container">
+                            <h2 class="fw-bold">환영합니다</h3>
+                            <form action="/login" method="post">
+                                <label for="name">회사코드</label>
+                                <input type="text" name="co_idx" id="co_idx" placeholder="회사코드">
+
+                                <label for="email">이메일</label>
+                                <input type="text" name="username" id="username" placeholder="이메일">
+
+                                <label for="password">비밀번호</label>
+                                <input type="password" name="password" id="password"
+                                    placeholder="●●●●">
+
+                                <div id="form-controls">
+                                    <button type="submit">로그인</button>
+                                </div>
+
+                                <div class="terms-container">
+                                    <input type="checkbox" name="masterChecked" id="masterChecked">
+                                    <label for="masterChecked">마스터 계정 로그인</label>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                    
-                    <button type="submit" class="btn btn-lg btn-primary w-100" id="loginBtn">
-                        로그인
-                    </button>
-                </form>
+                </div>
+
+                <!-- 오른쪽 이미지 영역 -->
+                <div class="col-lg-6 d-none d-lg-block">
+                    <div class="image-section">
+                        <img th:src="@{/bootstrap/login-background.png}" alt="user login">
+                    </div>
+                </div>
             </div>
         </div>
     </div>

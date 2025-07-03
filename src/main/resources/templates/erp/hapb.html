@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+<style>
+    .metric-card {
+        border-left: 5px solid;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .metric-card.primary {
+        border-left-color: #0d6efd;
+    }
+
+    .metric-card.success {
+        border-left-color: #198754;
+    }
+
+    .metric-card.warning {
+        border-left-color: #ffc107;
+    }
+
+    .metric-card.danger {
+        border-left-color: #dc3545;
+    }
+
+    .metric-card.info {
+        border-left-color: #0dcaf0;
+    }
+
+    .metric-card.purple {
+        border-left-color: #6f42c1;
+    }
+
+    .metric-card.teal {
+        border-left-color: #20c997;
+    }
+
+    .metric-card.orange {
+        border-left-color: #fd7e14;
+    }
+
+    .alert-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        font-size: 0.7rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .chart-container {
+        position: relative;
+        height: 250px;
+    }
+
+    .small-chart {
+        position: relative;
+        height: 200px;
+    }
+
+    .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+
+    .status-normal {
+        background-color: #198754;
+    }
+
+    .status-warning {
+        background-color: #ffc107;
+    }
+
+    .status-danger {
+        background-color: #dc3545;
+    }
+
+    .status-info {
+        background-color: #0dcaf0;
+    }
+
+    .module-card {
+        border-top: 4px solid;
+        min-height: 350px;
+    }
+
+    .module-hr {
+        border-color: #6f42c1;
+    }
+
+    .module-acc {
+        border-color: #198754;
+    }
+
+    .module-inv {
+        border-color: #dc3545;
+    }
+
+    .module-sales {
+        border-color: #0d6efd;
+    }
+
+    .notification-item {
+        border-left: 3px solid;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+    }
+
+    .notification-danger {
+        border-left-color: #dc3545;
+        background-color: rgba(220, 53, 69, 0.05);
+    }
+
+    .notification-warning {
+        border-left-color: #ffc107;
+        background-color: rgba(255, 193, 7, 0.05);
+    }
+
+    .notification-info {
+        border-left-color: #0dcaf0;
+        background-color: rgba(13, 202, 240, 0.05);
+    }
+
+    .notification-success {
+        border-left-color: #198754;
+        background-color: rgba(25, 135, 84, 0.05);
+    }
+</style>
+<div layout:fragment="content">
+    <!-- Navigation -->
+
+    <div class="container-fluid py-4">
+        <!-- 페이지 헤더 -->
+        <div class="row align-items-center mb-4">
+            <div class="col">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary rounded-3 p-2 me-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" class="bi bi-bell-fill" viewBox="0 0 16 16">
+                            <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="mb-1 fw-bold text-dark">통합 관리 대시보드</h3>
+                        <p class="mb-0 text-muted small">인사·회계·재고·영업 전체 현황을 한눈에 확인하세요.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col justify-content-between text-end">
+                <button class="btn btn-outline-primary btn-sm me-2">
+                    <i class="fas fa-sync-alt me-1"></i>새로고침
+                </button>
+                <button class="btn btn-primary btn-sm">
+                    <i class="fas fa-download me-1"></i>리포트 생성
+                </button>
+            </div>
+        </div>
+
+       <!-- 통합 요약 카드 -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card purple shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-xs fw-bold text-dark text-uppercase mb-1">근무 중 인원</div>
+                                <div class="h4 mb-0 fw-bold text-dark">47명</div>
+                                <small class="text-danger">
+                                    <i class="fas fa-user-clock me-1"></i>지각 3명
+                                </small>
+                            </div>
+                            <div style="color: #6f42c1; font-size: 2.5rem;">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card success shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-xs fw-bold text-success text-uppercase mb-1">이번 달 매출</div>
+                                <div class="h4 mb-0 fw-bold text-dark">₩17.2억</div>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i>목표 달성률 115%
+                                </small>
+                            </div>
+                            <div class="text-success" style="font-size: 2.5rem;">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card danger shadow-sm h-100">
+                    <div class="card-body position-relative">
+                        <span class="badge bg-danger alert-badge">!</span>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-xs fw-bold text-danger text-uppercase mb-1">재고 현황</div>
+                                <div class="h4 mb-0 fw-bold text-dark">1,247개</div>
+                                <small class="text-danger">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>부족 8품목
+                                </small>
+                            </div>
+                            <div class="text-danger" style="font-size: 2.5rem;">
+                                <i class="fas fa-warehouse"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-3">
+                <div class="card metric-card info shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-xs fw-bold text-info text-uppercase mb-1">금일 총 처리</div>
+                                <div class="h4 mb-0 fw-bold text-dark">376건</div>
+                                <small class="text-muted">수주 156 + 출고 142 + 입고 78</small>
+                            </div>
+                            <div class="text-info" style="font-size: 2.5rem;">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 주요 패널 -->
+        <div class="row mb-4">
+            <!-- 인사 모듈 -->
+            <div class="col-xl-6 col-lg-12 mb-4">
+                <div class="card shadow-sm module-card module-hr">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 fw-bold" style="color: #6f42c1;">
+                            <i class="fas fa-users me-2"></i>인사 모듈
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="small-chart">
+                                        <canvas id="attendanceChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="fw-bold mb-3">계약 만료 예정자</h6>
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item px-0 py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <div class="fw-bold">김철수</div>
+                                                <small class="text-muted">마케팅팀</small>
+                                            </div>
+                                            <small class="text-danger">2025-07-15</small>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item px-0 py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <div class="fw-bold">이영희</div>
+                                                <small class="text-muted">개발팀</small>
+                                            </div>
+                                            <small class="text-danger">2025-07-22</small>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item px-0 py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <div class="fw-bold">박민수</div>
+                                                <small class="text-muted">영업팀</small>
+                                            </div>
+                                            <small class="text-danger">2025-07-28</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 회계 모듈 -->
+            <div class="col-xl-6 col-lg-12 mb-4">
+                <div class="card shadow-sm module-card module-acc">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 fw-bold text-success">
+                            <i class="fas fa-calculator me-2"></i>회계 모듈
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="small-chart">
+                                        <canvas id="salaryChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="fw-bold mb-3">미정산 급여</h6>
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item px-0 py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <div class="fw-bold">6월 성과급</div>
+                                                <small class="text-muted">영업팀</small>
+                                            </div>
+                                            <small class="text-warning">₩3,200,000</small>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item px-0 py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <div class="fw-bold">야근 수당</div>
+                                                <small class="text-muted">개발팀</small>
+                                            </div>
+                                            <small class="text-warning">₩850,000</small>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item px-0 py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <div class="fw-bold">특별 상여금</div>
+                                                <small class="text-muted">기획팀</small>
+                                            </div>
+                                            <small class="text-warning">₩1,500,000</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <!-- 재고 모듈 -->
+            <div class="col-xl-6 col-lg-12 mb-4">
+                <div class="card shadow-sm module-card module-inv">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 fw-bold text-danger">
+                            <i class="fas fa-warehouse me-2"></i>재고 모듈
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="small-chart">
+                                        <canvas id="inventoryChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="fw-bold mb-3">재고 부족 품목</h6>
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item px-0 py-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <div class="fw-bold">노트북 A15</div>
+                                                <small class="text-muted">3개 / 안전 20개</small>
+                                            </div>
+                                            <span class="status-indicator status-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item px-0 py-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <div class="fw-bold">프린터 P320</div>
+                                                <small class="text-muted">1개 / 안전 15개</small>
+                                            </div>
+                                            <span class="status-indicator status-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="list-group-item px-0 py-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <div class="fw-bold">모니터 M27</div>
+                                                <small class="text-muted">5개 / 안전 25개</small>
+                                            </div>
+                                            <span class="status-indicator status-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 영업 모듈 -->
+            <div class="col-xl-6 col-lg-12 mb-4">
+                <div class="card shadow-sm module-card module-sales">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 fw-bold text-primary">
+                            <i class="fas fa-chart-line me-2"></i>영업 모듈
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="small-chart">
+                                        <canvas id="salesChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="fw-bold mb-3">수주/출고 현황</h6>
+                                <div class="row text-center">
+                                    <div class="col-12 mb-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body py-2">
+                                                <div class="text-muted small">이번 주 수주</div>
+                                                <div class="h5 fw-bold text-primary mb-0">892건</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body py-2">
+                                                <div class="text-muted small">출고 완료</div>
+                                                <div class="h5 fw-bold text-success mb-0">743건</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="card bg-light">
+                                            <div class="card-body py-2">
+                                                <div class="text-muted small">출고율</div>
+                                                <div class="h5 fw-bold text-info mb-0">83.3%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 통합 알림 패널 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 fw-bold text-dark">
+                            <i class="fas fa-bell me-2"></i>통합 알림 센터
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-xl-3 col-md-6 mb-3">
+                                <h6 class="fw-bold text-danger mb-3">
+                                    <i class="fas fa-truck me-2"></i>출고 지연
+                                </h6>
+                                <div class="notification-item notification-danger">
+                                    <div class="fw-bold">㈜테크솔루션</div>
+                                    <small>노트북 A15 Pro - 25대</small>
+                                    <div class="text-danger small">2일 지연</div>
+                                </div>
+                                <div class="notification-item notification-danger">
+                                    <div class="fw-bold">ABC 마케팅</div>
+                                    <small>프린터 P320 - 8대</small>
+                                    <div class="text-danger small">1일 지연</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-xl-3 col-md-6 mb-3">
+                                <h6 class="fw-bold text-warning mb-3">
+                                    <i class="fas fa-user-clock me-2"></i>계약 만료
+                                </h6>
+                                <div class="notification-item notification-warning">
+                                    <div class="fw-bold">김철수 (마케팅팀)</div>
+                                    <small>2025-07-15 만료</small>
+                                    <div class="text-warning small">12일 남음</div>
+                                </div>
+                                <div class="notification-item notification-warning">
+                                    <div class="fw-bold">이영희 (개발팀)</div>
+                                    <small>2025-07-22 만료</small>
+                                    <div class="text-warning small">19일 남음</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-xl-3 col-md-6 mb-3">
+                                <h6 class="fw-bold text-success mb-3">
+                                    <i class="fas fa-won-sign me-2"></i>미정산 급여
+                                </h6>
+                                <div class="notification-item notification-success">
+                                    <div class="fw-bold">6월 성과급</div>
+                                    <small>영업팀 - ₩3,200,000</small>
+                                    <div class="text-success small">승인 대기</div>
+                                </div>
+                                <div class="notification-item notification-success">
+                                    <div class="fw-bold">야근 수당</div>
+                                    <small>개발팀 - ₩850,000</small>
+                                    <div class="text-success small">승인 대기</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-xl-3 col-md-6 mb-3">
+                                <h6 class="fw-bold text-info mb-3">
+                                    <i class="fas fa-boxes me-2"></i>재고 부족
+                                </h6>
+                                <div class="notification-item notification-info">
+                                    <div class="fw-bold">노트북 A15 Pro</div>
+                                    <small>현재 3개 / 안전 20개</small>
+                                    <div class="text-info small">주문 필요</div>
+                                </div>
+                                <div class="notification-item notification-info">
+                                    <div class="fw-bold">프린터 P320</div>
+                                    <small>현재 1개 / 안전 15개</small>
+                                    <div class="text-info small">주문 필요</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <script>
+        // 근태 현황 차트
+        const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+        const attendanceChart = new Chart(attendanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['출근', '지각', '결근'],
+                datasets: [{
+                    data: [47, 3, 0],
+                    backgroundColor: ['#198754', '#ffc107', '#dc3545'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { fontSize: 10 }
+                    }
+                }
+            }
+        });
+
+        // 급여 지급 차트
+        const salaryCtx = document.getElementById('salaryChart').getContext('2d');
+        const salaryChart = new Chart(salaryCtx, {
+            type: 'bar',
+            data: {
+                labels: ['5월', '6월', '7월'],
+                datasets: [{
+                    label: '급여 (천만원)',
+                    data: [2.8, 3.1, 2.9],
+                    backgroundColor: '#198754',
+                    borderColor: '#198754',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // 재고 입출고 차트
+        const inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
+        const inventoryChart = new Chart(inventoryCtx, {
+            type: 'line',
+            data: {
+                labels: ['월', '화', '수', '목', '금'],
+                datasets: [{
+                    label: '입고',
+                    data: [78, 82, 71, 89, 95],
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: '출고',
+                    data: [135, 142, 128, 156, 167],
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { fontSize: 10 }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // 영업 매출 차트
+        const salesCtx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(salesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['5월', '6월', '7월'],
+                datasets: [{
+                    label: '매출 (억원)',
+                    data: [16.3, 15.7, 17.2],
+                    backgroundColor: '#0d6efd',
+                    borderColor: '#0d6efd',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</div>
+
+</html>
