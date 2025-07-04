@@ -20,4 +20,6 @@ public interface CustomerMapper {
     Map<String, Object> selectCustomerWithCredit(String customerCd);
 
     List<CustomerDTO> searchCustomers(String keyword);
+
+    List<CustomerDTO> searchByName(@Param("name") String name);
 }

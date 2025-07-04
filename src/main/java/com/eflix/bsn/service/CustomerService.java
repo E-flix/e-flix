@@ -10,6 +10,7 @@ public interface CustomerService {
     CustomerDTO getCustomerInfo(String customerCd);
     Map<String, Object> getCustomerWithCredit(String customerCd);
     List<CustomerDTO> searchCustomers(String keyword);
+    List<CustomerDTO> searchCustomersByName(String name);
     List<CustomerDTO> findAll();
     List<CustomerDTO> findByName(String name);
 }

@@ -227,8 +227,8 @@ public class BsnController {
     public List<CustomerDTO> customerSearch(@RequestParam String keyword){
         try {
             return keyword!=null && keyword.trim().length()>=2
-                  ? customerService.searchCustomers(keyword.trim())
-                  : new ArrayList<>();
+                ? customerService.searchCustomers(keyword.trim())
+                : new ArrayList<>();
         } catch(Exception e){
             log.error("거래처 검색 오류: {}", keyword, e); return new ArrayList<>();
         }
@@ -246,8 +246,8 @@ public class BsnController {
     public List<BsnItemDTO> itemSearch(@RequestParam String keyword){
         try {
             return keyword!=null && keyword.trim().length()>=2
-                   ? itemService.searchItemsByName(keyword.trim())
-                   : new ArrayList<>();
+                ? itemService.searchItemsByName(keyword.trim())
+                : new ArrayList<>();
         } catch(Exception e){
             log.error("품목 검색 오류: {}", keyword, e); return new ArrayList<>();
         }

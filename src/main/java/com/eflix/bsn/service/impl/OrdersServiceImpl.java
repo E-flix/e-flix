@@ -3,6 +3,7 @@ package com.eflix.bsn.service.impl;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class OrdersServiceImpl implements OrdersService {
 
+    @Autowired
     private final OrdersMapper ordersMapper;
     private final AuthContext authContext;
 
@@ -95,6 +97,26 @@ public class OrdersServiceImpl implements OrdersService {
         }
 
         return dto.getOrderNo();
+    }
+
+
+    /** 헤더만 업데이트 */
+    @Transactional
+    @Override
+    public void updateOrderHeader(OrdersDTO dto) {
+        ordersMapper.updateOrder(dto);
+    }
+
+     /** 단일 라인 아이템 업데이트 */
+    @Transactional
+    @Override
+    public void updateOrderDetails(String orderNo, List<OrdersDetailDTO> details) {
+         // 먼저 기존 라인 전체 삭제 후 재삽입하거나,
+         // 또는 수정과 삽입을 구분하여 처리
+        for (OrdersDetailDTO d : details) {
+            d.setOrderNo(orderNo);
+            ordersMapper.updateOrderDetail(d);
+        }
     }
 
     /*────────────────────── 삭제 영역 ──────────────────────*/
