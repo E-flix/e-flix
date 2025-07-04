@@ -96,7 +96,7 @@ public class BillingServiceImpl implements BillingService {
         String resBody = response.getBody();
         JsonObject root = JsonParser.parseString(resBody).getAsJsonObject();
 
-        JsonObject billingKeyInfo = responseJson.getAsJsonObject("billingKeyInfo");
+        JsonObject billingKeyInfo = root.getAsJsonObject("billingKeyInfo");
 
         String billingKey = billingKeyInfo.has("billingKey") ?
             billingKeyInfo.get("billingKey").getAsString() : "N/A";
