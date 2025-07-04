@@ -3,6 +3,7 @@ package com.eflix.bsn.service;
 
 import java.util.List;
 import com.eflix.bsn.dto.BsnItemDTO;
+import com.eflix.common.payment.dto.ItemDTO;
 
 public interface ItemService {
     /** 모든 품목 조회 */
@@ -13,4 +14,7 @@ public interface ItemService {
 
     /** 이름으로 검색 조회 */
     List<BsnItemDTO> searchItemsByName(String itemName);
+
+    List<ItemDTO> findAll();
+    List<ItemDTO> findByName(String name);
 }

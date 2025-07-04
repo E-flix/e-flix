@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.eflix.bsn.dto.BsnItemDTO;
+import com.eflix.common.payment.dto.ItemDTO;
 
 @Mapper
 public interface ItemMapper {
@@ -18,4 +19,7 @@ public interface ItemMapper {
 
     /** 품목명으로 검색 (부분 일치) */
     List<BsnItemDTO> selectItemsByName(@Param("itemName") String itemName);
+
+    List<ItemDTO> selectAll();
+    List<ItemDTO> selectByName(@Param("name") String name);
 }
