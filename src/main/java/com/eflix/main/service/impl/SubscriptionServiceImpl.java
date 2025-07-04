@@ -153,6 +153,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Transactional
     public void insertSubscriptionByProcedure(SubscriptionProcedureDTO dto) {
         try {
+            dto.setMstPw(passwordEncoder.encode(dto.getMstPw()));
             subscriptionMapper.callInsertSubscription(dto);
         } catch (Exception e) {
             log.error("구독 프로시저 호출 실패", e);
