@@ -304,12 +304,12 @@
             }
             rowMap.set(key, { 
               partnerCode: detail.partnerCode, // 거래처코드
-              partnerName: detail.partnerName || '[거래처코드 없음]', // 거래처명
+              partnerName: detail.partnerName || detail.institutionName || detail.cardName ||'[거래처코드 없음]', // 거래처명
               openingBalance: openingBalance, // 전기이월 
               debit: debit, // 차변
               credit: credit, // 대변
               balance: balance, //잔액
-              businessNumber: detail.businessNumber || detail.residentNumber || null, // 등록번호
+              businessNumber: detail.businessNumber || detail.residentNumber || detail.accountNumber || detail.cardNumber || null, // 등록번호
               representativeName: detail.representativeName || null // 대표자명
             });
           }
