@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.main.dto.CompanyDTO;
+import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
 import com.eflix.main.dto.etc.CompanySubscriptionDTO;
 import com.eflix.main.mapper.CompanyMapper;
@@ -50,5 +51,10 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public List<CompanySubscriptionDTO> findAllCompanyWithSubscription() {
         return companyMapper.findAllCompanyWithSubscription();
+    }
+
+    // 0703
+    public SubscriptionDTO findSubscriptionByCoIdx(String coIdx) {
+        return companyMapper.findSubscriptionByCoIdx(coIdx);
     }
 }

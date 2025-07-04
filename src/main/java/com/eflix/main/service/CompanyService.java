@@ -3,7 +3,9 @@ package com.eflix.main.service;
 import java.util.List;
 
 import com.eflix.main.dto.CompanyDTO;
+import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionBillDTO;
+import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
 import com.eflix.main.dto.etc.CompanySubscriptionDTO;
 import com.eflix.main.dto.etc.SubscriptionInfoDTO;
@@ -52,4 +54,7 @@ public interface CompanyService {
     public CompanyDTO findByCoIdx(String coIdx);
 
     public List<CompanySubscriptionDTO> findAllCompanyWithSubscription();
+
+    // 0703
+    public SubscriptionDTO findSubscriptionByCoIdx(String coIdx);
 }

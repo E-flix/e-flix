@@ -2,6 +2,10 @@ package com.eflix.main.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
+import com.eflix.common.payment.dto.SubscriptionPaymentDTO;
+import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
@@ -9,6 +13,7 @@ import com.eflix.main.dto.SubscriptionPackageDetailDTO;
 import com.eflix.main.dto.etc.InvoiceDTO;
 import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.dto.etc.SubscriptionInfoDTO;
+import com.eflix.main.dto.etc.SubscriptionProcedureDTO;
 
 /**
  * 구독 관리 매퍼 인터페이스
@@ -41,6 +46,7 @@ import com.eflix.main.dto.etc.SubscriptionInfoDTO;
  *   <li>2025-06-19: 최초 생성 (복성민)</li>
  *   <li>2025-06-23: 구독 상세 값 등록 로직 추가 (복성민)</li>
  *   <li>2025-06-24: 구독 정보 로직 수정 (복성민)</li>
+ *   <li>0703</li>
  * </ul>
  */
 
@@ -64,4 +70,13 @@ public interface SubscriptionMapper {
     public StatementDTO findSubscriptionBySpiIdx(String spiIdx);
 
     public InvoiceDTO findSubscriptionInvoiceBySpiIdx(String spiIdx);
+
+    // 0703
+    public void callInsertSubscription(@Param("dto") SubscriptionProcedureDTO dto);
+
+    public List<ModuleDTO> findAllModuleBySpiIdx(String spiIdx);
+
+    // 0704
+
+    public List<SubscriptionPaymentDTO> findAllByStatus(String string);
 }

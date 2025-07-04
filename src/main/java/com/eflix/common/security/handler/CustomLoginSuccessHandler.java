@@ -73,9 +73,9 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
         else if (userDetails.getSecurityMasterDTO() != null) {
             SecurityMasterDTO masterDTO = userDetails.getSecurityMasterDTO();
 
-            request.getSession().setAttribute("mstId", masterDTO.getMstId());
+            request.getSession().setAttribute("mstIdx", masterDTO.getMstIdx());
+            request.getSession().setAttribute("mstName", masterDTO.getMstName());
             request.getSession().setAttribute("coIdx", masterDTO.getCoIdx());
-            request.getSession().setAttribute("coIdx", masterDTO.getMstName());
             request.getSession().setAttribute("role", "ROLE_MASTER");
 
             log.info("ERP 마스터 로그인 성공: {}", masterDTO.getMstId());
@@ -91,6 +91,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             request.getSession().setAttribute("userIdx", securityUserDTO.getUserIdx());
             request.getSession().setAttribute("userId", securityUserDTO.getUserId());
             request.getSession().setAttribute("userName", securityUserDTO.getUserName());
+            request.getSession().setAttribute("coIdx", securityUserDTO.getCoIdx());
 
             log.info("메인 사용자 로그인 성공: {}", securityUserDTO.getUserId());
             

@@ -119,11 +119,9 @@ public class SecurityConfig {
 				.failureHandler(authenticationFailureHandler())  // 지워도 됨
 				.successHandler(authenticationSuccessHandler())  // 지워도 됨
 				.permitAll())
-			// .rememberMe(remember -> remember
-			// 	.key("eflix")
-			// 	.tokenValiditySeconds(60 * 60 * 24)
-			// 	.rememberMeParameter("user_remember")
-				// .userDetailsService(customUserDetailService))
+				.rememberMe(remember -> remember
+					.key("eflix")
+					.tokenValiditySeconds(60 * 60 * 24))
 			.userDetailsService(securityUserDetailService())
 			.logout(logout -> logout
 				.logoutSuccessHandler(logoutSuccessHandler())

@@ -1,0 +1,52 @@
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-18
+	- 설명     : E-FLIX 마이 페이지 비밀번호 확인 화면
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-18 (복성민): 레이아웃 구성
+============================================
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{common/main/layouts/default}">
+
+<div layout:fragment="content">
+	<!-- main -->
+	<div class="container-fluid d-flex justify-content-center align-items-center vh-100" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+        <div class="card" style="width: 400px;">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4">로그인</h5>
+                <div class="mb-3">
+                    <label for="password" class="form-label">비밀번호</label>
+                    <input type="password" class="form-control" id="password" placeholder="비밀번호를 입력하세요">
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary" id="checkBtn">확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $("#checkBtn").on("click", function(e) {
+            $.ajax({
+                type: "POST",
+                url: "/user/check",
+                data: JSON.stringify({userPw: $("#password").val()}),
+                contentType: "application/json",
+                success: function(res) {
+                    if(res.head.res_code === "200") {
+                        window.location.href = "/mypage/info";
+                    } else {
+                        Swal.fire("오류", res.head.res_result, "error");
+                    }
+                },
+                error: function(xhr, status, err) {
+                    console.err(err);
+                    Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+                }
+            })
+        });
+    </script>
+</div>

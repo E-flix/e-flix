@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
@@ -64,6 +65,7 @@ public class MainController {
 
 	@GetMapping()
 	public String home() {
+		System.out.println(AuthUtil.getCoIdx());
 		return "index";
 	}
 
@@ -84,18 +86,19 @@ public class MainController {
 		return "main/pay";
 	}
 
-	@GetMapping("/mypage_info")
+	@GetMapping("/mypage")
+	public String mypage() {
+		return "main/mypages/check";
+	}
+	
+
+	@GetMapping("/mypage/info")
 	public String mypage_info() {
-		return "main/mypageInfo";
+		return "main/mypages/info";
 	}
 
-	@GetMapping("/mypage_service")
-	public String mypage_service(@AuthenticationPrincipal SecurityUserDetails securityUserDetails, Model model) {
-
-		SubscriptionInfoDTO subscriptionInfo = subscriptionService.findSubscriptionByCoIdx(securityUserDetails.getSecurityUserDTO().getUserIdx());
-
-		model.addAttribute("info", subscriptionInfo);
-
-		return "main/mypageService";
+	@GetMapping("/mypage/service")
+	public String mypage_service() {
+		return "main/mypages/service";
 	}
 }

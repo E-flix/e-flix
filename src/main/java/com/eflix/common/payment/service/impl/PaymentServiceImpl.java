@@ -1,15 +1,20 @@
 package com.eflix.common.payment.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eflix.common.payment.Entity.PaymentEntity;
+import com.eflix.common.payment.dto.SubscriptionPaymentDTO;
 import com.eflix.common.payment.mapper.PaymentMapper;
 import com.eflix.common.payment.service.PaymentService;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDetailDTO;
 import com.eflix.main.mapper.SubscriptionMapper;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 결제 처리를 담당하는 서비스
@@ -35,6 +40,7 @@ import com.eflix.main.mapper.SubscriptionMapper;
  * </ul>
  */
 
+@Log4j2
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
@@ -46,35 +52,22 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentEntity getPaymentById(String paymentIdx) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'getPaymentEntity'");
-
         return paymentMapper.findPaymentById(paymentIdx);
     }
 
     @Override
     public int insertPayment(PaymentEntity paymentEntity) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'insertPayment'");
-
         return paymentMapper.insertPayment(paymentEntity);
     }
 
     @Override
     public int updatePayment(PaymentEntity paymentEntity) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'updatePayment'");
-
         return paymentMapper.updatePayment(paymentEntity);
     }
 
     @Override
     @Transactional
     public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'insertSubscriptionPackageDetail'");
-        // return subscriptionMapper.insertSubscriptionPackageDetail(subscriptionPackageDetailDTO);
-
         int affectedRows = subscriptionMapper.insertSubscription(subscriptionDTO);
 
         String spi_idx = "";
@@ -85,5 +78,14 @@ public class PaymentServiceImpl implements PaymentService {
         affectedRows = subscriptionMapper.insertSubscriptionPackageDetail(null);
 
         return 0;
+    }
+
+    @Override
+    public void processSubscription() {
+        log.info("정기 결제 요청 시작");
+
+        List<SubscriptionPaymentDTO> list = subscriptionMapper.findAllByStatus("SS01");
+
+        
     }
 }

@@ -11,6 +11,7 @@ import com.eflix.common.exception.CommonException;
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.CompanyRoleDTO;
 import com.eflix.main.dto.MasterDTO;
+import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
@@ -18,6 +19,7 @@ import com.eflix.main.dto.SubscriptionPackageDetailDTO;
 import com.eflix.main.dto.etc.InvoiceDTO;
 import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.dto.etc.SubscriptionInfoDTO;
+import com.eflix.main.dto.etc.SubscriptionProcedureDTO;
 import com.eflix.main.mapper.CompanyMapper;
 import com.eflix.main.mapper.CompanyRoleMapper;
 import com.eflix.main.mapper.MasterMapper;
@@ -145,5 +147,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public InvoiceDTO findSubscriptionInvoiceBySpiIdx(String spiIdx) {
         return subscriptionMapper.findSubscriptionInvoiceBySpiIdx(spiIdx);
+    }
+
+    @Override
+    @Transactional
+    public void insertSubscriptionByProcedure(SubscriptionProcedureDTO dto) {
+        try {
+            subscriptionMapper.callInsertSubscription(dto);
+        } catch (Exception e) {
+            log.error("구독 프로시저 호출 실패", e);
+            throw new CommonException("구독 등록 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<ModuleDTO> findAllModuleBySpiIdx(String spiIdx) {
+        return subscriptionMapper.findAllModuleBySpiIdx(spiIdx);
     }
 }

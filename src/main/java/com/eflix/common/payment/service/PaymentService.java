@@ -37,4 +37,7 @@ public interface PaymentService {
     public int updatePayment(PaymentEntity paymentEntity);
 
     public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO);
+
+    // 0704
+    public void processSubscription();
 }

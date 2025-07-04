@@ -1,11 +1,14 @@
 package com.eflix.common.security.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
 import lombok.Data;
 
 @Data
-public class SecurityEmpDTO {
+public class SecurityEmpDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private String empIdx;
     private String coIdx;
     private String empAccount;

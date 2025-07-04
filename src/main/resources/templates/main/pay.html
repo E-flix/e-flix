@@ -1109,34 +1109,99 @@
                 // customerId, cardNumber, expiryYear, expiryMonth, birthOrBusinessRegistrationNumber, passwordTwoDigits 등 정보를 전달받습니다.
 
                 // 포트원 빌링키 발급 API 호출
-            
-                const userName = /*[[${session.userName}]]*/ "";
-                const packageName = /*[[${subscriptionPackage.spkName}]]*/ "";
-                console.log(packageName);
+
+                // 포트원 빌링키 발급 API 호출
+                const uid = Date.now();
+                
+                // V1
                 IMP.init('imp73166581');
                 IMP.request_pay({
                     pg: "kakaopay",
                     pay_method: "card",
-                    merchant_uid: Date.now(),
-                    customer_uid: "user_" + Date.now(),
-                    name: packageName,
-                    amount: spkPrice * $('.form-check-input[name=period]:checked').val(),
+                    merchant_uid: `bill_${uid}`,
+                    customer_uid: `user_${uid}`, // 사용자의 고유 ID
+                    amount: 0,
+                    name: "카카오페이 빌링키 등록",
                     buyer_email: $('#pschEmail').val(),
-                    buyer_name: userName,
-                    buyer_tel: $('#pschTel').val(),
-                    buyer_addr: $('#coAddr').val() + $('#coAddrDetail'),
-                    buyer_postcode: $('#coZip').val()
-                }, async function (res) {
-                    let contractName= `contract_${Date.now()}`
-                    if (res.success) {
-                        addContract(contractName);
-                        addSubscription(res.customer_uid, res.pg_provider, contractName);
-                    } else {
+                    buyer_name: "test",
+                    buyer_tel: $('#pschTel').val()
+                    // m_redirect_url: "https://your-service.com/billing/complete"
+                }, function(rsp) {
+                    if (rsp.success) {
+                    // 백엔드에 전송
+                        const data = {
+                            impUid: rsp.imp_uid,
+                            customerUid: rsp.customer_uid
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url: "/payment/api/verify/billingKey",
+                            data: JSON.stringify(data),
+                            contentType: "application/json",
+                            success: function (res) {
+                                console.log(res);
+                            },
+                            error: function (xhr, status, err) {
+                                console.error(err);
 
+                            }
+                        });
                     }
-                }, function (xhr, status, err) {
-                    console.error(err);
                 });
+
+                // V2
+                // const customerId = `user_${uid}`;
+                // const data = {
+                //     number: "1234123412341234",
+                //     expiryYear: "27",
+                //     expiryMonth: "05",
+                //     birthOrBusinessRegistrationNumber: "900101",
+                //     passwordTwoDigits: "23",
+                //     customerId
+                // }
+
+                // $.ajax({
+                //     type: "POST",
+                //     url: "/payment/api/issue/billing",
+                //     data: JSON.stringify(data),
+                //     contentType: "application/json",
+                //     success: function(res) {
+                //         console.log(res);
+                //     },
+                //     error: function(xhr, status, err) {
+                //         console.error(err);
+                        
+                //     }
+                // })
+            
+                // const userName = /*[[${session.userName}]]*/ "";
+                // const packageName = /*[[${subscriptionPackage.spkName}]]*/ "";
+                // console.log(packageName);
+                // IMP.init('imp73166581');
+                // IMP.request_pay({
+                //     pg: "kakaopay",
+                //     pay_method: "card",
+                //     merchant_uid: Date.now(),
+                //     customer_uid: "user_" + Date.now(),
+                //     name: packageName,
+                //     amount: 0,
+                //     // amount: spkPrice * $('.form-check-input[name=period]:checked').val(),
+                //     buyer_email: $('#pschEmail').val(),
+                //     buyer_name: userName,
+                //     buyer_tel: $('#pschTel').val(),
+                //     buyer_addr: $('#coAddr').val() + $('#coAddrDetail'),
+                //     buyer_postcode: $('#coZip').val()
+                // }, async function (res) {
+                //     let contractName= `contract_${Date.now()}`
+                //     if (res.success) {
+                //         addContract(contractName);
+                //         addSubscription(res.customer_uid, res.pg_provider, contractName);
+                //     } else {
+
+                //     }
+                // }, function (xhr, status, err) {
+                //     console.error(err);
+                // });
             }
             function addContract(contractName) {
                 const contractData = {
@@ -1165,7 +1230,7 @@
             function addSubscription(customer_uid, pg_provider, contractName) {
                 const checkedModules = $('.form-check-input[name=module]:checked').map(function () {
                     return this.value;
-                }).get();
+                }).get().join(",");
 
                 const subMasterData = {
                     subscriptionDTO: {
@@ -1188,10 +1253,28 @@
                     }
                 }
 
+                const subscriptionData = {
+                        spkIdx,
+                        coIdx: coIdx,
+                        empIdx: 'emp-101',
+                        spiPay: pg_provider,
+                        spiPeriod: $('.form-check-input[name=period]:checked').val(),
+                        spiCtrt: contractName,
+                        spiUid: customer_uid,
+                        checkedModules,
+                        coIdx: coIdx,
+                        mstId: $('#mstId').val(),
+                        mstName: $('#mstName').val(),
+                        mstPw: $('#mstPw').val(),
+                        coTel: $('#coTel').val(),
+                        mstTel: $('#mstTel').val(),
+                        mstEmail: $('#mstEmail').val(),
+                }
+
                 $.ajax({
                     type: "POST",
                     url: "/subscription/insert",
-                    data: JSON.stringify(subMasterData),
+                    data: JSON.stringify(subscriptionData),
                     contentType: "application/json",
                     success: function(res) {
                         if(res.head.res_code === "200") {

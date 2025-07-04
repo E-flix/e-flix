@@ -166,4 +166,37 @@
             s.spi_idx, s.spk_idx, s.co_idx, s.spi_start, s.spi_end, s.spi_pay, s.spi_period,
             spk.spk_name, spk.spk_price
     </select>
+
+    <select id="callInsertSubscription" parameterType="SubscriptionProcedureDTO">
+        <![CDATA[
+            CALL PROC_INSERT_SUBSCRIPTION(
+                #{dto.spkIdx, mode=IN, jdbcType=VARCHAR},
+                #{dto.coIdx, mode=IN, jdbcType=VARCHAR},
+                #{dto.empIdx, mode=IN, jdbcType=VARCHAR},
+                #{dto.spiPay, mode=IN, jdbcType=VARCHAR},
+                #{dto.spiPeriod, mode=IN, jdbcType=NUMERIC},
+                #{dto.spiCtrt, mode=IN, jdbcType=VARCHAR},
+                #{dto.spiUid, mode=IN, jdbcType=VARCHAR},
+                #{dto.checkedModules, mode=IN, jdbcType=VARCHAR},
+                #{dto.mstId, mode=IN, jdbcType=VARCHAR},
+                #{dto.mstPw, mode=IN, jdbcType=VARCHAR},
+                #{dto.mstName, mode=IN, jdbcType=VARCHAR},
+                #{dto.mstEmail, mode=IN, jdbcType=VARCHAR},
+                #{dto.mstTel, mode=IN, jdbcType=VARCHAR}
+            )
+        ]]>
+    </select>
+
+    <select id="findAllModuleBySpiIdx" parameterType="String" resultType="ModuleDTO">
+        SELECT module_idx
+        FROM subscription_package_details
+        WHERE spi_idx = #{spiIdx}
+    </select>
+
+    <!-- 0704 -->
+    <select id="findAllByStatus" parameterType="String" resultType="SubscriptionPaymentDTO">
+        SELECT *
+        FROM subscription
+        WHERE spi_status = #{spiStatus}
+    </select>
 </mapper>

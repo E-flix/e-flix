@@ -118,6 +118,14 @@
 			<artifactId>jasperreports</artifactId>
 			<version>6.4.0</version>
 		</dependency>
+
+		<!-- JSON -->
+		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.13.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

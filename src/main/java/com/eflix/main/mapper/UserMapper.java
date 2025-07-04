@@ -17,4 +17,7 @@ public interface UserMapper {
     public List<UserDTO> findAllUsers(UserSearchDTO userSearchDTO);
 
     public int findAllUsersCount(UserSearchDTO userSearchDTO);
+
+    public UserDTO findUserPwByUserIdx(String userIdx);
+
 }

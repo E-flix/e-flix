@@ -125,4 +125,15 @@
         )
         WHERE rnum &gt; #{offset}
     </select>
+
+    <!-- ===================================== -->
+    <!-- 유저 정보 검색 결과                      -->
+    <!-- @author 복성민 -->
+    <!-- @since 2025-07-04 -->
+    <!-- ===================================== -->
+    <select id="findUserPwByUserIdx" parameterType="String" resultType="UserDTO">
+        SELECT user_pw
+        FROM users
+        WHERE user_idx = #{userIdx}
+    </select>
 </mapper>
