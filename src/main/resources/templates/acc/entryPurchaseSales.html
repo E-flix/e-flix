@@ -1839,8 +1839,6 @@
       const startDay = Number(document.querySelector('input[name="startDay"]').value);
       const endMonth = Number(document.querySelector('input[name="endMonth"]').value);
       const endDay = Number(document.querySelector('input[name="endDay"]').value);
-      
-
     }
 
     // 이벤트 리스너
@@ -1887,7 +1885,7 @@
         resentmenType: rowData.resentmenType || '',
         description: rowData.description || '',
         // amount 필드: 차변이면 양수, 대변이면 음수로 저장
-        amount: (rowData.debitAmount || 0) - (rowData.creditAmount || 0)
+        amount: rowData.debitAmount || rowData.creditAmount
       };
       try {
         const response = await fetch('/acc/enps/detail', {

@@ -71,28 +71,34 @@
       fd.account_number,
       cd.card_name,
       cd.card_number
-    FROM entry_master m 
-    LEFT JOIN entry_detail d ON m.entry_number = d.entry_number 
-    LEFT JOIN account a ON d.account_code = a.account_code
-    LEFT JOIN partner_number_master pm ON d.partner_code = pm.partner_code
-    LEFT JOIN partner_detail pd ON pm.partner_code = pd.partner_code 
-    AND pm.partner_type = 'd1'
-    LEFT JOIN financial_institution_detail fd ON pm.partner_code = fd.partner_code 
-    AND pm.partner_type = 'd2'
-    LEFT JOIN card_detail cd ON pm.partner_code = cd.partner_code 
-    AND pm.partner_type = 'd3'
+    FROM entry_master m
+    LEFT JOIN entry_detail d 
+      ON m.entry_number = d.entry_number 
+      AND m.co_idx = #{coIdx}
+      AND d.co_idx = #{coIdx}
+    LEFT JOIN account a 
+      ON d.account_code = a.account_code
+      AND a.co_idx = #{coIdx}
+    LEFT JOIN partner_number_master pm 
+      ON d.partner_code = pm.partner_code
+    LEFT JOIN partner_detail pd 
+      ON pm.partner_code = pd.partner_code 
+      AND pm.partner_type = 'd1'
+      AND pd.co_idx = #{coIdx}
+    LEFT JOIN financial_institution_detail fd 
+      ON pm.partner_code = fd.partner_code 
+      AND pm.partner_type = 'd2'
+      AND fd.co_idx = #{coIdx}
+    LEFT JOIN card_detail cd 
+      ON pm.partner_code = cd.partner_code 
+      AND pm.partner_type = 'd3'
+      AND cd.co_idx = #{coIdx}
     <where>
       <choose>
         <!-- accountCode가 있는 경우 조건 추가 -->
         <when test="accountCode != null and accountCode != ''">
           d.account_code = #{accountCode}
           AND m.ledger_check = 'a1'
-          AND m.co_idx = #{coIdx}
-          AND d.co_idx = #{coIdx}
-          AND a.co_idx = #{coIdx}
-          AND pd.co_idx = #{coIdx}
-          AND fd.co_idx = #{coIdx}
-          AND cd.co_idx = #{coIdx}
           <if test="startDate != null and startDate != ''">
             <![CDATA[
               AND m.entry_date >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
