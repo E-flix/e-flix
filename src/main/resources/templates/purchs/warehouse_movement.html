@@ -32,7 +32,7 @@
 
 	<!-- 버튼 -->
 	<div class="d-flex justify-content-end mb-2 gap-2">
-		<button type="button" class="btn btn-warning btn-sm" onclick="resetTransfer()">초기화</button>
+		<!-- <button type="button" class="btn btn-warning btn-sm" onclick="resetTransfer()">초기화</button> -->
 		<button type="button" class="btn btn-success btn-sm" onclick="saveTransfer()">저장</button>
 		<button type="button" class="btn btn-primary btn-sm" onclick="addTransferRow()">+ 행 추가</button>
 		<button type="button" class="btn btn-danger btn-sm" onclick="deleteSelectedRows()">선택 삭제</button>
@@ -40,19 +40,20 @@
 
 	<!-- AG Grid 테이블 영역 -->
 	<div class="grid-container mb-4" style="height: 45vh; width: 100%;">
-		<div id="whMovementGrid" class="ag-theme-alpne" style="width: 100%; height: 100%;"></div>
+		<div id="whMovementGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 	</div>
 </div>
 
 </html>
-
 <script th:inline="javascript">
 
-	let prdList = /*[[${prdList}]]*/[];
-	let prod = prdList.map(p => p.prodName);
-	console.log("prdList : ", prdList);
+	let sendWhList = /*[[${sendWhList}]]*/[];
+	let toWhList = /*[[${toWhList}]]*/[];
+
+	let toSendWh = sendWhList.map(p => p.prodName);
+	let toWh = toWhList.map(v => v.toWh);
+
 	let updateData = [];
-	// 로컬스토리지 행 저장
 	const STORAGE_KEY = "whMovementData";
 
 	let whMovementList = [];
@@ -92,9 +93,8 @@
 					return params.value === "제품명 선택" ? { color: 'gray' } : { color: 'black' };
 				},
 				cellEditorParams: {
-					values: prod
+					values: toSendWh
 				},
-
 			},
 			{
 				headerName: "보내는 창고 정보",
@@ -112,15 +112,39 @@
 					},
 					{ headerName: "이동전", field: "sendBeforeQty", cellStyle: { color: 'blue' } },
 					{ headerName: "이동후", field: "sendAfterQty", cellStyle: { color: 'blue' } },
-					{ headerName: "이동수량 - 값 입력", field: "sendMoveQty", editable: true, cellStyle: { color: 'green' } }
+					{ 
+						headerName: "이동수량", 
+						field: "sendMoveQty", 
+						editable: true, 
+						cellStyle: { color: 'green' },
+					}
 				]
 			},
 			{
 				headerName: "받는 창고 정보",
 				children: [
-					{ headerName: "창고ID", field: "recvWh" },
-					{ headerName: "이동전", field: "recvBeforeQty", cellStyle: { color: 'red' } },
-					{ headerName: "이동후", field: "recvAfterQty", cellStyle: { color: 'red' } }
+					{
+						headerName: "창고ID",
+						field: "toWh",
+						editable: true,
+						cellEditor: "agSelectCellEditor",
+						valueGetter: (params) => {
+							return params.data.toWh || "창고ID 선택";
+						},
+						cellStyle: (params) => {
+							return params.value === "창고ID 선택" ? { color: 'gray' } : { color: 'black' };
+						},
+						cellEditorParams: (params) => {
+							const sendWhId = params.data.sendWh;
+							const filteredToWh = toWh.filter(wh => wh !== sendWhId);
+							return {
+								values: filteredToWh
+							};
+						}
+					},
+					{ headerName: "이동전", field: "toBeforeQty", cellStyle: { color: 'blue' } },
+					{ headerName: "이동후", field: "recvAfterQty", cellStyle: { color: 'red' } },
+					{ headerName: "창고용량", field: "warehouseScale" }
 				]
 			}
 		],
@@ -132,20 +156,46 @@
 			params.api.sizeColumnsToFit();
 		},
 		onCellValueChanged: (event) => {
+			// 제품선택 시 정보 설정
 			if (event.colDef.field === "prodName") {
 				const selectedName = event.newValue;
-				const matched = prdList.find(p => p.prodName === selectedName);
+				const matched = sendWhList.find(p => p.prodName === selectedName);
+
 				if (matched) {
 					event.data.prodId = matched.prodId;
 					event.data.sendWh = matched.sendWh;
 					event.data.sendBeforeQty = matched.sendBeforeQty;
 					event.api.applyTransaction({ update: [event.data] });
+					event.api.refreshCells({ rowNodes: [event.node], columns: ['toWh'], force: true });
 				}
+			}
+
+			// 받는 창고 선택 시 이동전 수량 반영
+			if (event.colDef.field === "toWh") {
+				const selectedWh = event.newValue;
+				const matched = toWhList.find(v => v.toWh === selectedWh);
+
+				if (matched) {
+					event.data.toBeforeQty = matched.toBeforeQty;
+					event.data.warehouseScale = matched.warehouseScale;
+					event.api.applyTransaction({ update: [event.data] });
+				}
+			}
+
+			// 이동수량 변경 시 후 수량 계산
+			if (event.colDef.field === "sendMoveQty") {
+				const moveQty = Number(event.newValue ?? 0);
+				const beforeSend = Number(event.data.sendBeforeQty ?? 0);
+				const beforeRecv = Number(event.data.toBeforeQty ?? 0);
+
+				event.data.sendAfterQty = beforeSend - moveQty;
+				event.data.recvAfterQty = beforeRecv + moveQty;
+
+				event.api.applyTransaction({ update: [event.data] });
 			}
 		}
 	};
 
-	// ✅ 그리드 생성
 	document.addEventListener("DOMContentLoaded", () => {
 		agGrid.createGrid(document.querySelector("#whMovementGrid"), whmGridOptions);
 		window.addEventListener("resize", () => {
@@ -157,12 +207,12 @@
 <!-- 버튼 기능 -->
 <script>
 	// 초기화
-	function resetTransfer() {
-		if (!confirm("모든 데이터를 초기화 하시겠습니까?")) return;
+	// function resetTransfer() {
+	// 	if (!confirm("모든 데이터를 초기화 하시겠습니까?")) return;
 
-		localStorage.removeItem(STORAGE_KEY);
-		location.reload();
-	}
+	// 	localStorage.removeItem(STORAGE_KEY);
+	// 	location.reload();
+	// }
 	// 창고이동 후 저장
 	function saveTransfer() {
 		alert("저장 기능은 개발 중입니다.");
@@ -176,7 +226,7 @@
 			sendBeforeQty: 0,
 			sendAfterQty: 0,
 			sendMoveQty: 0,
-			recvWh: "",
+			toBeforeQty: 0,
 			recvBeforeQty: 0,
 			recvAfterQty: 0
 		};
@@ -207,4 +257,6 @@
 			window.location.href = '/purchs/wh';
 		}
 	});
+
+	
 </script>

@@ -3,16 +3,29 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.eflix.purchs.mapper.WhMovementMapper">
-<!-- 제품명 조회 (prod_id)-->
-<select id="searchProdIdList" parameterType="WhMovementDTO">
-  SELECT
-    i.prod_id AS prod_id, p.prod_name AS prod_name, i.warehouse_id AS send_wh, i.iv_current_quantity AS send_before_qty
- FROM
-    prod p JOIN inventory i ON p.prod_id = i.prod_id
-           JOIN warehouse w ON w.warehouse_id = i.warehouse_id
- WHERE
+<!-- 제품명 조회 (prod_id) 입고전 창고-->
+<select id="sendWarehouse" parameterType="WhMovementDTO">
+SELECT
+    i.prod_id AS prod_id,
+    p.prod_name AS prod_name,
+    i.warehouse_id AS send_wh,
+    i.iv_current_quantity AS send_before_qty
+FROM
+    prod p
+JOIN inventory i ON p.prod_id = i.prod_id
+WHERE
     p.prod_inbound_status = 'pis01'
- ORDER BY
+ORDER BY
     i.prod_id DESC
+</select>
+
+<!-- 제품명 조회 (prod_id) 입고전 창고-->
+<select id="toWarehouse" parameterType="WhMovementDTO">
+SELECT 
+    warehouse_id AS to_wh, 
+    warehouse_current AS to_before_qty,
+    warehouse_scale
+FROM
+    warehouse
 </select>
 </mapper>

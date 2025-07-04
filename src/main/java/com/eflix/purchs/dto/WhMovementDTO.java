@@ -7,5 +7,8 @@ public class WhMovementDTO {
     String prodId;
     String prodName;
     String sendWh;
+    String toWh;
     int sendBeforeQty;
+    int toBeforeQty;
+    int warehouseScale;
 }
