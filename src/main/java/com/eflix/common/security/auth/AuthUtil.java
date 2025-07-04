@@ -29,6 +29,14 @@ public class AuthUtil {
         return null;
     }
 
+    public static String getUserIdx() {
+        SecurityUserDetails userDetails = getUserDetails();
+        if(userDetails != null && userDetails.getSecurityUserDTO() != null) {
+            return userDetails.getSecurityUserDTO().getUserIdx();
+        }
+        return "user-101";
+    }
+
     public static String getCoIdx() {
         SecurityUserDetails userDetails = getUserDetails();
         if (userDetails != null && userDetails.getSecurityEmpDTO() != null) {
@@ -44,7 +52,7 @@ public class AuthUtil {
     public static String getMstIdx() {
         SecurityUserDetails userDetails = getUserDetails();
         if (userDetails != null && userDetails.getSecurityMasterDTO() != null) {
-            return userDetails.getSecurityMasterDTO().getMstId();
+            return userDetails.getSecurityMasterDTO().getMstIdx();
         }
         return "mst-101"; // 기본값
     }

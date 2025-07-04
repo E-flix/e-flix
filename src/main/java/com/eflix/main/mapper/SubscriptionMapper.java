@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.eflix.common.payment.dto.SubscriptionPaymentDTO;
 import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.SubscriptionDTO;
@@ -74,4 +75,8 @@ public interface SubscriptionMapper {
     public void callInsertSubscription(@Param("dto") SubscriptionProcedureDTO dto);
 
     public List<ModuleDTO> findAllModuleBySpiIdx(String spiIdx);
+
+    // 0704
+
+    public List<SubscriptionPaymentDTO> findAllByStatus(String string);
 }

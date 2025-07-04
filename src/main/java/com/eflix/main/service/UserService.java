@@ -48,5 +48,7 @@ public interface UserService {
 
     public int findAllUsersCount(UserSearchDTO userSearchDTO);
 
-    
+    // 0704
+    public boolean verifyPassword(String userIdx, String userPw);
+
 }

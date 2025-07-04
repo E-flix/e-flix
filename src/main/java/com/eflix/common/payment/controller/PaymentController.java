@@ -7,10 +7,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.eflix.common.exception.SyncPaymentException;
 import com.eflix.common.payment.Entity.PaymentEntity;
 import com.eflix.common.payment.config.PortOneSecretProperties;
+import com.eflix.common.payment.dto.BillingReqDTO;
 import com.eflix.common.payment.dto.CompletePaymentRequest;
 import com.eflix.common.payment.dto.CustomData;
 import com.eflix.common.payment.dto.ItemDTO;
+import com.eflix.common.payment.service.BillingService;
 import com.eflix.common.payment.service.PaymentService;
+import com.eflix.common.res.ResUtil;
+import com.eflix.common.res.result.ResResult;
+import com.eflix.common.res.result.ResStatus;
 import com.eflix.main.dto.SubscriptionPackageDTO;
 import com.eflix.main.mapper.ModuleMapper;
 import com.eflix.main.mapper.SubscriptionMapper;
@@ -31,6 +36,8 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,7 +78,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/payment")
+@RequestMapping("/payment")
 public class PaymentController {
 
     private static final Map<String, ItemDTO> items = new HashMap<>();
@@ -99,6 +106,9 @@ public class PaymentController {
     
     @Autowired
     private WebhookVerifier webhookVerifier;
+
+    @Autowired
+    private BillingService billingService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -210,10 +220,18 @@ public class PaymentController {
         });
     }
 
-    @PostMapping("/billings")
-    public String billings(@RequestBody String body) {
-        //TODO: process POST request
-        System.out.println(body);
-        return body;
+    @PostMapping("/api/verify/billingKey")
+    public ResponseEntity<ResResult> postVerify(@RequestBody BillingReqDTO billingReqDTO) {
+        ResResult result = null;
+        String billingKey = billingService.verifyBillingKey(billingReqDTO.getCustomerUid());
+        // TODO: DB 저장 등 추가 로직
+
+        if(billingKey != null) {
+            result = ResUtil.makeResult(ResStatus.OK, billingKey);
+        } else {
+            result = ResUtil.makeResult("401", "검증에 실패했습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

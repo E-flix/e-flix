@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eflix.common.res.ResUtil;
@@ -19,17 +20,15 @@ import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.common.security.dto.UserDTO;
 import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionDTO;
-import com.eflix.main.mapper.CompanyMapper;
 import com.eflix.main.mapper.SubscriptionMapper;
 import com.eflix.main.service.CompanyService;
 import com.eflix.main.service.UserService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-
-
+import org.springframework.web.bind.annotation.PostMapping;
 
 
 @RestController
@@ -62,7 +61,6 @@ public class UserRestController {
     
     @PutMapping("/me")
     public ResponseEntity<ResResult> update(@RequestBody UserDTO userDTO) {
-        //TODO: process PUT request
         ResResult result = null;
 
         int affectedRows = userService.updateUser(userDTO);
@@ -100,6 +98,22 @@ public class UserRestController {
 
         result = ResUtil.makeResult(ResStatus.OK, reusltData);
 
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    // 0704
+    @PostMapping("/check")
+    public ResponseEntity<ResResult> postCheck(@RequestBody UserDTO userDTO) {
+        ResResult result = null;
+
+        boolean check = userService.verifyPassword(AuthUtil.getUserIdx(), userDTO.getUserPw());
+
+        if(check) {
+            result = ResUtil.makeResult(ResStatus.OK, null);
+        } else {
+            result = ResUtil.makeResult("401", "아이디 또는 비밀번호가 일치하지 않습니다.", null);
+        }
+        
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
     

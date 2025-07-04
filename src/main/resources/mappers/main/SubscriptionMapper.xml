@@ -192,4 +192,11 @@
         FROM subscription_package_details
         WHERE spi_idx = #{spiIdx}
     </select>
+
+    <!-- 0704 -->
+    <select id="findAllByStatus" parameterType="String" resultType="SubscriptionPaymentDTO">
+        SELECT *
+        FROM subscription
+        WHERE spi_status = #{spiStatus}
+    </select>
 </mapper>
