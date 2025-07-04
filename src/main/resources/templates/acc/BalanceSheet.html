@@ -7,6 +7,7 @@
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
   - 2025-07-04 (김희정): 재무상태표 레이아웃
+  - 2025-07-04 (김희정): 재무상태표 DB연결
 ============================================ -->
 
 <head>
@@ -17,41 +18,35 @@
       padding-bottom: 1rem;
       margin-bottom: 2rem;
     }
-    
+
     .ag-header-cell-style {
       background-color: #6c757d !important;
       color: white !important;
       font-weight: 500;
     }
-    
+
     .ag-subtotal-cell-style {
       background-color: #f1f3f4 !important;
       font-weight: 400;
       border-top: 1px solid #dee2e6;
     }
-    
+
     .ag-total-cell-style {
       background-color: #f8f9fa !important;
       font-weight: 500;
     }
-    
+
     .ag-grand-total-cell-style {
       background-color: #e9ecef !important;
       font-weight: 600;
-    }
-    
-    @media print {
-      .btn, .d-print-none {
-        display: none !important;
-      }
     }
   </style>
 </head>
 
 <div layout:fragment="content">
   <div class="container-fluid">
-    <!-- 재무상태표 섹션 -->
     <div class="row">
+      <!-- 재무상태표 헤더 영역 -->
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <!-- 왼쪽: 일반전표 제목 -->
@@ -226,21 +221,16 @@
 
     // ag-Grid 세팅
     const gridOptions = {
-      headerHeight: 35,
-      rowHeight: 35,
-      rowData: balanceSheetData,
-      suppressMovableColumns: true,  // 컬럼 이동 금지
-      suppressRowDrag: true,         // 행 드래그 금지
-      rowDragManaged: false,         // 행 드래그 관리 비활성화
+      headerHeight: 35, // 헤더 높이
+      rowHeight: 35, // 행 높이
+      rowData: balanceSheetData, // 재무상태표 데이터
+      suppressMovableColumns: true, // 컬럼 이동 금지
+      suppressRowDrag: true, // 행 드래그 금지
+      rowDragManaged: false, // 행 드래그 관리 비활성화
       columnDefs: [
-        { 
-          headerName: "계정과목", 
-          field: "accountName",
-          flex: 1,
-          sortable: false,
+        { headerName: "계정과목", field: "accountName", flex: 1, sortable: false,
           cellRenderer: params => {
             let displayText = '';
-            
             // 대분류 (level 0)
             if (params.data.section) {
               displayText = `<strong style="font-weight: 600;">${params.data.section}</strong>`;
@@ -261,32 +251,23 @@
                 displayText = params.value;
               }
             }
-            
             return displayText;
           },
           cellClass: params => {
-            if (params.data.isHeader) return 'ag-header-cell-style';
+            if (params.data.isHeader) return 'ag-header-cell-style'; 
             if (params.data.isSubTotal) return 'ag-subtotal-cell-style';
             if (params.data.isTotal) return 'ag-total-cell-style';
             if (params.data.isGrandTotal) return 'ag-grand-total-cell-style';
             return '';
           }
         },
-        { 
-          headerName: "코드", 
-          field: "accountCode", 
-          width: 100,
-          sortable: false,
+        { headerName: "코드", field: "accountCode", width: 100, sortable: false,
           cellClass: params => {
             if (params.data.isHeader) return 'ag-header-cell-style';
             return '';
           }
         },
-        { 
-          headerName: "금액", 
-          field: "amount", 
-          width: 120,
-          sortable: false,
+        { headerName: "금액", field: "amount", width: 120, sortable: false,
           cellStyle: { textAlign: 'right' },
           cellRenderer: params => {
             if (!params.value) return '';
@@ -297,12 +278,8 @@
             return '';
           }
         },
-        { 
-          headerName: "합계", 
-          field: "total", 
-          width: 150,
-          sortable: false,
-          cellStyle: { textAlign: 'right' },
+        { headerName: "합계", field: "total", width: 150, sortable: false,
+          cellStyle: { textAlign: 'right'},
           cellRenderer: params => {
             if (!params.value) return '';
             return `<span>${params.value}</span>`;
@@ -313,9 +290,9 @@
           }
         }
       ],
-      suppressRowClickSelection: true,
-      onGridReady: (params) => {
-        gridOptions.api = params.api;
+      suppressRowClickSelection: true, // 행 클릭 시 선택 방지
+      onGridReady: (params) => { 
+        gridOptions.api = params.api; // 그리드 API 저장
       }
     };
 
@@ -338,7 +315,7 @@
           row.total = calculateSectionTotal(index);
         }
       });
-      
+
       console.log('재무상태표 합계 계산 완료');
     }
 
@@ -349,7 +326,7 @@
         const row = balanceSheetData[i];
         // 다음 소분류나 상위 레벨 도달시 중단
         if (row.level <= 2) break;
-        
+
         if (row.level === 3 && row.amount) {
           const amount = parseFloat(row.amount.replace(/[,()]/g, ''));
           total += row.amount.includes('(') ? -amount : amount;
@@ -365,7 +342,7 @@
         const row = balanceSheetData[i];
         // 다음 중분류나 상위 레벨 도달시 중단
         if (row.level <= 1) break;
-        
+
         if (row.level === 2 && row.isHeader && row.total) {
           const amount = parseFloat(row.total.replace(/,/g, ''));
           total += amount;
@@ -381,7 +358,7 @@
         const row = balanceSheetData[i];
         // 다음 대분류 도달시 중단
         if (row.level === 0) break;
-        
+
         if (row.level === 1 && row.isHeader && row.total) {
           const amount = parseFloat(row.total.replace(/,/g, ''));
           total += amount;
@@ -393,17 +370,8 @@
     // 초기 계산 실행
     calculateTotals();
 
-    // 기능 함수들
-    function printReport(reportType) {
-      window.print();
-    }
-
     function exportToExcel() {
       alert('Excel 내보내기 기능을 준비 중입니다.');
     }
-
-    // 전역 함수 등록
-    window.printReport = printReport;
-    window.exportToExcel = exportToExcel;
   </script>
 </div>
