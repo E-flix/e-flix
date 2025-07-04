@@ -24,9 +24,10 @@ public class WhMovementController {
     private final WhMovementService whMovementService;
     // 창고이동
 	@GetMapping("/whm")
-	public String warehouse_mnt(Model model) {
+	public String sendWarehouse(Model model) {
         // 제품명 조회
-        model.addAttribute("prdList", whMovementService.searchProdIdList());
+        model.addAttribute("sendWhList", whMovementService.sendWarehouse());
+        model.addAttribute("toWhList", whMovementService.toWarehouse());
 		return "purchs/warehouse_movement";
 	}
     

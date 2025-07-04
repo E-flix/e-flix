@@ -18,9 +18,14 @@ public class WhMovementServiceImpl implements WhMovementService {
     @Autowired
     WhMovementMapper whMovementMapper;
 
-    // 제품 조회
+    // 입고전 제품, 창고 조회
     @Override
-    public List<WhMovementDTO> searchProdIdList() {
-        return whMovementMapper.searchProdIdList();
+    public List<WhMovementDTO> sendWarehouse() {
+        return whMovementMapper.sendWarehouse();
+    }
+    // 입고후 창고 조회
+    @Override
+    public List<WhMovementDTO> toWarehouse() {
+        return whMovementMapper.toWarehouse();
     }
 }
