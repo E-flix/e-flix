@@ -33,4 +33,7 @@ public interface AttendanceRecordMapper {
     // 로그인 사원 근태현황 기본정보
     List<AttendanceRecordDTO> getBasicInfo(AttendanceRecordDTO dto);
 
+    // 근태관리 조회
+    List<AttendanceRecordDTO> managerSearch(AttendanceRecordDTO dto);
+
 }

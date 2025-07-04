@@ -167,14 +167,6 @@ public class HrController {
     }
   }
   
-
-  
-  // 근태 관리화면(관리자)
-  @GetMapping("/am")
-  public String attdMaList() {
-      return "hr/attdManager";
-  }
-  
   // 근태 신청화면 (사원)
   @GetMapping("/attdAdd")
   public String attdAdd() {

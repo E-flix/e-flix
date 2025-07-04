@@ -20,21 +20,24 @@
 
       <!-- 필터 영역 -->
       <div class="p-3 bg-light border rounded mb-4">
+          <form>
         <div class="row g-3 align-items-center">
           <div class="col-md-3">
             <label class="form-label">사원명</label>
-            <input type="text" class="form-control" placeholder="검색어 입력 후 [enter]">
+            <input type="text" name="empName" class="form-control" placeholder="검색어 입력 후 [enter]">
           </div>
           <div class="col-md-2">
             <label class="form-label">근무상태</label>
             <select class="form-select">
-              <option>선택</option>
+              <option value="">선택</option>
+              <option></option>
             </select>
           </div>
           <div class="col-md-2">
             <label class="form-label">부서명</label>
-            <select class="form-select">
-              <option>선택</option>
+            <select class="form-select " >
+              <option value="">선택</option>
+              <option ></option>
             </select>
           </div>
           <div class="col-md-2">
@@ -50,10 +53,11 @@
             </select>
           </div>
           <div class="col-md-1 d-flex align-items-end">
-            <button class="btn btn-primary me-2">조회</button>
+            <button type="submit" class="btn btn-primary me-2" id="searchBtn">조회</button>
             <button class="btn btn-secondary">초기화</button>
           </div>
         </div>
+          </form>
       </div>
 
       <!-- 상단 근태 리스트 -->
@@ -236,6 +240,26 @@
         cell.appendChild(input);
         input.focus();
       }
+
+      $("#searchBtn").on("click", function() {
+        const query = {
+          empName: $("#empName").val(),
+        }
+        $.ajax({
+          url: "/hr/am/search",
+          type: "GET",
+          data: query,
+          dataType: 'json',
+          success: function(code){
+            if( code === '200' ) {
+              alert('성공')
+            } 
+          },
+          error: function(xhr, status, err) {
+            console.error(err);
+          }
+        })
+      });
     </script>
 
   </div>
