@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.eflix.bsn.dto.BsnItemDTO;
 import com.eflix.bsn.mapper.ItemMapper;
 import com.eflix.bsn.service.ItemService;
+import com.eflix.common.payment.dto.ItemDTO;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -30,5 +31,15 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<BsnItemDTO> searchItemsByName(String itemName) {
         return itemMapper.selectItemsByName(itemName);
+    }
+
+    @Override
+    public List<ItemDTO> findAll() {
+        return itemMapper.selectAll();
+    }
+
+    @Override
+    public List<ItemDTO> findByName(String name) {
+        return itemMapper.selectByName(name);
     }
 }

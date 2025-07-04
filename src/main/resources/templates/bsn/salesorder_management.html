@@ -333,6 +333,7 @@
       let currentOrder = null;      // 선택(또는 신규) 헤더 레코드
       let editMode     = false;
       let selectedHeaderNode = null;
+      let selectedDetailNode = null;
     
       /*─────────────── 공통 유틸 ───────────────*/
       function safeSetRowData(api, rows){
@@ -442,6 +443,7 @@
         rowSelection:'multiple',
         animateRows:true,
         onGridReady:p=>{ detailGridApi = p.api; setEditMode(false); },
+        onCellClicked: onDetailCellClicked,   
         onCellValueChanged:()=> setTimeout(calcTotals,80)
       };
     
@@ -449,6 +451,7 @@
       headerGridApi = agGrid.createGrid(document.getElementById('headerGrid'),  headerGridOptions).api;
       detailGridApi = agGrid.createGrid(document.getElementById('detailGrid'),  detailGridOptions).api;
       creditGridApi = agGrid.createGrid(document.getElementById('creditGrid'),  creditGridOptions).api;
+
 
       /*──────────────── 4. “신규” 버튼 ────────────────*/
       $('#btnNew').click(createNew);
@@ -529,6 +532,69 @@
         });
       }
 
+
+      // “품목명” 셀 클릭 시 모달 열기
+      function onDetailCellClicked(event) {
+        if (event.colDef.field === 'itemName') {
+          selectedDetailNode = event.node;
+          $('#itemSearchInput').val('');
+          $('#itemSearchResults').empty();
+          $('#itemModal').modal('show');
+        }
+      }
+
+
+          // 모달이 열릴 때 전체 품목 조회
+      $('#itemModal').on('shown.bs.modal', ()=> loadItemList() );
+      // 검색 버튼 클릭 시 필터 조회
+      $('#btnItemSearch').click(()=> loadItemList($('#itemSearchInput').val()) );
+        
+      // AJAX로 품목 리스트 불러오기
+      function loadItemList(keyword = '') {
+        $.getJSON('/bsn/items', { name: keyword })
+          .done(list => {
+            const $tb = $('#itemSearchResults').empty();
+            list.forEach(item => {
+              const json = encodeURIComponent(JSON.stringify(item));
+              $tb.append(`
+                <tr>
+                  <td>
+                    <button class="btn btn-sm btn-primary btn-select-item"
+                            data-item="${json}">선택</button>
+                  </td>
+                  <td>${item.itemCode}</td>
+                  <td>${item.itemName}</td>
+                  <td>${item.spec}</td>
+                  <td>${item.unit}</td>
+                  <td>${Number(item.salePrice||0).toLocaleString()}</td>
+                </tr>
+              `);
+            });
+          })
+          .fail(()=> Swal.fire('오류','품목 목록을 불러오지 못했습니다.','error'));
+      }
+
+      // 모달에서 품목 선택 시 그리드에 값 채우기
+      $('#itemSearchResults').on('click', '.btn-select-item', function(){
+        const item = JSON.parse(decodeURIComponent($(this).data('item')));
+        // 기본 수량 1, 단가·규격·단위·공급가액·부가세·합계 자동 계산
+        const qty  = 1;
+        const unit = item.salePrice || 0;
+        const supply = qty * unit;
+        const tax    = Math.round(supply * (item.taxRate || 0) / 100);
+        selectedDetailNode.setDataValue('itemCode',    item.itemCode);
+        selectedDetailNode.setDataValue('itemName',    item.itemName);
+        selectedDetailNode.setDataValue('spec',        item.spec);
+        selectedDetailNode.setDataValue('unit',        item.unit);
+        selectedDetailNode.setDataValue('qty',         qty);
+        selectedDetailNode.setDataValue('unitPrice',   unit);
+        selectedDetailNode.setDataValue('supplyAmount',supply);
+        selectedDetailNode.setDataValue('taxAmount',   tax);
+        selectedDetailNode.setDataValue('totalAmount', supply + tax);
+        $('#itemModal').modal('hide');
+        calcTotals();
+      });
+
       // 예: 고객 검색 결과 테이블에서 “선택” 버튼 클릭 핸들러
       $('#customerSearchResults').on('click', '.btn-select-cust', function() {
         const cust = $(this).data('cust'); // { customerCd, customerNm, representativeNm, phoneNo, salesEmpCd, discountRate }
@@ -542,9 +608,6 @@
 
       
       $(function(){
-      
-        // … 기존 초기화 코드 …
-      
         // 1) 헤더 저장 버튼 핸들러
         $('#btnSaveHeader').click(function(){
           if(!currentOrder || !currentOrder.orderNo){
