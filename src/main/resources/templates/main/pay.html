@@ -81,19 +81,23 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold">웹 및 핵심 서비스:</label>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="module" value="mou-101" id="hr">
+                                    <input class="form-check-input" type="checkbox" name="module" value="mou-101"
+                                        id="hr">
                                     <label class="form-check-label" for="hr">인사</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="module" value="mou-104" id="bsn">
+                                    <input class="form-check-input" type="checkbox" name="module" value="mou-104"
+                                        id="bsn">
                                     <label class="form-check-label" for="bsn">영업</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="module" value="mou-103" id="purchs">
+                                    <input class="form-check-input" type="checkbox" name="module" value="mou-103"
+                                        id="purchs">
                                     <label class="form-check-label" for="purchs">재고</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="module" value="mou-102" id="acc">
+                                    <input class="form-check-input" type="checkbox" name="module" value="mou-102"
+                                        id="acc">
                                     <label class="form-check-label" for="acc">회계</label>
                                 </div>
                             </div>
@@ -187,25 +191,35 @@
                                     <label class="form-check-label" for="sameAsSubscriber">가입자와 동일</label>
                                 </div>
                                 <div class="row g-2 mb-3">
-                                    <div class="col-md-6"><input type="text" class="form-control" id="pschName" placeholder="신청자">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="pschName"
+                                            placeholder="신청자">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="pschTel" placeholder="연락처">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="pschTel"
+                                            placeholder="연락처">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coName" placeholder="회사명">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="coName"
+                                            placeholder="회사명">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coNameEn" placeholder="회사 영문명">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="coNameEn"
+                                            placeholder="회사 영문명">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="ceoName" placeholder="대표자명">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="ceoName"
+                                            placeholder="대표자명">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="ceoTel" placeholder="연락처">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="ceoTel"
+                                            placeholder="연락처">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coAddr" placeholder="주소">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="coAddr"
+                                            placeholder="주소">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="bizr_no" placeholder="사업자 번호">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="bizr_no"
+                                            placeholder="사업자 번호">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coAddrDetail" placeholder="나머지 주소">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="coAddrDetail"
+                                            placeholder="나머지 주소">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coZip" placeholder="우편번호">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="coZip"
+                                            placeholder="우편번호">
                                     </div>
                                     <div class="col-md-10"><input type="text" class="form-control" id="bizr_cert"
                                             placeholder="사업자 등록증">
@@ -225,7 +239,7 @@
                                                 url: `/company/find?userIdx=${userIdx}`,
                                                 success: function (res) {
                                                     const data = res.body;
-                                                    if(res.head.res_code === "200") {
+                                                    if (res.head.res_code === "200") {
                                                         coIdx = data.coIdx;
                                                         $('#pschName').val(data.pschName);
                                                         $('#pschTel').val(data.pschTel);
@@ -252,7 +266,7 @@
                                                             }
                                                         });
                                                     }
-                                                    
+
                                                 },
                                                 error: function (xhr, status, err) {
                                                     console.error(err);
@@ -271,9 +285,11 @@
                             <fieldset class="border rounded-3 p-3">
                                 <legend class="float-none w-auto px-2 fs-6 fw-semibold">마스터 ID 정보</legend>
                                 <div class="row g-2 mb-3">
-                                    <div class="col-md-6"><input type="text" class="form-control" id="mstId" placeholder="마스터 ID">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="mstId"
+                                            placeholder="마스터 ID">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="mstName" placeholder="이름">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="mstName"
+                                            placeholder="이름">
                                     </div>
                                     <div class="col-md-6"><input type="password" class="form-control" id="mstPw"
                                             placeholder="비밀번호">
@@ -281,11 +297,14 @@
                                     <div class="col-md-6"><input type="password" class="form-control" id="mstPwCheck"
                                             placeholder="비밀번호 확인">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coTel" placeholder="회사 전화번호">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="coTel"
+                                            placeholder="회사 전화번호">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="mstTel" placeholder="연락처">
+                                    <div class="col-md-6"><input type="text" class="form-control" id="mstTel"
+                                            placeholder="연락처">
                                     </div>
-                                    <div class="col-12"><input type="email" class="form-control" id="mstEmail" placeholder="이메일">
+                                    <div class="col-12"><input type="email" class="form-control" id="mstEmail"
+                                            placeholder="이메일">
                                     </div>
                                 </div>
                             </fieldset>
@@ -539,8 +558,8 @@
     </div>
 
     <!-- SweetAlert2 CSS/JS CDN  -->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Step Navigation Script -->
     <script th:inline="javascript">
@@ -647,15 +666,15 @@
             function updateSummary() {
                 const periodValue = $('input[name="period"]:checked').val(); // "1", "3", "12"
                 const billing = $('#billing-cycle').val(); // "annual", "monthly", "once"
-                
+
                 // 금액 계산
                 let price = 0;
                 let unit = '';
                 let displayPeriod = '';
-                
+
                 // 기본 월 단가 (spkPrice가 월 단가라고 가정)
                 const monthlyPrice = spkPrice || 20000; // spkPrice가 없으면 기본값 20000
-                
+
                 // 구독 기간 텍스트 설정
                 if (periodValue === "1") {
                     displayPeriod = "1개월";
@@ -664,7 +683,7 @@
                 } else if (periodValue === "12") {
                     displayPeriod = "1년";
                 }
-                
+
                 // 청구 방식에 따른 가격 계산
                 if (billing === "annual") {
                     // 년 단위 결제
@@ -681,16 +700,16 @@
                     price = monthlyPrice * totalMonths;
                     unit = "회";
                 }
-                
+
                 // 가격이 0이면 기본값 설정
                 if (price === 0) {
                     price = monthlyPrice;
                     unit = "월";
                 }
-                
+
                 // 소수점 처리
                 price = Math.round(price);
-                
+
                 // 청구 방식 텍스트 변환
                 let billingText = '';
                 if (billing === "annual") {
@@ -700,7 +719,7 @@
                 } else if (billing === "once") {
                     billingText = "일시불";
                 }
-                
+
                 // 표시 업데이트
                 const summaryText = `${displayPeriod} 구독, ₩${price.toLocaleString()} / ${billingText} 지불`;
                 $('#subscription-summary').text(summaryText);
@@ -766,14 +785,14 @@
                     url: "",
                     data: JSON.stringify(data),
                     contentType: "application/json",
-                    success: function(res) {
-                        if(res.head.res_code === "200") {
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
 
                         } else {
 
                         }
                     },
-                    error: function(xhr, status, err) {
+                    error: function (xhr, status, err) {
                         console.error(err)
                     }
                 });
@@ -1085,34 +1104,8 @@
             initCanvas();
 
             function autoCheckout() {
-                // const issueResponse = PortOne.requestIssueBillingKey({
-                //     storeId: "store-092db0f4-068f-4f50-9b06-029fca00b36c",
-                //     channelKey: "channel-key-b0a7e62d-ac57-4a3f-8c19-be48ce89d669",
-                //     billingKeyMethod: "EASY_PAY",
-                // });
-                // // 빌링키가 제대로 발급되지 않은 경우 에러 코드가 존재합니다
-                // if (issueResponse.code !== undefined) {
-                //     return alert(issueResponse.message);
-                // }
-
-                // // 고객사 서버에 빌링키를 전달합니다
-                // const response = await fetch(`/payment/billings`, {
-                //     method: "POST",
-                //     header: { "Content-Type": "application/json" },
-                //     body: JSON.stringify({
-                //         billingKey: issueResponse.billingKey,
-                //         // ...
-                //     }),
-                // });
-                // if (!response.ok) throw new Error(`response: ${await response.json()}`);
-
-                // customerId, cardNumber, expiryYear, expiryMonth, birthOrBusinessRegistrationNumber, passwordTwoDigits 등 정보를 전달받습니다.
-
-                // 포트원 빌링키 발급 API 호출
-
                 // 포트원 빌링키 발급 API 호출
                 const uid = Date.now();
-                
                 // V1
                 IMP.init('imp73166581');
                 IMP.request_pay({
@@ -1122,13 +1115,14 @@
                     customer_uid: `user_${uid}`, // 사용자의 고유 ID
                     amount: 0,
                     name: "카카오페이 빌링키 등록",
-                    buyer_email: $('#pschEmail').val(),
-                    buyer_name: "test",
-                    buyer_tel: $('#pschTel').val()
+                    buyer_email: $("#pschEmail").val(),
+                    buyer_name: $("pschName").val(),
+                    buyer_tel: $("#pschTel").val()
                     // m_redirect_url: "https://your-service.com/billing/complete"
-                }, function(rsp) {
+                }, function (rsp) {
+                    console.log(rsp)
                     if (rsp.success) {
-                    // 백엔드에 전송
+                        // 백엔드에 전송
                         const data = {
                             impUid: rsp.imp_uid,
                             customerUid: rsp.customer_uid
@@ -1139,7 +1133,8 @@
                             data: JSON.stringify(data),
                             contentType: "application/json",
                             success: function (res) {
-                                console.log(res);
+                                addContract(contractName);
+                                addSubscription(rsp.customer_uid, rsp.pg_provider, contractName);
                             },
                             error: function (xhr, status, err) {
                                 console.error(err);
@@ -1148,60 +1143,6 @@
                         });
                     }
                 });
-
-                // V2
-                // const customerId = `user_${uid}`;
-                // const data = {
-                //     number: "1234123412341234",
-                //     expiryYear: "27",
-                //     expiryMonth: "05",
-                //     birthOrBusinessRegistrationNumber: "900101",
-                //     passwordTwoDigits: "23",
-                //     customerId
-                // }
-
-                // $.ajax({
-                //     type: "POST",
-                //     url: "/payment/api/issue/billing",
-                //     data: JSON.stringify(data),
-                //     contentType: "application/json",
-                //     success: function(res) {
-                //         console.log(res);
-                //     },
-                //     error: function(xhr, status, err) {
-                //         console.error(err);
-                        
-                //     }
-                // })
-            
-                // const userName = /*[[${session.userName}]]*/ "";
-                // const packageName = /*[[${subscriptionPackage.spkName}]]*/ "";
-                // console.log(packageName);
-                // IMP.init('imp73166581');
-                // IMP.request_pay({
-                //     pg: "kakaopay",
-                //     pay_method: "card",
-                //     merchant_uid: Date.now(),
-                //     customer_uid: "user_" + Date.now(),
-                //     name: packageName,
-                //     amount: 0,
-                //     // amount: spkPrice * $('.form-check-input[name=period]:checked').val(),
-                //     buyer_email: $('#pschEmail').val(),
-                //     buyer_name: userName,
-                //     buyer_tel: $('#pschTel').val(),
-                //     buyer_addr: $('#coAddr').val() + $('#coAddrDetail'),
-                //     buyer_postcode: $('#coZip').val()
-                // }, async function (res) {
-                //     let contractName= `contract_${Date.now()}`
-                //     if (res.success) {
-                //         addContract(contractName);
-                //         addSubscription(res.customer_uid, res.pg_provider, contractName);
-                //     } else {
-
-                //     }
-                // }, function (xhr, status, err) {
-                //     console.error(err);
-                // });
             }
             function addContract(contractName) {
                 const contractData = {
@@ -1214,14 +1155,14 @@
                     url: "/subscription/contract",
                     data: JSON.stringify(contractData),
                     contentType: "application/json",
-                    success: function(res) {
-                        if(res.head.res_code === "200") {
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
                             // Swal.fire();
                         } else {
                             // Swal.fire();
                         }
                     },
-                    error: function(xhr, status, err) {
+                    error: function (xhr, status, err) {
                         console.error(err);
                     }
                 });
@@ -1254,21 +1195,21 @@
                 }
 
                 const subscriptionData = {
-                        spkIdx,
-                        coIdx: coIdx,
-                        empIdx: 'emp-101',
-                        spiPay: pg_provider,
-                        spiPeriod: $('.form-check-input[name=period]:checked').val(),
-                        spiCtrt: contractName,
-                        spiUid: customer_uid,
-                        checkedModules,
-                        coIdx: coIdx,
-                        mstId: $('#mstId').val(),
-                        mstName: $('#mstName').val(),
-                        mstPw: $('#mstPw').val(),
-                        coTel: $('#coTel').val(),
-                        mstTel: $('#mstTel').val(),
-                        mstEmail: $('#mstEmail').val(),
+                    spkIdx,
+                    coIdx: coIdx,
+                    empIdx: 'emp-101',
+                    spiPay: pg_provider,
+                    spiPeriod: $('.form-check-input[name=period]:checked').val(),
+                    spiCtrt: contractName,
+                    spiUid: customer_uid,
+                    checkedModules,
+                    coIdx: coIdx,
+                    mstId: $('#mstId').val(),
+                    mstName: $('#mstName').val(),
+                    mstPw: $('#mstPw').val(),
+                    coTel: $('#coTel').val(),
+                    mstTel: $('#mstTel').val(),
+                    mstEmail: $('#mstEmail').val(),
                 }
 
                 $.ajax({
@@ -1276,14 +1217,14 @@
                     url: "/subscription/insert",
                     data: JSON.stringify(subscriptionData),
                     contentType: "application/json",
-                    success: function(res) {
-                        if(res.head.res_code === "200") {
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
                             Swal.fire("성공", "구독이 성공적으로 이루어졌습니다.", "success");
                         } else {
                             Swal.fire("실패", res.body, "error");
                         }
                     },
-                    error: function(xhr, status, err) {
+                    error: function (xhr, status, err) {
                         console.error(err);
                         Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
                     }
@@ -1296,8 +1237,6 @@
         // 결제
         function Checkout() {
             let item = null;
-
-
             this.load = async () => {
                 // 로딩 모달창
                 const loadingModal = new bootstrap.Modal('#loadingModal');
@@ -1427,6 +1366,87 @@
                 successModal.show();
             };
         }
+
+
+        // const issueResponse = PortOne.requestIssueBillingKey({
+        //     storeId: "store-092db0f4-068f-4f50-9b06-029fca00b36c",
+        //     channelKey: "channel-key-b0a7e62d-ac57-4a3f-8c19-be48ce89d669",
+        //     billingKeyMethod: "EASY_PAY",
+        // });
+        // // 빌링키가 제대로 발급되지 않은 경우 에러 코드가 존재합니다
+        // if (issueResponse.code !== undefined) {
+        //     return alert(issueResponse.message);
+        // }
+
+        // // 고객사 서버에 빌링키를 전달합니다
+        // const response = await fetch(`/payment/billings`, {
+        //     method: "POST",
+        //     header: { "Content-Type": "application/json" },
+        //     body: JSON.stringify({
+        //         billingKey: issueResponse.billingKey,
+        //         // ...
+        //     }),
+        // });
+        // if (!response.ok) throw new Error(`response: ${await response.json()}`);
+
+        // customerId, cardNumber, expiryYear, expiryMonth, birthOrBusinessRegistrationNumber, passwordTwoDigits 등 정보를 전달받습니다.
+
+        // 포트원 빌링키 발급 API 호출
+
+        // V2
+        // const customerId = `user_${uid}`;
+        // const data = {
+        //     number: "1234123412341234",
+        //     expiryYear: "27",
+        //     expiryMonth: "05",
+        //     birthOrBusinessRegistrationNumber: "900101",
+        //     passwordTwoDigits: "23",
+        //     customerId
+        // }
+
+        // $.ajax({
+        //     type: "POST",
+        //     url: "/payment/api/issue/billing",
+        //     data: JSON.stringify(data),
+        //     contentType: "application/json",
+        //     success: function(res) {
+        //         console.log(res);
+        //     },
+        //     error: function(xhr, status, err) {
+        //         console.error(err);
+
+        //     }
+        // })
+
+        // const userName = /*[[${session.userName}]]*/ "";
+        // const packageName = /*[[${subscriptionPackage.spkName}]]*/ "";
+        // console.log(packageName);
+        // IMP.init('imp73166581');
+        // IMP.request_pay({
+        //     pg: "kakaopay",
+        //     pay_method: "card",
+        //     merchant_uid: Date.now(),
+        //     customer_uid: "user_" + Date.now(),
+        //     name: packageName,
+        //     amount: 0,
+        //     // amount: spkPrice * $('.form-check-input[name=period]:checked').val(),
+        //     buyer_email: $('#pschEmail').val(),
+        //     buyer_name: userName,
+        //     buyer_tel: $('#pschTel').val(),
+        //     buyer_addr: $('#coAddr').val() + $('#coAddrDetail'),
+        //     buyer_postcode: $('#coZip').val()
+        // }, async function (res) {
+        //     let contractName= `contract_${Date.now()}`
+        //     if (res.success) {
+        //         addContract(contractName);
+        //         addSubscription(res.customer_uid, res.pg_provider, contractName);
+        //     } else {
+
+        //     }
+        // }, function (xhr, status, err) {
+        //     console.error(err);
+        // });
     </script>
 </body>
+
 </html>

@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -20,13 +21,14 @@ import org.springframework.web.client.RestTemplate;
 import com.eflix.common.payment.dto.BillingReqDTO;
 import com.eflix.common.payment.service.BillingService;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 public class BillingServiceImpl implements BillingService {
-    
+
     @Value("${portone.v1.impCode}")
     private String impCode;
 
@@ -46,36 +48,60 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     public String getAccessToken() {
-        Map<String, String> body = Map.of("imp_key", apiKey, "imp_secret", impV1SecretKey);
+        // 요청 바디 생성
+        JsonObject json = new JsonObject();
+        json.addProperty("imp_key", apiKey);
+        json.addProperty("imp_secret", impV1SecretKey);
 
-        ResponseEntity<Map> res = restTemplate.postForEntity(
+        // 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // HTTP 요청 엔터티
+        HttpEntity<String> requestEntity = new HttpEntity<>(json.toString(), headers);
+
+        // POST 요청
+        ResponseEntity<String> response = restTemplate.exchange(
                 "https://api.iamport.kr/users/getToken",
-                new HttpEntity<>(body),
-                Map.class
-        );
-        Map<String, Object> response = (Map<String, Object>) res.getBody().get("response");
-        return (String) response.get("access_token");
+                HttpMethod.POST,
+                requestEntity,
+                String.class);
+
+        String resBody = response.getBody();
+        JsonObject root = JsonParser.parseString(resBody).getAsJsonObject();
+
+        JsonObject responseJson = root.getAsJsonObject("response");
+        String token = responseJson.get("access_token").getAsString();
+        long expiredAt = responseJson.get("expired_at").getAsLong();
+
+        return token;
     }
 
     @Override
     public String verifyBillingKey(String customerUid) {
-        String url = "https://api.portone.io/subscribe/customers/" + customerUid;
+        String accessToken = getAccessToken();
+        System.out.println("accessToken:" + accessToken);
+        String url = "https://api.iamport.kr/subscribe/customers/" + customerUid;
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "PortOne " + impV1SecretKey);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
+        headers.setBearerAuth(accessToken);
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 entity,
-                Map.class
-        );
+                String.class);
 
-        Map<String, Object> body = (Map<String, Object>) response.getBody().get("billingKeyInfo");
-        return body != null ? body.get("billingKey").toString() : "N/A";
+        String resBody = response.getBody();
+        JsonObject root = JsonParser.parseString(resBody).getAsJsonObject();
+
+        JsonObject billingKeyInfo = responseJson.getAsJsonObject("billingKeyInfo");
+
+        String billingKey = billingKeyInfo.has("billingKey") ?
+            billingKeyInfo.get("billingKey").getAsString() : "N/A";
+
+        return billingKey;
     }
 
     @Override
@@ -93,7 +119,8 @@ public class BillingServiceImpl implements BillingService {
         credential.addProperty("number", billingReqDTO.getNumber());
         credential.addProperty("expiryYear", billingReqDTO.getExpiryYear());
         credential.addProperty("expiryMonth", billingReqDTO.getExpiryMonth());
-        credential.addProperty("birthOrBusinessRegistrationNumber", billingReqDTO.getBirthOrBusinessRegistrationNumber());
+        credential.addProperty("birthOrBusinessRegistrationNumber",
+                billingReqDTO.getBirthOrBusinessRegistrationNumber());
         credential.addProperty("passwordTwoDigits", billingReqDTO.getPasswordTwoDigits());
 
         JsonObject card = new JsonObject();
