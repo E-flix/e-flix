@@ -20,10 +20,13 @@ public interface OrdersMapper {
 
     /* ───── 저장 / 수정 ───── */
     int insertOrder(OrdersDTO dto);
-    int updateOrder(OrdersDTO dto);
 
     /* ───── 상세 일괄 INSERT ───── */
     int insertOrderDetailBatch(@Param("list") List<OrdersDetailDTO> list);
+
+    /* ───── 수정 ───── */
+    int updateOrder(OrdersDTO dto);
+    int updateOrderDetail(OrdersDetailDTO detailDto);
 
     /* ───── 삭제 ───── */
     void deleteOrderDetailAll(String orderNo, String coIdx);   // ← 신규

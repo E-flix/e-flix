@@ -23,4 +23,8 @@ public interface OrdersService {
 
     /* 주문번호 채번 */
     String generateNextOrderNo();
+
+    /* 수정 */
+    void updateOrderHeader(OrdersDTO dto);
+    void updateOrderDetails(String orderNo, List<OrdersDetailDTO> details);
 }

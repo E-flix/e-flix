@@ -28,6 +28,7 @@
       CUSTOMER_NM,
       REPRESENTATIVE_NM,
       PHONE_NO,
+      SALES_EMP_CD, 
       DISCOUNT_RATE
     FROM CUSTOMERS
     WHERE USE_YN = 'Y'
@@ -40,6 +41,7 @@
       CUSTOMER_NM,
       REPRESENTATIVE_NM,
       PHONE_NO,
+      SALES_EMP_CD,
       DISCOUNT_RATE
     FROM CUSTOMERS
     WHERE USE_YN = 'Y'
@@ -137,6 +139,26 @@
     ORDER BY CUSTOMER_NM
     FETCH FIRST 10 ROWS ONLY
   </select>
+
+  <select id="searchByName"
+          resultType="com.eflix.bsn.dto.CustomerDTO"
+          parameterType="string">
+    SELECT
+      CUSTOMER_CD     AS customerCd,
+      CUSTOMER_NM     AS customerNm,
+      REPRESENTATIVE_NM AS representativeNm,
+      PHONE_NO        AS phoneNo,
+      SALES_EMP_CD    AS salesEmpCd,
+      DISCOUNT_RATE   AS discountRate
+    FROM EFLIX.CUSTOMERS
+    <where>
+      <if test="name != null and name != ''">
+        CUSTOMER_NM LIKE '%' || #{name} || '%'
+      </if>
+    </where>
+    ORDER BY CUSTOMER_NM
+  </select>
+
 
 
 

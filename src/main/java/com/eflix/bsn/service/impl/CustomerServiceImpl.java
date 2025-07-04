@@ -41,4 +41,9 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerDTO> searchCustomers(String keyword) {
         return customerMapper.searchCustomers(keyword);
     }
+
+    @Override
+    public List<CustomerDTO> searchCustomersByName(String name) {
+        return customerMapper.searchByName(name);
+    }
 }
