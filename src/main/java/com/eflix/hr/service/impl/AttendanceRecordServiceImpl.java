@@ -25,7 +25,7 @@ import com.eflix.hr.service.AttendanceRecordService;
 public class AttendanceRecordServiceImpl implements AttendanceRecordService {
 
   @Autowired
-  AttendanceRecordMapper attendanceRecordsMapper;
+  AttendanceRecordMapper attendanceRecordMapper;
   
 
     @Autowired
@@ -41,23 +41,29 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
   public List<AttendanceRecordDTO> getRecordsByEmpId(AttendanceRecordDTO attendanceRecordDTO) {
     attendanceRecordDTO.setEmpIdx(attendanceRecordDTO.getEmpIdx());
     attendanceRecordDTO.setCoIdx(authContext.getCoIdx());
-    return attendanceRecordsMapper.getRecordsByEmpId(attendanceRecordDTO);
+    return attendanceRecordMapper.getRecordsByEmpId(attendanceRecordDTO);
   }
 
   // 로그인 사원 근태현황 년월 드롭다운
   @Override
   public List<LocalDate> getYearMonthList(String empIdx) {
-    return attendanceRecordsMapper.getJoinDate(empIdx, authContext.getCoIdx());
+    return attendanceRecordMapper.getJoinDate(empIdx, authContext.getCoIdx());
+  }
+
+  // 근태관리 조회
+  @Override
+  public List<AttendanceRecordDTO> managerSearch(AttendanceRecordDTO attendanceRecordDTO) {
+    return attendanceRecordMapper.managerSearch(attendanceRecordDTO);
   }
 
   @Override
   public List<AttendanceRecordDTO> getBasicInfo(AttendanceRecordDTO attendanceRecordDTO) {
-    return attendanceRecordsMapper.getBasicInfo(attendanceRecordDTO);
+    return attendanceRecordMapper.getBasicInfo(attendanceRecordDTO);
   }
 
   @Override
   public List<AttendanceRecordDTO> userInfo(AttendanceRecordDTO attendanceRecordDTO) {
-    return attendanceRecordsMapper.getBasicInfo(attendanceRecordDTO);
+    return attendanceRecordMapper.getBasicInfo(attendanceRecordDTO);
   }
 
 	@Override
@@ -72,6 +78,7 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
 	public int deleteAttendanceRecord(String attdIdx) {
 		throw new UnsupportedOperationException("Unimplemented method 'deleteAttendanceRecord'");
 	}
+
 
 
 

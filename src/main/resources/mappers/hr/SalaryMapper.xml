@@ -8,5 +8,54 @@
   - 2025-06-19 (김어진): 계정과목 전체조회 작성
 =============================================== -->
 <mapper namespace="com.eflix.hr.mapper.SalaryMapper">
-
+ <!-- <select id="searchSalary"
+          parameterType="map"
+          resultMap="SalaryMap">
+    SELECT
+      s.salary_idx,
+      s.emp_idx,
+      emp.emp_name,
+      d.dept_name,
+      emp.emp_grade,
+      s.salary_month,
+      s.base_salary,
+      s.bonus,
+      s.overtime_pay,
+      s.night_work_pay,
+      s.total_salary,
+      s.tax,
+      s.health_insurance,
+      s.national_pension,
+      s.employment_ins,
+      s.industrial_ins,
+      s.other_deductions,
+      s.pay_month,
+      s.att_month,
+      s.Field      AS Field,
+      s.Field2     AS Field2,
+      s.Field3     AS Field3,
+      s.co_idx,
+      s.created_date
+    FROM salary s
+    JOIN employees emp
+      ON s.emp_idx = emp.emp_idx
+    LEFT JOIN departments d
+      ON emp.dept_idx = d.dept_idx
+    <where>
+      <if test="salaryMonth != null and salaryMonth != ''">
+        AND s.salary_month = #{salaryMonth}
+      </if>
+      <if test="payMonth != null and payMonth != ''">
+        AND s.pay_month = #{payMonth}
+      </if>
+      <if test="empName != null and empName != ''">
+        AND emp.emp_name LIKE '%' || #{empName} || '%'
+      </if>
+      <if test="deptName != null and deptName != ''">
+        AND d.dept_name = #{deptName}
+      </if>
+    </where>
+    ORDER BY emp.emp_idx
+    </select> -->
 </mapper>
+

@@ -1,4 +1,5 @@
 package com.eflix.hr.controller;
+
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.eflix.common.security.auth.AuthContext;
@@ -45,23 +48,22 @@ public class AttendanceRecordController {
     @ResponseBody
     public List<AttendanceRecordDTO> getRecordsByMonth(
             @RequestParam String empIdx,
-            @RequestParam String yearMonth   // e.g. "2025-05"
+            @RequestParam String yearMonth // e.g. "2025-05"
     ) {
         // 테스트용으로 empIdx 고정하실 거면 유지
         empIdx = "emp-001";
 
         YearMonth ym = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
         LocalDate start = ym.atDay(1);
-        LocalDate end   = ym.atEndOfMonth();
+        LocalDate end = ym.atEndOfMonth();
 
         AttendanceRecordDTO dto = new AttendanceRecordDTO();
         dto.setEmpIdx(empIdx);
         dto.setCoIdx(authContext.getCoIdx());
-        dto.setAttdStart(start.toString());        // "yyyy-MM"
-        dto.setAttdEnd(end.toString());            // "yyyy-MM"
+        dto.setAttdStart(start.toString()); // "yyyy-MM"
+        dto.setAttdEnd(end.toString()); // "yyyy-MM"
         return attendanceRecordService.getRecordsByEmpId(dto);
     }
-    
 
     @GetMapping("/al/yearmonth")
     @ResponseBody
@@ -78,35 +80,63 @@ public class AttendanceRecordController {
         List<AttendanceRecordDTO> records = attendanceRecordService.getAllRecords();
 
         model.addAttribute("records", records);
-        return "hr/attendance";  // templates/attendance/manage.html
+        return "hr/attendance"; // templates/attendance/manage.html
     }
 
     // 근태현황 기본항목
     @GetMapping("/al/basicInfo")
     @ResponseBody
-    public List<AttendanceRecordDTO> getBasicInfo( @RequestParam String empIdx,
-            @RequestParam String yearMonth   // e.g. "2025-05"
+    public List<AttendanceRecordDTO> getBasicInfo(@RequestParam String empIdx,
+            @RequestParam String yearMonth // e.g. "2025-05"
     ) {
         AttendanceRecordDTO atd = new AttendanceRecordDTO();
         atd.setEmpIdx(empIdx);
 
         YearMonth ym = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
         LocalDate start = ym.atDay(1);
-        LocalDate end   = ym.atEndOfMonth();
-        atd.setAttdStart(start.toString());        // "yyyy-MM"
-        atd.setAttdEnd(end.toString());            // "yyyy-MM"
+        LocalDate end = ym.atEndOfMonth();
+        atd.setAttdStart(start.toString()); // "yyyy-MM"
+        atd.setAttdEnd(end.toString()); // "yyyy-MM"
         atd.setCoIdx("co-101");
         List<AttendanceRecordDTO> basics = attendanceRecordService.getBasicInfo(atd);
 
-        System.out.println("asfsaf:" +basics.toString());
+        System.out.println("asfsaf:" + basics.toString());
         return basics;
     }
+
+    // 근태 관리화면(관리자) 검색
+    @GetMapping("/am/search")
+    @ResponseBody
+    public List<AttendanceRecordDTO> managerSearch(AttendanceRecordDTO dto) {
+        List<AttendanceRecordDTO> data = attendanceRecordService.managerSearch(dto);
+        return data;
+    }
+
+        @GetMapping("/list")
+    public String listPage(Model model) {
+        // 검색 폼과 자동 바인딩할 빈 DTO
+        model.addAttribute("attendanceRecordDTO", new AttendanceRecordDTO());
+        // // select 옵션용 리스트들
+        // model.addAttribute("attdStatusList", attendanceRecordService.getAllStatusCodes());
+        // model.addAttribute("deptments", attendanceRecordService.findAllDepartments());
+        return "attendance/list";  // → src/main/resources/templates/attendance/list.html
+    }
+
+    // 근태 관리화면(관리자)
+    @GetMapping("/am")
+    public String attdMaList() {
+        return "hr/attdManager";
+    }
+
+
+    
+
     // 근태현황 사용자 정보
     // @GetMapping("/al/userInfo")
     // public List<AttendanceRecordDTO> userInfo(@RequestParam String empIdx) {
-    //     empIdx = "emp-001";
-    //     List<EmployeeDTO> userInfo = attendanceRecordService.userInfo(empIdx);
-    //     return userInfo;
+    // empIdx = "emp-001";
+    // List<EmployeeDTO> userInfo = attendanceRecordService.userInfo(empIdx);
+    // return userInfo;
     // }
-    
+
 }

@@ -30,9 +30,11 @@ public interface AttendanceRecordService {
     // 사용자 정보
     public List<AttendanceRecordDTO> userInfo(AttendanceRecordDTO attendanceRecordDTO);
 
-
+    // 근태관리 조회
+    public List<AttendanceRecordDTO> managerSearch(AttendanceRecordDTO dto);
 
     int createAttendanceRecord(AttendanceRecordDTO dto);
     int updateAttendanceRecord(AttendanceRecordDTO dto);
     int deleteAttendanceRecord(String attdIdx);
+
 }
