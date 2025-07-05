@@ -40,11 +40,11 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * <h3>설정 내용</h3>
  * <ul>
- * <li>모든 요청에 대해 인증 없이 접근 허용</li>
- * <li>CSRF 보호 비활성화</li>
- * <li>Form Login 비활성화</li>
- * <li>Logout 기능 비활성화</li>
- * <li>BCryptPasswordEncoder 빈 등록</li>
+ *   <li>모든 요청에 대해 인증 없이 접근 허용</li>
+ *   <li>CSRF 보호 비활성화</li>
+ *   <li>Form Login 비활성화</li>
+ *   <li>Logout 기능 비활성화</li>
+ *   <li>BCryptPasswordEncoder 빈 등록</li>
  * </ul>
  * 
  * @author 복성민 (bokseongmin@gmail.com)
@@ -58,6 +58,8 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>2025-06-19: 최초 생성 (복성민)</li>
  *   <li>2025-06-21: securityMatcher, formLogin, remember, logout 설정 추가</li>
  *   <li>2025-06-24: /erp Security 설정</li>
+ *   <li>2025-06-30: 경로 필터 해제</li>
+ *   <li>2025-07-03: CustomAuthenticationFilter 추가</li>
  * </ul>
  */
 
