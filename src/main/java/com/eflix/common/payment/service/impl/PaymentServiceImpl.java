@@ -1,6 +1,10 @@
 package com.eflix.common.payment.service.impl;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,9 +26,9 @@ import lombok.extern.log4j.Log4j2;
  * <p>
  * </p>
  * 
-* <h3>주요 기능</h3>
+ * <h3>주요 기능</h3>
  * <ul>
- *   <li>상품 조회</li>
+ * <li>상품 조회</li>
  * </ul>
  * 
  * @author 복성민 (bokseongmin@gmail.com)
@@ -34,10 +38,11 @@ import lombok.extern.log4j.Log4j2;
  * @see
  * 
  * @changelog
- * <ul>
- *   <li>2025-06-19: 최초 생성 (복성민)</li>
- *   <li>2025-06-20: 결제 코드 추가 (복성민)</li>
- * </ul>
+ *            <ul>
+ *            <li>2025-06-19: 최초 생성 (복성민)</li>
+ *            <li>2025-06-20: 결제 코드 추가 (복성민)</li>
+ *            <li>2025-07-04: 정기 결제 로직 추가 (복성민)</li>
+ *            </ul>
  */
 
 @Log4j2
@@ -71,7 +76,7 @@ public class PaymentServiceImpl implements PaymentService {
         int affectedRows = subscriptionMapper.insertSubscription(subscriptionDTO);
 
         String spi_idx = "";
-        if(affectedRows > 0)  {
+        if (affectedRows > 0) {
             spi_idx = subscriptionDTO.getSpiIdx();
         }
 
@@ -80,12 +85,17 @@ public class PaymentServiceImpl implements PaymentService {
         return 0;
     }
 
+    // 정기 구독
     @Override
     public void processSubscription() {
         log.info("정기 결제 요청 시작");
 
+        LocalDate today = LocalDate.now();
+
         List<SubscriptionPaymentDTO> list = subscriptionMapper.findAllByStatus("SS01");
 
-        
+        List<SubscriptionPaymentDTO> _list = list.stream()
+                .filter(dto -> dto.getSpiNext().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isEqual(today))
+                .collect(Collectors.toList());
     }
 }

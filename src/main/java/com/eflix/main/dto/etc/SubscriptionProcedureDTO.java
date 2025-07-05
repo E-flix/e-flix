@@ -10,6 +10,7 @@ public class SubscriptionProcedureDTO {
     private String empIdx;
     private String spiPay;
     private int spiPeriod;
+    private int spiCycle;
     private String spiCtrt;
     private String spiUid;
     private String checkedModules;

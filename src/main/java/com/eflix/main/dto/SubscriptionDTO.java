@@ -19,7 +19,8 @@ import lombok.Data;
  * 
  * @changelog
  * <ul>
- *   <li>2025-06-19: 최초 생성 (복성민)</li>
+ *   <li>2025-06-19 복성민: 최초 생성</li>
+ *   <li>2025-07-05 복성민: spiNext(구독 결제일) 추가</li>
  * </ul>
  */
 
@@ -31,14 +32,16 @@ public class SubscriptionDTO {
     private String spkIdx;      // spk-000
     private String empIdx;      // emp-000
     private String spiPay;      // SP01: 무통장, SP02: 카드, SP03: 계좌, SP04: 카카오, SP05: 네이버
-    private String spiStatus;
+    private String spiStatus;   // 구독 상태
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    private Date spiStart;
+    private Date spiStart;      // 구독 시작일
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
-    private Date spiEnd;
-    private int spiPeriod;
+    private Date spiEnd;        // 구독 종료일
+    private int spiPeriod;      // 구독 기간
+    private int spiCycle;       // 결제 주기
+    private Date spiNext;       // 다음 결제일
     private String spiCtrt;     // 계약서 파일
-    private String spiUid;      // PortOne UID
+    private String spiUid;      // PortOne UID(빌링키)
 
     private String spkName;
     private String spkPrice;

@@ -77,6 +77,5 @@ public interface SubscriptionMapper {
     public List<ModuleDTO> findAllModuleBySpiIdx(String spiIdx);
 
     // 0704
-
     public List<SubscriptionPaymentDTO> findAllByStatus(String string);
 }

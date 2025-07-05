@@ -175,6 +175,7 @@
                 #{dto.empIdx, mode=IN, jdbcType=VARCHAR},
                 #{dto.spiPay, mode=IN, jdbcType=VARCHAR},
                 #{dto.spiPeriod, mode=IN, jdbcType=NUMERIC},
+                #{dto.spiCycle, mode=IN, jdbcType=NUMERIC},
                 #{dto.spiCtrt, mode=IN, jdbcType=VARCHAR},
                 #{dto.spiUid, mode=IN, jdbcType=VARCHAR},
                 #{dto.checkedModules, mode=IN, jdbcType=VARCHAR},
