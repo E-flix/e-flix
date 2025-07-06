@@ -113,31 +113,31 @@ public class BalanceSheetTemplate {
         
         // Ⅰ. 유동부채
         template.add(createRow("", "Ⅰ. 유동부채", "", "63", "", "", "", "", true, 1, false, false));
-        template.add(createRow("", "", "1. 단기차입금", "64", "1. 단기차입금", "", "", "단기차입금", false, 3, false, false));
-        template.add(createRow("", "", "2. 매입채무", "65", "2. 매입채무", "", "", "매입채무", false, 3, false, false));
-        template.add(createRow("", "", "3. 선수금", "66", "3. 선수금", "", "", "선수금", false, 3, false, false));
-        template.add(createRow("", "", "4. 미지급금", "67", "4. 미지급금", "", "", "미지급금", false, 3, false, false));
-        template.add(createRow("", "", "5. 예수금", "68", "5. 예수금", "", "", "예수금", false, 3, false, false));
-        template.add(createRow("", "", "6. 미지급비용", "69", "6. 미지급비용", "", "", "미지급비용", false, 3, false, false));
-        template.add(createRow("", "", "7. 유동성장기부채", "70", "7. 유동성장기부채", "", "", "유동성장기부채", false, 3, false, false));
-        template.add(createRow("", "", "8. 유동성충당부채", "71", "8. 유동성충당부채", "", "", "유동성충당부채", false, 3, false, false));
-        template.add(createRow("", "", "9. 기타", "72", "9. 기타", "", "", "유동부채 기타", false, 3, false, false));
+        template.add(createRow("", "", "", "64", "(1) 단기차입금", "", "", "단기차입금", false, 3, false, false));
+        template.add(createRow("", "", "", "65", "(2) 매입채무", "", "", "매입채무", false, 3, false, false));
+        template.add(createRow("", "", "", "66", "(3) 선수금", "", "", "선수금", false, 3, false, false));
+        template.add(createRow("", "", "", "67", "(4) 미지급금", "", "", "미지급금", false, 3, false, false));
+        template.add(createRow("", "", "", "68", "(5) 예수금", "", "", "예수금", false, 3, false, false));
+        template.add(createRow("", "", "", "69", "(6) 미지급비용", "", "", "미지급비용", false, 3, false, false));
+        template.add(createRow("", "", "", "70", "(7) 유동성장기부채", "", "", "유동성장기부채", false, 3, false, false));
+        template.add(createRow("", "", "", "71", "(8) 유동성충당부채", "", "", "유동성충당부채", false, 3, false, false));
+        template.add(createRow("", "", "", "72", "(9) 기타", "", "", "유동부채 기타", false, 3, false, false));
 
         // Ⅱ. 비유동부채
         template.add(createRow("", "Ⅱ. 비유동부채", "", "73", "", "", "", "", true, 1, false, false));
-        template.add(createRow("", "", "1. 장기차입금", "74", "1. 장기차입금", "", "", "장기차입금", false, 3, false, false));
+        template.add(createRow("", "", "", "74", "(1) 장기차입금", "", "", "장기차입금", false, 3, false, false));
         template.add(createRow("", "", "", "75", "① 관계회사", "", "", "장기차입금 관계회사", false, 3, false, false));
         template.add(createRow("", "", "", "76", "② 임원 및 종업원", "", "", "장기차입금 임원", false, 3, false, false));
         template.add(createRow("", "", "", "77", "③ 기타", "", "", "장기차입금 기타", false, 3, false, false));
-        template.add(createRow("", "", "2. 장기매입채무", "78", "2. 장기매입채무", "", "", "장기매입채무", false, 3, false, false));
-        template.add(createRow("", "", "3. 장기선수금", "79", "3. 장기선수금", "", "", "장기선수금", false, 3, false, false));
-        template.add(createRow("", "", "4. 장기미지급금", "80", "4. 장기미지급금", "", "", "장기미지급금", false, 3, false, false));
-        template.add(createRow("", "", "5. 임대보증금", "81", "5. 임대보증금", "", "", "임대보증금", false, 3, false, false));
-        template.add(createRow("", "", "6. 기타보증금", "82", "6. 기타보증금", "", "", "기타보증금", false, 3, false, false));
-        template.add(createRow("", "", "7. 퇴직급여충당부채", "83", "7. 퇴직급여충당부채", "", "", "퇴직급여충당부채", false, 3, false, false));
-        template.add(createRow("", "", "8. 기타충당부채", "84", "8. 기타충당부채", "", "", "기타충당부채", false, 3, false, false));
-        template.add(createRow("", "", "9. 제준비금", "85", "9. 제준비금", "", "", "제준비금", false, 3, false, false));
-        template.add(createRow("", "", "10. 기타", "86", "10. 기타", "", "", "비유동부채 기타", false, 3, false, false));
+        template.add(createRow("", "", "", "78", "(2) 장기매입채무", "", "", "장기매입채무", false, 3, false, false));
+        template.add(createRow("", "", "", "79", "(3) 장기선수금", "", "", "장기선수금", false, 3, false, false));
+        template.add(createRow("", "", "", "80", "(4) 장기미지급금", "", "", "장기미지급금", false, 3, false, false));
+        template.add(createRow("", "", "", "81", "(5) 임대보증금", "", "", "임대보증금", false, 3, false, false));
+        template.add(createRow("", "", "", "82", "(6) 기타보증금", "", "", "기타보증금", false, 3, false, false));
+        template.add(createRow("", "", "", "83", "(7) 퇴직급여충당부채", "", "", "퇴직급여충당부채", false, 3, false, false));
+        template.add(createRow("", "", "", "84", "(8) 기타충당부채", "", "", "기타충당부채", false, 3, false, false));
+        template.add(createRow("", "", "", "85", "(9) 제준비금", "", "", "제준비금", false, 3, false, false));
+        template.add(createRow("", "", "", "86", "(10) 기타", "", "", "비유동부채 기타", false, 3, false, false));
         
         // 부채총계
         template.add(createRow("", "", "", "87", "부채총계( Ⅰ+Ⅱ )", "", "", "", false, 0, false, true));

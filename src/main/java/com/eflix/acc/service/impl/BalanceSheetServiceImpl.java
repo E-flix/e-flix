@@ -39,14 +39,12 @@ public class BalanceSheetServiceImpl implements BalanceSheetService {
             // 현재 년도 설정
             String currentYear = String.valueOf(LocalDate.now().getYear());
             params.put("year", currentYear);
-            log.info("현재 년도로 설정: {}", currentYear);
             
             // AuthUtil에서 coIdx 가져오기
             String coIdx = AuthUtil.getCoIdx();
             params.put("coIdx", coIdx);
-            log.info("AuthUtil에서 coIdx 가져옴: {}", coIdx);
             
-            log.info("재무상태표 데이터 조회 시작 - params: {}", params);
+            log.info("재무상태표 데이터 조회 - year: {}, coIdx: {}", currentYear, coIdx);
             List<BalanceSheetDTO> result = balanceSheetMapper.getBalanceSheetByYear(params);
             log.info("재무상태표 데이터 조회 완료 - 조회건수: {}", result.size());
             return result;
@@ -62,36 +60,28 @@ public class BalanceSheetServiceImpl implements BalanceSheetService {
             List<Map<String, Object>> gridData = balanceSheetTemplate.getStandardTemplate();
             
             if (dbData != null && !dbData.isEmpty()) {
-                log.info("DB 데이터 변환 시작 - 총 {}건", dbData.size());
-                
                 // DB 데이터를 표준계정과목명별로 그룹화
                 Map<String, Long> accountAmountMap = new HashMap<>();
-                Map<String, BalanceSheetDTO> accountInfoMap = new HashMap<>();
                 
                 for (BalanceSheetDTO dto : dbData) {
                     if (dto.getStandardAccountName() != null && dto.getSumAmount() != null) {
                         accountAmountMap.merge(dto.getStandardAccountName(), dto.getSumAmount(), Long::sum);
-                        accountInfoMap.put(dto.getStandardAccountName(), dto);
-                        
-                        log.info("DB 데이터: {} = {}", dto.getStandardAccountName(), dto.getSumAmount());
                     }
                 }
                 
-                // 템플릿에 금액 매칭 - matchKey 사용
+                // 템플릿에 금액 매칭
                 for (Map<String, Object> row : gridData) {
                     String matchKey = (String) row.get("matchKey");
-                    
                     if (matchKey != null && !matchKey.isEmpty()) {
                         Long amount = findMatchByKey(matchKey, accountAmountMap);
                         if (amount != null && amount != 0) {
                             row.put("amount", formatAmount(amount));
-                            log.info("매칭 성공: {} = {}", matchKey, formatAmount(amount));
                         }
                     }
                 }
                 
                 // 합계 계산
-                calculateTotals(gridData, accountAmountMap, accountInfoMap);
+                calculateTotals(gridData);
             }
             
             return gridData;
@@ -103,24 +93,23 @@ public class BalanceSheetServiceImpl implements BalanceSheetService {
     }
     
     /**
-     * 매칭키로 안전한 매칭
+     * 매칭키로 매칭
      */
     private Long findMatchByKey(String matchKey, Map<String, Long> accountAmountMap) {
         if (matchKey == null || matchKey.isEmpty()) {
             return null;
         }
         
-        // 1. 정확한 매칭 (가장 우선)
+        // 1. 정확한 매칭
         Long exactMatch = accountAmountMap.get(matchKey);
         if (exactMatch != null) {
             return exactMatch;
         }
         
-        // 2. 최소한의 정제 후 매칭 (공백, 특수문자만)
-        String cleanKey = simpleClean(matchKey);
+        // 2. 정제 후 매칭
+        String cleanKey = cleanText(matchKey);
         for (Map.Entry<String, Long> entry : accountAmountMap.entrySet()) {
-            if (cleanKey.equals(simpleClean(entry.getKey()))) {
-                log.info("정제 매칭: {} -> {} = {}", matchKey, entry.getKey(), entry.getValue());
+            if (cleanKey.equals(cleanText(entry.getKey()))) {
                 return entry.getValue();
             }
         }
@@ -129,73 +118,321 @@ public class BalanceSheetServiceImpl implements BalanceSheetService {
     }
     
     /**
-     * 최소한의 정제 (공백과 기본 특수문자만)
+     * 텍스트 정제 (공백, 특수문자 제거)
      */
-    private String simpleClean(String text) {
+    private String cleanText(String text) {
         if (text == null) return "";
-        return text.trim()
-                  .replaceAll("\\s+", "")     // 공백 제거
-                  .replaceAll("및", "")        // "및" 제거
-                  .replaceAll("&", "");        // "&" 제거
+        return text.trim().replaceAll("\\s+", "").replaceAll("및", "").replaceAll("&", "");
     }
     
     /**
-     * 금액 포맷팅 (천단위 구분자 추가)
+     * 금액 포맷팅
      */
     private String formatAmount(Long amount) {
-        if (amount == null || amount == 0) return "";
+        if (amount == null) return "";
+        if (amount == 0) return "0";
         return String.format("%,d", amount);
     }
     
     /**
-     * 합계 계산
+     * 합계 계산 (통합)
      */
-    private void calculateTotals(List<Map<String, Object>> gridData, 
-                               Map<String, Long> accountAmountMap, 
-                               Map<String, BalanceSheetDTO> accountInfoMap) {
+    private void calculateTotals(List<Map<String, Object>> gridData) {
+        // 1. 소분류 합계 계산
+        calculateSubCategoryTotals(gridData);
         
-        long assetTotal = 0;
-        long liabilityTotal = 0;
-        long equityTotal = 0;
+        // 2. 중분류 합계 계산
+        calculateMidCategoryTotals(gridData);
         
-        // 대분류별 합계 계산
-        for (Map.Entry<String, BalanceSheetDTO> entry : accountInfoMap.entrySet()) {
-            BalanceSheetDTO dto = entry.getValue();
-            Long amount = accountAmountMap.get(entry.getKey());
+        // 3. 대분류 합계 계산
+        calculateMainCategoryTotals(gridData);
+        
+        // 4. 최종 총계 계산
+        calculateGrandTotals(gridData);
+    }
+    
+    /**
+     * 소분류 합계 계산
+     */
+    private void calculateSubCategoryTotals(List<Map<String, Object>> gridData) {
+        String[] subCategoryNames = {
+            "(4) 단기대여금", "(7) 미수금", "(3) 장기대여금", "1. 장기차입금"
+        };
+        
+        for (String subCategory : subCategoryNames) {
+            calculateSubCategoryTotal(gridData, subCategory);
+        }
+    }
+    
+    /**
+     * 특정 소분류의 합계 계산
+     */
+    private void calculateSubCategoryTotal(List<Map<String, Object>> gridData, String subCategoryName) {
+        long total = 0;
+        boolean inSubCategory = false;
+        int subCategoryIndex = -1;
+        
+        for (int i = 0; i < gridData.size(); i++) {
+            Map<String, Object> row = gridData.get(i);
+            String accountName = (String) row.get("accountName");
+            String amount = (String) row.get("amount");
             
-            if (amount != null && dto.getMajorCategory() != null) {
-                String majorCategory = dto.getMajorCategory();
-                
-                if ("자산".equals(majorCategory)) {
-                    assetTotal += amount;
-                } else if ("부채".equals(majorCategory)) {
-                    liabilityTotal += amount;
-                } else if ("자본".equals(majorCategory)) {
-                    equityTotal += amount;
+            // 소분류 시작 확인
+            if (accountName != null && accountName.equals(subCategoryName)) {
+                inSubCategory = true;
+                subCategoryIndex = i;
+                continue;
+            }
+            
+            // 소분류 종료 조건
+            if (inSubCategory && accountName != null && !accountName.isEmpty()) {
+                if (!accountName.trim().matches("^[①②③④⑤⑥⑦⑧⑨⑩].*")) {
+                    if (accountName.startsWith("(") || accountName.matches("^\\d+\\..*")) {
+                        break;
+                    }
+                }
+            }
+            
+            // 소분류 내의 하위 항목 금액 합계
+            if (inSubCategory && amount != null && !amount.isEmpty() && 
+                accountName != null && accountName.trim().matches("^[①②③④⑤⑥⑦⑧⑨⑩].*")) {
+                try {
+                    total += Long.parseLong(amount.replaceAll(",", ""));
+                } catch (NumberFormatException e) {
+                    // 무시
                 }
             }
         }
         
-        log.info("합계 계산 - 자산: {}, 부채: {}, 자본: {}", 
-                formatAmount(assetTotal), formatAmount(liabilityTotal), formatAmount(equityTotal));
+        // 소분류 헤더에 합계 설정
+        if (subCategoryIndex >= 0) {
+            gridData.get(subCategoryIndex).put("total", formatAmount(total));
+        }
+    }
+    
+    /**
+     * 중분류 합계 계산
+     */
+    private void calculateMidCategoryTotals(List<Map<String, Object>> gridData) {
+        String[] midCategories = {
+            "1. 당좌자산", "2. 재고자산", "1. 투자자산", 
+            "2. 유형자산", "3. 무형자산", "4. 기타 비유동자산"
+        };
         
-        // 총계 행에 금액 설정
+        for (String category : midCategories) {
+            calculateMidCategoryTotal(gridData, category);
+        }
+    }
+    
+    /**
+     * 중분류 합계 계산
+     */
+    private void calculateMidCategoryTotal(List<Map<String, Object>> gridData, String categoryName) {
+        long total = 0;
+        boolean inCategory = false;
+        int categoryIndex = -1;
+        
+        for (int i = 0; i < gridData.size(); i++) {
+            Map<String, Object> row = gridData.get(i);
+            String subsection = (String) row.get("subsection");
+            String subcategory = (String) row.get("subcategory");
+            String accountName = (String) row.get("accountName");
+            String amount = (String) row.get("amount");
+            
+            // 중분류 시작
+            if (subcategory != null && subcategory.equals(categoryName)) {
+                inCategory = true;
+                categoryIndex = i;
+                continue;
+            }
+            
+            // 종료 조건: 다른 중분류나 대분류가 시작되면 종료
+            if (inCategory) {
+                if (subcategory != null && !subcategory.isEmpty() && !subcategory.equals(categoryName)) {
+                    break;
+                }
+                if (subsection != null && !subsection.isEmpty() &&
+                    (subsection.startsWith("Ⅰ.") || subsection.startsWith("Ⅱ.") || 
+                     subsection.startsWith("Ⅲ.") || subsection.startsWith("Ⅳ."))) {
+                    break;
+                }
+            }
+            
+            // 중분류 내의 개별 항목들만 합산
+            if (inCategory && accountName != null && !accountName.isEmpty()) {
+                if (accountName.trim().matches("^\\(\\d+\\).*")) {
+                    if (amount != null && !amount.isEmpty()) {
+                        try {
+                            long amountValue = Long.parseLong(amount.replaceAll(",", ""));
+                            total += amountValue;
+                        } catch (NumberFormatException e) {
+                            // 무시
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 중분류 헤더에 합계 설정
+        if (categoryIndex >= 0) {
+            gridData.get(categoryIndex).put("total", formatAmount(total));
+        }
+    }
+    
+    /**
+     * 대분류 합계 계산
+     */
+    private void calculateMainCategoryTotals(List<Map<String, Object>> gridData) {
+        String[] mainCategories = {
+            "Ⅰ. 유동자산", "Ⅱ. 비유동자산", "Ⅰ. 유동부채", "Ⅱ. 비유동부채",
+            "Ⅲ. 자본금", "Ⅳ. 당기순손익"
+        };
+        
+        for (String category : mainCategories) {
+            long total = calculateCategoryTotal(gridData, category);
+            setCategoryTotal(gridData, category, total);
+        }
+    }
+    
+    /**
+     * 카테고리 합계 계산
+     */
+    private long calculateCategoryTotal(List<Map<String, Object>> gridData, String categoryName) {
+        long total = 0;
+        boolean inCategory = false;
+        
+        for (Map<String, Object> row : gridData) {
+            String subsection = (String) row.get("subsection");
+            String subcategory = (String) row.get("subcategory");
+            String accountName = (String) row.get("accountName");
+            String amount = (String) row.get("amount");
+            String midTotal = (String) row.get("total");
+            
+            // 대분류 시작
+            if (subsection != null && subsection.equals(categoryName)) {
+                inCategory = true;
+                continue;
+            }
+            
+            // 다른 대분류 시작하면 종료
+            if (inCategory && subsection != null && 
+                (subsection.startsWith("Ⅰ.") || subsection.startsWith("Ⅱ.") || 
+                 subsection.startsWith("Ⅲ.") || subsection.startsWith("Ⅳ.")) &&
+                !subsection.equals(categoryName)) {
+                break;
+            }
+            
+            // 대분류 내 합계 계산
+            if (inCategory) {
+                // 자산 대분류인 경우: 중분류 total 값들만 합산
+                if (categoryName.contains("자산")) {
+                    if (subcategory != null && !subcategory.isEmpty() && 
+                        midTotal != null && !midTotal.isEmpty()) {
+                        try {
+                            long midTotalValue = Long.parseLong(midTotal.replaceAll(",", ""));
+                            total += midTotalValue;
+                        } catch (NumberFormatException e) {
+                            // 무시
+                        }
+                    }
+                }
+                // 부채나 자본 대분류인 경우: 개별 항목들 직접 합산
+                else {
+                    if ((subcategory == null || subcategory.isEmpty()) && 
+                         amount != null && !amount.isEmpty() &&
+                         accountName != null && !accountName.isEmpty() &&
+                         accountName.trim().matches("^\\(\\d+\\).*")) {
+                        try {
+                            long amountValue = Long.parseLong(amount.replaceAll(",", ""));
+                            total += amountValue;
+                        } catch (NumberFormatException e) {
+                            // 무시
+                        }
+                    }
+                }
+            }
+        }
+        
+        return total;
+    }
+    
+    /**
+     * 카테고리 헤더에 합계 설정
+     */
+    private void setCategoryTotal(List<Map<String, Object>> gridData, String categoryName, long total) {
+        for (Map<String, Object> row : gridData) {
+            String subsection = (String) row.get("subsection");
+            if (subsection != null && subsection.equals(categoryName)) {
+                row.put("total", formatAmount(total));
+                break;
+            }
+        }
+    }
+    
+    /**
+     * 최종 총계 계산
+     */
+    private void calculateGrandTotals(List<Map<String, Object>> gridData) {
+        // 각 카테고리 합계 가져오기
+        long currentAssetTotal = getCategoryTotal(gridData, "Ⅰ. 유동자산");
+        long nonCurrentAssetTotal = getCategoryTotal(gridData, "Ⅱ. 비유동자산");
+        long currentLiabilityTotal = getCategoryTotal(gridData, "Ⅰ. 유동부채");
+        long nonCurrentLiabilityTotal = getCategoryTotal(gridData, "Ⅱ. 비유동부채");
+        
+        // 자본총계 계산
+        long equityTotal = calculateEquityTotal(gridData);
+        
+        // 총계 계산
+        long totalAsset = currentAssetTotal + nonCurrentAssetTotal;
+        long totalLiability = currentLiabilityTotal + nonCurrentLiabilityTotal;
+        long totalLiabilityAndEquity = totalLiability + equityTotal;
+        
+        // 총계 행에 설정
+        setGrandTotal(gridData, "자산총계", totalAsset);
+        setGrandTotal(gridData, "부채총계", totalLiability);
+        setGrandTotal(gridData, "자본총계", equityTotal);
+        setGrandTotal(gridData, "부채와 자본총계", totalLiabilityAndEquity);
+    }
+    
+    /**
+     * 카테고리 total 값 가져오기
+     */
+    private long getCategoryTotal(List<Map<String, Object>> gridData, String categoryName) {
+        for (Map<String, Object> row : gridData) {
+            String subsection = (String) row.get("subsection");
+            if (subsection != null && subsection.equals(categoryName)) {
+                String total = (String) row.get("total");
+                if (total != null && !total.isEmpty()) {
+                    try {
+                        return Long.parseLong(total.replaceAll(",", ""));
+                    } catch (NumberFormatException e) {
+                        return 0;
+                    }
+                }
+                return 0;
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * 자본총계 계산
+     */
+    private long calculateEquityTotal(List<Map<String, Object>> gridData) {
+        long capitalTotal = getCategoryTotal(gridData, "Ⅲ. 자본금");
+        long currentEarningsTotal = getCategoryTotal(gridData, "Ⅳ. 당기순손익");
+        return capitalTotal + currentEarningsTotal;
+    }
+    
+    /**
+     * 총계 행에 금액 설정
+     */
+    private void setGrandTotal(List<Map<String, Object>> gridData, String totalName, long amount) {
         for (Map<String, Object> row : gridData) {
             String accountName = (String) row.get("accountName");
-            if (accountName != null) {
-                if (accountName.contains("자산총계")) {
-                    row.put("amount", formatAmount(assetTotal));
-                    log.info("자산총계 설정: {}", formatAmount(assetTotal));
-                } else if (accountName.contains("부채총계")) {
-                    row.put("amount", formatAmount(liabilityTotal));
-                    log.info("부채총계 설정: {}", formatAmount(liabilityTotal));
-                } else if (accountName.contains("자본총계")) {
-                    row.put("amount", formatAmount(equityTotal));
-                    log.info("자본총계 설정: {}", formatAmount(equityTotal));
-                } else if (accountName.contains("부채와 자본총계")) {
-                    row.put("amount", formatAmount(liabilityTotal + equityTotal));
-                    log.info("부채와 자본총계 설정: {}", formatAmount(liabilityTotal + equityTotal));
-                }
+            if (accountName != null && accountName.contains(totalName)) {
+                row.put("total", formatAmount(amount));
+                break;
             }
         }
     }
