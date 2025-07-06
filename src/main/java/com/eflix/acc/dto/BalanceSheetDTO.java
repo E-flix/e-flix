@@ -17,5 +17,7 @@ import lombok.NoArgsConstructor;
 public class BalanceSheetDTO {
   private String standardAccountName; // 표준계정과목명
   private String majorCategory; // 대분류 (자산/부채/자본)
+  private String middleCategory; // 중분류
+  private String minorCategory; // 소분류
   private Long sumAmount; // 합계 금액
 }

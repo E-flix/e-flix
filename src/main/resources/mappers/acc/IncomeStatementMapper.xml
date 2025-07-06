@@ -8,7 +8,10 @@
   - 2025-07-05 (김희정): IncomeStatementMapper 생성
 =============================================== -->
 <mapper namespace="com.eflix.acc.mapper.IncomeStatementMapper">
-	<select id="" parameterType="" resultType="com.eflix.acc.dto.IncomeStatementDTO">
-
+	<select id="ads" parameterType="String" resultType="com.eflix.acc.dto.IncomeStatementDTO">
+    <!-- 여기에 SQL 쿼리를 작성하세요 -->
+    SELECT * FROM income_statement
+    WHERE year = #{year}
+    AND month = #{month}
 	</select>
 </mapper>
