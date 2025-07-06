@@ -1,9 +1,20 @@
 package com.eflix.acc.controller;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.eflix.acc.dto.IncomeStatementDTO;
+import com.eflix.acc.service.IncomeStatementService;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * ============================================
@@ -15,18 +26,58 @@ import lombok.RequiredArgsConstructor;
  * - 2025-06-23 (김희정): AccController에서 분리 => 손익계산서Controller 생성
  * ============================================
  */
+@Slf4j
 @Controller
 @RequestMapping("/acc")
 @RequiredArgsConstructor
 public class AccIncomeStatementController {
 
-  // private final Service Service;
+    private final IncomeStatementService incomeStatementService;
 
-  /**
-   * 손익계산서 화면 요청 처리
-   */
-  @GetMapping("/is")
-  public String incomeStatement() {
-    return "acc/incomeStatement";
-  }
+    /**
+     * 손익계산서 화면 요청 처리
+     */
+    @GetMapping("/is")
+    public String incomeStatement() {
+        return "acc/incomeStatement";
+    }
+
+    /**
+     * 손익계산서 데이터 조회 (AJAX) - endMonth 기준
+     */
+    @GetMapping("/is/data")
+    @ResponseBody
+    public Map<String, Object> getIncomeStatementData(
+            @RequestParam(required = false) String year,
+            @RequestParam(required = false) String endMonth,
+            @RequestParam(required = false) String coIdx) {
+        
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            log.info("손익계산서 데이터 조회 요청 - year: {}, endMonth: {}, coIdx: {}", year, endMonth, coIdx);
+            
+            // 파라미터 설정 (ServiceImpl에서 자동으로 처리됨)
+            Map<String, Object> params = new HashMap<>();
+            params.put("year", year);
+            params.put("endMonth", endMonth);
+            params.put("coIdx", coIdx);
+            
+            // 서비스 호출
+            List<IncomeStatementDTO> dbData = incomeStatementService.getIncomeStatementByYear(params);
+            List<Map<String, Object>> gridData = incomeStatementService.convertToGridFormat(dbData);
+            
+            result.put("success", true);
+            result.put("data", gridData);
+            result.put("message", "데이터 조회 성공");
+            
+        } catch (Exception e) {
+            log.error("손익계산서 데이터 조회 중 오류 발생", e);
+            result.put("success", false);
+            result.put("data", null);
+            result.put("message", "데이터 조회 실패: " + e.getMessage());
+        }
+        
+        return result;
+    }
 }
