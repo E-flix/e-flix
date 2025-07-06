@@ -43,24 +43,24 @@ public class AccBalanceSheetController {
   }
 
   /**
-   * 재무상태표 데이터 조회 (AJAX) - URL 매핑 수정
+   * 재무상태표 데이터 조회 (AJAX) - endMonth 기준으로 수정
    */
   @GetMapping("/bs/data")
   @ResponseBody
   public Map<String, Object> getBalanceSheetData(
       @RequestParam(required = false) String year,
-      @RequestParam(required = false) String month,
+      @RequestParam(required = false) String endMonth,
       @RequestParam(required = false) String coIdx) {
     
     Map<String, Object> result = new HashMap<>();
     
     try {
-      log.info("재무상태표 데이터 조회 요청 - year: {}, month: {}, coIdx: {}", year, month, coIdx);
+      log.info("재무상태표 데이터 조회 요청 - year: {}, endMonth: {}, coIdx: {}", year, endMonth, coIdx);
       
       // 파라미터 설정 (ServiceImpl에서 자동으로 처리됨)
       Map<String, Object> params = new HashMap<>();
       params.put("year", year);
-      params.put("month", month);
+      params.put("endMonth", endMonth);
       params.put("coIdx", coIdx);
       
       // 서비스 호출

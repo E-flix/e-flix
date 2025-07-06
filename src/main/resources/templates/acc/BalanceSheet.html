@@ -8,6 +8,7 @@
   - 2025-06-18 (김희정): title 및 내용 추가
   - 2025-07-04 (김희정): 재무상태표 레이아웃
   - 2025-07-04 (김희정): 재무상태표 DB연결
+  - 2025-07-06 (김희정): 날짜 필터 추가
 ============================================ -->
 
 <head>
@@ -49,11 +50,10 @@
       <!-- 재무상태표 헤더 영역 -->
       <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-1">
-          <!-- 왼쪽: 일반전표 제목 -->
+          <!-- 왼쪽: 재무상태표 제목 -->
           <h3 class="mb-0">재무상태표</h3>
           <!-- 오른쪽: 버튼 모음 -->
           <div>
-            <button type="button" id="diffFilterBtn" class="btn btn-outline-secondary btn-sm">조회</button>
             <button class="btn btn-outline-secondary btn-sm" onclick="출력()">출력</button>
             <button class="btn btn-outline-secondary btn-sm" onclick="엑셀()">엑셀</button>
           </div>
@@ -61,10 +61,10 @@
         <!-- 검색/필터 영역 -->
         <form class="row mb-2 align-items-end" method="get" action="/acc/bs">
           <div class="col-auto">
-            <label class="form-label mb-0">일자</label>
-            <input type="number" name="year" value="2025" min="2020" max="2030" class="form-control form-control-sm d-inline-block" style="width:80px;">
+            <label class="form-label mb-0">기준일</label>
+            <input type="number" name="year" value="2025" class="form-control form-control-sm d-inline-block" style="width:80px;" readonly>
             년
-            <select class="form-control form-control-sm d-inline-block" name="startMonth" style="width:70px;">
+            <select class="form-control form-control-sm d-inline-block" name="endMonth" style="width:70px;">
               <option value="1">1월</option>
               <option value="2">2월</option>
               <option value="3">3월</option>
@@ -78,6 +78,7 @@
               <option value="11">11월</option>
               <option value="12" selected>12월</option>
             </select>
+            말까지
           </div>
         </form>
         <div class="grid-container" style="height:100vh;">
@@ -93,15 +94,22 @@
     // 페이지 로드 시 데이터 가져오기
     document.addEventListener('DOMContentLoaded', function() {
         loadBalanceSheetData();
+        
+        // 월 변경 시 자동 조회 이벤트 추가
+        document.querySelector('select[name="endMonth"]').addEventListener('change', function() {
+            loadBalanceSheetData();
+        });
     });
     
     // 서버에서 재무상태표 데이터 가져오기
     async function loadBalanceSheetData() {
       try {
         const year = document.querySelector('input[name="year"]')?.value || '2025';
-        const month = document.querySelector('select[name="startMonth"]')?.value || '12';
+        const endMonth = document.querySelector('select[name="endMonth"]')?.value || '12';
         
-        const response = await fetch(`/acc/bs/data?year=${year}&month=${month}`);
+        console.log(`재무상태표 조회: ${year}년 ${endMonth}월말까지`);
+        
+        const response = await fetch(`/acc/bs/data?year=${year}&endMonth=${endMonth}`);
         const result = await response.json();
         
         if (result.success) {
@@ -142,23 +150,18 @@
         ];
     }
 
-    // 조회 버튼 이벤트 추가
-    document.getElementById('diffFilterBtn').addEventListener('click', function() {
-        loadBalanceSheetData();
-    });
-
     // ag-Grid 세팅
     const gridOptions = {
-      headerHeight: 35,
-      rowHeight: 35,
-      rowData: [],
-      suppressMovableColumns: true,
-      suppressRowDrag: true,
-      rowDragManaged: false,
-      rowSelection: 'multiRow', // v33에서는 문자열로 설정
-      suppressRowClickSelection: true, // 행 클릭으로 선택되지 않도록 설정
+      headerHeight: 35, // 헤더 높이 설정
+      rowHeight: 35, // 행 높이 설정
+      rowData: [], // 초기 데이터는 빈 배열로 설정
+      suppressMovableColumns: true, // 열 이동 기능 비활성화
+      suppressRowDrag: true, // 행 드래그 기능 비활성화
+      rowDragManaged: false, // 행 드래그 관리 비활성화
+      rowSelection: 'multiRow', // 다중 행 선택
+      suppressRowClickSelection: true, // 행 클릭 시 선택 방지
       columnDefs: [
-        { headerName: "계정과목", field: "accountName", flex: 1, sortable: false,
+        { headerName: "계정과목", field: "accountName",  width: 300, sortable: false, // flex: 1,
           cellRenderer: params => {
             let displayText = '';
             if (params.data.section) {

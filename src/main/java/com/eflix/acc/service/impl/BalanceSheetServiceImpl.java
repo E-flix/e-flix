@@ -40,11 +40,18 @@ public class BalanceSheetServiceImpl implements BalanceSheetService {
             String currentYear = String.valueOf(LocalDate.now().getYear());
             params.put("year", currentYear);
             
+            // endMonth 기본값 설정
+            String endMonth = (String) params.get("endMonth");
+            if (endMonth == null || endMonth.isEmpty()) {
+                endMonth = "12";
+                params.put("endMonth", endMonth);
+            }
+            
             // AuthUtil에서 coIdx 가져오기
             String coIdx = AuthUtil.getCoIdx();
             params.put("coIdx", coIdx);
             
-            log.info("재무상태표 데이터 조회 - year: {}, coIdx: {}", currentYear, coIdx);
+            log.info("재무상태표 데이터 조회 - year: {}, endMonth: {}까지, coIdx: {}", currentYear, endMonth, coIdx);
             List<BalanceSheetDTO> result = balanceSheetMapper.getBalanceSheetByYear(params);
             log.info("재무상태표 데이터 조회 완료 - 조회건수: {}", result.size());
             return result;

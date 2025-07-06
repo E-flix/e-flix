@@ -14,8 +14,8 @@ import com.eflix.acc.dto.BalanceSheetDTO;
 =============================================== */
 public interface BalanceSheetService {
     /**
-     * 연도별 재무상태표 데이터 조회
-     * @param params 조회 조건 (year, coIdx, month 등)
+     * 연도별 재무상태표 데이터 조회 (endMonth 기준)
+     * @param params 조회 조건 (year, coIdx, endMonth 등)
      * @return 재무상태표 데이터 리스트
      */
     List<BalanceSheetDTO> getBalanceSheetByYear(Map<String, Object> params);

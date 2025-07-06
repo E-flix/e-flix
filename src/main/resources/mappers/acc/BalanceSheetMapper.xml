@@ -29,6 +29,7 @@
     JOIN entry_master m
       ON e.entry_number = m.entry_number
     WHERE TO_CHAR(m.entry_date, 'YYYY') = #{year}
+      AND TO_NUMBER(TO_CHAR(m.entry_date, 'MM')) <![CDATA[<=]]> #{endMonth}
       AND a.co_idx = #{coIdx}
       AND e.co_idx = #{coIdx}
       AND m.co_idx = #{coIdx}
