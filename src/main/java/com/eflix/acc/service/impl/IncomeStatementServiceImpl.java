@@ -23,9 +23,6 @@ import lombok.extern.slf4j.Slf4j;
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-07-05 (김희정): Service 구현체 생성
-  - 2025-07-05 (김희정): 표준 템플릿 적용으로 간소화
-  - 2025-07-06 (김희정): 중복 메서드 정리 및 손익계산 로직 통합
-  - 2025-07-07 (김희정): 오류 처리 개선 및 누락 메서드 추가
 =============================================== */
 @Slf4j
 @Service
@@ -70,12 +67,12 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
     @Override
     public List<Map<String, Object>> convertToGridFormat(List<IncomeStatementDTO> dbData) {
         try {
+            // 기존 템플릿 그대로 사용 (99개 전체 항목)
             List<Map<String, Object>> gridData = incomeStatementTemplate.getStandardTemplate();
             
             if (dbData != null && !dbData.isEmpty()) {
                 // DB 데이터를 표준계정과목명별로 그룹화
                 Map<String, Long> accountAmountMap = new HashMap<>();
-                
                 for (IncomeStatementDTO dto : dbData) {
                     if (dto.getStandardAccountName() != null && dto.getSumAmount() != null) {
                         accountAmountMap.merge(dto.getStandardAccountName(), dto.getSumAmount(), Long::sum);
@@ -93,9 +90,8 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
                     }
                 }
                 
-                // 합계 계산 (오류 시 예외 전파)
+                // 합계 계산
                 calculateProfitAndLoss(gridData);
-                
             } else {
                 log.warn("손익계산서 DB 데이터가 없습니다. 빈 템플릿을 반환합니다.");
             }
@@ -109,14 +105,14 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
     }
     
     /**
-     * 손익 계산 및 설정 (통합된 단일 메서드)
+     * 손익 계산 및 설정
      */
     private void calculateProfitAndLoss(List<Map<String, Object>> gridData) {
         try {
             // 1. 상품매출원가 세부 계산
             calculateCostOfGoodsSold(gridData);
             
-            // 2. 제조원가 세부 계산
+            // 2. 제조원가 세부 계산 (일단 0으로 처리하되 템플릿 항목은 유지)
             calculateManufacturingCost(gridData);
             
             // 3. 대분류 합계 계산
@@ -133,12 +129,11 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
             setProfitAndLossTotal(gridData, "Ⅵ. 영업외수익", totalNonOpIncome);
             setProfitAndLossTotal(gridData, "Ⅶ. 영업외비용", totalNonOpExpense);
             
-            // 5. 손익 계산
-            long grossProfit = totalSales - totalCogs; // 매출총이익
-            long operatingProfit = grossProfit - totalSga; // 영업손익
-            long netIncome = operatingProfit + totalNonOpIncome - totalNonOpExpense; // 당기순손익
+            // 5. 손익 계산 및 설정
+            long grossProfit = totalSales - totalCogs;
+            long operatingProfit = grossProfit - totalSga;
+            long netIncome = operatingProfit + totalNonOpIncome - totalNonOpExpense;
             
-            // 6. 손익 설정
             setProfitAndLossTotal(gridData, "Ⅲ. 매출총이익 ( Ⅰ-Ⅱ )", grossProfit);
             setProfitAndLossTotal(gridData, "Ⅴ. 영업손익( Ⅲ－Ⅳ )", operatingProfit);
             setProfitAndLossTotal(gridData, "Ⅷ. 당기순손익( Ⅴ＋Ⅵ－Ⅶ )", netIncome);
@@ -147,113 +142,59 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
                      formatAmount(totalSales), formatAmount(totalCogs), formatAmount(grossProfit), formatAmount(netIncome));
                      
         } catch (Exception e) {
-            log.error("손익계산 중 심각한 오류 발생", e);
-            throw new RuntimeException("손익계산서 계산 중 오류가 발생했습니다. 데이터를 확인해주세요: " + e.getMessage(), e);
+            log.error("손익계산 중 오류 발생", e);
+            throw new RuntimeException("손익계산서 계산 중 오류가 발생했습니다: " + e.getMessage(), e);
         }
     }
     
     /**
-     * 상품매출원가 계산 로직 설명
-     * 
-     * 1. 기초재고액 = 전년도 상품계정 잔액 (차변-대변)
-     * 2. 당기매입액 = 상품계정 잔액 (차변-대변) + 기말재고액
-     * 3. 기말재고액 = 상품매출원가 전표에서 상품계정 대변금액
-     * 4. 타계정대체액 = 상품계정에서 다른 계정으로 대체된 금액 (대변)
-     * 
-     * 상품매출원가 = 기초재고액 + 당기매입액 - 기말재고액 - 타계정대체액
+     * 상품매출원가 계산
      */
     private void calculateCostOfGoodsSold(List<Map<String, Object>> gridData) {
         try {
-            log.info("=== 상품매출원가 계산 시작 ===");
-            
-            // 1. 기초재고액 = 전년도 상품계정 잔액 (차변-대변)
             long beginningInventory = getBeginningInventory();
-            log.info("1. 기초재고액: {}", formatAmount(beginningInventory));
-            
-            // 2. 기말재고액 = 상품매출원가 전표에서 상품계정 대변금액
             long endingInventory = getEndingInventory();
-            log.info("2. 기말재고액: {}", formatAmount(endingInventory));
-            
-            // 3. 당기매입액 = 상품계정 잔액 (차변-대변) + 기말재고액
             long currentPurchases = getCurrentPurchases();
-            log.info("3. 당기매입액: {}", formatAmount(currentPurchases));
-            
-            // 4. 타계정대체액 = 상품계정에서 다른 계정으로 대체된 금액 (대변)
             long otherAccountTransfer = getOtherAccountTransfer();
-            log.info("4. 타계정대체액: {}", formatAmount(otherAccountTransfer));
             
-            // 5. 상품매출원가 계산 = 기초재고액 + 당기매입액 - 기말재고액 - 타계정대체액
             long costOfGoodsSold = beginningInventory + currentPurchases - endingInventory - otherAccountTransfer;
-            log.info("5. 상품매출원가 계산: {} + {} - {} - {} = {}", 
+            
+            setAmountByCode(gridData, "11", beginningInventory);
+            setAmountByCode(gridData, "12", currentPurchases);
+            setAmountByCode(gridData, "13", endingInventory);
+            setAmountByCode(gridData, "14", otherAccountTransfer);
+            setAmountByCode(gridData, "10", costOfGoodsSold);
+            
+            log.info("상품매출원가 계산 완료 - 기초:{}, 매입:{}, 기말:{}, 대체:{}, 매출원가:{}", 
                     formatAmount(beginningInventory), formatAmount(currentPurchases), 
                     formatAmount(endingInventory), formatAmount(otherAccountTransfer), formatAmount(costOfGoodsSold));
-            
-            // 6. 각 항목별 금액 설정
-            log.info("=== 템플릿에 금액 설정 ===");
-            setAmountByCode(gridData, "11", beginningInventory); // 기초재고액
-            log.info("코드 11(기초재고액) 설정: {}", formatAmount(beginningInventory));
-            
-            setAmountByCode(gridData, "12", currentPurchases);   // 당기매입액
-            log.info("코드 12(당기매입액) 설정: {}", formatAmount(currentPurchases));
-            
-            setAmountByCode(gridData, "13", endingInventory);    // 기말재고액
-            log.info("코드 13(기말재고액) 설정: {}", formatAmount(endingInventory));
-            
-            setAmountByCode(gridData, "14", otherAccountTransfer); // 타계정대체액
-            log.info("코드 14(타계정대체액) 설정: {}", formatAmount(otherAccountTransfer));
-            
-            setAmountByCode(gridData, "10", costOfGoodsSold);    // 상품매출원가
-            log.info("코드 10(상품매출원가) 설정: {}", formatAmount(costOfGoodsSold));
-            
-            log.info("=== 상품매출원가 계산 완료 ===");
                     
         } catch (Exception e) {
-            log.error("상품매출원가 계산 중 예상치 못한 오류 발생", e);
-            
-            // 예상치 못한 오류시에는 모두 0으로 설정
-            setAmountByCode(gridData, "11", 0L); // 기초재고액
-            setAmountByCode(gridData, "12", 0L); // 당기매입액
-            setAmountByCode(gridData, "13", 0L); // 기말재고액
-            setAmountByCode(gridData, "14", 0L); // 타계정대체액
-            setAmountByCode(gridData, "10", 0L); // 상품매출원가
-            
-            log.warn("상품매출원가 계산 오류로 인해 모든 값을 0으로 설정했습니다.");
+            log.error("상품매출원가 계산 중 오류 발생", e);
+            setAmountByCode(gridData, "11", 0L);
+            setAmountByCode(gridData, "12", 0L);
+            setAmountByCode(gridData, "13", 0L);
+            setAmountByCode(gridData, "14", 0L);
+            setAmountByCode(gridData, "10", 0L);
         }
     }
     
     /**
-     * 제조원가 계산 (제조ㆍ공사ㆍ분양ㆍ기타원가)
+     * 제조원가 계산 (템플릿 항목 유지를 위해 0으로 설정)
      */
     private void calculateManufacturingCost(List<Map<String, Object>> gridData) {
         try {
-            // 제조원가도 상품매출원가와 동일한 구조로 계산 (현재는 모두 0)
-            long mfgBeginningInventory = getMfgBeginningInventory();
-            long mfgCurrentCost = getMfgCurrentCost();
-            long mfgEndingInventory = getMfgEndingInventory();
-            long mfgOtherAccountTransfer = getMfgOtherAccountTransfer();
-            
-            long manufacturingCost = mfgBeginningInventory + mfgCurrentCost - mfgEndingInventory - mfgOtherAccountTransfer;
-            
-            // 각 항목별 금액 설정 (0 값도 설정)
-            setAmountByCode(gridData, "16", mfgBeginningInventory); // 제조 기초재고액
-            setAmountByCode(gridData, "17", mfgCurrentCost);        // 제조 당기매입액
-            setAmountByCode(gridData, "18", mfgEndingInventory);    // 제조 기말재고액
-            setAmountByCode(gridData, "19", mfgOtherAccountTransfer); // 제조 타계정대체액
-            setAmountByCode(gridData, "15", manufacturingCost);     // 제조ㆍ공사ㆍ분양ㆍ기타원가
-            
-            log.info("제조원가 계산 완료 - 제조원가:{}", formatAmount(manufacturingCost));
-            
-        } catch (Exception e) {
-            log.error("제조원가 계산 중 예상치 못한 오류 발생", e);
-            
-            // 예상치 못한 오류시에는 모두 0으로 설정
+            // 제조원가는 현재 구현되지 않았으므로 0으로 설정하되 템플릿 항목은 유지
             setAmountByCode(gridData, "16", 0L); // 제조 기초재고액
-            setAmountByCode(gridData, "17", 0L); // 제조 당기원가
+            setAmountByCode(gridData, "17", 0L); // 제조 당기매입액
             setAmountByCode(gridData, "18", 0L); // 제조 기말재고액
             setAmountByCode(gridData, "19", 0L); // 제조 타계정대체액
-            setAmountByCode(gridData, "15", 0L); // 제조원가
+            setAmountByCode(gridData, "15", 0L); // 제조ㆍ공사ㆍ분양ㆍ기타원가
             
-            log.warn("제조원가 계산 오류로 인해 모든 값을 0으로 설정했습니다.");
+            log.debug("제조원가 항목들을 0으로 설정했습니다 (템플릿 구조 유지)");
+            
+        } catch (Exception e) {
+            log.error("제조원가 설정 중 오류 발생", e);
         }
     }
     
@@ -282,7 +223,6 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
                 try {
                     int code = Integer.parseInt(accountCode);
                     if (code >= start && code <= end) {
-                        // 쉼표 제거 후 숫자 변환
                         String cleanAmount = amountStr.replace(",", "");
                         long amount = Long.parseLong(cleanAmount);
                         total += amount;
@@ -304,28 +244,21 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
             String subsection = (String) row.get("subsection");
             if (subsection != null && subsection.equals(subsectionName)) {
                 row.put("total", formatAmount(amount));
-                log.debug("손익항목 설정 - {}: {}", subsectionName, formatAmount(amount));
                 break;
             }
         }
     }
     
     /**
-     * 코드별 금액 설정 - 디버깅 강화
+     * 코드별 금액 설정
      */
     private void setAmountByCode(List<Map<String, Object>> gridData, String code, long amount) {
-        boolean found = false;
         for (Map<String, Object> row : gridData) {
             String accountCode = (String) row.get("accountCode");
             if (code.equals(accountCode)) {
                 row.put("amount", formatAmount(amount));
-                log.debug("코드 {} 금액 설정 완료: {} -> {}", code, amount, formatAmount(amount));
-                found = true;
                 break;
             }
-        }
-        if (!found) {
-            log.warn("코드 {}에 해당하는 행을 찾을 수 없습니다. 금액: {}", code, formatAmount(amount));
         }
     }
     
@@ -358,13 +291,13 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
             return null;
         }
         
-        // 1. 정확한 매칭
+        // 정확한 매칭
         Long exactMatch = accountAmountMap.get(matchKey);
         if (exactMatch != null) {
             return exactMatch;
         }
         
-        // 2. 정제 후 매칭
+        // 정제 후 매칭
         String cleanKey = cleanText(matchKey);
         for (Map.Entry<String, Long> entry : accountAmountMap.entrySet()) {
             if (cleanKey.equals(cleanText(entry.getKey()))) {
@@ -376,7 +309,7 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
     }
     
     /**
-     * 텍스트 정제 (공백, 특수문자 제거)
+     * 텍스트 정제
      */
     private String cleanText(String text) {
         if (text == null) return "";
@@ -384,21 +317,13 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
     }
     
     /**
-     * 금액 포맷팅 (Long용)
-     */
-    private String formatAmount(Long amount) {
-        if (amount == null) return "0";
-        return String.format("%,d", amount);
-    }
-    
-    /**
-     * 금액 포맷팅 (long용)
+     * 금액 포맷팅
      */
     private String formatAmount(long amount) {
         return String.format("%,d", amount);
     }
     
-    // 실제 DB 조회 메서드들
+    // DB 조회 메서드들 (상품매출원가 관련만 실제 구현)
     
     /**
      * 상품 기초재고액 조회 (전년도 기말재고액)
@@ -407,16 +332,11 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("coIdx", AuthUtil.getCoIdx());
-            String previousYear = this.currentYear != null ? 
-                String.valueOf(Integer.parseInt(this.currentYear) - 1) : 
-                String.valueOf(LocalDate.now().getYear() - 1);
+            String previousYear = String.valueOf(Integer.parseInt(this.currentYear) - 1);
             params.put("previousYear", previousYear);
             
             Long result = incomeStatementMapper.getGoodsBeginningInventory(params);
-            long amount = result != null ? result : 0L;
-            
-            log.debug("상품 기초재고액 조회 완료: {}", formatAmount(amount));
-            return amount;
+            return result != null ? result : 0L;
             
         } catch (Exception e) {
             log.error("상품 기초재고액 조회 중 오류 발생", e);
@@ -431,17 +351,11 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("coIdx", AuthUtil.getCoIdx());
-            params.put("year", this.currentYear != null ? this.currentYear : String.valueOf(LocalDate.now().getYear()));
-            params.put("endMonth", this.currentEndMonth != null ? this.currentEndMonth : "12");
-            
-            log.info("상품 기말재고액 조회 파라미터 - coIdx: {}, year: {}, endMonth: {}", 
-                    params.get("coIdx"), params.get("year"), params.get("endMonth"));
+            params.put("year", this.currentYear);
+            params.put("endMonth", this.currentEndMonth);
             
             Long result = incomeStatementMapper.getGoodsEndingInventory(params);
-            long amount = result != null ? result : 0L;
-            
-            log.info("상품 기말재고액 조회 결과: {} (raw: {})", formatAmount(amount), result);
-            return amount;
+            return result != null ? result : 0L;
             
         } catch (Exception e) {
             log.error("상품 기말재고액 조회 중 오류 발생", e);
@@ -450,23 +364,17 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
     }
     
     /**
-     * 상품 당기매입액 조회 (상품계정 잔액 + 기말재고액) - 디버깅 강화
+     * 상품 당기매입액 조회 (상품계정 잔액 + 기말재고액)
      */
     private long getCurrentPurchases() {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("coIdx", AuthUtil.getCoIdx());
-            params.put("year", this.currentYear != null ? this.currentYear : String.valueOf(LocalDate.now().getYear()));
-            params.put("endMonth", this.currentEndMonth != null ? this.currentEndMonth : "12");
-            
-            log.info("상품 당기매입액 조회 파라미터 - coIdx: {}, year: {}, endMonth: {}", 
-                    params.get("coIdx"), params.get("year"), params.get("endMonth"));
+            params.put("year", this.currentYear);
+            params.put("endMonth", this.currentEndMonth);
             
             Long result = incomeStatementMapper.getGoodsPurchaseAmount(params);
-            long amount = result != null ? result : 0L;
-            
-            log.info("상품 당기매입액 조회 결과: {} (raw: {})", formatAmount(amount), result);
-            return amount;
+            return result != null ? result : 0L;
             
         } catch (Exception e) {
             log.error("상품 당기매입액 조회 중 오류 발생", e);
@@ -481,54 +389,15 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put("coIdx", AuthUtil.getCoIdx());
-            params.put("year", this.currentYear != null ? this.currentYear : String.valueOf(LocalDate.now().getYear()));
-            params.put("endMonth", this.currentEndMonth != null ? this.currentEndMonth : "12");
+            params.put("year", this.currentYear);
+            params.put("endMonth", this.currentEndMonth);
             
             Long result = incomeStatementMapper.getGoodsTransferAmount(params);
-            long amount = result != null ? result : 0L;
-            
-            log.debug("상품 타계정대체액 조회 완료: {}", formatAmount(amount));
-            return amount;
+            return result != null ? result : 0L;
             
         } catch (Exception e) {
             log.error("상품 타계정대체액 조회 중 오류 발생", e);
             return 0L;
         }
-    }
-    
-    /**
-     * 제조원가 기초재고액 조회
-     */
-    private long getMfgBeginningInventory() {
-        // TODO: 제조관련 전년도 기말재고액 조회 구현 필요
-        log.debug("제조원가 기초재고액 조회 기능이 아직 구현되지 않아 0으로 처리합니다.");
-        return 0L;
-    }
-    
-    /**
-     * 제조원가 당기원가 조회
-     */
-    private long getMfgCurrentCost() {
-        // TODO: 당기 제조원가 차변 합계 조회 구현 필요
-        log.debug("제조원가 당기원가 조회 기능이 아직 구현되지 않아 0으로 처리합니다.");
-        return 0L;
-    }
-    
-    /**
-     * 제조원가 기말재고액 조회
-     */
-    private long getMfgEndingInventory() {
-        // TODO: 제조관련 현재 잔액 조회 구현 필요
-        log.debug("제조원가 기말재고액 조회 기능이 아직 구현되지 않아 0으로 처리합니다.");
-        return 0L;
-    }
-    
-    /**
-     * 제조원가 타계정대체액 조회
-     */
-    private long getMfgOtherAccountTransfer() {
-        // TODO: 제조원가 타계정대체액 조회 구현 필요
-        log.debug("제조원가 타계정대체액 조회 기능이 아직 구현되지 않아 0으로 처리합니다.");
-        return 0L;
     }
 }
