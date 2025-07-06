@@ -38,10 +38,11 @@ public class SubscriptionDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private Date spiEnd;        // 구독 종료일
     private int spiPeriod;      // 구독 기간
-    private int spiCycle;       // 결제 주기
+    private int spiCycle;    // 결제 주기
     private Date spiNext;       // 다음 결제일
     private String spiCtrt;     // 계약서 파일
     private String spiUid;      // PortOne UID(빌링키)
+    private String spiMid;      // 거래 고유 ID
 
     private String spkName;
     private String spkPrice;

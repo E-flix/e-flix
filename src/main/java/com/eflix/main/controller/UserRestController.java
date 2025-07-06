@@ -20,6 +20,7 @@ import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.common.security.dto.UserDTO;
 import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionDTO;
+import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 import com.eflix.main.mapper.SubscriptionMapper;
 import com.eflix.main.service.CompanyService;
 import com.eflix.main.service.UserService;
@@ -75,28 +76,37 @@ public class UserRestController {
     }
 
     // 0703
+    // 0705
     @GetMapping("/api/service")
     public ResponseEntity<ResResult> getSubscription() {
         ResResult result = null;
 
-        SubscriptionDTO subscriptionDTO = companyService.findSubscriptionByCoIdx(AuthUtil.getCoIdx());
+        // SubscriptionDTO subscriptionDTO = companyService.findSubscriptionByCoIdx(AuthUtil.getCoIdx());
 
-        if(subscriptionDTO == null) {
+        // if(subscriptionDTO == null) {
+        //     result = ResUtil.makeResult("404", "구독 정보가 없습니다.", null);
+        //     return new ResponseEntity<>(result, HttpStatus.OK);
+        // }
+
+        // List<ModuleDTO> moduleList = subscriptionService.findAllModuleBySpiIdx(subscriptionDTO.getSpiIdx());
+        // if(moduleList == null) {
+        //     result = ResUtil.makeResult("404", "모듈 정보가 없습니다.", null);
+        //     return new ResponseEntity<>(result, HttpStatus.OK);
+        // }
+
+        // Map<String, Object> reusltData = new HashMap<>();
+        // reusltData.put("subscriptionDTO", subscriptionDTO);
+        // reusltData.put("moduleList", moduleList);
+
+        // result = ResUtil.makeResult(ResStatus.OK, reusltData);
+
+        SubscriptionInfoDTO subscriptionInfoDTO = subscriptionService.findSubscriptionByCoIdx(AuthUtil.getCoIdx());
+
+        if(subscriptionInfoDTO != null) {
+            result = ResUtil.makeResult(ResStatus.OK, subscriptionInfoDTO);
+        } else {
             result = ResUtil.makeResult("404", "구독 정보가 없습니다.", null);
-            return new ResponseEntity<>(result, HttpStatus.OK);
         }
-
-        List<ModuleDTO> moduleList = subscriptionService.findAllModuleBySpiIdx(subscriptionDTO.getSpiIdx());
-        if(moduleList == null) {
-            result = ResUtil.makeResult("404", "모듈 정보가 없습니다.", null);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        }
-
-        Map<String, Object> reusltData = new HashMap<>();
-        reusltData.put("subscriptionDTO", subscriptionDTO);
-        reusltData.put("moduleList", moduleList);
-
-        result = ResUtil.makeResult(ResStatus.OK, reusltData);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

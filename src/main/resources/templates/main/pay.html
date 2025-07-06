@@ -1619,12 +1619,13 @@
                 merchant_uid: 'bill_' + uid,
                 customer_uid: 'user_' + uid,
                 name: 'E-FLIX 구독 결제',
-                amount: 0,
+                amount: spkPrice,
                 buyer_email: userEmail,
                 buyer_name: userName,
                 buyer_tel: userTel
             }, function (rsp) {
                 if (rsp.success) {
+                    console.log(rsp);
                     // 1. 빌링키 서버에 등록
                     const data = {
                         impUid: rsp.imp_uid,
@@ -1639,7 +1640,7 @@
                         success: function (res) {
                             const contractName = 'contract_' + uid;
                             addContract(contractName);
-                            addSubscription(rsp.customer_uid, rsp.pg_provider, contractName);
+                            addSubscription(rsp.customer_uid, rsp.merchant_uid, rsp.pg_provider, contractName);
                         },
                         error: function (xhr, status, err) {
                             console.error(err);
@@ -1677,12 +1678,14 @@
         }
 
         // 구독 및 마스터 등록 함수
-        function addSubscription(customer_uid, pg_provider, contractName) {
-            const checkedModules = $('.form-check-input[name=module]:checked')
-                .map(function () { return this.value; })
-                .get().join(",");
+        function addSubscription(customer_uid, merchant_uid, pg_provider, contractName) {
+            const checkedModules = $('#selectedModules').val();
+            // const checkedModules = $('#selectedModules')
+            //     .map(function () { return this.value; })
+            //     .get().join(",");
 
-            const period = $('.form-check-input[name=period]:checked').val();
+            const period = $('#selectedPeriod').val();
+            const cycle = $("#billing-cycle").val() === "annual" ? "12" : "1";
             const mstId = $('#mstId').val();
             const mstName = $('#mstName').val();
             const mstPw = $('#mstPw').val();
@@ -1696,8 +1699,10 @@
                 empIdx: 'emp-101',
                 spiPay: pg_provider,
                 spiPeriod: period,
+                spiCycle: cycle,
                 spiCtrt: contractName,
                 spiUid: customer_uid,
+                spiMid: merchant_uid,
                 checkedModules,
                 mstId,
                 mstName,

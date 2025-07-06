@@ -35,4 +35,21 @@
         SET status = #{status}
         WHERE payment_id = #{paymentId}
     </update>
+
+    <!-- 0705 -->
+    <select id="callUpdateSubscription">
+        <![CDATA[
+            CALL PROC_RECORD_SUCCESSFUL_PAYMENT(
+                #{dto.spkIdx, mode=IN, jdbcType=VARCHAR},
+            )
+        ]]>
+    </select>
+
+    <insert id="insertPaymentLog" parameterType="String">
+        <selectKey resultType="String" keyProperty="logIdx" order="BEFORE">
+            SELECT 'log-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(log_idx, 5))), 100) + 1) FROM subscription_status_log
+        </selectKey>
+        INSERT INTO subscription_status_log(log_idx, spi_idx, old_status, new_status, change_date, change_reason)
+        VALUES(#{logIdx}, #{spiIdx}, #{oldStatus}, #{newStatus}, SYSDATE, #{changeReason})
+    </insert>
 </mapper>

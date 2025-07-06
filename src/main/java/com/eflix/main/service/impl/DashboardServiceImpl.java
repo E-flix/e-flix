@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.eflix.main.dto.QuestionDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.DashboardDTO;
 import com.eflix.main.dto.etc.InquirySummaryDTO;
@@ -35,6 +36,16 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public List<InquirySummaryDTO> getTodayAnswers() {
         return dashboardMapper.selectTodayAnswers();
+    }
+
+    @Override
+    public List<SubscriptionDTO> findAllSubscriptions() {
+        return dashboardMapper.findAllSubscriptions();
+    }
+
+    @Override
+    public List<QuestionDTO> findAllQuestions() {
+        return dashboardMapper.findAllQuestions();
     }
     
 }

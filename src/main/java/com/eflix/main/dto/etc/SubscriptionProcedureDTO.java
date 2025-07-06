@@ -13,6 +13,7 @@ public class SubscriptionProcedureDTO {
     private int spiCycle;
     private String spiCtrt;
     private String spiUid;
+    private String spiMid;
     private String checkedModules;
 
     private String mstId;

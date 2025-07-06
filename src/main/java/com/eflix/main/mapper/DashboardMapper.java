@@ -2,6 +2,7 @@ package com.eflix.main.mapper;
 
 import java.util.List;
 
+import com.eflix.main.dto.QuestionDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.InquirySummaryDTO;
 
@@ -17,4 +18,9 @@ public interface DashboardMapper {
     public int countTodayAnswers();              // 금일 등록된 답변 수
 
     public List<InquirySummaryDTO> selectTodayAnswers();              // 금일 등록된 답변
+
+    // 0706
+    public List<SubscriptionDTO> findAllSubscriptions(); // 신규 구독자
+    
+    public List<QuestionDTO> findAllQuestions(); // 미 답변 목록
 }
