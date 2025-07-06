@@ -51,7 +51,7 @@ public interface SubscriptionService {
 
     public SubscriptionInfoDTO test(String coIdx);
 
-    public SubscriptionInfoDTO findSubscriptionByCoIdx(String userIdx);
+    public SubscriptionInfoDTO findSubscriptionByUserIdx(String userIdx);
 
     public List<SubscriptionInfoDTO> findAllSubscriptionByCoIdx(String coIdx);
 
@@ -67,4 +67,7 @@ public interface SubscriptionService {
     public void insertSubscriptionByProcedure(SubscriptionProcedureDTO dto);
 
     public List<ModuleDTO> findAllModuleBySpiIdx(String spiIdx);
+
+    // 0706
+    public SubscriptionInfoDTO findSubscriptionByCoIdx(String coIdx);
 }

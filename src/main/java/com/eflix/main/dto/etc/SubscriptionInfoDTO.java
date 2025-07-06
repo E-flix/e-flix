@@ -3,6 +3,7 @@ package com.eflix.main.dto.etc;
 import java.util.Date;
 import java.util.List;
 
+import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
@@ -15,5 +16,6 @@ public class SubscriptionInfoDTO {
     private Date recentPayDate;
     private SubscriptionDTO subscriptionDTO;
     private SubscriptionPackageDTO subscriptionPackageDTO;
+    private CompanyDTO companyDTO;
     private List<ModuleDTO> moduleDTOs;
 }

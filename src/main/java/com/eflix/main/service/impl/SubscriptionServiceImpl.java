@@ -118,7 +118,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public SubscriptionInfoDTO findSubscriptionByCoIdx(String userIdx) {
+    public SubscriptionInfoDTO findSubscriptionByUserIdx(String userIdx) {
         CompanyDTO companyDTO = companyMapper.findByUserIdx(userIdx);
 
         return subscriptionMapper.findSubscriptionByCoIdx(companyDTO.getCoIdx());
@@ -165,5 +165,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public List<ModuleDTO> findAllModuleBySpiIdx(String spiIdx) {
         return subscriptionMapper.findAllModuleBySpiIdx(spiIdx);
+    }
+
+    // 0706
+    @Override
+    public SubscriptionInfoDTO findSubscriptionByCoIdx(String coIdx) {
+        return subscriptionMapper.findSubscriptionByCoIdx(coIdx);
     }
 }

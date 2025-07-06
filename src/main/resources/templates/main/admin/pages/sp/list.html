@@ -13,219 +13,551 @@
 
 <head>
     <title>관리자</title>
+    <style>
+		.main-container {
+			height: 100vh;
+			overflow: hidden;
+		}
+
+		.search-section {
+			height: 35%;
+		}
+
+		.content-section {
+			height: 65%;
+		}
+
+		.card-body {
+			overflow: auto;
+		}
+
+		.table-container {
+			overflow-y: auto;
+		}
+
+		.subscription-table-container {
+			height: 180px;
+			overflow-y: auto;
+		}
+
+		.company-list-container {
+			height: 280px;
+			overflow-y: auto;
+		}
+
+		.form-control-sm {
+			padding: 0.25rem 0.5rem;
+			font-size: 0.875rem;
+		}
+
+		.btn-sm {
+			padding: 0.25rem 0.5rem;
+			font-size: 0.875rem;
+		}
+
+		.card-header {
+			padding: 0.5rem 1rem;
+			font-size: 0.9rem;
+		}
+
+		.card-body {
+			padding: 0.75rem;
+		}
+
+		.table th,
+		.table td {
+			padding: 0.5rem;
+			font-size: 0.85rem;
+		}
+	</style>
 </head>
 <div layout:fragment="content">
-    <!-- 상단 영역 - 회사 정보 + 구독 목록 -->
-    <div class="row mb-4">
-        <!-- 왼쪽 - 회사 상세 정보 -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header fw-bold">회사 상세 정보</div>
-                <div class="card-body" id="companyDetail">
-                    <p class="text-muted">회사를 선택하면 상세 정보가 표시됩니다.</p>
-                </div>
-            </div>
-        </div>
+    <div class="container-fluid main-container">
+		<!-- 상단 검색 영역 -->
+		<div class="row search-section">
+			<div class="col-12">
+				<div class="card h-100">
+					<div class="card-header d-flex justify-content-between align-items-center">
+						<h6 class="mb-0">회사 검색</h6>
+						<div>
+							<button class="btn btn-dark btn-sm me-1" id="searchBtn">검색</button>
+							<button class="btn btn-danger btn-sm">삭제</button>
+						</div>
+					</div>
+					<div class="card-body">
+						<form id="searchForm">
+							<div class="row mb-2">
+								<div class="col-md-3"><input type="text" class="form-control" name="coIdx"
+										placeholder="회사번호"></div>
+								<div class="col-md-3"><input type="text" class="form-control" name="coName"
+										placeholder="회사명"></div>
+								<div class="col-md-3"><input type="text" class="form-control" name="coNameEng"
+										placeholder="회사 영문명"></div>
+								<div class="col-md-3"><input type="text" class="form-control" name="coRegNum"
+										placeholder="사업자 번호"></div>
+							</div>
+							<div class="row mb-2">
+								<div class="col-md-6"><input type="text" class="form-control" name="coAddr"
+										placeholder="주소"></div>
+								<div class="col-md-3"><input type="text" class="form-control" name="coPostcode"
+										placeholder="우편번호"></div>
+								<div class="col-md-3"><input type="text" class="form-control" name="coAddrDetail"
+										placeholder="나머지 주소"></div>
+							</div>
+							<div class="row mb-2">
+								<div class="col-md-3"><input type="text" class="form-control" name="ceoName"
+										placeholder="대표자명"></div>
+								<div class="col-md-3"><input type="text" class="form-control" name="ceoTel"
+										placeholder="연락처"></div>
+								<div class="col-md-3"><input type="text" class="form-control" name="pschName"
+										placeholder="담당자명"></div>
+								<div class="col-md-3"><input type="text" class="form-control" name="pschTel"
+										placeholder="연락처"></div>
+							</div>
+							<div class="row">
+								<div class="col-md-3"><input type="text" class="form-control" name="coRegDoc"
+										placeholder="사업자등록증"></div>
+								<div class="col-md-3"><input type="email" class="form-control" name="pschEmail"
+										placeholder="이메일"></div>
+								<div class="col-md-3"><input type="text" class="form-control" name="svcStatus"
+										placeholder="상태"></div>
+								<div class="col-md-3"><input type="date" class="form-control" name="expireDate"
+										placeholder="만료일"></div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
 
-        <!-- 오른쪽 - 구독 내역 -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header fw-bold">📋 구독 내역</div>
-                <div class="card-body p-0">
-                    <table class="table table-sm table-striped text-center mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>번호</th>
-                                <th>구독일시</th>
-                                <th>금액</th>
-                                <th>계약서</th>
-                                <th>거래 명세서</th>
-                                <th>세금 계산서</th>
-                            </tr>
-                        </thead>
-                        <tbody id="subscriptionTableBody">
-                            <tr>
-                                <td colspan="6" class="text-muted">회사를 선택하면 구독 내역이 표시됩니다.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer text-center">
-                    <small>총 0건</small>
-                </div>
-            </div>
-        </div>
-    </div>
+		<!-- 하단 콘텐츠 영역 -->
+		<div class="row content-section mt-2">
+			<!-- 왼쪽 - 회사 목록 -->
+			<div class="col-md-6">
+				<div class="card h-100">
+					<div class="card-header d-flex justify-content-between align-items-center">
+						<h6 class="mb-0">회사 목록</h6>
+						<div class="d-flex align-items-center">
+							<input type="text" class="form-control form-control-sm me-2" placeholder="검색어"
+								style="width: 150px;">
+							<button class="btn btn-sm btn-primary">검색</button>
+						</div>
+					</div>
+					<div class="card-body p-0">
+						<div class="table-container" style="height: 500px;">
+							<table class="table table-bordered table-hover text-center align-middle mb-0">
+								<thead class="table-light sticky-top">
+									<tr>
+										<th><input type="checkbox"></th>
+										<th>회사코드</th>
+										<th>회사명</th>
+										<th>대표자</th>
+										<th>담당자</th>
+										<th>등록일</th>
+										<th>상태</th>
+										<th>보기</th>
+									</tr>
+								</thead>
+								<tbody id="companyTableBody">
+									<!-- 회사 목록 -->
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="card-footer p-2">
+						<nav>
+							<ul class="pagination pagination-sm justify-content-center mb-0" id="paginationArea">
+								<li class="page-item active"><a class="page-link" href="#">1</a></li>
+								<li class="page-item"><a class="page-link" href="#">2</a></li>
+								<li class="page-item"><a class="page-link" href="#">3</a></li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</div>
 
-    <!-- 하단 영역 - 구독 회사 목록 -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header fw-bold">구독 회사 목록</div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover text-center mb-0 align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>회사번호</th>
-                                    <th>회사명</th>
-                                    <th>대표자</th>
-                                    <th>담당자</th>
-                                    <th>연락처</th>
-                                    <th>이메일</th>
-                                    <th>상태</th>
-                                    <th>남은기간</th>
-                                    <th>만료일</th>
-                                    <th>관리</th>
-                                </tr>
-                            </thead>
-                            <tbody id="companyTableBody">
+			<!-- 오른쪽 - 회사 상세 정보 및 구독 내역 -->
+			<div class="col-md-6">
+				<div class="row h-100">
+					<!-- 회사 상세 정보 -->
+					<div class="col-12 mb-2" style="height: 48%;">
+						<div class="card h-100">
+							<div class="card-header">
+								<h6 class="mb-0">회사 상세 정보</h6>
+							</div>
+							<div class="card-body" id="companyDetail">
+								<p class="text-muted">회사를 선택하면 상세 정보가 표시됩니다.</p>
+								<div id="companyDetailContent" style="display: none;">
+									<div class="row mb-2">
+										<div class="col-6"><strong>회사명:</strong> <span id="companyName"></span></div>
+										<div class="col-6"><strong>회사번호:</strong> <span id="companyNumber"></span></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-6"><strong>대표자:</strong> <span id="ceoName"></span></div>
+										<div class="col-6"><strong>담당자:</strong> <span id="managerName"></span></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-6"><strong>연락처:</strong> <span id="phoneNumber"></span></div>
+										<div class="col-6"><strong>이메일:</strong> <span id="email"></span></div>
+									</div>
+									<div class="row mb-2">
+										<div class="col-12"><strong>주소:</strong> <span id="address"></span></div>
+									</div>
+									<div class="row">
+										<div class="col-6"><strong>상태:</strong> <span id="status"></span></div>
+										<div class="col-6"><strong>만료일:</strong> <span id="expireDate"></span></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer text-center">
-                    <nav>
-                        <ul class="pagination pagination-sm justify-content-center mb-0">
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-        let currentPage = 1;
-        $(function () {
-            // 회사 목록 로딩
-            function loadCompanyList(page = 1) {
-                currentPage = page;
+					<!-- 구독 내역 -->
+					<div class="col-12" style="height: 48%;">
+						<div class="card h-100">
+							<div class="card-header">
+								<h6 class="mb-0">📋 구독 내역</h6>
+							</div>
+							<div class="card-body p-0">
+								<div class="subscription-table-container">
+									<table class="table table-sm table-striped text-center mb-0">
+										<thead class="table-light sticky-top">
+											<tr>
+												<th>번호</th>
+												<th>구독일시</th>
+												<th>금액</th>
+												<th>계약서</th>
+												<th>거래명세서</th>
+												<th>세금계산서</th>
+												<th>정보</th>
+											</tr>
+										</thead>
+										<tbody id="subscriptionTableBody">
+											<tr>
+												<td colspan="7" class="text-muted">회사를 선택하면 구독 내역이 표시됩니다.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="card-footer p-2 text-center">
+								<small>총 <span id="subscriptionCount">0</span>건</small>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
-                let params = $("#searchForm").serialize();
-                params += "&page=" + page;
+	<!-- 구독 정보 모달 -->
+	<div class="modal fade" id="subscriptionModal" tabindex="-1" aria-labelledby="subscriptionModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-md">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="subscriptionModalLabel">구독 정보</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="mb-3">
+							<label class="form-label">구독명</label>
+							<input type="text" class="form-control" placeholder="구독명">
+						</div>
+						<div class="mb-3">
+							<label class="form-label">계열 수</label>
+							<input type="text" class="form-control" placeholder="계열 수">
+						</div>
+						<div class="mb-3">
+							<label class="form-label">서비스</label>
+							<textarea class="form-control" rows="3" placeholder="서비스명 나열"></textarea>
+						</div>
+						<div class="row mb-3">
+							<div class="col">
+								<label class="form-label">기간</label>
+								<input type="date" class="form-control">
+							</div>
+							<div class="col d-flex align-items-end">
+								<span class="text-center">~</span>
+							</div>
+							<div class="col">
+								<label class="form-label">&nbsp;</label>
+								<input type="date" class="form-control">
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col">
+								<button type="button" class="btn btn-outline-secondary w-100">거래 명세서</button>
+							</div>
+							<div class="col">
+								<button type="button" class="btn btn-outline-secondary w-100">계약서</button>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col">
+								<label class="form-label">결제일</label>
+								<input type="date" class="form-control">
+							</div>
+							<div class="col">
+								<label class="form-label">만료일</label>
+								<input type="date" class="form-control">
+							</div>
+						</div>
+						<div class="text-center">
+							<button type="submit" class="btn btn-primary">확인</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		let currentPage = 1;
 
-                $.ajax({
-                    url: '/admin/api/company-subscription',
-                    method: 'GET',
-                    success: function (res) {
-                        const data = res.body;
-                        if (res.head.res_code === '200') {
-                            const tbody = $('#companyTableBody').empty();
-                            data.forEach(company => {
-                                const row = `
-                                <tr data-coidx="${company.coIdx}" data-coName="${company.coName}" data-pschName="${company.pschName}" data-pschTel="${company.pschTel}" data-pschEmail="${company.pschEmail}">
-                                    <td>${company.coIdx}</td>
-                                    <td>${company.coName}</td>
-                                    <td>${company.ceoName}</td>
-                                    <td>${company.pschName}</td>
-                                    <td>${company.pschTel}</td>
-                                    <td>${company.pschEmail}</td>
-                                    <td><span class="badge bg-success">${company.svcStatus}</span></td>
-                                    <td>${company.totalPeriod} 개월</td>
-                                    <td>${company.totalRemaining} 일</td>
-                                    <td><button class="btn btn-sm btn-outline-info">보기</button></td>
-                                </tr>`;
-                                tbody.append(row);
-                            });
-                        } else {
-                            alert('회사 목록을 불러오지 못했습니다.');
-                        }
-                    }
-                });
-            }
+		$("#searchBtn").on("click", function() {
+			loadCompanyList(1);
+		});
 
-            // 회사 선택 시 오른쪽 영역 업데이트
-            $(document).on('click', '#companyTableBody tr', function () {
-                const $row = $(this);
+		// 회사 목록 로딩
+		function loadCompanyList(page = 1) {
+			currentPage = page;
 
-                const coIdx = $row.data('coidx');
-                const coName = $row.data('coname');
-                const pschName = $row.data('pschname');
-                const pschTel = $row.data('pschtel');
-                const pschEmail = $row.data('pschemail');
+			let params = $("#searchForm").serialize();
+			params += "&page=" + page;
 
-                const ceoName = $row.find('td').eq(2).text();
-                const svcStatus = $row.find('td').eq(6).text().trim();
-                const spiPeriod = $row.find('td').eq(7).text();
-                const remainingDays = $row.find('td').eq(8).text();
+			$.ajax({
+				url: '/admin/api/companies',
+				method: 'GET',
+				data: params,
+				dataType: 'json',
+				success: function (res) {
+					if (res.head.res_code === '200') {
+						const data = res.body;
+						renderTable(data.companies);
+						renderPagination(data.page, data.pageSize, data.total);
+					} else {
+						alert('회사 목록을 불러오지 못했습니다.');
+					}
+				},
+				error: function () {
+					console.error(err);
+					Swal.fire("실패", "서버와 통신 중 문제가 발생했습니다.", "error");
+					$('#companyTableBody').empty();
+				}
+			});
 
-                // 회사 상세 정보
-                $('#companyDetail').html(`
-                    <div class="mb-2"><strong>회사명:</strong> ${coName}</div>
-                    <div class="mb-2"><strong>대표자:</strong> ${ceoName}</div>
-                    <div class="mb-2"><strong>담당자:</strong> ${pschName}</div>
-                    <div class="mb-2"><strong>담당자 연락처:</strong> ${pschTel}</div>
-                    <div class="mb-2"><strong>담당자 이메일:</strong> ${pschEmail}</div>
-                    <div class="mb-2"><strong>상태:</strong> <span class="badge bg-success">${svcStatus}</span></div>
-                    <div class="mb-2"><strong>계약기간:</strong> ${spiPeriod}</div>
-                    <div class="mb-2"><strong>남은기간:</strong> ${remainingDays}</div>
-                `);
+			// $.ajax({
+			//     url: '/admin/api/companies',
+			//     method: 'GET',
+			// 	data: params,
+			// 	dataType: 'json',
+			//     success: function (res) {
+			//         const data = res.body;
+			//         if (res.head.res_code === '200') {
+			//             const tbody = $('#companyTableBody').empty();
+			//             data.forEach(company => {
+			//                 const row = `
+			//                 <tr data-coidx="${company.coIdx}" data-coName="${company.coName}" data-pschName="${company.pschName}" data-pschTel="${company.pschTel}" data-pschEmail="${company.pschEmail}">
+			//                     <td><input type="checkbox"></td>
+			//                     <td>${company.coIdx}</td>
+			//                     <td>${company.coName}</td>
+			//                     <td>${company.ceoName}</td>
+			//                     <td>${company.pschName}</td>
+			//                     <td>${company.pschTel}</td>
+			//                     <td><span class="badge bg-success">${company.svcStatus}</span></td>
+			//                 </tr>`;
+			//                 tbody.append(row);
+			//             });
+			//         } else {
+			//             alert('회사 목록을 불러오지 못했습니다.');
+			//         }
+			//     },
+			//     error: function() {
+			//         $('#companyTableBody').empty();
+			//     }
+			// });
+		}
 
+		// 테이블 렌더링
+		function renderTable(companies) {
+			const $tbody = $("#companyTableBody");
+			$tbody.empty();
 
-                // 구독 내역 조회
-                $.ajax({
-                    type: 'GET',
-                    url: '/admin/api/subscription',
-                    data: { coIdx: coIdx },
-                    success: function (res) {
-                        const data = res.body;
-                        const tbody = $('#subscriptionTableBody').empty();
+			if (companies.length === 0) {
+				$tbody.append(`<tr><td colspan="6" class="text-muted">회사 정보가 없습니다.</td></tr>`);
+				return;
+			}
 
-                        if (res.head.res_code === '200') {
-                            data.forEach((subscription, i) => {
-                                const row = `
+			$.each(companies, function (i, co) {
+				$tbody.append(`
+					<tr data-co-idx="${co.coIdx}">
+						<td><input type="checkbox" value="${co.coIdx}"></td>
+						<td>${co.coIdx}</td>
+						<td>${co.coName}</td>
+						<td>${co.ceoName}</td>
+						<td>${co.pschName}</td>
+						<td>${co.coRegdate ? co.coRegdate.substring(0, 10) : ''}</td>
+						<td>
+							<span class="badge bg-${co.svcStatus === 'ES02' ? 'success' : 'secondary'}">
+								${co.svcStatus === 'ES01' ? '구독 전' :
+						co.svcStatus === 'ES02' ? '구독 중' :
+							co.svcStatus === 'ES03' ? '만료' : '기타'}
+							</span>
+						</td>
+						<td>
+							<button class="btn btn-sm btn-outline-info" data-bs-toggle="modal"
+									data-bs-target="#subscriptionModal"
+									data-co-idx="${co.coIdx}">
+								보기
+							</button>
+						</td>
+					</tr>
+				`);
+			});
+		}
+
+		// 페이지네이션 렌더링
+		function renderPagination(page, pageSize, total) {
+			const totalPages = Math.ceil(total / pageSize);
+			const $pagination = $("#paginationArea");
+			$pagination.empty();
+
+			// 이전 버튼
+			$pagination.append(`
+					<li class="page-item ${page === 1 ? 'disabled' : ''}">
+						<a class="page-link" data-page="${page - 1}" onclick="loadCompanyList(${page - 1})">&laquo;</a>
+					</li>
+				`);
+
+			for (let i = 1; i <= totalPages; i++) {
+				$pagination.append(`
+					<li class="page-item ${i === page ? 'active' : ''}">
+						<a class="page-link" data-page="${i}" onclick="loadCompanyList(${i})">${i}</a>
+					</li>
+				`);
+			}
+
+			// 다음 버튼
+			$pagination.append(`
+					<li class="page-item ${page === totalPages ? 'disabled' : ''}">
+						<a class="page-link" data-page="${page + 1}" onclick="loadCompanyList(${page + 1})">&raquo;</a>
+					</li>
+				`);
+		}
+
+		$(function () {
+			// 회사 선택 시 오른쪽 영역 업데이트
+			$(document).on('click', '#companyTableBody tr', function () {
+
+				// 기존 선택 해제
+				$('#companyTableBody tr').removeClass('table-active');
+				// 현재 행 선택
+				$(this).addClass('table-active');
+
+				const coIdx = $(this).data("co-idx");
+
+				$.ajax({
+					type: "GET",
+					url: `/admin/api/company-subscription/${coIdx}`,
+					success: function (res) {
+						const data = res.body;
+						if (res.head.res_code === "200") {
+							// 회사 상세 정보
+							$('#companyDetail').html(`
+								<div class="mb-2"><strong>회사명:</strong> ${data.companyDTO.coName}</div>
+								<div class="mb-2"><strong>대표자:</strong> ${data.companyDTO.ceoName}</div>
+								<div class="mb-2"><strong>담당자:</strong> ${data.companyDTO.pschName}</div>
+								<div class="mb-2"><strong>담당자 연락처:</strong> ${data.companyDTO.pschTel}</div>
+								<div class="mb-2"><strong>담당자 이메일:</strong> ${data.companyDTO.pschEmail}</div>
+								<div class="mb-2"><strong>상태:</strong> <span class="badge bg-success">${data.companyDTO.svcStatus}</span></div>
+							`);
+						} else {
+
+						}
+					},
+					error: function (xhr, status, xhr) {
+
+					}
+				});
+
+				// 구독 내역 조회
+				$.ajax({
+					type: 'GET',
+					url: '/admin/api/subscription',
+					data: { coIdx: coIdx },
+					success: function (res) {
+						const data = res.body;
+						const tbody = $('#subscriptionTableBody').empty();
+
+						if (res.head.res_code === '200') {
+							data.forEach((subscription, i) => {
+								const row = `
                                     <tr data-idx="${subscription.spiIdx}">
                                         <td>${i + 1}</td>
                                         <td>${subscription.spiStart}</td>
                                         <td>${subscription.spkPrice.toLocaleString('ko-KR', { style: 'currency', currency: 'KRW' })}</td>
                                         <td>
-                                            <button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_preview" data-idx="${subscription.spiIdx}">미리보기</button>
-                                            <button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_download" data-idx="${subscription.spiIdx}">다운로드</button>
+											<div class="d-flex g-2">
+												<button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_preview" data-idx="${subscription.spiIdx}">미리보기</button>
+												<button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_download" data-idx="${subscription.spiIdx}">다운로드</button>
+											</div>
                                         </td>
                                         <td>
-                                            <button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_preview" data-idx="${subscription.spiIdx}">미리보기</button>
-                                            <button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_download" data-idx="${subscription.spiIdx}">다운로드</button>
-                                        </td>
+											<div class="d-flex g-2">
+                                            	<button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_preview" data-idx="${subscription.spiIdx}">미리보기</button>
+                                            	<button class="btn btn-outline-primary btn-sm bill-btn" data-type="statement_download" data-idx="${subscription.spiIdx}">다운로드</button>
+											</div>
+										</td>
                                         <td>
-                                            <button class="btn btn-outline-secondary btn-sm bill-btn" data-type="invoice_preview" data-idx="${subscription.spiIdx}">미리보기</button>
-                                            <button class="btn btn-outline-secondary btn-sm bill-btn" data-type="invoice_download" data-idx="${subscription.spiIdx}">다운로드</button>
-                                        </td>
+											<div class="d-flex g-2">
+												<button class="btn btn-outline-secondary btn-sm bill-btn" data-type="invoice_preview" data-idx="${subscription.spiIdx}">미리보기</button>
+												<button class="btn btn-outline-secondary btn-sm bill-btn" data-type="invoice_download" data-idx="${subscription.spiIdx}">다운로드</button>
+											</div>
+										</td>
+                                        <td><button class="btn btn-sm btn-outline-primary" onclick="showSubscriptionModal()">상세</button></td>
                                     </tr>`;
-                                tbody.append(row);
-                            });
-                            $('.card-footer small').text(`총 ${res.body.length}건`);
-                        } else {
-                            tbody.append(`<tr><td colspan="4">구독 내역 없음</td></tr>`);
-                        }
-                    }
-                });
-            });
+								tbody.append(row);
+							});
+							$('#subscriptionCount').text(res.body.length);
+						} else {
+							tbody.append(`<tr><td colspan="7">구독 내역 없음</td></tr>`);
+						}
+					},
+					error: function () {
+						$('#subscriptionTableBody').empty();
+					}
+				});
+			});
 
-            // 청구서/계약서 버튼 클릭 시 파일 로딩
-            $(document).on('click', '.bill-btn', function () {
-                const spiIdx = $(this).data('idx');
-                const [docType, type] = $(this).data('type').split('_');
-                console.log(spiIdx, type)
+			// 청구서/계약서 버튼 클릭 시 파일 로딩
+			$(document).on('click', '.bill-btn', function () {
+				const spiIdx = $(this).data('idx');
+				const [docType, type] = $(this).data('type').split('_');
+				console.log(spiIdx, type);
 
-                let url = "";
-                if (type === "download") {
-                    url = `/subscription/report/${docType}/${spiIdx}`;
-                } else if (type === "preview") {
-                    url = `/subscription/report/preview/${docType}/${spiIdx}`;
-                }
+				let url = "";
+				if (type === "download") {
+					url = `/subscription/report/${docType}/${spiIdx}`;
+				} else if (type === "preview") {
+					url = `/subscription/report/preview/${docType}/${spiIdx}`;
+				}
 
-                // 팝업 창 옵션
-                const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+				// 팝업 창 옵션
+				const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
 
-                // 새 창 열기
-                window.open(url, "_blank", popupOptions);
-            });
+				// 새 창 열기
+				window.open(url, "_blank", popupOptions);
+			});
 
-            // 초기 회사 목록 로딩
-            loadCompanyList();
-        });
-    </script>
+			// 초기 회사 목록 로딩
+			loadCompanyList();
+		});
+
+		// 구독 정보 모달 표시
+		function showSubscriptionModal() {
+			const modal = new bootstrap.Modal(document.getElementById('subscriptionModal'));
+			modal.show();
+		}
+	</script>
 </div>

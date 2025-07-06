@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,7 @@ import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.InquiryDTO;
 import com.eflix.main.dto.QuestionDTO;
 import com.eflix.main.dto.SubscriptionBillDTO;
+import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
 import com.eflix.main.dto.etc.CompanySubscriptionDTO;
 import com.eflix.main.dto.etc.InquirySearchDTO;
@@ -176,6 +178,8 @@ public class AdminRestController {
 
         List<CompanyDTO> companyDTO = companyService.findAllCompany(companySearchDTO);
 
+        System.out.println(companySearchDTO.getPageSize());
+
         if(companyDTO != null) {
             Map<String, Object> searchResult = new HashMap<>();
             searchResult.put("companies", companyDTO);
@@ -184,11 +188,31 @@ public class AdminRestController {
             searchResult.put("startPage", companySearchDTO.getStartPage());
             searchResult.put("endPage", companySearchDTO.getEndPage());
             searchResult.put("lastPage", companySearchDTO.getLast());
+            searchResult.put("pageSize", companySearchDTO.getPageSize());
 
             result = ResUtil.makeResult(ResStatus.OK, searchResult);
         } else {
             result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
         }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    /**
+     * 회사 상세 조회
+     * GET /api/companies
+     */
+    @GetMapping("/api/company-subscription/{coIdx}")
+    public ResponseEntity<ResResult> getCompanySubscription(@PathVariable("coIdx") String coIdx) {
+        ResResult result = null;
+
+        SubscriptionInfoDTO subscriptionDTOs = subscriptionService.findSubscriptionByCoIdx(coIdx);
+
+        if(subscriptionDTOs != null) {
+            result = ResUtil.makeResult(ResStatus.OK, subscriptionDTOs);
+        } else {
+            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
+        } 
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
