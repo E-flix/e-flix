@@ -81,20 +81,44 @@
       <div id="psrGridPurchase" class="ag-theme-quartz" style="height: 70vh; width: 100%;"></div>
     </div>
   </div>
-  <script>
+  <script th:inline="javascript">
+    // 공통 코드(과세유형) 매핑
+    const code0H = /*[[${code0H}]]*/ [];
     // ag-Grid 컬럼 정의 (사진 참고)
     const columnDefs = [
-      { headerName: '유형', field: 'type', width: 70 },
-      { headerName: '일자', field: 'date', width: 90 },
-      { headerName: '품목', field: 'item', width: 180 },
-      { headerName: '공급가액', field: 'supplyAmount', width: 100, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
-      { headerName: '세액', field: 'tax', width: 90, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
-      { headerName: '합계', field: 'total', width: 100, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
-      { headerName: '코드', field: 'code', width: 70 },
-      { headerName: '거래처명', field: 'partnerName', width: 120 },
-      { headerName: '계정코드', field: 'accountCode', width: 80 },
-      { headerName: '계정과목명', field: 'accountName', width: 100 },
-      { headerName: '전자', field: 'electronic', width: 60 }
+      { headerName: "유형", field: "transactionType", initialWidth: 65, 
+        cellRenderer: params => {
+          const code = params.value;
+          const mapping = code0H.find(item => item.commonCode === code);
+          if (mapping) {
+            const badgeColor = parseInt(mapping.commonCode) <= 50 ? 'bg-danger' : 'bg-primary';
+            return `<span class="badge ${badgeColor}">${mapping.commonCodeName}</span>`;
+          }
+          return code || '';
+        }
+      },
+      { headerName: '일자',  field: 'entryDate',  width: 90, 
+        valueFormatter: params => {
+          if (!params.value) return '';
+          const d = new Date(params.value);
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          return `${mm}-${dd}`;
+        }
+      },
+      { headerName: '품목', field: 'itemName', width: 180 },
+      { headerName: '공급가액', field: 'totalSupplyAmount', width: 120, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
+      { headerName: '세액', field: 'totalTaxAmount', width: 110, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
+      { headerName: '합계', field: 'total', width: 130, type: 'numericColumn', valueGetter: params => (params.data?.totalSupplyAmount || 0) + (params.data?.totalTaxAmount || 0), valueFormatter: params => params.value?.toLocaleString() },
+      { headerName: '코드', field: 'partnerCode', width: 70 },
+      { headerName: '거래처명', field: 'partnerName', width: 170 },
+      { headerName: '계정코드', valueGetter: params => params.data?.details?.[0]?.accountCode || '', width: 110 },
+      { headerName: '계정과목명', valueGetter: params => params.data?.details?.[0]?.accountName || '', width: 150 },
+      { headerName: '전자', field: 'electronicType', width: 60,
+        cellRenderer: params => {
+          if (params.value === 'a1') return '○'; return '';
+        }
+      }
     ];
 
     function addSummaryRows(data) {
@@ -209,12 +233,10 @@
     ['startMonth','startDay','endMonth','endDay','transactionType','electronicType'].forEach(id => {
       document.getElementById(id).addEventListener('change', loadReport);
     });
-    // 최초 조회
-    loadReport();
     // 인쇄 버튼(단순 window.print)
     document.getElementById('printBtn').onclick = () => window.print();
 
-    // 과세유형 옵션 하드코딩
+    // 과세유형 옵션
     const transactionTypeOptions = {
       '전체': `
         <option value="">전체</option>
@@ -250,10 +272,8 @@
         if(id==='tab-sales') tab = '매출';
         if(id==='tab-purchase') tab = '매입';
         updateTransactionTypeOptions(tab);
-        setTimeout(loadReport, 0);
       });
     });
     updateTransactionTypeOptions('전체');
-    setTimeout(loadReport, 0);
   </script>
 </div>

@@ -1,6 +1,7 @@
 package com.eflix.acc.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.HashMap;
 import com.eflix.acc.dto.EntryMasterDTO;
 import com.eflix.acc.service.PurchaseSalesReportService;
+import com.eflix.common.code.service.CommonService;
 
 /**
  * ============================================
@@ -28,12 +30,14 @@ import com.eflix.acc.service.PurchaseSalesReportService;
 public class AccPurchaseSalesReportController {
 
   private final PurchaseSalesReportService purchaseSalesReportService;
+  private final CommonService commonService;
 
   /**
    * 매입매출장 화면 요청 처리
    */
   @GetMapping("/psr")
-  public String purchaseSalesReport() {
+  public String purchaseSalesReport(Model model) {
+    model.addAttribute("code0H", commonService.getCommon("0H")); // 과세유형
     return "acc/purchaseSalesReport";
   }
 

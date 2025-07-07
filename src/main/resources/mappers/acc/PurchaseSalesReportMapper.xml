@@ -12,8 +12,6 @@
   <resultMap id="entryDetailResultMap" type="com.eflix.acc.dto.EntryDetailDTO">
     <id property="lineNumber" column="line_number" />
     <result property="entryNumber" column="entry_number" />
-    <result property="partnerCode" column="partner_code" />
-    <result property="partnerName" column="partner_name" />
     <result property="accountCode" column="account_code" />
     <result property="coIdx" column="co_idx"/>
     
@@ -24,6 +22,8 @@
   <!-- EntryMasterDTO + details 매핑 정의 -->
   <resultMap id="entryMasterResultMap" type="com.eflix.acc.dto.EntryMasterDTO">
     <id property="entryNumber" column="entry_number" />
+    <result property="partnerCode" column="partner_code" />
+    <result property="partnerName" column="partner_name" />
     <result property="entryType" column="entry_type" />
     <result property="entryDate" column="entry_date" />
     <result property="transactionType" column="transaction_type" />
@@ -72,7 +72,7 @@
       pd.partner_name
     FROM entry_master m
     LEFT JOIN partner_detail pd ON m.partner_code = pd.partner_code 
-    AND pd.partner_type = 'd1'
+    AND pd.partner_type = 'b1'
     AND pd.co_idx = #{coIdx}
     <where>
       m.co_idx = #{coIdx}
