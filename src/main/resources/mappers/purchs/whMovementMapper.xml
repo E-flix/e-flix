@@ -3,8 +3,8 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.eflix.purchs.mapper.WhMovementMapper">
-<!-- 이동전 창고 목록-->
-<select id="fromWarehouse" parameterType="WhMovementDTO">
+<!-- 이동전 창고 목록 작동 OK-->
+<select id="fromWarehouse" resultType="WhMovementDTO">
 SELECT 
     warehouse_id AS from_wh_id,
     warehouse_location AS from_location
@@ -12,7 +12,7 @@ FROM warehouse
 ORDER BY warehouse_id
 </select>
 
-<!-- 선택한 이동 전 창고 안에 있는 제품 목록 + 수량-->
+<!-- 선택한 이동 전 창고 안에 있는 제품 목록 + 수량 작동 OK-->
 <select id="fromProd" parameterType="WhMovementDTO" resultType="WhMovementDTO">
 SELECT 
     i.prod_id,
@@ -20,11 +20,11 @@ SELECT
     i.iv_current_quantity AS current_quantity
 FROM inventory i
 JOIN prod p ON i.prod_id = p.prod_id
-WHERE i.warehouse_id = #{warehouse_id}
+WHERE i.warehouse_id = #{warehouseId}
 ORDER BY p.prod_name
 </select>
 
-<!-- 이동 후 창고 목록 + 남은 수용 가능 수량 (출발창고 제외) -->
+<!-- 이동 후 창고 목록 + 남은 수용 가능 수량 (출발창고 제외) 작동OK --> 
 <select id="toWarehouse" parameterType="WhMovementDTO" resultType="WhMovementDTO">
     SELECT 
         warehouse_id AS to_wh_id,
@@ -33,19 +33,19 @@ ORDER BY p.prod_name
         warehouse_scale,
         (warehouse_scale - warehouse_current) AS remaining_capacity
     FROM warehouse
-    WHERE warehouse_id != #{from_wh_id}
+    WHERE warehouse_id != #{fromWhId}
     ORDER BY warehouse_id
   </select>
 
   <!-- 현재 XML에 추가 필요 -->
-<select id="executeWarehouseTransfer" parameterType="WhMovementDTO" statementType="CALLABLE">
-    {call WAREHOUSE_TRANSFER_PROCEDURE(
-        #{prodId, mode=IN, jdbcType=VARCHAR},
-        #{fromWhId, mode=IN, jdbcType=VARCHAR},
-        #{toWhId, mode=IN, jdbcType=VARCHAR},
-        #{transferQty, mode=IN, jdbcType=NUMERIC},
-        #{manager, mode=IN, jdbcType=VARCHAR}
-    )}
+<select id="executeWarehouseTransfer" parameterType="WhMovementDTO">
+    CALL WAREHOUSE_TRANSFER_PROCEDURE(
+        #{prodId},
+        #{fromWhId},
+        #{toWhId},
+        #{transferQty},
+        #{manager}
+    )
 </select>
 
 </mapper>

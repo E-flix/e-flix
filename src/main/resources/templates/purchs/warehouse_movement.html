@@ -227,7 +227,7 @@
 
 				// 제품 목록 로드
 				try {
-					const response = await fetch(`/purchs/fromProd?warehouseId=${selectedWhId}`);
+					const response = await fetch(`/purchs/fromProd?fromWhId=${selectedWhId}`);
 					const prodList = await response.json();
 
 					// 해당 row에 제품ID 리스트 저장
@@ -240,7 +240,7 @@
 
 				// 받는 창고 목록 로드
 				try {
-					const response = await fetch(`/purchs/toWarehouse?fromWhId=${selectedWhId}`);
+					const response = await fetch(`/purchs/toWarehouse?toWhId=${selectedWhId}`);
 					const toWhData = await response.json();
 					toWhList = toWhData;
 					toWhOptions = toWhData.map(wh => wh.toWhId);
@@ -264,9 +264,20 @@
 				event.api.applyTransaction({ update: [event.data] });
 			}
 
+			// 제품 ID 선택 시 제품명, 재고 자동 세팅
+			if (event.colDef.field === "prodId") {
+				const selectedProd = (event.data.fromProdList || []).find(p => p.prodId === event.newValue);
+				if (selectedProd) {
+					event.data.prodName = selectedProd.prodName;
+					event.data.currentQuantity = selectedProd.currentQuantity;
+				}
+				event.api.applyTransaction({ update: [event.data] });
+			}
+
 			// 데이터 변경 시 로컬스토리지 업데이트
 			saveToLocalStorage();
-		}
+		},
+
 	};
 
 	// 그리드 초기화

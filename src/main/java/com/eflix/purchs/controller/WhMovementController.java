@@ -45,13 +45,13 @@ public class WhMovementController {
     }
 
     @GetMapping("/fromProd")
-    public List<WhMovementDTO> fromProd(@RequestParam String warehouseId) {
-        return whMovementService.fromProd(warehouseId);
+    public List<WhMovementDTO> fromProd(@RequestParam String fromWhId) {
+        return whMovementService.fromProd(fromWhId);
     }
 
     @GetMapping("/toWarehouse")
-    public List<WhMovementDTO> toWarehouse(@RequestParam String fromWhId) {
-        return whMovementService.toWarehouse(fromWhId);
+    public List<WhMovementDTO> toWarehouse(@RequestParam String toWhId) {
+        return whMovementService.toWarehouse(toWhId);
     }
 
     @PostMapping("/executeTransfer")
