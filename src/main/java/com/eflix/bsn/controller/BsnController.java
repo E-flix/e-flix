@@ -27,6 +27,7 @@ import com.eflix.bsn.dto.OrdersDTO;
 import com.eflix.bsn.dto.OrdersDetailDTO;
 import com.eflix.bsn.dto.QuotationDTO;
 import com.eflix.bsn.dto.QuotationDetailDTO;
+import com.eflix.bsn.dto.SalesOutboundDTO;
 import com.eflix.bsn.service.CreditService;
 import com.eflix.bsn.service.CustomerService;
 import com.eflix.bsn.service.ItemService;
@@ -581,7 +582,9 @@ public class BsnController {
      *──────────────────────────────*/
     @GetMapping("/obound_list")
     public String outboundList(){ return "bsn/soutbound_list"; }
-
-    @GetMapping("/obound")
-    public String outboundForm(){ return "bsn/soutbound"; }
+    @GetMapping("/soutbound")
+    public String soutboundPage(Model model) {
+        model.addAttribute("outbound", new SalesOutboundDTO());
+        return "bsn/soutbound";
+    }
 }

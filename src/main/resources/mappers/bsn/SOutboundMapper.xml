@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eflix.bsn.mapper.SOutboundMapper">
+
+  <select id="selectAllOutbound" resultType="com.eflix.bsn.dto.SalesOutboundDTO">
+    SELECT 
+      OUTBOUND_NO    AS outboundNo,
+      WRITE_DT       AS writeDt,
+      CUSTOMER_CD    AS customerCd,
+      ORDER_DT       AS orderDt,
+      OUTBOUND_DT    AS outboundDt,
+      MONEY          AS money,
+      REMARKS        AS remarks,
+      CO_IDX         AS coIdx
+    FROM EFLIX.SALES_OUTBOUND
+    WHERE CO_IDX = #{coIdx}
+    ORDER BY WRITE_DT DESC
+  </select>
+
+  <select id="selectOutboundDetails" resultType="com.eflix.bsn.dto.SoutboundDetailDTO">
+    SELECT
+      ORDER_NO     AS orderNo,
+      ITEM_NAME    AS itemName,
+      STANDARD     AS standard,
+      QTY          AS qty,
+      UNIT         AS unit,
+      REMARKS      AS remarks,
+      CO_IDX       AS coIdx
+    FROM EFLIX.SOUTBOUND_DETAIL
+    WHERE ORDER_NO = #{outboundNo}
+    ORDER BY ORDER_NO
+  </select>
+
+  <insert id="insertOutbound">
+    INSERT INTO EFLIX.SALES_OUTBOUND (
+      OUTBOUND_NO, WRITE_DT, CUSTOMER_CD, ORDER_DT, OUTBOUND_DT, MONEY, REMARKS, CO_IDX
+    ) VALUES (
+      #{outboundNo}, #{writeDt}, #{customerCd},
+      #{orderDt}, #{outboundDt}, #{money}, #{remarks}, #{coIdx}
+    )
+  </insert>
+
+  <insert id="insertOutboundDetail">
+    INSERT INTO EFLIX.SOUTBOUND_DETAIL (
+      ORDER_NO, ITEM_NAME, STANDARD, QTY, UNIT, REMARKS, CO_IDX
+    ) VALUES (
+      #{orderNo}, #{itemName}, #{standard},
+      #{qty}, #{unit}, #{remarks}, #{coIdx}
+    )
+  </insert>
+
+</mapper>

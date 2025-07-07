@@ -1,102 +1,354 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{common/layouts/default}">
+
 <head>
-  <title>출고 등록</title>
+  <meta charset="UTF-8" />
+  <title>출고 입력</title>
+  
+  <!-- 페이지 전용 스타일 (견적서 입력과 동일) -->
   <style>
-    .quote-card {
-      background: #fff;
+    .section-box {
+      padding: 15px;
       border: 1px solid #dee2e6;
-      border-radius: .25rem;
-      padding: 1.5rem;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      margin-bottom: 15px;
     }
-
-    .detail-table th {
-      background: #4da2f1;
-      color: #fff;
+    .section-box h6 {
+      margin-bottom: 12px;
+      color: #495057;
+      font-weight: 600;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 5px;
+    }
+    .bg-cell {
+      background-color: #e9ecef !important;
+      font-weight: 600;
       text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+      min-width: 80px;
     }
-
-    .detail-table td,
     .detail-table th {
+      background-color: #e9ecef;
+      text-align: center;
+      vertical-align: middle;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .detail-table td {
       vertical-align: middle;
     }
-
-    .btn-cyan {
-      background: #009fb2;
-      color: #fff;
+    .form-control-sm {
+      font-size: 0.875rem;
     }
-
-    .btn-pink {
-      background: #c81d64;
-      color: #fff;
+    .table-responsive { border-radius: 6px; }
+    .table td, .table th {
+      padding: 8px;
+      border: 1px solid #dee2e6;
     }
-
-    .btn-green {
-      background: #1cab26;
-      color: #fff;
+    .detail-table {
+      table-layout: fixed;
+      width: 100%;
+      min-width: 800px;
+    }
+    .detail-table th:nth-child(1) { width: 40px; }  /* 체크박스 */
+    .detail-table th:nth-child(2) { width: 120px; } /* 품목명 */
+    .detail-table th:nth-child(3) { width: 120px; } /* 규격 */
+    .detail-table th:nth-child(4) { width: 80px; }  /* 수량 */
+    .detail-table th:nth-child(5) { width: 80px; }  /* 단위 */
+    .detail-table th:nth-child(6) { width: 150px; } /* 비고 */
+    .modal-table th {
+      background-color: #e9ecef;
+      font-weight: 600;
+      text-align: center;
+    }
+    .modal-table td {
+      text-align: center;
+      vertical-align: middle;
     }
   </style>
 </head>
-<div layout:fragment="content" class="container-fluid py-4">
-  <div class="float-right">
-    <button type="reset" class="btn btn-cyan me-2">초기화</button>
-    <button type="button" class="btn btn-pink me-2">목록</button>
-    <button type="button" class="btn btn-green">등록</button>
-  </div>
-  <h3 class="mb-4">출고 의뢰서</h3>
-  <div class="quote-card mb-4">
-    <form id="quoteForm" class="row g-3">
-      <div class="col-md-3">
-        <label class="form-label">출고번호</label>
-        <input type="text" class="form-control" placeholder="입력">
+<body>
+<div layout:fragment="content" class="container-fluid px-3 py-2">
+  <form th:action="@{/bsn/createOutbound}"
+        th:object="${outbound}"
+        method="post">
+    
+    <!-- ── 타이틀 / 버튼 ─────────────────────────────────────────────── -->
+    <div class="d-flex justify-content-between align-items-center border p-2 rounded bg-light mb-2">
+      <h6 class="mb-0">출고 입력</h6>
+    </div>
+    <div class="text-end mb-2">
+      <button type="submit" class="btn btn-primary btn-sm me-1">등록</button>
+      <button type="button" class="btn btn-light btn-sm border btn-reset me-1">초기화</button>
+      <button type="button" class="btn btn-light btn-sm border btn-list">목록</button>
+    </div>
+
+    <!-- ── 출고 기본 정보 ──────────────────────────────────────── -->
+    <div class="section-box">
+      <h6>출고 기본 정보</h6>
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle mb-0">
+          <colgroup>
+            <col style="width:15%"><col style="width:35%">
+            <col style="width:15%"><col style="width:35%">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th class="bg-cell">출고번호</th>
+              <td><input type="text" th:field="*{outboundNo}" class="form-control form-control-sm" readonly></td>
+              <th class="bg-cell">작성일자</th>
+              <td><input type="date" th:field="*{writeDt}" class="form-control form-control-sm"></td>
+            </tr>
+            <tr>
+              <th class="bg-cell">거래처</th>
+              <td>
+                <input id="customerDisplay" type="text"
+                       class="form-control form-control-sm"
+                       placeholder="거래처 코드/이름" readonly>
+                <input type="hidden" th:field="*{customerCd}" id="customerCd">
+                <input type="hidden" th:field="*{customerName}">
+              </td>
+              <th class="bg-cell">대표명</th>
+              <td>
+                <input type="text" th:field="*{representativeNm}"
+                       id="repName" class="form-control form-control-sm" readonly>
+              </td>
+            </tr>
+            <tr>
+              <th class="bg-cell">주문일자</th>
+              <td><input type="date" th:field="*{orderDt}" class="form-control form-control-sm"></td>
+              <th class="bg-cell">출고일자</th>
+              <td><input type="date" th:field="*{outboundDt}" class="form-control form-control-sm"></td>
+            </tr>
+            <tr>
+              <th class="bg-cell">통화</th>
+              <td>
+                <select th:field="*{money}" class="form-select form-select-sm">
+                  <option value="KRW">KRW</option>
+                  <option value="USD">USD</option>
+                </select>
+              </td>
+              <th class="bg-cell">비고</th>
+              <td><input type="text" th:field="*{remarks}" class="form-control form-control-sm"></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">출고의뢰일자</label>
-        <input type="date" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">거래처</label>
-        <input type="text" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">납기일</label>
-        <input type="date" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">출하일자</label>
-        <input type="date" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">출하창고</label>
-        <input type="text" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">전표 발행 여부</label>
-        <div class="form-check">
-          <input id="voucherIssued" class="form-check-input" type="checkbox" name="voucher_issued" value="Y">
-          <label class="form-check-label" for="voucherIssued">발행 완료</label>
+    </div>
+
+    <!-- ── 출고 상세내역 ─────────────────────────────────────────── -->
+    <div class="section-box">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0">출고 상세내역</h6>
+        <div>
+          <button type="button" class="btn btn-secondary btn-sm add-row me-1">행 추가</button>
+          <button type="button" class="btn btn-danger btn-sm delete-row">행 삭제</button>
         </div>
-      </div>      
-      <div class="col-md-3">
-        <label class="form-label">비고</label>
-        <input type="text" class="form-control">
       </div>
-    </form>
+      <div class="table-responsive">
+        <table class="table table-bordered text-center detail-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox"></th>
+              <th>품목명</th>
+              <th>규격</th>
+              <th>수량</th>
+              <th>단위</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><input name="details[0].itemName" data-field="itemName"
+                         class="form-control form-control-sm item-name" readonly></td>
+              <td><input name="details[0].standard" data-field="standard"
+                         class="form-control form-control-sm item-standard" readonly></td>
+              <td><input type="number" name="details[0].qty" data-field="qty"
+                         class="form-control form-control-sm item-qty" value="1" min="1"></td>
+              <td><input name="details[0].unit" data-field="unit"
+                         class="form-control form-control-sm item-unit" readonly></td>
+              <td><input name="details[0].remarks" data-field="remarks"
+                         class="form-control form-control-sm item-remark"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </form>
+
+  <!-- 거래처 모달 (견적서 입력과 동일) -->
+  <div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">거래처 조회</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group mb-2">
+            <input id="customerSearch" type="text"
+                  class="form-control" placeholder="거래처명 검색">
+            <button id="btnCustomerSearch"
+                    class="btn btn-outline-secondary">검색</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered modal-table mb-0">
+              <thead><tr>
+                <th>선택</th><th>코드</th><th>이름</th>
+                <th>대표명</th><th>전화번호</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- 품목입력 -->
-  <div class="table-responsive mb-4">
-    <table class="table table-bordered detail-table">
-      <thead>
-        <tr>
-          <th style="width:5%;">순번</th>
-          <th style="width:20%;">품목코드</th>
-          <th style="width:10%;">품목명</th>
-          <th style="width:15%;">규격</th>
-          <th style="width:10%;">수량</th>
-          <th style="width:10%;">단위</th>
-          <th style="width:15%;">비고</th>
-        </tr>
-      </thead>
-    </table>
+  <!-- 품목 모달 (견적서 입력과 동일) -->
+  <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">품목 목록</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="table-responsive">
+            <table class="table table-bordered m-0 modal-table">
+              <thead><tr>
+                <th>선택</th><th>품목명</th><th>규격</th><th>단위</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- 행 추가/삭제, 모달 로직 스크립트 -->
+  <script th:inline="javascript">
+  /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', () => {
+      const tbody      = document.querySelector('.detail-table tbody');
+      const custInput  = document.getElementById('customerDisplay');
+      const hiddenCd   = document.getElementById('customerCd');
+      const hiddenName = document.querySelector('input[name="customerName"]');
+      const repInput   = document.getElementById('repName');
+      const phoneInput = document.getElementById('phone');
+      const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
+      const itemModal     = new bootstrap.Modal(document.getElementById('itemModal'));
+
+      // 행 인덱스 재정렬
+      function renumberRows() {
+        tbody.querySelectorAll('tr').forEach((tr, idx) => {
+          tr.querySelectorAll('[data-field]').forEach(inp => {
+            inp.name = `details[${idx}].${inp.dataset.field}`;
+          });
+          tr.querySelector('input[type="checkbox"]').name = '';
+        });
+      }
+
+      // 행 추가/삭제
+      document.querySelector('.add-row').addEventListener('click', () => {
+        const tr = tbody.querySelector('tr').cloneNode(true);
+        tr.querySelectorAll('input').forEach(i => {
+          if (i.type==='checkbox') i.checked=false;
+          else if (i.classList.contains('item-qty')) i.value=1;
+          else i.value='';
+        });
+        tbody.appendChild(tr);
+        renumberRows();
+      });
+      document.querySelector('.delete-row').addEventListener('click', () => {
+        tbody.querySelectorAll('input[type="checkbox"]:checked')
+             .forEach(cb=>cb.closest('tr').remove());
+        renumberRows();
+      });
+
+      // 거래처 모달 로딩/선택
+      function loadCustomers(name='') {
+        let url = '/bsn/customer/list';
+        if (name) url += `?name=${encodeURIComponent(name)}`;
+        fetch(url).then(r=>r.json()).then(list=>{
+          const tb = document.querySelector('#customerModal tbody');
+          tb.innerHTML = '';
+          list.forEach(c=>{
+            const row = document.createElement('tr');
+            row.innerHTML=`
+              <td><button class="btn btn-sm btn-outline-primary selCust">선택</button></td>
+              <td>${c.customerCd}</td><td>${c.customerNm}</td>
+              <td>${c.representativeNm}</td><td>${c.phoneNo}</td>`;
+            tb.appendChild(row);
+          });
+          tb.querySelectorAll('.selCust').forEach(btn=>
+            btn.addEventListener('click', ()=>{
+              const r = btn.closest('tr');
+              custInput.value      = `${r.children[1].textContent} / ${r.children[2].textContent}`;
+              hiddenCd.value       = r.children[1].textContent;
+              hiddenName.value     = r.children[2].textContent;
+              repInput.value       = r.children[3].textContent;
+              phoneInput.value     = r.children[4].textContent;
+              customerModal.hide();
+            }))
+        });
+      }
+      document.getElementById('btnCustomerSearch').addEventListener('click', ()=>loadCustomers(document.getElementById('customerSearch').value));
+      custInput.addEventListener('click', ()=>{ loadCustomers(); customerModal.show(); });
+
+      // 품목 모달 로딩/선택
+      function loadItems() {
+        fetch('/bsn/item/list').then(r=>r.json()).then(list=>{
+          const tb = document.querySelector('#itemModal tbody');
+          tb.innerHTML = '';
+          list.forEach(it=>{
+            const row = document.createElement('tr');
+            row.innerHTML=`
+              <td><button class="btn btn-sm btn-outline-primary selItem">선택</button></td>
+              <td>${it.itemName}</td><td>${it.spec}</td><td>${it.unit}</td>`;
+            tb.appendChild(row);
+          });
+          tb.querySelectorAll('.selItem').forEach(btn=>
+            btn.addEventListener('click', ()=>{
+              const r = btn.closest('tr');
+              const cur = document.activeElement.closest('tr');
+              cur.querySelector('.item-name').value     = r.children[1].textContent;
+              cur.querySelector('.item-standard').value = r.children[2].textContent;
+              cur.querySelector('.item-unit').value     = r.children[3].textContent;
+              itemModal.hide();
+            }))
+        });
+      }
+      tbody.addEventListener('click', e=>{
+        if (e.target.classList.contains('item-name')) {
+          loadItems(); itemModal.show();
+        }
+      });
+
+      // 초기화 / 목록 버튼
+      document.querySelector('.btn-reset').addEventListener('click', ()=>{
+        document.querySelectorAll('input:not([readonly])').forEach(i=>i.value='');
+        tbody.querySelectorAll('.item-qty').forEach(i=>i.value=1);
+        renumberRows();
+      });
+      document.querySelector('.btn-list').addEventListener('click', ()=>{
+        window.location.href = '/bsn/outbound_list';
+      });
+
+      // 제출 전 인덱스 정리
+      document.querySelector('form').addEventListener('submit', renumberRows);
+
+      // 초기 행번호 세팅
+      renumberRows();
+    });
+  /*]]>*/
+  </script>
 </div>
+</body>
+</html>
