@@ -4,6 +4,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.List;
+import com.eflix.acc.dto.PurchaseSalesReportDTO;
+import com.eflix.acc.service.PurchaseSalesReportService;
 
 /**
  * ============================================
@@ -20,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AccPurchaseSalesReportController {
 
-  // private final Service Service;
+  private final PurchaseSalesReportService purchaseSalesReportService;
 
   /**
    * 매입매출장 화면 요청 처리
@@ -28,5 +33,20 @@ public class AccPurchaseSalesReportController {
   @GetMapping("/psr")
   public String purchaseSalesReport() {
     return "acc/purchaseSalesReport";
+  }
+
+  /**
+   * 매입매출장 목록 조회 (AJAX)
+   */
+  @ResponseBody
+  @GetMapping("/psr/list")
+  public List<PurchaseSalesReportDTO> getReportList(
+      @RequestParam String startDate,
+      @RequestParam String endDate,
+      @RequestParam(required = false, defaultValue = "전체") String type,
+      @RequestParam(required = false, defaultValue = "전체") String taxType,
+      @RequestParam(required = false, defaultValue = "전체") String electronicType
+  ) {
+    return purchaseSalesReportService.getReportList(startDate, endDate, type, taxType, electronicType);
   }
 }

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.acc.mapper.PurchaseSalesReportMapper">
+  <resultMap id="purchaseSalesReportResultMap" type="com.eflix.acc.dto.PurchaseSalesReportDTO">
+    <result property="type" column="type" />
+    <result property="date" column="date" />
+    <result property="item" column="item" />
+    <result property="supplyAmount" column="supply_amount" />
+    <result property="tax" column="tax" />
+    <result property="total" column="total" />
+    <result property="code" column="code" />
+    <result property="partnerName" column="partner_name" />
+    <result property="accountCode" column="account_code" />
+    <result property="accountName" column="account_name" />
+    <result property="electronic" column="electronic" />
+  </resultMap>
+
+  <select id="getReportList" resultMap="purchaseSalesReportResultMap">
+    SELECT 
+      m.type,
+      m.date,
+      m.item,
+      m.supply_amount,
+      m.tax,
+      m.total,
+      m.code,
+      m.partner_name,
+      m.account_code,
+      m.account_name,
+      m.electronic
+    FROM purchase_sales_report m
+    <where>
+      <if test="startDate != null and startDate != ''">
+        AND m.date &gt;= #{startDate}
+      </if>
+      <if test="endDate != null and endDate != ''">
+        AND m.date &lt;= #{endDate}
+      </if>
+      <if test="type != null and type != '' and type != '전체'">
+        AND m.type = #{type}
+      </if>
+      <if test="taxType != null and taxType != '' and taxType != '전체'">
+        AND m.tax_type = #{taxType}
+      </if>
+      <if test="electronicType != null and electronicType != '' and electronicType != '전체'">
+        AND m.electronic = #{electronicType}
+      </if>
+      <if test="coIdx != null and coIdx != ''">
+        AND m.co_idx = #{coIdx}
+      </if>
+    </where>
+    ORDER BY m.date, m.code
+  </select>
+</mapper>

@@ -20,89 +20,183 @@
 </div> -->
 <head>
   <title>매입매출장</title>
-  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <style>
+    .ag-overlay-no-rows-center {
+      font-size: 1rem; 
+      /* font-weight: bold; */
+      color: #444; 
+    }
+    .ag-theme-alpine .ag-row-even, 
+    .ag-theme-alpine .ag-row-odd {
+      background: white !important;
+    }
+    .ag-theme-alpine .subtotal-row {
+      background: #f3f6fa !important;
+      font-weight: bold !important;
+    }
+  </style>
 </head>
-
 <div layout:fragment="content">
-  <div id="myGrid" class="ag-theme-quartz" style="height: 400px; width: 600px;"></div>
+  <!-- 모달 불러오기 -->
+  <div th:replace="acc/modal/modal :: modals"></div>
+  <div class="w-100" id="purchaseSalesReport">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <!-- 왼쪽: 매입매출장 제목 -->
+      <h3 class="mb-0">매입매출장</h3>
+      <!-- 오른쪽: 버튼 모음 -->
+      <div>
+        <button class="btn btn-secondary btn-sm" onclick="printLedger()">인쇄</button>
+      </div>
+    </div>
+    <!-- 탭 버튼 -->
+    <div class="mb-2 tab-btns">
+      <button type="button" class="btn btn-outline-primary btn-sm active" id="tab-all" style="margin-right:3px;">전체</button>
+      <button type="button" class="btn btn-outline-primary btn-sm" id="tab-sales" style="margin-right:3px;">매출</button>
+      <button type="button" class="btn btn-outline-primary btn-sm" id="tab-purchase">매입</button>
+    </div>
+    <!-- 검색조건 영역 -->
+         <div class="d-flex mb-2 align-items-end flex-nowrap" style="flex-wrap:nowrap;">
+      <div class="d-flex align-items-center me-2">
+        <label class="form-label me-2 mb-0">일자</label>
+        2025 년
+        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" style="width:45px;"> 월
+        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startDay" style="width:45px;"> 일 ~
+        2025 년
+        <input type="number" value="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" style="width:45px;"> 월
+        <input type="number" value="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" style="width:45px;"> 일
+      </div>
+      <div class="d-flex align-items-center me-2">
+        과세유형
+        <select id="taxType" class="form-select form-select-sm">
+          <option>전체</option><option>일반</option><option>간이</option>
+        </select>
+      </div>
+      <div class="d-flex align-items-center me-2">
+        전자유형
+        <select id="electronicType" class="form-select form-select-sm">
+          <option>전체</option><option>전자</option><option>수기</option>
+        </select>
+      </div>
+    </div>
+    </div>
+    <!-- 탭별 컨텐츠 -->
+    <div id="tab-content-all">
+      <div id="psrGridAll" class="ag-theme-quartz" style="height: 70vh; width: 100%;"></div>
+    </div>
+    <div id="tab-content-sales" style="display:none;">
+      <div id="psrGridSales" class="ag-theme-quartz" style="height: 70vh; width: 100%;"></div>
+    </div>
+    <div id="tab-content-purchase" style="display:none;">
+      <div id="psrGridPurchase" class="ag-theme-quartz" style="height: 70vh; width: 100%;"></div>
+    </div>
+  </div>
   <script>
-  const rawData = [
-      { country: 'USA', year: '2020', gold: 10, silver: 5, bronze: 3 },
-      { country: 'USA', year: '2021', gold: 7, silver: 3, bronze: 4 },
-      { country: 'Korea', year: '2020', gold: 5, silver: 3, bronze: 2 },
-      { country: 'Korea', year: '2021', gold: 6, silver: 4, bronze: 1 }
+    // ag-Grid 컬럼 정의 (사진 참고)
+    const columnDefs = [
+      { headerName: '유형', field: 'type', width: 70 },
+      { headerName: '일자', field: 'date', width: 90 },
+      { headerName: '품목', field: 'item', width: 180 },
+      { headerName: '공급가액', field: 'supplyAmount', width: 100, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
+      { headerName: '세액', field: 'tax', width: 90, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
+      { headerName: '합계', field: 'total', width: 100, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
+      { headerName: '코드', field: 'code', width: 70 },
+      { headerName: '거래처명', field: 'partnerName', width: 120 },
+      { headerName: '계정코드', field: 'accountCode', width: 80 },
+      { headerName: '계정과목명', field: 'accountName', width: 100 },
+      { headerName: '전자', field: 'electronic', width: 60 }
     ];
 
-    function generateDataWithTotals(data) {
+    function addSummaryRows(data) {
+      if (!data.length) return [];
       const grouped = {};
+      let grand = { supplyAmount: 0, tax: 0, total: 0 };
       const result = [];
-      let grandTotal = { gold: 0, silver: 0, bronze: 0 };
-
       data.forEach(row => {
-        if (!grouped[row.country]) {
-          grouped[row.country] = { gold: 0, silver: 0, bronze: 0, rows: [] };
-        }
-        grouped[row.country].gold += row.gold;
-        grouped[row.country].silver += row.silver;
-        grouped[row.country].bronze += row.bronze;
-        grouped[row.country].rows.push(row);
-
-        // accumulate grand total
-        grandTotal.gold += row.gold;
-        grandTotal.silver += row.silver;
-        grandTotal.bronze += row.bronze;
+        if (!grouped[row.type]) grouped[row.type] = { supplyAmount: 0, tax: 0, total: 0, rows: [] };
+        grouped[row.type].supplyAmount += row.supplyAmount || 0;
+        grouped[row.type].tax += row.tax || 0;
+        grouped[row.type].total += row.total || 0;
+        grouped[row.type].rows.push(row);
+        grand.supplyAmount += row.supplyAmount || 0;
+        grand.tax += row.tax || 0;
+        grand.total += row.total || 0;
       });
-
-      for (const country in grouped) {
-        result.push(...grouped[country].rows);
-        result.push({
-          country: `${country} 소계`,
-          year: '',
-          gold: grouped[country].gold,
-          silver: grouped[country].silver,
-          bronze: grouped[country].bronze,
-          isSummary: true
-        });
+      for (const type in grouped) {
+        result.push(...grouped[type].rows);
+        result.push({ type: type + ' 소계', supplyAmount: grouped[type].supplyAmount, tax: grouped[type].tax, total: grouped[type].total, isSubtotal: true });
       }
-
-      // Add grand total row at the end
-      result.push({
-        country: '총계',
-        year: '',
-        gold: grandTotal.gold,
-        silver: grandTotal.silver,
-        bronze: grandTotal.bronze,
-        isGrandTotal: true
-      });
-
+      result.push({ type: '총계', supplyAmount: grand.supplyAmount, tax: grand.tax, total: grand.total, isGrandTotal: true });
       return result;
     }
 
-    const rowData = generateDataWithTotals(rawData);
-
-    const columnDefs = [
-      { field: 'country', headerName: 'Country / Group' },
-      { field: 'year' },
-      { field: 'gold' },
-      { field: 'silver' },
-      { field: 'bronze' }
-    ];
-
-    const gridOptions = {
+    // 각 탭별 ag-Grid 인스턴스
+    const gridOptionsAll = {
       columnDefs,
-      rowData,
-      theme: 'quartz',
-      getRowStyle: params => {
-        if (params.data?.isGrandTotal) {
-          return { fontWeight: 'bold', backgroundColor: '#d9edf7' };
-        }
-        if (params.data?.isSummary) {
-          return { fontWeight: 'bold', backgroundColor: '#f0f0f0' };
-        }
-      }
+      rowData: [],
+      getRowClass: params => {
+        if (params.data?.isGrandTotal) return 'grandtotal-row';
+        if (params.data?.isSubtotal) return 'subtotal-row';
+      },
+      defaultColDef: { resizable: true, sortable: true },
+      suppressMovableColumns: true,
+      localeText: { noRowsToShow: '조회 결과가 없습니다.' }
+    };
+    const gridOptionsSales = { ...gridOptionsAll, rowData: [] };
+    const gridOptionsPurchase = { ...gridOptionsAll, rowData: [] };
+    const apiAll = agGrid.createGrid(document.getElementById('psrGridAll'), gridOptionsAll);
+    const apiSales = agGrid.createGrid(document.getElementById('psrGridSales'), gridOptionsSales);
+    const apiPurchase = agGrid.createGrid(document.getElementById('psrGridPurchase'), gridOptionsPurchase);
+
+    // 탭 전환 이벤트
+    document.getElementById('tab-all').onclick = function() {
+      document.getElementById('tab-content-all').style.display = '';
+      document.getElementById('tab-content-sales').style.display = 'none';
+      document.getElementById('tab-content-purchase').style.display = 'none';
+      this.classList.add('active');
+      document.getElementById('tab-sales').classList.remove('active');
+      document.getElementById('tab-purchase').classList.remove('active');
+    };
+    document.getElementById('tab-sales').onclick = function() {
+      document.getElementById('tab-content-all').style.display = 'none';
+      document.getElementById('tab-content-sales').style.display = '';
+      document.getElementById('tab-content-purchase').style.display = 'none';
+      this.classList.add('active');
+      document.getElementById('tab-all').classList.remove('active');
+      document.getElementById('tab-purchase').classList.remove('active');
+    };
+    document.getElementById('tab-purchase').onclick = function() {
+      document.getElementById('tab-content-all').style.display = 'none';
+      document.getElementById('tab-content-sales').style.display = 'none';
+      document.getElementById('tab-content-purchase').style.display = '';
+      this.classList.add('active');
+      document.getElementById('tab-all').classList.remove('active');
+      document.getElementById('tab-sales').classList.remove('active');
     };
 
-    agGrid.createGrid(document.getElementById('myGrid'), gridOptions);
+    // 데이터 로드 함수 (전체/매출/매입)
+    async function loadReport() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const taxType = document.getElementById('taxType').value;
+      const electronicType = document.getElementById('electronicType').value;
+      // 전체
+      let res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&type=전체&taxType=${taxType}&electronicType=${electronicType}`);
+      let data = await res.json();
+      apiAll.setGridOption('rowData', addSummaryRows(data));
+      // 매출
+      res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&type=매출&taxType=${taxType}&electronicType=${electronicType}`);
+      data = await res.json();
+      apiSales.setGridOption('rowData', addSummaryRows(data));
+      // 매입
+      res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&type=매입&taxType=${taxType}&electronicType=${electronicType}`);
+      data = await res.json();
+      apiPurchase.setGridOption('rowData', addSummaryRows(data));
+    }
+    document.getElementById('searchBtn').onclick = loadReport;
+    // 최초 조회
+    loadReport();
+    // 인쇄 버튼(단순 window.print)
+    document.getElementById('printBtn').onclick = () => window.print();
   </script>
 </div>
