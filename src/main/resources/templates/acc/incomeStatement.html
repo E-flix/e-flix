@@ -45,14 +45,16 @@
 
 <div layout:fragment="content">
   <div class="container-fluid">
+    <!-- 손익계산서 섹션 -->
     <div class="row">
-      <!-- 손익계산서 헤더 영역 -->
       <div class="col-12">
+
         <div class="d-flex justify-content-between align-items-center mb-1">
           <!-- 왼쪽: 손익계산서 제목 -->
           <h3 class="mb-0">손익계산서</h3>
           <!-- 오른쪽: 버튼 모음 -->
           <div>
+            <button type="button" id="diffFilterBtn" class="btn btn-outline-secondary btn-sm">조회</button>
             <button class="btn btn-outline-secondary btn-sm" onclick="출력()">출력</button>
             <button class="btn btn-outline-secondary btn-sm" onclick="엑셀()">엑셀</button>
           </div>
@@ -159,7 +161,7 @@
       rowSelection: 'multiRow',
       suppressRowClickSelection: true,
       columnDefs: [
-        { headerName: "계정과목", field: "accountName", flex: 1, sortable: false,
+        { headerName: "계정과목", field: "accountName", width: 300, sortable: false, // flex: 1,
           cellRenderer: params => {
             let displayText = '';
             if (params.data.section) {
@@ -188,7 +190,7 @@
             return '';
           }
         },
-        { headerName: "코드", field: "accountCode", width: 80, sortable: false,
+        { headerName: "코드", field: "accountCode", width: 100, sortable: false,
           cellClass: params => {
             if (params.data.isHeader) return 'ag-header-cell-style';
             return '';
@@ -205,7 +207,7 @@
             return '';
           }
         },
-        { headerName: "합계", field: "total", width: 130, sortable: false,
+        { headerName: "합계", field: "total", width: 150, sortable: false,
           cellStyle: { textAlign: 'right'},
           cellRenderer: params => {
             if (!params.value) return '';
@@ -236,6 +238,26 @@
     function 엑셀() {
       alert('Excel 내보내기 기능을 준비 중입니다.');
     }
+
+    // 당기순손익 금액을 반환하는 함수 추가
+    function getCurrentNetIncome() {
+      const netIncomeRow = incomeStatementData.find(row => 
+        row.subsection && row.subsection.includes("당기순손익")
+      );
+      
+      if (netIncomeRow && netIncomeRow.total) {
+        // 콤마 제거 후 숫자로 변환
+        const amount = parseFloat(netIncomeRow.total.replace(/,/g, '')) || 0;
+        console.log(`손익계산서 당기순손익: ${amount}`);
+        return amount;
+      }
+      
+      console.log('손익계산서 당기순손익을 찾을 수 없습니다.');
+      return 0;
+    }
+
+    // 전역 함수로 노출 (다른 페이지에서 접근 가능)
+    window.getIncomeStatementNetIncome = getCurrentNetIncome;
 </script>
 </div>
 </html>

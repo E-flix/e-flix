@@ -172,22 +172,33 @@
     
     <!-- 상품 타계정대체액 조회 (상품에서 다른 계정으로 대체된 금액) -->
     <select id="getGoodsTransferAmount" parameterType="map" resultType="long">
-        SELECT NVL(SUM(
-            CASE 
-                WHEN e.resentmen_type = 'g4' THEN e.amount
-                ELSE 0
-            END
-        ), 0) as transferAmount
-        FROM account a
-        JOIN entry_detail e ON a.account_code = e.account_code
-        JOIN entry_master m ON e.entry_number = m.entry_number
-        WHERE TO_CHAR(m.entry_date, 'YYYY') = #{year}
-          AND TO_NUMBER(TO_CHAR(m.entry_date, 'MM')) <![CDATA[<=]]> #{endMonth}
-          AND a.co_idx = #{coIdx}
-          AND e.co_idx = #{coIdx}
-          AND m.co_idx = #{coIdx}
-          AND a.major_category = '자산'
-          AND a.standard_account_name = '상품'
-          AND m.description LIKE '%대체%'
+      SELECT NVL(SUM(
+        CASE 
+          WHEN e.resentmen_type = 'g4' THEN e.amount
+          ELSE 0
+        END
+      ), 0) as transferAmount
+      FROM account a
+      JOIN entry_detail e ON a.account_code = e.account_code
+      JOIN entry_master m ON e.entry_number = m.entry_number
+      WHERE TO_CHAR(m.entry_date, 'YYYY') = #{year}
+        AND TO_NUMBER(TO_CHAR(m.entry_date, 'MM')) <![CDATA[<=]]> #{endMonth}
+        AND a.co_idx = #{coIdx}
+        AND e.co_idx = #{coIdx}
+        AND m.co_idx = #{coIdx}
+        AND a.major_category = '자산'
+        AND a.standard_account_name = '상품'
+        <!-- 상품매출원가 관련 분개는 제외 -->
+        AND NOT EXISTS (
+          SELECT 1 
+          FROM entry_detail e2
+          JOIN account a2 ON e2.account_code = a2.account_code
+          WHERE e2.entry_number = e.entry_number
+            AND e2.resentmen_type = 'g3'
+            AND (
+              a2.standard_account_name LIKE '%상품매출원가%' OR
+              a2.standard_account_name LIKE '%매출원가%'
+            )
+        )
     </select>
 </mapper>
