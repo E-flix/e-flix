@@ -8,5 +8,41 @@
   - 2025-06-19 (김어진): 계정과목 전체조회 작성
 =============================================== -->
 <mapper namespace="com.eflix.hr.mapper.SalaryMappingMapper">
+  <select id="findById" resultType="SalaryMappingDTO">
+    SELECT * FROM salary_mapping
+     WHERE co_idx = #{coIdx} AND mp_idx = #{mpIdx}
+  </select>
 
+ <select id="findAllByCoIdx" parameterType="String" resultType="SalaryMappingDTO">
+    SELECT
+      mp_idx,
+      al_number,
+      al_name,
+      type,
+      salary_type,
+      al_amount
+    FROM salary_mapping
+    WHERE co_idx = #{coIdx}
+    ORDER BY type, al_number
+  </select>
+
+  <insert id="insert" parameterType="SalaryMappingDTO">
+    INSERT INTO salary_mapping(mp_idx, al_number, salary_type, al_name, type, co_idx, al_amount)
+    VALUES(#{mpIdx}, #{alNumber}, #{salaryType}, #{alName}, #{type}, #{coIdx}, #{alAmount})
+  </insert>
+
+  <update id="update" parameterType="SalaryMappingDTO">
+    UPDATE salary_mapping
+      SET al_number    = #{alNumber},
+          salary_type  = #{salaryType},
+          al_name      = #{alName},
+          type         = #{type},
+          al_amount    = #{alAmount}
+    WHERE mp_idx = #{mpIdx}
+  </update>
+
+  <delete id="delete">
+    DELETE FROM salary_mapping
+     WHERE mp_idx = #{mpIdx}
+  </delete>
 </mapper>

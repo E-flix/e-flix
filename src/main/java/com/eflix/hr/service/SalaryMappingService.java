@@ -10,7 +10,7 @@ package com.eflix.hr.service;
 
 import java.util.List;
 
-import com.eflix.hr.dto.SalaryMappingDTO;
+import com.eflix.hr.dto.etc.SalaryMappingDTO;
 
 public interface SalaryMappingService {
     public List<SalaryMappingDTO> getAllSalaryMappings();
@@ -18,4 +18,9 @@ public interface SalaryMappingService {
     int createSalaryMapping(SalaryMappingDTO dto);
     int updateSalaryMapping(SalaryMappingDTO dto);
     int deleteSalaryMapping(String mpIdx);
+
+    public List<SalaryMappingDTO> findAllByCoIdx(String coIdx);
+    public void insert(SalaryMappingDTO salaryMappingDTO);
+    public void modify(SalaryMappingDTO salaryMappingDTO);
+    public void delete(String salaryIdx);
 }

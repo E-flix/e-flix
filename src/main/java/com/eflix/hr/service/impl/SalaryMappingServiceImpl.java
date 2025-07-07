@@ -10,13 +10,18 @@ package com.eflix.hr.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.eflix.hr.dto.SalaryMappingDTO;
+import com.eflix.hr.dto.etc.SalaryMappingDTO;
+import com.eflix.hr.mapper.SalaryMappingMapper;
 import com.eflix.hr.service.SalaryMappingService;
 
 @Service
 public class SalaryMappingServiceImpl implements SalaryMappingService {
+
+  @Autowired
+  private SalaryMappingMapper salaryMappingMapper;
 
   @Override
   public List<SalaryMappingDTO> getAllSalaryMappings() {
@@ -41,6 +46,26 @@ public class SalaryMappingServiceImpl implements SalaryMappingService {
   @Override
   public int deleteSalaryMapping(String mpIdx) {
     throw new UnsupportedOperationException("Unimplemented method 'deleteSalaryMapping'");
+  }
+
+  @Override
+  public List<SalaryMappingDTO> findAllByCoIdx(String coIdx) {
+    return salaryMappingMapper.findAllByCoIdx(coIdx);
+  }
+
+  @Override
+  public void insert(SalaryMappingDTO salaryMappingDTO) {
+    salaryMappingMapper.insert(salaryMappingDTO);
+  }
+
+  @Override
+  public void modify(SalaryMappingDTO salaryMappingDTO) {
+    salaryMappingMapper.modify(salaryMappingDTO);
+  }
+
+  @Override
+  public void delete(String salaryIdx) {
+    salaryMappingMapper.delete(salaryIdx);
   }
 
 }

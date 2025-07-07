@@ -21,8 +21,8 @@
     <!-- 버튼 상단 배치 -->
     <div class="d-flex justify-content-end flex-wrap gap-2 mb-3">
       <button class="btn btn-outline-secondary">전체선택</button>
-      <button class="btn btn-warning">급여계산</button>
-      <button class="btn btn-primary">급여확정</button>
+      <button class="btn btn-warning" id="calcBtn">급여계산</button>
+      <button class="btn btn-primary" id="confirmBtn">급여확정</button>
       <button class="btn btn-success">EXCEL</button>
       <button class="btn btn-outline-danger">PDF생성</button>
       <button class="btn btn-success">명세서일괄발송</button>
@@ -80,7 +80,7 @@
             <th>수정</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="salaryTableBody">
           <tr data-bs-toggle="modal" data-bs-target="#salaryDetailModal" class="table-success" style="cursor:pointer;">
             <td><input type="checkbox"></td>
             <td>1</td>
@@ -178,19 +178,143 @@
 
     <!-- 지급월 자동 설정 -->
     <script>
-      document.getElementById("baseMonth").addEventListener("change", function () {
-        const base = this.value;
-        const year = parseInt(base.slice(0, 4));
-        const month = parseInt(base.slice(6, 8));
-        let nextMonth = month + 1;
-        let nextYear = year;
-        if (nextMonth > 12) {
-          nextMonth = 1;
-          nextYear += 1;
-        }
-        document.getElementById("payMonth").innerHTML =
-          `<option>${nextYear}년 ${String(nextMonth).padStart(2, '0')}월</option>`;
+      const coIdx = 'co-201'; // 테스트 회사코드
+
+      // 1) 조회 클릭 → 목록 로딩
+      $('#btnSearch').on('click', function () {
+        loadSalaryList();
       });
+
+      // 2) 기본귀속월 변경 시 자동으로 지급월 설정
+
+      // 3) 급여 목록 AJAX 호출
+      function loadSalaryList() {
+        const salaryMonth = $('#baseMonth').val().replace('년 ', '-').replace('월', '');
+        const payMonth = $('#payMonth').val().replace('년 ', '-').replace('월', '');
+        const empName = $('#empName').val();
+        const deptIdx = $('#deptSelect').val(); // <select id="deptSelect">
+
+        $.ajax({
+          url: '/hr/sc/list',
+          method: 'GET',
+          data: {
+            coIdx: coIdx,
+            salaryMonth: salaryMonth,
+            payMonth: payMonth,
+            empName: empName,
+            deptIdx: deptIdx
+          },
+          dataType: 'json',
+          success: function (list) {
+            renderSalaryTable(list);
+          },
+          error: function (xhr) {
+            console.error(xhr.responseText);
+          }
+        });
+      }
+
+      // 4) 목록 렌더링
+      function renderSalaryTable(list) {
+        const $tbody = $('#salaryTableBody');
+        $tbody.empty();
+        if (!list.length) {
+          $tbody.append('<tr><td colspan="13" class="text-center">조회 결과가 없습니다.</td></tr>');
+          return;
+        }
+        list.forEach(item => {
+          $tbody.append(`
+            <tr data-salary-idx="${item.salaryIdx}" class="${item.status === 'st-02' ? 'table-success' : ''}" style="cursor:pointer;">
+              <td><input type="checkbox" name="salaryCheckbox"></td>
+              <td>${item.empIdx}</td>
+              <td>${item.empName}</td>
+              <td>${item.deptName}</td>
+              <td>${item.grdName}</td>
+              <td>${item.salaryMonth}</td>
+              <td>${item.payMonth}</td>
+              <td>${item.baseSalary.toLocaleString()}</td>
+              <td>${item.allowanceSum.toLocaleString()}</td>
+              <td>${item.deductionSum.toLocaleString()}</td>
+              <td>${item.netSalary.toLocaleString()}</td>
+              <td><span class="badge bg-${item.status === 'st-02' ? 'success' : 'secondary'}">${item.status === 'st-02' ? '계산완료' : '미계산'}</span></td>
+              <td></td>
+            </tr>
+          `);
+        });
+      }
+
+      // 5) 행 클릭 → 상세조회 모달
+      $('#salaryTableBody').on('click', 'tr[data-salary-idx]', function () {
+        const salaryIdx = $(this).data('salaryIdx');
+        $.ajax({
+          url: '/hr/sc/detail-items',
+          method: 'GET',
+          data: { coIdx: coIdx, salaryIdx: salaryIdx },
+          dataType: 'json',
+          success: function (details) {
+            renderDetailModal(details);
+            $('#salaryDetailModal').modal('show');
+          }
+        });
+      });
+
+      // 6) 상세 모달 렌더링
+      function renderDetailModal(details) {
+        const $body = $('#salaryDetailModal tbody');
+        $body.empty();
+        details.forEach(row => {
+          $body.append(`
+            <tr>
+              <td>${row.item}</td>          <!-- item_name → itemName -->
+              <td>${row.amount.toLocaleString()}</td>
+              <td>${row.memo}</td>              <!-- memo 그대로 -->
+              <td>${row.taxType}</td>           <!-- tax_type → taxType -->
+              <td>${row.payType}</td>           <!-- pay_type → payType -->
+            </tr>
+          `);
+        });
+      }
+
+      // 7) 급여 계산 버튼
+      $('#calcBtn').on('click', function() {
+        const selected = $('input[name="salaryCheckbox"]:checked').map((number, cb) => $(cb).closest('tr').data('salaryIdx')).get();
+
+        if(!selected.length) {
+          Swal.fire("실패", "선택된 사원이 없습니다.", "error");
+          return;
+        }
+
+        $.ajax({
+          type: "POST",
+          url: "/hr/sc/calc",
+          data: {coIdx: coIdx, salaryIdxList: selected},
+          success: function(res) {
+            loadSalaryList();
+          }
+        });
+      });
+
+      // 8) 급여 확정 버튼
+      $('#confirmBtn').on('click', function() {
+        const selected = $('input[name="salaryCheckbox"]:checked').map((number, cb) => $(cb).closest('tr').data('salaryIdx')).get();
+
+        if(!selected.length) {
+          Swal.fire("실패", "선택된 사원이 없습니다.", "error");
+          return;
+        }
+
+        $.ajax({
+          type: "POST",
+          url: "/hr/sc/confirm",
+          data: {coIdx: coIdx, salaryIdxList: selected},
+          success: function(res) {
+            loadSalaryList();
+          }
+        });
+      });
+
+      // 초기 로딩
+      loadSalaryList();
     </script>
   </div>
 </div>
