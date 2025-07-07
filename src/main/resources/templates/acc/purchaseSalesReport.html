@@ -9,15 +9,6 @@
   - 2025-06-18 (김희정): title 및 내용 추가
   - 2025-06-24 (김희정): ag-grid 소계 테스트
 ============================================ -->
-<!-- <head>
-  <title>매입매출장</title>
-</head>
-<div layout:fragment="content">
-  <div id="purchase-sales-report">
-    <h2>매입매출장</h2>
-    <p>매입매출장 화면입니다.</p>
-  </div>
-</div> -->
 <head>
   <title>매입매출장</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
@@ -35,18 +26,30 @@
       background: #f3f6fa !important;
       font-weight: bold !important;
     }
+    .subtotal-cell {
+      background: #f3f6fa !important;
+      text-align: center !important;
+      justify-content: center !important;
+      align-items: center !important;
+      display: flex !important;
+      height: 100%;
+    }
+    .subtotal-row {
+      background: #f3f6fa !important;
+    }
+    .grandtotal-row {
+      background: #f3f6fa !important;
+    }
   </style>
 </head>
 <div layout:fragment="content">
-  <!-- 모달 불러오기 -->
-  <div th:replace="acc/modal/modal :: modals"></div>
   <div class="w-100" id="purchaseSalesReport">
     <div class="d-flex justify-content-between align-items-center mb-1">
       <!-- 왼쪽: 매입매출장 제목 -->
       <h3 class="mb-0">매입매출장</h3>
       <!-- 오른쪽: 버튼 모음 -->
       <div>
-        <button class="btn btn-secondary btn-sm" onclick="printLedger()">인쇄</button>
+        <button class="btn btn-secondary btn-sm" id="printBtn">인쇄</button>
       </div>
     </div>
     <!-- 탭 버튼 -->
@@ -60,25 +63,24 @@
       <div class="d-flex align-items-center me-2">
         <label class="form-label me-2 mb-0">일자</label>
         2025 년
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" style="width:45px;"> 월
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startDay" style="width:45px;"> 일 ~
+        <input type="number" value="1" min="1" max="12" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" id="startMonth" style="width:45px;"> 월
+        <input type="number" value="1" min="1" max="31" class="form-control form-control-sm d-inline-block mx-1" name="startDay" id="startDay" style="width:45px;"> 일 ~
         2025 년
-        <input type="number" value="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" style="width:45px;"> 월
-        <input type="number" value="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" style="width:45px;"> 일
+        <input type="number" value="12" min="1" max="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" id="endMonth" style="width:45px;"> 월
+        <input type="number" value="31" min="1" max="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" id="endDay" style="width:45px;"> 일
       </div>
       <div class="d-flex align-items-center me-2">
-        과세유형
-        <select id="taxType" class="form-select form-select-sm">
-          <option>전체</option><option>일반</option><option>간이</option>
+        <label class="me-2 mb-0" style="white-space:nowrap;">과세유형</label>
+        <select id="transactionType" name="transactionType" class="form-select form-select-sm"> 
+          <option value="">전체</option>
         </select>
       </div>
       <div class="d-flex align-items-center me-2">
-        전자유형
-        <select id="electronicType" class="form-select form-select-sm">
-          <option>전체</option><option>전자</option><option>수기</option>
+        <label class="me-2 mb-0" style="white-space:nowrap;">전자유형</label>
+        <select id="electronicType" name="electronicType" class="form-select form-select-sm">
+          <option value="">전체</option><option value="a1">전자</option><option value="a2">수기</option>
         </select>
       </div>
-    </div>
     </div>
     <!-- 탭별 컨텐츠 -->
     <div id="tab-content-all">
@@ -91,112 +93,345 @@
       <div id="psrGridPurchase" class="ag-theme-quartz" style="height: 70vh; width: 100%;"></div>
     </div>
   </div>
-  <script>
+  <script th:inline="javascript">
+    // 공통 코드(과세유형) 매핑
+    const code0H = /*[[${code0H}]]*/ [];
     // ag-Grid 컬럼 정의 (사진 참고)
     const columnDefs = [
-      { headerName: '유형', field: 'type', width: 70 },
-      { headerName: '일자', field: 'date', width: 90 },
-      { headerName: '품목', field: 'item', width: 180 },
-      { headerName: '공급가액', field: 'supplyAmount', width: 100, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
-      { headerName: '세액', field: 'tax', width: 90, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
-      { headerName: '합계', field: 'total', width: 100, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
-      { headerName: '코드', field: 'code', width: 70 },
-      { headerName: '거래처명', field: 'partnerName', width: 120 },
-      { headerName: '계정코드', field: 'accountCode', width: 80 },
-      { headerName: '계정과목명', field: 'accountName', width: 100 },
-      { headerName: '전자', field: 'electronic', width: 60 }
+      {
+        headerName: "유형",
+        field: "transactionType",
+        initialWidth: 100,
+        cellRenderer: params => {
+          if (params.data?.isSubtotal || params.data?.isGrandTotal) { // 소계/합계 row
+            // 합계 row: 유형 컬럼에만 표시
+            return params.data.entryDate;
+          }
+          // 일반 row: 기존 badge 렌더링
+          const code = params.value;
+          const mapping = code0H.find(item => item.commonCode === code);
+          if (mapping) {
+            const badgeColor = parseInt(mapping.commonCode) <= 50 ? 'bg-danger' : 'bg-primary';
+            return `<span class="badge ${badgeColor}">${mapping.commonCodeName}</span>`;
+          }
+          return code || '';
+        },
+        colSpan: params => (params.data?.isSubtotal || params.data?.isGrandTotal) ? 3 : 1, // 소계/합계 row는 유형 컬럼을 3개 합침
+        cellClass: params => (params.data?.isSubtotal || params.data?.isGrandTotal) ? 'ag-cell-center subtotal-cell' : '' // 소계/합계 row는 가운데 정렬
+      },
+      { headerName: '일자',  field: 'entryDate', width: 90,
+        valueFormatter: params => {
+          if (!params.value) return '';
+          const d = new Date(params.value); // 날짜 형식 변환
+          const mm = String(d.getMonth() + 1).padStart(2, '0'); // 월
+          const dd = String(d.getDate()).padStart(2, '0'); // 일
+          return `${mm}-${dd}`; // 일자 형식
+        },
+        colSpan: params => (params.data?.isSubtotal || params.data?.isGrandTotal) ? 0 : 1 // 소계/합계 row는 일자 컬럼 숨김
+      },
+      { headerName: '품목', field: 'itemName', width: 180,
+        colSpan: params => (params.data?.isSubtotal || params.data?.isGrandTotal) ? 0 : 1 // 소계/합계 row는 품목 컬럼 숨김
+      },
+      { headerName: '공급가액', field: 'totalSupplyAmount', width: 120, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
+      { headerName: '세액', field: 'totalTaxAmount', width: 110, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
+      { headerName: '합계', field: 'total', width: 130, type: 'numericColumn', valueGetter: params => (params.data?.totalSupplyAmount || 0) + (params.data?.totalTaxAmount || 0), valueFormatter: params => params.value?.toLocaleString() },
+      { headerName: '코드', field: 'partnerCode', width: 70 },
+      { headerName: '거래처명', field: 'partnerName', width: 170 },
+      { headerName: '계정코드', valueGetter: params => params.data?.details?.[0]?.accountCode || '', width: 110 },
+      { headerName: '계정과목명', valueGetter: params => params.data?.details?.[0]?.accountName || '', width: 150 },
+      { headerName: '전자', field: 'electronicType', width: 60,
+        cellRenderer: params => {
+          if (params.value === 'a1') return '○'; return '';
+        }
+      }
     ];
 
-    function addSummaryRows(data) {
-      if (!data.length) return [];
-      const grouped = {};
-      let grand = { supplyAmount: 0, tax: 0, total: 0 };
-      const result = [];
-      data.forEach(row => {
-        if (!grouped[row.type]) grouped[row.type] = { supplyAmount: 0, tax: 0, total: 0, rows: [] };
-        grouped[row.type].supplyAmount += row.supplyAmount || 0;
-        grouped[row.type].tax += row.tax || 0;
-        grouped[row.type].total += row.total || 0;
-        grouped[row.type].rows.push(row);
-        grand.supplyAmount += row.supplyAmount || 0;
-        grand.tax += row.tax || 0;
-        grand.total += row.total || 0;
-      });
-      for (const type in grouped) {
-        result.push(...grouped[type].rows);
-        result.push({ type: type + ' 소계', supplyAmount: grouped[type].supplyAmount, tax: grouped[type].tax, total: grouped[type].total, isSubtotal: true });
+    function addSummaryRows(data) { // 소계 및 합계 행 추가
+      if (!data.length) return []; // 빈 데이터 처리
+      const result = []; // 결과 배열 초기화
+      let grand = { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0 }; // 전체 합계 초기화
+
+      // 날짜 오름차순 정렬
+      data = [...data].sort((a, b) => new Date(a.entryDate) - new Date(b.entryDate));
+
+      // 그룹핑 함수
+      const getMonth = row => { // 월 추출 함수
+        const d = new Date(row.entryDate); // 날짜 객체 생성
+        return isNaN(d) ? (row.entryDate?.substr(5, 2) || '') : String(d.getMonth() + 1).padStart(2, '0'); // 월을 2자리 문자열로 반환
+      };
+      const getQuarter = row => { // 분기 추출 함수
+        const d = new Date(row.entryDate); // 날짜 객체 생성
+        const m = isNaN(d) ? parseInt(row.entryDate?.substr( 5, 2)) : d.getMonth() + 1; // 월 추출
+        return m ? `${Math.floor((m - 1) / 3) + 1}` : ''; // 분기 계산
+      };
+      const getHalf = row => { // 반기 추출 함수
+        const d = new Date(row.entryDate); // 날짜 객체 생성
+        const m = isNaN(d) ? parseInt(row.entryDate?.substr(5, 2)) : d.getMonth() + 1; // 월 추출
+        return m ? (m <= 6 ? '상' : '하') : ''; // 반기 계산
+      };
+
+      // 누적용
+      let monthSum = {}, quarterSum = {}, halfSum = {}; // 월, 분기, 반기별 누적 객체 초기화
+
+      // 일자별 정렬
+      const days = [...new Set(data.map(row => { // 중복 제거를 위해 Set 사용
+        const d = new Date(row.entryDate); // 날짜 객체 생성
+        if (isNaN(d)) return row.entryDate?.substr(5, 5) || ''; // 날짜가 유효하지 않으면 문자열로 반환
+        const mm = String(d.getMonth() + 1).padStart(2, '0'); // 월을 2자리 문자열로 반환
+        const dd = String(d.getDate()).padStart(2, '0'); // 일을 2자리 문자열로 반환
+        return `${mm}-${dd}`;
+      }))].sort(); // 날짜 문자열을 정렬하여 일자별로 그룹화
+
+      // 일자별로 루프
+      for (let i = 0; i < data.length;) { //  인덱스 i를 사용하여 루프
+        const curRow = data[i]; // 현재 행을 가져옴
+        const curDate = curRow.entryDate; // 현재 행의 날짜
+        const d = new Date(curDate); // 날짜 객체 생성
+        const mm = isNaN(d) ? (curDate?.substr(5, 2) || '') : String(d.getMonth() + 1).padStart(2, '0'); // 월을 2자리 문자열로 반환
+        const dd = isNaN(d) ? (curDate?.substr(8, 2) || '') : String(d.getDate()).padStart(2, '0'); // 일을 2자리 문자열로 반환
+        const dayKey = `${mm}-${dd}`; // 일자 키 생성
+
+        // 같은 일자 데이터 모으기
+        const dayRows = []; // 일자별 행 배열 초기화
+        while ( i < data.length && (() => { // 현재 행이 같은 일자인지 확인하는 함수
+            const row = data[i]; // 현재 행을 가져옴
+            const d2 = new Date(row.entryDate); // 날짜 객체 생성
+            const mm2 = isNaN(d2) ? (row.entryDate?.substr(5, 2) || '') : String(d2.getMonth() + 1).padStart(2, '0'); // 월을 2자리 문자열로 반환
+            const dd2 = isNaN(d2) ? (row.entryDate?.substr(8, 2) || '') : String(d2.getDate()).padStart(2, '0'); // 일을 2자리 문자열로 반환
+            return `${mm2}-${dd2}` === dayKey; // 같은 일자인지 비교
+          })() 
+        ) {
+          dayRows.push(data[i]); // 같은 일자 행을 배열에 추가
+          i++;
+        }
+
+        // 일자 데이터 push
+        dayRows.forEach(row => { // 각 일자 행에 대해
+          result.push(row); // 결과 배열에 행 추가
+
+          // 누적
+          grand.totalSupplyAmount += row.totalSupplyAmount || 0; // 공급가액 누적
+          grand.totalTaxAmount += row.totalTaxAmount || 0; // 세액 누적
+          grand.total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0); // 총합 누적
+
+          // 월/분기/반기 누적
+          const month = getMonth(row); // 월 추출
+          const quarter = getQuarter(row); // 분기 추출
+          const half = getHalf(row); // 반기 추출
+          // 월 누적 객체 초기화 및 누적
+          monthSum[month] = monthSum[month] || { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0, count: 0 }; // 월 누적 객체 초기화
+          monthSum[month].totalSupplyAmount += row.totalSupplyAmount || 0; // 공급가액 누적
+          monthSum[month].totalTaxAmount += row.totalTaxAmount || 0; // 세액 누적
+          monthSum[month].total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0); // 총합 누적
+          monthSum[month].count++; // 건수 누적
+          // 분기 및 반기 누적 객체 초기화 및 누적
+          quarterSum[quarter] = quarterSum[quarter] || { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0, count: 0 }; // 분기 누적 객체 초기화
+          quarterSum[quarter].totalSupplyAmount += row.totalSupplyAmount || 0;// 공급가액 누적
+          quarterSum[quarter].totalTaxAmount += row.totalTaxAmount || 0; // 세액 누적
+          quarterSum[quarter].total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0); // 총합 누적
+          quarterSum[quarter].count++; // 건수 누적
+          // 반기 누적 객체 초기화 및 누적
+          halfSum[half] = halfSum[half] || { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0, count: 0 }; // 반기 누적 객체 초기화
+          halfSum[half].totalSupplyAmount += row.totalSupplyAmount || 0; // 공급가액 누적
+          halfSum[half].totalTaxAmount += row.totalTaxAmount || 0; // 세액 누적
+          halfSum[half].total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0); // 총합 누적
+          halfSum[half].count++; // 건수 누적
+        });
+
+        // 일계
+        result.push({ // 일계 행 추가
+          entryDate: `일계 [ ${dayRows.length} 건 ]`, // 일자별 건수 표시
+          totalSupplyAmount: dayRows.reduce((a, b) => a + (b.totalSupplyAmount || 0), 0), // 공급가액 합계
+          totalTaxAmount: dayRows.reduce((a, b) => a + (b.totalTaxAmount || 0), 0), // 세액 합계
+          total: dayRows.reduce((a, b) => a + (b.totalSupplyAmount || 0) + (b.totalTaxAmount || 0), 0), // 총합 합계
+          isSubtotal: true // 소계 표시
+        });
+
+        // 월계
+        if ( i === data.length || getMonth(data[i - 1]) !== getMonth(data[i])) { // 월이 바뀌었거나 마지막 데이터인 경우
+          const month = getMonth(dayRows[0]); // 현재 행의 월 추출
+          const ms = monthSum[month]; // 월 누적 객체
+          result.push({ // 월계 행 추가
+            entryDate: `월계 [ ${ms.count} 건 ]`, // 월별 건수 표시
+            totalSupplyAmount: ms.totalSupplyAmount, // 공급가액 합계
+            totalTaxAmount: ms.totalTaxAmount, // 세액 합계
+            total: ms.total, // 총합 합계
+            isSubtotal: true // 소계 표시
+          });
+          // 월 누적 초기화
+          monthSum[month] = undefined; // 월 누적 객체 초기화
+        }
+
+        // 분기계
+        if ( i === data.length || getQuarter(data[i - 1]) !== getQuarter(data[i]) ) { // 분기가 바뀌었거나 마지막 데이터인 경우
+          const quarter = getQuarter(dayRows[0]); // 현재 행의 분기 추출
+          const qs = quarterSum[quarter]; //  분기 누적 객체
+          result.push({ // 분기계 행 추가
+            entryDate: `분기계 [ ${qs.count} 건 ]`, // 분기별 건수 표시
+            totalSupplyAmount: qs.totalSupplyAmount, // 공급가액 합계
+            totalTaxAmount: qs.totalTaxAmount, // 세액 합계
+            total: qs.total, // 총합 합계
+            isSubtotal: true // 소계 표시
+          });
+          quarterSum[quarter] = undefined; // 분기 누적 객체 초기화
+        }
+
+        // 반기계
+        if ( i === data.length || getHalf(data[i - 1]) !== getHalf(data[i]) ) { // 반기가 바뀌었거나 마지막 데이터인 경우
+          const half = getHalf(dayRows[0]); // 현재 행의 반기 추출
+          const hs = halfSum[half]; // 반기 누적 객체
+          result.push({// 반기계 행 추가
+            entryDate: `반기계 [ ${hs.count} 건 ]`, // 반기별 건수 표시
+            totalSupplyAmount: hs.totalSupplyAmount, // 공급가액 합계
+            totalTaxAmount: hs.totalTaxAmount, // 세액 합계
+            total: hs.total,//  총합 합계
+            isSubtotal: true // 소계 표시
+          });
+          halfSum[half] = undefined; // 반기 누적 객체 초기화
+        }
       }
-      result.push({ type: '총계', supplyAmount: grand.supplyAmount, tax: grand.tax, total: grand.total, isGrandTotal: true });
-      return result;
+
+      // 소계
+      result.push({ // 소계 행 추가
+        entryDate: '소계',  // 소계 표시
+        totalSupplyAmount: grand.totalSupplyAmount, // 공급가액 합계
+        totalTaxAmount: grand.totalTaxAmount, // 세액 합계
+        total: grand.total,// 총합 합계
+        isGrandTotal: true // 합계 표시
+      });
+
+      return result; // 최종 결과 반환
     }
 
     // 각 탭별 ag-Grid 인스턴스
     const gridOptionsAll = {
+      headerHeight: 35,
+      rowHeight: 35,
       columnDefs,
       rowData: [],
-      getRowClass: params => {
-        if (params.data?.isGrandTotal) return 'grandtotal-row';
-        if (params.data?.isSubtotal) return 'subtotal-row';
+      getRowClass: params => { // 행 클래스 설정
+        if (params.data?.isGrandTotal) return 'grandtotal-row'; // 합계 행
+        if (params.data?.isSubtotal) return 'subtotal-row'; // 소계 행
       },
-      defaultColDef: { resizable: true, sortable: true },
-      suppressMovableColumns: true,
+      defaultColDef: { resizable: true, sortable: true }, // 기본 컬럼 정의
+      suppressMovableColumns: true, // 컬럼 이동 비활성화
       localeText: { noRowsToShow: '조회 결과가 없습니다.' }
     };
-    const gridOptionsSales = { ...gridOptionsAll, rowData: [] };
-    const gridOptionsPurchase = { ...gridOptionsAll, rowData: [] };
-    const apiAll = agGrid.createGrid(document.getElementById('psrGridAll'), gridOptionsAll);
-    const apiSales = agGrid.createGrid(document.getElementById('psrGridSales'), gridOptionsSales);
-    const apiPurchase = agGrid.createGrid(document.getElementById('psrGridPurchase'), gridOptionsPurchase);
+    const gridOptionsSales = { ...gridOptionsAll, rowData: [] }; // 매출 탭용
+    const gridOptionsPurchase = { ...gridOptionsAll, rowData: [] }; // 매입 탭용
+    const apiAll = agGrid.createGrid(document.getElementById('psrGridAll'), gridOptionsAll); // 전체 탭용
+    const apiSales = agGrid.createGrid(document.getElementById('psrGridSales'), gridOptionsSales); // 매출 탭용
+    const apiPurchase = agGrid.createGrid(document.getElementById('psrGridPurchase'), gridOptionsPurchase); // 매입 탭용
 
     // 탭 전환 이벤트
-    document.getElementById('tab-all').onclick = function() {
-      document.getElementById('tab-content-all').style.display = '';
-      document.getElementById('tab-content-sales').style.display = 'none';
-      document.getElementById('tab-content-purchase').style.display = 'none';
-      this.classList.add('active');
-      document.getElementById('tab-sales').classList.remove('active');
-      document.getElementById('tab-purchase').classList.remove('active');
+    document.getElementById('tab-all').onclick = function() { // 전체 탭 클릭 이벤트
+      document.getElementById('tab-content-all').style.display = ''; // 전체 탭 컨텐츠 보이기
+      document.getElementById('tab-content-sales').style.display = 'none'; // 매출 탭 컨텐츠 숨기기
+      document.getElementById('tab-content-purchase').style.display = 'none'; // 매입 탭 컨텐츠 숨기기
+      this.classList.add('active'); // 전체 탭 활성화
+      document.getElementById('tab-sales').classList.remove('active'); // 매출 탭 비활성화
+      document.getElementById('tab-purchase').classList.remove('active'); // 매입 탭 비활성화
     };
-    document.getElementById('tab-sales').onclick = function() {
-      document.getElementById('tab-content-all').style.display = 'none';
-      document.getElementById('tab-content-sales').style.display = '';
-      document.getElementById('tab-content-purchase').style.display = 'none';
-      this.classList.add('active');
-      document.getElementById('tab-all').classList.remove('active');
-      document.getElementById('tab-purchase').classList.remove('active');
+    document.getElementById('tab-sales').onclick = function() { // 매출 탭 클릭 이벤트
+      document.getElementById('tab-content-all').style.display = 'none'; // 전체 탭 컨텐츠 숨기기
+      document.getElementById('tab-content-sales').style.display = ''; // 매출 탭 컨텐츠 보이기
+      document.getElementById('tab-content-purchase').style.display = 'none'; // 매입 탭 컨텐츠 숨기기
+      this.classList.add('active'); // 매출 탭 활성화
+      document.getElementById('tab-all').classList.remove('active'); // 전체 탭 비활성화
+      document.getElementById('tab-purchase').classList.remove('active'); // 매입 탭 비활성화
     };
-    document.getElementById('tab-purchase').onclick = function() {
-      document.getElementById('tab-content-all').style.display = 'none';
-      document.getElementById('tab-content-sales').style.display = 'none';
-      document.getElementById('tab-content-purchase').style.display = '';
-      this.classList.add('active');
-      document.getElementById('tab-all').classList.remove('active');
-      document.getElementById('tab-sales').classList.remove('active');
+    document.getElementById('tab-purchase').onclick = function() { // 매입 탭 클릭 이벤트
+      document.getElementById('tab-content-all').style.display = 'none'; // 전체 탭 컨텐츠 숨기기 
+      document.getElementById('tab-content-sales').style.display = 'none'; // 매출 탭 컨텐츠 숨기기
+      document.getElementById('tab-content-purchase').style.display = ''; // 매입 탭 컨텐츠 보이기
+      this.classList.add('active'); // 매입 탭 활성화
+      document.getElementById('tab-all').classList.remove('active'); // 전체 탭 비활성화
+      document.getElementById('tab-sales').classList.remove('active'); // 매출 탭 비활성화
     };
 
-    // 데이터 로드 함수 (전체/매출/매입)
-    async function loadReport() {
-      const startDate = document.getElementById('startDate').value;
-      const endDate = document.getElementById('endDate').value;
-      const taxType = document.getElementById('taxType').value;
-      const electronicType = document.getElementById('electronicType').value;
-      // 전체
-      let res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&type=전체&taxType=${taxType}&electronicType=${electronicType}`);
-      let data = await res.json();
-      apiAll.setGridOption('rowData', addSummaryRows(data));
-      // 매출
-      res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&type=매출&taxType=${taxType}&electronicType=${electronicType}`);
-      data = await res.json();
-      apiSales.setGridOption('rowData', addSummaryRows(data));
-      // 매입
-      res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&type=매입&taxType=${taxType}&electronicType=${electronicType}`);
-      data = await res.json();
-      apiPurchase.setGridOption('rowData', addSummaryRows(data));
+    function pad2(n) { return n < 10 ? '0' + n : n; } // 2자리 숫자 포맷 함수
+    function getDateRange() { // 시작일과 종료일을 가져오는 함수
+      const startMonth = pad2(Number(document.getElementById('startMonth').value)); // 시작월을 2자리로 포맷
+      const startDay = pad2(Number(document.getElementById('startDay').value)); // 시작일을 2자리로 포맷
+      const endMonth = pad2(Number(document.getElementById('endMonth').value)); // 종료월을 2자리로 포맷
+      const endDay = pad2(Number(document.getElementById('endDay').value)); // 종료일을 2자리로 포맷
+      return {
+        startDate: `${startMonth}-${startDay}`, // 시작일 포맷
+        endDate: `${endMonth}-${endDay}` // 종료일 포맷
+      };
     }
-    document.getElementById('searchBtn').onclick = loadReport;
-    // 최초 조회
-    loadReport();
-    // 인쇄 버튼(단순 window.print)
-    document.getElementById('printBtn').onclick = () => window.print();
+    function getActiveTabEntryType() {
+      if(document.getElementById('tab-all').classList.contains('active')) return '';
+      if(document.getElementById('tab-sales').classList.contains('active')) return '매출';
+      if(document.getElementById('tab-purchase').classList.contains('active')) return '매입';
+      return '';
+    }
+    async function loadReport() { // 보고서 데이터를 불러오는 함수
+      const { startDate, endDate } = getDateRange(); // 시작일과 종료일을 가져옴
+      const transactionType = document.getElementById('transactionType').value; // 과세유형 선택값
+      const electronicType = document.getElementById('electronicType').value; // 전자유형 선택값
+      const entryType = getActiveTabEntryType(); // 현재 활성화된 탭의 유형 가져오기
+      let res, data; // 응답 변수 초기화
+      try { // 서버에서 데이터 요청
+        res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&entryType=${entryType}&transactionType=${transactionType}&electronicType=${electronicType}`);
+        if (!res.ok) { // 응답이 실패한 경우
+          console.error('HTTP error', res.status, await res.text());
+          data = []; // 빈 데이터로 초기화
+        } else {
+          data = await res.json(); // JSON 데이터 파싱
+          console.log((entryType||'전체') + ' 데이터:', data);
+        }
+      } catch (e) {
+        console.error('fetch error', e);
+        data = [];
+      }
+      if(entryType === '' || entryType === '전체') apiAll.setGridOption('rowData', addSummaryRows(data)); // 전체 탭 데이터 설정
+      if(entryType === '매출') apiSales.setGridOption('rowData', addSummaryRows(data)); // 매출 탭 데이터 설정
+      if(entryType === '매입') apiPurchase.setGridOption('rowData', addSummaryRows(data)); // 매입 탭 데이터 설정
+    }
+    ['startMonth','startDay','endMonth','endDay','transactionType','electronicType'].forEach(id => { // 검색조건 변경 이벤트
+      document.getElementById(id).addEventListener('change', loadReport); // 검색조건 변경 시 보고서 재로딩
+    });
+
+    // 과세유형 옵션
+    const transactionTypeOptions = {
+      '전체': `
+        <option value="">전체</option>
+        <option value="11">11. 과세</option><option value="12">12. 영세</option><option value="13">13. 면세</option><option value="14">14. 건별</option><option value="15">15. 간이</option>
+        <option value="16">16. 수출</option><option value="17">17. 카과</option><option value="18">18. 카면</option><option value="19">19. 카영</option><option value="20">20. 면건</option>
+        <option value="21">21. 전자</option><option value="22">22. 현과</option><option value="23">23. 현면</option><option value="24">24. 현영</option>
+        <option value="51">51. 과세</option><option value="52">52. 영세</option><option value="53">53. 면세</option><option value="54">54. 불공</option>
+        <option value="55">55. 수입</option><option value="56">56. 금전</option><option value="57">57. 카과</option><option value="58">58. 카면</option><option value="59">59. 카영</option>
+        <option value="60">60. 면건</option><option value="61">61. 현과</option><option value="62">62. 현면</option>
+      `,
+      '매출': `
+        <option value="">전체</option>
+        <option value="11">11. 과세</option><option value="12">12. 영세</option><option value="13">13. 면세</option><option value="14">14. 건별</option><option value="15">15. 간이</option>
+        <option value="16">16. 수출</option><option value="17">17. 카과</option><option value="18">18. 카면</option><option value="19">19. 카영</option><option value="20">20. 면건</option>
+        <option value="21">21. 전자</option><option value="22">22. 현과</option><option value="23">23. 현면</option><option value="24">24. 현영</option>
+      `,
+      '매입': `
+        <option value="">전체</option>
+        <option value="51">51. 과세</option><option value="52">52. 영세</option><option value="53">53. 면세</option><option value="54">54. 불공</option>
+        <option value="55">55. 수입</option><option value="56">56. 금전</option><option value="57">57. 카과</option><option value="58">58. 카면</option><option value="59">59. 카영</option>
+        <option value="60">60. 면건</option><option value="61">61. 현과</option><option value="62">62. 현면</option>
+      `
+    };
+    function updateTransactionTypeOptions(tab) { // 탭에 따라 과세유형 옵션 업데이트
+      const transactionTypeSelect = document.getElementById('transactionType'); // 과세유형 셀렉트 박스
+      transactionTypeSelect.innerHTML = transactionTypeOptions[tab] || transactionTypeOptions['전체']; // 선택된 탭에 맞는 옵션으로 업데이트
+      transactionTypeSelect.value = ""; // 항상 전체로 초기화 
+      // addEventListener('change', loadReport))가 실행되도록 강제로 change 이벤트를 발생
+      transactionTypeSelect.dispatchEvent(new Event('change')); // 변경 이벤트 트리거 // 검색조건 변경 이벤트 발생
+    }
+    ['tab-all','tab-sales','tab-purchase'].forEach(id => { // 각 탭 버튼에 클릭 이벤트 추가
+      document.getElementById(id).addEventListener('click', function() { // 탭 클릭 시
+        let tab = '전체'; // 기본값은 전체
+        if(id==='tab-sales') tab = '매출'; // 매출 탭 클릭 시
+        if(id==='tab-purchase') tab = '매입'; // 매입 탭 클릭 시
+        updateTransactionTypeOptions(tab); // 과세유형 옵션 업데이트
+      });
+    });
+    updateTransactionTypeOptions('전체'); // 초기 로딩 시 전체 탭에 맞는 과세유형 옵션 설정
   </script>
 </div>

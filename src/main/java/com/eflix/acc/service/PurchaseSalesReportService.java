@@ -1,11 +1,12 @@
 package com.eflix.acc.service;
 
 import java.util.List;
-import com.eflix.acc.dto.PurchaseSalesReportDTO;
+import java.util.Map;
+import com.eflix.acc.dto.EntryMasterDTO;
 
 /**
  * 매입매출장 Service
  */
 public interface PurchaseSalesReportService {
-    List<PurchaseSalesReportDTO> getReportList(String startDate, String endDate, String type, String taxType, String electronicType);
+    List<EntryMasterDTO> getReportList(Map<String, Object> params);
 }

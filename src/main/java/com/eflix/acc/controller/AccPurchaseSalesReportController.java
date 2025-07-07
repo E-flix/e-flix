@@ -1,14 +1,18 @@
 package com.eflix.acc.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
-import com.eflix.acc.dto.PurchaseSalesReportDTO;
+import java.util.Map;
+import java.util.HashMap;
+import com.eflix.acc.dto.EntryMasterDTO;
 import com.eflix.acc.service.PurchaseSalesReportService;
+import com.eflix.common.code.service.CommonService;
 
 /**
  * ============================================
@@ -26,12 +30,14 @@ import com.eflix.acc.service.PurchaseSalesReportService;
 public class AccPurchaseSalesReportController {
 
   private final PurchaseSalesReportService purchaseSalesReportService;
+  private final CommonService commonService;
 
   /**
    * 매입매출장 화면 요청 처리
    */
   @GetMapping("/psr")
-  public String purchaseSalesReport() {
+  public String purchaseSalesReport(Model model) {
+    model.addAttribute("code0H", commonService.getCommon("0H")); // 과세유형
     return "acc/purchaseSalesReport";
   }
 
@@ -40,13 +46,19 @@ public class AccPurchaseSalesReportController {
    */
   @ResponseBody
   @GetMapping("/psr/list")
-  public List<PurchaseSalesReportDTO> getReportList(
+  public List<EntryMasterDTO> getReportList(
       @RequestParam String startDate,
       @RequestParam String endDate,
-      @RequestParam(required = false, defaultValue = "전체") String type,
-      @RequestParam(required = false, defaultValue = "전체") String taxType,
-      @RequestParam(required = false, defaultValue = "전체") String electronicType
+      @RequestParam(required = false, defaultValue = "") String entryType,
+      @RequestParam(required = false, defaultValue = "") String transactionType,
+      @RequestParam(required = false, defaultValue = "") String electronicType
   ) {
-    return purchaseSalesReportService.getReportList(startDate, endDate, type, taxType, electronicType);
+    Map<String, Object> params = new HashMap<>();
+    params.put("startDate", startDate);
+    params.put("endDate", endDate);
+    params.put("entryType", entryType);
+    params.put("transactionType", transactionType);
+    params.put("electronicType", electronicType);
+    return purchaseSalesReportService.getReportList(params);
   }
 }

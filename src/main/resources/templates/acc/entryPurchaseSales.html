@@ -2124,5 +2124,193 @@
         }
       }
     }
+
+    // 요약 행 추가 함수
+    function addSummaryRows(data) {
+      if (!data.length) return [];
+      const result = [];
+      let grand = { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0 };
+
+      // 날짜 오름차순 정렬
+      data = [...data].sort((a, b) => new Date(a.entryDate) - new Date(b.entryDate));
+
+      // 그룹핑
+      const groupBy = (arr, keyFn) => arr.reduce((acc, row) => {
+        const key = keyFn(row);
+        acc[key] = acc[key] || [];
+        acc[key].push(row);
+        return acc;
+      }, {});
+
+      // 월/분기/반기 그룹핑
+      const getMonth = row => {
+        const d = new Date(row.entryDate);
+        return isNaN(d) ? (row.entryDate?.substr(5, 2) || '') : String(d.getMonth() + 1).padStart(2, '0');
+      };
+      const getQuarter = row => {
+        const d = new Date(row.entryDate);
+        const m = isNaN(d) ? parseInt(row.entryDate?.substr(5, 2)) : d.getMonth() + 1;
+        return m ? `${Math.floor((m - 1) / 3) + 1}` : '';
+      };
+      const getHalf = row => {
+        const d = new Date(row.entryDate);
+        const m = isNaN(d) ? parseInt(row.entryDate?.substr(5, 2)) : d.getMonth() + 1;
+        return m ? (m <= 6 ? '상' : '하') : '';
+      };
+
+      // 그룹핑된 키
+      const byMonth = groupBy(data, getMonth);
+      const byQuarter = groupBy(data, getQuarter);
+      const byHalf = groupBy(data, getHalf);
+
+      // 월/분기/반기/전체 합계 누적용
+      let monthSum = {}, quarterSum = {}, halfSum = {};
+
+      // 일자별 정렬
+      const days = [...new Set(data.map(row => {
+        const d = new Date(row.entryDate);
+        if (isNaN(d)) return row.entryDate?.substr(5, 5) || '';
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${mm}-${dd}`;
+      }))].sort();
+
+      // 월/분기/반기/전체 마지막 일자인지 체크 함수
+      const isLastOfGroup = (idx, arr, groupFn) => {
+        if (idx === arr.length - 1) return true;
+        return groupFn(arr[idx]) !== groupFn(arr[idx + 1]);
+      };
+
+      // 일자별로 루프
+      for (let i = 0; i < data.length;) {
+        const curRow = data[i];
+        const curDate = curRow.entryDate;
+        const d = new Date(curDate);
+        const mm = isNaN(d) ? (curDate?.substr(5, 2) || '') : String(d.getMonth() + 1).padStart(2, '0');
+        const dd = isNaN(d) ? (curDate?.substr(8, 2) || '') : String(d.getDate()).padStart(2, '0');
+        const dayKey = `${mm}-${dd}`;
+
+        // 같은 일자 데이터 모으기
+        const dayRows = [];
+        while (
+          i < data.length &&
+          (() => {
+            const row = data[i];
+            const d2 = new Date(row.entryDate);
+            const mm2 = isNaN(d2) ? (row.entryDate?.substr(5, 2) || '') : String(d2.getMonth() + 1).padStart(2, '0');
+            const dd2 = isNaN(d2) ? (row.entryDate?.substr(8, 2) || '') : String(d2.getDate()).padStart(2, '0');
+            return `${mm2}-${dd2}` === dayKey;
+          })()
+        ) {
+          dayRows.push(data[i]);
+          i++;
+        }
+
+        // 일자 데이터 push
+        dayRows.forEach(row => {
+          result.push(row);
+
+          // 누적
+          grand.totalSupplyAmount += row.totalSupplyAmount || 0;
+          grand.totalTaxAmount += row.totalTaxAmount || 0;
+          grand.total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0);
+
+          // 월/분기/반기 누적
+          const month = getMonth(row);
+          const quarter = getQuarter(row);
+          const half = getHalf(row);
+
+          monthSum[month] = monthSum[month] || { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0, count: 0 };
+          monthSum[month].totalSupplyAmount += row.totalSupplyAmount || 0;
+          monthSum[month].totalTaxAmount += row.totalTaxAmount || 0;
+          monthSum[month].total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0);
+          monthSum[month].count++;
+
+          quarterSum[quarter] = quarterSum[quarter] || { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0, count: 0 };
+          quarterSum[quarter].totalSupplyAmount += row.totalSupplyAmount || 0;
+          quarterSum[quarter].totalTaxAmount += row.totalTaxAmount || 0;
+          quarterSum[quarter].total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0);
+          quarterSum[quarter].count++;
+
+          halfSum[half] = halfSum[half] || { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0, count: 0 };
+          halfSum[half].totalSupplyAmount += row.totalSupplyAmount || 0;
+          halfSum[half].totalTaxAmount += row.totalTaxAmount || 0;
+          halfSum[half].total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0);
+          halfSum[half].count++;
+        });
+
+        // 일계
+        result.push({
+          entryDate: `${dayKey} 일계 [ ${dayRows.length} 건 ]`,
+          totalSupplyAmount: dayRows.reduce((a, b) => a + (b.totalSupplyAmount || 0), 0),
+          totalTaxAmount: dayRows.reduce((a, b) => a + (b.totalTaxAmount || 0), 0),
+          total: dayRows.reduce((a, b) => a + (b.totalSupplyAmount || 0) + (b.totalTaxAmount || 0), 0),
+          isSubtotal: true
+        });
+
+        // 월계
+        if (
+          i === data.length ||
+          getMonth(data[i - 1]) !== getMonth(data[i])
+        ) {
+          const month = getMonth(dayRows[0]);
+          const ms = monthSum[month];
+          result.push({
+            entryDate: `${month}월계 [ ${ms.count} 건 ]`,
+            totalSupplyAmount: ms.totalSupplyAmount,
+            totalTaxAmount: ms.totalTaxAmount,
+            total: ms.total,
+            isSubtotal: true
+          });
+          // 월 누적 초기화
+          monthSum[month] = undefined;
+        }
+
+        // 분기계
+        if (
+          i === data.length ||
+          getQuarter(data[i - 1]) !== getQuarter(data[i])
+        ) {
+          const quarter = getQuarter(dayRows[0]);
+          const qs = quarterSum[quarter];
+          result.push({
+            entryDate: `${quarter}분기계 [ ${qs.count} 건 ]`,
+            totalSupplyAmount: qs.totalSupplyAmount,
+            totalTaxAmount: qs.totalTaxAmount,
+            total: qs.total,
+            isSubtotal: true
+          });
+          quarterSum[quarter] = undefined;
+        }
+
+        // 반기계
+        if (
+          i === data.length ||
+          getHalf(data[i - 1]) !== getHalf(data[i])
+        ) {
+          const half = getHalf(dayRows[0]);
+          const hs = halfSum[half];
+          result.push({
+            entryDate: `${half}반기계 [ ${hs.count} 건 ]`,
+            totalSupplyAmount: hs.totalSupplyAmount,
+            totalTaxAmount: hs.totalTaxAmount,
+            total: hs.total,
+            isSubtotal: true
+          });
+          halfSum[half] = undefined;
+        }
+      }
+
+      // 소계
+      result.push({
+        entryDate: '소계',
+        totalSupplyAmount: grand.totalSupplyAmount,
+        totalTaxAmount: grand.totalTaxAmount,
+        total: grand.total,
+        isGrandTotal: true
+      });
+
+      return result;
+    }
   </script>
 </div>

@@ -1,54 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================
+  - 작성자   : 김희정
+  - 최초작성 : 2025-07-07
+  - 설명     : PurchaseSalesReport query xml
+  [ 변경 이력 ]
+	- 2025-07-07 (김희정): 매출매입현황 전체 조회 작성
+=============================================== -->
 <mapper namespace="com.eflix.acc.mapper.PurchaseSalesReportMapper">
-  <resultMap id="purchaseSalesReportResultMap" type="com.eflix.acc.dto.PurchaseSalesReportDTO">
-    <result property="type" column="type" />
-    <result property="date" column="date" />
-    <result property="item" column="item" />
-    <result property="supplyAmount" column="supply_amount" />
-    <result property="tax" column="tax" />
-    <result property="total" column="total" />
-    <result property="code" column="code" />
-    <result property="partnerName" column="partner_name" />
+  <!-- EntryDetailDTO 매핑 정의 -->
+  <resultMap id="entryDetailResultMap" type="com.eflix.acc.dto.EntryDetailDTO">
+    <id property="lineNumber" column="line_number" />
+    <result property="entryNumber" column="entry_number" />
     <result property="accountCode" column="account_code" />
-    <result property="accountName" column="account_name" />
-    <result property="electronic" column="electronic" />
+    <result property="coIdx" column="co_idx"/>
+    
+    <result property="accountName" column="account_name"/>
+    <result property="majorCategory" column="major_category"/>
   </resultMap>
 
-  <select id="getReportList" resultMap="purchaseSalesReportResultMap">
+  <!-- EntryMasterDTO + details 매핑 정의 -->
+  <resultMap id="entryMasterResultMap" type="com.eflix.acc.dto.EntryMasterDTO">
+    <id property="entryNumber" column="entry_number" />
+    <result property="partnerCode" column="partner_code" />
+    <result property="partnerName" column="partner_name" />
+    <result property="entryType" column="entry_type" />
+    <result property="entryDate" column="entry_date" />
+    <result property="transactionType" column="transaction_type" />
+    <result property="electronicType" column="electronic_type" />
+    <result property="itemName" column="item_name" />
+    <result property="totalSupplyAmount" column="total_supply_amount" />
+    <result property="totalTaxAmount" column="total_tax_amount" />
+
+    <result property="coIdx" column="co_idx"/>
+    <!-- 디테일 부분 컬렉션 매핑 => 하위 컬렉션 매핑 (1:N 관계) 
+     ofType == collection에서 리스트 안에 들어가는 객체의 타입을 알려주는 속성 -->
+    <collection property="details" ofType="com.eflix.acc.dto.EntryDetailDTO" resultMap="entryDetailResultMap" />
+  </resultMap>
+
+   <!-- 매입매출 조회 -->
+  <select id="getReportList" resultMap="entryMasterResultMap" parameterType="map">
     SELECT 
-      m.type,
-      m.date,
-      m.item,
-      m.supply_amount,
-      m.tax,
-      m.total,
-      m.code,
-      m.partner_name,
-      m.account_code,
-      m.account_name,
-      m.electronic
-    FROM purchase_sales_report m
+      m.entry_type, 
+      m.entry_date, 
+      m.transaction_type, 
+      m.electronic_type, 
+      m.item_name, 
+      m.total_supply_amount, 
+      m.total_tax_amount,
+      m.partner_code,
+      ( SELECT d2.account_code
+        FROM entry_detail d2
+        JOIN account a2 
+          ON d2.account_code = a2.account_code 
+        AND a2.co_idx = #{coIdx}
+        WHERE d2.entry_number = m.entry_number
+          AND d2.co_idx = #{coIdx}
+          AND a2.major_category IN ('수익', '비용')
+          AND ROWNUM = 1
+      ) AS account_code,
+      ( SELECT a3.account_name
+        FROM entry_detail d3
+        JOIN account a3 
+          ON d3.account_code = a3.account_code 
+        AND a3.co_idx = #{coIdx}
+        WHERE d3.entry_number = m.entry_number
+          AND d3.co_idx = #{coIdx}
+          AND a3.major_category IN ('수익', '비용')
+          AND ROWNUM = 1
+      ) AS account_name,
+      pd.partner_name
+    FROM entry_master m
+    LEFT JOIN partner_detail pd ON m.partner_code = pd.partner_code 
+    AND pd.partner_type = 'b1'
+    AND pd.co_idx = #{coIdx}
     <where>
-      <if test="startDate != null and startDate != ''">
-        AND m.date &gt;= #{startDate}
+      m.co_idx = #{coIdx}
+      AND m.ledger_check = 'a1'
+      AND m.transaction_type != '63'
+      <if test="entryType != null and entryType != ''">
+        AND m.entry_type = #{entryType}
       </if>
-      <if test="endDate != null and endDate != ''">
-        AND m.date &lt;= #{endDate}
+      <if test="transactionType != null and transactionType != ''">
+        AND m.transaction_type = #{transactionType}
       </if>
-      <if test="type != null and type != '' and type != '전체'">
-        AND m.type = #{type}
+      <if test="electronicType != null and electronicType != ''">
+        AND m.electronic_type = #{electronicType}
       </if>
-      <if test="taxType != null and taxType != '' and taxType != '전체'">
-        AND m.tax_type = #{taxType}
+      <if test="year != null and year != ''">
+        AND TO_CHAR(m.entry_date, 'YYYY') = #{year}
       </if>
-      <if test="electronicType != null and electronicType != '' and electronicType != '전체'">
-        AND m.electronic = #{electronicType}
-      </if>
-      <if test="coIdx != null and coIdx != ''">
-        AND m.co_idx = #{coIdx}
+      <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+        AND TO_CHAR(m.entry_date, 'MM-DD') BETWEEN #{startDate} AND #{endDate}
       </if>
     </where>
-    ORDER BY m.date, m.code
+    ORDER BY m.entry_date, m.entry_number
   </select>
 </mapper>
