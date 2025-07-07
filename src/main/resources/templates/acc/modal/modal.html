@@ -151,15 +151,11 @@
 
       // 데이터 필터링
       filterData(searchText) {
-        console.log('계정과목 검색:', searchText); // 디버깅용
-        
         if (!this.gridOptions || !this.gridOptions.api) {
-          console.warn('그리드 API가 준비되지 않았습니다.');
           return;
         }
         
         if (!this.allData || this.allData.length === 0) {
-          console.warn('검색할 데이터가 없습니다.');
           return;
         }
         
@@ -172,8 +168,6 @@
           
           return codeLower.includes(searchLower) || nameLower.includes(searchLower);
         });
-        
-        console.log('필터링 결과:', filteredData.length, '개'); // 디버깅용
         
         this.gridOptions.api.setGridOption('rowData', filteredData);
         
@@ -231,7 +225,6 @@
             this.gridOptions.api.sizeColumnsToFit();
           })
           .catch(err => {
-            console.error(err);
             alert('계정과목 데이터를 불러오는데 실패했습니다.');
           });
       },
@@ -355,15 +348,11 @@
 
       // 데이터 필터링
       filterData(searchText) {
-        console.log('거래처 검색:', searchText); // 디버깅용
-        
         if (!this.gridOptions || !this.gridOptions.api) {
-          console.warn('그리드 API가 준비되지 않았습니다.');
           return;
         }
         
         if (!this.allData || this.allData.length === 0) {
-          console.warn('검색할 데이터가 없습니다.');
           return;
         }
         
@@ -376,8 +365,6 @@
           
           return codeLower.includes(searchLower) || nameLower.includes(searchLower);
         });
-        
-        console.log('필터링 결과:', filteredData.length, '개'); // 디버깅용
         
         this.gridOptions.api.setGridOption('rowData', filteredData);
         
@@ -435,7 +422,6 @@
             this.gridOptions.api.sizeColumnsToFit();
           })
           .catch(err => {
-            console.error(err);
             alert('거래처 데이터를 불러오는데 실패했습니다.');
           });
       },
