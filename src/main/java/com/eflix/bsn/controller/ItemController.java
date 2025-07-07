@@ -8,7 +8,7 @@ import com.eflix.bsn.service.ItemService;
 import com.eflix.common.payment.dto.ItemDTO;
 
 @RestController
-@RequestMapping("/bsn/items")
+@RequestMapping("/bsn/items/search")
 public class ItemController {
 
     private final ItemService service;
