@@ -6,6 +6,7 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-23 (김희정): 계정과목 모달 / 거래처 모달 생성
+  - 2025-07-07 (김희정): 모달 내부에서 모든 로직 자체 처리하도록 변경
 ============================================ -->
 <div th:fragment="modals">
   <!-- 계정과목 모달 -->
@@ -18,6 +19,10 @@
         </div>
         <div class="modal-body">
           <div id="accountGrid" class="ag-theme-alpine" style="height:400px; width:100%;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+          <button type="button" class="btn btn-primary" onclick="AccountModal.selectFromButton()">선택</button>
         </div>
       </div>
     </div>
@@ -34,7 +39,208 @@
         <div class="modal-body">
           <div id="partnerGrid" class="ag-theme-alpine" style="height:400px; width:100%;"></div>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+          <button type="button" class="btn btn-primary" onclick="PartnerModal.selectFromButton()">선택</button>
+        </div>
       </div>
     </div>
   </div>
+
+  <script>
+    // 계정과목 모달 관리 객체
+    const AccountModal = {
+      instance: null,
+      gridOptions: null,
+      currentCallbackInfo: null,
+      
+      // 모달 초기화
+      init() {
+        if (this.instance) return;
+        
+        this.instance = new bootstrap.Modal(document.getElementById('accountModal'));
+        
+        // 그리드 옵션 설정
+        this.gridOptions = {
+          headerHeight: 35,
+          rowHeight: 35,
+          columnDefs: [
+            { headerName: "코드", field: "accountCode", sortable: true, filter: true, width: 100 },
+            { headerName: "계정과목명", field: "accountName", sortable: true, filter: true, flex: 1 }
+          ],
+          rowSelection: { mode: 'singleRow' },
+          defaultColDef: {
+            minWidth: 100,
+            resizable: true,
+          },
+          onRowDoubleClicked: (event) => {
+            this.selectAccount(event.data.accountCode, event.data.accountName);
+          },
+          onGridReady: (params) => {
+            this.gridOptions.api = params.api;
+            this.loadData();
+          }
+        };
+        
+        // 그리드 생성
+        agGrid.createGrid(document.getElementById('accountGrid'), this.gridOptions);
+      },
+      
+      // 모달 열기
+      open(callbackInfo) {
+        this.init();
+        this.currentCallbackInfo = callbackInfo;
+        this.instance.show();
+        
+        // 그리드가 이미 준비되었으면 데이터 새로고침
+        if (this.gridOptions.api) {
+          this.loadData();
+        }
+      },
+      
+      // 데이터 로드
+      loadData() {
+        if (!this.gridOptions.api) return;
+        
+        fetch('/acc/act/list')
+          .then(res => {
+            if (!res.ok) throw new Error('계정과목 API 호출 실패');
+            return res.json();
+          })
+          .then(data => {
+            this.gridOptions.api.setGridOption('rowData', data);
+            this.gridOptions.api.sizeColumnsToFit();
+          })
+          .catch(err => {
+            console.error(err);
+            alert('계정과목 데이터를 불러오는데 실패했습니다.');
+          });
+      },
+      
+      // 계정과목 선택 처리
+      selectAccount(code, name) {
+        if (this.currentCallbackInfo && this.currentCallbackInfo.callback) {
+          this.currentCallbackInfo.callback(code, name);
+        }
+        this.instance.hide();
+      },
+      
+      // 선택 버튼으로 선택
+      selectFromButton() {
+        const selectedNodes = this.gridOptions.api.getSelectedNodes();
+        if (selectedNodes.length === 0) {
+          alert('계정과목을 선택해주세요.');
+          return;
+        }
+        
+        const selectedData = selectedNodes[0].data;
+        this.selectAccount(selectedData.accountCode, selectedData.accountName);
+      }
+    };
+
+    // 거래처 모달 관리 객체
+    const PartnerModal = {
+      instance: null,
+      gridOptions: null,
+      currentCallbackInfo: null,
+      
+      // 모달 초기화
+      init() {
+        if (this.instance) return;
+        
+        this.instance = new bootstrap.Modal(document.getElementById('partnerModal'));
+        
+        // 그리드 옵션 설정
+        this.gridOptions = {
+          headerHeight: 35,
+          rowHeight: 35,
+          columnDefs: [
+            { headerName: "코드", field: "partnerCode", sortable: true, filter: true, width: 100 },
+            { headerName: "거래처명", field: "partnerName", sortable: true, filter: true, flex: 1 }
+          ],
+          rowSelection: { mode: 'singleRow' },
+          defaultColDef: {
+            minWidth: 100,
+            resizable: true,
+          },
+          onRowDoubleClicked: (event) => {
+            this.selectPartner(event.data.partnerCode, event.data.partnerName);
+          },
+          onGridReady: (params) => {
+            this.gridOptions.api = params.api;
+            this.loadData();
+          }
+        };
+        
+        // 그리드 생성
+        agGrid.createGrid(document.getElementById('partnerGrid'), this.gridOptions);
+      },
+      
+      // 모달 열기
+      open(callbackInfo) {
+        this.init();
+        this.currentCallbackInfo = callbackInfo;
+        this.instance.show();
+        
+        // 그리드가 이미 준비되었으면 데이터 새로고침
+        if (this.gridOptions.api) {
+          this.loadData();
+        }
+      },
+      
+      // 데이터 로드
+      loadData() {
+        if (!this.gridOptions.api) return;
+        
+        fetch('/acc/pt/list')
+          .then(res => {
+            if (!res.ok) throw new Error('거래처 API 호출 실패');
+            return res.json();
+          })
+          .then(data => {
+            this.gridOptions.api.setGridOption('rowData', data);
+            this.gridOptions.api.sizeColumnsToFit();
+          })
+          .catch(err => {
+            console.error(err);
+            alert('거래처 데이터를 불러오는데 실패했습니다.');
+          });
+      },
+      
+      // 거래처 선택 처리
+      selectPartner(code, name) {
+        if (this.currentCallbackInfo && this.currentCallbackInfo.callback) {
+          this.currentCallbackInfo.callback(code, name);
+        }
+        this.instance.hide();
+      },
+      
+      // 선택 버튼으로 선택
+      selectFromButton() {
+        const selectedNodes = this.gridOptions.api.getSelectedNodes();
+        if (selectedNodes.length === 0) {
+          alert('거래처를 선택해주세요.');
+          return;
+        }
+        
+        const selectedData = selectedNodes[0].data;
+        this.selectPartner(selectedData.partnerCode, selectedData.partnerName);
+      }
+    };
+
+    // 전역 함수로 노출 (entry.html에서 사용)
+    window.openAccountModal = function(rowIndex, callback) {
+      AccountModal.open({
+        rowIndex: rowIndex,
+        callback: callback
+      });
+    };
+
+    window.openPartnerModal = function(rowIndex, callback) {
+      PartnerModal.open({
+        rowIndex: rowIndex,
+        callback: callback
+      });
+    };
+  </script>
 </div>

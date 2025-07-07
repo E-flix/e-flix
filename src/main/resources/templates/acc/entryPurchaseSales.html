@@ -28,7 +28,7 @@
       font-weight: bold !important;
       text-align: center;
     }
-    /* 상세 그리드 소계 행 스타일 - entry.html과 동일하게 적용 */
+    /* 상세 그리드 소계 행 스타일 */
     .detail-subtotal-row .ag-cell {
       background: #f3f6fa !important;
       font-weight: bold !important;
@@ -83,7 +83,7 @@
   <div class="w-100">
     <!-- 헤더 영역 -->
     <div class="d-flex justify-content-between align-items-center mb-2">
-      <h4 class="mb-0">매입매출전표</h4>
+      <h3 class="mb-0">매입매출전표</h3>
       <div>
         <button class="btn btn-outline-secondary btn-sm" onclick="deleteSelectedRows()">삭제</button>
         <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">인쇄</button>
@@ -91,18 +91,36 @@
     </div>
 
     <!-- 날짜 필터 영역 -->
+    <!-- 검색/필터 영역만 수정 -->
     <form class="row g-2 mb-2 align-items-end" method="get" action="/voucher/list">
-      <div class="col-12 d-flex justify-content-between align-items-center">
-        <div>
-          <label class="form-label mb-0">일자</label>
-          2025 년
-          <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:45px;"> 월
-          <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startDay" style="width:45px;"> 일 ~
-          2025 년
-          <input type="number" value="12" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:45px;"> 월
-          <input type="number" value="31" class="form-control form-control-sm d-inline-block" name="endDay" style="width:45px;"> 일
-        </div>
-        <small class="text-muted">※전자세금계산서 및 전자계산서는 전자(세금)계산서관리에서 관리하세요.</small>
+      <div class="col-auto">
+        <label class="form-label mb-0">일자</label>
+        2025 년
+        <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:45px;"> 월
+        <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startDay" style="width:45px;"> 일 ~
+        2025 년
+        <input type="number" value="12" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:45px;"> 월
+        <input type="number" value="31" class="form-control form-control-sm d-inline-block" name="endDay" style="width:45px;"> 일
+      </div>
+      <div class="col-auto">
+        <label class="form-label mb-0">구분</label>
+        <select class="form-control form-control-sm d-inline-block" name="entryType" style="width:80px;">
+          <option value="">전체</option>
+          <option value="매입">매입</option>
+          <option value="매출">매출</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="button" id="diffFilterBtn" class="btn btn-outline-warning btn-sm">
+          차액 전표만 보기
+        </button>
+        <button type="button" id="showAllBtn" class="btn btn-outline-secondary btn-sm" style="display: none;">
+          전체 보기
+        </button>
+      </div>
+      <!-- 오른쪽 정렬 안내 메시지 -->
+      <div class="col text-end">
+        <small class="text-muted">※ 코드에서 F4를 누르면 검색할 수 있습니다.</small>
       </div>
     </form>
     <!-- 메인 매입매출전표 그리드 -->
@@ -209,10 +227,23 @@
         psEntryNumber++;
       }
       
+      // transactionType에 따라 entryType 자동 결정
+      let entryType = '매입매출'; // 기본값
+      if (rowData.transactionType) {
+        const transactionCode = parseInt(rowData.transactionType);
+        if (!isNaN(transactionCode)) {
+          if (transactionCode <= 50) {
+            entryType = '매출';
+          } else {
+            entryType = '매입';
+          }
+        }
+      }
+      
       // 매입매출전표 마스터 데이터 구성
       const masterData = {
         entryNumber: rowData.entryNumber || 0,
-        entryType: '매입매출',
+        entryType: entryType, // transactionType에 따라 자동 설정
         entryDate: rowData.entryDate,
         entryStatus: 'a2',
         creator: loginUser, // 로그인한 사용자 정보 사용
@@ -715,6 +746,7 @@
           const current = [];
           detailGridApi.forEachNode(node => current.push(node.data));
           detailGridApi.applyTransaction({ remove: current });
+          detailGridApi.setGridOption('rowData', []);
           currentDetailEntryNumber = null;
         }
         return;
@@ -1138,7 +1170,35 @@
         const allColumns = purchaseSalesGridOptions.columnDefs;
         const currentColIndex = allColumns.findIndex(col => col.field === currentCol);
         
-        // Enter 키 처리
+        // --------------- ▼ F4 모달 추가 ▼ ------------------
+        if (event.event.key === 'F4') {
+          if (currentCol === 'partnerCode') {
+            // 거래처 모달 열기 - 콜백으로 값 설정
+            openPartnerModal(currentRowIndex, (code, name) => {
+              const node = api.getDisplayedRowAtIndex(currentRowIndex);
+              if (node) {
+                node.setDataValue('partnerCode', String(code));
+                node.setDataValue('partnerName', String(name));
+                
+                // 거래처 정보 추가 조회하여 등록번호 설정
+                fetch(`/acc/pt/${code}`)
+                  .then(res => res.json())
+                  .then(partner => {
+                    if (partner) {
+                      const registrationNumber = partner.businessNumber || partner.residentNumber || '';
+                      node.setDataValue('businessNumber', registrationNumber);
+                    }
+                  })
+                  .catch(err => console.error('거래처 정보 조회 실패:', err));
+              }
+            });
+            event.event.preventDefault();
+            return;
+          }
+        }
+        // --------------- ▲ F4 모달 추가 ▲ ------------------
+        
+        // 기존 Enter 키 처리는 그대로 유지
         if (event.event.key === 'Enter') {
           event.event.preventDefault();
           event.event.stopPropagation();
@@ -1223,7 +1283,6 @@
           // 계산 중 플래그 해제
           delete rowData._isCalculating;
           
-          // 그리드 셀 새로고침
           setTimeout(() => {
             if (purchaseSalesGridApi) {
               purchaseSalesGridApi.refreshCells({
@@ -1582,7 +1641,35 @@
         const allColumns = detailGridOptions.columnDefs;
         const currentColIndex = allColumns.findIndex(col => col.field === currentCol);
         
-        // Enter 키 처리
+        // --------------- ▼ F4 모달 추가 ▼ ------------------
+        if (event.event.key === 'F4') {
+          if (currentCol === 'accountCode') {
+            // 계정과목 모달 열기 - 콜백으로 값 설정
+            openAccountModal(currentRowIndex, (code, name) => {
+              const node = api.getDisplayedRowAtIndex(currentRowIndex);
+              if (node) {
+                node.setDataValue('accountCode', String(code));
+                node.setDataValue('accountName', String(name));
+              }
+            });
+            event.event.preventDefault();
+            return;
+          } else if (currentCol === 'partnerCode') {
+            // 거래처 모달 열기 - 콜백으로 값 설정
+            openPartnerModal(currentRowIndex, (code, name) => {
+              const node = api.getDisplayedRowAtIndex(currentRowIndex);
+              if (node) {
+                node.setDataValue('partnerCode', String(code));
+                node.setDataValue('partnerName', String(name));
+              }
+            });
+            event.event.preventDefault();
+            return;
+          }
+        }
+        // --------------- ▲ F4 모달 추가 ▲ ------------------
+        
+        // 기존 Enter 키 처리는 그대로 유지
         if (event.event.key === 'Enter') {
           event.event.preventDefault();
           event.event.stopPropagation();
