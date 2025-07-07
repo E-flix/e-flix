@@ -76,6 +76,7 @@
 	</div>
 </div>
 <!--container-fluid 끝-->
+
 </html>
 
 <!-- AG Grid 설정 -->
@@ -96,7 +97,7 @@
 				field: "commonCodeName",
 				editable: false,
 				cellRenderer: (params) => {
-					if(params.value === "비었음") {
+					if (params.value === "비었음") {
 						return `<span class="badge bg-danger">비었음</span>`;
 					} else {
 						return `<span class="badge bg-success">재고존재</span>`;
@@ -124,13 +125,6 @@
 
 <!-- 페이지 기능 -->
 <script>
-	// 창고이동
-	document.getElementById('warehouse_mnt').addEventListener('change', function () {
-		if (this.checked) {
-			window.location.href = '/purchs/whm';
-		}
-	});
-
 	// 등록
 	$("#addBtn").on("click", () => {
 		const warehouseId = $("#warehouseId").val();
@@ -221,5 +215,12 @@
 				showConfirmButton: false
 			});
 		});
+	});
+
+	// 페이지 이동
+	document.getElementById('warehouse_mnt').addEventListener('change', function () {
+		if (this.checked) {
+			window.location.href = '/purchs/whm';
+		}
 	});
 </script>

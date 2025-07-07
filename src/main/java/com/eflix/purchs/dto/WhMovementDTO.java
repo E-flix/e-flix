@@ -4,11 +4,25 @@ import lombok.Data;
 
 @Data
 public class WhMovementDTO {
-    String prodId;
-    String prodName;
-    String sendWh;
-    String toWh;
-    int sendBeforeQty;
-    int toBeforeQty;
-    int warehouseScale;
+    // 제품 정보
+    private String prodId;
+    private String prodName;
+
+    // 이동 전 창고 정보
+    private String fromWhId;
+    private String fromLocation;
+    private int fromBeforeQty;
+
+    // 이동 후 창고 정보
+    private String toWhId;
+    private String toLocation;
+    private int toBeforeQty;
+    private int warehouseScale;
+    private int remainingCapacity;
+
+    // 이동 수량
+    private int transferQty;
+
+    // 담당자
+    private String manager;
 }
