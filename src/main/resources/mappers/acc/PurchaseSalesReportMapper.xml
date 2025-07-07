@@ -94,5 +94,6 @@
         AND TO_CHAR(m.entry_date, 'MM-DD') BETWEEN #{startDate} AND #{endDate}
       </if>
     </where>
+    ORDER BY m.entry_date, m.entry_number
   </select>
 </mapper>
