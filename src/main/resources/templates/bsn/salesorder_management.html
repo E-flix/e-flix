@@ -174,6 +174,8 @@
       border-top: 2px solid #2e59d9;
     }
   </style>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 </head>
 
 <div layout:fragment="content" class="management-container">
@@ -327,6 +329,43 @@
   <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
+
+      function DatePicker() {}
+
+      DatePicker.prototype.init = function (params) {
+        this.eInput = document.createElement('input');
+        this.eInput.classList.add('ag-input');
+        this.eInput.value = params.value || '';
+      
+        $(this.eInput).datepicker({
+          dateFormat: 'yy-mm-dd',
+          changeMonth: true,
+          changeYear: true
+        });
+      
+        // 최초 포커스 시 달력 바로 표시(선택 사항)
+        setTimeout(() => $(this.eInput).datepicker('show'), 0);
+      };
+
+      DatePicker.prototype.getGui = function () {
+        return this.eInput;                 // ← 화살표 함수 ❌
+      };
+
+      DatePicker.prototype.afterGuiAttached = function () {
+        this.eInput.focus();
+      };
+
+      DatePicker.prototype.getValue = function () {
+        return this.eInput.value;           // ← 화살표 함수 ❌
+      };
+
+      DatePicker.prototype.destroy = function () {
+        $(this.eInput).datepicker('destroy');
+      };
+
+      DatePicker.prototype.isPopup = function () {
+        return false;
+      };
     
       /*─────────────── 전역 변수 ───────────────*/
       let headerGridApi, detailGridApi, creditGridApi;
@@ -338,151 +377,145 @@
       /*─────────────── 공통 유틸 ───────────────*/
       function safeSetRowData(api, rows){
         if (!api) return;
-        if (api.setRowData)            api.setRowData(rows);               // v28-32
-        else if (api.setGridOption)    api.setGridOption('rowData', rows); // v33
+        if (api.setRowData)            api.setRowData(rows);
+        else if (api.setGridOption)    api.setGridOption('rowData', rows);
       }
       function safeSetPinnedBottomRow(api, rows){
         if (!api) return;
-        if (api.setPinnedBottomRowData) api.setPinnedBottomRowData(rows);          // v28-32
-        else if (api.setGridOption)     api.setGridOption('pinnedBottomRowData', rows); // v33
+        if (api.setPinnedBottomRowData) api.setPinnedBottomRowData(rows);
+        else if (api.setGridOption)     api.setGridOption('pinnedBottomRowData', rows);
       }
+
+      
     
       /*──────────────── 1. 헤더 그리드 ────────────────*/
       const headerGridOptions = {
-        columnDefs:[
-        { headerName:'주문번호', field:'orderNo', pinned:'left',
-          width:150, cellClass:'font-weight-bold text-primary', editable: false }, // PK는 편집 금지
-        { headerName:'주문일자', field:'orderDt', minWidth:110, flex:1, editable: true, cellEditor: 'agDatePicker' },
-        { headerName:'거래처',   field:'customerNm', minWidth:150, flex:1, editable: false },
-        { headerName:'대표',     field:'representativeNm', minWidth:110, flex:1, editable: false },
-        { headerName:'연락처',   field:'phoneNo', minWidth:120, flex:1, editable: false },
-        { headerName:'담당자',   field:'salesEmpCd', minWidth:100, flex:1, editable: false },
-        { headerName:'할인율(%)',field:'discountRate', minWidth:90,  flex:1,
-          valueFormatter:p=> (p.value??0)+'%', editable: false },
-        { headerName:'결제조건', field:'paymentTerms',   minWidth:100, flex:1, editable: true },
-        { headerName:'작성자',   field:'orderWriter',    minWidth:90,  flex:1, editable: true }
-      ],
+        components: { datePicker: DatePicker },
+        columnDefs: [
+          { headerName:'주문번호',   field:'orderNo',        pinned:'left', width:150,
+            cellClass:'font-weight-bold text-primary', editable:false },
+          { headerName:'주문일자',   field:'orderDt',        minWidth:110, flex:1,
+            editable:true,  cellEditor:'datePicker' },
+          { headerName:'거래처',     field:'customerNm',     minWidth:150, flex:1,
+            editable:false },
+          { headerName:'대표',       field:'representativeNm',minWidth:110, flex:1,
+            editable:false },
+          { headerName:'연락처',     field:'phoneNo',        minWidth:120, flex:1,
+            editable:false },
+          { headerName:'담당자',     field:'salesEmpCd',     minWidth:100, flex:1,
+            editable:false },
+          { headerName:'할인율(%)',  field:'discountRate',   minWidth: 90, flex:1,
+            valueFormatter:p=> (p.value??0)+'%', editable:false },
+          { headerName:'결제조건',   field:'paymentTerms',   minWidth:100, flex:1,
+            editable:true },
+          { headerName:'작성자',     field:'orderWriter',    minWidth: 90, flex:1,
+            editable:true, cellEditor:'agTextCellEditor' }
+        ],
         headerHeight: 35,
         rowHeight: 35,
-        rowSelection:{ mode:'multiRow', checkboxes:true, headerCheckbox:true },
-        onRowClicked: handleHeaderRowClicked,
-        pagination:true,
-        paginationPageSize:10,
-        defaultColDef:{ resizable:true, sortable:true, filter:true },
-        onCellClicked: onHeaderCellClicked,
-        onGridReady:p=>{ headerGridApi = p.api; loadHeaderData(); },
-        resizable:true,
-        sortable:true,
-        filter:true,
-        editable: true
+        rowSelection: { mode:'multiRow', checkboxSelection:true, headerCheckboxSelection:true },
+        onRowClicked:       handleHeaderRowClicked,
+        onCellClicked:      onHeaderCellClicked,
+        onCellValueChanged: headerCellValueChanged,
+        pagination:         true,
+        paginationPageSize: 10,
+        defaultColDef:      { resizable:true, sortable:true, filter:true, editable:true },
+        onGridReady:        p=>{ headerGridApi = p.api; loadHeaderData(); }
       };
     
-      /*──────────────── 2. 여신 그리드 – “가로” 구조 ───────────────*/
+      /*──────────────── 2. 여신 그리드 ────────────────*/
       const creditGridOptions = {
-        columnDefs:[
-        { headerName:'여신한도',     field:'creditLimit',     minWidth:110, flex:1,
-          type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
-        { headerName:'여신잔액',     field:'remainingCredit', minWidth:110, flex:1,
-          type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
-        { headerName:'여신사용액',   field:'creditUsed',      minWidth:110, flex:1,
-          type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
-        { headerName:'여신상태',     field:'creditStatus',    minWidth:90,  flex:1 },
-        { headerName:'보류여부',     field:'creditHoldFlg',   minWidth:80,  flex:1 },
-        { headerName:'거래정지',     field:'tradeStopFlg',    minWidth:80,  flex:1 }
-      ],
-        // 헤더 높이 지정
+        columnDefs: [
+          { headerName:'여신한도',     field:'creditLimit',     flex:1, minWidth:110,
+            type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
+          { headerName:'여신잔액',     field:'remainingCredit', flex:1, minWidth:110,
+            type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
+          { headerName:'여신사용액',   field:'creditUsed',      flex:1, minWidth:110,
+            type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
+          { headerName:'여신상태',     field:'creditStatus',    flex:1, minWidth: 90 },
+          { headerName:'보류여부',     field:'creditHoldFlg',   flex:1, minWidth: 80 },
+          { headerName:'거래정지',     field:'tradeStopFlg',    flex:1, minWidth: 80 }
+        ],
         headerHeight: 35,
-        // 행 높이 지정
-        rowHeight: 35,
+        rowHeight:    35,
         defaultColDef:{ resizable:true },
-        rowData:[getInitCreditObj()],          // ← 단 일 행
-        suppressRowClickSelection:true,
-        suppressMovableColumns:true,
-        onGridReady:p=> creditGridApi = p.api,
-        domLayout:'autoHeight'
+        rowData:      [ getInitCreditObj() ],
+        suppressRowClickSelection: true,
+        suppressMovableColumns:     true,
+        domLayout:   'autoHeight',
+        onGridReady: p=> creditGridApi = p.api
       };
     
       /*──────────────── 3. 디테일 그리드 ────────────────*/
       const detailColDefs = [
         { checkboxSelection:true, headerCheckboxSelection:true, width:50 },
-        { headerName:'순번',     field:'lineNo', width:60, cellClass:'text-center', editable: false },
-        { headerName:'품목코드', field:'itemCode', width:120, editable: true },
-        { headerName:'품목명',   field:'itemName', width:180, editable: true },
-        { headerName:'규격',     field:'spec',     width:120, editable: true },
-        { headerName:'수량',     field:'qty',      width:90,  type:'numericColumn',
-          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable: true },
-        { headerName:'단가',     field:'unitPrice',width:110, type:'numericColumn',
-          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable: true },
+        { headerName:'순번',     field:'lineNo',       width:60,
+          cellClass:'text-center', editable:false },
+        { headerName:'품목코드', field:'itemCode',     width:120, editable:true },
+        { headerName:'품목명',   field:'itemName',     width:180, editable:true },
+        { headerName:'규격',     field:'spec',         width:120, editable:true },
+        { headerName:'수량',     field:'qty',          width:90,  type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable:true },
+        { headerName:'단가',     field:'unitPrice',    width:110, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable:true },
         { headerName:'공급가액', field:'supplyAmount', width:120, type:'numericColumn',
-          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable: true },
-        { headerName:'부가세',   field:'taxAmount',  width:100, type:'numericColumn',
-          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable: true },
-        { headerName:'합계',     field:'totalAmount',width:120, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable:true },
+        { headerName:'부가세',   field:'taxAmount',    width:100, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable:true },
+        { headerName:'합계',     field:'totalAmount',  width:120, type:'numericColumn',
           cellClass:'font-weight-bold',
-          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable: false },
-        { headerName:'출고일',   field:'outboundDt', width:110,
-          valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '',
-          editable: true, cellEditor: 'agDatePicker' },
-        { headerName:'납기일',   field:'catchDt',    width:110,
-          valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '',
-          editable: true, cellEditor: 'agDatePicker' },
-        { headerName:'출고상태', field:'outState',   width:100, editable: true },
-        { headerName:'비고',     field:'remarks',    flex:1, editable: true }
+          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable:false },
+        { headerName:'출고일',   field:'outboundDt',   width:110,
+          editable:true, cellEditor:'datePicker', 
+          valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '' },
+        { headerName:'납기일',   field:'catchDt',      width:110,
+          editable:true, cellEditor:'datePicker',
+          valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '' },
+        { headerName:'출고상태', field:'outState',     width:100, editable:true },
+        { headerName:'비고',     field:'remarks',      flex:1,   editable:true }
       ];
-
     
       const detailGridOptions = {
-        // 헤더 높이 지정
-        headerHeight: 35,
-        // 행 높이 지정
-        rowHeight: 35,
-        resizable:true,
-        editable: true,
-        columnDefs : detailColDefs,
-        defaultColDef:{ resizable:true },
-        rowSelection:'multiple',
-        animateRows:true,
-        onGridReady:p=>{ detailGridApi = p.api; setEditMode(false); },
-        onCellClicked: onDetailCellClicked,   
-        onCellValueChanged:()=> setTimeout(calcTotals,80)
+        components: { datePicker: DatePicker },
+        columnDefs:         detailColDefs,
+        defaultColDef:      { resizable:true, sortable:true, filter:true, editable:true },
+        frameworkComponents: { datePicker: DatePicker },
+        headerHeight:       35,
+        rowHeight:          35,
+        rowSelection:       'multiple',
+        animateRows:        true,
+        onGridReady:        p=>{ detailGridApi = p.api; setEditMode(false); },
+        onCellClicked:      onDetailCellClicked,
+        onCellValueChanged: ()=> setTimeout(calcTotals,80)
       };
     
       /*─────────────── 그리드 생성 ───────────────*/
-      headerGridApi = agGrid.createGrid(document.getElementById('headerGrid'),  headerGridOptions).api;
-      detailGridApi = agGrid.createGrid(document.getElementById('detailGrid'),  detailGridOptions).api;
-      creditGridApi = agGrid.createGrid(document.getElementById('creditGrid'),  creditGridOptions).api;
-
-
-      /*──────────────── 4. “신규” 버튼 ────────────────*/
-      $('#btnNew').click(createNew);
+      headerGridApi = agGrid.createGrid(document.getElementById('headerGrid'),headerGridOptions).api;
+      detailGridApi = agGrid.createGrid(document.getElementById('detailGrid'), detailGridOptions).api;
+      creditGridApi = agGrid.createGrid($('#creditGrid')[0],  creditGridOptions).api;
     
+      /*──────────────── 4. 신규 버튼 ────────────────*/
+      $('#btnNew').click(createNew);
       function createNew(){
         $.get('/bsn/orders/nextOrderNo').done(no=>{
           const today = dayjs().format('YYYY-MM-DD');
           const newHeader = {
-            orderNo   : no,
-            orderDt   : today,
-            customerNm: '',          // 이후 자동 채움
-            paymentTerms:'Net 30'
+            orderNo: no, orderDt: today,
+            customerNm:'', paymentTerms:'Net 30'
           };
-    
-          /* 헤더 그리드 최상단에 추가 */
           headerGridApi.applyTransaction({ add:[newHeader], addIndex:0 });
           headerGridApi.ensureIndexVisible(0);
           headerGridApi.setFocusedCell(0,'customerNm');
-    
-          /* 디테일 그리드 빈 행 1줄 */
           safeSetRowData(detailGridApi,[{ lineNo:1, qty:1 }]);
           calcTotals();
-    
-          /* 여신 초기화 & 편집 모드 on */
           safeSetRowData(creditGridApi, getInitCreditRows());
           currentOrder = newHeader;
           setEditMode(true);
         });
       }
-
-        function headerCellValueChanged(event) {
+    
+      /*──────────────── 5. 헤더 inline 편집 저장 ────────────────*/
+      function headerCellValueChanged(event){
         const dto = {
           orderNo:      event.data.orderNo,
           orderDt:      event.data.orderDt,
@@ -494,19 +527,15 @@
           url: `/bsn/orders/${encodeURIComponent(dto.orderNo)}`,
           method: 'PUT',
           contentType: 'application/json',
-          data: JSON.stringify(dto),
-        })
-        .done(() => {
-          console.log('헤더 업데이트 성공');
-        })
-        .fail(err => {
-          console.error('헤더 업데이트 실패', err);
-          // 실패 시 원래 값으로 되돌리기
+          data: JSON.stringify(dto)
+        }).fail(()=>{
+          // 실패 시 원래 값 복구
           event.node.setDataValue(event.colDef.field, event.oldValue);
         });
       }
-
-      function detailCellValueChanged(event) {
+    
+      /*──────────────── 6. 디테일 inline 편집 저장 ────────────────*/
+      function detailCellValueChanged(event){
         const d = event.data;
         const dto = {
           orderNo:     d.orderNo,
@@ -515,26 +544,25 @@
           qty:         d.qty,
           unitPrice:   d.unitPrice,
           supplyAmount:d.supplyAmount,
+          taxAmount:   d.taxAmount,
+          totalAmount: d.totalAmount,
+          outboundDt:  d.outboundDt,
+          catchDt:     d.catchDt,
+          outState:    d.outState,
           remarks:     d.remarks
         };
         $.ajax({
           url: `/bsn/orders/${encodeURIComponent(dto.orderNo)}/details/${dto.lineNo}`,
           method: 'PUT',
           contentType: 'application/json',
-          data: JSON.stringify(dto),
-        })
-        .done(() => {
-          console.log('디테일 업데이트 성공');
-        })
-        .fail(err => {
-          console.error('디테일 업데이트 실패', err);
+          data: JSON.stringify(dto)
+        }).fail(()=>{
           event.node.setDataValue(event.colDef.field, event.oldValue);
         });
       }
-
-
-      // “품목명” 셀 클릭 시 모달 열기
-      function onDetailCellClicked(event) {
+    
+      /*──────────────── 7. 품목 모달 열기 & 처리 ────────────────*/
+      function onDetailCellClicked(event){
         if (event.colDef.field === 'itemName') {
           selectedDetailNode = event.node;
           $('#itemSearchInput').val('');
@@ -542,16 +570,10 @@
           $('#itemModal').modal('show');
         }
       }
-
-
-          // 모달이 열릴 때 전체 품목 조회
       $('#itemModal').on('shown.bs.modal', ()=> loadItemList() );
-      // 검색 버튼 클릭 시 필터 조회
       $('#btnItemSearch').click(()=> loadItemList($('#itemSearchInput').val()) );
-        
-      // AJAX로 품목 리스트 불러오기
       function loadItemList(keyword = '') {
-        $.getJSON('/bsn/items', { name: keyword })
+        $.getJSON('/bsn/items',{ name: keyword })
           .done(list => {
             const $tb = $('#itemSearchResults').empty();
             list.forEach(item => {
@@ -567,21 +589,17 @@
                   <td>${item.spec}</td>
                   <td>${item.unit}</td>
                   <td>${Number(item.salePrice||0).toLocaleString()}</td>
-                </tr>
-              `);
+                </tr>`);
             });
           })
-          .fail(()=> Swal.fire('오류','품목 목록을 불러오지 못했습니다.','error'));
+          .fail(()=> Swal.fire('오류','품목 목록 불러오기 실패','error'));
       }
-
-      // 모달에서 품목 선택 시 그리드에 값 채우기
-      $('#itemSearchResults').on('click', '.btn-select-item', function(){
+      $('#itemSearchResults').on('click','.btn-select-item',function(){
         const item = JSON.parse(decodeURIComponent($(this).data('item')));
-        // 기본 수량 1, 단가·규격·단위·공급가액·부가세·합계 자동 계산
-        const qty  = 1;
-        const unit = item.salePrice || 0;
+        const qty = 1;
+        const unit = item.salePrice||0;
         const supply = qty * unit;
-        const tax    = Math.round(supply * (item.taxRate || 0) / 100);
+        const tax = Math.round(supply * (item.taxRate||0)/100);
         selectedDetailNode.setDataValue('itemCode',    item.itemCode);
         selectedDetailNode.setDataValue('itemName',    item.itemName);
         selectedDetailNode.setDataValue('spec',        item.spec);
@@ -594,350 +612,212 @@
         $('#itemModal').modal('hide');
         calcTotals();
       });
-
-      // 예: 고객 검색 결과 테이블에서 “선택” 버튼 클릭 핸들러
-      $('#customerSearchResults').on('click', '.btn-select-cust', function() {
-        const cust = $(this).data('cust'); // { customerCd, customerNm, representativeNm, phoneNo, salesEmpCd, discountRate }
-        // 헤더 그리드에 한 번에 반영
-        ['customerCd','customerNm','representativeNm','phoneNo','salesEmpCd','discountRate']
-          .forEach(f => selectedHeaderNode.setDataValue(f, cust[f]));
-        // currentOrder 갱신
-        currentOrder = selectedHeaderNode.data;
-        $('#customerModal').modal('hide');
-      });
-
-      
-      $(function(){
-        // 1) 헤더 저장 버튼 핸들러
-        $('#btnSaveHeader').click(function(){
-          if(!currentOrder || !currentOrder.orderNo){
-            Swal.fire('알림','저장할 헤더를 선택 또는 생성해주세요.','info');
-            return;
-          }
-          // 편집 중단
-          headerGridApi.stopEditing();
-          // DTO 생성
-          const headerDto = {
-            orderNo:      currentOrder.orderNo,
-            orderDt:      currentOrder.orderDt,
-            customerCd:   currentOrder.customerCd,
-            paymentTerms: currentOrder.paymentTerms,
-            orderWriter:  currentOrder.orderWriter,
-            remarks:      currentOrder.remarks
-          };
-          Swal.showLoading();
-          $.ajax({
-            url: `/bsn/orders/${encodeURIComponent(headerDto.orderNo)}`,
-            method: 'PUT',
-            contentType: 'application/json',
-            data: JSON.stringify(headerDto)
-          })
-          .done(() => {
-            Swal.fire('완료','헤더가 저장되었습니다.','success');
-            loadHeaderData();
-          })
-          .fail(() => {
-            Swal.fire('실패','헤더 저장 중 오류가 발생했습니다.','error');
-          });
-        });
-      
-        // 2) 디테일 저장 버튼 핸들러
-        $('#btnSaveDetail').click(function(){
-          if(!currentOrder || !currentOrder.orderNo){
-            Swal.fire('알림','먼저 헤더를 선택하거나 생성해주세요.','info');
-            return;
-          }
-          detailGridApi.stopEditing();
-          // 모든 디테일 행 수집
-          const details = [];
-          detailGridApi.forEachNode(node => {
-            const d = node.data;
-            // 필수 필드(itemCode)가 있으면 포함
-            if(d.itemCode){
-              details.push({
-                orderNo:     currentOrder.orderNo,
-                lineNo:      d.lineNo,
-                itemCode:    d.itemCode,
-                qty:         d.qty,
-                unitPrice:   d.unitPrice,
-                supplyAmount:d.supplyAmount,
-                taxAmount:   d.taxAmount,
-                totalAmount: d.totalAmount,
-                outboundDt:  d.outboundDt,
-                catchDt:     d.catchDt,
-                outState:    d.outState,
-                remarks:     d.remarks
-              });
-            }
-          });
-          if(details.length === 0){
-            Swal.fire('안내','저장할 디테일이 없습니다.','warning');
-            return;
-          }
-          Swal.showLoading();
-          $.ajax({
-            url: `/bsn/orders/${encodeURIComponent(currentOrder.orderNo)}/details`,
-            method: 'PUT',
-            contentType: 'application/json',
-            data: JSON.stringify(details)
-          })
-          .done(() => {
-            Swal.fire('완료','디테일이 저장되었습니다.','success');
-          })
-          .fail(() => {
-            Swal.fire('실패','디테일 저장 중 오류가 발생했습니다.','error');
-          });
-        });
-      });
-
-      // 1-1) 모달이 열릴 때 거래처 리스트 로드
-      $('#customerModal').on('shown.bs.modal', function() {
-        loadCustomerList();  
-        $('#customerSearchInput').val('');      // 검색창 초기화
-      });
-      
-      // 1-2) 검색 버튼 클릭 시에도 조회
-      $('#btnCustomerSearch').click(function() {
-        loadCustomerList($('#customerSearchInput').val());
-      });
-      
-      // 1-3) 거래처 조회 함수
-      function loadCustomerList(keyword = '') {
-        $.getJSON('/bsn/customers', { name: keyword })
-          .done(function(data) {
-            const $tbody = $('#customerSearchResults').empty();
-            data.forEach(function(c) {
-              const custJson = encodeURIComponent(JSON.stringify(c));
-              $tbody.append(`
-                <tr>
-                  <td>
-                    <button class="btn btn-sm btn-primary btn-select-cust"
-                            data-cust="${custJson}">
-                      선택
-                    </button>
-                  </td>
-                  <td>${c.customerCd}</td>
-                  <td>${c.customerNm}</td>
-                  <td>${c.representativeNm}</td>
-                  <td>${c.phoneNo}</td>
-                </tr>
-              `);
-            });
-          })
-          .fail(function() {
-            Swal.fire('오류','거래처 목록을 불러오지 못했습니다.','error');
-          });
-      }
-      
-      // 1-4) “선택” 버튼 클릭 시 헤더 그리드에 값 반영
-      $('#customerSearchResults').on('click', '.btn-select-cust', function() {
-        const c = JSON.parse(decodeURIComponent($(this).data('cust')));
-        ['customerCd','customerNm','representativeNm','phoneNo','salesEmpCd','discountRate']
-          .forEach(f => selectedHeaderNode.setDataValue(f, c[f]));
-        currentOrder = selectedHeaderNode.data;
-        $('#customerModal').modal('hide');
-      });
-
-
     
-      /*──────────────── 5. 저장 버튼 ────────────────*/
-      $('#btnSave').click(saveOrder);
-    
-      function saveOrder(){
-        if(!editMode){
-          Swal.fire('알림','편집 모드가 아닙니다. “신규” 버튼을 먼저 클릭하세요.','info');
-          return;
-        }
-        headerGridApi.stopEditing();
-    
-        const headerData = currentOrder;
-        if(!headerData){
-          Swal.fire('오류','헤더 정보가 없습니다.','error'); return;
-        }
-    
-        const details=[];
-        detailGridApi.forEachNode(n=>{
-          if(n.data.itemCode) details.push({...n.data});
-        });
-        if(details.length===0){
-          Swal.fire('안내','품목을 한 개 이상 입력해 주세요.','warning'); return;
-        }
-    
-        const dto = {...headerData, details};
-    
-        Swal.showLoading();
-        $.ajax({
-          url:'/bsn/orders',
-          method:'POST',
-          contentType:'application/json',
-          data:JSON.stringify(dto)
-        }).done(r=>{
-          if(r.success){
-            Swal.fire('저장 완료','주문서가 등록되었습니다.','success');
-            setEditMode(false);
-            loadHeaderData();
-          }else{
-            Swal.fire('저장 실패',r.message||'서버 오류','error');
-          }
-        }).fail(()=> Swal.fire('저장 실패','통신 오류가 발생했습니다.','error'));
-      }
-
-
-    
-      /*──────────────── 헤더 클릭 → 디테일 + 여신 ───────────────*/
-      // ① 헤더 행 클릭 시
-      function handleHeaderRowClicked(e){
-        const { orderNo, customerCd } = e.data;   // ← customerCd 가 이미 헤더에 담겨있음
-        currentOrder = e.data;
-      
-        // 주문 상세
-        const reqDetail = $.getJSON(`/bsn/orders/${orderNo}/details`);
-        // ★ 여신 : 새 API
-        const reqCredit = $.getJSON(`/bsn/customer/${customerCd}/credit`);
-      
-        $.when(reqDetail, reqCredit).done((dRes, cRes)=>{
-            safeSetRowData(detailGridApi, dRes[0]);
-            showCredit(cRes[0]);
-            calcTotals();
-        }).fail(()=> Swal.fire('오류','데이터를 불러오지 못했습니다','error'));
-      }
-      
-      // ② 신규 입력 중 고객을 바꿨을 때도 호출
-      function afterSelectCustomer(cust){          // cust = {customerCd, …}
-        currentOrder.customerCd = cust.customerCd;
-        $('#customerNmInput').val(cust.customerNm);
-        // ★ 고객 선택 즉시 여신 새로 고침
-        $.getJSON(`/bsn/customer/${cust.customerCd}/credit`).done(showCredit);
-      }
-      
-      function showCredit(c){                      // CreditInfoDTO → 그리드 행 1개
-        safeSetRowData(creditGridApi,[{
-          creditLimit     : c.creditLimit     ?? 0,
-          remainingCredit : c.remainingCredit?? 0,
-          creditUsed      : c.creditUsed     ?? 0,
-          creditStatus    : c.creditStatus   ?? '',
-          creditHoldFlg   : c.creditHoldFlg  ?? '',
-          tradeStopFlg    : c.tradeStopFlg   ?? ''
-        }]);
-      }
-      /*──────────────── 여신 정보 채우기 ───────────────*/
-      function fillCredit(c){
-        const row = {
-          creditLimit     : c.creditLimit     ?? 0,
-          remainingCredit : c.remainingCredit?? 0,
-          creditUsed      : c.creditUsed     ?? 0,
-          creditStatus    : c.creditStatus   ?? '',
-          creditHoldFlg   : c.creditHoldFlg  ?? '',
-          tradeStopFlg    : c.tradeStopFlg   ?? ''
-        };
-        safeSetRowData(creditGridApi,[row]);
-      }
-
-      function onHeaderCellClicked(event) {
+      /*──────────────── 8. 거래처 모달 ────────────────*/
+      function onHeaderCellClicked(event){
         if (event.colDef.field === 'customerNm') {
           selectedHeaderNode = event.node;
-          // 검색 인풋 초기화
           $('#customerSearchInput').val('');
           $('#customerSearchResults').empty();
           $('#customerModal').modal('show');
         }
       }
+      $('#customerModal').on('shown.bs.modal', ()=> loadCustomerList() );
+      $('#btnCustomerSearch').click(()=> loadCustomerList($('#customerSearchInput').val()) );
+      function loadCustomerList(keyword = '') {
+        $.getJSON('/bsn/customers',{ name: keyword })
+          .done(data => {
+            const $tb = $('#customerSearchResults').empty();
+            data.forEach(c => {
+              const j = encodeURIComponent(JSON.stringify(c));
+              $tb.append(`
+                <tr>
+                  <td>
+                    <button class="btn btn-sm btn-primary btn-select-cust"
+                            data-cust="${j}">선택</button>
+                  </td>
+                  <td>${c.customerCd}</td>
+                  <td>${c.customerNm}</td>
+                  <td>${c.representativeNm}</td>
+                  <td>${c.phoneNo}</td>
+                </tr>`);
+            });
+          })
+          .fail(()=> Swal.fire('오류','거래처 목록 불러오기 실패','error'));
+      }
+      $('#customerSearchResults').on('click','.btn-select-cust',function(){
+        const c = JSON.parse(decodeURIComponent($(this).data('cust')));
+        ['customerCd','customerNm','representativeNm','phoneNo','salesEmpCd','discountRate']
+          .forEach(f=> selectedHeaderNode.setDataValue(f, c[f]));
+        currentOrder = selectedHeaderNode.data;
+        /* 3) ★ 선택 즉시 여신 정보 가져오기 ★ */
+        $.getJSON(`/bsn/customer/${c.customerCd}/credit`)
+            .done(showCredit)                 // 이미 만들어 둔 showCredit() 재사용
+            .fail(() => Swal.fire('오류', '여신 정보를 불러오지 못했습니다.', 'error'));
+
+        $('#customerModal').modal('hide');
+      });
     
-      /*──────────────── 7. 삭제 버튼(다중) ────────────────*/
+      /*──────────────── 9. 저장 버튼 ────────────────*/
+      $('#btnSaveHeader').click(function(){
+        if (!currentOrder || !currentOrder.orderNo) {
+          return Swal.fire('알림','먼저 헤더를 선택 또는 생성해주세요.','info');
+        }
+        headerGridApi.stopEditing();
+        const dto = {
+          orderNo:      currentOrder.orderNo,
+          orderDt:      currentOrder.orderDt,
+          customerCd:   currentOrder.customerCd,
+          paymentTerms: currentOrder.paymentTerms,
+          orderWriter:  currentOrder.orderWriter,
+          remarks:      currentOrder.remarks
+        };
+        Swal.showLoading();
+        $.ajax({
+          url: `/bsn/orders/${encodeURIComponent(dto.orderNo)}`,
+          method:'PUT',
+          contentType:'application/json',
+          data: JSON.stringify(dto)
+        })
+        .done(()=> Swal.fire('완료','헤더가 저장되었습니다.','success'))
+        .fail(()=> Swal.fire('실패','헤더 저장 중 오류가 발생했습니다.','error'));
+      });
+    
+      /*──────────────── 10. 신규 등록(POST) ────────────────*/
+      $('#btnSave').click(saveOrder);
+      function saveOrder(){
+        if (!editMode) {
+          return Swal.fire('알림','신규 모드에서만 저장할 수 있습니다.','info');
+        }
+        headerGridApi.stopEditing();
+        if (!currentOrder) {
+          return Swal.fire('오류','헤더 정보가 없습니다.','error');
+        }
+        const details = [];
+        detailGridApi.forEachNode(n=>{
+          if (n.data.itemCode) details.push({...n.data});
+        });
+        if (details.length===0) {
+          return Swal.fire('안내','품목을 한 개 이상 입력해 주세요.','warning');
+        }
+        const dto = {...currentOrder, details};
+        Swal.showLoading();
+        $.ajax({
+          url: '/bsn/orders',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(dto)
+        })
+        .done(r=>{
+          if (r.success) {
+            Swal.fire('저장 완료','주문서가 등록되었습니다.','success');
+            setEditMode(false);
+            loadHeaderData();
+          } else {
+            Swal.fire('저장 실패',r.message||'서버 오류','error');
+          }
+        })
+        .fail(()=> Swal.fire('저장 실패','통신 오류가 발생했습니다.','error'));
+      }
+    
+      /*──────────────── 11. 헤더 클릭 → 디테일+여신 ────────────────*/
+      function handleHeaderRowClicked(e){
+        currentOrder = e.data;
+        // 신규 등록(editMode) 중에는 로드하지 않음
+        if (editMode) {
+          return;
+        }
+        const { orderNo, customerCd } = e.data;
+        const reqDetail = $.getJSON(`/bsn/orders/${orderNo}/details`);
+        const reqCredit = $.getJSON(`/bsn/customer/${customerCd}/credit`);
+        $.when(reqDetail, reqCredit)
+          .done((dRes, cRes)=>{
+            safeSetRowData(detailGridApi, dRes[0]);
+            showCredit(cRes[0]);
+            calcTotals();
+          })
+          .fail(()=> console.error('데이터 로드 실패'));
+      }
+      function showCredit(c){
+        safeSetRowData(creditGridApi,[{
+          creditLimit:     c.creditLimit    || 0,
+          remainingCredit: c.remainingCredit|| 0,
+          creditUsed:      c.creditUsed     || 0,
+          creditStatus:    c.creditStatus   || '',
+          creditHoldFlg:   c.creditHoldFlg  || '',
+          tradeStopFlg:    c.tradeStopFlg   || ''
+        }]);
+      }
+    
+      /*──────────────── 12. 삭제 ────────────────*/
       $('#btnDelete').click(deleteOrder);
-    
       function deleteOrder(){
         const sel = headerGridApi.getSelectedRows();
-        if(sel.length===0){
-          Swal.fire('선택 필요','삭제할 주문서를 체크해 주세요.','warning'); return;
+        if (!sel.length) {
+          return Swal.fire('안내','삭제할 주문서를 선택해 주세요.','warning');
         }
         Swal.fire({
-          title:'삭제 확인',
-          text:`선택한 ${sel.length}건을 삭제하시겠습니까?`,
-          icon:'warning',
-          showCancelButton:true,
-          confirmButtonColor:'#e74a3b',
-          cancelButtonColor:'#6c757d',
-          confirmButtonText:'삭제',
-          cancelButtonText:'취소'
+          title: '삭제 확인',
+          text: `선택한 ${sel.length}건을 삭제하시겠습니까?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#e74a3b',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: '삭제',
+          cancelButtonText: '취소'
         }).then(r=>{
-          if(!r.isConfirmed) return;
+          if (!r.isConfirmed) return;
           Swal.showLoading();
-          const jobs=sel.map(o=> $.ajax({url:`/bsn/orders/${o.orderNo}`,method:'DELETE'}));
-          $.when.apply($,jobs).done(()=>{
+          const jobs = sel.map(o=>$.ajax({ url:`/bsn/orders/${o.orderNo}`, method:'DELETE' }));
+          $.when.apply($, jobs).done(()=>{
             Swal.fire('삭제 완료','삭제되었습니다.','success');
             loadHeaderData();
-            safeSetRowData(detailGridApi,[]);
-            fillCredit(getInitCreditRows());
+            safeSetRowData(detailGridApi, []);
+            showCredit(getInitCreditObj());
           }).fail(()=> Swal.fire('삭제 실패','서버 오류가 발생했습니다.','error'));
         });
       }
     
-      /*──────────────── 8. 데이터 로드/계산 ────────────────*/
+      /*──────────────── 13. 로드 & 계산 ────────────────*/
       function loadHeaderData(){
         $.get('/bsn/sorlist/data')
-          .done(list=> safeSetRowData(headerGridApi,list))
-          .fail(()=> console.error('주문 목록 로드 실패'));
-      }
-      function fillCredit(c){
-        safeSetRowData(creditGridApi,[
-          {field:'여신한도',   value:c.creditLimit,     format:'currency'},
-          {field:'여신잔액',   value:c.remainingCredit,format:'currency'},
-          {field:'여신사용액', value:c.creditUsed,     format:'currency'},
-          {field:'여신상태',   value:c.creditStatus,   format:'text'},
-          {field:'거래정지',   value:c.tradeStopFlg,   format:'text'}
-        ]);
+          .done(list=> safeSetRowData(headerGridApi, list))
+          .fail(()=> console.error('헤더 로드 실패'));
       }
       function calcTotals(){
-        let supply=0,tax=0,total=0;
+        let supply=0, tax=0, total=0;
         detailGridApi.forEachNode(n=>{
-          supply+=Number(n.data.supplyAmount||0);
-          tax   +=Number(n.data.taxAmount  ||0);
-          total +=Number(n.data.totalAmount||0);
+          supply += Number(n.data.supplyAmount||0);
+          tax    += Number(n.data.taxAmount||0);
+          total  += Number(n.data.totalAmount||0);
         });
         safeSetPinnedBottomRow(detailGridApi,[{
           itemCode:'합계', supplyAmount:supply, taxAmount:tax, totalAmount:total
         }]);
       }
     
-      /*──────────────── 9. 기타 ────────────────*/
+      /*──────────────── 14. 기타 ────────────────*/
       function getInitCreditRows(){
-        return [
-          {field:'여신한도',   value:0, format:'currency'},
-          {field:'여신잔액',   value:0, format:'currency'},
-          {field:'여신사용액', value:0, format:'currency'},
-          {field:'여신상태',   value:'',format:'text'},
-          {field:'거래정지',   value:'',format:'text'}
-        ];
+        return [{ creditLimit:0, remainingCredit:0, creditUsed:0,
+                  creditStatus:'', creditHoldFlg:'', tradeStopFlg:'' }];
+      }
+      function getInitCreditObj(){
+        return { creditLimit:0, remainingCredit:0, creditUsed:0,
+                creditStatus:'', creditHoldFlg:'', tradeStopFlg:'' };
       }
       function setEditMode(flag){
         editMode = flag;
         detailGridApi.refreshCells({force:true});
         headerGridApi.refreshCells({force:true});
         $('#btnSave,#btnAddRow,#btnDeleteRow').prop('disabled', !flag);
-      }
-
-      /*─────────────── 보조 함수 ───────────────*/
-      function getInitCreditObj(){
-        return {
-          creditLimit    :0,
-          remainingCredit:0,
-          creditUsed     :0,
-          creditStatus   :'',
-          creditHoldFlg  :'',
-          tradeStopFlg   :''
-        };
       }
       function numFmt(v){ return Number(v||0).toLocaleString()+'원'; }
-      function setEditMode(flag){
-        editMode = flag;
-        detailGridApi.refreshCells({force:true});
-        headerGridApi.refreshCells({force:true});
-        $('#btnSave,#btnAddRow,#btnDeleteRow').prop('disabled', !flag);
-      }
+    
       console.log('주문서 관리 JS 초기화 완료');
+    
     });
     /*]]>*/
     </script>
+    
 </div>
 </html>
