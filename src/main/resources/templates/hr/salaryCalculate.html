@@ -262,24 +262,36 @@
       function renderDetailModal(details) {
         const $body = $('#salaryDetailModal tbody');
         $body.empty();
-        details.forEach(row => {
+        let total = 0;
+        details.forEach(function (item) {
+          total += Number(item.amount);
           $body.append(`
-            <tr>
-              <td>${row.item}</td>          <!-- item_name → itemName -->
-              <td>${row.amount.toLocaleString()}</td>
-              <td>${row.memo}</td>              <!-- memo 그대로 -->
-              <td>${row.taxType}</td>           <!-- tax_type → taxType -->
-              <td>${row.payType}</td>           <!-- pay_type → payType -->
-            </tr>
-          `);
+          <tr>
+            <td>${item.itemName}</td>
+            <td>${Number(item.amount).toLocaleString()}</td>
+            <td>${item.remark || '-'}</td>
+            <td>${item.taxType || '-'}</td>
+            <td>${item.payType}</td>
+          </tr>
+        `);
         });
+        // 실수령액 행 추가 (총계)
+        $body.append(`
+        <tr>
+          <td>실수령액</td>
+          <td>${total.toLocaleString()}</td>
+          <td>계산 자동</td>
+          <td>-</td>
+          <td>-</td>
+        </tr>
+      `);
       }
 
       // 7) 급여 계산 버튼
-      $('#calcBtn').on('click', function() {
+      $('#calcBtn').on('click', function () {
         const selected = $('input[name="salaryCheckbox"]:checked').map((number, cb) => $(cb).closest('tr').data('salaryIdx')).get();
 
-        if(!selected.length) {
+        if (!selected.length) {
           Swal.fire("실패", "선택된 사원이 없습니다.", "error");
           return;
         }
@@ -287,18 +299,18 @@
         $.ajax({
           type: "POST",
           url: "/hr/sc/calc",
-          data: {coIdx: coIdx, salaryIdxList: selected},
-          success: function(res) {
+          data: { coIdx: coIdx, salaryIdxList: selected },
+          success: function (res) {
             loadSalaryList();
           }
         });
       });
 
       // 8) 급여 확정 버튼
-      $('#confirmBtn').on('click', function() {
+      $('#confirmBtn').on('click', function () {
         const selected = $('input[name="salaryCheckbox"]:checked').map((number, cb) => $(cb).closest('tr').data('salaryIdx')).get();
 
-        if(!selected.length) {
+        if (!selected.length) {
           Swal.fire("실패", "선택된 사원이 없습니다.", "error");
           return;
         }
@@ -306,8 +318,8 @@
         $.ajax({
           type: "POST",
           url: "/hr/sc/confirm",
-          data: {coIdx: coIdx, salaryIdxList: selected},
-          success: function(res) {
+          data: { coIdx: coIdx, salaryIdxList: selected },
+          success: function (res) {
             loadSalaryList();
           }
         });

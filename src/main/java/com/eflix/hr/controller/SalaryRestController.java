@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,10 +51,10 @@ public class SalaryRestController {
     }
 
     @GetMapping("/detail-items")
-    public List<SalaryFullDetailDTO> getSalaryDetailItems(
+    public List<SalaryDetailDTO> getSalaryDetailItems(
             @RequestParam String coIdx,
             @RequestParam String salaryIdx) {
-        return salaryService.getSalaryDetailItems(coIdx, salaryIdx);
+        return salaryService.selectSalaryDetail(coIdx, salaryIdx);
     }
 
     @PostMapping("/calc")
@@ -76,21 +75,29 @@ public class SalaryRestController {
         salaryService.confirmSalary(map);
     }
     
-
+    // 0707
     @GetMapping("/items")
     public List<SalaryMappingDTO> getItems(@RequestParam("coIdx") String coIdx) {
         return salaryMappingService.findAllByCoIdx(coIdx);
     }
 
+    @GetMapping("/item/{mpIdx}")
+    public SalaryMappingDTO getItem(@PathVariable("mpIdx") String mpIdx, @RequestParam("coIdx") String coIdx) {
+        return salaryMappingService.findByMpIdx(coIdx, mpIdx);
+    }
+
     @PostMapping("/item")
     public void postItem(@ModelAttribute SalaryMappingDTO salaryMappingDTO) {
+        
+        System.out.println(salaryMappingDTO.toString());
         salaryMappingService.insert(salaryMappingDTO);
     }
 
     @PutMapping("/item/{mpIdx}")
-    public void putItem(@PathVariable("mpIdx") String mpIdx, @RequestBody SalaryMappingDTO salaryMappingDTO) {
+    public void putItem(@PathVariable("mpIdx") String mpIdx, @ModelAttribute SalaryMappingDTO salaryMappingDTO) {
+        System.out.println(salaryMappingDTO);
         salaryMappingDTO.setMpIdx(mpIdx);
-        salaryMappingService.modify(salaryMappingDTO);
+        salaryMappingService.update(salaryMappingDTO);
     }
 
     @DeleteMapping("/item/{mpIdx}")

@@ -85,4 +85,9 @@ public class SalaryServiceImpl implements SalaryService {
     salaryMapper.confirmSalary(map);
   }
 
+  @Override
+  public List<SalaryDetailDTO> selectSalaryDetail(String coIdx, String salaryIdx) {
+    return salaryMapper.selectSalaryDetail(coIdx, salaryIdx);
+  }
+
 }

@@ -13,14 +13,9 @@ import java.util.List;
 import com.eflix.hr.dto.etc.SalaryMappingDTO;
 
 public interface SalaryMappingService {
-    public List<SalaryMappingDTO> getAllSalaryMappings();
-    public SalaryMappingDTO getSalaryMappingById(String mpIdx);
-    int createSalaryMapping(SalaryMappingDTO dto);
-    int updateSalaryMapping(SalaryMappingDTO dto);
-    int deleteSalaryMapping(String mpIdx);
-
     public List<SalaryMappingDTO> findAllByCoIdx(String coIdx);
+    public SalaryMappingDTO findByMpIdx(String coIdx, String mpIdx);
     public void insert(SalaryMappingDTO salaryMappingDTO);
-    public void modify(SalaryMappingDTO salaryMappingDTO);
+    public void update(SalaryMappingDTO salaryMappingDTO);
     public void delete(String salaryIdx);
 }

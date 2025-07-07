@@ -28,10 +28,10 @@ public interface SalaryService {
     // 0707
     public List<SalarySummaryDTO> findSalaryList(String coIdx, String salaryMonth, String payMonth, String empName,
             String deptIdx);
-    public List<SalaryDetailDTO> findSalaryDetail(String coIdx, String salaryIdx);
+    public List<SalaryDetailDTO> selectSalaryDetail(String coIdx, String salaryIdx);
 
+    public List<SalaryDetailDTO> findSalaryDetail(String coIdx, String salaryIdx);
     public List<SalaryFullDetailDTO> getSalaryDetailItems(String coIdx, String salaryIdx);
-    
     public void calculateSalary(Map<String, Object> map);
     public void confirmSalary(Map<String, Object> map);
 }

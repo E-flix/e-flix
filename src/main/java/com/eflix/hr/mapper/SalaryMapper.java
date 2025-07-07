@@ -28,8 +28,10 @@ public interface SalaryMapper {
     List<SalaryDTO> bankList();
 
     List<SalarySummaryDTO> findSalaryList(String coIdx, String salaryMonth, String payMonth, String empName, String deptIdx);
+
     List<SalaryDetailDTO> findSalaryDetail(String coIdx, String salaryIdx);
     List<SalaryFullDetailDTO> getSalaryDetailItems(String coIdx, String salaryIdx);
     void calculateSalary(Map<String,Object> map);
     void confirmSalary(Map<String,Object> map);
+    List<SalaryDetailDTO> selectSalaryDetail(String coIdx, String salaryIdx);
 }

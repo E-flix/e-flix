@@ -5,6 +5,7 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 클래스 생성
+  - 2025-07-07 (복성민): 급여 매핑 조회, 추가, 수정, 삭제 추가
 ============================================ */
 package com.eflix.hr.service.impl;
 
@@ -24,33 +25,13 @@ public class SalaryMappingServiceImpl implements SalaryMappingService {
   private SalaryMappingMapper salaryMappingMapper;
 
   @Override
-  public List<SalaryMappingDTO> getAllSalaryMappings() {
-    throw new UnsupportedOperationException("Unimplemented method 'getAllSalaryMappings'");
-  }
-
-  @Override
-  public SalaryMappingDTO getSalaryMappingById(String mpIdx) {
-    throw new UnsupportedOperationException("Unimplemented method 'getSalaryMappingById'");
-  }
-
-  @Override
-  public int createSalaryMapping(SalaryMappingDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'createSalaryMapping'");
-  }
-
-  @Override
-  public int updateSalaryMapping(SalaryMappingDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'updateSalaryMapping'");
-  }
-
-  @Override
-  public int deleteSalaryMapping(String mpIdx) {
-    throw new UnsupportedOperationException("Unimplemented method 'deleteSalaryMapping'");
-  }
-
-  @Override
   public List<SalaryMappingDTO> findAllByCoIdx(String coIdx) {
     return salaryMappingMapper.findAllByCoIdx(coIdx);
+  }
+
+  @Override
+  public SalaryMappingDTO findByMpIdx(String coIdx, String mpIdx) {
+    return salaryMappingMapper.findByMpIdx(coIdx, mpIdx);
   }
 
   @Override
@@ -59,8 +40,8 @@ public class SalaryMappingServiceImpl implements SalaryMappingService {
   }
 
   @Override
-  public void modify(SalaryMappingDTO salaryMappingDTO) {
-    salaryMappingMapper.modify(salaryMappingDTO);
+  public void update(SalaryMappingDTO salaryMappingDTO) {
+    salaryMappingMapper.update(salaryMappingDTO);
   }
 
   @Override

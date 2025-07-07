@@ -11,4 +11,7 @@ public class SalaryMappingDTO {
     private String type;
     private String coIdx;
     private double alAmount;
+    private String useStatus;
+    private String targetDept;
+    private String mpMemo;
 }
