@@ -13,15 +13,20 @@
   <div class="modal fade" id="accountModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">계정과목 선택</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-header align-items-center">
+          <h5 class="modal-title mb-0">계정과목 선택</h5>
+          <small class="text-muted ms-3">※ 키보드를 누르면 바로 검색할 수 있습니다.</small>
+          <button type="button" class="btn-close" onclick="AccountModal.close()"></button>
         </div>
         <div class="modal-body">
+          <!-- 검색창 추가 -->
+          <div class="mb-3">
+            <input type="text" id="accountSearchInput" class="form-control" placeholder="계정과목명 또는 코드로 검색..." />
+          </div>
           <div id="accountGrid" class="ag-theme-alpine" style="height:400px; width:100%;"></div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+          <button type="button" class="btn btn-secondary" onclick="AccountModal.close()">취소</button>
           <button type="button" class="btn btn-primary" onclick="AccountModal.selectFromButton()">선택</button>
         </div>
       </div>
@@ -32,15 +37,20 @@
   <div class="modal fade" id="partnerModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">거래처 선택</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-header align-items-center">
+          <h5 class="modal-title mb-0">거래처 선택</h5>
+          <small class="text-muted ms-3">※ 키보드를 누르면 바로 검색할 수 있습니다.</small>
+          <button type="button" class="btn-close" onclick="PartnerModal.close()"></button>
         </div>
         <div class="modal-body">
+          <!-- 검색창 추가 -->
+          <div class="mb-3">
+            <input type="text" id="partnerSearchInput" class="form-control" placeholder="거래처명 또는 코드로 검색..." />
+          </div>
           <div id="partnerGrid" class="ag-theme-alpine" style="height:400px; width:100%;"></div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+          <button type="button" class="btn btn-secondary" onclick="PartnerModal.close()">취소</button>
           <button type="button" class="btn btn-primary" onclick="PartnerModal.selectFromButton()">선택</button>
         </div>
       </div>
@@ -50,28 +60,33 @@
   <script>
     // 계정과목 모달 관리 객체
     const AccountModal = {
-      instance: null,
-      gridOptions: null,
-      currentCallbackInfo: null,
+      instance: null, // 모달 인스턴스 저장
+      gridOptions: null, // 그리드 옵션 저장
+      currentCallbackInfo: null, // 현재 콜백 정보 저장
+      allData: [], // 전체 데이터 저장
       
       // 모달 초기화
       init() {
-        if (this.instance) return;
+        if (this.instance) return; // 이미 초기화된 경우 중복 초기화를 방지
         
-        this.instance = new bootstrap.Modal(document.getElementById('accountModal'));
+        // focus: false 옵션으로 Bootstrap의 자동 포커스 관리를 비활성화합니다.
+        this.instance = new bootstrap.Modal(document.getElementById('accountModal'), { focus: false }); // 모달 인스턴스 생성
         
         // 그리드 옵션 설정
         this.gridOptions = {
           headerHeight: 35,
           rowHeight: 35,
           columnDefs: [
-            { headerName: "코드", field: "accountCode", sortable: true, filter: true, width: 100 },
-            { headerName: "계정과목명", field: "accountName", sortable: true, filter: true, flex: 1 }
+            { headerName: "코드", field: "accountCode", sortable: true, filter: false, width: 120 },
+            { headerName: "계정과목명", field: "accountName", sortable: true, filter: false, flex: 1 }
           ],
           rowSelection: { mode: 'singleRow' },
           defaultColDef: {
             minWidth: 100,
             resizable: true,
+          },
+          onCellClicked: (params) => {
+            params.node.setSelected(true);
           },
           onRowDoubleClicked: (event) => {
             this.selectAccount(event.data.accountCode, event.data.accountName);
@@ -84,6 +99,100 @@
         
         // 그리드 생성
         agGrid.createGrid(document.getElementById('accountGrid'), this.gridOptions);
+        
+        // 검색 이벤트 설정
+        this.setupSearchEvents();
+        
+        // 모달 이벤트 설정
+        this.setupModalEvents();
+      },
+      
+      // 검색 이벤트 설정
+      setupSearchEvents() {
+        const searchInput = document.getElementById('accountSearchInput');
+        if (searchInput) {
+          // Arrow function으로 this 바인딩 문제 해결
+          searchInput.addEventListener('input', (e) => {
+            this.filterData(e.target.value);
+          });
+          
+          searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              this.selectFirstItem();
+            }
+          });
+        }
+      },
+      
+      // 모달 이벤트 설정
+      setupModalEvents() {
+        const modalElement = document.getElementById('accountModal');
+        const searchInput = document.getElementById('accountSearchInput');
+
+        // 모달 내 키보드 입력 시 검색창으로 포커스 이동 (IME 문제 해결)
+        modalElement.addEventListener('keydown', (e) => {
+          if (e.target === searchInput || e.ctrlKey || e.altKey || e.metaKey || e.key === 'Enter' || e.key === 'Escape') {
+            return;
+          }
+          
+          // 한/영, 한자 키 등 기능 키는 무시
+          if (e.key === 'Process' || e.key === 'HangulMode' || e.key === 'HanjaMode') {
+            return;
+          }
+
+          // 포커스를 검색창으로 이동시키고, 기본 동작을 막아 영문자 직접 입력을 방지
+          if (document.activeElement !== searchInput) {
+            searchInput.focus();
+            e.preventDefault();
+          }
+        });
+      },
+
+      // 데이터 필터링
+      filterData(searchText) {
+        console.log('계정과목 검색:', searchText); // 디버깅용
+        
+        if (!this.gridOptions || !this.gridOptions.api) {
+          console.warn('그리드 API가 준비되지 않았습니다.');
+          return;
+        }
+        
+        if (!this.allData || this.allData.length === 0) {
+          console.warn('검색할 데이터가 없습니다.');
+          return;
+        }
+        
+        const filteredData = this.allData.filter(item => {
+          if (!searchText || searchText.trim() === '') return true;
+          
+          const searchLower = searchText.toLowerCase().trim();
+          const codeLower = (item.accountCode || '').toString().toLowerCase();
+          const nameLower = (item.accountName || '').toString().toLowerCase();
+          
+          return codeLower.includes(searchLower) || nameLower.includes(searchLower);
+        });
+        
+        console.log('필터링 결과:', filteredData.length, '개'); // 디버깅용
+        
+        this.gridOptions.api.setGridOption('rowData', filteredData);
+        
+        // 그리드 크기 조정
+        setTimeout(() => {
+          if (this.gridOptions.api) {
+            this.gridOptions.api.sizeColumnsToFit();
+          }
+        }, 50);
+      },
+      
+      // 첫 번째 항목 선택
+      selectFirstItem() {
+        if (!this.gridOptions.api) return;
+        
+        const firstRowNode = this.gridOptions.api.getDisplayedRowAtIndex(0);
+        if (firstRowNode && firstRowNode.data) {
+          this.selectAccount(firstRowNode.data.accountCode, firstRowNode.data.accountName);
+        }
       },
       
       // 모달 열기
@@ -91,13 +200,22 @@
         this.init();
         this.currentCallbackInfo = callbackInfo;
         this.instance.show();
-        
-        // 그리드가 이미 준비되었으면 데이터 새로고침
-        if (this.gridOptions.api) {
-          this.loadData();
+
+        // shown.bs.modal 이벤트 대신 open 함수에서 직접 처리
+        const searchInput = document.getElementById('accountSearchInput');
+        if (searchInput) {
+          searchInput.value = '';
         }
+        this.filterData('');
+        
+        // 모달이 완전히 표시된 후 포커스 설정
+        setTimeout(() => {
+          if (searchInput) {
+            searchInput.focus();
+          }
+        }, 150); // Bootstrap 모달의 fade 애니메이션 시간(150ms)보다 약간 길게 설정
       },
-      
+
       // 데이터 로드
       loadData() {
         if (!this.gridOptions.api) return;
@@ -108,6 +226,7 @@
             return res.json();
           })
           .then(data => {
+            this.allData = data;
             this.gridOptions.api.setGridOption('rowData', data);
             this.gridOptions.api.sizeColumnsToFit();
           })
@@ -125,6 +244,11 @@
         this.instance.hide();
       },
       
+      // 모달 닫기
+      close() {
+        this.instance.hide();
+      },
+
       // 선택 버튼으로 선택
       selectFromButton() {
         const selectedNodes = this.gridOptions.api.getSelectedNodes();
@@ -143,25 +267,30 @@
       instance: null,
       gridOptions: null,
       currentCallbackInfo: null,
+      allData: [], // 전체 데이터 저장
       
       // 모달 초기화
       init() {
         if (this.instance) return;
         
-        this.instance = new bootstrap.Modal(document.getElementById('partnerModal'));
+        // focus: false 옵션으로 Bootstrap의 자동 포커스 관리를 비활성화합니다.
+        this.instance = new bootstrap.Modal(document.getElementById('partnerModal'), { focus: false });
         
         // 그리드 옵션 설정
         this.gridOptions = {
           headerHeight: 35,
           rowHeight: 35,
           columnDefs: [
-            { headerName: "코드", field: "partnerCode", sortable: true, filter: true, width: 100 },
-            { headerName: "거래처명", field: "partnerName", sortable: true, filter: true, flex: 1 }
+            { headerName: "코드", field: "partnerCode", sortable: true, filter: false, width: 120 },
+            { headerName: "거래처명", field: "partnerName", sortable: true, filter: false, flex: 1 }
           ],
           rowSelection: { mode: 'singleRow' },
           defaultColDef: {
             minWidth: 100,
             resizable: true,
+          },
+          onCellClicked: (params) => {
+            params.node.setSelected(true);
           },
           onRowDoubleClicked: (event) => {
             this.selectPartner(event.data.partnerCode, event.data.partnerName);
@@ -174,6 +303,100 @@
         
         // 그리드 생성
         agGrid.createGrid(document.getElementById('partnerGrid'), this.gridOptions);
+        
+        // 검색 이벤트 설정
+        this.setupSearchEvents();
+        
+        // 모달 이벤트 설정
+        this.setupModalEvents();
+      },
+      
+      // 검색 이벤트 설정
+      setupSearchEvents() {
+        const searchInput = document.getElementById('partnerSearchInput');
+        if (searchInput) {
+          // Arrow function으로 this 바인딩 문제 해결
+          searchInput.addEventListener('input', (e) => {
+            this.filterData(e.target.value);
+          });
+          
+          searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              this.selectFirstItem();
+            }
+          });
+        }
+      },
+      
+      // 모달 이벤트 설정
+      setupModalEvents() {
+        const modalElement = document.getElementById('partnerModal');
+        const searchInput = document.getElementById('partnerSearchInput');
+
+        // 모달 내 키보드 입력 시 검색창으로 포커스 이동 (IME 문제 해결)
+        modalElement.addEventListener('keydown', (e) => {
+          if (e.target === searchInput || e.ctrlKey || e.altKey || e.metaKey || e.key === 'Enter' || e.key === 'Escape') {
+            return;
+          }
+
+          // 한/영, 한자 키 등 기능 키는 무시
+          if (e.key === 'Process' || e.key === 'HangulMode' || e.key === 'HanjaMode') {
+            return;
+          }
+          
+          // 포커스를 검색창으로 이동시키고, 기본 동작을 막아 영문자 직접 입력을 방지
+          if (document.activeElement !== searchInput) {
+            searchInput.focus();
+            e.preventDefault();
+          }
+        });
+      },
+
+      // 데이터 필터링
+      filterData(searchText) {
+        console.log('거래처 검색:', searchText); // 디버깅용
+        
+        if (!this.gridOptions || !this.gridOptions.api) {
+          console.warn('그리드 API가 준비되지 않았습니다.');
+          return;
+        }
+        
+        if (!this.allData || this.allData.length === 0) {
+          console.warn('검색할 데이터가 없습니다.');
+          return;
+        }
+        
+        const filteredData = this.allData.filter(item => {
+          if (!searchText || searchText.trim() === '') return true;
+          
+          const searchLower = searchText.toLowerCase().trim();
+          const codeLower = (item.partnerCode || '').toString().toLowerCase();
+          const nameLower = (item.partnerName || '').toString().toLowerCase();
+          
+          return codeLower.includes(searchLower) || nameLower.includes(searchLower);
+        });
+        
+        console.log('필터링 결과:', filteredData.length, '개'); // 디버깅용
+        
+        this.gridOptions.api.setGridOption('rowData', filteredData);
+        
+        // 그리드 크기 조정
+        setTimeout(() => {
+          if (this.gridOptions.api) {
+            this.gridOptions.api.sizeColumnsToFit();
+          }
+        }, 50);
+      },
+      
+      // 첫 번째 항목 선택
+      selectFirstItem() {
+        if (!this.gridOptions.api) return;
+        
+        const firstRowNode = this.gridOptions.api.getDisplayedRowAtIndex(0);
+        if (firstRowNode && firstRowNode.data) {
+          this.selectPartner(firstRowNode.data.partnerCode, firstRowNode.data.partnerName);
+        }
       },
       
       // 모달 열기
@@ -181,13 +404,22 @@
         this.init();
         this.currentCallbackInfo = callbackInfo;
         this.instance.show();
-        
-        // 그리드가 이미 준비되었으면 데이터 새로고침
-        if (this.gridOptions.api) {
-          this.loadData();
+
+        // shown.bs.modal 이벤트 대신 open 함수에서 직접 처리
+        const searchInput = document.getElementById('partnerSearchInput');
+        if (searchInput) {
+          searchInput.value = '';
         }
+        this.filterData('');
+
+        // 모달이 완전히 표시된 후 포커스 설정
+        setTimeout(() => {
+          if (searchInput) {
+            searchInput.focus();
+          }
+        }, 150); // Bootstrap 모달의 fade 애니메이션 시간(150ms)보다 약간 길게 설정
       },
-      
+
       // 데이터 로드
       loadData() {
         if (!this.gridOptions.api) return;
@@ -198,6 +430,7 @@
             return res.json();
           })
           .then(data => {
+            this.allData = data;
             this.gridOptions.api.setGridOption('rowData', data);
             this.gridOptions.api.sizeColumnsToFit();
           })
@@ -212,6 +445,11 @@
         if (this.currentCallbackInfo && this.currentCallbackInfo.callback) {
           this.currentCallbackInfo.callback(code, name);
         }
+        this.instance.hide();
+      },
+
+      // 모달 닫기
+      close() {
         this.instance.hide();
       },
       
