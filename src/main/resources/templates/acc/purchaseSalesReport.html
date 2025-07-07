@@ -37,7 +37,7 @@
       <h3 class="mb-0">매입매출장</h3>
       <!-- 오른쪽: 버튼 모음 -->
       <div>
-        <button class="btn btn-secondary btn-sm" onclick="printLedger()">인쇄</button>
+        <button class="btn btn-secondary btn-sm" id="printBtn">인쇄</button>
       </div>
     </div>
     <!-- 탭 버튼 -->
@@ -51,25 +51,24 @@
       <div class="d-flex align-items-center me-2">
         <label class="form-label me-2 mb-0">일자</label>
         2025 년
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" style="width:45px;"> 월
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startDay" style="width:45px;"> 일 ~
+        <input type="number" value="1" min="1" max="12" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" id="startMonth" style="width:45px;"> 월
+        <input type="number" value="1" min="1" max="31" class="form-control form-control-sm d-inline-block mx-1" name="startDay" id="startDay" style="width:45px;"> 일 ~
         2025 년
-        <input type="number" value="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" style="width:45px;"> 월
-        <input type="number" value="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" style="width:45px;"> 일
+        <input type="number" value="12" min="1" max="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" id="endMonth" style="width:45px;"> 월
+        <input type="number" value="31" min="1" max="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" id="endDay" style="width:45px;"> 일
       </div>
       <div class="d-flex align-items-center me-2">
-        과세유형
-        <select id="taxType" class="form-select form-select-sm">
-          <option>전체</option><option>일반</option><option>간이</option>
+        <label class="me-2 mb-0" style="white-space:nowrap;">과세유형</label>
+        <select id="transactionType" name="transactionType" class="form-select form-select-sm">
+          <option value="">전체</option><option value="일반">일반</option><option value="간이">간이</option>
         </select>
       </div>
       <div class="d-flex align-items-center me-2">
-        전자유형
-        <select id="electronicType" class="form-select form-select-sm">
-          <option>전체</option><option>전자</option><option>수기</option>
+        <label class="me-2 mb-0" style="white-space:nowrap;">전자유형</label>
+        <select id="electronicType" name="electronicType" class="form-select form-select-sm">
+          <option value="">전체</option><option value="a1">전자</option><option value="a2">수기</option>
         </select>
       </div>
-    </div>
     </div>
     <!-- 탭별 컨텐츠 -->
     <div id="tab-content-all">
@@ -123,6 +122,8 @@
 
     // 각 탭별 ag-Grid 인스턴스
     const gridOptionsAll = {
+      headerHeight: 35,
+      rowHeight: 35,
       columnDefs,
       rowData: [],
       getRowClass: params => {
@@ -165,29 +166,94 @@
       document.getElementById('tab-sales').classList.remove('active');
     };
 
-    // 데이터 로드 함수 (전체/매출/매입)
-    async function loadReport() {
-      const startDate = document.getElementById('startDate').value;
-      const endDate = document.getElementById('endDate').value;
-      const taxType = document.getElementById('taxType').value;
-      const electronicType = document.getElementById('electronicType').value;
-      // 전체
-      let res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&type=전체&taxType=${taxType}&electronicType=${electronicType}`);
-      let data = await res.json();
-      apiAll.setGridOption('rowData', addSummaryRows(data));
-      // 매출
-      res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&type=매출&taxType=${taxType}&electronicType=${electronicType}`);
-      data = await res.json();
-      apiSales.setGridOption('rowData', addSummaryRows(data));
-      // 매입
-      res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&type=매입&taxType=${taxType}&electronicType=${electronicType}`);
-      data = await res.json();
-      apiPurchase.setGridOption('rowData', addSummaryRows(data));
+    function pad2(n) { return n < 10 ? '0' + n : n; }
+    function getDateRange() {
+      const startMonth = pad2(Number(document.getElementById('startMonth').value));
+      const startDay = pad2(Number(document.getElementById('startDay').value));
+      const endMonth = pad2(Number(document.getElementById('endMonth').value));
+      const endDay = pad2(Number(document.getElementById('endDay').value));
+      return {
+        startDate: `${startMonth}-${startDay}`,
+        endDate: `${endMonth}-${endDay}`
+      };
     }
-    document.getElementById('searchBtn').onclick = loadReport;
+    function getActiveTabEntryType() {
+      if(document.getElementById('tab-all').classList.contains('active')) return '';
+      if(document.getElementById('tab-sales').classList.contains('active')) return '매출';
+      if(document.getElementById('tab-purchase').classList.contains('active')) return '매입';
+      return '';
+    }
+    async function loadReport() {
+      const { startDate, endDate } = getDateRange();
+      const transactionType = document.getElementById('transactionType').value;
+      const electronicType = document.getElementById('electronicType').value;
+      const entryType = getActiveTabEntryType();
+      let res, data;
+      try {
+        res = await fetch(`/acc/psr/list?startDate=${startDate}&endDate=${endDate}&entryType=${entryType}&transactionType=${transactionType}&electronicType=${electronicType}`);
+        if (!res.ok) {
+          console.error('HTTP error', res.status, await res.text());
+          data = [];
+        } else {
+          data = await res.json();
+          console.log((entryType||'전체') + ' 데이터:', data);
+        }
+      } catch (e) {
+        console.error('fetch error', e);
+        data = [];
+      }
+      if(entryType === '' || entryType === '전체') apiAll.setGridOption('rowData', addSummaryRows(data));
+      if(entryType === '매출') apiSales.setGridOption('rowData', addSummaryRows(data));
+      if(entryType === '매입') apiPurchase.setGridOption('rowData', addSummaryRows(data));
+    }
+    ['startMonth','startDay','endMonth','endDay','transactionType','electronicType'].forEach(id => {
+      document.getElementById(id).addEventListener('change', loadReport);
+    });
     // 최초 조회
     loadReport();
     // 인쇄 버튼(단순 window.print)
     document.getElementById('printBtn').onclick = () => window.print();
+
+    // 과세유형 옵션 하드코딩
+    const transactionTypeOptions = {
+      '전체': `
+        <option value="">전체</option>
+        <option value="11">11. 과세</option><option value="12">12. 영세</option><option value="13">13. 면세</option><option value="14">14. 건별</option><option value="15">15. 간이</option>
+        <option value="16">16. 수출</option><option value="17">17. 카과</option><option value="18">18. 카면</option><option value="19">19. 카영</option><option value="20">20. 면건</option>
+        <option value="21">21. 전자</option><option value="22">22. 현과</option><option value="23">23. 현면</option><option value="24">24. 현영</option>
+        <option value="51">51. 과세</option><option value="52">52. 영세</option><option value="53">53. 면세</option><option value="54">54. 불공</option>
+        <option value="55">55. 수입</option><option value="56">56. 금전</option><option value="57">57. 카과</option><option value="58">58. 카면</option><option value="59">59. 카영</option>
+        <option value="60">60. 면건</option><option value="61">61. 현과</option><option value="62">62. 현면</option>
+      `,
+      '매출': `
+        <option value="">전체</option>
+        <option value="11">11. 과세</option><option value="12">12. 영세</option><option value="13">13. 면세</option><option value="14">14. 건별</option><option value="15">15. 간이</option>
+        <option value="16">16. 수출</option><option value="17">17. 카과</option><option value="18">18. 카면</option><option value="19">19. 카영</option><option value="20">20. 면건</option>
+        <option value="21">21. 전자</option><option value="22">22. 현과</option><option value="23">23. 현면</option><option value="24">24. 현영</option>
+      `,
+      '매입': `
+        <option value="">전체</option>
+        <option value="51">51. 과세</option><option value="52">52. 영세</option><option value="53">53. 면세</option><option value="54">54. 불공</option>
+        <option value="55">55. 수입</option><option value="56">56. 금전</option><option value="57">57. 카과</option><option value="58">58. 카면</option><option value="59">59. 카영</option>
+        <option value="60">60. 면건</option><option value="61">61. 현과</option><option value="62">62. 현면</option>
+      `
+    };
+    function updateTransactionTypeOptions(tab) {
+      const transactionTypeSelect = document.getElementById('transactionType');
+      transactionTypeSelect.innerHTML = transactionTypeOptions[tab] || transactionTypeOptions['전체'];
+      transactionTypeSelect.value = ""; // 항상 전체로 초기화
+      transactionTypeSelect.dispatchEvent(new Event('change'));
+    }
+    ['tab-all','tab-sales','tab-purchase'].forEach(id => {
+      document.getElementById(id).addEventListener('click', function() {
+        let tab = '전체';
+        if(id==='tab-sales') tab = '매출';
+        if(id==='tab-purchase') tab = '매입';
+        updateTransactionTypeOptions(tab);
+        setTimeout(loadReport, 0);
+      });
+    });
+    updateTransactionTypeOptions('전체');
+    setTimeout(loadReport, 0);
   </script>
 </div>

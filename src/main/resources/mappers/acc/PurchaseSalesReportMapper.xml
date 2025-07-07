@@ -39,7 +39,7 @@
   </resultMap>
 
    <!-- 매입매출 조회 -->
-  <select id="getReportList" resultMap="entryMasterResultMap">
+  <select id="getReportList" resultMap="entryMasterResultMap" parameterType="map">
     SELECT 
       m.entry_type, 
       m.entry_date, 
@@ -78,19 +78,18 @@
       m.co_idx = #{coIdx}
       AND m.ledger_check = 'a1'
       AND m.transaction_type != '63'
-
       <if test="entryType != null and entryType != ''">
         AND m.entry_type = #{entryType}
       </if>
-
+      <if test="transactionType != null and transactionType != ''">
+        AND m.transaction_type = #{transactionType}
+      </if>
       <if test="electronicType != null and electronicType != ''">
         AND m.electronic_type = #{electronicType}
       </if>
-
       <if test="year != null and year != ''">
         AND TO_CHAR(m.entry_date, 'YYYY') = #{year}
       </if>
-
       <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
         AND TO_CHAR(m.entry_date, 'MM-DD') BETWEEN #{startDate} AND #{endDate}
       </if>
