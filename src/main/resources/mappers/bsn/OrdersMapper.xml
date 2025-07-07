@@ -25,8 +25,8 @@
     FROM   ORDERS o
     JOIN   CUSTOMERS c
           ON c.CUSTOMER_CD = o.CUSTOMER_CD
+          and  c.co_idx = #{coIdx}
     WHERE  o.co_idx = #{coIdx}
-    and  c.co_idx = #{coIdx}
     ORDER  BY o.ORDER_DT DESC
   </select>
 
@@ -50,9 +50,9 @@
     FROM   ORDERS o
     JOIN   CUSTOMERS c
           ON c.CUSTOMER_CD = o.CUSTOMER_CD
+          AND c.CO_IDX = o.CO_IDX
     WHERE  o.ORDER_NO = #{orderNo}
     and o.co_idx = #{coIdx}
-    and c.co_idx = #{coIdx}
   </select>
 
   <!--─────────────────────────────-->
@@ -111,14 +111,18 @@
       SET ORDER_DT      = TO_DATE(#{orderDt},      'YYYY-MM-DD'),
           PAYMENT_TERMS = #{paymentTerms},
           ORDER_WRITER  = #{orderWriter},
-          REMARKS       = #{remarks}
+          REMARKS       = #{remarks},
+          CUSTOMER_CD   = #{customerCd}  /* ★ 거래처 변경 가능하도록 추가 */
     WHERE ORDER_NO     = #{orderNo}
+    AND CO_IDX         = #{coIdx}
   </update>
 
   <!-- 주문 상세(라인) 업데이트 -->
   <update id="updateOrderDetail" parameterType="com.eflix.bsn.dto.OrdersDetailDTO">
   UPDATE EFLIX.ORDERS_DETAIL
     SET ITEM_CODE     = #{itemCode},
+        ITEM_NAME     = #{itemName},  
+        SPEC          = #{spec},
         QTY           = #{qty},
         UNIT_PRICE    = #{unitPrice},
         SUPPLY_AMOUNT = #{supplyAmount},
@@ -130,6 +134,7 @@
         REMARKS       = #{remarks}
     WHERE ORDER_NO     = #{orderNo}
     AND LINE_NO      = #{lineNo}
+    AND CO_IDX       = #{coIdx}
 </update>
 
   <!--─────────────────────────────-->

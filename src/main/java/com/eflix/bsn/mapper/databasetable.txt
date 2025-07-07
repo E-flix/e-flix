@@ -180,3 +180,33 @@ COMMENT ON COLUMN EFLIX.ORDERS_DETAIL.REMARKS       IS '비고';
 COMMENT ON COLUMN EFLIX.ORDERS_DETAIL.OUTBOUND_DT   IS '출고일';
 COMMENT ON COLUMN EFLIX.ORDERS_DETAIL.CATCH_DT      IS '납기일';
 COMMENT ON COLUMN EFLIX.ORDERS_DETAIL.OUT_STATE     IS '출고상태';
+
+
+/* ─── SALES_OUTBOUND (매출 출고 헤더) ─────────────── */
+CREATE TABLE EFLIX.SALES_OUTBOUND (
+    OUTBOUND_NO  VARCHAR2(30)  NOT NULL,   -- PK (출고 번호)
+    WRITE_DT     VARCHAR2(30)  NOT NULL,   -- 작성일(문자열; 필요하면 DATE 변환)
+    CUSTOMER_CD  VARCHAR2(20)  NOT NULL,   -- 거래처 코드 FK
+    ORDER_DT     DATE          NOT NULL,   -- 주문일
+    OUTBOUND_DT  DATE          NOT NULL,   -- 실제 출고일
+    MONEY        VARCHAR2(4)   NOT NULL,   -- 통화(예: KRW, USD)
+    REMARKS      VARCHAR2(20),             -- 비고
+    CO_IDX       VARCHAR2(30),             -- 회사 식별자(FK 필요 시)
+
+    CONSTRAINT PK_SALES_OUTBOUND
+        PRIMARY KEY (OUTBOUND_NO),
+
+    CONSTRAINT FK_SO_CUSTOMER
+        FOREIGN KEY (CUSTOMER_CD)
+        REFERENCES EFLIX.CUSTOMERS (CUSTOMER_CD)
+
+    /* CO_IDX가 회사(법인) 테이블을 참조한다면 추가 FK 예시
+    -- ,CONSTRAINT FK_SO_COMPANY
+    --     FOREIGN KEY (CO_IDX)
+    --     REFERENCES EFLIX.COMPANY (CO_IDX)
+    */
+);
+
+/* ── 컬럼 설명(선택) ──────────────────────────────
+COMMENT ON COLUMN EFLIX.SALES_OUTBOUND.MONEY IS 'KRW, USD 등 통화 코드';
+*/

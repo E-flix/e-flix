@@ -72,11 +72,30 @@
       background-color: #2e59d9;
       border-color: #2e59d9;
     }
+
+    /* 견적서 조회 버튼 스타일 */
+    .btn-quotation { 
+      background-color: #f6c23e; 
+      border-color: #f6c23e;
+      color: #3a3b45;
+      font-weight: 600;
+    }
+    .btn-quotation:hover {
+      background-color: #f4b619;
+      border-color: #f4b619;
+      color: #3a3b45;
+    }
+    .btn-quotation:disabled {
+      background-color: #858796;
+      border-color: #858796;
+      color: #ffffff;
+    }
     
     /* 그리드 높이 설정 */
     .header-grid { height: 300px; }
     .credit-grid { height: 240px; }
     .detail-grid { height: 350px; }
+    .quotation-grid { height: 400px; }
     
     /* 탭 스타일 (SB Admin 2 맞춤) */
     .nav-tabs {
@@ -173,7 +192,37 @@
     .ag-theme-alpine .ag-pinned-bottom-row .ag-cell {
       border-top: 2px solid #2e59d9;
     }
+
+    /* 견적서 모달 테이블 스타일 */
+    .quotation-modal-table th {
+      background-color: #f8f9fc;
+      font-weight: 600;
+      text-align: center;
+      border: 1px solid #e3e6f0;
+    }
+    
+    .quotation-modal-table td {
+      text-align: center;
+      vertical-align: middle;
+      border: 1px solid #e3e6f0;
+    }
+
+    /* 견적서 선택 버튼 스타일 */
+    .btn-select-quotation {
+      background-color: #1cc88a;
+      border-color: #1cc88a;
+      color: white;
+      font-size: 0.8rem;
+      padding: 0.25rem 0.5rem;
+    }
+    .btn-select-quotation:hover {
+      background-color: #17a673;
+      border-color: #17a673;
+      color: white;
+    }
   </style>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 </head>
 
 <div layout:fragment="content" class="management-container">
@@ -190,6 +239,12 @@
       
       <!-- 액션 버튼들 -->
       <div>
+        <button type="button" class="btn btn-quotation btn-sm me-1" id="btnQuotationSearch" disabled>
+          <i class="fas fa-file-alt"></i> 견적서 조회
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm me-1" id="btnDebug" style="background-color: #6c757d;">
+          <i class="fas fa-bug"></i> 디버그
+        </button>
         <button type="button" class="btn btn-create btn-sm me-1" id="btnNew">
           <i class="fas fa-plus"></i> 신규
         </button>
@@ -265,6 +320,74 @@
     </div>
   </div>
 
+  <!-- 견적서 조회 모달 -->
+  <div class="modal fade" id="quotationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-file-alt mr-2"></i>견적서 조회 및 변환
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- 견적서 검색 필터 -->
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label class="form-label">견적서 번호</label>
+              <input id="quotationNoFilter" type="text" class="form-control form-control-sm" placeholder="견적서 번호">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">거래처명</label>
+              <input id="customerNameFilter" type="text" class="form-control form-control-sm" placeholder="거래처명">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">견적일자(시작)</label>
+              <input id="quotationDateFrom" type="date" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">견적일자(종료)</label>
+              <input id="quotationDateTo" type="date" class="form-control form-control-sm">
+            </div>
+          </div>
+          <div class="text-center mb-3">
+            <button id="btnQuotationFilter" class="btn btn-primary btn-sm">
+              <i class="fas fa-search"></i> 검색
+            </button>
+            <button id="btnQuotationFilterReset" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-undo"></i> 초기화
+            </button>
+          </div>
+          
+          <!-- 견적서 목록 -->
+          <div class="table-responsive">
+            <table class="table table-bordered quotation-modal-table mb-0">
+              <thead>
+                <tr>
+                  <th width="80">선택</th>
+                  <th width="150">견적서 번호</th>
+                  <th width="100">견적일자</th>
+                  <th width="150">거래처명</th>
+                  <th width="100">대표명</th>
+                  <th width="120">연락처</th>
+                  <th width="100">유효기간</th>
+                  <th width="100">납기예정일</th>
+                  <th>비고</th>
+                </tr>
+              </thead>
+              <tbody id="quotationSearchResults"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> 취소
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 거래처 검색 모달 -->
   <div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
@@ -327,6 +450,43 @@
   <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
+
+      function DatePicker() {}
+
+      DatePicker.prototype.init = function (params) {
+        this.eInput = document.createElement('input');
+        this.eInput.classList.add('ag-input');
+        this.eInput.value = params.value || '';
+      
+        $(this.eInput).datepicker({
+          dateFormat: 'yy-mm-dd',
+          changeMonth: true,
+          changeYear: true
+        });
+      
+        // 최초 포커스 시 달력 바로 표시(선택 사항)
+        setTimeout(() => $(this.eInput).datepicker('show'), 0);
+      };
+
+      DatePicker.prototype.getGui = function () {
+        return this.eInput;                 // ← 화살표 함수 ❌
+      };
+
+      DatePicker.prototype.afterGuiAttached = function () {
+        this.eInput.focus();
+      };
+
+      DatePicker.prototype.getValue = function () {
+        return this.eInput.value;           // ← 화살표 함수 ❌
+      };
+
+      DatePicker.prototype.destroy = function () {
+        $(this.eInput).datepicker('destroy');
+      };
+
+      DatePicker.prototype.isPopup = function () {
+        return false;
+      };
     
       /*─────────────── 전역 변수 ───────────────*/
       let headerGridApi, detailGridApi, creditGridApi;
@@ -334,155 +494,447 @@
       let editMode     = false;
       let selectedHeaderNode = null;
       let selectedDetailNode = null;
+      let quotationList = [];       // 견적서 목록 데이터
     
       /*─────────────── 공통 유틸 ───────────────*/
       function safeSetRowData(api, rows){
         if (!api) return;
-        if (api.setRowData)            api.setRowData(rows);               // v28-32
-        else if (api.setGridOption)    api.setGridOption('rowData', rows); // v33
+        if (api.setRowData)            api.setRowData(rows);
+        else if (api.setGridOption)    api.setGridOption('rowData', rows);
       }
       function safeSetPinnedBottomRow(api, rows){
         if (!api) return;
-        if (api.setPinnedBottomRowData) api.setPinnedBottomRowData(rows);          // v28-32
-        else if (api.setGridOption)     api.setGridOption('pinnedBottomRowData', rows); // v33
+        if (api.setPinnedBottomRowData) api.setPinnedBottomRowData(rows);
+        else if (api.setGridOption)     api.setGridOption('pinnedBottomRowData', rows);
       }
+
+      
     
       /*──────────────── 1. 헤더 그리드 ────────────────*/
       const headerGridOptions = {
-        columnDefs:[
-        { headerName:'주문번호', field:'orderNo', pinned:'left',
-          width:150, cellClass:'font-weight-bold text-primary', editable: false }, // PK는 편집 금지
-        { headerName:'주문일자', field:'orderDt', minWidth:110, flex:1, editable: true, cellEditor: 'agDatePicker' },
-        { headerName:'거래처',   field:'customerNm', minWidth:150, flex:1, editable: false },
-        { headerName:'대표',     field:'representativeNm', minWidth:110, flex:1, editable: false },
-        { headerName:'연락처',   field:'phoneNo', minWidth:120, flex:1, editable: false },
-        { headerName:'담당자',   field:'salesEmpCd', minWidth:100, flex:1, editable: false },
-        { headerName:'할인율(%)',field:'discountRate', minWidth:90,  flex:1,
-          valueFormatter:p=> (p.value??0)+'%', editable: false },
-        { headerName:'결제조건', field:'paymentTerms',   minWidth:100, flex:1, editable: true },
-        { headerName:'작성자',   field:'orderWriter',    minWidth:90,  flex:1, editable: true }
-      ],
+        components: { datePicker: DatePicker },
+        columnDefs: [
+          { headerName:'주문번호',   field:'orderNo',        pinned:'left', width:150,
+            cellClass:'font-weight-bold text-primary', editable:false },
+          { headerName:'주문일자',   field:'orderDt',        minWidth:110, flex:1,
+            editable:true,  cellEditor:'datePicker' },
+          { headerName:'거래처',     field:'customerNm',     minWidth:150, flex:1,
+            editable:false },
+          { headerName:'대표',       field:'representativeNm',minWidth:110, flex:1,
+            editable:false },
+          { headerName:'연락처',     field:'phoneNo',        minWidth:120, flex:1,
+            editable:false },
+          { headerName:'담당자',     field:'salesEmpCd',     minWidth:100, flex:1,
+            editable:false },
+          { headerName:'할인율(%)',  field:'discountRate',   minWidth: 90, flex:1,
+            valueFormatter:p=> (p.value??0)+'%', editable:false },
+          { headerName:'결제조건',   field:'paymentTerms',   minWidth:100, flex:1,
+            editable:true },
+          { headerName:'작성자',     field:'orderWriter',    minWidth: 90, flex:1,
+            editable:true, cellEditor:'agTextCellEditor' }
+        ],
         headerHeight: 35,
         rowHeight: 35,
-        rowSelection:{ mode:'multiRow', checkboxes:true, headerCheckbox:true },
-        onRowClicked: handleHeaderRowClicked,
-        pagination:true,
-        paginationPageSize:10,
-        defaultColDef:{ resizable:true, sortable:true, filter:true },
-        onCellClicked: onHeaderCellClicked,
-        onGridReady:p=>{ headerGridApi = p.api; loadHeaderData(); },
-        resizable:true,
-        sortable:true,
-        filter:true,
-        editable: true
+        rowSelection: { mode:'multiRow', checkboxSelection:true, headerCheckboxSelection:true },
+        onRowClicked:       handleHeaderRowClicked,
+        onCellClicked:      onHeaderCellClicked,
+        onCellValueChanged: headerCellValueChanged,
+        pagination:         true,
+        paginationPageSize: 10,
+        defaultColDef:      { resizable:true, sortable:true, filter:true, editable:true },
+        onGridReady:        p=>{ headerGridApi = p.api; loadHeaderData(); }
       };
     
-      /*──────────────── 2. 여신 그리드 – “가로” 구조 ───────────────*/
+      /*──────────────── 2. 여신 그리드 ────────────────*/
       const creditGridOptions = {
-        columnDefs:[
-        { headerName:'여신한도',     field:'creditLimit',     minWidth:110, flex:1,
-          type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
-        { headerName:'여신잔액',     field:'remainingCredit', minWidth:110, flex:1,
-          type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
-        { headerName:'여신사용액',   field:'creditUsed',      minWidth:110, flex:1,
-          type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
-        { headerName:'여신상태',     field:'creditStatus',    minWidth:90,  flex:1 },
-        { headerName:'보류여부',     field:'creditHoldFlg',   minWidth:80,  flex:1 },
-        { headerName:'거래정지',     field:'tradeStopFlg',    minWidth:80,  flex:1 }
-      ],
-        // 헤더 높이 지정
+        columnDefs: [
+          { headerName:'여신한도',     field:'creditLimit',     flex:1, minWidth:110,
+            type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
+          { headerName:'여신잔액',     field:'remainingCredit', flex:1, minWidth:110,
+            type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
+          { headerName:'여신사용액',   field:'creditUsed',      flex:1, minWidth:110,
+            type:'numericColumn', valueFormatter:p=>numFmt(p.value) },
+          { headerName:'여신상태',     field:'creditStatus',    flex:1, minWidth: 90 },
+          { headerName:'보류여부',     field:'creditHoldFlg',   flex:1, minWidth: 80 },
+          { headerName:'거래정지',     field:'tradeStopFlg',    flex:1, minWidth: 80 }
+        ],
         headerHeight: 35,
-        // 행 높이 지정
-        rowHeight: 35,
+        rowHeight:    35,
         defaultColDef:{ resizable:true },
-        rowData:[getInitCreditObj()],          // ← 단 일 행
-        suppressRowClickSelection:true,
-        suppressMovableColumns:true,
-        onGridReady:p=> creditGridApi = p.api,
-        domLayout:'autoHeight'
+        rowData:      [ getInitCreditObj() ],
+        suppressRowClickSelection: true,
+        suppressMovableColumns:     true,
+        domLayout:   'autoHeight',
+        onGridReady: p=> creditGridApi = p.api
       };
     
       /*──────────────── 3. 디테일 그리드 ────────────────*/
       const detailColDefs = [
         { checkboxSelection:true, headerCheckboxSelection:true, width:50 },
-        { headerName:'순번',     field:'lineNo', width:60, cellClass:'text-center', editable: false },
-        { headerName:'품목코드', field:'itemCode', width:120, editable: true },
-        { headerName:'품목명',   field:'itemName', width:180, editable: true },
-        { headerName:'규격',     field:'spec',     width:120, editable: true },
-        { headerName:'수량',     field:'qty',      width:90,  type:'numericColumn',
-          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable: true },
-        { headerName:'단가',     field:'unitPrice',width:110, type:'numericColumn',
-          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable: true },
+        { headerName:'순번',     field:'lineNo',       width:60,
+          cellClass:'text-center', editable:false },
+        { headerName:'품목코드', field:'itemCode',     width:120, editable:true },
+        { headerName:'품목명',   field:'itemName',     width:180, editable:true },
+        { headerName:'규격',     field:'spec',         width:120, editable:true },
+        { headerName:'수량',     field:'qty',          width:90,  type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable:true },
+        { headerName:'단가',     field:'unitPrice',    width:110, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable:true },
         { headerName:'공급가액', field:'supplyAmount', width:120, type:'numericColumn',
-          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable: true },
-        { headerName:'부가세',   field:'taxAmount',  width:100, type:'numericColumn',
-          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable: true },
-        { headerName:'합계',     field:'totalAmount',width:120, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable:true },
+        { headerName:'부가세',   field:'taxAmount',    width:100, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable:true },
+        { headerName:'합계',     field:'totalAmount',  width:120, type:'numericColumn',
           cellClass:'font-weight-bold',
-          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable: false },
-        { headerName:'출고일',   field:'outboundDt', width:110,
-          valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '',
-          editable: true, cellEditor: 'agDatePicker' },
-        { headerName:'납기일',   field:'catchDt',    width:110,
-          valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '',
-          editable: true, cellEditor: 'agDatePicker' },
-        { headerName:'출고상태', field:'outState',   width:100, editable: true },
-        { headerName:'비고',     field:'remarks',    flex:1, editable: true }
+          valueFormatter:p=>Number(p.value||0).toLocaleString(), editable:false },
+        { headerName:'출고일',   field:'outboundDt',   width:110,
+          editable:true, cellEditor:'datePicker', 
+          valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '' },
+        { headerName:'납기일',   field:'catchDt',      width:110,
+          editable:true, cellEditor:'datePicker',
+          valueFormatter:p=> p.value ? dayjs(p.value).format('YYYY-MM-DD') : '' },
+        { headerName:'출고상태', field:'outState',     width:100, editable:true },
+        { headerName:'비고',     field:'remarks',      flex:1,   editable:true }
       ];
-
     
       const detailGridOptions = {
-        // 헤더 높이 지정
-        headerHeight: 35,
-        // 행 높이 지정
-        rowHeight: 35,
-        resizable:true,
-        editable: true,
-        columnDefs : detailColDefs,
-        defaultColDef:{ resizable:true },
-        rowSelection:'multiple',
-        animateRows:true,
-        onGridReady:p=>{ detailGridApi = p.api; setEditMode(false); },
-        onCellClicked: onDetailCellClicked,   
-        onCellValueChanged:()=> setTimeout(calcTotals,80)
+        components: { datePicker: DatePicker },
+        columnDefs:         detailColDefs,
+        defaultColDef:      { resizable:true, sortable:true, filter:true, editable:true },
+        frameworkComponents: { datePicker: DatePicker },
+        headerHeight:       35,
+        rowHeight:          35,
+        rowSelection:       'multiple',
+        animateRows:        true,
+        onGridReady:        p=>{ detailGridApi = p.api; setEditMode(false); },
+        onCellClicked:      onDetailCellClicked,
+        onCellValueChanged: ()=> setTimeout(calcTotals,80)
       };
     
       /*─────────────── 그리드 생성 ───────────────*/
-      headerGridApi = agGrid.createGrid(document.getElementById('headerGrid'),  headerGridOptions).api;
-      detailGridApi = agGrid.createGrid(document.getElementById('detailGrid'),  detailGridOptions).api;
-      creditGridApi = agGrid.createGrid(document.getElementById('creditGrid'),  creditGridOptions).api;
-
-
-      /*──────────────── 4. “신규” 버튼 ────────────────*/
-      $('#btnNew').click(createNew);
+      headerGridApi = agGrid.createGrid(document.getElementById('headerGrid'),headerGridOptions).api;
+      detailGridApi = agGrid.createGrid(document.getElementById('detailGrid'), detailGridOptions).api;
+      creditGridApi = agGrid.createGrid($('#creditGrid')[0],  creditGridOptions).api;
     
+      /*──────────────── 4. 신규 버튼 ────────────────*/
+      $('#btnNew').click(createNew);
       function createNew(){
         $.get('/bsn/orders/nextOrderNo').done(no=>{
           const today = dayjs().format('YYYY-MM-DD');
           const newHeader = {
-            orderNo   : no,
-            orderDt   : today,
-            customerNm: '',          // 이후 자동 채움
-            paymentTerms:'Net 30'
+            orderNo: no, orderDt: today,
+            customerNm:'', paymentTerms:'Net 30'
           };
-    
-          /* 헤더 그리드 최상단에 추가 */
           headerGridApi.applyTransaction({ add:[newHeader], addIndex:0 });
           headerGridApi.ensureIndexVisible(0);
           headerGridApi.setFocusedCell(0,'customerNm');
-    
-          /* 디테일 그리드 빈 행 1줄 */
           safeSetRowData(detailGridApi,[{ lineNo:1, qty:1 }]);
           calcTotals();
-    
-          /* 여신 초기화 & 편집 모드 on */
           safeSetRowData(creditGridApi, getInitCreditRows());
           currentOrder = newHeader;
           setEditMode(true);
+          
+          // ★ 신규 모드일 때 견적서 조회 버튼 활성화
+          $('#btnQuotationSearch').prop('disabled', false);
         });
       }
 
-        function headerCellValueChanged(event) {
+      /*──────────────── 견적서 조회 버튼 클릭 ────────────────*/
+      $('#btnQuotationSearch').click(function() {
+        if (!editMode) {
+          Swal.fire('알림', '신규 모드에서만 견적서 조회가 가능합니다.', 'info');
+          return;
+        }
+        
+        console.log('견적서 조회 버튼 클릭 - editMode:', editMode);
+        
+        // ★ 견적서 목록 로드 전 테스트
+        $('#quotationModal').modal('show');
+        loadQuotationList();
+      });
+
+      /*──────────────── 견적서 목록 로드 ────────────────*/
+      function loadQuotationList(filter = {}) {
+        console.log('견적서 목록 로드 시작:', filter);
+        
+        // 검색 필터가 있다면 검색 API 사용, 없다면 전체 목록 API 사용
+        const hasFilter = filter.quotationNo || filter.customerName || filter.dateFrom || filter.dateTo;
+        
+        // ★ 로딩 표시
+        const $tbody = $('#quotationSearchResults');
+        $tbody.html('<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> 로딩 중...</td></tr>');
+        
+        if (hasFilter) {
+          // 검색 API 사용
+          console.log('필터 검색 API 호출:', filter);
+          $.getJSON('/bsn/quotation/search', filter)
+            .done(function(data) {
+              console.log('검색 결과:', data);
+              quotationList = data;
+              displayQuotationList(data);
+            })
+            .fail(function(xhr, status, error) {
+              console.error('견적서 검색 실패:', { xhr, status, error });
+              Swal.fire('오류', `견적서 검색에 실패했습니다: ${error}`, 'error');
+              quotationList = [];
+              displayQuotationList([]);
+            });
+        } else {
+          // 전체 목록 API 사용
+          console.log('전체 목록 API 호출');
+          $.getJSON('/bsn/quotation/list')
+            .done(function(data) {
+              console.log('전체 목록 결과:', data);
+              quotationList = data;
+              displayQuotationList(data);
+            })
+            .fail(function(xhr, status, error) {
+              console.error('견적서 목록 로드 실패:', { xhr, status, error });
+              Swal.fire('오류', `견적서 목록을 불러올 수 없습니다: ${error}`, 'error');
+              quotationList = [];
+              displayQuotationList([]);
+            });
+        }
+      }
+
+      /*──────────────── 견적서 목록 표시 ────────────────*/
+      function displayQuotationList(list) {
+        const $tbody = $('#quotationSearchResults').empty();
+        
+        if (list.length === 0) {
+          $tbody.append(`
+            <tr>
+              <td colspan="9" class="text-center text-muted">검색된 견적서가 없습니다.</td>
+            </tr>
+          `);
+          return;
+        }
+
+        list.forEach(quotation => {
+          const quotationJson = encodeURIComponent(JSON.stringify(quotation));
+          $tbody.append(`
+            <tr>
+              <td>
+                <button class="btn btn-select-quotation btn-sm" 
+                        data-quotation="${quotationJson}">
+                  선택
+                </button>
+              </td>
+              <td>${quotation.quotationNo || ''}</td>
+              <td>${formatDate(quotation.quotationDt)}</td>
+              <td>${quotation.customerName || ''}</td>
+              <td>${quotation.representativeNm || ''}</td>
+              <td>${quotation.phone || ''}</td>
+              <td>${formatDate(quotation.validPeriod)}</td>
+              <td>${formatDate(quotation.expectedDeliveryDt)}</td>
+              <td>${quotation.remarks || ''}</td>
+            </tr>
+          `);
+        });
+      }
+
+      /*──────────────── 견적서 검색 필터 ────────────────*/
+      $('#btnQuotationFilter').click(function() {
+        const filter = {
+          quotationNo: $('#quotationNoFilter').val().trim(),
+          customerName: $('#customerNameFilter').val().trim(),
+          dateFrom: $('#quotationDateFrom').val(),
+          dateTo: $('#quotationDateTo').val()
+        };
+        loadQuotationList(filter);
+      });
+
+      $('#btnQuotationFilterReset').click(function() {
+        $('#quotationNoFilter, #customerNameFilter, #quotationDateFrom, #quotationDateTo').val('');
+        loadQuotationList(); // 필터 없이 전체 목록 로드
+      });
+
+      /*──────────────── 견적서 선택 및 변환 ────────────────*/
+      $('#quotationSearchResults').on('click', '.btn-select-quotation', function() {
+        const quotation = JSON.parse(decodeURIComponent($(this).data('quotation')));
+        
+        Swal.fire({
+          title: '견적서 변환',
+          text: `견적서 "${quotation.quotationNo}"를 주문서로 변환하시겠습니까?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#1cc88a',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: '변환',
+          cancelButtonText: '취소'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            convertQuotationToOrder(quotation);
+          }
+        });
+      });
+
+      /*──────────────── 견적서 → 주문서 변환 로직 ────────────────*/
+      function convertQuotationToOrder(quotation) {
+        console.log('=== 견적서 변환 시작 ===');
+        console.log('선택된 견적서:', quotation);
+        
+        // 1. 견적서 상세 정보 가져오기
+        $.getJSON(`/bsn/quotation/details?quotationNo=${encodeURIComponent(quotation.quotationNo)}`)
+          .done(function(details) {
+            console.log('견적서 상세 조회 결과:', details);
+            
+            if (!details || details.length === 0) {
+              Swal.fire('경고', '견적서 상세 정보가 없습니다.', 'warning');
+              return;
+            }
+            
+            // 2. 주문서 헤더 정보 매핑
+            if (currentOrder && currentOrder.orderNo) {
+              console.log('현재 주문서:', currentOrder);
+              
+              // 헤더 그리드에서 현재 주문서 행 찾기
+              let targetNode = null;
+              headerGridApi.forEachNode(node => {
+                if (node.data.orderNo === currentOrder.orderNo) {
+                  targetNode = node;
+                }
+              });
+              
+              if (targetNode) {
+                console.log('대상 노드 찾음:', targetNode.data);
+                
+                // ★ 필수 필드들을 모두 설정
+                const customerCd = quotation.customerCd || '';
+                const customerNm = quotation.customerName || '';
+                const representativeNm = quotation.representativeNm || '';
+                const phoneNo = quotation.phone || '';
+                const salesEmpCd = quotation.salesEmpCd || 'emp-101';
+                const discountRate = quotation.discountRate || 0;
+                const paymentTerms = 'Net 30';
+                
+                // ★ 중요: ORDER_WRITER (담당자) 설정 - 여러 후보에서 선택
+                let orderWriter = 'emp-101'; // 기본값 (사원 코드 형태)
+                if (quotation.sender && quotation.sender.trim()) {
+                  orderWriter = quotation.sender.trim();
+                } else if (quotation.salesEmpCd && quotation.salesEmpCd.trim()) {
+                  orderWriter = quotation.salesEmpCd.trim();
+                }
+                
+                console.log('설정할 헤더 값들:', {
+                  customerCd, customerNm, representativeNm, phoneNo, 
+                  salesEmpCd, discountRate, paymentTerms, orderWriter
+                });
+                
+                // ★ 필수 필드 검증
+                if (!customerCd.trim()) {
+                  Swal.fire('오류', '견적서에 거래처 정보가 없습니다.', 'error');
+                  return;
+                }
+                
+                // 헤더 데이터 설정
+                targetNode.setDataValue('customerCd', customerCd);
+                targetNode.setDataValue('customerNm', customerNm);
+                targetNode.setDataValue('representativeNm', representativeNm);
+                targetNode.setDataValue('phoneNo', phoneNo);
+                targetNode.setDataValue('salesEmpCd', salesEmpCd);
+                targetNode.setDataValue('discountRate', discountRate);
+                targetNode.setDataValue('paymentTerms', paymentTerms);
+                targetNode.setDataValue('orderWriter', orderWriter);
+                
+                // currentOrder 업데이트
+                currentOrder = targetNode.data;
+                
+                console.log('헤더 설정 완료:', currentOrder);
+              } else {
+                console.error('대상 노드를 찾을 수 없음');
+                Swal.fire('오류', '주문서 헤더를 찾을 수 없습니다.', 'error');
+                return;
+              }
+            } else {
+              console.error('현재 주문서가 없음');
+              Swal.fire('오류', '먼저 신규 주문서를 생성해주세요.', 'error');
+              return;
+            }
+
+            // 3. 주문서 디테일 정보 매핑
+            console.log('디테일 변환 시작:', details);
+            
+            const orderDetails = details.map((detail, index) => {
+              const lineData = {
+                lineNo: index + 1,
+                itemCode: detail.itemCode || '',
+                itemName: detail.itemName || '',
+                spec: detail.spec || '',
+                qty: detail.qty || 1,
+                unitPrice: detail.unitPrice || 0,
+                supplyAmount: detail.supplyAmount || 0,
+                taxAmount: detail.taxAmount || 0,
+                totalAmount: detail.totalMoney || detail.totalAmount || 0,
+                remarks: detail.remarks || '',
+                outboundDt: null,
+                catchDt: null,
+                outState: '대기'
+              };
+              
+              console.log(`디테일 ${index + 1}:`, lineData);
+              return lineData;
+            });
+
+            console.log('변환된 주문서 디테일:', orderDetails);
+            
+            // ★ 디테일 필수 필드 검증
+            const invalidDetails = orderDetails.filter(d => !d.itemCode || !d.itemCode.trim());
+            if (invalidDetails.length > 0) {
+              Swal.fire('경고', `${invalidDetails.length}개 행에 품목코드가 없습니다. 그래도 진행하시겠습니까?`, 'warning');
+            }
+
+            safeSetRowData(detailGridApi, orderDetails);
+            calcTotals();
+
+            // 4. 여신 정보 로드 (거래처 정보가 있다면)
+            if (quotation.customerCd && quotation.customerCd.trim()) {
+              console.log('여신 정보 로드 시작:', quotation.customerCd);
+              $.getJSON(`/bsn/customer/${quotation.customerCd}/credit`)
+                .done(function(creditData) {
+                  console.log('여신 정보 로드 성공:', creditData);
+                  showCredit(creditData);
+                })
+                .fail(function(xhr, status, error) {
+                  console.warn('여신 정보 로드 실패:', { xhr, status, error });
+                  safeSetRowData(creditGridApi, getInitCreditRows());
+                });
+            } else {
+              console.log('거래처 코드가 없어 기본 여신 정보 설정');
+              safeSetRowData(creditGridApi, getInitCreditRows());
+            }
+
+            $('#quotationModal').modal('hide');
+            
+            console.log('=== 견적서 변환 완료 ===');
+            
+            Swal.fire({
+              title: '변환 완료!',
+              text: '견적서가 주문서로 성공적으로 변환되었습니다.\n필수 정보를 확인 후 등록해 주세요.',
+              icon: 'success',
+              timer: 3000,
+              showConfirmButton: true
+            });
+
+          })
+          .fail(function(xhr, status, error) {
+            console.error('견적서 상세 조회 실패:', { xhr, status, error });
+            Swal.fire('오류', `견적서 상세 정보를 불러올 수 없습니다: ${error}`, 'error');
+          });
+      }
+
+      /*──────────────── 날짜 포맷 유틸리티 ────────────────*/
+      function formatDate(dateString) {
+        if (!dateString) return '';
+        try {
+          return dayjs(dateString).format('YYYY-MM-DD');
+        } catch (e) {
+          return dateString;
+        }
+      }
+    
+      /*──────────────── 5. 헤더 inline 편집 저장 ────────────────*/
+      function headerCellValueChanged(event){
         const dto = {
           orderNo:      event.data.orderNo,
           orderDt:      event.data.orderDt,
@@ -494,19 +946,15 @@
           url: `/bsn/orders/${encodeURIComponent(dto.orderNo)}`,
           method: 'PUT',
           contentType: 'application/json',
-          data: JSON.stringify(dto),
-        })
-        .done(() => {
-          console.log('헤더 업데이트 성공');
-        })
-        .fail(err => {
-          console.error('헤더 업데이트 실패', err);
-          // 실패 시 원래 값으로 되돌리기
+          data: JSON.stringify(dto)
+        }).fail(()=>{
+          // 실패 시 원래 값 복구
           event.node.setDataValue(event.colDef.field, event.oldValue);
         });
       }
-
-      function detailCellValueChanged(event) {
+    
+      /*──────────────── 6. 디테일 inline 편집 저장 ────────────────*/
+      function detailCellValueChanged(event){
         const d = event.data;
         const dto = {
           orderNo:     d.orderNo,
@@ -515,26 +963,25 @@
           qty:         d.qty,
           unitPrice:   d.unitPrice,
           supplyAmount:d.supplyAmount,
+          taxAmount:   d.taxAmount,
+          totalAmount: d.totalAmount,
+          outboundDt:  d.outboundDt,
+          catchDt:     d.catchDt,
+          outState:    d.outState,
           remarks:     d.remarks
         };
         $.ajax({
           url: `/bsn/orders/${encodeURIComponent(dto.orderNo)}/details/${dto.lineNo}`,
           method: 'PUT',
           contentType: 'application/json',
-          data: JSON.stringify(dto),
-        })
-        .done(() => {
-          console.log('디테일 업데이트 성공');
-        })
-        .fail(err => {
-          console.error('디테일 업데이트 실패', err);
+          data: JSON.stringify(dto)
+        }).fail(()=>{
           event.node.setDataValue(event.colDef.field, event.oldValue);
         });
       }
-
-
-      // “품목명” 셀 클릭 시 모달 열기
-      function onDetailCellClicked(event) {
+    
+      /*──────────────── 7. 품목 모달 열기 & 처리 ────────────────*/
+      function onDetailCellClicked(event){
         if (event.colDef.field === 'itemName') {
           selectedDetailNode = event.node;
           $('#itemSearchInput').val('');
@@ -542,16 +989,10 @@
           $('#itemModal').modal('show');
         }
       }
-
-
-          // 모달이 열릴 때 전체 품목 조회
       $('#itemModal').on('shown.bs.modal', ()=> loadItemList() );
-      // 검색 버튼 클릭 시 필터 조회
       $('#btnItemSearch').click(()=> loadItemList($('#itemSearchInput').val()) );
-        
-      // AJAX로 품목 리스트 불러오기
       function loadItemList(keyword = '') {
-        $.getJSON('/bsn/items', { name: keyword })
+        $.getJSON('/bsn/items',{ name: keyword })
           .done(list => {
             const $tb = $('#itemSearchResults').empty();
             list.forEach(item => {
@@ -567,21 +1008,17 @@
                   <td>${item.spec}</td>
                   <td>${item.unit}</td>
                   <td>${Number(item.salePrice||0).toLocaleString()}</td>
-                </tr>
-              `);
+                </tr>`);
             });
           })
-          .fail(()=> Swal.fire('오류','품목 목록을 불러오지 못했습니다.','error'));
+          .fail(()=> Swal.fire('오류','품목 목록 불러오기 실패','error'));
       }
-
-      // 모달에서 품목 선택 시 그리드에 값 채우기
-      $('#itemSearchResults').on('click', '.btn-select-item', function(){
+      $('#itemSearchResults').on('click','.btn-select-item',function(){
         const item = JSON.parse(decodeURIComponent($(this).data('item')));
-        // 기본 수량 1, 단가·규격·단위·공급가액·부가세·합계 자동 계산
-        const qty  = 1;
-        const unit = item.salePrice || 0;
+        const qty = 1;
+        const unit = item.salePrice||0;
         const supply = qty * unit;
-        const tax    = Math.round(supply * (item.taxRate || 0) / 100);
+        const tax = Math.round(supply * (item.taxRate||0)/100);
         selectedDetailNode.setDataValue('itemCode',    item.itemCode);
         selectedDetailNode.setDataValue('itemName',    item.itemName);
         selectedDetailNode.setDataValue('spec',        item.spec);
@@ -594,348 +1031,617 @@
         $('#itemModal').modal('hide');
         calcTotals();
       });
-
-      // 예: 고객 검색 결과 테이블에서 “선택” 버튼 클릭 핸들러
-      $('#customerSearchResults').on('click', '.btn-select-cust', function() {
-        const cust = $(this).data('cust'); // { customerCd, customerNm, representativeNm, phoneNo, salesEmpCd, discountRate }
-        // 헤더 그리드에 한 번에 반영
-        ['customerCd','customerNm','representativeNm','phoneNo','salesEmpCd','discountRate']
-          .forEach(f => selectedHeaderNode.setDataValue(f, cust[f]));
-        // currentOrder 갱신
-        currentOrder = selectedHeaderNode.data;
-        $('#customerModal').modal('hide');
-      });
-
-      
-      $(function(){
-        // 1) 헤더 저장 버튼 핸들러
-        $('#btnSaveHeader').click(function(){
-          if(!currentOrder || !currentOrder.orderNo){
-            Swal.fire('알림','저장할 헤더를 선택 또는 생성해주세요.','info');
-            return;
-          }
-          // 편집 중단
-          headerGridApi.stopEditing();
-          // DTO 생성
-          const headerDto = {
-            orderNo:      currentOrder.orderNo,
-            orderDt:      currentOrder.orderDt,
-            customerCd:   currentOrder.customerCd,
-            paymentTerms: currentOrder.paymentTerms,
-            orderWriter:  currentOrder.orderWriter,
-            remarks:      currentOrder.remarks
-          };
-          Swal.showLoading();
-          $.ajax({
-            url: `/bsn/orders/${encodeURIComponent(headerDto.orderNo)}`,
-            method: 'PUT',
-            contentType: 'application/json',
-            data: JSON.stringify(headerDto)
-          })
-          .done(() => {
-            Swal.fire('완료','헤더가 저장되었습니다.','success');
-            loadHeaderData();
-          })
-          .fail(() => {
-            Swal.fire('실패','헤더 저장 중 오류가 발생했습니다.','error');
-          });
-        });
-      
-        // 2) 디테일 저장 버튼 핸들러
-        $('#btnSaveDetail').click(function(){
-          if(!currentOrder || !currentOrder.orderNo){
-            Swal.fire('알림','먼저 헤더를 선택하거나 생성해주세요.','info');
-            return;
-          }
-          detailGridApi.stopEditing();
-          // 모든 디테일 행 수집
-          const details = [];
-          detailGridApi.forEachNode(node => {
-            const d = node.data;
-            // 필수 필드(itemCode)가 있으면 포함
-            if(d.itemCode){
-              details.push({
-                orderNo:     currentOrder.orderNo,
-                lineNo:      d.lineNo,
-                itemCode:    d.itemCode,
-                qty:         d.qty,
-                unitPrice:   d.unitPrice,
-                supplyAmount:d.supplyAmount,
-                taxAmount:   d.taxAmount,
-                totalAmount: d.totalAmount,
-                outboundDt:  d.outboundDt,
-                catchDt:     d.catchDt,
-                outState:    d.outState,
-                remarks:     d.remarks
-              });
-            }
-          });
-          if(details.length === 0){
-            Swal.fire('안내','저장할 디테일이 없습니다.','warning');
-            return;
-          }
-          Swal.showLoading();
-          $.ajax({
-            url: `/bsn/orders/${encodeURIComponent(currentOrder.orderNo)}/details`,
-            method: 'PUT',
-            contentType: 'application/json',
-            data: JSON.stringify(details)
-          })
-          .done(() => {
-            Swal.fire('완료','디테일이 저장되었습니다.','success');
-          })
-          .fail(() => {
-            Swal.fire('실패','디테일 저장 중 오류가 발생했습니다.','error');
-          });
-        });
-      });
-
-      // 1-1) 모달이 열릴 때 거래처 리스트 로드
-      $('#customerModal').on('shown.bs.modal', function() {
-        loadCustomerList();  
-        $('#customerSearchInput').val('');      // 검색창 초기화
-      });
-      
-      // 1-2) 검색 버튼 클릭 시에도 조회
-      $('#btnCustomerSearch').click(function() {
-        loadCustomerList($('#customerSearchInput').val());
-      });
-      
-      // 1-3) 거래처 조회 함수
-      function loadCustomerList(keyword = '') {
-        $.getJSON('/bsn/customers', { name: keyword })
-          .done(function(data) {
-            const $tbody = $('#customerSearchResults').empty();
-            data.forEach(function(c) {
-              const custJson = encodeURIComponent(JSON.stringify(c));
-              $tbody.append(`
-                <tr>
-                  <td>
-                    <button class="btn btn-sm btn-primary btn-select-cust"
-                            data-cust="${custJson}">
-                      선택
-                    </button>
-                  </td>
-                  <td>${c.customerCd}</td>
-                  <td>${c.customerNm}</td>
-                  <td>${c.representativeNm}</td>
-                  <td>${c.phoneNo}</td>
-                </tr>
-              `);
-            });
-          })
-          .fail(function() {
-            Swal.fire('오류','거래처 목록을 불러오지 못했습니다.','error');
-          });
-      }
-      
-      // 1-4) “선택” 버튼 클릭 시 헤더 그리드에 값 반영
-      $('#customerSearchResults').on('click', '.btn-select-cust', function() {
-        const c = JSON.parse(decodeURIComponent($(this).data('cust')));
-        ['customerCd','customerNm','representativeNm','phoneNo','salesEmpCd','discountRate']
-          .forEach(f => selectedHeaderNode.setDataValue(f, c[f]));
-        currentOrder = selectedHeaderNode.data;
-        $('#customerModal').modal('hide');
-      });
-
-
     
-      /*──────────────── 5. 저장 버튼 ────────────────*/
-      $('#btnSave').click(saveOrder);
-    
-      function saveOrder(){
-        if(!editMode){
-          Swal.fire('알림','편집 모드가 아닙니다. “신규” 버튼을 먼저 클릭하세요.','info');
-          return;
-        }
-        headerGridApi.stopEditing();
-    
-        const headerData = currentOrder;
-        if(!headerData){
-          Swal.fire('오류','헤더 정보가 없습니다.','error'); return;
-        }
-    
-        const details=[];
-        detailGridApi.forEachNode(n=>{
-          if(n.data.itemCode) details.push({...n.data});
-        });
-        if(details.length===0){
-          Swal.fire('안내','품목을 한 개 이상 입력해 주세요.','warning'); return;
-        }
-    
-        const dto = {...headerData, details};
-    
-        Swal.showLoading();
-        $.ajax({
-          url:'/bsn/orders',
-          method:'POST',
-          contentType:'application/json',
-          data:JSON.stringify(dto)
-        }).done(r=>{
-          if(r.success){
-            Swal.fire('저장 완료','주문서가 등록되었습니다.','success');
-            setEditMode(false);
-            loadHeaderData();
-          }else{
-            Swal.fire('저장 실패',r.message||'서버 오류','error');
-          }
-        }).fail(()=> Swal.fire('저장 실패','통신 오류가 발생했습니다.','error'));
-      }
-
-
-    
-      /*──────────────── 헤더 클릭 → 디테일 + 여신 ───────────────*/
-      // ① 헤더 행 클릭 시
-      function handleHeaderRowClicked(e){
-        const { orderNo, customerCd } = e.data;   // ← customerCd 가 이미 헤더에 담겨있음
-        currentOrder = e.data;
-      
-        // 주문 상세
-        const reqDetail = $.getJSON(`/bsn/orders/${orderNo}/details`);
-        // ★ 여신 : 새 API
-        const reqCredit = $.getJSON(`/bsn/customer/${customerCd}/credit`);
-      
-        $.when(reqDetail, reqCredit).done((dRes, cRes)=>{
-            safeSetRowData(detailGridApi, dRes[0]);
-            showCredit(cRes[0]);
-            calcTotals();
-        }).fail(()=> Swal.fire('오류','데이터를 불러오지 못했습니다','error'));
-      }
-      
-      // ② 신규 입력 중 고객을 바꿨을 때도 호출
-      function afterSelectCustomer(cust){          // cust = {customerCd, …}
-        currentOrder.customerCd = cust.customerCd;
-        $('#customerNmInput').val(cust.customerNm);
-        // ★ 고객 선택 즉시 여신 새로 고침
-        $.getJSON(`/bsn/customer/${cust.customerCd}/credit`).done(showCredit);
-      }
-      
-      function showCredit(c){                      // CreditInfoDTO → 그리드 행 1개
-        safeSetRowData(creditGridApi,[{
-          creditLimit     : c.creditLimit     ?? 0,
-          remainingCredit : c.remainingCredit?? 0,
-          creditUsed      : c.creditUsed     ?? 0,
-          creditStatus    : c.creditStatus   ?? '',
-          creditHoldFlg   : c.creditHoldFlg  ?? '',
-          tradeStopFlg    : c.tradeStopFlg   ?? ''
-        }]);
-      }
-      /*──────────────── 여신 정보 채우기 ───────────────*/
-      function fillCredit(c){
-        const row = {
-          creditLimit     : c.creditLimit     ?? 0,
-          remainingCredit : c.remainingCredit?? 0,
-          creditUsed      : c.creditUsed     ?? 0,
-          creditStatus    : c.creditStatus   ?? '',
-          creditHoldFlg   : c.creditHoldFlg  ?? '',
-          tradeStopFlg    : c.tradeStopFlg   ?? ''
-        };
-        safeSetRowData(creditGridApi,[row]);
-      }
-
-      function onHeaderCellClicked(event) {
+      /*──────────────── 8. 거래처 모달 ────────────────*/
+      function onHeaderCellClicked(event){
         if (event.colDef.field === 'customerNm') {
           selectedHeaderNode = event.node;
-          // 검색 인풋 초기화
           $('#customerSearchInput').val('');
           $('#customerSearchResults').empty();
           $('#customerModal').modal('show');
         }
       }
+      $('#customerModal').on('shown.bs.modal', ()=> loadCustomerList() );
+      $('#btnCustomerSearch').click(()=> loadCustomerList($('#customerSearchInput').val()) );
+      function loadCustomerList(keyword = '') {
+        $.getJSON('/bsn/customers',{ name: keyword })
+          .done(data => {
+            const $tb = $('#customerSearchResults').empty();
+            data.forEach(c => {
+              const j = encodeURIComponent(JSON.stringify(c));
+              $tb.append(`
+                <tr>
+                  <td>
+                    <button class="btn btn-sm btn-primary btn-select-cust"
+                            data-cust="${j}">선택</button>
+                  </td>
+                  <td>${c.customerCd}</td>
+                  <td>${c.customerNm}</td>
+                  <td>${c.representativeNm}</td>
+                  <td>${c.phoneNo}</td>
+                </tr>`);
+            });
+          })
+          .fail(()=> Swal.fire('오류','거래처 목록 불러오기 실패','error'));
+      }
+      $('#customerSearchResults').on('click','.btn-select-cust',function(){
+        const c = JSON.parse(decodeURIComponent($(this).data('cust')));
+        ['customerCd','customerNm','representativeNm','phoneNo','salesEmpCd','discountRate']
+          .forEach(f=> selectedHeaderNode.setDataValue(f, c[f]));
+        currentOrder = selectedHeaderNode.data;
+        /* 3) ★ 선택 즉시 여신 정보 가져오기 ★ */
+        $.getJSON(`/bsn/customer/${c.customerCd}/credit`)
+            .done(showCredit)                 // 이미 만들어 둔 showCredit() 재사용
+            .fail(() => Swal.fire('오류', '여신 정보를 불러오지 못했습니다.', 'error'));
+
+        $('#customerModal').modal('hide');
+      });
     
-      /*──────────────── 7. 삭제 버튼(다중) ────────────────*/
+      /*──────────────── 9. 저장 버튼 ────────────────*/
+      $('#btnSaveHeader').click(function(){
+        if (!currentOrder || !currentOrder.orderNo) {
+          return Swal.fire('알림','먼저 헤더를 선택 또는 생성해주세요.','info');
+        }
+        headerGridApi.stopEditing();
+        const dto = {
+          orderNo:      currentOrder.orderNo,
+          orderDt:      currentOrder.orderDt,
+          customerCd:   currentOrder.customerCd,
+          paymentTerms: currentOrder.paymentTerms,
+          orderWriter:  currentOrder.orderWriter,
+          remarks:      currentOrder.remarks
+        };
+        Swal.showLoading();
+        $.ajax({
+          url: `/bsn/orders/${encodeURIComponent(dto.orderNo)}`,
+          method:'PUT',
+          contentType:'application/json',
+          data: JSON.stringify(dto)
+        })
+        .done(()=> Swal.fire('완료','헤더가 저장되었습니다.','success'))
+        .fail(()=> Swal.fire('실패','헤더 저장 중 오류가 발생했습니다.','error'));
+      });
+    
+      /*──────────────── 10. 신규 등록(POST) - 완전 강화된 버전 ────────────────*/
+      $('#btnSave').click(saveOrder);
+      function saveOrder(){
+        console.log('=== 주문서 저장 시작 ===');
+        
+        if (!editMode) {
+          return Swal.fire('알림','신규 모드에서만 저장할 수 있습니다.','info');
+        }
+        
+        headerGridApi.stopEditing();
+        detailGridApi.stopEditing();
+        
+        if (!currentOrder) {
+          console.error('currentOrder가 없음');
+          return Swal.fire('오류','헤더 정보가 없습니다.','error');
+        }
+        
+        console.log('현재 주문서 상태:', currentOrder);
+        
+        // ★ 필수 필드 검증 강화
+        const validationErrors = [];
+        
+        if (!currentOrder.orderNo || !currentOrder.orderNo.trim()) {
+          validationErrors.push('주문번호가 없습니다.');
+        }
+        
+        if (!currentOrder.customerCd || !currentOrder.customerCd.trim()) {
+          validationErrors.push('거래처를 선택해 주세요.');
+        }
+        
+        if (!currentOrder.orderDt) {
+          validationErrors.push('주문일자를 입력해 주세요.');
+        }
+        
+        if (!currentOrder.orderWriter || !currentOrder.orderWriter.trim()) {
+          console.warn('담당자 정보가 없어 기본값으로 설정합니다.');
+          currentOrder.orderWriter = 'emp-101'; // 기본 사원코드
+        }
+        
+        if (validationErrors.length > 0) {
+          console.error('헤더 검증 실패:', validationErrors);
+          return Swal.fire('오류', validationErrors.join('\n'), 'error');
+        }
+        
+        // ★ 디테일 수집 및 검증
+        const details = [];
+        let detailErrors = [];
+        
+        detailGridApi.forEachNode((node, index) => {
+          const data = node.data;
+          console.log(`디테일 ${index + 1}:`, data);
+          
+          if (data.itemCode && data.itemCode.trim()) {
+            // 필수 필드 기본값 설정
+            const detail = {
+              ...data,
+              lineNo: details.length + 1,
+              qty: data.qty || 1,
+              unitPrice: data.unitPrice || 0,
+              supplyAmount: data.supplyAmount || 0,
+              taxAmount: data.taxAmount || 0,
+              totalAmount: data.totalAmount || 0,
+              outState: data.outState || '대기',
+              remarks: data.remarks || ''
+            };
+            
+            details.push(detail);
+          } else if (data.itemName || data.qty || data.unitPrice) {
+            // 품목코드는 없지만 다른 데이터가 있는 경우
+            detailErrors.push(`${index + 1}번째 행: 품목코드가 필요합니다.`);
+          }
+        });
+        
+        console.log('수집된 디테일:', details);
+        console.log('디테일 오류:', detailErrors);
+        
+        if (details.length === 0) {
+          return Swal.fire('안내','품목을 한 개 이상 입력해 주세요.','warning');
+        }
+        
+        if (detailErrors.length > 0) {
+          return Swal.fire('오류', detailErrors.join('\n'), 'error');
+        }
+        
+        // ★ 최종 DTO 구성
+        const dto = {
+          ...currentOrder,
+          details: details
+        };
+        
+        // ★ 디버깅: 전송 데이터 로그 출력
+        console.log('=== 최종 전송 데이터 ===');
+        console.log('DTO 전체:', dto);
+        console.log('헤더 필수 필드:', {
+          orderNo: dto.orderNo,
+          orderDt: dto.orderDt,
+          customerCd: dto.customerCd,
+          customerNm: dto.customerNm,
+          orderWriter: dto.orderWriter,
+          paymentTerms: dto.paymentTerms
+        });
+        console.log('디테일 건수:', details.length);
+        details.forEach((detail, index) => {
+          console.log(`디테일 ${index + 1}:`, {
+            lineNo: detail.lineNo,
+            itemCode: detail.itemCode,
+            itemName: detail.itemName,
+            qty: detail.qty,
+            unitPrice: detail.unitPrice
+          });
+        });
+        
+        // ★ 저장 요청
+        Swal.fire({
+          title: '저장 중...',
+          text: '주문서를 저장하고 있습니다.',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+        
+        console.log('AJAX 요청 시작');
+        
+        $.ajax({
+          url: '/bsn/orders',
+          method: 'POST',
+          contentType: 'application/json; charset=utf-8',
+          data: JSON.stringify(dto),
+          timeout: 30000 // 30초 타임아웃
+        })
+        .done(function(response) {
+          console.log('=== 저장 응답 성공 ===');
+          console.log('응답 전체:', response);
+          
+          if (response && response.success) {
+            console.log('저장 성공:', response.orderNo);
+            
+            Swal.fire({
+              title: '저장 완료!',
+              text: `주문서 "${response.orderNo}"가 성공적으로 등록되었습니다.`,
+              icon: 'success',
+              timer: 3000,
+              showConfirmButton: true
+            });
+            
+            // 상태 초기화
+            setEditMode(false);
+            $('#btnQuotationSearch').prop('disabled', true);
+            currentOrder = null;
+            
+            // 헤더 목록 새로고침
+            loadHeaderData();
+            
+            // 디테일/여신 초기화
+            safeSetRowData(detailGridApi, []);
+            safeSetRowData(creditGridApi, getInitCreditRows());
+            
+          } else {
+            console.error('저장 실패 응답:', response);
+            Swal.fire({
+              title: '저장 실패',
+              text: response?.message || '서버에서 알 수 없는 오류가 발생했습니다.',
+              icon: 'error',
+              confirmButtonText: '확인'
+            });
+          }
+        })
+        .fail(function(xhr, status, error) {
+          console.error('=== 저장 요청 실패 ===');
+          console.error('XHR 상태:', xhr.status, xhr.statusText);
+          console.error('응답 텍스트:', xhr.responseText);
+          console.error('오류 정보:', { status, error });
+          
+          let errorMessage = '저장 중 오류가 발생했습니다.';
+          
+          try {
+            if (xhr.responseText) {
+              const errorData = JSON.parse(xhr.responseText);
+              errorMessage = errorData.message || errorMessage;
+              
+              if (errorData.errorDetail) {
+                console.error('상세 오류:', errorData.errorDetail);
+              }
+            }
+          } catch(parseError) {
+            console.error('응답 JSON 파싱 실패:', parseError);
+            if (xhr.responseText && xhr.responseText.length < 500) {
+              errorMessage = xhr.responseText;
+            }
+          }
+          
+          Swal.fire({
+            title: '저장 실패',
+            text: errorMessage,
+            icon: 'error',
+            footer: `상태 코드: ${xhr.status}`,
+            confirmButtonText: '확인'
+          });
+        });
+      }
+    
+      /*──────────────── 11. 헤더 클릭 → 디테일+여신 ────────────────*/
+      function handleHeaderRowClicked(e){
+        currentOrder = e.data;
+        // 신규 등록(editMode) 중에는 로드하지 않음
+        if (editMode) {
+          return;
+        }
+        
+        // 기존 데이터 조회 모드일 때는 견적서 조회 버튼 비활성화
+        $('#btnQuotationSearch').prop('disabled', true);
+        
+        const { orderNo, customerCd } = e.data;
+        const reqDetail = $.getJSON(`/bsn/orders/${orderNo}/details`);
+        const reqCredit = $.getJSON(`/bsn/customer/${customerCd}/credit`);
+        $.when(reqDetail, reqCredit)
+          .done((dRes, cRes)=>{
+            safeSetRowData(detailGridApi, dRes[0]);
+            showCredit(cRes[0]);
+            calcTotals();
+          })
+          .fail(()=> console.error('데이터 로드 실패'));
+      }
+      function showCredit(c){
+        safeSetRowData(creditGridApi,[{
+          creditLimit:     c.creditLimit    || 0,
+          remainingCredit: c.remainingCredit|| 0,
+          creditUsed:      c.creditUsed     || 0,
+          creditStatus:    c.creditStatus   || '',
+          creditHoldFlg:   c.creditHoldFlg  || '',
+          tradeStopFlg:    c.tradeStopFlg   || ''
+        }]);
+      }
+    
+      /*──────────────── 12. 삭제 ────────────────*/
       $('#btnDelete').click(deleteOrder);
-    
       function deleteOrder(){
         const sel = headerGridApi.getSelectedRows();
-        if(sel.length===0){
-          Swal.fire('선택 필요','삭제할 주문서를 체크해 주세요.','warning'); return;
+        if (!sel.length) {
+          return Swal.fire('안내','삭제할 주문서를 선택해 주세요.','warning');
         }
         Swal.fire({
-          title:'삭제 확인',
-          text:`선택한 ${sel.length}건을 삭제하시겠습니까?`,
-          icon:'warning',
-          showCancelButton:true,
-          confirmButtonColor:'#e74a3b',
-          cancelButtonColor:'#6c757d',
-          confirmButtonText:'삭제',
-          cancelButtonText:'취소'
+          title: '삭제 확인',
+          text: `선택한 ${sel.length}건을 삭제하시겠습니까?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#e74a3b',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: '삭제',
+          cancelButtonText: '취소'
         }).then(r=>{
-          if(!r.isConfirmed) return;
+          if (!r.isConfirmed) return;
           Swal.showLoading();
-          const jobs=sel.map(o=> $.ajax({url:`/bsn/orders/${o.orderNo}`,method:'DELETE'}));
-          $.when.apply($,jobs).done(()=>{
+          const jobs = sel.map(o=>$.ajax({ url:`/bsn/orders/${o.orderNo}`, method:'DELETE' }));
+          $.when.apply($, jobs).done(()=>{
             Swal.fire('삭제 완료','삭제되었습니다.','success');
             loadHeaderData();
-            safeSetRowData(detailGridApi,[]);
-            fillCredit(getInitCreditRows());
+            safeSetRowData(detailGridApi, []);
+            showCredit(getInitCreditObj());
           }).fail(()=> Swal.fire('삭제 실패','서버 오류가 발생했습니다.','error'));
         });
       }
     
-      /*──────────────── 8. 데이터 로드/계산 ────────────────*/
+      /*──────────────── 13. 로드 & 계산 ────────────────*/
       function loadHeaderData(){
         $.get('/bsn/sorlist/data')
-          .done(list=> safeSetRowData(headerGridApi,list))
-          .fail(()=> console.error('주문 목록 로드 실패'));
-      }
-      function fillCredit(c){
-        safeSetRowData(creditGridApi,[
-          {field:'여신한도',   value:c.creditLimit,     format:'currency'},
-          {field:'여신잔액',   value:c.remainingCredit,format:'currency'},
-          {field:'여신사용액', value:c.creditUsed,     format:'currency'},
-          {field:'여신상태',   value:c.creditStatus,   format:'text'},
-          {field:'거래정지',   value:c.tradeStopFlg,   format:'text'}
-        ]);
+          .done(list=> safeSetRowData(headerGridApi, list))
+          .fail(()=> console.error('헤더 로드 실패'));
       }
       function calcTotals(){
-        let supply=0,tax=0,total=0;
+        let supply=0, tax=0, total=0;
         detailGridApi.forEachNode(n=>{
-          supply+=Number(n.data.supplyAmount||0);
-          tax   +=Number(n.data.taxAmount  ||0);
-          total +=Number(n.data.totalAmount||0);
+          supply += Number(n.data.supplyAmount||0);
+          tax    += Number(n.data.taxAmount||0);
+          total  += Number(n.data.totalAmount||0);
         });
         safeSetPinnedBottomRow(detailGridApi,[{
           itemCode:'합계', supplyAmount:supply, taxAmount:tax, totalAmount:total
         }]);
       }
     
-      /*──────────────── 9. 기타 ────────────────*/
+      /*──────────────── 15. 행 추가/삭제 버튼 ────────────────*/
+      $('#btnAddRow').click(function() {
+        if (!editMode) {
+          Swal.fire('알림', '신규 모드에서만 행을 추가할 수 있습니다.', 'info');
+          return;
+        }
+        
+        const newRowData = {
+          lineNo: detailGridApi.getDisplayedRowCount() + 1,
+          itemCode: '',
+          itemName: '',
+          spec: '',
+          qty: 1,
+          unitPrice: 0,
+          supplyAmount: 0,
+          taxAmount: 0,
+          totalAmount: 0,
+          remarks: '',
+          outboundDt: null,
+          catchDt: null,
+          outState: '대기'
+        };
+        
+        detailGridApi.applyTransaction({ add: [newRowData] });
+        calcTotals();
+      });
+
+      $('#btnDeleteRow').click(function() {
+        if (!editMode) {
+          Swal.fire('알림', '신규 모드에서만 행을 삭제할 수 있습니다.', 'info');
+          return;
+        }
+        
+        const selectedRows = detailGridApi.getSelectedRows();
+        if (selectedRows.length === 0) {
+          Swal.fire('알림', '삭제할 행을 선택해 주세요.', 'info');
+          return;
+        }
+        
+        Swal.fire({
+          title: '행 삭제',
+          text: `선택한 ${selectedRows.length}개 행을 삭제하시겠습니까?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#e74a3b',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: '삭제',
+          cancelButtonText: '취소'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            detailGridApi.applyTransaction({ remove: selectedRows });
+            
+            // 행 번호 재정렬
+            const remainingData = [];
+            detailGridApi.forEachNode((node, index) => {
+              node.data.lineNo = index + 1;
+              remainingData.push(node.data);
+            });
+            safeSetRowData(detailGridApi, remainingData);
+            calcTotals();
+            
+            Swal.fire('완료', '선택한 행이 삭제되었습니다.', 'success');
+          }
+        });
+      });
+
+      /*──────────────── 16. 기타 유틸리티 ────────────────*/
       function getInitCreditRows(){
-        return [
-          {field:'여신한도',   value:0, format:'currency'},
-          {field:'여신잔액',   value:0, format:'currency'},
-          {field:'여신사용액', value:0, format:'currency'},
-          {field:'여신상태',   value:'',format:'text'},
-          {field:'거래정지',   value:'',format:'text'}
-        ];
+        return [{ creditLimit:0, remainingCredit:0, creditUsed:0,
+                  creditStatus:'', creditHoldFlg:'', tradeStopFlg:'' }];
+      }
+      function getInitCreditObj(){
+        return { creditLimit:0, remainingCredit:0, creditUsed:0,
+                creditStatus:'', creditHoldFlg:'', tradeStopFlg:'' };
       }
       function setEditMode(flag){
         editMode = flag;
         detailGridApi.refreshCells({force:true});
         headerGridApi.refreshCells({force:true});
         $('#btnSave,#btnAddRow,#btnDeleteRow').prop('disabled', !flag);
-      }
-
-      /*─────────────── 보조 함수 ───────────────*/
-      function getInitCreditObj(){
-        return {
-          creditLimit    :0,
-          remainingCredit:0,
-          creditUsed     :0,
-          creditStatus   :'',
-          creditHoldFlg  :'',
-          tradeStopFlg   :''
-        };
+        
+        // 편집 모드가 아닐 때는 견적서 조회 버튼 비활성화
+        if (!flag) {
+          $('#btnQuotationSearch').prop('disabled', true);
+        }
       }
       function numFmt(v){ return Number(v||0).toLocaleString()+'원'; }
+      function getInitCreditRows(){
+        return [{ creditLimit:0, remainingCredit:0, creditUsed:0,
+                  creditStatus:'', creditHoldFlg:'', tradeStopFlg:'' }];
+      }
+      function getInitCreditObj(){
+        return { creditLimit:0, remainingCredit:0, creditUsed:0,
+                creditStatus:'', creditHoldFlg:'', tradeStopFlg:'' };
+      }
       function setEditMode(flag){
         editMode = flag;
         detailGridApi.refreshCells({force:true});
         headerGridApi.refreshCells({force:true});
         $('#btnSave,#btnAddRow,#btnDeleteRow').prop('disabled', !flag);
+        
+        // 편집 모드가 아닐 때는 견적서 조회 버튼 비활성화
+        if (!flag) {
+          $('#btnQuotationSearch').prop('disabled', true);
+        }
       }
-      console.log('주문서 관리 JS 초기화 완료');
+      function numFmt(v){ return Number(v||0).toLocaleString()+'원'; }
+
+      // 모달 이벤트 리스너 추가
+      $('#quotationModal').on('shown.bs.modal', function() {
+        loadQuotationList(); // 모달이 열릴 때 견적서 목록 로드
+      });
+
+      // 견적서 검색 필터 엔터키 이벤트
+      $('#quotationNoFilter, #customerNameFilter').on('keypress', function(e) {
+        if (e.which === 13) { // 엔터키
+          $('#btnQuotationFilter').click();
+        }
+      });
+
+      // ★ 디버그 버튼 기능
+      $('#btnDebug').click(function() {
+        Swal.fire({
+          title: '디버그 메뉴',
+          html: `
+            <div class="d-grid gap-2">
+              <button class="btn btn-info btn-sm" onclick="checkAuthInfo()">
+                <i class="fas fa-user"></i> 인증 정보 확인
+              </button>
+              <button class="btn btn-warning btn-sm" onclick="checkQuotationData()">
+                <i class="fas fa-database"></i> 견적서 데이터 확인
+              </button>
+              <button class="btn btn-success btn-sm" onclick="testQuotationAPI()">
+                <i class="fas fa-api"></i> 견적서 API 테스트
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="clearConsole()">
+                <i class="fas fa-broom"></i> 콘솔 초기화
+              </button>
+            </div>
+          `,
+          showConfirmButton: false,
+          showCancelButton: true,
+          cancelButtonText: '닫기',
+          width: 400
+        });
+      });
+
+      // ★ 디버그 함수들
+      window.checkAuthInfo = function() {
+        console.log('=== 인증 정보 확인 시작 ===');
+        $.getJSON('/bsn/debug/auth-info')
+          .done(function(data) {
+            console.log('인증 정보:', data);
+            Swal.fire({
+              title: '인증 정보',
+              html: `
+                <div class="text-start">
+                  <strong>회사 코드:</strong> ${data.coIdx || 'N/A'}<br>
+                  <strong>사원 코드:</strong> ${data.empIdx || 'N/A'}<br>
+                  <strong>사용자 코드:</strong> ${data.userIdx || 'N/A'}<br>
+                  <strong>마스터 코드:</strong> ${data.mstIdx || 'N/A'}
+                </div>
+              `,
+              icon: 'info'
+            });
+          })
+          .fail(function() {
+            Swal.fire('오류', '인증 정보를 가져올 수 없습니다.', 'error');
+          });
+      };
+
+      window.checkQuotationData = function() {
+        console.log('=== 견적서 데이터 확인 시작 ===');
+        $.getJSON('/bsn/debug/quotation-raw')
+          .done(function(data) {
+            console.log('견적서 원시 데이터:', data);
+            
+            let message = `
+              <div class="text-start">
+                <strong>회사 코드:</strong> ${data.coIdx || 'N/A'}<br>
+                <strong>견적서 건수:</strong> ${data.quotationCount || 0}<br>
+            `;
+            
+            if (data.firstQuotation) {
+              message += `
+                <hr>
+                <strong>첫 번째 견적서:</strong><br>
+                - 번호: ${data.firstQuotation.quotationNo || 'N/A'}<br>
+                - 거래처: ${data.firstQuotation.customerName || 'N/A'}<br>
+                - 거래처코드: ${data.firstQuotation.customerCd || 'N/A'}<br>
+              `;
+            }
+            
+            message += '</div>';
+            
+            Swal.fire({
+              title: '견적서 데이터',
+              html: message,
+              icon: data.success ? 'info' : 'error'
+            });
+          })
+          .fail(function() {
+            Swal.fire('오류', '견적서 데이터를 가져올 수 없습니다.', 'error');
+          });
+      };
+
+      window.testQuotationAPI = function() {
+        console.log('=== 견적서 API 테스트 시작 ===');
+        
+        // 1. 목록 API 테스트
+        $.getJSON('/bsn/quotation/list')
+          .done(function(data) {
+            console.log('견적서 목록 API 결과:', data);
+            
+            if (data && data.length > 0) {
+              // 2. 첫 번째 견적서의 상세 API 테스트
+              const firstQuotation = data[0];
+              console.log('첫 번째 견적서 상세 API 테스트:', firstQuotation.quotationNo);
+              
+              $.getJSON(`/bsn/quotation/details?quotationNo=${encodeURIComponent(firstQuotation.quotationNo)}`)
+                .done(function(details) {
+                  console.log('견적서 상세 API 결과:', details);
+                  
+                  Swal.fire({
+                    title: 'API 테스트 성공',
+                    html: `
+                      <div class="text-start">
+                        <strong>목록 API:</strong> 성공 (${data.length}건)<br>
+                        <strong>상세 API:</strong> 성공 (${details.length}건)<br>
+                        <hr>
+                        자세한 내용은 콘솔을 확인하세요.
+                      </div>
+                    `,
+                    icon: 'success'
+                  });
+                })
+                .fail(function() {
+                  Swal.fire('경고', '견적서 목록은 성공했지만 상세 조회에 실패했습니다.', 'warning');
+                });
+            } else {
+              Swal.fire('정보', '견적서 데이터가 없습니다. 먼저 견적서를 등록해주세요.', 'info');
+            }
+          })
+          .fail(function() {
+            Swal.fire('오류', '견적서 목록 API 호출에 실패했습니다.', 'error');
+          });
+      };
+
+      window.clearConsole = function() {
+        console.clear();
+        console.log('콘솔이 초기화되었습니다.');
+        Swal.fire('완료', '콘솔이 초기화되었습니다.', 'success');
+      };
+    
+      console.log('견적서 변환 기능이 포함된 주문서 관리 JS 초기화 완료');
+      console.log('디버그 기능: 우상단 디버그 버튼을 클릭하세요.');
+    
     });
     /*]]>*/
     </script>
