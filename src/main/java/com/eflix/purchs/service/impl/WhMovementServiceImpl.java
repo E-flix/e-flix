@@ -16,35 +16,35 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WhMovementServiceImpl implements WhMovementService {
 
-    @Autowired
-    WhMovementMapper whMovementMapper;
+    private final WhMovementMapper whMovementMapper;
 
-    // 이동전 창고 목록
     @Override
     public List<WhMovementDTO> fromWarehouse() {
         return whMovementMapper.fromWarehouse();
     }
 
-    // 선택한 이동 전 창고 안에 있는 제품 목록 + 수량
     @Override
-    public List<WhMovementDTO> fromProd(String warehouseId) {
-        return whMovementMapper.fromProd(warehouseId);
+    public List<WhMovementDTO> fromProd(String fromWhId) {
+        WhMovementDTO warehouseDTO = new WhMovementDTO();
+        warehouseDTO.setFromWhId(fromWhId);
+        return whMovementMapper.fromProd(warehouseDTO);
     }
 
-    // 이동 후 창고 목록 + 남은 수용 가능 수량 (출발창고 제외)
     @Override
-    public List<WhMovementDTO> toWarehouse(String from_wh_id) {
-        return whMovementMapper.toWarehouse(from_wh_id);
+    public List<WhMovementDTO> toWarehouse(String toWhId) {
+        WhMovementDTO warehouseDTO = new WhMovementDTO();
+        warehouseDTO.setFromWhId(toWhId);
+        return whMovementMapper.toWarehouse(warehouseDTO);
     }
 
     @Override
     @Transactional
-    public void executeWarehouseTransfer(WhMovementDTO dto) {
+    public int executeWarehouseTransfer(WhMovementDTO warehouseDTO) {
         try {
-            whMovementMapper.executeWarehouseTransfer(dto);
+            whMovementMapper.executeWarehouseTransfer(warehouseDTO);
         } catch (Exception e) {
-            // RuntimeException은 unchecked exception이므로 throws 선언 불필요
             throw new RuntimeException("창고 이동 실패: " + e.getMessage());
         }
+        return 0;
     }
 }
