@@ -333,7 +333,7 @@ public class IncomeStatementServiceImpl implements IncomeStatementService {
             Map<String, Object> params = new HashMap<>();
             params.put("coIdx", AuthUtil.getCoIdx());
             String previousYear = String.valueOf(Integer.parseInt(this.currentYear) - 1);
-            params.put("previousYear", previousYear);
+            params.put("year", previousYear);
             
             Long result = incomeStatementMapper.getGoodsBeginningInventory(params);
             return result != null ? result : 0L;

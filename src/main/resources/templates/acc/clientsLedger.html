@@ -484,144 +484,7 @@
       detailApi.updateGridOptions({ rowData: rowData });
     }
 
-    // ------------------------▼ 모달 ▼------------------------------
-    let accountGridApi;
-    let partnerGridApi;
-    let accountModalInstance;
-    let partnerModalInstance;
-
-    // 계정과목 모달 AG Grid
-    const accountGridOptions = {
-      headerHeight: 35,
-      rowHeight: 35,
-      columnDefs: [
-        { headerName: "코드", field: "accountCode", sortable: true, filter: true },
-        { headerName: "계정과목명", field: "accountName", sortable: true, filter: true }
-      ],
-      rowSelection: 'single',
-      defaultColDef: {
-        flex: 1,
-        minWidth: 100,
-        resizable: true,
-      },
-      onGridReady: (params) => {
-        // onGridReady 콜백에서 API를 할당하고 데이터를 로드합니다.
-        accountGridApi = params.api;
-        loadAccountData();
-      },
-      onRowDoubleClicked: (event) => {
-        selectAccount(event.data.accountCode, event.data.accountName);
-      }
-    };
-
-    // 거래처 모달 AG Grid
-    const partnerGridOptions = {
-        headerHeight: 35,
-      rowHeight: 35,
-      columnDefs: [
-        { headerName: "코드", field: "partnerCode", sortable: true, filter: true },
-        { headerName: "거래처명", field: "partnerName", sortable: true, filter: true }
-      ],
-      rowSelection: 'single',
-      defaultColDef: {
-        flex: 1,
-        minWidth: 100,
-        resizable: true,
-      },
-      onGridReady: (params) => {
-        // onGridReady 콜백에서 API를 할당하고 데이터를 로드합니다.
-        partnerGridApi = params.api;
-        loadPartnerData();
-      },
-      onRowDoubleClicked: (event) => {
-        selectPartner(event.data.partnerCode, event.data.partnerName);
-      }
-    };
-
-    function loadAccountData() {
-      fetch('/acc/act/list')
-        .then(res => {
-          if (!res.ok) throw new Error('계정과목 API 호출 실패');
-          return res.json();
-        })
-        .then(data => {
-          if (accountGridApi) {
-            accountGridApi.updateGridOptions({ rowData: data });
-          } else {
-            console.error('Account Grid API not available when loading data.');
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          alert('계정과목 데이터를 불러오는데 실패했습니다.');
-        });
-    }
-
-    function loadPartnerData() {
-      fetch('/acc/pt/list')
-        .then(res => {
-          if (!res.ok) throw new Error('거래처 API 호출 실패');
-          return res.json();
-        })
-        .then(data => {
-          if (partnerGridApi) {
-            partnerGridApi.updateGridOptions({ rowData: data });
-          } else {
-            console.error('Partner Grid API not available when loading data.');
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          alert('거래처 데이터를 불러오는데 실패했습니다.');
-        });
-    }
-
-    function openAccountModal() {
-      if (!accountModalInstance) {
-        accountModalInstance = new bootstrap.Modal(document.getElementById('accountModal'));
-        
-        document.getElementById('accountModal').addEventListener('shown.bs.modal', () => {
-          if (!accountGridApi) {
-            agGrid.createGrid(document.getElementById('accountGrid'), accountGridOptions);
-          } else {
-            loadAccountData();
-          }
-        });
-      }
-      accountModalInstance.show();
-    }
-
-    function selectAccount(code, name) {
-      $('#accountCode').val(code);
-      $('#accountName').val(name);
-      if (accountModalInstance) accountModalInstance.hide();
-      $('#accountCode').trigger('change');
-    }
-
-    function openPartnerModal() {
-      if (!partnerModalInstance) {
-        partnerModalInstance = new bootstrap.Modal(document.getElementById('partnerModal'));
-
-        document.getElementById('partnerModal').addEventListener('shown.bs.modal', () => {
-          if (!partnerGridApi) {
-            agGrid.createGrid(document.getElementById('partnerGrid'), partnerGridOptions);
-          } else {
-            loadPartnerData();
-          }
-        });
-      }
-      partnerModalInstance.show();
-    }
-
-    function selectPartner(code, name) {
-      $('#partnerCode').val(code);
-      $('#partnerName').val(name);
-      if (partnerModalInstance) partnerModalInstance.hide();
-      $('#partnerCode').trigger('change');
-    }
-    // ------------------------▲ 모달 ▲------------------------------
-
-    // 모달이 닫힐 때 포커스를 원래 입력 필드로 되돌려 aria-hidden 경고를 해결합니다.
+    // 모달이 닫힐 때 포커스를 원래 입력 필드로 되돌림
     $(document).ready(function() {
       $('#accountModal').on('hidden.bs.modal', function () {
         $('#accountCode').focus();
@@ -631,29 +494,43 @@
       });
     });
 
+    function windowOpenAccountModal() {
+      window.openAccountModal(null, function(code, name) {
+        $('#accountCode').val(code).trigger('change');
+        $('#accountName').val(name);
+      });
+    }
+
+    function windowOpenPartnerModal() {
+      window.openPartnerModal(null, function(code, name) {
+        $('#partnerCode').val(code).trigger('change');
+        $('#partnerName').val(name);
+      });
+    }
+
     // 계정과목 input에서 F4 누르면 계정과목 모달 오픈
     $('#accountCode').on('keydown', function(e) {
       if (e.key === 'F4' || e.keyCode === 115) {
         e.preventDefault();
-        openAccountModal();
+        windowOpenAccountModal();
       }
     });
     // 거래처 input에서 F4 누르면 거래처 모달 오픈
     $('#partnerCode').on('keydown', function(e) {
       if (e.key === 'F4' || e.keyCode === 115) {
         e.preventDefault();
-        openPartnerModal();
+        windowOpenPartnerModal();
       }
     });
     // 계정과목 검색 버튼 클릭 시 모달 오픈
     $('#accountBtn').on('click', function(e) {
       e.preventDefault();
-      openAccountModal();
+      windowOpenAccountModal();
     });
     // 거래처 검색 버튼 클릭 시 모달 오픈
     $('#partnerBtn').on('click', function(e) {
       e.preventDefault();
-      openPartnerModal();
+      windowOpenPartnerModal();
     });
 
     // 마지막 유효 계정과목/거래처 코드 저장 변수

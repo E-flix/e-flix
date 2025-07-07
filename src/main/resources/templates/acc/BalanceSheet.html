@@ -89,68 +89,94 @@
   </div>
 
   <script th:inline="javascript">
+    // 중복 실행 방지를 위한 플래그들
+    let isDataLoading = false; // 데이터 로딩 중인지 여부
+    let isApplyingNetIncome = false; // 당기순손익을 반영 중인지 여부
+    let isCalculatingTotals = false; // 자본 총계 계산 중인지 여부
+    
+    // 재무상태표 데이터 저장 변수
     let balanceSheetData = [];
 
-    // 페이지 로드 시 데이터 가져오기
+    // 페이지 로드 시 이벤트 리스너 등록
     document.addEventListener('DOMContentLoaded', function() {
-        loadBalanceSheetData();
-        
         // 월 변경 시 자동 조회 이벤트 추가
         document.querySelector('select[name="endMonth"]').addEventListener('change', function() {
             loadBalanceSheetData();
         });
     });
     
-    // 서버에서 재무상태표 데이터 가져오기
+    // 재무상태표 데이터 로드 함수
     async function loadBalanceSheetData() {
-      try {
-        const year = document.querySelector('input[name="year"]')?.value || '2025';
-        const endMonth = document.querySelector('select[name="endMonth"]')?.value || '12';
+        if (isDataLoading) return;
+        isDataLoading = true;
         
-        console.log(`재무상태표 조회: ${year}년 ${endMonth}월말까지`);
-        
-        const response = await fetch(`/acc/bs/data?year=${year}&endMonth=${endMonth}`);
-        const result = await response.json();
-        
-        if (result.success) {
-            balanceSheetData = result.data;
+        try {
+            const year = document.querySelector('input[name="year"]')?.value || '2025';
+            const endMonth = document.querySelector('select[name="endMonth"]')?.value || '12';
             
-            // 그리드 새로고침 - v33에서는 setGridOption 사용
-            if (gridOptions.api) {
-                gridOptions.api.setGridOption('rowData', balanceSheetData);
+            const response = await fetch(`/acc/bs/data?year=${year}&endMonth=${endMonth}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                balanceSheetData = result.data;
+                
+                // 그리드 데이터 업데이트
+                if (gridOptions.api) {
+                    gridOptions.api.setGridOption('rowData', balanceSheetData);
+                }
+                
+                // 손익계산서에서 당기순손익 가져와서 반영
+                await applyNetIncomeToBalanceSheet();
+            } else {
+                console.error('데이터 조회 실패:', result.message);
             }
-        } else {
-            console.error('데이터 조회 실패:', result.message);
-            // 에러 시 더미 데이터 사용
-            balanceSheetData = getDummyData();
-            if (gridOptions.api) {
-                gridOptions.api.setGridOption('rowData', balanceSheetData);
-            }
+        } catch (error) {
+            console.error('재무상태표 데이터 로드 실패:', error);
+        } finally {
+            isDataLoading = false;
         }
-      } catch (error) {
-        console.error('재무상태표 데이터 로드 실패:', error);
-        // 에러 시 더미 데이터 사용
-        balanceSheetData = getDummyData();
-        if (gridOptions.api) {
-            gridOptions.api.setGridOption('rowData', balanceSheetData);
-        }
-      }
     }
 
-    // 더미 데이터 함수 (에러 시 백업용)
-    function getDummyData() {
-        return [
-            { section: "자 산", subsection: "", subcategory: "", accountCode: "", accountName: "", amount: "", total: "", isHeader: true, level: 0 },
-            { section: "", subsection: "", subcategory: "", accountCode: "", accountName: "현금및현금성자산", amount: "1,000,000", total: "", isHeader: false, level: 3 },
-            { section: "", subsection: "", subcategory: "", accountCode: "", accountName: "자산총계", amount: "", total: "1,000,000", isHeader: false, level: 0, isGrandTotal: true },
-            { section: "부 채", subsection: "", subcategory: "", accountCode: "", accountName: "", amount: "", total: "", isHeader: true, level: 0 },
-            { section: "", subsection: "", subcategory: "", accountCode: "", accountName: "부채총계", amount: "", total: "0", isHeader: false, level: 0, isGrandTotal: true },
-            { section: "자 본", subsection: "", subcategory: "", accountCode: "", accountName: "", amount: "", total: "", isHeader: true, level: 0 },
-            { section: "", subsection: "", subcategory: "", accountCode: "", accountName: "자본총계", amount: "", total: "1,000,000", isHeader: false, level: 0, isGrandTotal: true }
-        ];
+    // 당기순손익을 재무상태표에 반영하는 함수
+    async function applyNetIncomeToBalanceSheet() {
+        if (isApplyingNetIncome) return; // 중복 실행 방지
+        isApplyingNetIncome = true; 
+        
+        try {
+            const netIncome = await getNetIncomeFromIncomeStatement(); // 손익계산서에서 당기순손익 가져오기
+            
+            if (netIncome !== 0) {
+                // accountCode가 89인 당기순손익 항목 찾기
+                const netIncomeRow = balanceSheetData.find(row => 
+                    row.accountCode === "89" || 
+                    (row.accountName && row.accountName.includes("당기순손익"))
+                );
+                
+                if (netIncomeRow) {
+                    // 금액 포맷팅 (콤마 추가)
+                    const formattedAmount = netIncome.toLocaleString(); // 금액을 천 단위로 콤마 추가
+                    
+                    // 당기순손익을 합계 컬럼에 반영
+                    netIncomeRow.total = formattedAmount; // 합계 컬럼에 반영
+                    netIncomeRow.amount = ""; // 금액 컬럼은 비워둠
+                    
+                    // 그리드 새로고침
+                    if (gridOptions.api) {
+                        gridOptions.api.refreshCells(); // 셀 새로고침
+                    }
+                    
+                    // 자본 총계 재계산
+                    calculateTotals(); 
+                }
+            }
+        } catch (error) {
+            console.error('당기순손익 반영 실패:', error);
+        } finally {
+            isApplyingNetIncome = false; // 플래그 초기화
+        }
     }
 
-    // ag-Grid 세팅
+    // ag-Grid 설정
     const gridOptions = {
       headerHeight: 35, // 헤더 높이 설정
       rowHeight: 35, // 행 높이 설정
@@ -158,31 +184,31 @@
       suppressMovableColumns: true, // 열 이동 기능 비활성화
       suppressRowDrag: true, // 행 드래그 기능 비활성화
       rowDragManaged: false, // 행 드래그 관리 비활성화
-      rowSelection: 'multiRow', // 다중 행 선택
-      suppressRowClickSelection: true, // 행 클릭 시 선택 방지
+      rowSelection: 'multiRow', // 다중 행 선택 
+      suppressRowClickSelection: true, // 행 클릭 시 선택 해제
       columnDefs: [
-        { headerName: "계정과목", field: "accountName",  width: 300, sortable: false, // flex: 1,
+        { headerName: "계정과목", field: "accountName", width: 300, sortable: false,
           cellRenderer: params => {
-            let displayText = '';
-            if (params.data.section) {
+            let displayText = ''; // 계정과목 표시용 변수
+            if (params.data.section) { // 대분류가 있는 경우
               displayText = `<strong style="font-weight: 600;">${params.data.section}</strong>`;
             }
-            else if (params.data.subsection) {
+            else if (params.data.subsection) { // 중분류가 있는 경우 
               displayText = `<strong style="font-weight: 500;">${params.data.subsection}</strong>`;
             }
-            else if (params.data.subcategory) {
+            else if (params.data.subcategory) { // 소분류가 있는 경우
               displayText = `<span style="font-weight: 500;">${params.data.subcategory}</span>`;
             }
-            else if (params.value) {
-              if (params.data.isSubTotal || params.data.isTotal || params.data.isGrandTotal) {
-                displayText = `<strong style="font-weight: 500;">${params.value}</strong>`;
-              } else {
+            else if (params.value) { // 계정과목이 있는 경우
+              if (params.data.isSubTotal || params.data.isTotal || params.data.isGrandTotal) { // 소계, 합계, 총계인 경우
+                displayText = `<strong style="font-weight: 500;">${params.value}</strong>`; // 소계, 합계, 총계는 굵게 표시
+              } else { // 일반 계정과목
                 displayText = params.value;
               }
             }
             return displayText;
           },
-          cellClass: params => {
+          cellClass: params => { // 계정과목 셀 스타일 지정
             if (params.data.isHeader) return 'ag-header-cell-style'; 
             if (params.data.isSubTotal) return 'ag-subtotal-cell-style';
             if (params.data.isTotal) return 'ag-total-cell-style';
@@ -191,46 +217,294 @@
           }
         },
         { headerName: "코드", field: "accountCode", width: 100, sortable: false,
-          cellClass: params => {
+          cellClass: params => { // 코드 셀 스타일 지정
             if (params.data.isHeader) return 'ag-header-cell-style';
             return '';
           }
         },
         { headerName: "금액", field: "amount", width: 120, sortable: false,
           cellStyle: { textAlign: 'right' },
-          cellRenderer: params => {
+          cellRenderer: params => { // 금액 셀
             if (!params.value) return '';
             return params.value;
           },
-          cellClass: params => {
-            if (params.data.isHeader) return 'ag-header-cell-style';
+          cellClass: params => { // 금액 셀 스타일 지정
+            if (params.data.isHeader) return 'ag-header-cell-style'; 
             return '';
           }
         },
         { headerName: "합계", field: "total", width: 150, sortable: false,
           cellStyle: { textAlign: 'right'},
-          cellRenderer: params => {
+          cellRenderer: params => { // 합계 셀 
             if (!params.value) return '';
             return `<span>${params.value}</span>`;
           },
-          cellClass: params => {
-            if (params.data.isHeader) return 'ag-header-cell-style';
+          cellClass: params => { // 합계 셀 스타일 지정
+            if (params.data.isHeader) return 'ag-header-cell-style'; 
             return '';
           }
         }
       ],
       onGridReady: (params) => { 
         gridOptions.api = params.api;
-        // 초기 데이터 로드
-        loadBalanceSheetData();
+        // 그리드가 준비되면 데이터 로드
+        loadBalanceSheetData(); // 재무상태표 데이터 로드
       }
     };
 
     // 그리드 생성
-    agGrid.createGrid(document.querySelector("#balanceSheetGrid"), gridOptions);
+    agGrid.createGrid(document.querySelector("#balanceSheetGrid"), gridOptions); 
 
-    function exportToExcel() {
+    // 손익계산서에서 당기순손익 가져오는 함수
+    async function getNetIncomeFromIncomeStatement() { 
+      try {
+        // 방법 1: 전역 변수 확인
+        if (window.getIncomeStatementNetIncome && typeof window.getIncomeStatementNetIncome === 'function') { // 손익계산서에서 당기순손익을 가져오는 함수가 있는 경우
+          return window.getIncomeStatementNetIncome(); // 손익계산서에서 당기순손익 가져오기
+        }
+        
+        // 방법 2: 서버에서 손익계산서 데이터 직접 가져와서 계산
+        const year = document.querySelector('input[name="year"]')?.value || '2025'; // 기본값 2025년
+        const endMonth = document.querySelector('select[name="endMonth"]')?.value || '12'; // 기본값 12월
+        
+        const response = await fetch(`/acc/is/data?year=${year}&endMonth=${endMonth}`); // 손익계산서 데이터 API 호출
+        const result = await response.json(); // 손익계산서 데이터 가져오기
+        
+        if (result.success && result.data) { // 손익계산서 데이터가 있는 경우
+          return calculateNetIncomeFromISData(result.data); // 손익계산서 데이터에서 당기순손익 계산 
+        }
+        
+        return 0;
+      } catch (error) {
+        console.error('당기순손익 가져오기 실패:', error);
+        return 0;
+      }
+    }
+
+    // 손익계산서 데이터에서 당기순손익 계산하는 함수
+    function calculateNetIncomeFromISData(isData) {
+      try {
+        // 당기순손익 항목 직접 찾기
+        const netIncomeRow = isData.find(row => 
+          row.subsection && row.subsection.includes("당기순손익") // 당기순손익 항목 찾기
+        );
+        
+        if (netIncomeRow && netIncomeRow.total) { // 당기순손익 금액이 있는 경우
+          const amount = parseFloat(netIncomeRow.total.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+          return amount; // 당기순손익 금액 반환
+        }
+        
+        // 당기순손익이 없으면 직접 계산
+        return calculateNetIncomeDirectly(isData); // 직접 계산 함수 호출
+        
+      } catch (error) {
+        console.error('당기순손익 계산 실패:', error);
+        return 0; // 오류 발생 시 0 반환
+      }
+    }
+
+    // 당기순손익 직접 계산 함수
+    function calculateNetIncomeDirectly(isData) {
+      try {
+        let 매출액 = 0;
+        let 매출원가 = 0;
+        let 판관비 = 0;
+        let 영업외수익 = 0;
+        let 영업외비용 = 0;
+        
+        // 각 항목별 합계 찾기
+        isData.forEach(row => { // 각 행에 대해
+          if (row.subsection && row.total) { // subsection이 있고 total이 있는 경우
+            const amount = parseFloat(row.total.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+            
+            if (row.subsection.includes("매출액")) { // 매출액 항목인 경우
+              매출액 = amount;
+            } else if (row.subsection.includes("매출원가")) { // 매출원가 항목인 경우
+              매출원가 = amount;
+            } else if (row.subsection.includes("판매비") || row.subsection.includes("관리비")) { // 판관비 항목인 경우
+              판관비 = amount;
+            } else if (row.subsection.includes("영업외수익")) { // 영업외수익 항목인 경우
+              영업외수익 = amount;
+            } else if (row.subsection.includes("영업외비용")) { // 영업외비용 항목인 경우
+              영업외비용 = amount;
+            }
+          }
+        });
+        
+        // 당기순손익 = 매출액 - 매출원가 - 판관비 + 영업외수익 - 영업외비용
+        const 당기순손익 = 매출액 - 매출원가 - 판관비 + 영업외수익 - 영업외비용; // 당기순손익 계산
+        return 당기순손익; // 계산된 당기순손익 반환
+        
+      } catch (error) {
+        console.error('직접 계산 실패:', error); // 오류 처리
+        return 0;
+      }
+    }
+
+    // 합계 계산 메인 함수
+    function calculateTotals() { // 합계 계산 메인 함수
+      if (isCalculatingTotals) return; // 중복 실행 방지 
+      isCalculatingTotals = true; // 합계 계산 중 플래그 설정
+      
+      try {
+        // 중분류별 합계 계산
+        calculateSubsectionTotals();
+        
+        // 총합계 계산 (자산총계, 부채총계, 자본총계)
+        calculateGrandTotals();
+        
+        // 그리드 새로고침
+        if (gridOptions.api) { // 그리드 API가 초기화되었는지 확인
+          gridOptions.api.refreshCells(); // 셀 새로고침
+        }
+      } catch (error) { // 합계 계산 중 오류 처리
+        console.error('합계 계산 실패:', error);
+      } finally { // 플래그 초기화
+        isCalculatingTotals = false; // 합계 계산 완료
+      }
+    }
+
+    // 중분류별 합계 계산 (유동자산, 비유동자산, 유동부채, 비유동부채, 자본금 등)
+    function calculateSubsectionTotals() { // 중분류별 합계 계산
+      balanceSheetData.forEach(row => { // 각 행에 대해
+        if (row.subsection && row.level === 1) { // 중분류 레벨 1 항목인 경우
+          const subsectionName = row.subsection; // 현재 중분류 이름
+          let total = 0; // 해당 중분류의 금액 합계 초기화
+          let inSubsection = false; // 중분류 시작 여부 플래그
+          
+          // 해당 중분류 이후부터 다음 중분류 전까지의 level 3 항목들 합계
+          for (let i = 0; i < balanceSheetData.length; i++) { 
+            const item = balanceSheetData[i]; // 현재 항목
+            
+            // 현재 중분류 시작
+            if (item.subsection === subsectionName) { // 중분류 이름이 일치하면
+              inSubsection = true; // 중분류 시작
+              continue; // 다음 항목으로 넘어감
+            }
+            
+            // 다른 중분류나 대분류가 나오면 종료
+            if (inSubsection && (item.subsection || item.section)) { // 중분류나 대분류가 나오면
+              break; // 중분류 종료
+            }
+            
+            // 현재 중분류에 속한 level 3 항목들의 금액 합계
+            if (inSubsection && item.level === 3 && item.amount) { // level 3 항목인지 확인
+              const amount = parseFloat(item.amount.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+              total += amount; // 합계에 추가
+            }
+          }
+          
+          if (total > 0) { // 합계가 0보다 큰 경우에만
+            row.total = total.toLocaleString(); // 금액을 문자열로 변환하여 설정
+          }
+        }
+      });
+    }
+
+    // 총합계 계산 (자산총계, 부채총계, 자본총계)
+    function calculateGrandTotals() {
+      // 1. 자산총계 = 유동자산 + 비유동자산
+      const 유동자산 = findRowBySubsection('유동자산'); // 유동자산 행 찾기
+      const 비유동자산 = findRowBySubsection('비유동자산'); // 비유동자산 행 찾기
+      
+      let 자산총계금액 = 0; // 자산총계 금액 초기화
+      if (유동자산 && 유동자산.total) { // 유동자산이 total 필드를 가지고 있다면
+        자산총계금액 += parseFloat(유동자산.total.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+      }
+      if (비유동자산 && 비유동자산.total) { // 비유동자산이 total 필드를 가지고 있다면
+        자산총계금액 += parseFloat(비유동자산.total.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+      }
+      // 자산총계 행 찾기
+      const assetTotalRow = balanceSheetData.find(row => 
+        row.accountName && row.accountName.includes('자산총계') // accountName에 '자산총계'가 포함된 행 찾기
+      );
+      if (assetTotalRow) { // 자산총계 행이 있다면
+        assetTotalRow.total = 자산총계금액.toLocaleString(); // 총계 금액 설정
+      }
+      
+      // 2. 부채총계 = 유동부채 + 비유동부채
+      const 유동부채 = findRowBySubsection('유동부채'); // 유동부채 행 찾기
+      const 비유동부채 = findRowBySubsection('비유동부채'); // 비유동부채 행 찾기
+      
+      let 부채총계금액 = 0; // 부채총계 금액 초기화
+      if (유동부채 && 유동부채.total) { // 유동부채가 total 필드를 가지고 있다면 
+        부채총계금액 += parseFloat(유동부채.total.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+      }
+      if (비유동부채 && 비유동부채.total) { // 비유동부채가 total 필드를 가지고 있다면
+        부채총계금액 += parseFloat(비유동부채.total.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+      }
+      // 부채총계 행 찾기
+      const liabilityTotalRow = balanceSheetData.find(row =>  // accountName에 '부채총계'가 포함된 행 찾기
+        row.accountName && row.accountName.includes('부채총계')
+      );
+      if (liabilityTotalRow) { // 부채총계 행이 있다면
+        liabilityTotalRow.total = 부채총계금액.toLocaleString(); // 총계 금액 설정
+      }
+      
+      // 3. 자본총계 = 자본금 + 당기순손익
+      const 자본금 = findRowBySubsection('자본금') || findRowByName('자본금'); // 자본금 행 찾기
+      const 당기순손익 = balanceSheetData.find(row =>  // 당기순손익 행 찾기
+        row.accountCode === "89" ||  // accountCode가 89인 행 찾기
+        (row.accountName && row.accountName.includes("당기순손익")) // accountName에 "당기순손익"이 포함된 행 찾기
+      );
+      
+      let 자본총계금액 = 0; // 자본총계 금액 초기화
+      
+      // 자본금 합계
+      if (자본금 && 자본금.total) { // 자본금이 total 필드를 가지고 있다면
+        자본총계금액 += parseFloat(자본금.total.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+      } else if (자본금 && 자본금.amount) { // 자본금이 amount 필드를 가지고 있다면
+        자본총계금액 += parseFloat(자본금.amount.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+      }
+      
+      // 당기순손익 합계
+      if (당기순손익 && 당기순손익.total) { // 당기순손익이 total 필드를 가지고 있다면
+        자본총계금액 += parseFloat(당기순손익.total.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+      } else if (당기순손익 && 당기순손익.amount) { // 당기순손익이 amount 필드를 가지고 있다면
+        자본총계금액 += parseFloat(당기순손익.amount.replace(/,/g, '')) || 0; // 금액을 숫자로 변환
+      }
+      // 자본총계 행 찾기
+      const equityTotalRow = balanceSheetData.find(row => 
+        row.accountName && row.accountName.includes('자본총계')
+      );
+      if (equityTotalRow) { // 자본총계 행이 있다면
+        equityTotalRow.total = 자본총계금액.toLocaleString(); // 총계 금액 설정
+      }
+      
+      // 4. 부채와 자본총계 = 부채총계 + 자본총계
+      const 부채와자본총계금액 = 부채총계금액 + 자본총계금액;
+      // 부채와 자본총계 행 찾기
+      const totalRow = balanceSheetData.find(row => 
+        row.accountName && (
+          row.accountName.includes('부채와 자본총계') || 
+          row.accountName.includes('부채와자본총계') ||
+          row.accountName.includes('부채·자본총계')
+        )
+      );
+      if (totalRow) { // 부채와 자본총계 행이 있다면
+        totalRow.total = 부채와자본총계금액.toLocaleString(); // 총계 금액 설정
+      }
+    }
+    // 특정 이름으로 행 찾기
+    function findRowByName(name) {
+      return balanceSheetData.find(row => 
+        row.accountName && row.accountName.includes(name)
+      );
+    }
+    // 중분류별로 행 찾기
+    function findRowBySubsection(subsection) {
+      return balanceSheetData.find(row => 
+        row.subsection && row.subsection.includes(subsection)
+      );
+    }
+    // 출력 함수
+    function 출력() {
+      alert('출력 기능을 준비 중입니다.');
+    }
+    // 엑셀 내보내기 함수
+    function 엑셀() {
       alert('Excel 내보내기 기능을 준비 중입니다.');
     }
-</script>
+  </script>
 </div>
+</html>
