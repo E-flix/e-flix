@@ -31,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -66,7 +68,7 @@ public class UserRestController {
     public ResponseEntity<ResResult> update(@RequestBody UserDTO userDTO) {
         ResResult result = null;
 
-        int affectedRows = userService.updateUser(userDTO);
+        int affectedRows = userService.updateUserByUserIdx(userDTO);
 
         if(affectedRows > 0) {
             result = ResUtil.makeResult(ResStatus.OK, null);
@@ -130,10 +132,32 @@ public class UserRestController {
     }
 
     // 0706
-    @PostMapping("/insert")
-    public ResponseEntity<ResResult> postInsert(@RequestBody UserDTO userDTO) {
+    @PutMapping("/update")
+    public ResponseEntity<ResResult> putUpdate(@RequestBody UserDTO userDTO) {
         ResResult result = null;
-        
+
+        userDTO.setUserIdx(AuthUtil.getUserIdx());
+        int affectedRows = userService.updateUserByUserIdx(userDTO);
+
+        if(affectedRows > 0) {
+            result = ResUtil.makeResult(ResStatus.OK, null);
+        } else {
+            result = ResUtil.makeResult("400", "회원 정보를 수정하던 중 오류가 발생했습니다.", null);
+        }
+  
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    // 0707
+    @GetMapping("/info")
+    public ResponseEntity<ResResult> getInfo() {
+        ResResult result = null;
+		UserDTO userDTO = userService.findByUserIdx(AuthUtil.getUserIdx());
+        if(userDTO != null) {
+            result = ResUtil.makeResult(ResStatus.OK, userDTO);
+        } else {
+            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
+        }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

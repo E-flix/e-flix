@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
+import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.service.CompanyService;
@@ -90,16 +91,28 @@ public class CompnayRestController {
 
     @PostMapping("/insert")
     public ResponseEntity<ResResult> insert(@RequestPart("companyData") CompanyDTO companyDTO, @RequestPart("bizrCert") MultipartFile bizrCert) {
-        //TODO: process POST request
-        ResResult result;
+        ResResult result = null;
 
+        int affectedRows = 0;
+        
         companyDTO.setBizrCert(bizrCert.getOriginalFilename());
-        int affectedRows = companyService.insertCompany(companyDTO);
 
-        if(affectedRows > 0) {
-            result = ResUtil.makeResult(ResStatus.OK, null);
+        if(AuthUtil.getCoIdx() == null) {
+            affectedRows = companyService.insertCompany(companyDTO);
+
+            if(affectedRows > 0) {
+                result = ResUtil.makeResult(ResStatus.OK, null);
+            } else {
+                result = ResUtil.makeResult("400", "회사 정보를 등록 중 오류가 발생했습니다.", null);
+            }
         } else {
-            result = ResUtil.makeResult("400", "회사 정보를 등록 중 오류가 발생했습니다.", null);
+            affectedRows = companyService.updateCompany(companyDTO);
+
+            if(affectedRows > 0) {
+                result = ResUtil.makeResult(ResStatus.OK, null);
+            } else {
+                result = ResUtil.makeResult("400", "회사 정보를 등록 중 오류가 발생했습니다.", null);
+            }
         }
 
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -108,7 +121,7 @@ public class CompnayRestController {
     @PutMapping("/update")
     public ResponseEntity<ResResult> update(@RequestBody CompanyDTO companyDTO) {
         //TODO: process POST request
-        ResResult result;
+        ResResult result = null;
         
         int affectedRows = companyService.updateCompany(companyDTO);
 
@@ -120,5 +133,20 @@ public class CompnayRestController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-    
+
+    // 0707
+    @GetMapping("/info")
+    public ResponseEntity<ResResult> getMethodName() {
+        ResResult result = null;
+
+        CompanyDTO companyDTO = companyService.findByUserIdx(AuthUtil.getUserIdx());
+
+        if(companyDTO != null) {
+            result = ResUtil.makeResult(ResStatus.OK, companyDTO);
+        } else {
+            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

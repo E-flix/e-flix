@@ -46,53 +46,48 @@
                         <div class="card-body p-4">
                             <p class="section-subtitle">서비스 사용을 위한 기본 정보를 입력해주세요.</p>
 
-                            <form id="userForm">
-                                <div class="form-floating mb-3">
-                                    <input class="form-control" id="userId" type="text" placeholder="아이디..."
-                                        required />
-                                    <label for="userId">아이디</label>
-                                    <div class="invalid-feedback">아이디를 입력해주세요.</div>
-                                </div>
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="userId" type="text" placeholder="아이디..." required />
+                                <label for="userId">아이디</label>
+                                <div class="invalid-feedback">아이디를 입력해주세요.</div>
+                            </div>
 
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="userPw" type="password" placeholder="****"
-                                                required />
-                                            <label for="userPw">비밀번호</label>
-                                            <div class="invalid-feedback">비밀번호를 입력해주세요.</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="userPwCheck" type="password"
-                                                placeholder="****" required />
-                                            <label for="userPwCheck">비밀번호 확인</label>
-                                            <div class="invalid-feedback">비밀번호가 서로 일치하지 않습니다.</div>
-                                        </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input class="form-control" id="userPw" type="password" placeholder="****"
+                                            required />
+                                        <label for="userPw">비밀번호</label>
+                                        <div class="invalid-feedback">비밀번호를 입력해주세요.</div>
                                     </div>
                                 </div>
-
-                                <div class="form-floating mb-3">
-                                    <input class="form-control" id="userTel" type="tel" placeholder="연락처..."
-                                        required />
-                                    <label for="userTel">연락처</label>
-                                    <div class="invalid-feedback">연락처를 입력해주세요.</div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input class="form-control" id="userPwCheck" type="password" placeholder="****"
+                                            required />
+                                        <label for="userPwCheck">비밀번호 확인</label>
+                                        <div class="invalid-feedback">비밀번호가 서로 일치하지 않습니다.</div>
+                                    </div>
                                 </div>
+                            </div>
 
-                                <div class="form-floating mb-4">
-                                    <input class="form-control" id="userEmail" type="email" placeholder="이메일..."
-                                        required />
-                                    <label for="userEmail">이메일</label>
-                                    <div class="invalid-feedback">이메일을 입력해주세요.</div>
-                                </div>
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="userTel" type="tel" placeholder="연락처..." required />
+                                <label for="userTel">연락처</label>
+                                <div class="invalid-feedback">연락처를 입력해주세요.</div>
+                            </div>
 
-                                <div class="d-grid">
-                                    <button class="btn btn-primary btn-lg" type="submit">
-                                        <i class="bi bi-check-circle me-2"></i>개인정보 저장
-                                    </button>
-                                </div>
-                            </form>
+                            <div class="form-floating mb-4">
+                                <input class="form-control" id="userEmail" type="email" placeholder="이메일..." required />
+                                <label for="userEmail">이메일</label>
+                                <div class="invalid-feedback">이메일을 입력해주세요.</div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button class="btn btn-primary btn-lg" id="userBtn">
+                                    <i class="bi bi-check-circle me-2"></i>개인정보 저장
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -278,28 +273,86 @@
         }
     </script>
     <script th:inline="javascript">
+        function loadUserData() {
+            $.ajax({
+                type: "GET",
+                url: "/user/info",
+                success: function (res) {
+                    if (res.head.res_code === "200") {
+                        const data = res.body;
+                        $("#userId").val(data.userId);
+                        $("#userTel").val(data.userTel);
+                        $("#userEmail").val(data.userEmail);
+                    } else {
+
+                    }
+                },
+                error: function (xhr, status, err) {
+                    console.error(err);
+                }
+            });
+        }
+
+        function loadCompanyData() {
+            $.ajax({
+                type: "GET",
+                url: "/company/info",
+                success: function (res) {
+                    const data = res.body;
+                    if (res.head.res_code === "200") {
+                        $('#coName').val(data.coName)
+                        $('#coNameEn').val(data.coNameEn),
+                            $('#coZip').val(data.coZip),
+                            $('#coAddr').val(data.coAddr),
+                            $('#coAddrDetail').val(data.coAddrDetail),
+                            $('#ceoName').val(data.ceoName),
+                            $('#ceoTel').val(data.ceoTel),
+                            $('#bizrNo').val(data.bizrNo),
+                            // $('#bizrCert').val(data.bizrCert),
+                            $('#pschName').val(data.pschName),
+                            $('#pschTel').val(data.pschTel),
+                            $('#pschEmail').val(data.pschEmail)
+                    }
+                },
+                error: function (xhr, status, err) {
+                    console.error(err);
+                }
+            });
+        }
+
         $(document).ready(function () {
+            loadUserData();
+            loadCompanyData();
+
             const userIdx = /*[[${session.userIdx}]]*/ "";
             $('#userBtn').on('click', function () {
+                if ($("#userPw").val() !== $("#userPwCheck").val()) {
+                    $("#userPwCheck").siblings(".invalid-feedback").show();
+                    $("#userPwCheck").focus();
+                    return;
+                } else {
+                    $("#userPwCheck").siblings(".invalid-feedback").hide();
+                }
                 const userData = {
-                    userId,
-                    userPw,
-                    userTel,
-                    userEmail,
+                    userId: $("#userId").val(),
+                    userPw: $("#userPw").val(),
+                    userTel: $("#userTel").val(),
+                    userEmail: $("#userEmail").val(),
                 }
 
                 $.ajax({
-                    type: "POST",
+                    type: "PUT",
                     url: "/user/update",
                     data: JSON.stringify(userData),
-                    success: function(res) {
+                    contentType: "application/json",
+                    success: function (res) {
                         if (res.head.res_code === "200") {
                             Swal.fire("성공", "수정 완료", "success");
                         } else {
                             Swal.fire("실패", res.head.res_result, "error");
                         }
                     },
-                    error: function(xhr, status, err) {
+                    error: function (xhr, status, err) {
                         console.error(err);
                         Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
                     }

@@ -42,7 +42,7 @@ public interface UserService {
 
     public UserDTO findByUserIdx(String userIdx);
 
-    public int updateUser(UserDTO userDTO);
+    public int updateUserByUserIdx(UserDTO userDTO);
 
     public List<UserDTO> findAllUsers(UserSearchDTO userSearchDTO);
 

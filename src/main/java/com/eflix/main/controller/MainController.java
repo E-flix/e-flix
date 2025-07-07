@@ -14,10 +14,12 @@ import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionPackageDTO;
+import com.eflix.main.dto.UserDTO;
 import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 import com.eflix.main.service.CompanyService;
 import com.eflix.main.service.ModuleService;
 import com.eflix.main.service.SubscriptionService;
+import com.eflix.main.service.UserService;
 
 /**
  * ERP 회사 관리를 위한 Service 클래스
@@ -59,6 +61,9 @@ public class MainController {
 
 	@Autowired
 	private ModuleService moduleService;
+
+	@Autowired
+	private UserService userService;
 
 	@Autowired
 	private CompanyService companyService;
