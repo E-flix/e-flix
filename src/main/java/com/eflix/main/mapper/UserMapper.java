@@ -2,7 +2,7 @@ package com.eflix.main.mapper;
 
 import java.util.List;
 
-import com.eflix.common.security.dto.UserDTO;
+import com.eflix.main.dto.UserDTO;
 import com.eflix.main.dto.etc.UserSearchDTO;
 
 public interface UserMapper {

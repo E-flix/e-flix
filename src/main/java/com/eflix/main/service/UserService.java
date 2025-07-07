@@ -2,8 +2,8 @@ package com.eflix.main.service;
 
 import java.util.List;
 
-import com.eflix.common.security.dto.UserDTO;
 import com.eflix.main.dto.SubscriptionDTO;
+import com.eflix.main.dto.UserDTO;
 import com.eflix.main.dto.etc.UserSearchDTO;
 
 /**

@@ -17,9 +17,9 @@ import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
 import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.common.security.details.SecurityUserDetails;
-import com.eflix.common.security.dto.UserDTO;
 import com.eflix.main.dto.ModuleDTO;
 import com.eflix.main.dto.SubscriptionDTO;
+import com.eflix.main.dto.UserDTO;
 import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 import com.eflix.main.mapper.SubscriptionMapper;
 import com.eflix.main.service.CompanyService;
@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 @RestController
@@ -126,5 +128,12 @@ public class UserRestController {
         
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-    
+
+    // 0706
+    @PostMapping("/insert")
+    public ResponseEntity<ResResult> postInsert(@RequestBody UserDTO userDTO) {
+        ResResult result = null;
+        
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }
