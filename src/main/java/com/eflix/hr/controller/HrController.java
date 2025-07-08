@@ -83,7 +83,7 @@ public class HrController {
     Model model) {
 
     // 부서 드롭다운용 전체 부서 조회
-    List<DepartmentDTO> depts = departmentService.findAllDepts();
+    List<DepartmentDTO> depts = departmentService.findUpAllByCoIdx(AuthUtil.getCoIdx());
 
     // 사원관리 페이지 직급 드롭다운 조회
     List<EmployeeDTO> gradeList = employeeService.gradeList();
@@ -167,11 +167,7 @@ public class HrController {
     }
   }
   
-  // 근태 신청화면 (사원)
-  @GetMapping("/attdAdd")
-  public String attdAdd() {
-      return "hr/attdAdd";
-  }
+
   
   // 근태 신청승인 화면(관리자)
   @GetMapping("/attdApproval")

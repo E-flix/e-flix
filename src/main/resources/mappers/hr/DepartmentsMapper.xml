@@ -14,7 +14,7 @@
         dept_idx   AS deptIdx,
         dept_name  AS deptName
     FROM departments
-    WHERE dept_up_idx IS NULL AND co_idx = #{coIdx}
+    WHERE co_idx = #{coIdx}
     ORDER BY dept_name
   </select>
   

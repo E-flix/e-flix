@@ -29,4 +29,10 @@ public class DeptRestController {
     public List<DepartmentDTO> getList(@RequestParam("coIdx") String coIdx, @RequestParam("deptUpIdx") String deptUpIdx) {
         return departmentService.findDownAllByCoIdx(coIdx, deptUpIdx);
     }
+
+    @GetMapping("/list/all")
+    public List<DepartmentDTO> getList(@RequestParam("coIdx") String coIdx) {
+        return departmentService.findAllDepts(coIdx);
+    }
+    
 }

@@ -35,7 +35,7 @@
           </div>
           <div class="col-md-2">
             <label class="form-label">부서명</label>
-            <select class="form-select " >
+            <select class="form-select" id="deptSelect">
               <option value="">선택</option>
               <option ></option>
             </select>
@@ -218,6 +218,7 @@
 
     <!-- 스크립트 -->
     <script>
+      const coIdx = "co-201"
       function showDetail(name) {
         document.getElementById('detailSection').style.display = 'block';
         // 추가적으로 선택한 사원 데이터로 갱신할 수 있음
@@ -260,6 +261,25 @@
           }
         })
       });
+    function loadDept() {
+       $.ajax({
+          url: "/hr/dept/list/all?coIdx=" + coIdx,
+          type: "GET",
+          success: function(res){
+            $("#deptSelect").empty();
+            $.each(res, function(i, item) {
+              let option = `<option value="${item.deptIdx}">${item.deptName}</option>`;
+              $("#deptSelect").append(option);
+            });
+          },
+          error: function(xhr, status, err) {
+            console.error(err);
+          }
+        })
+    }
+    $(document).ready(function () {
+      loadDept();
+    });
     </script>
 
   </div>

@@ -18,10 +18,9 @@
     <h2>근태신청</h2>
     <div class="mt-4">
 
-      <form>
         <!-- 버튼 -->
         <div class="d-flex justify-content-end mb-3">
-          <button type="submit" class="btn btn-primary">신청하기</button>
+          <button type="submit" class="btn btn-primary" id="addBtn">신청하기</button>
         </div>
         <div class="p-4 border rounded bg-light">
 
@@ -47,7 +46,7 @@
           <div class="row mb-3">
             <div class="col-md-4">
               <label class="form-label">신청일자</label>
-              <input type="text" class="form-control" value="2025-06-19" readonly>
+              <input type="text" class="form-control" id="regDate" readonly>
             </div>
           </div>
 
@@ -55,22 +54,11 @@
           <div class="row mb-3">
             <div class="col-md-4">
               <label class="form-label">근태 유형</label>
-              <select class="form-select">
-                <option>연차</option>
+              <select class="form-select" id="editType">
+                <option value="AT01">연차</option>
                 <option>반차</option>
                 <option>병가</option>
                 <option>외근</option>
-                <option>조퇴</option>
-                <option>지각</option>
-              </select>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">시간 단위 사용</label>
-              <select class="form-select">
-                <option>해당 없음</option>
-                <option>오전 반차</option>
-                <option>오후 반차</option>
-                <option>시간차 (직접 지정)</option>
               </select>
             </div>
           </div>
@@ -79,32 +67,18 @@
           <div class="row mb-3">
             <div class="col-md-4">
               <label class="form-label">시작일</label>
-              <input type="date" class="form-control" value="2025-06-20">
+              <input type="date" class="form-control" id="oldValue" value="2025-06-20">
             </div>
             <div class="col-md-4">
               <label class="form-label">종료일</label>
-              <input type="date" class="form-control" value="2025-06-20">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">시간 설정 (선택)</label>
-              <div class="d-flex gap-2">
-                <input type="time" class="form-control">
-                <span>~</span>
-                <input type="time" class="form-control">
-              </div>
+              <input type="date" class="form-control" id="newValue" value="2025-06-20">
             </div>
           </div>
 
           <!-- 사유 -->
           <div class="mb-3">
             <label class="form-label">사유</label>
-            <input type="text" class="form-control" placeholder="예: 가족 행사 참여">
-          </div>
-
-          <!-- 첨부파일 -->
-          <div class="mb-3">
-            <label class="form-label">첨부파일</label>
-            <input type="file" class="form-control">
+            <input type="text" class="form-control" id="reason" placeholder="예: 가족 행사 참여">
           </div>
 
           <!-- 승인 상태 (숨김 또는 read-only용) -->
@@ -117,8 +91,40 @@
 
 
         </div>
-      </form>
     </div>
+    <script>
+      $(document).ready(function() {
+        const today = new Date();
+        // $("#regDate").val(today.getFullYear() + "-" + today.getMonth() + "-" + today.getDay());
+      });
+      $("#addBtn").on("click", function() {
+        const data = {
+          empIdx: "emp-107",
+          editType: $("#editType").val(),
+          oldValue: $("#oldValue").val(),
+          newValue: $("#newValue").val(),
+          reason: $("#reason").val()
+        }
+
+        $.ajax({
+          type:"POST",
+          url: "/hr/insertAttd",
+          data: JSON.stringify(data),
+          contentType: "application/json",
+          success: function(res) {
+            if(res) {
+              Swal.fire("성공", "성공적으로 반영되었습니다.", "success");
+            } else {
+              Swal.fire("실패", "데이터를 반영하던 중 오류가 발생했습니다.", "error");
+            }
+          },
+          error: function(xhr, status, err) {
+            console.error(err);
+            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+          }
+        });
+      });
+    </script>
 
   </div>
 </div>
