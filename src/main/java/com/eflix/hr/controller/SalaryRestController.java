@@ -35,7 +35,9 @@ public class SalaryRestController {
 
     @Autowired
     private SalaryMappingService salaryMappingService;
-
+    
+    
+    // 0707
     @GetMapping("/list")
     public List<SalarySummaryDTO> getList(@RequestParam String coIdx,
             @RequestParam(required = false) String salaryMonth,
@@ -59,12 +61,9 @@ public class SalaryRestController {
 
     @PostMapping("/calc")
     public void postCal(@RequestParam String coIdx, @RequestParam List<String> salaryIdxList) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("coIdx", coIdx);
-                map.put("salaryIdxList", salaryIdxList);
-        salaryService.calculateSalary(map);
+        System.out.println();
+        salaryService.calculateSalary(coIdx, salaryIdxList);
     }
-    
 
     @PostMapping("/confirm")
     public void postConfirm(@RequestParam String coIdx,
@@ -74,8 +73,6 @@ public class SalaryRestController {
                 map.put("salaryIdxList", salaryIdxList);
         salaryService.confirmSalary(map);
     }
-    
-    // 0707
     @GetMapping("/items")
     public List<SalaryMappingDTO> getItems(@RequestParam("coIdx") String coIdx) {
         return salaryMappingService.findAllByCoIdx(coIdx);
@@ -88,8 +85,6 @@ public class SalaryRestController {
 
     @PostMapping("/item")
     public void postItem(@ModelAttribute SalaryMappingDTO salaryMappingDTO) {
-        
-        System.out.println(salaryMappingDTO.toString());
         salaryMappingService.insert(salaryMappingDTO);
     }
 

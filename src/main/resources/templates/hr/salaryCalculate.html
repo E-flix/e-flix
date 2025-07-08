@@ -81,21 +81,7 @@
           </tr>
         </thead>
         <tbody id="salaryTableBody">
-          <tr data-bs-toggle="modal" data-bs-target="#salaryDetailModal" class="table-success" style="cursor:pointer;">
-            <td><input type="checkbox"></td>
-            <td>1</td>
-            <td>홍길동</td>
-            <td>인사부</td>
-            <td>사원</td>
-            <td>2025-05</td>
-            <td>2025-06</td>
-            <td>2,000,000</td>
-            <td>200,000</td>
-            <td>100,000</td>
-            <td>2,100,000</td>
-            <td><span class="badge bg-success">계산완료</span></td>
-            <td></td>
-          </tr>
+
         </tbody>
       </table>
     </div>
@@ -301,7 +287,7 @@
           url: "/hr/sc/calc",
           data: { coIdx: coIdx, salaryIdxList: selected },
           success: function (res) {
-            loadSalaryList();
+            // loadSalaryList();
           }
         });
       });

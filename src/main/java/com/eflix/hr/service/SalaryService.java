@@ -32,6 +32,6 @@ public interface SalaryService {
 
     public List<SalaryDetailDTO> findSalaryDetail(String coIdx, String salaryIdx);
     public List<SalaryFullDetailDTO> getSalaryDetailItems(String coIdx, String salaryIdx);
-    public void calculateSalary(Map<String, Object> map);
+    public void calculateSalary(String coIdx, List<String> salaryIdxList);
     public void confirmSalary(Map<String, Object> map);
 }

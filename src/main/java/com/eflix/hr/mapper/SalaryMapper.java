@@ -31,7 +31,7 @@ public interface SalaryMapper {
 
     List<SalaryDetailDTO> findSalaryDetail(String coIdx, String salaryIdx);
     List<SalaryFullDetailDTO> getSalaryDetailItems(String coIdx, String salaryIdx);
-    void calculateSalary(Map<String,Object> map);
+    void calculateSalary(String coIdx, String salaryIdx);
     void confirmSalary(Map<String,Object> map);
     List<SalaryDetailDTO> selectSalaryDetail(String coIdx, String salaryIdx);
 }

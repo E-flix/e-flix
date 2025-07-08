@@ -87,7 +87,7 @@
       s.base_salary,
       NVL(aw.allowance_sum, 0) AS allowance_sum,
       NVL(dw.deduction_sum, 0) AS deduction_sum,
-      (s.base_salary + NVL(aw.allowance_sum, 0) - NVL(dw.deduction_sum, 0)) AS net_salary,
+      (s.base_salary + NVL(aw.allowance_sum, 0) - NVL(dw.deduction_sum, 0) - NVL(s.tax, 0)) AS net_salary,
       s.salary_type
     FROM salary s
     INNER JOIN employees e ON s.emp_idx = e.emp_idx
@@ -146,6 +146,17 @@
     JOIN salary s ON sm.co_idx = s.co_idx
     WHERE sm.use_status = 'Y'
       AND s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
+    
+    UNION ALL
+
+    SELECT
+      '세금' AS itemName,
+      -s.tax AS amount,
+      '-' AS remark,
+      '과세'                AS taxType,
+      '공제'                AS payType
+    FROM salary s
+    WHERE s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
   </select>
 
   <!-- 결과 매핑 - 급여 상세 항목 -->
@@ -173,22 +184,8 @@
   </select>
 
     <!-- 급여 계산 실행 -->
-    <update id="calculateSalary" parameterType="map">
-        UPDATE salary 
-        SET 
-            total_salary = base_salary + 
-                          COALESCE(bonus, 0) + 
-                          COALESCE(overtime_pay, 0) + 
-                          COALESCE(night_work_pay, 0) + 
-                          COALESCE(sal1, 0) + 
-                          COALESCE(sal2, 0) + 
-                          COALESCE(sal3, 0),
-            salary_type = 'st-02'
-        WHERE salary_idx IN 
-        <foreach collection="salaryIdxList" item="salaryIdx" open="(" close=")" separator=",">
-            #{salaryIdx}
-        </foreach>
-        AND co_idx = #{coIdx}
+    <update id="calculateSalary" parameterType="String">
+        CALL PROC_FILL_SALARY_SAL(#{coIdx}, #{salaryIdx})
     </update>
 
     <!-- 급여 확정 -->
