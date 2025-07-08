@@ -6,7 +6,7 @@ import com.eflix.purchs.dto.WhMovementDTO;
 
 public interface WhMovementMapper {
     public List<WhMovementDTO> fromWarehouse();
-    public List<WhMovementDTO> fromProd(WhMovementDTO warehouseDTO);
-    public List<WhMovementDTO> toWarehouse(WhMovementDTO warehouseDTO);
-    public int executeWarehouseTransfer(WhMovementDTO warehouseDTO);
+    public List<WhMovementDTO> fromProd(String fromWhId);
+    public List<WhMovementDTO> toWarehouse(String toWhId);
+    public void executeWarehouseTransfer(WhMovementDTO warehouseDTO);
 }
