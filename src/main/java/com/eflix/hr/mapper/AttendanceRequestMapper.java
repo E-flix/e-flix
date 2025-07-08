@@ -17,7 +17,10 @@ import com.eflix.hr.dto.AttendanceRequestDTO;
 public interface AttendanceRequestMapper {
     List<AttendanceRequestDTO> selectAll();
     AttendanceRequestDTO selectById(@Param("editIdx") String editIdx);
+
     int insert(AttendanceRequestDTO dto);
+
     int update(AttendanceRequestDTO dto);
+    
     int deleteById(@Param("editIdx") String editIdx);
 }

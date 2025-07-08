@@ -15,15 +15,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.eflix.common.security.auth.AuthContext;
+import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.AttendanceRecordDTO;
+import com.eflix.hr.dto.AttendanceRequestDTO;
 import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.service.AttendanceRecordService;
+import com.eflix.hr.service.AttendanceRequestService;
 import com.eflix.hr.service.EmployeeService;
 
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.PostMapping;
+
 
 @RequestMapping("/hr")
 @Controller
@@ -31,6 +36,9 @@ public class AttendanceRecordController {
 
     @Autowired
     private AttendanceRecordService attendanceRecordService;
+
+    @Autowired
+    private AttendanceRequestService attendanceRequestService;
 
     @Autowired
     private EmployeeService employeeService;
@@ -59,7 +67,7 @@ public class AttendanceRecordController {
 
         AttendanceRecordDTO dto = new AttendanceRecordDTO();
         dto.setEmpIdx(empIdx);
-        dto.setCoIdx(authContext.getCoIdx());
+        dto.setCoIdx(AuthUtil.getCoIdx());
         dto.setAttdStart(start.toString()); // "yyyy-MM"
         dto.setAttdEnd(end.toString()); // "yyyy-MM"
         return attendanceRecordService.getRecordsByEmpId(dto);
@@ -112,7 +120,7 @@ public class AttendanceRecordController {
         return data;
     }
 
-        @GetMapping("/list")
+    @GetMapping("/list")
     public String listPage(Model model) {
         // 검색 폼과 자동 바인딩할 빈 DTO
         model.addAttribute("attendanceRecordDTO", new AttendanceRecordDTO());
@@ -128,7 +136,36 @@ public class AttendanceRecordController {
         return "hr/attdManager";
     }
 
+  // 근태 신청화면 (사원)
+    @GetMapping("/attdAdd")
+    public String attdAdd() {
+        return "hr/attdAdd";
+    }
 
+    //근태 신청 POST
+    @PostMapping("/insertAttd")
+    @ResponseBody
+    public boolean postAttd(@RequestBody AttendanceRequestDTO attendanceRequestDTO) {
+        attendanceRequestDTO.setCoIdx(AuthUtil.getCoIdx());
+        System.out.println(attendanceRequestDTO.toString());
+        int affectedRows = attendanceRequestService.insert(attendanceRequestDTO);
+        if(affectedRows > 0) {
+            return true;
+        }
+        return false;
+    }
+    
+    // 근태 신청 승인
+    @PostMapping("/updateAttd")
+    public boolean updateAttd(AttendanceRequestDTO attendanceRequestDTO) {
+        attendanceRequestDTO.setCoIdx(AuthUtil.getCoIdx());
+        int affectedRows = attendanceRequestService.update(attendanceRequestDTO);
+        if(affectedRows > 0 ) {
+            return true;
+        }
+        return false;
+    }
+    
     
 
     // 근태현황 사용자 정보

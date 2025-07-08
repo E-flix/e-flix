@@ -62,8 +62,8 @@ public class DepartmentServiceImpl implements DepartmentService{
   }
 
   @Override
-  public List<DepartmentDTO> findAllDepts() {
-    return departmentMapper.findAllDepts(AuthUtil.getCoIdx());
+  public List<DepartmentDTO> findAllDepts(String coIdx) {
+    return departmentMapper.findAllDepts(coIdx);
   }
 
   @Override

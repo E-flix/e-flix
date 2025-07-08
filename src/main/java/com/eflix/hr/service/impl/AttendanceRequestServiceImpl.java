@@ -10,13 +10,19 @@ package com.eflix.hr.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eflix.hr.dto.AttendanceRequestDTO;
+import com.eflix.hr.mapper.AttendanceRequestMapper;
 import com.eflix.hr.service.AttendanceRequestService;
 
 @Service
 public class AttendanceRequestServiceImpl implements AttendanceRequestService{
+
+  @Autowired
+  private AttendanceRequestMapper attendanceRequestMapper;
 
   @Override
   public List<AttendanceRequestDTO> getAllAttendanceRequests() {
@@ -30,6 +36,7 @@ public class AttendanceRequestServiceImpl implements AttendanceRequestService{
 
   @Override
   public int createAttendanceRequest(AttendanceRequestDTO dto) {
+
     throw new UnsupportedOperationException("Unimplemented method 'createAttendanceRequest'");
   }
 
@@ -41,6 +48,18 @@ public class AttendanceRequestServiceImpl implements AttendanceRequestService{
   @Override
   public int deleteAttendanceRequest(String editIdx) {
     throw new UnsupportedOperationException("Unimplemented method 'deleteAttendanceRequest'");
+  }
+
+  //근태 신청 POST
+  @Override
+  public int insert(AttendanceRequestDTO attendanceRequestDTO) {
+    return attendanceRequestMapper.insert(attendanceRequestDTO);
+  }
+  
+  // 근태 신청 승인(관리자)
+  @Override
+  public int update(AttendanceRequestDTO attendanceRequestDTO) {
+    return attendanceRequestMapper.update(attendanceRequestDTO);
   }
 
 }

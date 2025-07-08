@@ -18,4 +18,8 @@ public interface AttendanceRequestService {
     int createAttendanceRequest(AttendanceRequestDTO dto);
     int updateAttendanceRequest(AttendanceRequestDTO dto);
     int deleteAttendanceRequest(String editIdx);
+
+    public int insert(AttendanceRequestDTO attendanceRequestDTO);
+    
+    public int update(AttendanceRequestDTO attendanceRequestDTO);
 }

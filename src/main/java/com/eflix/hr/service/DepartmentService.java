@@ -21,7 +21,7 @@ public interface DepartmentService {
     int updateDepartment(DepartmentDTO dto);
     int deleteDepartment(String deptIdx);
 
-    public List<DepartmentDTO> findAllDepts();
+    public List<DepartmentDTO> findAllDepts(String coIdx);
     public List<DepartmentDTO> findAllDeptsUP(String deptIdx);
     
     // 부서등록
