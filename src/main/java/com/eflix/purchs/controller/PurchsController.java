@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/purchs")
 public class PurchsController {
-	// 재고관리목록
+	// 재고관리 목록
 	@GetMapping("")
 	public String category() {
 		return "purchs/category";
@@ -39,12 +39,6 @@ public class PurchsController {
 	@GetMapping("/obdv")
 	public String outbound_view() {
 		return "purchs/outbound_view";
-	}
-
-	// 창고조회
-	@GetMapping("/whv")
-	public String warehouse_view() {
-		return "purchs/warehouse_view";
 	}
 
 	// 재고조회
