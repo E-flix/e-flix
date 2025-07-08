@@ -1,15 +1,19 @@
 package com.eflix.hr.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.eflix.common.code.dto.CommonDTO;
 import com.eflix.common.code.service.CommonService;
@@ -45,6 +49,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 @RequestMapping("/hr")
 public class HrController {
+
+  @Value("${upload.path}")
+  private String path;
 
   @Autowired
   private EmployeeService employeeService;
@@ -145,8 +152,18 @@ public class HrController {
   //사원 등록
   @PostMapping("/insertEmp")
   @ResponseBody
-  public String insertEmp(EmployeeDTO emp) {
+  public String insertEmp(MultipartFile empPhoto, EmployeeDTO emp) throws IllegalStateException, IOException {
+    String uploadDir = path + "/hr/emp/";
+    File dir = new File(uploadDir);
+    if (!dir.exists()) {
+        dir.mkdirs();
+    }
+    File dest = new File(uploadDir + empPhoto.getOriginalFilename());
+    empPhoto.transferTo(dest);
+
+    emp.setEmpImg(empPhoto.getOriginalFilename());
     emp.setCoIdx(AuthUtil.getCoIdx());
+    
     int affectedRows = employeeService.insertEmp(emp);
     if(affectedRows > 0) {
       return "200";
@@ -157,7 +174,16 @@ public class HrController {
 
   @PostMapping("/updateEmp")
   @ResponseBody
-  public String updateEmp(EmployeeDTO emp) {
+  public String updateEmp(MultipartFile empPhoto, EmployeeDTO emp) throws IllegalStateException, IOException {
+     String uploadDir = path + "/hr/emp/";
+    File dir = new File(uploadDir);
+    if (!dir.exists()) {
+        dir.mkdirs();
+    }
+    File dest = new File(uploadDir + empPhoto.getOriginalFilename());
+    empPhoto.transferTo(dest);
+
+    emp.setEmpImg(empPhoto.getOriginalFilename());
     emp.setCoIdx(AuthUtil.getCoIdx());
     int affectedRows = employeeService.updateEmployee(emp);
     if(affectedRows > 0) {

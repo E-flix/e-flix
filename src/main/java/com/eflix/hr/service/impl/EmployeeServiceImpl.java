@@ -16,18 +16,25 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eflix.common.security.auth.AuthContext;
 import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.SalaryDTO;
 import com.eflix.hr.mapper.EmployeeMapper;
+import com.eflix.hr.mapper.SalaryMapper;
 import com.eflix.hr.service.EmployeeService;
+import com.eflix.hr.service.SalaryService;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
   @Autowired
   EmployeeMapper employeeMapper;
+
+  @Autowired
+  private SalaryMapper salaryMapper;
 
   @Override
   public EmployeeDTO selectById(String empIdx) {
@@ -59,7 +66,21 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   // 사원등록
   @Override
+  @Transactional
   public int insertEmp(EmployeeDTO emp) {
-    return employeeMapper.insertEmp(emp);
+    if(employeeMapper.insertEmp(emp) <= 0) {
+      return 0;
+    }
+
+    SalaryDTO salaryDTO = new SalaryDTO();
+    salaryDTO.setEmpIdx(emp.getEmpIdx());
+    salaryDTO.setBaseSalary(emp.getBaseSalary());
+    
+    return salaryMapper.insert(salaryDTO);
+  }
+
+  // 0708
+  public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO) {
+    return employeeMapper.findAllEmployee(employeeDTO);
   }
 }

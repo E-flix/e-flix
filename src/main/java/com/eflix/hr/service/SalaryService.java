@@ -21,7 +21,7 @@ public interface SalaryService {
     public List<SalaryDTO> bankList();
 
     // 0707
-    public List<SalarySummaryDTO> findSalaryList(String coIdx, String salaryMonth, String payMonth, String empName,
+    public List<SalarySummaryDTO> findSalaryList(String coIdx, String attMonth, String payMonth, String empName,
             String deptIdx);
     public List<SalaryDetailDTO> selectSalaryDetail(String coIdx, String salaryIdx);
 

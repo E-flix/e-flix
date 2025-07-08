@@ -3,6 +3,8 @@ package com.eflix.hr.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.eflix.common.security.auth.AuthUtil;
+import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.hr.dto.etc.SalaryDetailDTO;
 import com.eflix.hr.dto.etc.SalaryFullDetailDTO;
 import com.eflix.hr.dto.etc.SalaryMappingDTO;
@@ -15,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,52 +41,54 @@ public class SalaryRestController {
 
     @Autowired
     private SalaryMappingService salaryMappingService;
-    
+
+    public String getCoIdx() {
+        return AuthUtil.getCoIdx();
+    }
     
     // 0707
     @GetMapping("/list")
-    public List<SalarySummaryDTO> getList(@RequestParam String coIdx,
-            @RequestParam(required = false) String salaryMonth,
+    public List<SalarySummaryDTO> getList(
+            @RequestParam(required = false) String attMonth,
             @RequestParam(required = false) String payMonth,
             @RequestParam(required = false) String empName,
             @RequestParam(required = false) String deptIdx) {
-        return salaryService.findSalaryList(coIdx, salaryMonth, payMonth, empName, deptIdx);
+        return salaryService.findSalaryList(getCoIdx(), attMonth, payMonth, empName, deptIdx);
     }
 
     @GetMapping("/detail")
-    public List<SalaryDetailDTO> findSalaryDetail(@RequestParam String coIdx, @RequestParam String salaryIdx) {
-        return salaryService.findSalaryDetail(coIdx, salaryIdx);
+    public List<SalaryDetailDTO> findSalaryDetail(@RequestParam String salaryIdx) {
+        return salaryService.findSalaryDetail(getCoIdx(), salaryIdx);
     }
 
     @GetMapping("/detail-items")
     public List<SalaryDetailDTO> getSalaryDetailItems(
-            @RequestParam String coIdx,
             @RequestParam String salaryIdx) {
-        return salaryService.selectSalaryDetail(coIdx, salaryIdx);
+        return salaryService.selectSalaryDetail(getCoIdx(), salaryIdx);
     }
 
     @PostMapping("/calc")
-    public void postCal(@RequestParam String coIdx, @RequestParam List<String> salaryIdxList) {
+    public void postCal(@RequestParam List<String> salaryIdxList) {
         System.out.println();
-        salaryService.calculateSalary(coIdx, salaryIdxList);
+        salaryService.calculateSalary(getCoIdx(), salaryIdxList);
     }
 
     @PostMapping("/confirm")
-    public void postConfirm(@RequestParam String coIdx,
+    public void postConfirm(
             @RequestParam List<String> salaryIdxList) {
                 Map<String, Object> map = new HashMap<>();
-                map.put("coIdx", coIdx);
+                map.put("coIdx", getCoIdx());
                 map.put("salaryIdxList", salaryIdxList);
         salaryService.confirmSalary(map);
     }
     @GetMapping("/items")
-    public List<SalaryMappingDTO> getItems(@RequestParam("coIdx") String coIdx) {
-        return salaryMappingService.findAllByCoIdx(coIdx);
+    public List<SalaryMappingDTO> getItems() {
+        return salaryMappingService.findAllByCoIdx(getCoIdx());
     }
 
     @GetMapping("/item/{mpIdx}")
-    public SalaryMappingDTO getItem(@PathVariable("mpIdx") String mpIdx, @RequestParam("coIdx") String coIdx) {
-        return salaryMappingService.findByMpIdx(coIdx, mpIdx);
+    public SalaryMappingDTO getItem(@PathVariable("mpIdx") String mpIdx) {
+        return salaryMappingService.findByMpIdx(getCoIdx(), mpIdx);
     }
 
     @PostMapping("/item")
@@ -90,7 +98,6 @@ public class SalaryRestController {
 
     @PutMapping("/item/{mpIdx}")
     public void putItem(@PathVariable("mpIdx") String mpIdx, @ModelAttribute SalaryMappingDTO salaryMappingDTO) {
-        System.out.println(salaryMappingDTO);
         salaryMappingDTO.setMpIdx(mpIdx);
         salaryMappingService.update(salaryMappingDTO);
     }

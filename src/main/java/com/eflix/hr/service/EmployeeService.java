@@ -30,4 +30,7 @@ public interface EmployeeService {
 
     public List<EmployeeDTO> getAllEmployees(Map<String, Object> params);
     public int insertEmp(EmployeeDTO emp);
+
+    // 0708
+    public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO);
 }

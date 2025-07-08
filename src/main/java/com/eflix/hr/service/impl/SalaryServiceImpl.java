@@ -36,10 +36,10 @@ public class SalaryServiceImpl implements SalaryService {
   }
 
   @Override
-  public List<SalarySummaryDTO> findSalaryList(String coIdx, String salaryMonth, String payMonth, String empName,
+  public List<SalarySummaryDTO> findSalaryList(String coIdx, String attMonth, String payMonth, String empName,
       String deptIdx) {
 
-    return salaryMapper.findSalaryList(coIdx, salaryMonth, payMonth, empName, deptIdx);
+    return salaryMapper.findSalaryList(coIdx, attMonth, payMonth, empName, deptIdx);
   }
 
   @Override
@@ -56,7 +56,6 @@ public class SalaryServiceImpl implements SalaryService {
   @Override
   public void calculateSalary(String coIdx, List<String> salaryIdxList) {
     for (String salaryIdx : salaryIdxList) {
-      log.info("회사코드 : {} , 급여 번호 : {}", coIdx, salaryIdx);
         salaryMapper.calculateSalary(coIdx, salaryIdx);
     }
   }

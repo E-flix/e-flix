@@ -27,7 +27,7 @@ public interface SalaryMapper {
     
     List<SalaryDTO> bankList();
 
-    List<SalarySummaryDTO> findSalaryList(String coIdx, String salaryMonth, String payMonth, String empName, String deptIdx);
+    List<SalarySummaryDTO> findSalaryList(String coIdx, String attMonth, String payMonth, String empName, String deptIdx);
 
     // 0707
     List<SalaryDetailDTO> findSalaryDetail(String coIdx, String salaryIdx);
