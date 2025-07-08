@@ -1,134 +1,100 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{common/layouts/default}">
-<!-- ============================================
-  - 작성자   : 이혁진
-  - 최초작성 : 2025-06-23
-  - 설명     : 입고 관리 (AG Grid 적용)
-  -----------------------------------------------
-  [ 변경 이력 ]
-  - 2025-06-23 (이혁진): AG Grid, 레이아웃 통일 적용
-  - 2025-06-24 (이혁진): 조회 완료 수동등록 작업중 및 프로시저 자동 생성 기능 예정
-  - 2025-06-24 (이혁진): 반품기능 준비중
-  - 2025-06-24 (이혁진): 반품기능 완료
-  - 2025-06-25 (이혁진): 입고기능 개발 중
-  - 2025-06-25 (이혁진): 입고기능 개발 완료
-  - 2025-07-01 (이혁진): 2시간 반복 자동입고기능 완성 (페이지 최종완성)
-============================================ -->
 
 <head>
 	<title>입고관리</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <div layout:fragment="content" class="container-fluid">
 	<div class="d-flex justify-content-between align-items-center mb-4">
 		<h2>입고관리</h2>
 	</div>
+
 	<div class="col-md-12">
-		<div class="radio-group">
+		<div class="btn-group" role="group">
 			<input type="radio" class="btn-check" name="accountFilter" id="ibd" autocomplete="off" checked>
-			<label class="btn btn-outline-secondary btn-sm me-1" for="ibd">입고</label>
+			<label class="btn btn-outline-secondary btn-sm" for="ibd">입고</label>
 			<input type="radio" class="btn-check" name="accountFilter" id="obd" autocomplete="off">
-			<label class="btn btn-outline-secondary btn-sm me-1" for="obd">출고</label>
+			<label class="btn btn-outline-secondary btn-sm" for="obd">출고</label>
 		</div>
 	</div>
 
 	<div class="d-flex justify-content-end mb-2 gap-2">
-		<button type="button" class="btn btn-success btn-sm" id="makeBtn">생산</button>
-		<button type="button" class="btn btn-danger btn-sm" id="rejectBtn">반려</button>
-		<button type="button" class="btn btn-primary btn-sm" id="inboundBtn">창고입고</button>
+		<button type="button" class="btn btn-success btn-sm fw-bold" id="makeBtn" style="min-width: 80px;">생산</button>
+		<button type="button" class="btn btn-danger btn-sm fw-bold" id="rejectBtn" style="min-width: 80px;">반려</button>
+		<button type="button" class="btn btn-primary btn-sm fw-bold" id="inboundBtn"
+			style="min-width: 80px;">창고입고</button>
 	</div>
 
 	<div class="card border-0">
 		<div class="card-body" style="padding: 1px;">
 			<div class="row" style="height: 75vh;">
-
-				<!-- 제품 테이블 (AG Grid) -->
-				<div class="col-md-9">
+				<div class="col-md-8">
 					<div id="inboundGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 				</div>
-
-				<div class="col-md-3">
-
+				<div class="col-md-4">
 					<div class="border rounded p-3 shadow-sm bg-gray h-100 d-flex flex-column justify-content-between">
 						<div>
 							<h5 class="mb-3 text-center">제품입고 정보 입력</h5>
-
 							<div class="mb-3">
-								<label class="form-label" for="todayDate">생산날짜</label>
-								<!--보이는 날짜 yyyy-MM-dd -->
+								<label class="form-label fw-semibold" for="todayDate">생산날짜</label>
 								<input type="text" class="form-control form-control-sm" id="todayDate" readonly>
-								<!--서버 전송용 날짜 yyyy-MM-dd:HH:mm:ss -->
-								<input type="hidden" id="fullDateTime" hidden>
+								<input type="hidden" id="fullDateTime">
 							</div>
-
 							<div class="mb-3">
-								<label class="form-label">제품명</label>
+								<label class="form-label fw-semibold">제품명</label>
 								<input type="text" class="form-control form-control-sm" id="prodName" placeholder="제품명">
 							</div>
-
 							<div class="mb-3">
-								<label class="form-label">제품분류</label>
+								<label class="form-label fw-semibold">제품분류</label>
 								<select class="form-control form-control-sm" id="productType">
 									<option selected>제품분류선택</option>
-									<option th:each="cd: ${ibdp} " th:value="${cd.commonCode}"
-										th:text="${cd.commonCodeName}">
-									</option>
+									<option th:each="cd: ${ibdp}" th:value="${cd.commonCode}"
+										th:text="${cd.commonCodeName}"></option>
 								</select>
 							</div>
-
 							<div class="mb-3">
-								<label class="form-label">제품크기</label>
+								<label class="form-label fw-semibold">제품수량</label>
 								<input type="text" class="form-control form-control-sm" id="prodQuantity"
 									placeholder="제품수량">
 							</div>
-
 							<div class="mb-3">
-								<label class="form-label">안전재고유무</label>
+								<label class="form-label fw-semibold">안전재고량</label>
 								<input type="text" class="form-control form-control-sm" id="safetyStockAmount"
 									placeholder="안전재고량">
 							</div>
-
 						</div>
 					</div>
-
 				</div>
-
 			</div>
 
-			<!-- 창고 테이블 (AG Grid) -->
-			<div class="grid-container" style="height: 30vh; width: 100%;">
+			<div class="grid-container mt-3" style="height: 30vh; width: 100%;">
 				<div id="warehouseGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 			</div>
-			<!-- 입고 예정 정보 (선택창) -->
-			<div id="selectionSummary" class="w-100 mt-3" style="display: none;">
-				<div class="bg-light fw-bold border-bottom p-2">
-					입고 예정 정보
-				</div>
-				<div class="table-responsive" style="max-height: 200px;">
-					<table class="table table-bordered text-center align-middle w-100">
-						<thead class="table-light">
-							<tr>
-								<th>입고제품ID</th>
-								<th>입고요청량</th>
-								<th>도착창고ID</th>
-								<th>입고가능량</th>
-								<th>입고후용량</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td><input id="summaryProdId" type="text" readonly
-										class="form-control form-control-sm mx-auto" /></td>
-								<td><input id="summaryQuantity" type="text" readonly
-										class="form-control form-control-sm mx-auto" style="color: red;" /></td>
-								<td><input id="summaryWarehouseId" type="text" readonly
-										class="form-control form-control-sm mx-auto" /></td>
-								<td><input id="summaryWarehouseAmount" type="text" readonly
-										class="form-control form-control-sm mx-auto" style="color: green;" /></td>
-								<td><input id="summaryAmountAfter" type="text" readonly
-										class="form-control form-control-sm mx-auto" style="color: blue;" /></td>
-							</tr>
-						</tbody>
-					</table>
+
+			<div id="selectionSummary" class="card p-3 mt-3" style="display: none;">
+				<h6 class="fw-bold border-bottom pb-2 mb-2">입고 예정 정보</h6>
+				<div class="row mb-2">
+					<div class="col">
+						<small class="text-muted">제품ID</small>
+						<div id="summaryProdId" class="fw-bold"></div>
+					</div>
+					<div class="col">
+						<small class="text-muted">요청량</small>
+						<div id="summaryQuantity" class="fw-bold text-danger"></div>
+					</div>
+					<div class="col">
+						<small class="text-muted">도착창고</small>
+						<div id="summaryWarehouseId" class="fw-bold"></div>
+					</div>
+					<div class="col">
+						<small class="text-muted">입고가능</small>
+						<div id="summaryWarehouseAmount" class="fw-bold text-success"></div>
+					</div>
+					<div class="col">
+						<small class="text-muted">입고후</small>
+						<div id="summaryAmountAfter" class="fw-bold text-primary"></div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -136,6 +102,7 @@
 </div>
 
 </html>
+
 <!-- AG Grid 및 페이지 스크립트 -->
 <script th:inline="javascript">
 	// 데이터 가져오기
@@ -435,11 +402,11 @@
 			// 계산
 			const result = conf - quantities;
 			// 출력
-			document.getElementById("summaryProdId").value = prodIds; // 제품ID
-			document.getElementById("summaryQuantity").value = quantities; // 입고요청량
-			document.getElementById("summaryWarehouseId").value = warehouseId; // 창고ID
-			document.getElementById("summaryWarehouseAmount").value = conf; // 입고가능량
-			document.getElementById("summaryAmountAfter").value = result; // 입고후용량
+			document.getElementById("summaryProdId").innerText = prodIds; // 제품ID
+			document.getElementById("summaryQuantity").innerText = quantities; // 입고요청량
+			document.getElementById("summaryWarehouseId").innerText = warehouseId; // 창고ID
+			document.getElementById("summaryWarehouseAmount").innerText = conf; // 입고가능량
+			document.getElementById("summaryAmountAfter").innerText = result; // 입고후용량
 		} else {
 			// 숨기기
 			summarySection.style.display = "none";

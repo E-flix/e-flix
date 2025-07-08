@@ -12,6 +12,7 @@ public class WhMovementDTO {
     private String fromWhId;
     private String fromLocation;
     private int fromBeforeQty;
+    private int currentQuantity;
 
     // 이동 후 창고 정보
     private String toWhId;

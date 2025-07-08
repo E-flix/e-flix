@@ -5,8 +5,8 @@ import java.util.List;
 import com.eflix.purchs.dto.WhMovementDTO;
 
 public interface WhMovementService {
-   List<WhMovementDTO> fromWarehouse();
-    List<WhMovementDTO> fromProd(String fromWhId);
-    List<WhMovementDTO> toWarehouse(String toWhId);
-    public int executeWarehouseTransfer(WhMovementDTO warehouseDTO);
+   public List<WhMovementDTO> fromWarehouse();
+   public List<WhMovementDTO> fromProd(String fromWhId);
+   public List<WhMovementDTO> toWarehouse(String toWhId);
+    public void executeWarehouseTransfer(WhMovementDTO warehouseDTO);
 }

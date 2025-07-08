@@ -2,11 +2,11 @@
 	layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 이혁진
-  - 최초작성 : 2025-06-23
+  - 최초작성 : 2025-07-07
   - 설명     : 창고 이동 (AG Grid + 백엔드 연동)
   -----------------------------------------------
   [ 변경 이력 ]
-  - 2025-07-07 (이혁진): 백엔드 API 연동 완료
+  - 2025-07-07 (이혁진): 창고이동 기능 완성
 ============================================ -->
 
 <head>
@@ -25,383 +25,223 @@
 			<label class="btn btn-outline-secondary btn-sm me-1" for="warehouse_mnt">창고이동</label>
 		</div>
 	</div>
-
 	<!-- 버튼 -->
 	<div class="d-flex justify-content-end mb-2 gap-2">
-		<button type="button" class="btn btn-warning btn-sm" onclick="resetTransfer()">초기화</button>
 		<button type="button" class="btn btn-success btn-sm" onclick="saveTransfer()">저장</button>
-		<button type="button" class="btn btn-primary btn-sm" onclick="addTransferRow()">+ 행 추가</button>
+		<button type="button" class="btn btn-primary btn-sm" id="addTransferRow" onclick="addTransferRow()">+ 행
+			추가</button>
 		<button type="button" class="btn btn-danger btn-sm" onclick="deleteSelectedRows()">선택 삭제</button>
 	</div>
-
 	<!-- AG Grid 테이블 영역 -->
 	<div class="grid-container mb-4" style="height: 45vh; width: 100%;">
 		<div id="whMovementGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 	</div>
+
 </div>
 
 </html>
 <script th:inline="javascript">
-	// 서버에서 전달받은 데이터
-	let fromWhList = /*[[${fromWhList}]]*/[];
 
-	// 전역 변수
-	let fromProdList = [];
+	let fromWhList = [];
+	let gridFromWhList = {};
 	let toWhList = [];
-	let currentSelectedFromWh = null;
 	let whMovementList = [];
-	let updateData = [];
-	const STORAGE_KEY = "whMovementData";
 
-	// 로컬 스토리지에서 데이터 복원
-	if (localStorage.getItem(STORAGE_KEY)) {
-		whMovementList = JSON.parse(localStorage.getItem(STORAGE_KEY));
-	}
+	const STORAGE_KEY = "whMovementList";
 
-	// 창고 목록을 셀렉트박스 옵션으로 변환
-	let fromWhOptions = fromWhList.map(wh => wh.fromWhId);
-	let toWhOptions = [];
+	let whmGridOptions;
 
-	const whmGridOptions = {
-		rowData: whMovementList,
-		rowHeight: 35,
-		headerHeight: 35,
-		defaultColDef: { resizable: true },
+	document.addEventListener("DOMContentLoaded", async () => {
+		loadFromLocalStorage();
+		// 창고목록가져오기
+		await getWh();
 
-		columnDefs: [
-			{
-				headerName: "제품정보",
-				children: [
-					{
-						headerName: "제품ID",
-						field: "prodId",
-						editable: true,
-						cellEditor: "agSelectCellEditor",
-						width: 100,
-						valueGetter: (params) => {
-							return params.data.prodId || "제품ID";
+		// Grid option
+		whmGridOptions = {
+			rowData: whMovementList,
+			rowHeight: 35,
+			headerHeight: 35,
+			defaultColDef: { resizable: true },
+			columnDefs: [
+				{
+					headerName: "제품정보",
+					children: [
+						{
+							headerName: "제품ID",
+							field: "prodId",
+							editable: true,
+							cellEditor: "agSelectCellEditor",
+							width: 100,
+							valueGetter: params => params.data.prodId || "제품ID",
+							cellStyle: params => params.value === "제품ID" ? { color: 'gray' } : { color: 'black' },
+							cellEditorParams: params => {
+								if (!params.data.fromWhId) return { values: [] };
+								return {
+									values: (params.data.fromProdOptions || []).map(p => p.prodId)
+								};
+							}
 						},
-						cellStyle: (params) => {
-							return params.value === "제품ID" ? { color: 'gray' } : { color: 'black' };
-						},
-						cellEditorParams: (params) => {
-							// 현재 row에서 fromProdList 바인딩
-							return {
-								values: params.data.fromProdOptions || []
-							};
+						{
+							headerName: "제품명",
+							field: "prodName",
+							editable: false,
+							width: 150,
+							valueGetter: (params) => params.data.prodName || "제품명",
+							cellStyle: (params) => params.value === "제품명" ? { color: 'gray' } : { color: 'black' }
 						}
-					},
-					{
-						headerName: "제품명",
-						field: "prodName",
-						editable: false,
-						cellEditor: "agSelectCellEditor",
-						width: 150,
-						valueGetter: (params) => {
-							return params.data.prodName || "제품명";
+					]
+				},
+				{
+					headerName: "보내는 창고",
+					children: [
+						{
+							headerName: "창고ID",
+							field: "fromWhId",
+							editable: true,
+							cellEditor: "agSelectCellEditor",
+							width: 100,
+							valueGetter: params => params.data.fromWhId || "창고선택",
+							cellStyle: params => params.value === "창고선택" ? { color: 'gray' } : { color: 'black' },
+							cellEditorParams: gridFromWhList
 						},
-						cellStyle: (params) => {
-							return params.value === "제품명" ? { color: 'gray' } : { color: 'black' };
+						{
+							headerName: "창고위치",
+							field: "fromLocation",
+							editable: false,
+							width: 120,
+							valueGetter: (params) => params.data.fromLocation || "위치"
+						},
+						{
+							headerName: "현재수량",
+							field: "currentQuantity",
+							editable: false,
+							width: 100,
+							cellStyle: { color: 'blue' },
+							valueGetter: (params) => params.data.currentQuantity || 0
 						}
+					]
+				},
+				{
+					headerName: "받는 창고",
+					children: [
+						{
+							headerName: "창고ID",
+							field: "toWhId",
+							editable: true,
+							cellEditor: "agSelectCellEditor",
+							width: 100,
+							valueGetter: (params) => params.data.toWhId || "창고선택",
+							cellStyle: (params) => params.value === "창고선택" ? { color: 'gray' } : { color: 'black' },
+							cellEditorParams: (params) => {
+								return {
+									values: toWhList.filter(wh => wh.toWhId !== params.data.fromWhId).map(wh => wh.toWhId)
+								};
+							}
+						},
+						{
+							headerName: "창고위치",
+							field: "toLocation",
+							editable: false,
+							width: 120,
+							valueGetter: (params) => params.data.toLocation || "위치"
+						},
+						{
+							headerName: "남은용량",
+							field: "remainingCapacity",
+							editable: false,
+							width: 100,
+							cellStyle: { color: 'green' },
+							valueGetter: (params) => params.data.remainingCapacity || 0
+						}
+					]
+				},
+				{
+					headerName: "이동수량",
+					field: "transferQty",
+					editable: true,
+					width: 100,
+					cellStyle: { color: 'red', fontWeight: 'bold' }
+				},
+				{
+					headerName: "담당자",
+					field: "manager",
+					editable: true,
+					width: 100
+				}
+			],
+			rowSelection: 'multiple',
+
+			onGridReady: (params) => {
+				whmGridOptions.api = params.api;
+				params.api.sizeColumnsToFit();
+			},
+
+			onCellValueChanged: async (event) => {
+				const data = event.data;
+
+				if (event.colDef.field === "fromWhId") {
+					const selectedFromWhId = event.newValue;
+					if (!selectedFromWhId) {
+						data.fromProdOptions = [];
+						data.prodId = "";
+						data.prodName = "";
+						data.currentQuantity = 0;
+						event.api.applyTransaction({ update: [data] });
+						return;
 					}
-				]
-			},
-			{
-				headerName: "보내는 창고",
-				children: [
-					{
-						headerName: "창고ID",
-						field: "fromWhId",
-						editable: true,
-						cellEditor: "agSelectCellEditor",
-						width: 100,
-						valueGetter: (params) => {
-							return params.data.fromWhId || "창고선택";
-						},
-						cellStyle: (params) => {
-							return params.value === "창고선택" ? { color: 'gray' } : { color: 'black' };
-						},
-						cellEditorParams: {
-							values: fromWhOptions
-						}
-					},
-					{
-						headerName: "창고위치",
-						field: "fromLocation",
-						editable: false,
-						width: 120,
-						valueGetter: (params) => {
-							return params.data.fromLocation || "위치";
-						}
-					},
-					{
-						headerName: "현재수량",
-						field: "currentQuantity",
-						editable: false,
-						width: 100,
-						valueGetter: (params) => {
-							return params.data.currentQuantity || 0;
-						},
-						cellStyle: { color: 'blue' }
+
+					const whInfo = fromWhList.find(wh => wh.fromWhId === selectedFromWhId);
+					data.fromLocation = whInfo ? whInfo.fromLocation : "";
+
+					try {
+						const res = await fetch(`/purchs/fromProd?fromWhId=${selectedFromWhId}`);
+						data.fromProdOptions = await res.json();
+					} catch (e) {
+						console.error("제품 목록 fetch 실패", e);
+						data.fromProdOptions = [];
 					}
-				]
-			},
-			{
-				headerName: "받는 창고",
-				children: [
-					{
-						headerName: "창고ID",
-						field: "toWhId",
-						editable: true,
-						cellEditor: "agSelectCellEditor",
-						width: 100,
-						valueGetter: (params) => {
-							return params.data.toWhId || "창고선택";
-						},
-						cellStyle: (params) => {
-							return params.value === "창고선택" ? { color: 'gray' } : { color: 'black' };
-						},
-						cellEditorParams: (params) => {
-							// 보내는 창고 제외한 목록 반환
-							const filteredOptions = toWhOptions.filter(whId => whId !== params.data.fromWhId);
-							return {
-								values: filteredOptions
-							};
-						}
-					},
-					{
-						headerName: "창고위치",
-						field: "toLocation",
-						editable: false,
-						width: 120,
-						valueGetter: (params) => {
-							return params.data.toLocation || "위치";
-						}
-					},
-					{
-						headerName: "남은용량",
-						field: "remainingCapacity",
-						editable: false,
-						width: 100,
-						valueGetter: (params) => {
-							return params.data.remainingCapacity || 0;
-						},
-						cellStyle: { color: 'green' }
+
+					data.prodId = "";
+					data.prodName = "";
+					data.currentQuantity = 0;
+
+					try {
+						const res = await fetch(`/purchs/toWarehouse?toWhId=${selectedFromWhId}`);
+						toWhList = await res.json();
+					} catch (e) {
+						console.error("받는 창고 목록 실패", e);
+						toWhList = [];
 					}
-				]
-			},
-			{
-				headerName: "이동수량",
-				field: "transferQty",
-				editable: true,
-				width: 100,
-				cellStyle: { color: 'red', fontWeight: 'bold' }
-			},
-			{
-				headerName: "담당자",
-				field: "manager",
-				editable: true,
-				width: 100
+
+					event.api.applyTransaction({ update: [data] });
+				}
+				else if (event.colDef.field === "toWhId") {
+					const selectedToWhId = event.newValue;
+					const toWhInfo = toWhList.find(wh => wh.toWhId === selectedToWhId);
+					data.toLocation = toWhInfo ? toWhInfo.toLocation : "";
+					data.remainingCapacity = toWhInfo ? toWhInfo.remainingCapacity : 0;
+					event.api.applyTransaction({ update: [data] });
+				}
+				else if (event.colDef.field === "prodId") {
+					const selectedProd = (data.fromProdOptions || []).find(p => p.prodId === event.newValue);
+					data.prodName = selectedProd ? selectedProd.prodName : "";
+					data.currentQuantity = selectedProd ? selectedProd.currentQuantity : 0;
+					event.api.applyTransaction({ update: [data] });
+				}
+
+				saveToLocalStorage();
 			}
-		],
+		};
 
-		rowSelection: {
-			mode: "multiRow"
-		},
-
-		onGridReady: (params) => {
-			whmGridOptions.api = params.api;
-			params.api.sizeColumnsToFit();
-		},
-
-		onCellValueChanged: async (event) => {
-			// 보내는 창고 선택 시 제품 목록 로드
-			if (event.colDef.field === "fromWhId") {
-				const selectedWhId = event.newValue;
-
-				// 보내는 창고 위치 정보 설정
-				const whInfo = fromWhList.find(wh => wh.fromWhId === selectedWhId);
-				if (whInfo) {
-					event.data.fromLocation = whInfo.fromLocation;
-				}
-
-				// 제품 목록 로드
-				try {
-					const response = await fetch(`/purchs/fromProd?fromWhId=${selectedWhId}`);
-					const prodList = await response.json();
-
-					// 해당 row에 제품ID 리스트 저장
-					event.data.fromProdOptions = prodList.map(p => p.prodId);
-					event.data.fromProdList = prodList; // 이름/수량 조회용
-
-				} catch (error) {
-					console.error("제품 목록 로드 실패:", error);
-				}
-
-				// 받는 창고 목록 로드
-				try {
-					const response = await fetch(`/purchs/toWarehouse?toWhId=${selectedWhId}`);
-					const toWhData = await response.json();
-					toWhList = toWhData;
-					toWhOptions = toWhData.map(wh => wh.toWhId);
-				} catch (error) {
-					console.error("받는 창고 목록 로드 실패:", error);
-				}
-
-				event.api.applyTransaction({ update: [event.data] });
-			}
-
-			// 받는 창고 선택 시
-			if (event.colDef.field === "toWhId") {
-				const selectedToWhId = event.newValue;
-				const toWhInfo = toWhList.find(wh => wh.toWhId === selectedToWhId);
-
-				if (toWhInfo) {
-					event.data.toLocation = toWhInfo.toLocation;
-					event.data.remainingCapacity = toWhInfo.remainingCapacity;
-				}
-
-				event.api.applyTransaction({ update: [event.data] });
-			}
-
-			// 제품 ID 선택 시 제품명, 재고 자동 세팅
-			if (event.colDef.field === "prodId") {
-				const selectedProd = (event.data.fromProdList || []).find(p => p.prodId === event.newValue);
-				if (selectedProd) {
-					event.data.prodName = selectedProd.prodName;
-					event.data.currentQuantity = selectedProd.currentQuantity;
-				}
-				event.api.applyTransaction({ update: [event.data] });
-			}
-
-			// 데이터 변경 시 로컬스토리지 업데이트
-			saveToLocalStorage();
-		},
-
-	};
-
-	// 그리드 초기화
-	document.addEventListener("DOMContentLoaded", () => {
 		agGrid.createGrid(document.querySelector("#whMovementGrid"), whmGridOptions);
-		window.addEventListener("resize", () => {
-			whmGridOptions.api?.sizeColumnsToFit();
-		});
 	});
 
-	// 로컬스토리지 저장
 	function saveToLocalStorage() {
-		updateData = [];
-		whmGridOptions.api.forEachNode(node => updateData.push(node.data));
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(updateData));
+		const allData = [];
+		whmGridOptions.api.forEachNode(node => allData.push(node.data));
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
 	}
 
-	// 초기화
-	function resetTransfer() {
-		if (!confirm("모든 데이터를 초기화 하시겠습니까?")) return;
-
-		localStorage.removeItem(STORAGE_KEY);
-		whmGridOptions.api.setRowData([]);
-	}
-
-	// 창고이동 저장
-	async function saveTransfer() {
-		const rowData = [];
-		let hasError = false;
-
-		// 그리드 데이터 검증 및 수집
-		whmGridOptions.api.forEachNode(node => {
-			const data = node.data;
-
-			// 필수 필드 검증
-			if (!data.prodId || !data.fromWhId || !data.toWhId || !data.transferQty || !data.manager) {
-				hasError = true;
-				return;
-			}
-
-			// 이동 수량 검증
-			if (data.transferQty <= 0) {
-				hasError = true;
-				return;
-			}
-
-			// 재고 부족 검증
-			if (data.transferQty > data.currentQuantity) {
-				alert(`${data.prodName}: 이동 수량이 현재 재고보다 많습니다.`);
-				hasError = true;
-				return;
-			}
-
-			rowData.push({
-				prodId: data.prodId,
-				fromWhId: data.fromWhId,
-				toWhId: data.toWhId,
-				transferQty: data.transferQty,
-				manager: data.manager
-			});
-		});
-
-		if (hasError) {
-			alert("입력값을 확인해주세요. (제품, 창고, 수량, 담당자는 필수입니다)");
-			return;
-		}
-
-		if (rowData.length === 0) {
-			alert("이동할 데이터가 없습니다.");
-			return;
-		}
-
-		// 확인 메시지
-		if (!confirm(`${rowData.length}개 항목을 이동하시겠습니까?`)) {
-			return;
-		}
-
-		// 각 행을 순차적으로 처리
-		let successCount = 0;
-		let failCount = 0;
-		let failMessages = [];
-
-		for (const data of rowData) {
-			try {
-				const response = await fetch('/purchs/executeTransfer', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Accept': 'application/json'
-					},
-					body: JSON.stringify(data)
-				});
-
-				const result = await response.json();
-
-				if (result.success) {
-					successCount++;
-				} else {
-					failCount++;
-					failMessages.push(`${data.prodId}: ${result.message}`);
-				}
-
-			} catch (error) {
-				failCount++;
-				failMessages.push(`${data.prodId}: 서버 오류 - ${error.message}`);
-			}
-		}
-
-		// 결과 메시지 표시
-		let message = `처리 완료\n성공: ${successCount}건, 실패: ${failCount}건`;
-		if (failMessages.length > 0) {
-			message += `\n\n실패 내역:\n${failMessages.join('\n')}`;
-		}
-
-		alert(message);
-
-		// 성공한 경우 페이지 새로고침
-		if (successCount > 0) {
-			localStorage.removeItem(STORAGE_KEY);
-			location.reload();
-		}
-	}
-
-	// 행 추가
 	function addTransferRow() {
 		const newRow = {
 			prodId: "",
@@ -413,29 +253,87 @@
 			toLocation: "",
 			remainingCapacity: 0,
 			transferQty: 0,
-			manager: ""
+			manager: "",
+			fromProdOptions: []
 		};
-
 		whmGridOptions.api.applyTransaction({ add: [newRow] });
 		saveToLocalStorage();
 	}
 
-	// 행 삭제
 	function deleteSelectedRows() {
 		const selectedRows = whmGridOptions.api.getSelectedRows();
 		if (selectedRows.length === 0) {
 			alert("삭제할 행을 선택하세요.");
 			return;
 		}
-
-		if (!confirm(`${selectedRows.length}개 행을 삭제하시겠습니까?`)) {
-			return;
-		}
-
+		if (!confirm(`${selectedRows.length}개 행을 삭제하시겠습니까?`)) return;
 		whmGridOptions.api.applyTransaction({ remove: selectedRows });
 		saveToLocalStorage();
 	}
+
+	// 창고목록
+	async function getWh() {
+		try {
+			const res = await fetch('/purchs/fromWarehouse');
+			fromWhList = await res.json();
+			gridFromWhList = { values: fromWhList.map(wh => wh.fromWhId) };
+		} catch (e) {
+			console.error("보내는 창고 목록 fetch 실패", e);
+			gridFromWhList = { values: [] };
+		}
+	}
+
+	// 창고이동 기능
+	function saveTransfer() {
+		const rowData = [];
+		whmGridOptions.api.forEachNode(node => rowData.push(node.data));
+
+		if (rowData.length === 0) {
+			Swal.fire({
+				icon: 'warning',
+				title: '저장할 데이터가 없습니다.',
+			});
+			return;
+		}
+
+		let successCount = 0;
+		let failCount = 0;
+
+		const promises = rowData.map(row => {
+			return fetch('/purchs/executeTransfer', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(row)
+			})
+				.then(res => {
+					if (!res.ok) throw new Error("이동 성공");
+					successCount++;
+				})
+				.catch(err => {
+					console.error("이동 실패", err, row);
+					failCount++;
+				});
+		});
+
+		Promise.all(promises).then(() => {
+			Swal.fire({
+				icon: "info",
+				title: '이동 처리 결과',
+				html: `성공: <b>${successCount}</b> 건<br>실패: <b>${failCount}</b> 건`,
+				showConfirmButton: false,
+				timer: 1500
+			});
+		});
+	}
+
+	function loadFromLocalStorage() {
+		const saved = localStorage.getItem(STORAGE_KEY);
+		whMovementList = JSON.parse(saved);
+	}
+
 </script>
+
+
 
 <!-- 페이지 기능 -->
 <script>
