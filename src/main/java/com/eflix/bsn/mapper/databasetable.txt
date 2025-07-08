@@ -185,13 +185,17 @@ COMMENT ON COLUMN EFLIX.ORDERS_DETAIL.OUT_STATE     IS '출고상태';
 /* ─── SALES_OUTBOUND (매출 출고 헤더) ─────────────── */
 CREATE TABLE EFLIX.SALES_OUTBOUND (
     OUTBOUND_NO  VARCHAR2(30)  NOT NULL,   -- PK (출고 번호)
-    WRITE_DT     VARCHAR2(30)  NOT NULL,   -- 작성일(문자열; 필요하면 DATE 변환)
+    WRITE_DT     VARCHAR2(30)  NOT NULL,   -- 작성일(문자열)
     CUSTOMER_CD  VARCHAR2(20)  NOT NULL,   -- 거래처 코드 FK
+    CUSTOMER_NAME VARCHAR2(100),           -- ★ 추가: 거래처명 (조인 최적화)
+    REPRESENTATIVE_NM VARCHAR2(50),        -- ★ 추가: 대표명
     ORDER_DT     DATE          NOT NULL,   -- 주문일
     OUTBOUND_DT  DATE          NOT NULL,   -- 실제 출고일
-    MONEY        VARCHAR2(4)   NOT NULL,   -- 통화(예: KRW, USD)
-    REMARKS      VARCHAR2(20),             -- 비고
-    CO_IDX       VARCHAR2(30),             -- 회사 식별자(FK 필요 시)
+    MONEY        VARCHAR2(4)   DEFAULT 'KRW' NOT NULL,   -- 통화
+    REMARKS      VARCHAR2(200),            -- ★ 확장: 비고 길이 증가
+    CO_IDX       VARCHAR2(30),             -- 회사 식별자
+    CREATED_AT   TIMESTAMP(6)  DEFAULT SYSTIMESTAMP NOT NULL,  -- ★ 추가: 생성일시
+    UPDATED_AT   TIMESTAMP(6)  DEFAULT SYSTIMESTAMP NOT NULL,  -- ★ 추가: 수정일시
 
     CONSTRAINT PK_SALES_OUTBOUND
         PRIMARY KEY (OUTBOUND_NO),
@@ -199,14 +203,46 @@ CREATE TABLE EFLIX.SALES_OUTBOUND (
     CONSTRAINT FK_SO_CUSTOMER
         FOREIGN KEY (CUSTOMER_CD)
         REFERENCES EFLIX.CUSTOMERS (CUSTOMER_CD)
-
-    /* CO_IDX가 회사(법인) 테이블을 참조한다면 추가 FK 예시
-    -- ,CONSTRAINT FK_SO_COMPANY
-    --     FOREIGN KEY (CO_IDX)
-    --     REFERENCES EFLIX.COMPANY (CO_IDX)
-    */
 );
 
-/* ── 컬럼 설명(선택) ──────────────────────────────
-COMMENT ON COLUMN EFLIX.SALES_OUTBOUND.MONEY IS 'KRW, USD 등 통화 코드';
-*/
+/* ─── SOUTBOUND_DETAIL (매출 출고 상세) ───────────── */
+CREATE TABLE EFLIX.SOUTBOUND_DETAIL (
+    OUTBOUND_NO  VARCHAR2(30)  NOT NULL,   -- FK → SALES_OUTBOUND.OUTBOUND_NO
+    LINE_NO      NUMBER        NOT NULL,   -- ★ 추가: 라인 번호 (순번)
+    ITEM_CODE    VARCHAR2(50),             -- ★ 추가: 품목 코드
+    ITEM_NAME    VARCHAR2(100) NOT NULL,   -- 품목명
+    STANDARD     VARCHAR2(100),            -- ★ 확장: 규격 (SPEC → STANDARD)
+    QTY          NUMBER(10,2)  NOT NULL,   -- ★ 수정: 소수점 지원
+    UNIT         VARCHAR2(20),             -- ★ 확장: 단위
+    UNIT_PRICE   NUMBER(15,2),             -- ★ 추가: 단가
+    SUPPLY_AMOUNT NUMBER(15,2),            -- ★ 추가: 공급가액
+    TAX_AMOUNT   NUMBER(15,2),             -- ★ 추가: 부가세
+    TOTAL_AMOUNT NUMBER(15,2),             -- ★ 추가: 합계금액
+    REMARKS      VARCHAR2(200),            -- 비고
+    CO_IDX       VARCHAR2(30),             -- 회사 식별자
+
+    CONSTRAINT PK_SOUTBOUND_DETAIL
+        PRIMARY KEY (OUTBOUND_NO, LINE_NO),  -- ★ 수정: 복합키로 변경
+
+    CONSTRAINT FK_SALES_OUT_TO_SOUT_DET
+        FOREIGN KEY (OUTBOUND_NO)
+        REFERENCES EFLIX.SALES_OUTBOUND (OUTBOUND_NO)
+        ON DELETE CASCADE  -- ★ 추가: 헤더 삭제 시 디테일 자동 삭제
+);
+
+/* ─── 인덱스 생성 (성능 최적화) ─────────────────── */
+CREATE INDEX IDX_SALES_OUTBOUND_CO_DT 
+ON EFLIX.SALES_OUTBOUND (CO_IDX, OUTBOUND_DT);
+
+CREATE INDEX IDX_SOUTBOUND_DETAIL_ITEM 
+ON EFLIX.SOUTBOUND_DETAIL (ITEM_CODE);
+
+/* ─── 컬럼 주석 추가 ─────────────────────────────── */
+COMMENT ON COLUMN EFLIX.SALES_OUTBOUND.OUTBOUND_NO    IS '출고 번호 (PK)';
+COMMENT ON COLUMN EFLIX.SALES_OUTBOUND.CUSTOMER_NAME  IS '거래처명 (조인 최적화용)';
+COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.LINE_NO      IS '라인 번호 (복수 품목 지원)';
+COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.ITEM_CODE    IS '품목 코드 (BSN_ITEM FK)';
+COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.UNIT_PRICE   IS '단가';
+COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.SUPPLY_AMOUNT IS '공급가액';
+COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.TAX_AMOUNT   IS '부가세';
+COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.TOTAL_AMOUNT IS '합계금액';
