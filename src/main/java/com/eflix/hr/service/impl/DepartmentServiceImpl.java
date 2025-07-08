@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.common.security.auth.AuthContext;
+import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.mapper.DepartmentMapper;
 import com.eflix.hr.service.DepartmentService;
@@ -26,19 +27,17 @@ public class DepartmentServiceImpl implements DepartmentService{
   @Autowired
   private DepartmentMapper departmentMapper;
 
-  @Autowired
-  private AuthContext authContext;
   // 부서조회
   @Override
   public List<DepartmentDTO> selectAll(DepartmentDTO departmentDTO) {
-    departmentDTO.setCoIdx(authContext.getCoIdx());
+    departmentDTO.setCoIdx(AuthUtil.getCoIdx());
     return departmentMapper.selectAll(departmentDTO);
   }
 
     // 부서등록
   @Override
   public int insertDept(DepartmentDTO dept) {
-    dept.setCoIdx(authContext.getCoIdx());
+    dept.setCoIdx(AuthUtil.getCoIdx());
     return departmentMapper.insertDept(dept);
   }
   
@@ -64,12 +63,22 @@ public class DepartmentServiceImpl implements DepartmentService{
 
   @Override
   public List<DepartmentDTO> findAllDepts() {
-    return departmentMapper.findAllDepts(authContext.getCoIdx());
+    return departmentMapper.findAllDepts(AuthUtil.getCoIdx());
   }
 
   @Override
   public List<DepartmentDTO> findAllDeptsUP(String deptIdx) {
-    return departmentMapper.findAllDeptsUp(authContext.getCoIdx(), deptIdx);
+    return departmentMapper.findAllDeptsUp(AuthUtil.getCoIdx(), deptIdx);
+  }
+
+  @Override
+  public List<DepartmentDTO> findUpAllByCoIdx(String coIdx) {
+    return departmentMapper.findUpAllByCoIdx(coIdx);
+  }
+
+  @Override
+  public List<DepartmentDTO> findDownAllByCoIdx(String coIdx, String deptUpIdx) {
+    return departmentMapper.findDownAllByCoIdx(coIdx, deptUpIdx);
   }
 
 

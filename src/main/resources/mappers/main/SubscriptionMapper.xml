@@ -67,7 +67,7 @@
     </insert>
 
 
-    <resultMap id="subscriptionInfoMap" type="SubscriptionInfoDTO">
+    <!-- <resultMap id="subscriptionInfoMap" type="SubscriptionInfoDTO">
       <id property="spiIdx" column="spi_idx" />
         <association property="subscriptionDTO" javaType="SubscriptionDTO">
             <id property="spiIdx" column="spi_idx" />
@@ -107,6 +107,95 @@
         LEFT JOIN subscription_package_details spd ON spi.spi_idx = spd.spi_idx
         LEFT JOIN modules mou ON spd.module_idx = mou.module_idx
         WHERE spi.co_idx = #{coIdx}
+    </select> -->
+
+    <!-- 0705 -->
+    <resultMap id="subscriptionInfoMap" type="SubscriptionInfoDTO">
+        <id property="spiIdx" column="spi_idx" />
+        <result property="recentPayDate" column="recent_pay_date"/>
+        <association property="subscriptionDTO" javaType="SubscriptionDTO">
+            <id property="spiIdx" column="spi_idx" />
+            <result property="spkIdx" column="spk_idx" />
+            <result property="coIdx" column="co_idx" />
+            <result property="empIdx" column="emp_idx" />
+            <result property="spiPay" column="spi_pay" />
+            <result property="spiStatus" column="spi_status" />
+            <result property="spiStart" column="spi_start" />
+            <result property="spiEnd" column="spi_end" />
+            <result property="spiPeriod" column="spi_period" />
+            <result property="spiCycle" column="spi_cycle" />
+            <result property="spiNext" column="spi_next" />
+            <result property="spiCtrt" column="spi_ctrt" />
+            <result property="spiUid" column="spi_uid" />
+            <result property="spiMid" column="spi_mid" />
+            </association>
+
+        <association property="companyDTO" javaType="companyDTO">
+            <result property="coName" column="co_name" />
+            <result property="ceoName" column="ceo_name" />
+            <result property="pschName" column="psch_name" />
+            <result property="pschTel" column="psch_tel" />
+            <result property="pschEmail" column="psch_email" />
+            <result property="svcStatus" column="svc_status" />
+        </association>
+        <association property="subscriptionPackageDTO" javaType="SubscriptionPackageDTO">
+            <id property="spkIdx" column="spk_idx" />
+            <result property="spkName" column="spk_name" />
+            <result property="spkPrice" column="spk_price" />
+            <result property="spkMax" column="spk_max" />
+        </association>
+
+        <collection property="moduleDTOs" ofType="ModuleDTO">
+            <id property="moduleIdx" column="module_idx" />
+            <result property="moduleName" column="module_name" />
+        </collection>
+    </resultMap>
+
+    <select id="findSubscriptionByCoIdx" parameterType="String" resultMap="subscriptionInfoMap">
+        SELECT
+            spi.spi_idx,
+            spi.spk_idx,
+            spi.co_idx,
+            spi.emp_idx,
+            spi.spi_pay,
+            spi.spi_status,
+            spi.spi_start,
+            spi.spi_end,
+            spi.spi_period,
+            spi.spi_cycle,
+            spi.spi_next,
+            spi.spi_ctrt,
+            spi.spi_uid,
+            spi.spi_mid,
+
+            co.co_name,
+            co.ceo_name,
+            co.psch_name,
+            co.psch_tel,
+            co.psch_email,
+            co.svc_status,
+
+            spk.spk_name,
+            spk.spk_price,
+            spk.spk_max,
+
+            (
+                SELECT MAX(log.change_date)
+                FROM subscription_status_log log
+                WHERE log.spi_idx = spi.spi_idx
+                AND log.new_status = 'SS01'
+            ) AS recent_pay_date,
+
+            mou.module_idx,
+            mou.module_name
+
+        FROM subscription spi
+            JOIN subscription_packages spk ON spi.spk_idx = spk.spk_idx
+            LEFT JOIN companies co ON spi.co_idx = co.co_idx
+            LEFT JOIN subscription_package_details spd ON spi.spi_idx = spd.spi_idx
+            LEFT JOIN modules mou ON spd.module_idx = mou.module_idx
+        WHERE spi.co_idx = #{coIdx}
+        AND spi.spi_status = 'SS01'
     </select>
 
     <!-- 0629 -->
@@ -175,8 +264,10 @@
                 #{dto.empIdx, mode=IN, jdbcType=VARCHAR},
                 #{dto.spiPay, mode=IN, jdbcType=VARCHAR},
                 #{dto.spiPeriod, mode=IN, jdbcType=NUMERIC},
+                #{dto.spiCycle, mode=IN, jdbcType=NUMERIC},
                 #{dto.spiCtrt, mode=IN, jdbcType=VARCHAR},
                 #{dto.spiUid, mode=IN, jdbcType=VARCHAR},
+                #{dto.spiMid, mode=IN, jdbcType=VARCHAR},
                 #{dto.checkedModules, mode=IN, jdbcType=VARCHAR},
                 #{dto.mstId, mode=IN, jdbcType=VARCHAR},
                 #{dto.mstPw, mode=IN, jdbcType=VARCHAR},

@@ -9,11 +9,15 @@
 package com.eflix.hr.service.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.SalaryDTO;
+import com.eflix.hr.dto.etc.SalaryDetailDTO;
+import com.eflix.hr.dto.etc.SalaryFullDetailDTO;
+import com.eflix.hr.dto.etc.SalarySummaryDTO;
 import com.eflix.hr.mapper.SalaryMapper;
 import com.eflix.hr.service.SalaryService;
 
@@ -51,6 +55,39 @@ public class SalaryServiceImpl implements SalaryService {
   @Override
   public List<SalaryDTO> bankList() {
     return salaryMapper.bankList();
+  }
+
+  @Override
+  public List<SalarySummaryDTO> findSalaryList(String coIdx, String salaryMonth, String payMonth, String empName,
+      String deptIdx) {
+
+        return salaryMapper.findSalaryList(coIdx, salaryMonth, payMonth, empName, deptIdx);
+  }
+
+  @Override
+  public List<SalaryDetailDTO> findSalaryDetail(String coIdx, String salaryIdx) {
+
+    return salaryMapper.findSalaryDetail(coIdx, salaryIdx);
+  }
+
+  @Override
+  public List<SalaryFullDetailDTO> getSalaryDetailItems(String coIdx, String salaryIdx) {
+    return salaryMapper.getSalaryDetailItems(coIdx, salaryIdx);
+  }
+
+  @Override
+  public void calculateSalary(Map<String, Object> map) {
+    salaryMapper.calculateSalary(map);
+  }
+
+  @Override
+  public void confirmSalary(Map<String, Object> map) {
+    salaryMapper.confirmSalary(map);
+  }
+
+  @Override
+  public List<SalaryDetailDTO> selectSalaryDetail(String coIdx, String salaryIdx) {
+    return salaryMapper.selectSalaryDetail(coIdx, salaryIdx);
   }
 
 }

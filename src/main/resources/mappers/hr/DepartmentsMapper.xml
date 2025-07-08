@@ -68,4 +68,24 @@
         #{coIdx}
       )
   </insert>
+
+  <!-- 0707 -->
+  <select id="findUpAllByCoIdx" parameterType="String" resultType="DepartmentDTO">
+    SELECT
+      dept_idx   AS deptIdx,
+      dept_name  AS deptName
+    FROM departments
+    WHERE dept_up_idx IS NULL AND co_idx = #{coIdx}
+    ORDER BY dept_name
+  </select>
+  <select id="findDownAllByCoIdx" parameterType="String" resultType="DepartmentDTO">
+    SELECT
+      d1.dept_idx   AS deptIdx,
+      d1.dept_name  AS deptName,
+      d2.dept_name AS dept_up_name
+    FROM departments d1
+      LEFT JOIN departments d2 ON d1.dept_up_idx = d2.dept_idx
+    WHERE d1.co_idx = #{coIdx} AND d1.dept_up_idx = #{deptUpIdx}
+    ORDER BY d1.dept_name
+  </select>
 </mapper>

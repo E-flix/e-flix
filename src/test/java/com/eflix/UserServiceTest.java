@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.eflix.common.security.dto.UserDTO;
+import com.eflix.main.dto.UserDTO;
 import com.eflix.main.mapper.UserMapper;
 
 @SpringBootTest

@@ -13,49 +13,502 @@
           resultMap="SalaryMap">
     SELECT
       s.salary_idx,
-      s.emp_idx,
-      emp.emp_name,
+      e.emp_idx,
+      e.emp_name,
       d.dept_name,
-      emp.emp_grade,
+      g.grd_name,
       s.salary_month,
-      s.base_salary,
-      s.bonus,
-      s.overtime_pay,
-      s.night_work_pay,
-      s.total_salary,
-      s.tax,
-      s.health_insurance,
-      s.national_pension,
-      s.employment_ins,
-      s.industrial_ins,
-      s.other_deductions,
       s.pay_month,
-      s.att_month,
-      s.Field      AS Field,
-      s.Field2     AS Field2,
-      s.Field3     AS Field3,
-      s.co_idx,
-      s.created_date
+      s.base_salary,
+      NVL(aw.allowance_sum, 0) AS allowance_sum,
+      NVL(dw.deduction_sum, 0) AS deduction_sum,
+      (s.base_salary + NVL(aw.allowance_sum, 0) - NVL(dw.deduction_sum, 0)) AS net_salary,
+      s.salary_type
     FROM salary s
-    JOIN employees emp
-      ON s.emp_idx = emp.emp_idx
-    LEFT JOIN departments d
-      ON emp.dept_idx = d.dept_idx
-    <where>
-      <if test="salaryMonth != null and salaryMonth != ''">
-        AND s.salary_month = #{salaryMonth}
-      </if>
-      <if test="payMonth != null and payMonth != ''">
-        AND s.pay_month = #{payMonth}
-      </if>
-      <if test="empName != null and empName != ''">
-        AND emp.emp_name LIKE '%' || #{empName} || '%'
-      </if>
-      <if test="deptName != null and deptName != ''">
-        AND d.dept_name = #{deptName}
-      </if>
-    </where>
-    ORDER BY emp.emp_idx
+    INNER JOIN employees e ON s.emp_idx = e.emp_idx
+    LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+    LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+    LEFT JOIN (
+        SELECT co_idx,
+              SUM(CASE WHEN type = 'sm-01' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS allowance_sum
+        FROM salary_mapping
+        WHERE use_status = 'Y'
+        GROUP BY co_idx
+    ) aw ON s.co_idx = aw.co_idx
+    LEFT JOIN (
+        SELECT co_idx,
+              SUM(CASE WHEN type = 'sm-02' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS deduction_sum
+        FROM salary_mapping
+        WHERE use_status = 'Y'
+        GROUP BY co_idx
+    ) dw ON s.co_idx = dw.co_idx
+    WHERE s.co_idx = #{coIdx}
+        <if test="salaryMonth != null and salaryMonth != ''">
+          AND s.salary_month = #{salaryMonth}
+        </if>
+        <if test="payMonth != null and payMonth != ''">
+          AND s.pay_month   = #{payMonth}
+        </if>
+        <if test="empName != null and empName != ''">
+          AND e.emp_name LIKE '%' || #{empName} || '%'
+        </if>
+        <if test="deptIdx != null and deptIdx != ''">
+          AND d.dept_idx = #{deptIdx}
+        </if>
+    ORDER BY d.dept_name, g.grd_order, e.emp_name
     </select> -->
+
+    <!-- 요약 결과 매핑 -->
+  <resultMap id="salarySummaryMap" type="SalarySummaryDTO">
+    <id     property="salaryIdx"    column="salary_idx"/>
+    <result property="empIdx"        column="emp_idx"/>
+    <result property="empName"       column="emp_name"/>
+    <result property="deptName"      column="dept_name"/>
+    <result property="grdName"       column="grd_name"/>
+    <result property="salaryMonth"   column="salary_month"/>
+    <result property="payMonth"      column="pay_month"/>
+    <result property="baseSalary"    column="base_salary"/>
+    <result property="allowanceSum"  column="allowance_sum"/>
+    <result property="deductionSum"  column="deduction_sum"/>
+    <result property="netSalary"     column="net_salary"/>
+    <result property="status"        column="salary_type"/>
+  </resultMap>
+
+  <!-- 리스트 조회 / 동적 검색 지원 -->
+  <select id="findSalaryList" resultMap="salarySummaryMap" parameterType="map">
+    SELECT
+      s.salary_idx,
+      e.emp_idx,
+      e.emp_name,
+      d.dept_name,
+      g.grd_name,
+      s.salary_month,
+      s.pay_month,
+      s.base_salary,
+      NVL(aw.allowance_sum, 0) AS allowance_sum,
+      NVL(dw.deduction_sum, 0) AS deduction_sum,
+      (s.base_salary + NVL(aw.allowance_sum, 0) - NVL(dw.deduction_sum, 0)) AS net_salary,
+      s.salary_type
+    FROM salary s
+    INNER JOIN employees e ON s.emp_idx = e.emp_idx
+    LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+    LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+    LEFT JOIN (
+        SELECT co_idx,
+              SUM(CASE WHEN type = 'sm-01' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS allowance_sum
+        FROM salary_mapping
+        WHERE use_status = 'Y'
+        GROUP BY co_idx
+    ) aw ON s.co_idx = aw.co_idx
+    LEFT JOIN (
+        SELECT co_idx,
+              SUM(CASE WHEN type = 'sm-02' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS deduction_sum
+        FROM salary_mapping
+        WHERE use_status = 'Y'
+        GROUP BY co_idx
+    ) dw ON s.co_idx = dw.co_idx
+    WHERE s.co_idx = #{coIdx}
+        <if test="salaryMonth != null and salaryMonth != ''">
+          AND s.salary_month = #{salaryMonth}
+        </if>
+        <if test="payMonth != null and payMonth != ''">
+          AND s.pay_month   = #{payMonth}
+        </if>
+        <if test="empName != null and empName != ''">
+          AND e.emp_name LIKE '%' || #{empName} || '%'
+        </if>
+        <if test="deptIdx != null and deptIdx != ''">
+          AND d.dept_idx = #{deptIdx}
+        </if>
+    ORDER BY d.dept_name, g.grd_order, e.emp_name
+  </select>
+
+  <!-- 급여 상세항목 (salary + salary_mapping) -->
+  <select id="selectSalaryDetail" parameterType="String" resultType="SalaryDetailDTO">
+    SELECT
+      '기본급'              AS itemName,
+      s.base_salary         AS amount,
+      '-'                   AS remark,
+      '과세'                AS taxType,
+      '지급'                AS payType
+    FROM salary s
+    WHERE s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
+    
+    UNION ALL
+    
+    SELECT
+      sm.al_name            AS itemName,
+      CASE sm.type WHEN 'sm-02' THEN -sm.al_amount ELSE sm.al_amount END AS amount,
+      '-'                   AS remark,
+      DECODE(sm.type, 'sm-01', '과세', '비과세') AS taxType,
+      DECODE(sm.type, 'sm-01', '지급', '공제') AS payType
+    FROM salary_mapping sm
+    JOIN salary s ON sm.co_idx = s.co_idx
+    WHERE sm.use_status = 'Y'
+      AND s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
+  </select>
+
+  <!-- 결과 매핑 - 급여 상세 항목 -->
+  <!-- <resultMap id="salaryDetailMap" type="SalaryDetailDTO">
+    <result property="item"            column="item"/>
+    <result property="amount"          column="amount"/>
+    <result property="remark"          column="remark"/>
+    <result property="taxType"         column="tax_type"/>
+    <result property="transactionType" column="transaction_type"/>
+  </resultMap> -->
+
+  <!-- 급여 상세 조회 -->
+  <select id="findSalaryDetail" resultType="SalaryDetailDTO" parameterType="string">
+    SELECT 
+            s.*,
+            e.emp_name,
+            d.dept_name,
+            g.grd_name
+        FROM salary s
+        INNER JOIN employees e ON s.emp_idx = e.emp_idx
+        INNER JOIN departments d ON e.dept_idx = d.dept_idx
+        INNER JOIN grade g ON e.grd_idx = g.grd_idx
+        WHERE s.co_idx = #{coIdx}
+        AND s.salary_idx = #{salaryIdx}
+  </select>
+
+    <!-- 급여 계산 실행 -->
+    <update id="calculateSalary" parameterType="map">
+        UPDATE salary 
+        SET 
+            total_salary = base_salary + 
+                          COALESCE(bonus, 0) + 
+                          COALESCE(overtime_pay, 0) + 
+                          COALESCE(night_work_pay, 0) + 
+                          COALESCE(sal1, 0) + 
+                          COALESCE(sal2, 0) + 
+                          COALESCE(sal3, 0),
+            salary_type = 'st-02'
+        WHERE salary_idx IN 
+        <foreach collection="salaryIdxList" item="salaryIdx" open="(" close=")" separator=",">
+            #{salaryIdx}
+        </foreach>
+        AND co_idx = #{coIdx}
+    </update>
+
+    <!-- 급여 확정 -->
+    <update id="confirmSalary" parameterType="map">
+        UPDATE salary 
+        SET salary_type = 'st-03'
+        WHERE salary_idx IN 
+          <foreach collection="salaryIdxList" item="salaryIdx" open="(" close=")" separator=",">
+              #{salaryIdx}
+          </foreach>
+          AND co_idx = #{coIdx}
+          AND salary_type = 'st-02'
+    </update>
+
+    <!-- 급여 상세 항목별 조회 (모달용) -->
+    <select id="getSalaryDetailItems" parameterType="String" resultType="SalaryDetailDTO">
+    SELECT *
+      FROM (
+      
+        SELECT
+          COALESCE(m.al_name, '기본급')    AS item,
+          s.base_salary                  AS amount,
+          '-'                            AS memo,
+          '과세'                         AS tax_type,
+          '지급'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'base_salary'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '직책수당')  AS item,
+          s.bonus                        AS amount,
+          '정액'                         AS memo,
+          '과세'                         AS tax_type,
+          '지급'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'bonus'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.bonus      > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '연장수당')  AS item,
+          s.overtime_pay                 AS amount,
+          '정액'                         AS memo,
+          '과세'                         AS tax_type,
+          '지급'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'overtime_pay'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.overtime_pay > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '야간수당')  AS item,
+          s.night_work_pay               AS amount,
+          '정액'                         AS memo,
+          '과세'                         AS tax_type,
+          '지급'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'night_work_pay'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.night_work_pay > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '식대수당')  AS item,
+          s.sal2                         AS amount,
+          '정액'                         AS memo,
+          '비과세'                       AS tax_type,
+          '지급'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'sal2'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.sal2       > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '기타수당1') AS item,
+          s.sal1                         AS amount,
+          '정액'                         AS memo,
+          '비과세'                       AS tax_type,
+          '지급'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'sal1'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.sal1       > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '기타수당2') AS item,
+          s.sal3                         AS amount,
+          '정액'                         AS memo,
+          '비과세'                       AS tax_type,
+          '지급'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'sal3'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.sal3       > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '세금')     AS item,
+         -s.tax                          AS amount,
+          '-'                            AS memo,
+          '과세'                         AS tax_type,
+          '공제'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'tax'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.tax        > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '국민연금')   AS item,
+         -s.national_pension             AS amount,
+          '4.5%'                         AS memo,
+          '비과세'                       AS tax_type,
+          '공제'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'national_pension'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.national_pension > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '건강보험')   AS item,
+         -s.health_insurance             AS amount,
+          '3.495%'                       AS memo,
+          '비과세'                       AS tax_type,
+          '공제'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'health_insurance'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.health_insurance > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '고용보험')  AS item,
+         -s.employment_ins               AS amount,
+          '0.8%'                         AS memo,
+          '비과세'                       AS tax_type,
+          '공제'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'employment_ins'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.employment_ins > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '산재보험')  AS item,
+         -s.industrial_ins               AS amount,
+          '0.6%'                         AS memo,
+          '비과세'                       AS tax_type,
+          '공제'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'industrial_ins'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.industrial_ins > 0
+
+        UNION ALL
+
+        SELECT
+          COALESCE(m.al_name, '기타공제')  AS item,
+         -s.other_deductions             AS amount,
+          '-'                            AS memo,
+          '비과세'                       AS tax_type,
+          '공제'                         AS pay_type
+        FROM salary s
+        LEFT JOIN salary_mapping m
+          ON m.co_idx      = s.co_idx
+         AND m.al_number   = 'other_deductions'
+         AND m.salary_type = 'st-01'
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+          AND s.other_deductions > 0
+
+        UNION ALL
+
+        SELECT
+          '실수령액'                     AS item,
+          ( s.base_salary
+          + NVL(s.bonus,0)
+          + NVL(s.overtime_pay,0)
+          + NVL(s.night_work_pay,0)
+          + NVL(s.sal1,0)
+          + NVL(s.sal2,0)
+          + NVL(s.sal3,0)
+          - NVL(s.tax,0)
+          - NVL(s.health_insurance,0)
+          - NVL(s.national_pension,0)
+          - NVL(s.employment_ins,0)
+          - NVL(s.industrial_ins,0)
+          - NVL(s.other_deductions,0)
+          )                             AS amount,
+          '계산 자동'                    AS memo,
+          '-'                            AS tax_type,
+          '-'                            AS pay_type
+        FROM salary s
+        WHERE s.salary_idx = #{salaryIdx}
+          AND s.co_idx     = #{coIdx}
+      )
+    ORDER BY
+      CASE WHEN pay_type = '지급' THEN 1
+           WHEN pay_type = '공제' THEN 2
+           ELSE 3
+      END,
+      item
+    </select>
+
+    <!-- 부서 목록 조회 -->
+    <select id="getDepartmentList" parameterType="string" resultType="DeptDTO">
+        SELECT dept_idx, dept_name
+        FROM departments
+        WHERE co_idx = #{coIdx}
+        AND dept_status = 'Y'
+        ORDER BY dept_name
+    </select>
+
+    <!-- 급여 항목별 합계 조회 -->
+    <select id="getSalarySummary" parameterType="map" resultType="SalarySummaryDTO">
+        SELECT 
+            COUNT(*) as total_count,
+            SUM(base_salary) as total_base_salary,
+            SUM(COALESCE(bonus, 0) + COALESCE(overtime_pay, 0) + COALESCE(night_work_pay, 0) + 
+                COALESCE(sal1, 0) + COALESCE(sal2, 0) + COALESCE(sal3, 0)) as total_allowance,
+            SUM(COALESCE(tax, 0) + COALESCE(health_insurance, 0) + COALESCE(national_pension, 0) + 
+                COALESCE(employment_ins, 0) + COALESCE(industrial_ins, 0) + COALESCE(other_deductions, 0)) as total_deduction,
+            SUM(total_salary - 
+                (COALESCE(tax, 0) + COALESCE(health_insurance, 0) + COALESCE(national_pension, 0) + 
+                 COALESCE(employment_ins, 0) + COALESCE(industrial_ins, 0) + COALESCE(other_deductions, 0))) as total_net_salary
+        FROM salary s
+        INNER JOIN employees e ON s.emp_idx = e.emp_idx
+        WHERE s.co_idx = #{coIdx}
+        <if test="salaryMonth != null and salaryMonth != ''">
+            AND s.salary_month = #{salaryMonth}
+        </if>
+        <if test="payMonth != null and payMonth != ''">
+            AND s.pay_month = #{payMonth}
+        </if>
+        <if test="empName != null and empName != ''">
+            AND e.emp_name LIKE '%' || #{empName} || '%'
+        </if>
+        <if test="deptIdx != null and deptIdx != ''">
+            AND e.dept_idx = #{deptIdx}
+        </if>
+    </select>
+
+    <!-- 급여 항목 코드 생성용 시퀀스 조회 -->
+    <select id="getNextMappingIdx" resultType="string">
+        SELECT 'mp-' || LPAD(NVL(MAX(TO_NUMBER(SUBSTR(mp_idx, 4))), 0) + 1, 3, '0') as next_idx
+        FROM salary_mapping
+        WHERE mp_idx LIKE 'mp-%'
+    </select>
+
+    <!-- 급여 항목 코드 생성용 시퀀스 조회 -->
+    <select id="getNextAlNumber" resultType="string">
+        SELECT 'al-' || LPAD(NVL(MAX(TO_NUMBER(SUBSTR(al_number, 4))), 100) + 1, 3, '0') as next_al_number
+        FROM salary_mapping
+        WHERE al_number LIKE 'al-%'
+    </select>
 </mapper>
 

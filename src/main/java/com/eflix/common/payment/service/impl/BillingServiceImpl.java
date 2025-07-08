@@ -48,6 +48,9 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     public String getAccessToken() {
+
+        String url = "https://api.iamport.kr/users/getToken";
+
         // 요청 바디 생성
         JsonObject json = new JsonObject();
         json.addProperty("imp_key", apiKey);
@@ -62,7 +65,7 @@ public class BillingServiceImpl implements BillingService {
 
         // POST 요청
         ResponseEntity<String> response = restTemplate.exchange(
-                "https://api.iamport.kr/users/getToken",
+                url,
                 HttpMethod.POST,
                 requestEntity,
                 String.class);
@@ -95,14 +98,18 @@ public class BillingServiceImpl implements BillingService {
 
         String resBody = response.getBody();
         JsonObject root = JsonParser.parseString(resBody).getAsJsonObject();
+        
+        JsonObject responseJson = root.getAsJsonObject("response");
 
-        JsonObject billingKeyInfo = root.getAsJsonObject("billingKeyInfo");
+        System.out.println(responseJson.toString());
 
-        String billingKey = billingKeyInfo.has("billingKey") ?
-            billingKeyInfo.get("billingKey").getAsString() : "N/A";
+        String billingKey = responseJson.has("customer_uid") ?
+            responseJson.get("customer_uid").getAsString() : "";
 
         return billingKey;
     }
+
+
 
     @Override
     public String issueBillingKey(BillingReqDTO billingReqDTO) throws Exception {

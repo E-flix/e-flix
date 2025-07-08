@@ -9,8 +9,6 @@ import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.common.security.dto.SecurityEmpDTO;
 import com.eflix.common.security.dto.SecurityMasterDTO;
 import com.eflix.common.security.dto.SecurityUserDTO;
-import com.eflix.common.security.dto.UserDTO;
-import com.eflix.main.dto.MasterDTO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

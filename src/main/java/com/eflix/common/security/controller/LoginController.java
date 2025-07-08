@@ -17,8 +17,8 @@ import com.eflix.acc.controller.AccAccountController;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
-import com.eflix.common.security.dto.UserDTO;
 import com.eflix.common.security.mapper.SecurityMapper;
+import com.eflix.main.dto.UserDTO;
 import com.eflix.main.service.UserService;
 
 /**

@@ -6,7 +6,82 @@
   - 설명     : SalaryMappingMapper query xml
   [ 변경 이력 ]
   - 2025-06-19 (김어진): 계정과목 전체조회 작성
+  - 2025-06-19 (복성민): 급여 매핑 조회, 추가, 수정, 삭제 추가
 =============================================== -->
 <mapper namespace="com.eflix.hr.mapper.SalaryMappingMapper">
+ <select id="findAllByCoIdx" parameterType="String" resultType="SalaryMappingDTO">
+    SELECT
+      mp_idx,
+      al_number,
+      al_name,
+      type,
+      salary_type,
+      al_amount,
+      UPPER(use_status) AS use_status,
+      target_dept,
+      mp_memo
+    FROM salary_mapping
+    WHERE co_idx = #{coIdx}
+    ORDER BY type, al_number
+  </select>
 
+  <select id="findByMpIdx" resultType="SalaryMappingDTO">
+    SELECT
+      mp_idx,
+      al_number,
+      salary_type,
+      al_name,
+      type,
+      co_idx,
+      al_amount,
+      UPPER(use_status) AS use_status,
+      target_dept,
+      mp_memo
+    FROM salary_mapping
+    WHERE co_idx = #{coIdx} AND mp_idx = #{mpIdx}
+  </select>
+
+  <insert id="insert" parameterType="SalaryMappingDTO">
+    <selectKey resultType="String" keyProperty="mpIdx" order="BEFORE">
+      SELECT 'mp-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(mp_idx, 4))), 100) + 1) FROM salary_mapping
+    </selectKey>
+    INSERT INTO salary_mapping(mp_idx, al_number, salary_type, al_name, type, co_idx, al_amount, use_status, target_dept, mp_memo)
+    VALUES(#{mpIdx}, #{alNumber}, #{salaryType}, #{alName}, #{type}, #{coIdx}, #{alAmount}, UPPER(#{useStatus}), #{targetDept}, #{mpMemo})
+  </insert>
+
+  <update id="update" parameterType="SalaryMappingDTO">
+    UPDATE salary_mapping
+      <set>
+        <if test="alNumber != null and alNumber != ''">
+          al_number    = #{alNumber},
+        </if>
+        <if test="salaryType != null and salaryType != ''">
+          salary_type  = #{salaryType},
+        </if>
+        <if test="alName != null and alName != ''">
+          al_name    = #{alName},
+        </if>
+        <if test="type != null and type != ''">
+          type    = #{type},
+        </if>
+        <if test="alAmount != null and alAmount != ''">
+          al_amount    = #{alAmount},
+        </if>
+        <if test="useStatus != null and useStatus != ''">
+          use_status    = UPPER(#{useStatus}),
+        </if>
+        <if test="targetDept != null and targetDept != ''">
+          target_dept    = #{targetDept},
+        </if>
+        <if test="mpMemo != null and mpMemo != ''">
+          mp_memo    = #{mpMemo},
+        </if>
+      </set>
+    WHERE mp_idx = #{mpIdx}
+  </update>
+
+  <delete id="delete" parameterType="String">
+    DELETE FROM salary_mapping
+     WHERE mp_idx = #{mpIdx}
+  </delete>
 </mapper>

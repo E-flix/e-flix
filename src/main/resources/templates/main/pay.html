@@ -6,6 +6,9 @@
 --------------------------------------------
 	[ 변경 이력 ]
 	- 2025-06-22 (복성민): 생성
+    - 2025-06-23 (복성민): 포트원 연동
+    - 2025-06-25 (복성민): 결제 기능 구현
+    - 2025-07-04 (복성민): 디자인 수정 및 결제 로직 변경
 ============================================
 -->
 <!DOCTYPE html>
@@ -19,6 +22,7 @@
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <script th:src="@{/bootstrap/vendor/jquery/jquery.min.js}"></script>
 
     <!-- PortOne SDK -->
@@ -29,45 +33,349 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
+        .step-indicator {
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 25%;
+            right: 25%;
+            height: 3px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+
+        .step {
+            position: relative;
+            z-index: 2;
+        }
+
         .step span {
             display: inline-block;
-            border: 1px solid #ccc;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
             border-radius: 50%;
-            padding: 5px 10px;
-            color: #555;
+            background: #e9ecef;
+            color: #6c757d;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
         }
 
         .step.active span {
-            background-color: #0d6efd;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border-color: #0d6efd;
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .step.completed span {
+            background: #28a745;
+            color: white;
+        }
+
+        .step.completed span::before {
+            content: '✓';
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .price-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+
+        .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        fieldset {
+            border: 2px solid #e9ecef !important;
+            border-radius: 12px !important;
+            background: #f8f9fa;
+        }
+
+        fieldset legend {
+            background: white;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .highlight-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .highlight-card ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .highlight-card li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .signature-preview {
+            max-width: 200px;
+            max-height: 100px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 5px;
+        }
+
+        #signatureCanvas {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: crosshair;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #e9ecef;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: #e7f3ff;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .product-highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .product-highlight h5 {
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .product-highlight ul {
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .product-highlight li {
+            margin-bottom: 12px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .product-highlight li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .checkout-summary {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .contract-document {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 auto 15px;
+        }
+
+        .step-content {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 
-<body>
+<body class="bg-light">
     <div class="container my-5">
         <div class="text-center mb-4">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" height="30" class="me-2">
-            <h4 class="d-inline-block align-middle fw-bold">E-FELIX - Business <span
-                    th:text="${subscriptionPackage.spkName}"></span></h4>
+            <div class="feature-icon d-inline-block">
+                <i class="bi bi-microsoft"></i>
+            </div>
+            <h2 class="d-inline-block align-middle fw-bold ms-3">E-FELIX - Business <span
+                    class="text-primary">Standard</span></h2>
         </div>
 
         <div class="card shadow-lg border-0">
             <div class="bg-white p-4 rounded">
                 <!-- Step Indicator -->
                 <div class="row mb-4 text-center step-indicator">
-                    <div class="col step step-1 active"><span>1</span>
-                        <div>구독 정보</div>
+                    <div class="col step step-1 active">
+                        <span>1</span>
+                        <div class="fw-semibold">구독 정보</div>
                     </div>
-                    <div class="col step step-2"><span>2</span>
-                        <div>사용자 세부 정보</div>
+                    <div class="col step step-2">
+                        <span>2</span>
+                        <div class="fw-semibold">사용자 세부 정보</div>
                     </div>
-                    <div class="col step step-3"><span>3</span>
-                        <div>계약서</div>
+                    <div class="col step step-3">
+                        <span>3</span>
+                        <div class="fw-semibold">계약서</div>
                     </div>
-                    <div class="col step step-4"><span>4</span>
-                        <div>결제 및 완료</div>
+                    <div class="col step step-4">
+                        <span>4</span>
+                        <div class="fw-semibold">결제 및 완료</div>
                     </div>
                 </div>
 
@@ -76,102 +384,116 @@
                     <div class="row g-4">
                         <!-- Left -->
                         <div class="col-md-7">
-                            <h5 class="fw-bold">구독 설정</h5>
+                            <h5 class="fw-bold mb-4">
+                                <i class="bi bi-gear me-2 text-primary"></i>구독 설정
+                            </h5>
 
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">웹 및 핵심 서비스:</label>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="module" value="mou-101"
-                                        id="hr">
-                                    <label class="form-check-label" for="hr">인사</label>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold mb-3">웹 및 핵심 서비스:</label>
+                                <div class="row g-2">
+                                    <!-- 인사 -->
+                                    <div class="col-md-6">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-module"
+                                            data-value="mou-101">
+                                            <i class="bi bi-people me-2"></i>인사
+                                        </button>
+                                    </div>
+                                    <!-- 회계 -->
+                                    <div class="col-md-6">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-module"
+                                            data-value="mou-102">
+                                            <i class="bi bi-calculator me-2"></i>회계
+                                        </button>
+                                    </div>
+                                    <!-- 영업 -->
+                                    <div class="col-md-6">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-module"
+                                            data-value="mou-104">
+                                            <i class="bi bi-graph-up me-2"></i>영업
+                                        </button>
+                                    </div>
+                                    <!-- 재고 -->
+                                    <div class="col-md-6">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-module"
+                                            data-value="mou-103">
+                                            <i class="bi bi-box-seam me-2"></i>재고
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="module" value="mou-104"
-                                        id="bsn">
-                                    <label class="form-check-label" for="bsn">영업</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="module" value="mou-103"
-                                        id="purchs">
-                                    <label class="form-check-label" for="purchs">재고</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="module" value="mou-102"
-                                        id="acc">
-                                    <label class="form-check-label" for="acc">회계</label>
-                                </div>
+                                <!-- 선택된 모듈 hidden input (폼 제출용) -->
+                                <input type="hidden" name="selectedModules" id="selectedModules">
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">구독 기간 선택</label>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="period" id="period-1month"
-                                        value="1">
-                                    <label class="form-check-label" for="period-month">1개월</label>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold mb-3">구독 기간 선택</label>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period" data-value="1">
+                                            <i class="bi bi-calendar-month d-block fs-4 mb-2"></i>1개월
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period" data-value="3">
+                                            <i class="bi bi-calendar3 d-block fs-4 mb-2"></i>3개월
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period active" data-value="12">
+                                            <i class="bi bi-calendar2-fill d-block fs-4 mb-2"></i>1년
+                                            <span class="badge bg-success small">추천</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="period" id="period-3month"
-                                        value="3">
-                                    <label class="form-check-label" for="period-month">3개월</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="period" id="period-year"
-                                        value="12" checked>
-                                    <label class="form-check-label" for="period-year">1년</label>
-                                </div>
+                                
+                                <!-- 선택된 구독 기간 hidden input (폼 제출용) -->
+                                <input type="hidden" name="selectedPeriod" id="selectedPeriod" value="12">
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">얼마나 자주 청구하시겠습니까?</label>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">얼마나 자주 청구하시겠습니까?</label>
                                 <select class="form-select" id="billing-cycle">
                                     <option value="annual">년</option>
                                     <option value="monthly">월</option>
-                                    <option value="once">일시불</option>
                                 </select>
                             </div>
 
-                            <div class="border-top pt-3">
-                                <div class="fw-bold mb-1">E-FELIX - Business <span th:text="${type}"></span></div>
-                                <div class="text-muted mb-2" id="subscription-summary"></div>
-                            </div>
+                            <div class="checkout-summary">
+                                <div class="fw-bold mb-2 fs-5">E-FELIX - Business Standard</div>
+                                <div class="text-muted mb-3" id="subscription-summary">1년 구독, ₩202,800 / 년 지불</div>
 
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="text-muted">오늘 결제 기한 (세금이 포함되지 않음)</span>
-                                <span class="price-box" id="resultPrice">₩202,800.00</span>
+                                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                    <div>
+                                        <span class="fw-bold">오늘 결제 기한</span>
+                                        <br>
+                                        <small class="text-muted">(세금이 포함되지 않음)</small>
+                                    </div>
+                                    <span class="price-box" id="resultPrice">₩202,800.00</span>
+                                </div>
                             </div>
 
                             <div class="d-grid mt-4">
-                                <button class="btn btn-primary" id="next-to-step-2">다음</button>
+                                <button class="btn btn-primary btn-lg" id="next-to-step-2">
+                                    다음 단계로 <i class="bi bi-arrow-right ms-2"></i>
+                                </button>
                             </div>
                         </div>
 
                         <!-- Right -->
                         <div class="col-md-5">
-                            <div class="bg-white p-4">
-                                <h5 class="fw-bold">E-FLIX - Business Standard</h5>
-                                <p class="">제품 하이라이트</p>
-                                <ul>
-                                    <li><strong>[인사]</strong> 인사 문서, 근태표, 인사평가 및 급여 명세를 효율적으로 관리하세요.</li>
-                                    <li>모든 직원 정보에 <strong>언제 어디서나 안전하게 접근</strong></li>
-                                    <li><strong>상시 인사 지원 체계</strong> 포함</li>
-                                </ul>
-
-                                <ul>
-                                    <li><strong>[영업]</strong> 견적, 계약서, 영업 보고서 등을 빠르게 작성하고 공유하세요.</li>
-                                    <li><strong>거래 데이터</strong>를 안전하게 클라우드에 저장</li>
-                                    <li><strong>24시간 영업 지원</strong> 가능</li>
-                                </ul>
-
-                                <ul>
-                                    <li><strong>[재고]</strong> 입출고, 재고 현황 및 창고 관리를 쉽게 시작하세요.</li>
-                                    <li><strong>다양한 기기</strong>에서 재고 데이터 확인 및 관리</li>
-                                </ul>
-
-                                <ul>
-                                    <li><strong>[회계]</strong> 전표, 세금계산서, 재무제표 작성을 빠르게 시작하세요.</li>
-                                    <li><strong>언제 어디서나</strong> 회계 문서 접근 가능</li>
-                                </ul>
-                            </div>
+                            <h5 class="fw-bold">E-FELIX - Business Standard</h5>
+                            <p class="mb-3">제품 하이라이트</p>
+                            <ul>
+                                <li><strong>[인사]</strong> 인사 문서, 근태표, 인사평가 및 급여 명세를 효율적으로 관리하세요.</li>
+                                <li>모든 직원 정보에 <strong>언제 어디서나 안전하게 접근</strong></li>
+                                <li><strong>상시 인사 지원 체계</strong> 포함</li>
+                                <li><strong>[영업]</strong> 견적, 계약서, 영업 보고서 등을 빠르게 작성하고 공유하세요.</li>
+                                <li><strong>거래 데이터</strong>를 안전하게 클라우드에 저장</li>
+                                <li><strong>24시간 영업 지원</strong> 가능</li>
+                                <li><strong>[재고]</strong> 입출고, 재고 현황 및 창고 관리를 쉽게 시작하세요.</li>
+                                <li><strong>다양한 기기</strong>에서 재고 데이터 확인 및 관리</li>
+                                <li><strong>[회계]</strong> 전표, 세금계산서, 재무제표 작성을 빠르게 시작하세요.</li>
+                                <li><strong>언제 어디서나</strong> 회계 문서 접근 가능</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -181,148 +503,110 @@
                     <div class="row g-4">
                         <!-- Left -->
                         <div class="col-md-7">
-                            <h5 class="fw-bold">구매자 정보</h5>
+                            <h5 class="fw-bold mb-4">
+                                <i class="bi bi-person-fill me-2 text-primary"></i>구매자 정보
+                            </h5>
 
                             <!-- 가입 정보 -->
-                            <fieldset class="border rounded-3 p-3">
-                                <legend class="float-none w-auto px-2 fs-6 fw-semibold">가입 정보</legend>
+                            <fieldset class="border rounded-3 p-4 mb-4">
+                                <legend class="float-none w-auto px-3 fs-6 fw-bold">
+                                    <i class="bi bi-building me-2"></i>가입 정보
+                                </legend>
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" id="sameAsSubscriber">
-                                    <label class="form-check-label" for="sameAsSubscriber">가입자와 동일</label>
+                                    <label class="form-check-label fw-semibold" for="sameAsSubscriber">
+                                        <i class="bi bi-check2-circle me-2"></i>가입자와 동일
+                                    </label>
                                 </div>
-                                <div class="row g-2 mb-3">
-                                    <div class="col-md-6"><input type="text" class="form-control" id="pschName"
-                                            placeholder="신청자">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="pschName" placeholder="신청자">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="pschTel"
-                                            placeholder="연락처">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="pschTel" placeholder="연락처">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coName"
-                                            placeholder="회사명">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="coName" placeholder="회사명">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coNameEn"
-                                            placeholder="회사 영문명">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="coNameEn" placeholder="회사 영문명" readonly>
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="ceoName"
-                                            placeholder="대표자명">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="ceoName" placeholder="대표자명" readonly>
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="ceoTel"
-                                            placeholder="연락처">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="ceoTel" placeholder="연락처" readonly>
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coAddr"
-                                            placeholder="주소">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="coAddr" placeholder="주소" readonly>
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="bizr_no"
-                                            placeholder="사업자 번호">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="bizr_no" placeholder="사업자 번호" readonly>
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coAddrDetail"
-                                            placeholder="나머지 주소">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="coAddrDetail" placeholder="나머지 주소" readonly>
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coZip"
-                                            placeholder="우편번호">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="coZip" placeholder="우편번호" readonly>
                                     </div>
-                                    <div class="col-md-10"><input type="text" class="form-control" id="bizr_cert"
-                                            placeholder="사업자 등록증">
+                                    <div class="col-md-10">
+                                        <input type="text" class="form-control" id="bizr_cert" placeholder="사업자 등록증" readonly>
                                     </div>
-                                    <div class="col-md-2"><button class="btn btn-dark w-100">불러오기</button></div>
                                 </div>
                             </fieldset>
-                            <script th:inline="javascript">
-                                let coIdx = null;
-                                $(document).ready(function () {
-                                    $('#sameAsSubscriber').change(function () {
-                                        const userIdx = /*[[${session.userIdx}]]*/ "";
-                                        if ($(this).is(':checked')) {
-                                            // 체크되었을 때 AJAX로 가입자 정보 가져오기
-                                            $.ajax({
-                                                type: 'GET',
-                                                url: `/company/find?userIdx=${userIdx}`,
-                                                success: function (res) {
-                                                    const data = res.body;
-                                                    if (res.head.res_code === "200") {
-                                                        coIdx = data.coIdx;
-                                                        $('#pschName').val(data.pschName);
-                                                        $('#pschTel').val(data.pschTel);
-                                                        $('#coName').val(data.coName);
-                                                        $('#coNameEn').val(data.coNameEn);
-                                                        $('#ceoName').val(data.ceoName);
-                                                        $('#ceoTel').val(data.ceoTel);
-                                                        $('#coAddr').val(data.coAddr);
-                                                        $('#bizr_no').val(data.bizrNo);
-                                                        $('#coAddrDetail').val(data.coAddrDetail);
-                                                        $('#coZip').val(data.coZip);
-                                                        $('#bizr_cert').val(data.bizrCert);
-                                                    } else {
-                                                        Swal.fire({
-                                                            title: "등록된 회사가 없습니다. </br> 해당 정보로 등록하시겠나요?",
-                                                            showDenyButton: true,
-                                                            confirmButtonText: "등록",
-                                                            denyButtonText: `취소`,
-                                                            icon: 'question'
-                                                        }).then((result) => {
-                                                            /* Read more about isConfirmed, isDenied below */
-                                                            if (result.isConfirmed) {
-                                                                Swal.fire("저장되었습니다", "", "success");
-                                                            }
-                                                        });
-                                                    }
-
-                                                },
-                                                error: function (xhr, status, err) {
-                                                    console.error(err);
-                                                    Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
-                                                }
-                                            });
-                                        } else {
-                                            // 체크 해제 시 폼의 모든 input 값을 초기화
-                                            $('#targetForm input').val('');
-                                        }
-                                    });
-                                });
-                            </script>
 
                             <!-- 마스터 ID 정보 -->
-                            <fieldset class="border rounded-3 p-3">
-                                <legend class="float-none w-auto px-2 fs-6 fw-semibold">마스터 ID 정보</legend>
-                                <div class="row g-2 mb-3">
-                                    <div class="col-md-6"><input type="text" class="form-control" id="mstId"
-                                            placeholder="마스터 ID">
+                            <fieldset class="border rounded-3 p-4 mb-4">
+                                <legend class="float-none w-auto px-3 fs-6 fw-bold">
+                                    <i class="bi bi-shield-lock me-2"></i>마스터 ID 정보
+                                </legend>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="mstId" placeholder="마스터 ID">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="mstName"
-                                            placeholder="이름">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="mstName" placeholder="이름">
                                     </div>
-                                    <div class="col-md-6"><input type="password" class="form-control" id="mstPw"
-                                            placeholder="비밀번호">
+                                    <div class="col-md-6">
+                                        <input type="password" class="form-control" id="mstPw" placeholder="비밀번호">
                                     </div>
-                                    <div class="col-md-6"><input type="password" class="form-control" id="mstPwCheck"
+                                    <div class="col-md-6">
+                                        <input type="password" class="form-control" id="mstPwCheck"
                                             placeholder="비밀번호 확인">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="coTel"
-                                            placeholder="회사 전화번호">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="coTel" placeholder="회사 전화번호">
                                     </div>
-                                    <div class="col-md-6"><input type="text" class="form-control" id="mstTel"
-                                            placeholder="연락처">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="mstTel" placeholder="연락처">
                                     </div>
-                                    <div class="col-12"><input type="email" class="form-control" id="mstEmail"
-                                            placeholder="이메일">
+                                    <div class="col-12">
+                                        <input type="email" class="form-control" id="mstEmail" placeholder="이메일">
                                     </div>
                                 </div>
                             </fieldset>
 
                             <div class="d-flex justify-content-between mt-4">
-                                <button class="btn btn-primary" id="back-to-step-1">이전</button>
-                                <button class="btn btn-primary" id="next-to-step-3">다음</button>
+                                <button class="btn btn-outline-secondary" id="back-to-step-1">
+                                    <i class="bi bi-arrow-left me-2"></i>이전
+                                </button>
+                                <button class="btn btn-primary" id="next-to-step-3">
+                                    다음 단계로 <i class="bi bi-arrow-right ms-2"></i>
+                                </button>
                             </div>
                         </div>
 
                         <!-- Right -->
                         <div class="col-md-5">
-                            <div class="bg-white p-4">
-                                <h6 class="fw-bold">주문 요약</h6>
+                            <div class="checkout-summary">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-cart-check me-2"></i>주문 요약
+                                </h6>
 
-                                <div class="bg-light p-3 rounded border">
-                                    <div class="fw-bold mb-1">E-FELIX - Business <span th:text="${type}"></span></div>
-                                    <div class="text-muted mb-2" id="subscription-summary"></div>
+                                <div class="bg-white p-3 rounded border">
+                                    <div class="fw-bold mb-1">E-FELIX - Business Standard</div>
+                                    <div class="text-muted mb-2" id="subscription-summary-2">1년 구독, ₩202,800 / 년 지불
+                                    </div>
 
                                     <div class="d-flex justify-content-between pt-2 border-top mt-3">
                                         <div>
@@ -330,12 +614,20 @@
                                             <br>
                                             <small class="text-muted">(세금이 포함되지 않음)</small>
                                         </div>
-                                        <div class="fw-bold text-end" id="price-display"></div>
+                                        <div class="fw-bold text-end price-box" id="price-display">₩202,800.00</div>
                                     </div>
                                 </div>
 
-                                <p class="">제품 하이라이트</p>
-                                <div id="highlight-list"></div>
+                                <div class="mt-4">
+                                    <p class="fw-semibold mb-3">제품 하이라이트</p>
+                                    <div id="highlight-list" class="highlight-card">
+                                        <ul>
+                                            <li><strong>[인사]</strong> 인사 문서, 근태표, 인사평가 및 급여 명세를 효율적으로 관리하세요.</li>
+                                            <li>모든 직원 정보에 <strong>언제 어디서나 안전하게 접근</strong></li>
+                                            <li><strong>상시 인사 지원 체계</strong> 포함</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -343,84 +635,195 @@
 
                 <!-- Step 3 -->
                 <div class="step-content step-3-content d-none">
-                    <h5 class="fw-bold">계약서</h5>
-                    <p>계약서 내용을 확인하고 작성하세요.</p>
-                    <div id="contract-document"></div>
-                    <div class="d-flex justify-content-between mt-4">
-                        <button class="btn btn-secondary" id="back-to-step-2">이전</button>
-                        <!-- <button class="btn btn-success" id="next-to-step-4">다음</button> -->
-                        <button class="btn btn-secondary" id="next-to-step-4">결제 진행</button>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <h5 class="fw-bold mb-4">
+                                <i class="bi bi-file-earmark-text me-2 text-primary"></i>계약서
+                            </h5>
+                            <div class="alert alert-info d-flex align-items-center mb-4">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <div>계약서 내용을 확인하고 전자서명을 진행해주세요.</div>
+                            </div>
+
+                            <div class="contract-document">
+                                <div id="contract-document">
+                                    <div class="text-center mb-4">
+                                        <h4 class="fw-bold">E-FELIX 서비스 이용 계약서</h4>
+                                        <p class="text-muted">Service Agreement</p>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold">제 1 조 (목적)</h6>
+                                        <p>본 계약은 E-FELIX 서비스(이하 "서비스")를 이용함에 있어 회사와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.
+                                        </p>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold">제 2 조 (서비스 내용)</h6>
+                                        <p>회사는 다음과 같은 서비스를 제공합니다:</p>
+                                        <ul>
+                                            <li>인사 관리 시스템</li>
+                                            <li>영업 관리 시스템</li>
+                                            <li>재고 관리 시스템</li>
+                                            <li>회계 관리 시스템</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold">제 3 조 (이용료 및 결제)</h6>
+                                        <p>서비스 이용료는 선택한 패키지에 따라 결정되며, 계약 시점에 고지된 금액을 기준으로 합니다.</p>
+                                    </div>
+
+                                    <div class="row mt-5">
+                                        <div class="col-md-6">
+                                            <div class="border p-3 rounded">
+                                                <h6 class="fw-bold">계약자 정보</h6>
+                                                <p class="mb-1">
+                                                <p class="mb-1"><strong>회사명:</strong> <span
+                                                        id="contract-company"></span></p>
+                                                <p class="mb-1"><strong>대표자:</strong> <span id="contract-ceo"></span>
+                                                </p>
+                                                <p class="mb-1"><strong>사업자번호:</strong> <span
+                                                        id="contract-bizno"></span></p>
+                                                <p class="mb-1"><strong>주소:</strong> <span id="contract-address"></span>
+                                                </p>
+                                                <p class="mb-1"><strong>연락처:</strong> <span id="contract-tel"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="border p-3 rounded">
+                                                <h6 class="fw-bold">서비스 정보</h6>
+                                                <p class="mb-1"><strong>서비스:</strong> E-FELIX Business Standard</p>
+                                                <p class="mb-1"><strong>구독 기간:</strong> <span
+                                                        id="contract-period"></span></p>
+                                                <p class="mb-1"><strong>이용료:</strong> <span id="contract-price"></span>
+                                                </p>
+                                                <p class="mb-1"><strong>결제 방식:</strong> <span
+                                                        id="contract-billing"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-4">
+                                <button class="btn btn-outline-secondary" id="back-to-step-2">
+                                    <i class="bi bi-arrow-left me-2"></i>이전
+                                </button>
+                                <button class="btn btn-primary" id="next-to-step-4">
+                                    결제 정보 입력 <i class="bi bi-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Step 4 -->
                 <div class="step-content step-4-content d-none">
                     <div class="row g-4">
-
                         <!-- Left -->
                         <div class="col-md-7">
-                            <h5 class="fw-bold">결제 확인</h5>
-                            <p>결제 정보를 확인하고 완료하세요.</p>
+                            <h5 class="fw-bold mb-4">
+                                <i class="bi bi-credit-card me-2 text-primary"></i>결제 정보
+                            </h5>
 
-                            <!-- 결제 -->
-                            <main id="checkoutMain">
-                                <div class="bg-white p-4 shadow-sm rounded">
-                                    <h6 class="fw-bold mb-4">결제 요약</h6>
-                                    <form id="checkoutForm">
-                                        <!-- Item Information -->
-                                        <div class="d-flex align-items-center mb-4">
-                                            <div class="flex-grow-1">
-                                                <h5 id="itemName" class="mb-1"></h5>
-                                                <p class="price-value text-muted mb-0"></p>
-                                            </div>
-                                        </div>
-
-                                        <!-- Price Summary -->
-                                        <div class="bg-light p-3 rounded border mb-4">
-                                            <div class="d-flex justify-content-between">
-                                                <label class="fw-bold mb-0">총 구입 가격</label>
-                                                <span class="price-value fw-bold text-primary fs-5"></span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Checkout Button -->
-                                        <button id="checkoutButton" type="submit" class="btn btn-primary w-100 py-3">
-                                            <span class="checkout-text">결제</span>
-                                            <span class="spinner-border spinner-border-sm ms-2 d-none" role="status">
-                                                <span class="visually-hidden">Loading...</span>
-                                            </span>
-                                        </button>
-                                    </form>
+                            <!-- 결제 방법 선택 -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold mb-3">결제 방법</label>
+                                <div class="d-flex gap-3">
+                                    <button type="button" class="btn btn-outline-primary flex-fill" id="btnEasyPay">
+                                        <i class="bi bi-lightning-charge-fill me-2"></i>간편결제
+                                    </button>
                                 </div>
-                            </main>
+                            </div>
+                            
+                            <!-- 간편결제 수단 선택 -->
+                            <div id="easyPayOptions" class="d-none mt-3">
+                                <label class="form-label fw-semibold mb-2">간편결제 수단 선택</label>
+                                <div class="d-flex gap-3">
+                                    <button type="button" class="btn btn-outline-warning flex-fill easy-pay-btn" data-method="kakaopay">
+                                        <i class="bi bi-chat-dots-fill me-2"></i>카카오페이
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success flex-fill easy-pay-btn" data-method="naverpay">
+                                        <i class="bi bi-shop-window me-2"></i>네이버페이
+                                    </button>
+                                </div>
+                                <!-- 선택된 결제 수단 hidden input -->
+                                <input type="hidden" id="selectedEasyPayMethod" name="easyPayMethod" value="">
+                            </div>
+                           
                             <div class="d-flex justify-content-between mt-4">
-                                <button class="btn btn-secondary" id="back-to-step-3">이전</button>
-                                <button class="btn btn-success">완료</button>
+                                <button class="btn btn-outline-secondary" id="back-to-step-3">
+                                    <i class="bi bi-arrow-left me-2"></i>이전
+                                </button>
+                                <button class="btn btn-success btn-lg" id="processPayment">
+                                    <span id="paymentButtonText">결제 진행</span>
+                                    <span id="paymentSpinner" class="loading-spinner ms-2 d-none"></span>
+                                </button>
                             </div>
                         </div>
 
                         <!-- Right -->
                         <div class="col-md-5">
-                            <div class="bg-white p-4">
-                                <h6 class="fw-bold">주문 요약</h6>
+                            <div class="checkout-summary">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-receipt me-2"></i>최종 결제 내역
+                                </h6>
 
-                                <div class="bg-light p-3 rounded border">
-                                    <div class="fw-bold mb-1">E-FELIX - Business <span
-                                            th:text="${subscriptionPackage.spkName}"></span></div>
-                                    <div class="text-muted mb-2" id="subscription-summary"></div>
+                                <div class="bg-white p-3 rounded border">
+                                    <div class="fw-bold mb-2">E-FELIX - Business Standard</div>
+                                    <div class="text-muted mb-2" id="final-subscription-summary">1년 구독, ₩202,800 / 년 지불
+                                    </div>
 
-                                    <div class="d-flex justify-content-between pt-2 border-top mt-3">
-                                        <div>
-                                            <span class="fw-bold">오늘 결제 기한</span>
-                                            <br>
-                                            <small class="text-muted">(세금이 포함되지 않음)</small>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-12">
+                                            <small class="text-muted">선택된 모듈:</small>
+                                            <div id="selectedModules" class="fw-semibold"></div>
                                         </div>
-                                        <div class="fw-bold text-end" id="price-display"></div>
+                                    </div>
+
+                                    <div class="border-top pt-3">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>기본 요금</span>
+                                            <span id="basePrice">₩202,800.00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>부가세 (10%)</span>
+                                            <span id="vatAmount">₩20,280.00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between fw-bold fs-5 pt-2 border-top">
+                                            <span>총 결제 금액</span>
+                                            <span class="price-box" id="totalAmount">₩223,080.00</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <p class="">제품 하이라이트</p>
-                                <div id="highlight-list"></div>
+                                <div class="mt-4">
+                                    <div class="alert alert-light border">
+                                        <h6 class="fw-bold mb-2">
+                                            <i class="bi bi-shield-check me-2"></i>안전한 결제
+                                        </h6>
+                                        <ul class="mb-0 small">
+                                            <li>SSL 암호화로 안전하게 보호됩니다</li>
+                                            <li>카드 정보는 저장되지 않습니다</li>
+                                            <li>PCI DSS 보안 표준을 준수합니다</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <div class="alert alert-success border-success">
+                                        <h6 class="fw-bold mb-2">
+                                            <i class="bi bi-check-circle me-2"></i>결제 후 진행 사항
+                                        </h6>
+                                        <ul class="mb-0 small">
+                                            <li>즉시 서비스 이용 가능</li>
+                                            <li>계정 정보 이메일 발송</li>
+                                            <li>온보딩 가이드 제공</li>
+                                            <li>24시간 고객 지원</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -431,55 +834,110 @@
 
     <!-- 서명 모달 -->
     <div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="signatureModalLabel">전자 서명</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fs-4 fw-bold" id="signatureModalLabel">
+                        <i class="fas fa-signature me-2"></i>전자 서명
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="닫기"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <!-- 탭 메뉴 -->
-                    <ul class="nav nav-tabs" id="signatureTab" role="tablist">
+                    <ul class="nav nav-pills nav-justified mb-4" id="signatureTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="draw-tab" data-bs-toggle="tab"
-                                data-bs-target="#draw-pane" type="button" role="tab">직접 그리기</button>
+                            <button class="nav-link active rounded-pill fw-semibold" id="draw-tab" data-bs-toggle="tab"
+                                data-bs-target="#draw-pane" type="button" role="tab">
+                                <i class="fas fa-pen-fancy me-2"></i>직접 그리기
+                            </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-pane"
-                                type="button" role="tab">파일 업로드</button>
+                            <button class="nav-link rounded-pill fw-semibold" id="upload-tab" data-bs-toggle="tab"
+                                data-bs-target="#upload-pane" type="button" role="tab">
+                                <i class="fas fa-cloud-upload-alt me-2"></i>파일 업로드
+                            </button>
                         </li>
                     </ul>
 
                     <div class="tab-content" id="signatureTabContent">
                         <!-- 직접 그리기 탭 -->
                         <div class="tab-pane fade show active" id="draw-pane" role="tabpanel">
-                            <p class="text-muted mb-3">아래 영역에 마우스나 터치로 서명을 그려주세요.</p>
-                            <div class="text-center">
-                                <canvas id="signatureCanvas" width="400" height="200"></canvas>
-                            </div>
-                            <div class="signature-controls text-center">
-                                <button type="button" class="btn btn-outline-secondary btn-sm"
-                                    id="clearCanvas">지우기</button>
+                            <div class="row">
+                                <div class="col-md-8 mx-auto">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-header bg-light border-0 text-center">
+                                            <h6 class="mb-0 text-muted">
+                                                <i class="fas fa-mouse-pointer me-2"></i>아래 영역에 마우스나 터치로 서명을 그려주세요
+                                            </h6>
+                                        </div>
+                                        <div class="card-body text-center p-4">
+                                            <div class="border border-3 border-primary rounded p-3 mb-3"
+                                                style="background: #fafafa;">
+                                                <canvas id="signatureCanvas" width="500" height="200"
+                                                    class="border-0 rounded"></canvas>
+                                            </div>
+                                            <div class="signature-controls">
+                                                <button type="button"
+                                                    class="btn btn-outline-danger btn-sm rounded-pill px-4"
+                                                    id="clearCanvas">
+                                                    <i class="fas fa-eraser me-2"></i>지우기
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 파일 업로드 탭 -->
                         <div class="tab-pane fade" id="upload-pane" role="tabpanel">
-                            <div class="file-upload-area" id="fileUploadArea">
-                                <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
-                                <p class="text-muted mb-2">서명 이미지를 드래그하거나 클릭하여 업로드하세요</p>
-                                <p class="text-muted small">PNG, JPG, GIF 파일만 지원됩니다</p>
-                                <input type="file" id="signatureFile" accept="image/*" style="display: none;">
-                            </div>
-                            <div id="uploadPreview" class="mt-3 text-center" style="display: none;">
-                                <img id="uploadedImage" class="signature-preview" alt="업로드된 서명">
+                            <div class="row">
+                                <div class="col-md-8 mx-auto">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-body p-5">
+                                            <div class="file-upload-area text-center border border-3 border-dashed border-primary rounded p-5 mb-3"
+                                                id="fileUploadArea"
+                                                style="cursor: pointer; background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);">
+                                                <i class="fas fa-cloud-upload-alt fa-4x text-primary mb-3"></i>
+                                                <h5 class="text-primary fw-bold mb-2">서명 이미지를 업로드하세요</h5>
+                                                <p class="text-muted mb-2">드래그 앤 드롭 또는 클릭하여 파일을 선택하세요</p>
+                                                <div class="d-flex justify-content-center gap-2 mb-3">
+                                                    <span class="badge bg-light text-dark">PNG</span>
+                                                    <span class="badge bg-light text-dark">JPG</span>
+                                                    <span class="badge bg-light text-dark">GIF</span>
+                                                </div>
+                                                <button type="button" class="btn btn-primary rounded-pill px-4">
+                                                    <i class="fas fa-folder-open me-2"></i>파일 선택
+                                                </button>
+                                                <input type="file" id="signatureFile" accept="image/*"
+                                                    style="display: none;">
+                                            </div>
+                                            <div id="uploadPreview" class="text-center" style="display: none;">
+                                                <div class="border border-2 border-success rounded p-3 bg-light">
+                                                    <img id="uploadedImage" class="signature-preview rounded shadow-sm"
+                                                        alt="업로드된 서명" style="max-width: 100%; max-height: 200px;">
+                                                    <div class="mt-3">
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check me-1"></i>업로드 완료
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <button type="button" class="btn btn-primary" id="saveSignature">저장</button>
+                <div class="modal-footer bg-light border-0 p-4">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>취소
+                    </button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold" id="saveSignature">
+                        <i class="fas fa-save me-2"></i>저장하기
+                    </button>
                 </div>
             </div>
         </div>
@@ -561,259 +1019,294 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Step Navigation Script -->
     <script th:inline="javascript">
+         // 간편결제 버튼 누르면 결제 수단 버튼 표시
+        $('#btnEasyPay').on('click', function () {
+            $('#easyPayOptions').removeClass('d-none').hide().slideDown();
+        });
+
+        // 간편결제 수단 버튼 선택 처리
+        $('.easy-pay-btn').on('click', function () {
+            $('.easy-pay-btn').removeClass('active btn-primary').addClass('btn-outline-warning btn-outline-success');
+            $(this).addClass('active btn-primary');
+
+            const selectedMethod = $(this).data('method');
+            $('#selectedEasyPayMethod').val(selectedMethod);
+        });
+        // 전역 변수: 회사 ID와 선택된 모듈들을 담을 변수
+        let coIdx = null;
+        const selected = new Set();
+
+        // 페이지 로딩 시 초기 설정
         $(document).ready(function () {
-            function showStep(stepNumber) {
-                // 모든 step-content 숨김
-                $('.step-content').removeClass('d-block').addClass('d-none');
-                $('.step-' + stepNumber + '-content').removeClass('d-none').addClass('d-block');
+            // 가입자 정보 자동 입력 체크박스 이벤트 등록
+            $('#sameAsSubscriber').change(handleSubscriberInfoCheckbox);
 
-                // Step indicator active 설정
-                $('.step-indicator .step').removeClass('active');
-                $('.step-' + stepNumber).addClass('active');
-            }
+            // 단계별 이동 관련 이벤트 설정
+            setupStepNavigation();
 
-            function stepValidation1() {
+            // 모듈 선택 관련 설정
+            setupModuleSelection();
 
-            }
+            // 구독 기간 관련 설정
+            setupPeriodSelection();
 
-            function stepValidation2() {
+            // 구독 기간 및 청구 방식 설정
+            setupBillingEvents();
 
-            }
+            // 서명 관련 이벤트 설정
+            // setupSignatureHandlers();
 
-            function stepValidation3() {
+            // Canvas 초기화 (서명용)
+            initCanvas();
+        });
 
-            }
-
-            $('#next-to-step-2').click(function () {
-                stepValidation1();
-                showStep(2);
-            });
-
-            $('#next-to-step-3').click(function () {
-                applyContract();
-                showStep(3);
-            });
-
-            $('#next-to-step-4').click(function () {
-                // const checkout = new Checkout();
-                // checkout.load();
-                autoCheckout();
-                showStep(4);
-            });
-
-            $('#back-to-step-1').click(function () {
-                showStep(1);
-            });
-
-            $('#back-to-step-2').click(function () {
-                showStep(2);
-            });
-
-            $('#back-to-step-3').click(function () {
-                showStep(3);
-            });
-
-            // 서비스 체크 초기화
-            function resetCheckboxes() {
-                $('#hr, #bsn, #purchs, #acc').prop('disabled', false);
-            }
-
-            $('#hr, #acc').change(function () {
-                updateSummary();
-                if (this.checked) {
-                    $('#bsn, #purchs').prop('disabled', true);
-                } else {
-                    resetCheckboxes();
-                }
-            });
-
-            $('#bsn, #purchs').change(function () {
-                updateSummary();
-                if (this.checked) {
-                    $('#hr, #acc').prop('disabled', true);
-                } else {
-                    resetCheckboxes();
-                }
-            });
-
-            const highlightMap = {
-                "hr": `
-                    <ul>
-                        <li><strong>[인사]</strong> 인사 문서, 근태표, 인사평가 및 급여 명세를 효율적으로 관리하세요.</li>
-                        <li>모든 직원 정보에 <strong>언제 어디서나 안전하게 접근</strong></li>
-                        <li><strong>상시 인사 지원 체계</strong> 포함</li>
-                    </ul>`,
-                "bsn": `
-                    <ul>
-                        <li><strong>[영업]</strong> 견적, 계약서, 영업 보고서 등을 빠르게 작성하고 공유하세요.</li>
-                        <li><strong>거래 데이터</strong>를 안전하게 클라우드에 저장</li>
-                        <li><strong>24시간 영업 지원</strong> 가능</li>
-                    </ul>`,
-                "purchs": `
-                    <ul>
-                        <li><strong>[재고]</strong> 입출고, 재고 현황 및 창고 관리를 쉽게 시작하세요.</li>
-                        <li><strong>다양한 기기</strong>에서 재고 데이터 확인 및 관리</li>
-                    </ul>`,
-                "acc": `
-                    <ul>
-                        <li><strong>[회계]</strong> 전표, 세금계산서, 재무제표 작성을 빠르게 시작하세요.</li>
-                        <li><strong>언제 어디서나</strong> 회계 문서 접근 가능</li>
-                    </ul>`
-            };
-
-            function updateSummary() {
-                const periodValue = $('input[name="period"]:checked').val(); // "1", "3", "12"
-                const billing = $('#billing-cycle').val(); // "annual", "monthly", "once"
-
-                // 금액 계산
-                let price = 0;
-                let unit = '';
-                let displayPeriod = '';
-
-                // 기본 월 단가 (spkPrice가 월 단가라고 가정)
-                const monthlyPrice = spkPrice || 20000; // spkPrice가 없으면 기본값 20000
-
-                // 구독 기간 텍스트 설정
-                if (periodValue === "1") {
-                    displayPeriod = "1개월";
-                } else if (periodValue === "3") {
-                    displayPeriod = "3개월";
-                } else if (periodValue === "12") {
-                    displayPeriod = "1년";
-                }
-
-                // 청구 방식에 따른 가격 계산
-                if (billing === "annual") {
-                    // 년 단위 결제
-                    const totalMonths = parseInt(periodValue);
-                    price = monthlyPrice * totalMonths;
-                    unit = "년";
-                } else if (billing === "monthly") {
-                    // 월 단위 결제
-                    price = monthlyPrice;
-                    unit = "월";
-                } else if (billing === "once") {
-                    // 일시불 결제
-                    const totalMonths = parseInt(periodValue);
-                    price = monthlyPrice * totalMonths;
-                    unit = "회";
-                }
-
-                // 가격이 0이면 기본값 설정
-                if (price === 0) {
-                    price = monthlyPrice;
-                    unit = "월";
-                }
-
-                // 소수점 처리
-                price = Math.round(price);
-
-                // 청구 방식 텍스트 변환
-                let billingText = '';
-                if (billing === "annual") {
-                    billingText = "년";
-                } else if (billing === "monthly") {
-                    billingText = "월";
-                } else if (billing === "once") {
-                    billingText = "일시불";
-                }
-
-                // 표시 업데이트
-                const summaryText = `${displayPeriod} 구독, ₩${price.toLocaleString()} / ${billingText} 지불`;
-                $('#subscription-summary').text(summaryText);
-                $('#price-display').text(`₩${price.toLocaleString()}`);
-                $('#resultPrice').text(`₩${price.toLocaleString()}`);
-            }
-
-            function updateBillingOptions() {
-                const selectedValue = $('input[name="period"]:checked').val();
-                const $billingSelect = $('#billing-cycle');
-
-                // 기존 옵션 제거
-                $billingSelect.empty();
-
-                if (selectedValue === '12') {
-                    // 1년 선택 시: 매년, 매월
-                    $billingSelect.append('<option value="annual">년</option>');
-                    $billingSelect.append('<option value="monthly">월</option>');
-                } else {
-                    // 1개월, 3개월 선택 시: 매월, 일시불
-                    $billingSelect.append('<option value="monthly">월</option>');
-                    $billingSelect.append('<option value="once">일시불</option>');
-                }
-            }
-
-            // 초기 설정
-            updateBillingOptions();
-
-            // 라디오 버튼이 변경될 때마다 갱신
-            $('input[name="period"]').on('change', updateBillingOptions);
-
-            $('input[name="period"]').on('change', updateSummary);
-            $('#billing-cycle').on('change', updateSummary);
-
-            $('#next-to-step-2').click(function () {
-                // 체크된 모듈 항목 확인
-                const checkedServices = $('.form-check-input[name=module]:checked').map(function () {
-                    return this.id; // id 값이 hr, bsn, purchs, acc
-                }).get();
-
-                // 체크된 구독 기간 항목 확인
-                const checkedPeriod = $('.form-check-input[name=period]:checked').id;
-
-                console.log($('.form-check-input[name=module]:checked').map(function () {
-                    return this.value;
-                }).get());
-
-                // 하이라이트 영역 비우고 다시 추가
-                let highlightHtml = "";
-                checkedServices.forEach(serviceId => {
-                    highlightHtml += highlightMap[serviceId] || "";
-                });
-
-                $('#highlight-list').html(highlightHtml);
-            });
-
-            function updateCompanyInfo() {
-                const data = {
-
-                }
+        // 체크박스 체크 시 가입자 정보 자동 채우기 처리
+        function handleSubscriberInfoCheckbox() {
+            const userIdx = /*[[${session.userIdx}]]*/ "";
+            if (this.checked) {
+                // AJAX로 가입자 회사 정보 가져오기
                 $.ajax({
-                    type: "POST",
-                    url: "",
-                    data: JSON.stringify(data),
-                    contentType: "application/json",
+                    type: 'GET',
+                    url: `/company/find?userIdx=${userIdx}`,
                     success: function (res) {
                         if (res.head.res_code === "200") {
-
+                            coIdx = res.body.coIdx;
+                            fillCompanyInfo(res.body);
                         } else {
-
+                            // 회사 정보가 없을 경우 사용자에게 등록 여부 묻기
+                            Swal.fire({
+                                title: "등록된 회사가 없습니다. </br> 해당 정보로 등록하시겠나요?",
+                                showDenyButton: true,
+                                confirmButtonText: "등록",
+                                denyButtonText: "취소",
+                                icon: 'question'
+                            }).then(result => {
+                                if (result.isConfirmed) {
+                                    Swal.fire("저장되었습니다", "", "success");
+                                }
+                            });
                         }
                     },
-                    error: function (xhr, status, err) {
-                        console.error(err)
-                    }
+                    error: () => Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error")
+                });
+            } else {
+                // 체크 해제 시 입력 폼 초기화
+                $('#targetForm input').val('');
+            }
+        }
+
+        // 가입자 회사 정보를 입력 폼에 채우는 함수
+        function fillCompanyInfo(data) {
+            $('#pschName').val(data.pschName);
+            $('#pschTel').val(data.pschTel);
+            $('#coName').val(data.coName);
+            $('#coNameEn').val(data.coNameEn);
+            $('#ceoName').val(data.ceoName);
+            $('#ceoTel').val(data.ceoTel);
+            $('#coAddr').val(data.coAddr);
+            $('#bizr_no').val(data.bizrNo);
+            $('#coAddrDetail').val(data.coAddrDetail);
+            $('#coZip').val(data.coZip);
+            $('#bizr_cert').val(data.bizrCert);
+        }
+
+        // 단계 이동 버튼 이벤트 설정 함수
+        function setupStepNavigation() {
+            $('#next-to-step-2').click(handleStep2Transition);
+            $('#next-to-step-3').click(() => {
+                generateContractHTML();
+                showStep(3);
+            });
+            $('#next-to-step-4').click(() => {
+                updateFinalSummary();
+                showStep(4);
+            });
+            $('#back-to-step-1').click(() => showStep(1));
+            $('#back-to-step-2').click(() => showStep(2));
+            $('#back-to-step-3').click(() => showStep(3));
+        }
+
+        // 모듈 설명 리스트를 2단계에서 출력
+        function handleStep2Transition() {
+            const checkedServices = $('.toggle-module.active').map(function () {
+                return $(this).data('value');
+            }).get();
+
+            const highlightMap = getHighlightMap();
+            const highlightHtml = checkedServices.map(service => highlightMap[service] || '').join('');
+
+            $('#highlight-list').html(highlightHtml);
+            showStep(2);
+        }
+
+        // 최종 결제 금액 및 요약 출력 (4단계)
+        function updateFinalSummary() {
+            const period = $('#selectedPeriod').val();
+            const selectedModules = $('.toggle-module.active');
+            const moduleCount = selectedModules.length;
+            const selectedLabels = selectedModules.map(function () {
+                return $(this).text().trim();
+            }).get();
+
+            const pricePerModulePerMonth = spkPrice; // 기본 요금: 부가세 포함
+            const totalPrice = pricePerModulePerMonth // 부가세 포함 금액
+            const vat = Math.round(totalPrice / 10); // 실제 부가세 금액만 따로 보여주기
+            const basePrice = totalPrice - vat; // 순수 공급가 계산
+
+            const formatCurrency = amount => '₩' + amount.toLocaleString('ko-KR') + '.00';
+            const periodTextMap = { "1": "1개월 구독", "3": "6개월 구독", "12": "1년 구독" };
+
+            $('#final-subscription-summary').text(`${periodTextMap[period]}, ${formatCurrency(totalPrice)} / ${period === "12" ? "년" : "개월"} 지불`);
+            $('#selectedModules').html(selectedLabels.join(', '));
+            $('#basePrice').text(formatCurrency(basePrice)); // 공급가
+            $('#vatAmount').text(formatCurrency(vat)); // 부가세
+            $('#totalAmount').text(formatCurrency(totalPrice)); // 총액
+        }
+
+        // 해당 단계 화면만 보여주기
+        function showStep(stepNumber) {
+            $('.step-content').removeClass('d-block').addClass('d-none');
+            $(`.step-${stepNumber}-content`).removeClass('d-none').addClass('d-block');
+            $('.step-indicator .step').removeClass('active');
+            $(`.step-${stepNumber}`).addClass('active');
+        }
+
+        // 모듈 버튼 선택 처리 및 상호 비활성화 설정
+        function setupModuleSelection() {
+            $('.toggle-module').on('click', function () {
+                const $this = $(this);
+                const value = $this.data('value');
+                if ($this.prop('disabled')) return;
+
+                // 선택 상태 토글
+                $this.toggleClass('active');
+                $this.hasClass('active') ? selected.add(value) : selected.delete(value);
+                $('#selectedModules').val(Array.from(selected).join(','));
+
+                // 상호 배제 로직
+                const groupA = ['mou-101', 'mou-102'];
+                const groupB = ['mou-103', 'mou-104'];
+
+                if (groupA.includes(value)) {
+                    $this.hasClass('active') ? disableModules(groupB) : resetDisabledIfNoneSelected(groupA, groupB);
+                } else if (groupB.includes(value)) {
+                    $this.hasClass('active') ? disableModules(groupA) : resetDisabledIfNoneSelected(groupB, groupA);
+                }
+
+                updateSummary();
+            });
+        }
+
+        // 구독기간 버튼 선택 처리 및 상호 비활성화 설정
+        function setupPeriodSelection() {
+            $('.toggle-period').on('click', function() {
+                $('.toggle-period').removeClass('active');
+
+                $(this).addClass('active');
+
+                $('#selectedPeriod').val($(this).data('value'));
+
+                updateSummary();
+            });
+        }
+
+        // 특정 모듈 비활성화
+        function disableModules(modules) {
+            modules.forEach(val => {
+                $(`.toggle-module[data-value='${val}']`).prop('disabled', true).addClass('disabled');
+            });
+        }
+
+        // 조건 충족 시 다시 활성화
+        function resetDisabledIfNoneSelected(group, others) {
+            const anySelected = group.some(val => selected.has(val));
+            if (!anySelected) {
+                others.forEach(val => {
+                    $(`.toggle-module[data-value='${val}']`).prop('disabled', false).removeClass('disabled');
                 });
             }
+        }
 
-            function applyContract() {
-                const today = new Date();
-                const formatted = today.getFullYear() + '-' +
-                    String(today.getMonth() + 1).padStart(2, '0') + '-' +
-                    String(today.getDate()).padStart(2, '0');
-                const signCoName = $('#coName').val();
-                const signPschName = $('#pschName').val();
-                const signCoAddr = $('#coAddr').val();
+        // 모듈 설명 HTML 매핑 객체
+        function getHighlightMap() {
+            return {
+                "mou-101": `<ul><li><strong>[인사]</strong> 인사 문서, 근태표, 인사평가 및 급여 명세를 효율적으로 관리하세요.</li><li>모든 직원 정보에 <strong>언제 어디서나 안전하게 접근</strong></li><li><strong>상시 인사 지원 체계</strong> 포함</li></ul>`,
+                "mou-102": `<ul><li><strong>[회계]</strong> 전표, 세금계산서, 재무제표 작성을 빠르게 시작하세요.</li><li><strong>언제 어디서나</strong> 회계 문서 접근 가능</li></ul>`,
+                "mou-103": `<ul><li><strong>[재고]</strong> 입출고, 재고 현황 및 창고 관리를 쉽게 시작하세요.</li><li><strong>다양한 기기</strong>에서 재고 데이터 확인 및 관리</li></ul>`,
+                "mou-104": `<ul><li><strong>[영업]</strong> 견적, 계약서, 영업 보고서 등을 빠르게 작성하고 공유하세요.</li><li><strong>거래 데이터</strong>를 안전하게 클라우드에 저장</li><li><strong>24시간 영업 지원</strong> 가능</li></ul>`
+            };
+        }
 
-                let contractDocumentHTML =
-                    `
+        // 구독 기간 라디오와 청구방식 셀렉트박스 변경 감지
+        function setupBillingEvents() {
+            $('input[name="period"]').on('change', () => {
+                updateBillingOptions();
+                updateSummary();
+            });
+            $('#billing-cycle').on('change', updateSummary);
+            updateBillingOptions();
+        }
+
+        // 구독 기간에 따라 청구방식 옵션을 갱신
+        function updateBillingOptions() {
+            const selectedValue = $('#selectedPeriod').val();
+            const $billingSelect = $('#billing-cycle');
+            $billingSelect.empty();
+
+            if (selectedValue === '12') {
+                $billingSelect.append('<option value="annual">년</option>');
+                $billingSelect.append('<option value="monthly">월</option>');
+            } else {
+                $billingSelect.append('<option value="monthly">월</option>');
+            }
+        }
+
+        // 선택된 기간과 청구방식으로 가격 계산 및 표시
+        function updateSummary() {
+            const periodValue = $('#selectedPeriod').val();
+            const billing = $('#billing-cycle').val();
+            const monthlyPrice = spkPrice;
+
+            let price = 0;
+            let unit = '';
+            if (billing === "annual" || billing === "once") {
+                price = monthlyPrice * parseInt(periodValue);
+                unit = billing === "annual" ? "년" : "회";
+            } else {
+                price = monthlyPrice;
+                unit = "월";
+            }
+
+            price = Math.round(price);
+
+            const billingText = billing === "annual" ? "년" : billing === "monthly" ? "월" : "일시불";
+            const displayPeriod = periodValue === "12" ? "1년" : periodValue + "개월";
+
+            $('#subscription-summary').text(`${displayPeriod} 구독, ₩${price.toLocaleString()} / ${billingText} 지불`);
+            $('#price-display').text(`₩${price.toLocaleString()}`);
+            $('#resultPrice').text(`₩${price.toLocaleString()}`);
+        }
+
+        // 계약서 HTML 생성 함수 (실제 텍스트는 백엔드 또는 템플릿에서 관리 권장)
+        function generateContractHTML() {
+            const today = new Date();
+            const formatted = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const signCoName = $('#coName').val();
+            const signPschName = $('#pschName').val();
+            const signCoAddr = $('#coAddr').val();
+            const contractHTML =
+                `
                     <div class="container bg-white p-5 shadow rounded" id="contract-group">
-                        <h2 class="contract-title">ERP 시스템 이용 계약서</h2>
+                        <div class="text-center mb-4">
+                            <h4 class="fw-bold">E-FELIX 서비스 이용 계약서</h4>
+                            <p class="text-muted">Service Agreement</p>
+                        </div>
 
                         <div class="contract-section">
                         <h5>제1조 (당사자)</h5>
+                        <p>본 계약은 E-FELIX 서비스(이하 "서비스")를 이용함에 있어 회사와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+
                         <p><strong>갑(공급자)</strong><br>
                             회사명: E-FLIX<br>
                             대표자: 팀장<br>
@@ -888,7 +1381,7 @@
                         <div class="col-md-6">
                             <strong>갑(공급자)</strong><br>
                             회사명: E-FLIX<br>
-                            대표자 서명: 팀장 <img src="/eflix-sign.png" alt="대표자 서명 이미지" width="400" height="200"><br>
+                            대표자 서명: 팀장 <img src="/eflix-sign.png" class="signature-preview" alt="대표자 서명 이미지" width="400" height="200"><br>
                             날짜: ${formatted}
                         </div>
                         <div class="col-md-6">
@@ -899,473 +1392,481 @@
                         </div>
                         </div>
                     </div>
-                    `;
-                $("#contract-document").html(contractDocumentHTML);
-            }
+            `;
+            $('#contract-document').html(contractHTML);
+        }
 
-            // (1) 서명 등록 후 작성 버튼 클릭 → (인) 자리 교체
-            $('#toPaymentModal').on('click', function () {
-                setTimeout(function () {
-                    const paymentModal = new bootstrap.Modal($('#paymentModal')[0]);
-                    paymentModal.show();
-                }, 500);
+        // 서명 등록 후 작성 버튼 클릭 → (인) 자리 교체
+        $('#toPaymentModal').on('click', function () {
+            setTimeout(function () {
+                const paymentModal = new bootstrap.Modal($('#paymentModal')[0]);
+                paymentModal.show();
+            }, 500);
 
-                // 예시: canvas 또는 텍스트 입력으로부터 얻은 서명
-                const userSignature = "홍길동"; // 또는 이미지 경로
+            // 예시: canvas 또는 텍스트 입력으로부터 얻은 서명
+            const userSignature = "홍길동"; // 또는 이미지 경로
 
-                // 텍스트 서명 버전
-                $('#signatureDisplay').html(userSignature + ' (서명)');
+            // 텍스트 서명 버전
+            $('#signatureDisplay').html(userSignature + ' (서명)');
 
-                // 또는 이미지 서명 버전
-                // $('#signatureDisplay').html('<img src="/images/signature.png" alt="서명" style="height:40px;">');
+            // 또는 이미지 서명 버전
+            // $('#signatureDisplay').html('<img src="/images/signature.png" alt="서명" style="height:40px;">');
+        });
+
+        // 서명 영역 클릭 시 서명 모달 다시 열기
+        $('#signatureDisplay').on('click', function () {
+            const signatureModal = new bootstrap.Modal($('#contractSignatureModal')[0]);
+            signatureModal.show();
+        });
+
+        // Canvas 관련 변수
+        let canvas = document.getElementById('signatureCanvas');
+        let ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let currentSignature = null;
+
+        // Canvas 초기화
+        function initCanvas() {
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        // 마우스 이벤트
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // 터치 이벤트
+        canvas.addEventListener('touchstart', handleTouch);
+        canvas.addEventListener('touchmove', handleTouch);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' :
+                e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
             });
+            canvas.dispatchEvent(mouseEvent);
+        }
 
-            // (2) 서명 영역 클릭 시 서명 모달 다시 열기
-            $('#signatureDisplay').on('click', function () {
-                const signatureModal = new bootstrap.Modal($('#contractSignatureModal')[0]);
-                signatureModal.show();
-            });
+        // Canvas 지우기
+        document.getElementById('clearCanvas').addEventListener('click', function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
 
-            // Canvas 관련 변수
-            let canvas = document.getElementById('signatureCanvas');
-            let ctx = canvas.getContext('2d');
-            let isDrawing = false;
-            let currentSignature = null;
+        // 파일 업로드 관련
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const signatureFile = document.getElementById('signatureFile');
+        const uploadPreview = document.getElementById('uploadPreview');
+        const uploadedImage = document.getElementById('uploadedImage');
 
-            // Canvas 초기화
-            function initCanvas() {
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-            }
+        fileUploadArea.addEventListener('click', () => signatureFile.click());
 
-            // 마우스 이벤트
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
+        // 드래그 앤 드롭
+        fileUploadArea.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
 
-            // 터치 이벤트
-            canvas.addEventListener('touchstart', handleTouch);
-            canvas.addEventListener('touchmove', handleTouch);
-            canvas.addEventListener('touchend', stopDrawing);
+        fileUploadArea.addEventListener('dragleave', function (e) {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+        });
 
-            function startDrawing(e) {
-                isDrawing = true;
-                const rect = canvas.getBoundingClientRect();
-                ctx.beginPath();
-                ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-            }
-
-            function draw(e) {
-                if (!isDrawing) return;
-                const rect = canvas.getBoundingClientRect();
-                ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-                ctx.stroke();
-            }
-
-            function stopDrawing() {
-                isDrawing = false;
-                ctx.beginPath();
-            }
-
-            function handleTouch(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' :
-                    e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                canvas.dispatchEvent(mouseEvent);
-            }
-
-            // Canvas 지우기
-            document.getElementById('clearCanvas').addEventListener('click', function () {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            });
-
-            // 파일 업로드 관련
-            const fileUploadArea = document.getElementById('fileUploadArea');
-            const signatureFile = document.getElementById('signatureFile');
-            const uploadPreview = document.getElementById('uploadPreview');
-            const uploadedImage = document.getElementById('uploadedImage');
-
-            fileUploadArea.addEventListener('click', () => signatureFile.click());
-
-            // 드래그 앤 드롭
-            fileUploadArea.addEventListener('dragover', function (e) {
-                e.preventDefault();
-                fileUploadArea.classList.add('dragover');
-            });
-
-            fileUploadArea.addEventListener('dragleave', function (e) {
-                e.preventDefault();
-                fileUploadArea.classList.remove('dragover');
-            });
-
-            fileUploadArea.addEventListener('drop', function (e) {
-                e.preventDefault();
-                fileUploadArea.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFileSelect(files[0]);
-                }
-            });
-
-            signatureFile.addEventListener('change', function (e) {
-                if (e.target.files.length > 0) {
-                    handleFileSelect(e.target.files[0]);
-                }
-            });
-
-            function handleFileSelect(file) {
-                if (!file.type.match('image.*')) {
-                    alert('이미지 파일만 업로드 가능합니다.');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    uploadedImage.src = e.target.result;
-                    uploadPreview.style.display = 'block';
-                    currentSignature = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-
-            // 서명 저장
-            document.getElementById('saveSignature').addEventListener('click', function () {
-                let signatureData = null;
-
-                // 현재 활성 탭 확인
-                const activeTab = document.querySelector('#signatureTab .nav-link.active').id;
-
-                if (activeTab === 'draw-tab') {
-                    // Canvas에서 서명 데이터 가져오기
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const data = imageData.data;
-                    let hasDrawing = false;
-
-                    // Canvas에 그려진 내용이 있는지 확인
-                    for (let i = 0; i < data.length; i += 4) {
-                        if (data[i + 3] > 0) { // 알파값이 0보다 크면 그려진 내용이 있음
-                            hasDrawing = true;
-                            break;
-                        }
-                    }
-
-                    if (hasDrawing) {
-                        signatureData = canvas.toDataURL();
-                    } else {
-                        alert('서명을 그려주세요.');
-                        return;
-                    }
-                } else if (activeTab === 'upload-tab') {
-                    // 업로드된 이미지 사용
-                    if (currentSignature) {
-                        signatureData = currentSignature;
-                    } else {
-                        alert('서명 이미지를 업로드해주세요.');
-                        return;
-                    }
-                }
-
-                // 서명을 계약서에 적용
-                if (signatureData) {
-                    const signatureDisplay = document.getElementById('signatureDisplay');
-                    signatureDisplay.innerHTML = `<img src="${signatureData}" class="signature-preview" alt="전자서명">`;
-                    signatureDisplay.style.textDecoration = 'none';
-                    signatureDisplay.removeAttribute('data-bs-toggle');
-                    signatureDisplay.removeAttribute('data-bs-target');
-                    signatureDisplay.style.cursor = 'default';
-
-                    // 모달 닫기
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('signatureModal'));
-                    modal.hide();
-
-                    // Canvas와 업로드 초기화
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    uploadPreview.style.display = 'none';
-                    signatureFile.value = '';
-                    currentSignature = null;
-
-                    alert('서명이 저장되었습니다.');
-                }
-            });
-
-            // 모달이 열릴 때 Canvas 초기화
-            document.getElementById('signatureModal').addEventListener('shown.bs.modal', function () {
-                initCanvas();
-            });
-
-            // 초기 Canvas 설정
-            initCanvas();
-
-            function autoCheckout() {
-                // 포트원 빌링키 발급 API 호출
-                const uid = Date.now();
-                // V1
-                IMP.init('imp73166581');
-                IMP.request_pay({
-                    pg: "kakaopay",
-                    pay_method: "card",
-                    merchant_uid: `bill_${uid}`,
-                    customer_uid: `user_${uid}`, // 사용자의 고유 ID
-                    amount: 0,
-                    name: "카카오페이 빌링키 등록",
-                    buyer_email: $("#pschEmail").val(),
-                    buyer_name: $("pschName").val(),
-                    buyer_tel: $("#pschTel").val()
-                    // m_redirect_url: "https://your-service.com/billing/complete"
-                }, function (rsp) {
-                    console.log(rsp)
-                    if (rsp.success) {
-                        // 백엔드에 전송
-                        const data = {
-                            impUid: rsp.imp_uid,
-                            customerUid: rsp.customer_uid
-                        }
-                        $.ajax({
-                            type: "POST",
-                            url: "/payment/api/verify/billingKey",
-                            data: JSON.stringify(data),
-                            contentType: "application/json",
-                            success: function (res) {
-                                addContract(contractName);
-                                addSubscription(rsp.customer_uid, rsp.pg_provider, contractName);
-                            },
-                            error: function (xhr, status, err) {
-                                console.error(err);
-
-                            }
-                        });
-                    }
-                });
-            }
-            function addContract(contractName) {
-                const contractData = {
-                    contractHTML: $('#contract-document').html(),
-                    contractName
-                }
-
-                $.ajax({
-                    type: "POST",
-                    url: "/subscription/contract",
-                    data: JSON.stringify(contractData),
-                    contentType: "application/json",
-                    success: function (res) {
-                        if (res.head.res_code === "200") {
-                            // Swal.fire();
-                        } else {
-                            // Swal.fire();
-                        }
-                    },
-                    error: function (xhr, status, err) {
-                        console.error(err);
-                    }
-                });
-            }
-
-            function addSubscription(customer_uid, pg_provider, contractName) {
-                const checkedModules = $('.form-check-input[name=module]:checked').map(function () {
-                    return this.value;
-                }).get().join(",");
-
-                const subMasterData = {
-                    subscriptionDTO: {
-                        spkIdx,
-                        coIdx: coIdx,
-                        empIdx: 'emp-101',
-                        spiPay: pg_provider,
-                        spiPeriod: $('.form-check-input[name=period]:checked').val(),
-                        spiCtrt: contractName,
-                        spiUid: customer_uid,
-                        checkedModules,
-                    }, masterDTO: {
-                        coIdx: coIdx,
-                        mstId: $('#mstId').val(),
-                        mstName: $('#mstName').val(),
-                        mstPw: $('#mstPw').val(),
-                        coTel: $('#coTel').val(),
-                        mstTel: $('#mstTel').val(),
-                        mstEmail: $('#mstEmail').val(),
-                    }
-                }
-
-                const subscriptionData = {
-                    spkIdx,
-                    coIdx: coIdx,
-                    empIdx: 'emp-101',
-                    spiPay: pg_provider,
-                    spiPeriod: $('.form-check-input[name=period]:checked').val(),
-                    spiCtrt: contractName,
-                    spiUid: customer_uid,
-                    checkedModules,
-                    coIdx: coIdx,
-                    mstId: $('#mstId').val(),
-                    mstName: $('#mstName').val(),
-                    mstPw: $('#mstPw').val(),
-                    coTel: $('#coTel').val(),
-                    mstTel: $('#mstTel').val(),
-                    mstEmail: $('#mstEmail').val(),
-                }
-
-                $.ajax({
-                    type: "POST",
-                    url: "/subscription/insert",
-                    data: JSON.stringify(subscriptionData),
-                    contentType: "application/json",
-                    success: function (res) {
-                        if (res.head.res_code === "200") {
-                            Swal.fire("성공", "구독이 성공적으로 이루어졌습니다.", "success");
-                        } else {
-                            Swal.fire("실패", res.body, "error");
-                        }
-                    },
-                    error: function (xhr, status, err) {
-                        console.error(err);
-                        Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
-                    }
-                });
+        fileUploadArea.addEventListener('drop', function (e) {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
             }
         });
 
+        signatureFile.addEventListener('change', function (e) {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (!file.type.match('image.*')) {
+                alert('이미지 파일만 업로드 가능합니다.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                uploadedImage.src = e.target.result;
+                uploadPreview.style.display = 'block';
+                currentSignature = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 서명 저장
+        document.getElementById('saveSignature').addEventListener('click', function () {
+            let signatureData = null;
+
+            // 현재 활성 탭 확인
+            const activeTab = document.querySelector('#signatureTab .nav-link.active').id;
+
+            if (activeTab === 'draw-tab') {
+                // Canvas에서 서명 데이터 가져오기
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                let hasDrawing = false;
+
+                // Canvas에 그려진 내용이 있는지 확인
+                for (let i = 0; i < data.length; i += 4) {
+                    if (data[i + 3] > 0) { // 알파값이 0보다 크면 그려진 내용이 있음
+                        hasDrawing = true;
+                        break;
+                    }
+                }
+
+                if (hasDrawing) {
+                    signatureData = canvas.toDataURL();
+                } else {
+                    alert('서명을 그려주세요.');
+                    return;
+                }
+            } else if (activeTab === 'upload-tab') {
+                // 업로드된 이미지 사용
+                if (currentSignature) {
+                    signatureData = currentSignature;
+                } else {
+                    alert('서명 이미지를 업로드해주세요.');
+                    return;
+                }
+            }
+
+            // 서명을 계약서에 적용
+            if (signatureData) {
+                const signatureDisplay = document.getElementById('signatureDisplay');
+                signatureDisplay.innerHTML = `<img src="${signatureData}" class="signature-preview" alt="전자서명">`;
+                signatureDisplay.style.textDecoration = 'none';
+                signatureDisplay.removeAttribute('data-bs-toggle');
+                signatureDisplay.removeAttribute('data-bs-target');
+                signatureDisplay.style.cursor = 'default';
+
+                // 모달 닫기
+                const modal = bootstrap.Modal.getInstance(document.getElementById('signatureModal'));
+                modal.hide();
+
+                // Canvas와 업로드 초기화
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                uploadPreview.style.display = 'none';
+                signatureFile.value = '';
+                currentSignature = null;
+
+                alert('서명이 저장되었습니다.');
+            }
+        });
+
+        initCanvas();
+        // 모달이 열릴 때 Canvas 초기화
+        document.getElementById('signatureModal').addEventListener('shown.bs.modal', function () {
+            initCanvas();
+        });
+
+        $("#processPayment").on("click", function () {
+            processPayment();
+        });
+
+        // 실제 결제(빌링키 발급 포함) 시작 처리 함수
+        function processPayment() {
+            const uid = Date.now(); // 고유한 결제 ID 생성
+            const userName = $('#pschName').val(); // 결제자 이름
+            const userEmail = $('#pschEmail').val(); // 결제자 이메일
+            const userTel = $('#pschTel').val(); // 결제자 연락처
+
+            const period = $('#selectedPeriod').val(); // 구독 기간
+            const moduleCount = $('.toggle-module.active').length;
+            const amount = 16900 * moduleCount * parseInt(period); // 총 결제 금액
+
+            // IMP 결제 초기화
+            IMP.init('imp73166581'); // PortOne에서 발급받은 가맹점 식별코드
+
+            // 결제 요청
+            IMP.request_pay({
+                pg: 'kakaopay',
+                pay_method: 'card',
+                merchant_uid: 'bill_' + uid,
+                customer_uid: 'user_' + uid,
+                name: 'E-FLIX 구독 결제',
+                amount: spkPrice,
+                buyer_email: userEmail,
+                buyer_name: userName,
+                buyer_tel: userTel
+            }, function (rsp) {
+                if (rsp.success) {
+                    console.log(rsp);
+                    // 1. 빌링키 서버에 등록
+                    const data = {
+                        impUid: rsp.imp_uid,
+                        customerUid: rsp.customer_uid
+                    };
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/payment/api/verify/billingKey',
+                        contentType: 'application/json',
+                        data: JSON.stringify(data),
+                        success: function (res) {
+                            const contractName = 'contract_' + uid;
+                            addContract(contractName);
+                            addSubscription(rsp.customer_uid, rsp.merchant_uid, rsp.pg_provider, contractName);
+                        },
+                        error: function (xhr, status, err) {
+                            console.error(err);
+                            Swal.fire('오류', '결제 정보 등록에 실패했습니다.', 'error');
+                        }
+                    });
+                } else {
+                    Swal.fire('결제 실패', rsp.error_msg, 'error');
+                }
+            });
+        }
+
+        // 계약서 데이터를 서버에 전송하는 함수
+        function addContract(contractName) {
+            const contractData = {
+                contractHTML: $('#contract-document').html(),
+                contractName: contractName
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/subscription/contract",
+                data: JSON.stringify(contractData),
+                contentType: "application/json",
+                success: function (res) {
+                    if (res.head.res_code !== "200") {
+                        Swal.fire("실패", res.body || "계약서 저장 실패", "error");
+                    }
+                },
+                error: function (xhr, status, err) {
+                    console.error(err);
+                    Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+                }
+            });
+        }
+
+        // 구독 및 마스터 등록 함수
+        function addSubscription(customer_uid, merchant_uid, pg_provider, contractName) {
+            const checkedModules = $('#selectedModules').val();
+            // const checkedModules = $('#selectedModules')
+            //     .map(function () { return this.value; })
+            //     .get().join(",");
+
+            const period = $('#selectedPeriod').val();
+            const cycle = $("#billing-cycle").val() === "annual" ? "12" : "1";
+            const mstId = $('#mstId').val();
+            const mstName = $('#mstName').val();
+            const mstPw = $('#mstPw').val();
+            const coTel = $('#coTel').val();
+            const mstTel = $('#mstTel').val();
+            const mstEmail = $('#mstEmail').val();
+
+            const subscriptionData = {
+                spkIdx,
+                coIdx,
+                empIdx: 'emp-101',
+                spiPay: pg_provider,
+                spiPeriod: period,
+                spiCycle: cycle,
+                spiCtrt: contractName,
+                spiUid: customer_uid,
+                spiMid: merchant_uid,
+                checkedModules,
+                mstId,
+                mstName,
+                mstPw,
+                coTel,
+                mstTel,
+                mstEmail
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/subscription/insert",
+                data: JSON.stringify(subscriptionData),
+                contentType: "application/json",
+                success: function (res) {
+                    if (res.head.res_code === "200") {
+                        Swal.fire("성공", "구독이 성공적으로 이루어졌습니다.", "success");
+                    } else {
+                        Swal.fire("실패", res.body || "구독 등록 실패", "error");
+                    }
+                },
+                error: function (xhr, status, err) {
+                    console.error(err);
+                    Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+                }
+            });
+        }
+
+
         const spkPrice = /*[[${subscriptionPackage.spkPrice}]]*/ ""
         const spkIdx = /*[[${subscriptionPackage.spkIdx}]]*/ ""
-        // 결제
-        function Checkout() {
-            let item = null;
-            this.load = async () => {
-                // 로딩 모달창
-                const loadingModal = new bootstrap.Modal('#loadingModal');
-                loadingModal.show();
 
-                const waitPortOne = new Promise((resolve) => {
-                    console.log('Checking window.PortOne:', window.PortOne); // 상태 출력
-                    const polling = setInterval(() => {
-                        if (window.PortOne != null) {
-                            clearInterval(polling);
-                            resolve();
-                        }
-                    }, 5000);
-                });
+        // V2 결제
+        // function Checkout() {
+        //     let item = null;
+        //     this.load = async () => {
+        //         // 로딩 모달창
+        //         const loadingModal = new bootstrap.Modal('#loadingModal');
+        //         loadingModal.show();
 
-                const waitItem = fetch(`/api/payment/item?spkIdx=${spkIdx}`).then(
-                    async (response) => (item = await response.json())
-                );
+        //         const waitPortOne = new Promise((resolve) => {
+        //             console.log('Checking window.PortOne:', window.PortOne); // 상태 출력
+        //             const polling = setInterval(() => {
+        //                 if (window.PortOne != null) {
+        //                     clearInterval(polling);
+        //                     resolve();
+        //                 }
+        //             }, 5000);
+        //         });
 
-                // 로딩 모달창 닫기
-                try {
-                    await Promise.all([waitPortOne, waitItem]);
-                    console.log('Both promises completed');
+        //         const waitItem = fetch(`/api/payment/item?spkIdx=${spkIdx}`).then(
+        //             async (response) => (item = await response.json())
+        //         );
 
-                    // 모달 닫기
-                    loadingModal.hide();
+        //         // 로딩 모달창 닫기
+        //         try {
+        //             await Promise.all([waitPortOne, waitItem]);
+        //             console.log('Both promises completed');
 
-                    // 모달이 완전히 닫힌 후 다음 단계 실행
-                    $('#loadingModal').on('hidden.bs.modal', () => {
-                        $('#checkoutMain').removeClass('d-none');
-                        this.showCheckout();
-                    });
+        //             // 모달 닫기
+        //             loadingModal.hide();
 
-                } catch (error) {
-                    console.error('Loading failed:', error);
-                    loadingModal.hide();
-                    // 에러 처리
-                }
+        //             // 모달이 완전히 닫힌 후 다음 단계 실행
+        //             $('#loadingModal').on('hidden.bs.modal', () => {
+        //                 $('#checkoutMain').removeClass('d-none');
+        //                 this.showCheckout();
+        //             });
 
-                // 결제창 열기
-                $('#checkoutMain').removeClass('d-none');
-                await this.showCheckout();
-            };
+        //         } catch (error) {
+        //             console.error('Loading failed:', error);
+        //             loadingModal.hide();
+        //             // 에러 처리
+        //         }
 
-            this.showCheckout = async () => {
-                $('#itemName').text(item.name);
-                $('.price-value').text(`${item.price.toLocaleString()}원`);
+        //         // 결제창 열기
+        //         $('#checkoutMain').removeClass('d-none');
+        //         await this.showCheckout();
+        //     };
 
-                $('#checkoutForm').on('submit', async (e) => {
-                    e.preventDefault();
-                    this.setWaitingPayment(true);
+        //     this.showCheckout = async () => {
+        //         $('#itemName').text(item.name);
+        //         $('.price-value').text(`${item.price.toLocaleString()}원`);
 
-                    function randomId() {
-                        return [...crypto.getRandomValues(new Uint32Array(2))]
-                            .map((word) => word.toString(16).padStart(8, "0"))
-                            .join("");
-                    }
+        //         $('#checkoutForm').on('submit', async (e) => {
+        //             e.preventDefault();
+        //             this.setWaitingPayment(true);
 
-                    const paymentId = randomId();
-                    const payment = await PortOne.requestPayment({
-                        storeId: "store-092db0f4-068f-4f50-9b06-029fca00b36c",
-                        channelKey: "channel-key-a0af8c14-0047-4ad6-ade6-5589354d0047",
-                        paymentId,
-                        orderName: item.name,
-                        totalAmount: item.price,
-                        currency: item.currency,
-                        payMethod: "CARD",
-                        customData: {
-                            item: item.id,
-                        },
-                    });
+        //             function randomId() {
+        //                 return [...crypto.getRandomValues(new Uint32Array(2))]
+        //                     .map((word) => word.toString(16).padStart(8, "0"))
+        //                     .join("");
+        //             }
 
-                    if (payment.code !== undefined) {
-                        this.setWaitingPayment(false);
-                        console.log(payment);
-                        this.openFailDialog(payment.message);
-                        return;
-                    }
+        //             const paymentId = randomId();
+        //             const payment = await PortOne.requestPayment({
+        //                 storeId: "",
+        //                 channelKey: "",
+        //                 paymentId,
+        //                 orderName: item.name,
+        //                 totalAmount: item.price,
+        //                 currency: item.currency,
+        //                 payMethod: "CARD",
+        //                 customData: {
+        //                     item: item.id,
+        //                 },
+        //             });
 
-                    const completeResponse = await fetch("/api/payment/complete", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            paymentId: payment.paymentId,
-                        }),
-                    });
+        //             if (payment.code !== undefined) {
+        //                 this.setWaitingPayment(false);
+        //                 console.log(payment);
+        //                 this.openFailDialog(payment.message);
+        //                 return;
+        //             }
 
-                    this.setWaitingPayment(false);
+        //             const completeResponse = await fetch("/api/payment/complete", {
+        //                 method: "POST",
+        //                 headers: {
+        //                     "Content-Type": "application/json",
+        //                 },
+        //                 body: JSON.stringify({
+        //                     paymentId: payment.paymentId,
+        //                 }),
+        //             });
 
-                    if (completeResponse.ok) {
-                        const paymentComplete = await completeResponse.json();
-                        if (paymentComplete.status === "PAID") {
-                            this.openSuccessDialog();
-                        }
-                    } else {
-                        this.openFailDialog(await completeResponse.text());
-                    }
-                });
-            };
+        //             this.setWaitingPayment(false);
 
-            this.setWaitingPayment = (isWaiting) => {
-                if (isWaiting) {
-                    $('#checkoutButton')
-                        .prop('disabled', true)
-                        .addClass('disabled');
-                    $('.checkout-text').addClass('d-none');
-                    $('#checkoutButton .spinner-border').removeClass('d-none');
-                } else {
-                    $('#checkoutButton')
-                        .prop('disabled', false)
-                        .removeClass('disabled');
-                    $('.checkout-text').removeClass('d-none');
-                    $('#checkoutButton .spinner-border').addClass('d-none');
-                }
-            };
+        //             if (completeResponse.ok) {
+        //                 const paymentComplete = await completeResponse.json();
+        //                 if (paymentComplete.status === "PAID") {
+        //                     this.openSuccessDialog();
+        //                 }
+        //             } else {
+        //                 this.openFailDialog(await completeResponse.text());
+        //             }
+        //         });
+        //     };
 
-            this.openFailDialog = (message) => {
-                $('#failMessage').text(message);
-                const failModal = new bootstrap.Modal('#failModal');
-                failModal.show();
-            };
+        //     this.setWaitingPayment = (isWaiting) => {
+        //         if (isWaiting) {
+        //             $('#checkoutButton')
+        //                 .prop('disabled', true)
+        //                 .addClass('disabled');
+        //             $('.checkout-text').addClass('d-none');
+        //             $('#checkoutButton .spinner-border').removeClass('d-none');
+        //         } else {
+        //             $('#checkoutButton')
+        //                 .prop('disabled', false)
+        //                 .removeClass('disabled');
+        //             $('.checkout-text').removeClass('d-none');
+        //             $('#checkoutButton .spinner-border').addClass('d-none');
+        //         }
+        //     };
 
-            this.openSuccessDialog = () => {
-                const successModal = new bootstrap.Modal('#successModal');
-                successModal.show();
-            };
-        }
+        //     this.openFailDialog = (message) => {
+        //         $('#failMessage').text(message);
+        //         const failModal = new bootstrap.Modal('#failModal');
+        //         failModal.show();
+        //     };
+
+        //     this.openSuccessDialog = () => {
+        //         const successModal = new bootstrap.Modal('#successModal');
+        //         successModal.show();
+        //     };
+        // }
 
 
         // const issueResponse = PortOne.requestIssueBillingKey({

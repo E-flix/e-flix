@@ -1,6 +1,7 @@
 package com.eflix.common.payment.service;
 
 import com.eflix.common.payment.Entity.PaymentEntity;
+import com.eflix.common.payment.dto.SubscriptionPaymentDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.SubscriptionPackageDetailDTO;
 
@@ -36,8 +37,8 @@ public interface PaymentService {
 
     public int updatePayment(PaymentEntity paymentEntity);
 
-    public int insertSubscriptionInfo(SubscriptionDTO subscriptionDTO);
-
     // 0704
     public void processSubscription();
+    
+    public String requestPayment(SubscriptionPaymentDTO dto, String accessToken);
 }

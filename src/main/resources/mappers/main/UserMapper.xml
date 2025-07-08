@@ -63,10 +63,10 @@
     <!-- @author 복성민 -->
     <!-- @since 2025-06-25 -->
     <!-- ===================================== -->
-    <update id="updateUser" parameterType="UserDTO">
+    <update id="updateUserByUserIdx" parameterType="UserDTO">
         UPDATE users
         SET
-        <if test="user_pw != null and user_pw !=''">
+        <if test="userPw != null and userPw !=''">
             user_pw = #{userPw},
         </if>
         <if test="userTel != null and userTel !=''">
@@ -75,7 +75,7 @@
         <if test="userEmail != null and userEmail !=''">
             user_email = #{userEmail},
         </if>
-            user_moddate = now()
+            user_moddate = SYSDATE
         WHERE user_idx = #{userIdx}
     </update>
 

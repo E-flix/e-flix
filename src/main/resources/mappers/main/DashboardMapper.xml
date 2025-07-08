@@ -47,4 +47,28 @@
         FROM answers 
         WHERE TRUNC(ansr_regdate) = TRUNC(SYSDATE)
     </select>
+
+    
+    <!-- 0706 -->
+    <select id="findAllSubscriptions" resultType="SubscriptionDTO">
+        SELECT *
+        FROM (
+            SELECT
+                c.co_name,
+                s.spi_start,
+                sp.spk_name
+            FROM companies c
+                JOIN subscription s ON c.co_idx = s.co_idx
+                JOIN subscription_packages sp ON s.spk_idx = sp.spk_idx
+            ORDER BY s.spi_start DESC
+        )
+        WHERE ROWNUM &lt;= 5
+    </select>
+
+    <select id="findAllQuestions" resultType="QuestionDTO">
+        SELECT q.qst_idx, q.qst_title, q.qst_writer, q.qst_content, q.qst_regdate, q.qst_email, q.qst_tel
+        FROM questions q
+            LEFT JOIN answers a ON q.qst_idx = a.qst_idx
+        WHERE a.qst_idx IS NULL
+    </select>
 </mapper>

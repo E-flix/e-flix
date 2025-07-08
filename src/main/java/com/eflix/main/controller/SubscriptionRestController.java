@@ -6,9 +6,13 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.eflix.common.jasperResolver.JasperDownloadPDF;
 import com.eflix.common.jasperResolver.JasperPreviewPDF;
+import com.eflix.common.payment.service.BillingService;
+import com.eflix.common.payment.service.PaymentService;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
+import com.eflix.main.dto.SubscriptionDTO;
+import com.eflix.main.dto.SubscriptionPackageDetailDTO;
 import com.eflix.main.dto.etc.InvoiceDTO;
 import com.eflix.main.dto.etc.StatementDTO;
 import com.eflix.main.dto.etc.SubMasterDTO;
@@ -54,7 +58,10 @@ public class SubscriptionRestController {
     private ReportService reportService;
 
     @Autowired
-    private CompanyService companyService;
+    private PaymentService paymentService;
+
+    @Autowired
+    private BillingService billingService;
 
     @Autowired
     private JasperPreviewPDF jasperPreviewPDF;

@@ -224,9 +224,8 @@ public class PaymentController {
     public ResponseEntity<ResResult> postVerify(@RequestBody BillingReqDTO billingReqDTO) {
         ResResult result = null;
         String billingKey = billingService.verifyBillingKey(billingReqDTO.getCustomerUid());
-        // TODO: DB 저장 등 추가 로직
 
-        if(billingKey != null) {
+        if(!billingKey.isBlank()) {
             result = ResUtil.makeResult(ResStatus.OK, billingKey);
         } else {
             result = ResUtil.makeResult("401", "검증에 실패했습니다.", null);

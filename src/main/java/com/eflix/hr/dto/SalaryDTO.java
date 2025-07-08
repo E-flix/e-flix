@@ -35,17 +35,18 @@ public class SalaryDTO {
     private Double otherDeductions; // other_deductions
     private String payMonth;         // pay_month
     private String attMonth;         // att_month
-    private String field;            // field
-    private String field2;           // field2
-    private String field3;           // field3
-    private String field4;           // field4
-    private String field5;           // field5
-    private String field6;           // field6
-    private String field7;           // field7
-    private String field8;           // field8
-    private String field9;           // field9
-    private String field10;          // field10
+    private String sal1;            // sal1
+    private String sal2;           // sal2
+    private String sal3;           // sal3
+    private String sal4;           // sal4
+    private String sal5;           // sal5
+    private String sal6;           // sal6
+    private String sal7;           // sal7
+    private String sal8;           // sal8
+    private String sal9;           // sal9
+    private String sal10;          // sal10
 
     private String coIdx;
+    private String salaryType;
 
 }

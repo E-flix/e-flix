@@ -2,8 +2,8 @@ package com.eflix.main.service;
 
 import java.util.List;
 
-import com.eflix.common.security.dto.UserDTO;
 import com.eflix.main.dto.SubscriptionDTO;
+import com.eflix.main.dto.UserDTO;
 import com.eflix.main.dto.etc.UserSearchDTO;
 
 /**
@@ -42,7 +42,7 @@ public interface UserService {
 
     public UserDTO findByUserIdx(String userIdx);
 
-    public int updateUser(UserDTO userDTO);
+    public int updateUserByUserIdx(UserDTO userDTO);
 
     public List<UserDTO> findAllUsers(UserSearchDTO userSearchDTO);
 

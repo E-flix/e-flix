@@ -118,7 +118,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public SubscriptionInfoDTO findSubscriptionByCoIdx(String userIdx) {
+    public SubscriptionInfoDTO findSubscriptionByUserIdx(String userIdx) {
         CompanyDTO companyDTO = companyMapper.findByUserIdx(userIdx);
 
         return subscriptionMapper.findSubscriptionByCoIdx(companyDTO.getCoIdx());
@@ -153,6 +153,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Transactional
     public void insertSubscriptionByProcedure(SubscriptionProcedureDTO dto) {
         try {
+            System.out.println(dto.toString());
+            dto.setMstPw(passwordEncoder.encode(dto.getMstPw()));
             subscriptionMapper.callInsertSubscription(dto);
         } catch (Exception e) {
             log.error("구독 프로시저 호출 실패", e);
@@ -163,5 +165,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public List<ModuleDTO> findAllModuleBySpiIdx(String spiIdx) {
         return subscriptionMapper.findAllModuleBySpiIdx(spiIdx);
+    }
+
+    // 0706
+    @Override
+    public SubscriptionInfoDTO findSubscriptionByCoIdx(String coIdx) {
+        return subscriptionMapper.findSubscriptionByCoIdx(coIdx);
     }
 }
