@@ -31,12 +31,12 @@ public class DeptRestController {
     }
 
     @GetMapping("/list/down")
-    public List<DepartmentDTO> getList(@RequestParam("deptUpIdx") String deptUpIdx) {
+    public List<DepartmentDTO> getDownList(@RequestParam("deptUpIdx") String deptUpIdx) {
         return departmentService.findDownAllByCoIdx(getCoIdx(), deptUpIdx);
     }
 
     @GetMapping("/list/all")
-    public List<DepartmentDTO> getList(@RequestParam("coIdx") String coIdx) {
+    public List<DepartmentDTO> getUpList(@RequestParam("coIdx") String coIdx) {
         return departmentService.findAllDepts(coIdx);
     }
     
