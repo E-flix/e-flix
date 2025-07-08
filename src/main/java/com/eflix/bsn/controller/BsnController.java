@@ -28,11 +28,13 @@ import com.eflix.bsn.dto.OrdersDetailDTO;
 import com.eflix.bsn.dto.QuotationDTO;
 import com.eflix.bsn.dto.QuotationDetailDTO;
 import com.eflix.bsn.dto.SalesOutboundDTO;
+import com.eflix.bsn.dto.SoutboundDetailDTO;
 import com.eflix.bsn.service.CreditService;
 import com.eflix.bsn.service.CustomerService;
 import com.eflix.bsn.service.ItemService;
 import com.eflix.bsn.service.OrdersService;
 import com.eflix.bsn.service.QuotationService;
+import com.eflix.bsn.service.SOutboundService;
 import com.eflix.common.security.auth.AuthUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,6 +56,7 @@ public class BsnController {
     private final CreditService    creditService;
     private final CustomerService  customerService;
     private final ItemService      itemService;
+    private final SOutboundService sOutboundService;
     private final ObjectMapper     objectMapper;
 
     /*──────────── 1. 메인 ────────────*/
@@ -578,13 +581,184 @@ public class BsnController {
     }
 
     /*──────────────────────────────
-     * 6. 출고 뷰(임시)
+     * 6. 출고 뷰
      *──────────────────────────────*/
     @GetMapping("/obound_list")
     public String outboundList(){ return "bsn/soutbound_list"; }
+
     @GetMapping("/soutbound")
     public String soutboundPage(Model model) {
         model.addAttribute("outbound", new SalesOutboundDTO());
         return "bsn/soutbound";
+    }
+
+    /*──────────────────────────────
+     * 7. 출고 관리 영역
+     *──────────────────────────────*/
+
+    /**
+     * ★ 출고 목록 조회 API
+     */
+    @GetMapping("/soutbounds")
+    @ResponseBody
+    public List<SalesOutboundDTO> soutboundsList() {
+        try {
+            return sOutboundService.getOutboundList();
+        } catch (Exception e) {
+            log.error("출고 목록 조회 오류", e);
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * ★ 출고 상세 조회 API
+     */
+    @GetMapping("/soutbounds/{outboundNo}/details")
+    @ResponseBody
+    public List<SoutboundDetailDTO> soutboundDetails(@PathVariable String outboundNo) {
+        try {
+            return sOutboundService.getOutboundDetails(outboundNo);
+        } catch (Exception e) {
+            log.error("출고 상세 조회 오류: {}", outboundNo, e);
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * ★ 주문서 기반 출고 생성 API (핵심 비즈니스 로직)
+     */
+    @PostMapping("/soutbounds/create-from-order")
+    @ResponseBody
+    public Map<String, Object> createOutboundFromOrder(@RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+        String coIdx = AuthUtil.getCoIdx();
+        String empIdx = AuthUtil.getEmpIdx();
+        
+        try {
+            String orderNo = request.get("orderNo");
+            
+            log.info("주문서 기반 출고 생성 요청 - 회사: {}, 사원: {}, 주문번호: {}", 
+                    coIdx, empIdx, orderNo);
+            
+            // ✅ StringUtils 없이 검증
+            if (orderNo == null || orderNo.trim().isEmpty()) {
+                throw new IllegalArgumentException("주문서 번호가 필요합니다.");
+            }
+            
+            // ★ 1. 주문서 존재 여부 확인
+            OrdersDTO order = ordersService.getOrder(orderNo);
+            if (order == null || order.getOrderNo() == null || order.getOrderNo().trim().isEmpty()) {
+                throw new RuntimeException("주문서를 찾을 수 없습니다: " + orderNo);
+            }
+            
+            // ★ 2. 주문서 기반 출고 생성
+            String outboundNo = sOutboundService.createOutboundFromOrder(orderNo);
+            
+            // ★ 3. 주문서 상태 업데이트 (출고 처리)
+            updateOrderStatusToShipped(orderNo);
+            
+            response.put("success", true);
+            response.put("outboundNo", outboundNo);
+            response.put("message", "주문서 기반 출고가 성공적으로 생성되었습니다.");
+            
+            log.info("주문서 기반 출고 생성 성공 - 주문번호: {} → 출고번호: {}", orderNo, outboundNo);
+            
+        } catch (IllegalArgumentException e) {
+            log.warn("주문서 기반 출고 생성 실패 (유효성 검증) - 회사: {}, 오류: {}", coIdx, e.getMessage());
+            response.put("success", false);
+            response.put("message", "입력 오류: " + e.getMessage());
+            
+        } catch (RuntimeException e) {
+            log.error("주문서 기반 출고 생성 실패 (비즈니스 로직) - 회사: {}, 오류: {}", coIdx, e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "처리 오류: " + e.getMessage());
+            
+        } catch (Exception e) {
+            log.error("주문서 기반 출고 생성 실패 (시스템 오류) - 회사: {}, 오류: {}", coIdx, e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "시스템 오류가 발생했습니다. 관리자에게 문의하세요.");
+        }
+        
+        return response;
+    }
+
+    /**
+     * ★ 출고 등록 API
+     */
+    @PostMapping("/soutbounds")
+    @ResponseBody
+    public Map<String, Object> createOutbound(@RequestBody SalesOutboundDTO dto) {
+        Map<String, Object> response = new HashMap<>();
+        String coIdx = AuthUtil.getCoIdx();
+        
+        try {
+            log.info("출고 등록 요청 - 회사: {}, 거래처: {}", coIdx, dto.getCustomerCd());
+            
+            String outboundNo = sOutboundService.createOutbound(dto);
+            
+            response.put("success", true);
+            response.put("outboundNo", outboundNo);
+            response.put("message", "출고가 성공적으로 등록되었습니다.");
+            
+            log.info("출고 등록 성공 - 출고번호: {}", outboundNo);
+            
+        } catch (Exception e) {
+            log.error("출고 등록 실패 - 회사: {}, 오류: {}", coIdx, e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "출고 등록 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        
+        return response;
+    }
+
+    /**
+     * ★ 출고 삭제 API
+     */
+    @DeleteMapping("/soutbounds/{outboundNo}")
+    @ResponseBody
+    public Map<String, Object> deleteOutbound(@PathVariable String outboundNo) {
+        Map<String, Object> response = new HashMap<>();
+        String coIdx = AuthUtil.getCoIdx();
+        
+        try {
+            log.info("출고 삭제 요청 - 회사: {}, 출고번호: {}", coIdx, outboundNo);
+            
+            sOutboundService.deleteOutbound(outboundNo);
+            
+            response.put("success", true);
+            response.put("message", "출고가 성공적으로 삭제되었습니다.");
+            
+            log.info("출고 삭제 성공 - 출고번호: {}", outboundNo);
+            
+        } catch (Exception e) {
+            log.error("출고 삭제 실패 - 회사: {}, 출고번호: {}, 오류: {}", coIdx, outboundNo, e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "출고 삭제 중 오류가 발생했습니다: " + e.getMessage());
+        }
+        
+        return response;
+    }
+
+    /**
+     * ★ 주문서 상태를 '출고완료'로 업데이트
+     */
+    private void updateOrderStatusToShipped(String orderNo) {
+        try {
+            // 주문서 상세의 출고 상태를 '출고완료'로 업데이트
+            List<OrdersDetailDTO> details = ordersService.getOrderDetails(orderNo);
+            
+            details.forEach(detail -> {
+                detail.setOutState("출고완료");
+                detail.setOutboundDt(java.time.LocalDate.now());
+            });
+            
+            ordersService.updateOrderDetails(orderNo, details);
+            
+            log.info("주문서 상태 업데이트 완료 - 주문번호: {} → 출고완료", orderNo);
+            
+        } catch (Exception e) {
+            log.error("주문서 상태 업데이트 실패 - 주문번호: {}, 오류: {}", orderNo, e.getMessage(), e);
+            // ★ 주문서 상태 업데이트 실패는 출고 생성을 중단시키지 않음 (로그만 남김)
+        }
     }
 }

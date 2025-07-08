@@ -1,55 +1,164 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.eflix.bsn.mapper.SOutboundMapper">
 
+  <!-- ★ 출고 헤더 조회 (고객 정보 포함) -->
   <select id="selectAllOutbound" resultType="com.eflix.bsn.dto.SalesOutboundDTO">
     SELECT 
-      OUTBOUND_NO    AS outboundNo,
-      WRITE_DT       AS writeDt,
-      CUSTOMER_CD    AS customerCd,
-      ORDER_DT       AS orderDt,
-      OUTBOUND_DT    AS outboundDt,
-      MONEY          AS money,
-      REMARKS        AS remarks,
-      CO_IDX         AS coIdx
-    FROM EFLIX.SALES_OUTBOUND
-    WHERE CO_IDX = #{coIdx}
-    ORDER BY WRITE_DT DESC
+      so.OUTBOUND_NO        AS outboundNo,
+      so.WRITE_DT           AS writeDt,
+      so.CUSTOMER_CD        AS customerCd,
+      so.CUSTOMER_NAME      AS customerName,        -- ★ 추가
+      so.REPRESENTATIVE_NM  AS representativeNm,    -- ★ 추가
+      so.ORDER_DT           AS orderDt,
+      so.OUTBOUND_DT        AS outboundDt,
+      so.MONEY              AS money,
+      so.REMARKS            AS remarks,
+      so.CO_IDX             AS coIdx,
+      so.CREATED_AT         AS createdAt,           -- ★ 추가
+      so.UPDATED_AT         AS updatedAt            -- ★ 추가
+    FROM EFLIX.SALES_OUTBOUND so
+    WHERE so.CO_IDX = #{coIdx}
+    ORDER BY so.OUTBOUND_DT DESC, so.CREATED_AT DESC
   </select>
 
+  <!-- ★ 출고 상세 조회 (확장된 필드 포함) -->
   <select id="selectOutboundDetails" resultType="com.eflix.bsn.dto.SoutboundDetailDTO">
     SELECT
-      ORDER_NO     AS orderNo,
-      ITEM_NAME    AS itemName,
-      STANDARD     AS standard,
-      QTY          AS qty,
-      UNIT         AS unit,
-      REMARKS      AS remarks,
-      CO_IDX       AS coIdx
-    FROM EFLIX.SOUTBOUND_DETAIL
-    WHERE ORDER_NO = #{outboundNo}
-    ORDER BY ORDER_NO
+      sd.OUTBOUND_NO        AS outboundNo,          -- ★ 수정: ORDER_NO → OUTBOUND_NO
+      sd.LINE_NO            AS lineNo,              -- ★ 추가
+      sd.ITEM_CODE          AS itemCode,            -- ★ 추가
+      sd.ITEM_NAME          AS itemName,
+      sd.STANDARD           AS standard,
+      sd.QTY                AS qty,
+      sd.UNIT               AS unit,
+      sd.UNIT_PRICE         AS unitPrice,           -- ★ 추가
+      sd.SUPPLY_AMOUNT      AS supplyAmount,        -- ★ 추가
+      sd.TAX_AMOUNT         AS taxAmount,           -- ★ 추가
+      sd.TOTAL_AMOUNT       AS totalAmount,         -- ★ 추가
+      sd.REMARKS            AS remarks,
+      sd.CO_IDX             AS coIdx
+    FROM EFLIX.SOUTBOUND_DETAIL sd
+    WHERE sd.OUTBOUND_NO = #{outboundNo}
+    ORDER BY sd.LINE_NO
   </select>
 
-  <insert id="insertOutbound">
+  <!-- ★ 출고 헤더 INSERT (확장된 필드 포함) -->
+  <insert id="insertOutbound" parameterType="com.eflix.bsn.dto.SalesOutboundDTO">
     INSERT INTO EFLIX.SALES_OUTBOUND (
-      OUTBOUND_NO, WRITE_DT, CUSTOMER_CD, ORDER_DT, OUTBOUND_DT, MONEY, REMARKS, CO_IDX
+      OUTBOUND_NO, WRITE_DT, CUSTOMER_CD, CUSTOMER_NAME, REPRESENTATIVE_NM,
+      ORDER_DT, OUTBOUND_DT, MONEY, REMARKS, CO_IDX
     ) VALUES (
-      #{outboundNo}, #{writeDt}, #{customerCd},
+      #{outboundNo}, #{writeDt}, #{customerCd}, #{customerName}, #{representativeNm},
       #{orderDt}, #{outboundDt}, #{money}, #{remarks}, #{coIdx}
     )
   </insert>
 
-  <insert id="insertOutboundDetail">
+  <!-- ★ 출고 상세 INSERT (확장된 필드 포함) -->
+  <insert id="insertOutboundDetail" parameterType="com.eflix.bsn.dto.SoutboundDetailDTO">
     INSERT INTO EFLIX.SOUTBOUND_DETAIL (
-      ORDER_NO, ITEM_NAME, STANDARD, QTY, UNIT, REMARKS, CO_IDX
+      OUTBOUND_NO, LINE_NO, ITEM_CODE, ITEM_NAME, STANDARD,
+      QTY, UNIT, UNIT_PRICE, SUPPLY_AMOUNT, TAX_AMOUNT, TOTAL_AMOUNT,
+      REMARKS, CO_IDX
     ) VALUES (
-      #{orderNo}, #{itemName}, #{standard},
-      #{qty}, #{unit}, #{remarks}, #{coIdx}
+      #{outboundNo}, #{lineNo}, #{itemCode}, #{itemName}, #{standard},
+      #{qty}, #{unit}, #{unitPrice}, #{supplyAmount}, #{taxAmount}, #{totalAmount},
+      #{remarks}, #{coIdx}
     )
   </insert>
+
+  <!-- ★ 출고 상세 일괄 INSERT (배치 처리) -->
+  <insert id="insertOutboundDetailBatch">
+    INSERT ALL
+    <foreach collection="list" item="d">
+      INTO EFLIX.SOUTBOUND_DETAIL (
+        OUTBOUND_NO, LINE_NO, ITEM_CODE, ITEM_NAME, STANDARD,
+        QTY, UNIT, UNIT_PRICE, SUPPLY_AMOUNT, TAX_AMOUNT, TOTAL_AMOUNT,
+        REMARKS, CO_IDX
+      ) VALUES (
+        #{d.outboundNo}, #{d.lineNo}, #{d.itemCode}, #{d.itemName}, #{d.standard},
+        #{d.qty}, #{d.unit}, #{d.unitPrice}, #{d.supplyAmount}, #{d.taxAmount}, #{d.totalAmount},
+        #{d.remarks}, #{d.coIdx}
+      )
+    </foreach>
+    SELECT 1 FROM DUAL
+  </insert>
+
+  <!-- ★ 출고번호 생성 (옵션: 자동 채번) -->
+  <select id="selectNextOutboundNo" resultType="string" parameterType="string">
+    SELECT 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || 
+           LPAD(NVL(MAX(TO_NUMBER(SUBSTR(OUTBOUND_NO, -4))), 0) + 1, 4, '0') AS nextNo
+    FROM EFLIX.SALES_OUTBOUND
+    WHERE CO_IDX = #{coIdx}
+      AND OUTBOUND_NO LIKE 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'
+  </select>
+
+  <!-- ★ 출고 삭제 (헤더/디테일) -->
+  <delete id="deleteOutbound" parameterType="string">
+    DELETE FROM EFLIX.SALES_OUTBOUND
+    WHERE OUTBOUND_NO = #{outboundNo}
+      AND CO_IDX = #{coIdx}
+    <!-- CASCADE 옵션으로 DETAIL은 자동 삭제됨 -->
+  </delete>
+
+  <!-- ★ 주문서 기반 출고 생성: 주문서 헤더 정보 조회 -->
+  <select id="selectOrderForOutbound" resultType="com.eflix.bsn.dto.SalesOutboundDTO">
+    SELECT 
+      o.ORDER_NO            AS outboundNo,        -- ★ 임시로 orderNo를 outboundNo에 매핑
+      TO_CHAR(SYSDATE, 'YYYY-MM-DD') AS writeDt, -- 작성일은 오늘
+      o.CUSTOMER_CD         AS customerCd,
+      c.CUSTOMER_NM         AS customerName,
+      c.REPRESENTATIVE_NM   AS representativeNm,
+      o.ORDER_DT            AS orderDt,
+      NULL                  AS outboundDt,        -- 출고일은 Service에서 설정
+      'KRW'                 AS money,
+      o.REMARKS             AS remarks,
+      o.CO_IDX              AS coIdx
+    FROM EFLIX.ORDERS o
+    JOIN EFLIX.CUSTOMERS c ON c.CUSTOMER_CD = o.CUSTOMER_CD AND c.CO_IDX = o.CO_IDX
+    WHERE o.ORDER_NO = #{orderNo}
+      AND o.CO_IDX = #{coIdx}
+  </select>
+
+  <!-- ★ 주문서 기반 출고 생성: 주문서 상세 정보 조회 -->
+  <select id="selectOrderDetailsForOutbound" resultType="com.eflix.bsn.dto.SoutboundDetailDTO">
+    SELECT 
+      NULL                  AS outboundNo,        -- Service에서 설정
+      od.LINE_NO            AS lineNo,
+      od.ITEM_CODE          AS itemCode,
+      od.ITEM_NAME          AS itemName,
+      od.SPEC               AS standard,          -- SPEC → STANDARD 매핑
+      od.QTY                AS qty,
+      '개'                  AS unit,              -- 기본 단위 (필요시 BSN_ITEM 조인)
+      od.UNIT_PRICE         AS unitPrice,
+      od.SUPPLY_AMOUNT      AS supplyAmount,
+      od.TAX_AMOUNT         AS taxAmount,
+      od.TOTAL_AMOUNT       AS totalAmount,
+      od.REMARKS            AS remarks,
+      od.CO_IDX             AS coIdx
+    FROM EFLIX.ORDERS_DETAIL od
+    WHERE od.ORDER_NO = #{orderNo}
+      AND od.CO_IDX = #{coIdx}
+    ORDER BY od.LINE_NO
+  </select>
+
+  <!-- ★ 출고 헤더 수정 -->
+  <update id="updateOutbound" parameterType="com.eflix.bsn.dto.SalesOutboundDTO">
+    UPDATE EFLIX.SALES_OUTBOUND
+    SET WRITE_DT = #{writeDt},
+        CUSTOMER_CD = #{customerCd},
+        CUSTOMER_NAME = #{customerName},
+        REPRESENTATIVE_NM = #{representativeNm},
+        ORDER_DT = #{orderDt},
+        OUTBOUND_DT = #{outboundDt},
+        MONEY = #{money},
+        REMARKS = #{remarks},
+        UPDATED_AT = SYSTIMESTAMP
+    WHERE OUTBOUND_NO = #{outboundNo}
+      AND CO_IDX = #{coIdx}
+  </update>
 
 </mapper>
