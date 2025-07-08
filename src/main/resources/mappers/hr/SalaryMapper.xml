@@ -57,6 +57,11 @@
         </if>
     ORDER BY d.dept_name, g.grd_order, e.emp_name
     </select> -->
+  
+  <insert id="insertSalary" parameterType="SalaryDTO">
+    INSERT INTO salary(salary_idx, emp_idx, base_salary)
+    VALUES (#{salaryIdx}, #{empIdx}, #{baseSalary})
+  </insert>
 
     <!-- 요약 결과 매핑 -->
   <resultMap id="salarySummaryMap" type="SalarySummaryDTO">

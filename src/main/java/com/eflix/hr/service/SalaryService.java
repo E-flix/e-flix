@@ -17,11 +17,6 @@ import com.eflix.hr.dto.etc.SalaryFullDetailDTO;
 import com.eflix.hr.dto.etc.SalarySummaryDTO;
 
 public interface SalaryService {
-    public List<SalaryDTO> getAllSalaries();
-    public SalaryDTO getSalaryById(String salaryIdx);
-    int createSalary(SalaryDTO dto);
-    int updateSalary(SalaryDTO dto);
-    int deleteSalary(String salaryIdx);
     
     public List<SalaryDTO> bankList();
 
@@ -34,4 +29,7 @@ public interface SalaryService {
     public List<SalaryFullDetailDTO> getSalaryDetailItems(String coIdx, String salaryIdx);
     public void calculateSalary(String coIdx, List<String> salaryIdxList);
     public void confirmSalary(Map<String, Object> map);
+
+    // 0708
+    public int insertSalary(SalaryDTO salaryDTO);
 }

@@ -29,9 +29,13 @@ public interface SalaryMapper {
 
     List<SalarySummaryDTO> findSalaryList(String coIdx, String salaryMonth, String payMonth, String empName, String deptIdx);
 
+    // 0707
     List<SalaryDetailDTO> findSalaryDetail(String coIdx, String salaryIdx);
     List<SalaryFullDetailDTO> getSalaryDetailItems(String coIdx, String salaryIdx);
     void calculateSalary(String coIdx, String salaryIdx);
     void confirmSalary(Map<String,Object> map);
     List<SalaryDetailDTO> selectSalaryDetail(String coIdx, String salaryIdx);
+
+    // 0708
+    int insertSalary(SalaryDTO salaryDTO);
 }

@@ -68,7 +68,6 @@ public class LoginController {
     @PostMapping("/signup")
     @ResponseBody
     public ResponseEntity<ResResult> postMethodName(@RequestBody UserDTO userDTO, RedirectAttributes rttr) {
-        //TODO: process POST request
 
         ResResult result;
         

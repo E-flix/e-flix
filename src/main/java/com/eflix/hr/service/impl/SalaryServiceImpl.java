@@ -31,31 +31,6 @@ public class SalaryServiceImpl implements SalaryService {
   private SalaryMapper salaryMapper;
 
   @Override
-  public List<SalaryDTO> getAllSalaries() {
-    throw new UnsupportedOperationException("Unimplemented method 'getAllSalaries'");
-  }
-
-  @Override
-  public SalaryDTO getSalaryById(String salaryIdx) {
-    throw new UnsupportedOperationException("Unimplemented method 'getSalaryById'");
-  }
-
-  @Override
-  public int createSalary(SalaryDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'createSalary'");
-  }
-
-  @Override
-  public int updateSalary(SalaryDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'updateSalary'");
-  }
-
-  @Override
-  public int deleteSalary(String salaryIdx) {
-    throw new UnsupportedOperationException("Unimplemented method 'deleteSalary'");
-  }
-
-  @Override
   public List<SalaryDTO> bankList() {
     return salaryMapper.bankList();
   }
@@ -94,6 +69,11 @@ public class SalaryServiceImpl implements SalaryService {
   @Override
   public List<SalaryDetailDTO> selectSalaryDetail(String coIdx, String salaryIdx) {
     return salaryMapper.selectSalaryDetail(coIdx, salaryIdx);
+  }
+
+  @Override
+  public int insertSalary(SalaryDTO salaryDTO) {
+    return salaryMapper.insertSalary(salaryDTO);
   }
 
 }
