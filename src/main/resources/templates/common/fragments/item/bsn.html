@@ -32,14 +32,12 @@
          href="/bsn/order_management">주문서 관리</a>
 
       <h6 class="collapse-header">출고 관리:</h6>
-      <a th:class="${activeSubMenu == 'soutbound_list'} ? 'collapse-item active' : 'collapse-item'"
-         href="/bsn/soutbound_list">출고 조회</a>
       <a th:class="${activeSubMenu == 'soutbound'} ? 'collapse-item active' : 'collapse-item'"
-         href="/bsn/soutbound">출고 의뢰</a>
+         href="/bsn/soutbound">출고 관리</a>
 
       <h6 class="collapse-header">수금 관리:</h6>
-      <a th:class="${activeSubMenu == 'sales_money'} ? 'collapse-item active' : 'collapse-item'"
-         href="/bsn/sales_money">영업 매출</a>
+      <a th:class="${activeSubMenu == 'dashboard'} ? 'collapse-item active' : 'collapse-item'"
+      href="/bsn/dashboard">영업 대시보드</a>
       <a th:class="${activeSubMenu == 'accounts'} ? 'collapse-item active' : 'collapse-item'"
          href="/bsn/accounts">미수금 관리</a>
       <a th:class="${activeSubMenu == 'customer_credit'} ? 'collapse-item active' : 'collapse-item'"

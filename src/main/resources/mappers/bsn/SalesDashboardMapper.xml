@@ -11,24 +11,29 @@
 
   <!-- 오늘 매출액 -->
   <select id="getTodaySales" parameterType="string" resultType="java.math.BigDecimal">
+    <![CDATA[
     SELECT COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS todaySales
     FROM ORDERS_DETAIL od
     JOIN ORDERS o ON o.ORDER_NO = od.ORDER_NO AND o.CO_IDX = od.CO_IDX
     WHERE od.CO_IDX = #{coIdx}
       AND TRUNC(o.ORDER_DT) = TRUNC(SYSDATE)
+    ]]>
   </select>
 
   <!-- 이번달 매출액 -->
   <select id="getMonthSales" parameterType="string" resultType="java.math.BigDecimal">
+    <![CDATA[
     SELECT COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS monthSales
     FROM ORDERS_DETAIL od
     JOIN ORDERS o ON o.ORDER_NO = od.ORDER_NO AND o.CO_IDX = od.CO_IDX
     WHERE od.CO_IDX = #{coIdx}
       AND TO_CHAR(o.ORDER_DT, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+    ]]>
   </select>
 
   <!-- 월별 매출 차트 데이터 (최근 N개월) -->
   <select id="getMonthlySalesChart" resultType="java.util.HashMap">
+    <![CDATA[
     SELECT 
       TO_CHAR(o.ORDER_DT, 'YYYY-MM') AS month,
       COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS amount,
@@ -39,10 +44,12 @@
       AND o.ORDER_DT >= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -#{months})
     GROUP BY TO_CHAR(o.ORDER_DT, 'YYYY-MM')
     ORDER BY month DESC
+    ]]>
   </select>
 
   <!-- 일별 매출 트렌드 (최근 N일) -->
   <select id="getDailySalesTrend" resultType="java.util.HashMap">
+    <![CDATA[
     SELECT 
       TO_CHAR(o.ORDER_DT, 'YYYY-MM-DD') AS date,
       COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS amount,
@@ -53,6 +60,7 @@
       AND o.ORDER_DT >= TRUNC(SYSDATE) - #{days}
     GROUP BY TO_CHAR(o.ORDER_DT, 'YYYY-MM-DD')
     ORDER BY date DESC
+    ]]>
   </select>
 
   <!-- ========================================
@@ -61,30 +69,37 @@
 
   <!-- 견적서 건수 (이번달) -->
   <select id="getQuotationCount" parameterType="string" resultType="int">
+    <![CDATA[
     SELECT COUNT(*) 
     FROM QUOTATION q
     WHERE q.CO_IDX = #{coIdx}
       AND TO_CHAR(q.QUOTATION_DT, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+    ]]>
   </select>
 
   <!-- 주문서 건수 (이번달) -->
   <select id="getOrderCount" parameterType="string" resultType="int">
+    <![CDATA[
     SELECT COUNT(*) 
     FROM ORDERS o
     WHERE o.CO_IDX = #{coIdx}
       AND TO_CHAR(o.ORDER_DT, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+    ]]>
   </select>
 
   <!-- 출고 건수 (이번달) -->
   <select id="getOutboundCount" parameterType="string" resultType="int">
+    <![CDATA[
     SELECT COUNT(*) 
     FROM SALES_OUTBOUND so
     WHERE so.CO_IDX = #{coIdx}
       AND TO_CHAR(so.OUTBOUND_DT, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+    ]]>
   </select>
 
   <!-- 견적 → 수주 전환율 -->
   <select id="getQuotationConversionRate" parameterType="string" resultType="java.math.BigDecimal">
+    <![CDATA[
     WITH CONVERSION_DATA AS (
       SELECT 
         COUNT(DISTINCT q.QUOTATION_NO) AS quotation_count,
@@ -103,10 +118,12 @@
         ELSE 0 
       END AS conversionRate
     FROM CONVERSION_DATA
+    ]]>
   </select>
 
   <!-- 평균 주문 금액 -->
   <select id="getAverageOrderValue" parameterType="string" resultType="java.math.BigDecimal">
+    <![CDATA[
     SELECT 
       COALESCE(AVG(order_total.total_amount), 0) AS avgOrderValue
     FROM (
@@ -119,15 +136,18 @@
         AND o.ORDER_DT >= TRUNC(SYSDATE, 'MM')
       GROUP BY o.ORDER_NO
     ) order_total
+    ]]>
   </select>
 
   <!-- 대기중인 주문 건수 -->
   <select id="getPendingOrdersCount" parameterType="string" resultType="int">
+    <![CDATA[
     SELECT COUNT(DISTINCT o.ORDER_NO)
     FROM ORDERS o
     JOIN ORDERS_DETAIL od ON od.ORDER_NO = o.ORDER_NO AND od.CO_IDX = o.CO_IDX
     WHERE o.CO_IDX = #{coIdx}
       AND (od.OUT_STATE IS NULL OR od.OUT_STATE IN ('대기', '준비중'))
+    ]]>
   </select>
 
   <!-- ========================================
@@ -136,6 +156,7 @@
 
   <!-- 상위 고객 목록 (매출 기준) -->
   <select id="getTopCustomers" resultType="java.util.HashMap">
+    <![CDATA[
     SELECT 
       c.CUSTOMER_CD AS customerCd,
       c.CUSTOMER_NM AS customerName,
@@ -153,10 +174,12 @@
     GROUP BY c.CUSTOMER_CD, c.CUSTOMER_NM, c.REPRESENTATIVE_NM
     ORDER BY totalRevenue DESC
     FETCH FIRST #{limit} ROWS ONLY
+    ]]>
   </select>
 
   <!-- 고객별 주문 빈도 분석 -->
   <select id="getCustomerOrderFrequency" parameterType="string" resultType="java.util.HashMap">
+    <![CDATA[
     SELECT 
       c.CUSTOMER_CD AS customerCd,
       c.CUSTOMER_NM AS customerName,
@@ -174,10 +197,12 @@
     GROUP BY c.CUSTOMER_CD, c.CUSTOMER_NM
     HAVING COUNT(DISTINCT o.ORDER_NO) >= 2
     ORDER BY monthlyFrequency DESC
+    ]]>
   </select>
 
   <!-- 여신 위험 고객 목록 -->
   <select id="getCreditRiskCustomers" parameterType="string" resultType="java.util.HashMap">
+    <![CDATA[
     SELECT 
       c.CUSTOMER_CD AS customerCd,
       c.CUSTOMER_NM AS customerName,
@@ -197,6 +222,7 @@
         OR cr.CREDIT_STATUS != '정상'  -- 신용 상태 불량
       )
     ORDER BY usageRatio DESC
+    ]]>
   </select>
 
   <!-- ========================================
@@ -205,6 +231,7 @@
 
   <!-- 베스트셀러 상품 목록 -->
   <select id="getTopSellingProducts" resultType="java.util.HashMap">
+    <![CDATA[
     SELECT 
       od.ITEM_CODE AS itemCode,
       od.ITEM_NAME AS itemName,
@@ -221,6 +248,7 @@
     GROUP BY od.ITEM_CODE, od.ITEM_NAME
     ORDER BY totalRevenue DESC
     FETCH FIRST #{limit} ROWS ONLY
+    ]]>
   </select>
 
   <!-- ========================================
@@ -229,6 +257,7 @@
 
   <!-- 영업사원별 매출 실적 -->
   <select id="getSalesByEmployee" parameterType="string" resultType="java.util.HashMap">
+    <![CDATA[
     SELECT 
       c.SALES_EMP_CD AS employeeId,
       COUNT(DISTINCT o.ORDER_NO) AS orderCount,
@@ -244,6 +273,7 @@
       AND o.ORDER_DT >= TRUNC(SYSDATE, 'MM')  -- 이번달
     GROUP BY c.SALES_EMP_CD
     ORDER BY totalRevenue DESC
+    ]]>
   </select>
 
   <!-- ========================================
@@ -252,6 +282,7 @@
 
   <!-- 장기 미출고 주문 목록 -->
   <select id="getDelayedOrders" parameterType="string" resultType="java.util.HashMap">
+    <![CDATA[
     SELECT 
       o.ORDER_NO AS orderNo,
       o.ORDER_DT AS orderDate,
@@ -266,10 +297,12 @@
       AND o.ORDER_DT <= SYSDATE - 7  -- 7일 이상 미출고
     GROUP BY o.ORDER_NO, o.ORDER_DT, c.CUSTOMER_NM
     ORDER BY daysDelayed DESC
+    ]]>
   </select>
 
   <!-- 견적서 유효기간 만료 임박 목록 -->
   <select id="getExpiringQuotations" parameterType="string" resultType="java.util.HashMap">
+    <![CDATA[
     SELECT 
       q.QUOTATION_NO AS quotationNo,
       q.CUSTOMER_NAME AS customerName,
@@ -286,10 +319,12 @@
           AND o.ORDER_DT >= q.QUOTATION_DT
       )
     ORDER BY daysToExpire ASC
+    ]]>
   </select>
 
   <!-- 거래정지 고객 목록 -->
   <select id="getBlockedCustomers" parameterType="string" resultType="java.util.HashMap">
+    <![CDATA[
     SELECT 
       c.CUSTOMER_CD AS customerCd,
       c.CUSTOMER_NM AS customerName,
@@ -303,6 +338,7 @@
       AND c.USE_YN = 'Y'
       AND cr.TRADE_STOP_FLG = 'Y'
     ORDER BY cr.TRADE_STOP_DT DESC
+    ]]>
   </select>
 
 </mapper>

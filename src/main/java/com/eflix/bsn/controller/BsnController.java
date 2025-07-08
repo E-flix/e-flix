@@ -762,10 +762,6 @@ public class BsnController {
         }
     }
 
-    /*──────────────────────────────
-     * 8. 영업 대시보드 라우팅 
-     *──────────────────────────────*/
-
     /**
      * 📊 영업 대시보드 메인 화면
      */
@@ -775,11 +771,8 @@ public class BsnController {
         log.info("영업 대시보드 접근 - 회사: {}", coIdx);
 
         try {
-            // 기본 대시보드 데이터 (선택사항)
-            // model.addAttribute("todayDate", LocalDate.now());
-            // model.addAttribute("companyInfo", getCompanyInfo(coIdx));
-
-            return "bsn/dashboard";
+            // 변경: "bsn/SalesDashboard" 템플릿으로 매핑
+            return "bsn/SalesDashboard";
         } catch (Exception e) {
             log.error("영업 대시보드 접근 실패 - 회사: {}", coIdx, e);
             return "redirect:/bsn";
