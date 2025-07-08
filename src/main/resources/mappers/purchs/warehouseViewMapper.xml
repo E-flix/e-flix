@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.purchs.mapper.WarehouseViewMapper">
+<!-- 창고 조회 -->
+<select id="warehouseViewList" resultType="WarehouseViewDTO">
+    SELECT
+        warehouse_id,
+        warehouse_location,
+        warehouse_scale,
+        warehouse_current,
+        warehouse_manager,
+        c.common_code_name AS warehouse_status_name
+    FROM
+        warehouse w JOIN common_code c ON w.warehouse_status = c.common_code
+    ORDER BY
+        warehouse_id
+</select>
+<!-- 창고 상세 조회 (모달) -->
+<select id="warehouseViewListDetail" parameterType="String" resultType="WarehouseViewDTO">
+    SELECT 
+        i.prod_id AS prod_id,
+        p.prod_name AS prod_name,
+        i.iv_current_quantity AS current_quantity
+    FROM 
+        inventory i JOIN prod p ON i.prod_id = p.prod_id
+    WHERE 
+        i.warehouse_id = #{warehouseId}
+    ORDER BY 
+        i.prod_id
+</select>
+</mapper>
