@@ -9,10 +9,177 @@
 ============================================ -->
 <head>
   <title>자동전표처리</title>
+  <style>
+    .entry-auto-container { background: #eaf3fa; padding: 20px; border-radius: 8px; }
+    .entry-auto-header h2 { margin: 0; }
+    .ag-theme-alpine { flex: 1; width: 100%; font-size: 14px; min-width: 0; overflow-x: hidden; }
+    /* ag-Grid 컬럼 최소/최대/기본 너비 조정 */
+    #grid-periods, #grid-debits, #grid-credits, #grid-journal {
+      min-width: 0;
+      max-width: 100%;
+    }
+    /* ag-Grid group header 가운데 정렬 */
+    .ag-header-center .ag-header-group-cell-label {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+    .ag-header-center .ag-header-cell-label {
+      justify-content: center !important;
+      text-align: center;
+    }
+  </style>
 </head>
 <div layout:fragment="content">
-  <div id="entry-auto">
-    <h2>자동전표처리</h2>
-    <p>자동전표처리 화면입니다.</p>
+  <div id="entry-auto" class="entry-auto-container">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <!-- 왼쪽: 매입매출장 제목 -->
+      <h3 class="mb-0">자동전표처리</h3>
+      <!-- 오른쪽: 버튼 모음 -->
+      <div>
+        <button class="btn btn-outline-secondary btn-sm">전표추가</button>
+      </div>
+    </div>
+    <div class="entry-auto-section entry-auto-row d-flex mb-2" style="gap:7px;">
+      <!-- 귀속월/지급일/전표일자 목록 ag-Grid -->
+      <div class="entry-auto-col d-flex flex-column flex-fill" style="height:40vh;">
+        <div id="grid-periods" class="ag-theme-alpine" style="width:100%; height:100%"></div>
+      </div>
+      <!-- 지급항목(차변) ag-Grid -->
+      <div class="entry-auto-col d-flex flex-column flex-fill"  style="height:40vh;">
+        <div id="grid-debits" class="ag-theme-alpine" style="width:100%; height:100%"></div>
+      </div>
+      <!-- 공제항목(대변) ag-Grid -->
+      <div class="entry-auto-col d-flex flex-column flex-fill"  style="height:40vh;">
+        <div id="grid-credits" class="ag-theme-alpine" style="width:100%; height:100%"></div>
+      </div>
+    </div>
+    <!-- 일반전표(차변/대변) ag-Grid -->
+    <div class="entry-auto-section mb-3">
+      <div id="grid-journal" class="ag-theme-alpine"></div>
+    </div>
   </div>
+  <script>
+    // ag-Grid 예시 데이터 및 컬럼 정의
+    // 귀속월/지급일/전표일자 목록 컬럼
+    const periodsColumnDefs = [
+      { headerName: '귀속월', field: 'month', flex: 1, minWidth: 80, maxWidth: 120, headerClass: 'ag-header-center' },
+      { headerName: '지급일', field: 'payDate', flex: 1, minWidth: 100, maxWidth: 140, headerClass: 'ag-header-center' },
+      { headerName: '전표일자', field: 'entryDate', flex: 1, minWidth: 100, maxWidth: 140, headerClass: 'ag-header-center' }
+    ];
+    // 귀속월/지급일/전표일자 예시 데이터
+    const periodsRowData = [
+      { month: '2025-01', payDate: '2025-02-15', entryDate: '2025-02-01' },
+      { month: '2025-02', payDate: '2025-03-15', entryDate: '2025-03-01' },
+      { month: '2025-03', payDate: '2025-04-15', entryDate: '2025-04-01' },
+      { month: '2025-04', payDate: '2025-05-15', entryDate: '2025-05-01' },
+      { month: '2025-05', payDate: '2025-06-15', entryDate: '2025-06-01' },
+      { month: '2025-06', payDate: '2025-07-15', entryDate: '2025-07-01' },
+      { month: '2025-07', payDate: '2025-07-16', entryDate: '2025-07-01' }
+    ];
+    // 지급항목(차변) 컬럼 (멀티로우 헤더 적용)
+    const debitsColumnDefs = [
+      {
+        headerName: '지급항목(차변)',
+        headerClass: 'ag-header-center',
+        children: [
+          { headerName: '지급항목', field: 'item', flex: 1, minWidth: 80, maxWidth: 120, headerClass: 'ag-header-center'},
+          { headerName: '코드', field: 'code', width: 70, minWidth: 60, maxWidth: 80, headerClass: 'ag-header-center' },
+          { headerName: '계정과목', field: 'account', flex: 1, minWidth: 80, maxWidth: 120, headerClass: 'ag-header-center' },
+          { headerName: '금액', field: 'amount', valueFormatter: params => params.value.toLocaleString(), flex: 1, minWidth: 100, maxWidth: 140, headerClass: 'ag-header-center' }
+        ]
+      }
+    ];
+    // 지급항목(차변) 예시 데이터
+    const debitsRowData = [
+      { item: '급여', code: '801', account: '급여', amount: 8200000 },
+      { item: '기본급', code: '503', account: '급여', amount: 18230000 },
+      { item: '상여금', code: '803', account: '상여금', amount: 2000000 },
+      { item: '상여금', code: '505', account: '상여금', amount: 4500000 }
+    ];
+    // 공제항목(대변) 컬럼
+    const creditsColumnDefs = [
+      {
+        headerName: '공제항목(대변)',
+        headerClass: 'ag-header-center',
+        children: [
+          { headerName: '공제항목', field: 'item', flex: 1, minWidth: 80, maxWidth: 120, headerClass: 'ag-header-center' },
+          { headerName: '코드', field: 'code', width: 70, minWidth: 60, maxWidth: 80, headerClass: 'ag-header-center' },
+          { headerName: '계정과목', field: 'account', flex: 1, minWidth: 80, maxWidth: 120, headerClass: 'ag-header-center' },
+          { headerName: '금액', field: 'amount', valueFormatter: params => params.value.toLocaleString(), flex: 1, minWidth: 100, maxWidth: 140, headerClass: 'ag-header-center' }
+        ]
+      }
+    ];
+    // 공제항목(대변) 예시 데이터
+    const creditsRowData = [
+      { item: '연말정산', code: '254', account: '예수금', amount: 227650 },
+      { item: '건강보험', code: '254', account: '예수금', amount: 1167360 },
+      { item: '고용보험', code: '254', account: '예수금', amount: 296370 },
+      { item: '장기요양보험', code: '254', account: '예수금', amount: 151160 },
+      { item: '소득세', code: '254', account: '예수금', amount: 520000 },
+      { item: '지방소득세', code: '254', account: '예수금', amount: 52000 },
+      { item: '차인지급액', code: '262', account: '미지급금', amount: 30515460 }
+    ];
+    // 일반전표(차변/대변) 컬럼
+    const journalColumnDefs = [
+      { headerName: '구분', field: 'type', width: 60, minWidth: 50, maxWidth: 70 },
+      { headerName: '코드', field: 'accountCode', width: 60, minWidth: 50, maxWidth: 70 },
+      { headerName: '계정과목', field: 'accountName', flex: 1, minWidth: 80, maxWidth: 120 },
+      { headerName: '코드', field: 'partnerCode', width: 60, minWidth: 50, maxWidth: 70 },
+      { headerName: '거래처', field: 'partnerName', flex: 1, minWidth: 80, maxWidth: 120 },
+      { headerName: '차변', field: 'debit', valueFormatter: params => params.value ? params.value.toLocaleString() : '', width: 100, minWidth: 80, maxWidth: 120 },
+      { headerName: '대변', field: 'credit', valueFormatter: params => params.value ? params.value.toLocaleString() : '', width: 100, minWidth: 80, maxWidth: 120 },
+      { headerName: '적요', field: 'desc', flex: 2, minWidth: 120, maxWidth: 200 }
+    ];
+    // 일반전표(차변/대변) 예시 데이터
+    const journalRowData = [
+      { type: '차변', code: '801', account: '급여', partner: '급여', debit: 8200000, credit: '', desc: '7월 귀속 급여' },
+      { type: '차변', code: '503', account: '급여', partner: '급여', debit: 18230000, credit: '', desc: '7월 귀속 급여' },
+      { type: '차변', code: '803', account: '상여금', partner: '상여금', debit: 2000000, credit: '', desc: '7월 귀속 상여금' },
+      { type: '차변', code: '505', account: '상여금', partner: '상여금', debit: 4500000, credit: '', desc: '7월 귀속 여름상여' },
+      { type: '대변', code: '254', account: '예수금', partner: '연말정산', debit: '', credit: 277650, desc: '' },
+      { type: '대변', code: '254', account: '예수금', partner: '건강보험', debit: '', credit: 1167360, desc: '' }
+    ];
+    document.addEventListener('DOMContentLoaded', function() {
+      // 각 ag-Grid 표 생성
+      agGrid.createGrid(document.getElementById('grid-periods'), {
+        columnDefs: periodsColumnDefs,
+        rowData: periodsRowData,
+        rowSelection: {
+          mode: 'singleRow',
+          enableClickSelection: true,
+          enableSelectionWithoutKeys: false
+        },
+        defaultColDef: { resizable: true },
+        headerHeight: 30,
+        rowHeight: 28
+      });
+      agGrid.createGrid(document.getElementById('grid-debits'), {
+        columnDefs: debitsColumnDefs,
+        rowData: debitsRowData,
+        defaultColDef: { resizable: true },
+        headerHeight: 30, // children header 높이
+        groupHeaderHeight: 30, // group header 높이
+        rowHeight: 28
+      });
+      agGrid.createGrid(document.getElementById('grid-credits'), {
+        columnDefs: creditsColumnDefs,
+        rowData: creditsRowData,
+        defaultColDef: { resizable: true },
+        headerHeight: 30, // children header 높이
+        groupHeaderHeight: 30, // group header 높이
+        rowHeight: 28
+      });
+      agGrid.createGrid(document.getElementById('grid-journal'), {
+        columnDefs: journalColumnDefs,
+        rowData: journalRowData,
+        domLayout: 'autoHeight',
+        defaultColDef: { resizable: true },
+        headerHeight: 30,
+        rowHeight: 28
+      });
+    });
+  </script>
 </div>
