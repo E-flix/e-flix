@@ -16,44 +16,34 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eflix.common.security.auth.AuthContext;
 import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.SalaryDTO;
 import com.eflix.hr.mapper.EmployeeMapper;
+import com.eflix.hr.mapper.SalaryMapper;
 import com.eflix.hr.service.EmployeeService;
+import com.eflix.hr.service.SalaryService;
 
 @Service
-public class EmployeeServiceImpl implements EmployeeService{
+public class EmployeeServiceImpl implements EmployeeService {
 
   @Autowired
   EmployeeMapper employeeMapper;
-  
-  // // 사원관리 페이지 검색조건 드롭다운 조회
-  // @Override
-  // public List<EmployeeDTO> getAllEmployees(String option, String keyword) {
-  //   return employeeMapper.selectAll(option, keyword);
-  // }
+
+  @Autowired
+  private SalaryMapper salaryMapper;
 
   @Override
   public EmployeeDTO selectById(String empIdx) {
-    // throw new UnsupportedOperationException("Unimplemented method 'getEmployeeById'");
     return employeeMapper.selectById(AuthUtil.getCoIdx(), empIdx);
-  }
-
-  @Override
-  public int createEmployee(EmployeeDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'createEmployee'");
   }
 
   @Override
   public int updateEmployee(EmployeeDTO dto) {
     return employeeMapper.update(dto);
-  }
-
-  @Override
-  public int deleteEmployee(String empIdx) {
-    throw new UnsupportedOperationException("Unimplemented method 'deleteEmployee'");
   }
 
   // 사원관리 페이지 직급 드롭다운용 조회
@@ -68,15 +58,29 @@ public class EmployeeServiceImpl implements EmployeeService{
     return employeeMapper.empStatusList();
   }
 
-    @Override
-    public List<EmployeeDTO> getAllEmployees(Map<String, Object> params) {
-        params.put("coIdx", AuthUtil.getCoIdx());
-        return employeeMapper.selectAll(params);
+  @Override
+  public List<EmployeeDTO> getAllEmployees(Map<String, Object> params) {
+    params.put("coIdx", AuthUtil.getCoIdx());
+    return employeeMapper.selectAll(params);
+  }
+
+  // 사원등록
+  @Override
+  @Transactional
+  public int insertEmp(EmployeeDTO emp) {
+    if(employeeMapper.insertEmp(emp) <= 0) {
+      return 0;
     }
 
-  // 사원등록 
-    @Override
-    public int insertEmp(EmployeeDTO emp) {
-      return employeeMapper.insertEmp(emp);
-    }
+    SalaryDTO salaryDTO = new SalaryDTO();
+    salaryDTO.setEmpIdx(emp.getEmpIdx());
+    salaryDTO.setBaseSalary(emp.getBaseSalary());
+    
+    return salaryMapper.insert(salaryDTO);
+  }
+
+  // 0708
+  public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO) {
+    return employeeMapper.findAllEmployee(employeeDTO);
+  }
 }

@@ -18,9 +18,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException, ServletException {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'commence'");
-
         String uri = request.getRequestURI();
 		log.info("비인증 접근 시도: {}", uri);
 

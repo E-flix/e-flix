@@ -15,9 +15,6 @@ public class MasterServiceImpl implements MasterService {
 
     @Override
     public int insertMaster(MasterDTO masterDTO) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'insertMaster'");
-
         return masterMapper.insertMaster(masterDTO);
     }
     

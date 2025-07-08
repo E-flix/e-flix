@@ -20,9 +20,7 @@ public interface EmployeeService {
   // 사원관리 페이지 검색조건 드롭다운 조회
     
     public EmployeeDTO selectById(String empIdx);
-    int createEmployee(EmployeeDTO dto);
     int updateEmployee(EmployeeDTO dto);
-    int deleteEmployee(String empIdx);
 
     // 사원관리 페이지 직급 드롭다운 조회 
     public List<EmployeeDTO> gradeList(); 
@@ -32,4 +30,7 @@ public interface EmployeeService {
 
     public List<EmployeeDTO> getAllEmployees(Map<String, Object> params);
     public int insertEmp(EmployeeDTO emp);
+
+    // 0708
+    public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO);
 }

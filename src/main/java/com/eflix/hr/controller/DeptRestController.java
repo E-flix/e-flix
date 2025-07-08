@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.service.DepartmentService;
 
@@ -19,15 +20,19 @@ public class DeptRestController {
 
     @Autowired
     private DepartmentService departmentService;
+
+    public String getCoIdx() {
+        return AuthUtil.getCoIdx();
+    }
     
     @GetMapping("/list/up")
-    public List<DepartmentDTO> getUpList(@RequestParam("coIdx") String coIdx) {
-        return departmentService.findUpAllByCoIdx(coIdx);
+    public List<DepartmentDTO> getUpList() {
+        return departmentService.findUpAllByCoIdx(getCoIdx());
     }
 
     @GetMapping("/list/down")
-    public List<DepartmentDTO> getList(@RequestParam("coIdx") String coIdx, @RequestParam("deptUpIdx") String deptUpIdx) {
-        return departmentService.findDownAllByCoIdx(coIdx, deptUpIdx);
+    public List<DepartmentDTO> getList(@RequestParam("deptUpIdx") String deptUpIdx) {
+        return departmentService.findDownAllByCoIdx(getCoIdx(), deptUpIdx);
     }
 
     @GetMapping("/list/all")

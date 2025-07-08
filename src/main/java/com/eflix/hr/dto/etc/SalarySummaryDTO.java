@@ -9,7 +9,7 @@ public class SalarySummaryDTO {
     private String empName;
     private String deptName;
     private String grdName;
-    private String salaryMonth;
+    private String attMonth;
     private String payMonth;
     private String baseSalary;
     private int allowanceSum; // -- 지급 합계
