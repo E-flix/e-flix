@@ -10,9 +10,6 @@
 <head>
   <title>자동전표처리</title>
   <style>
-    .entry-auto-container { background: #eaf3fa; padding: 20px; border-radius: 8px; }
-    .entry-auto-header h2 { margin: 0; }
-    .ag-theme-alpine { flex: 1; width: 100%; font-size: 14px; min-width: 0; overflow-x: hidden; }
     /* ag-Grid 컬럼 최소/최대/기본 너비 조정 */
     #grid-periods, #grid-debits, #grid-credits, #grid-journal {
       min-width: 0;
@@ -44,30 +41,34 @@
     </div>
     <div class="entry-auto-section entry-auto-row d-flex mb-2" style="gap:7px;">
       <!-- 귀속월/지급일/전표일자 목록 ag-Grid -->
-      <div class="entry-auto-col d-flex flex-column flex-fill" style="height:40vh;">
+      <div class="entry-auto-col d-flex flex-column flex-fill" style="height:48vh;">
         <div id="grid-periods" class="ag-theme-alpine" style="width:100%; height:100%"></div>
       </div>
       <!-- 지급항목(차변) ag-Grid -->
-      <div class="entry-auto-col d-flex flex-column flex-fill"  style="height:40vh;">
+      <div class="entry-auto-col d-flex flex-column flex-fill"  style="height:48vh;">
         <div id="grid-debits" class="ag-theme-alpine" style="width:100%; height:100%"></div>
       </div>
       <!-- 공제항목(대변) ag-Grid -->
-      <div class="entry-auto-col d-flex flex-column flex-fill"  style="height:40vh;">
+      <div class="entry-auto-col d-flex flex-column flex-fill"  style="height:48vh;">
         <div id="grid-credits" class="ag-theme-alpine" style="width:100%; height:100%"></div>
       </div>
     </div>
     <!-- 일반전표(차변/대변) ag-Grid -->
-    <div class="entry-auto-section mb-3">
-      <div id="grid-journal" class="ag-theme-alpine"></div>
+    <div class="mb-2" style="height:23vh;">
+      <div id="grid-journal" class="ag-theme-alpine" style="width:100%; height:100%"></div>
     </div>
   </div>
-  <script>
+  <script th:inline="javascript">
+    // 공통 코드(과세유형) 매핑
+    const code0H = /*[[${code0H}]]*/ [];
+    const code0A = /*[[${code0A}]]*/ [];
+    const code0G = /*[[${code0G}]]*/ [];
     // ag-Grid 예시 데이터 및 컬럼 정의
     // 귀속월/지급일/전표일자 목록 컬럼
     const periodsColumnDefs = [
-      { headerName: '귀속월', field: 'month', flex: 1, minWidth: 80, maxWidth: 120, headerClass: 'ag-header-center' },
-      { headerName: '지급일', field: 'payDate', flex: 1, minWidth: 100, maxWidth: 140, headerClass: 'ag-header-center' },
-      { headerName: '전표일자', field: 'entryDate', flex: 1, minWidth: 100, maxWidth: 140, headerClass: 'ag-header-center' }
+      { headerName: '귀속월', field: 'month', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
+      { headerName: '지급일', field: 'payDate', flex: 1, minWidth: 100, headerClass: 'ag-header-center' },
+      { headerName: '전표일자', field: 'entryDate', flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
     ];
     // 귀속월/지급일/전표일자 예시 데이터
     const periodsRowData = [
@@ -77,7 +78,12 @@
       { month: '2025-04', payDate: '2025-05-15', entryDate: '2025-05-01' },
       { month: '2025-05', payDate: '2025-06-15', entryDate: '2025-06-01' },
       { month: '2025-06', payDate: '2025-07-15', entryDate: '2025-07-01' },
-      { month: '2025-07', payDate: '2025-07-16', entryDate: '2025-07-01' }
+      { month: '2025-07', payDate: '2025-07-16', entryDate: '2025-07-01' },
+      { month: '2025-08', payDate: '2025-07-16', entryDate: '2025-07-01' },
+      { month: '2025-09', payDate: '2025-07-16', entryDate: '2025-07-01' },
+      { month: '2025-10', payDate: '2025-07-16', entryDate: '2025-07-01' },
+      { month: '2025-11', payDate: '2025-07-16', entryDate: '2025-07-01' },
+      { month: '2025-12', payDate: '2025-07-16', entryDate: '2025-07-01' }
     ];
     // 지급항목(차변) 컬럼 (멀티로우 헤더 적용)
     const debitsColumnDefs = [
@@ -85,10 +91,10 @@
         headerName: '지급항목(차변)',
         headerClass: 'ag-header-center',
         children: [
-          { headerName: '지급항목', field: 'item', flex: 1, minWidth: 80, maxWidth: 120, headerClass: 'ag-header-center'},
-          { headerName: '코드', field: 'code', width: 70, minWidth: 60, maxWidth: 80, headerClass: 'ag-header-center' },
-          { headerName: '계정과목', field: 'account', flex: 1, minWidth: 80, maxWidth: 120, headerClass: 'ag-header-center' },
-          { headerName: '금액', field: 'amount', valueFormatter: params => params.value.toLocaleString(), flex: 1, minWidth: 100, maxWidth: 140, headerClass: 'ag-header-center' }
+          { headerName: '지급항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center'},
+          { headerName: '코드', field: 'code', width: 65, minWidth: 60, headerClass: 'ag-header-center', editable: true },
+          { headerName: '계정과목', field: 'account', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
+          { headerName: '금액', field: 'amount', valueFormatter: params => params.value.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
         ]
       }
     ];
@@ -105,10 +111,10 @@
         headerName: '공제항목(대변)',
         headerClass: 'ag-header-center',
         children: [
-          { headerName: '공제항목', field: 'item', flex: 1, minWidth: 80, maxWidth: 120, headerClass: 'ag-header-center' },
-          { headerName: '코드', field: 'code', width: 70, minWidth: 60, maxWidth: 80, headerClass: 'ag-header-center' },
-          { headerName: '계정과목', field: 'account', flex: 1, minWidth: 80, maxWidth: 120, headerClass: 'ag-header-center' },
-          { headerName: '금액', field: 'amount', valueFormatter: params => params.value.toLocaleString(), flex: 1, minWidth: 100, maxWidth: 140, headerClass: 'ag-header-center' }
+          { headerName: '공제항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
+          { headerName: '코드', field: 'code', width: 65, minWidth: 60, headerClass: 'ag-header-center', editable: true },
+          { headerName: '계정과목', field: 'account', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
+          { headerName: '금액', field: 'amount', valueFormatter: params => params.value.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
         ]
       }
     ];
@@ -123,24 +129,178 @@
       { item: '차인지급액', code: '262', account: '미지급금', amount: 30515460 }
     ];
     // 일반전표(차변/대변) 컬럼
-    const journalColumnDefs = [
-      { headerName: '구분', field: 'type', width: 60, minWidth: 50, maxWidth: 70 },
-      { headerName: '코드', field: 'accountCode', width: 60, minWidth: 50, maxWidth: 70 },
-      { headerName: '계정과목', field: 'accountName', flex: 1, minWidth: 80, maxWidth: 120 },
-      { headerName: '코드', field: 'partnerCode', width: 60, minWidth: 50, maxWidth: 70 },
-      { headerName: '거래처', field: 'partnerName', flex: 1, minWidth: 80, maxWidth: 120 },
-      { headerName: '차변', field: 'debit', valueFormatter: params => params.value ? params.value.toLocaleString() : '', width: 100, minWidth: 80, maxWidth: 120 },
-      { headerName: '대변', field: 'credit', valueFormatter: params => params.value ? params.value.toLocaleString() : '', width: 100, minWidth: 80, maxWidth: 120 },
-      { headerName: '적요', field: 'desc', flex: 2, minWidth: 120, maxWidth: 200 }
+    // selectedMaster가 없으면 에러 발생하므로 기본값 선언
+    const selectedMaster = { entryDate: '2025-07-01' };
+    const journalColumnDefs =  [
+      { headerName: "일자", 
+        cellRenderer: params => {
+          // 소계 행인 경우 - 첫 번째 셀에서만 전표소계 표시
+          if (params.data && params.data.isSummary === true) {
+            return '전표소계';
+          }
+          if (!selectedMaster || !selectedMaster.entryDate) return '';
+          const d = new Date(selectedMaster.entryDate);
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          return `${mm}-${dd}`;
+        }, minWidth: 70, maxWidth: 90, width: 80, cellClass: 'ag-cell-center',
+        colSpan: params => {
+          // 소계 행인 경우 5개 셀 합치기 (일자~계정과목)
+          if (params.data && params.data.isSummary === true) {
+            return 5;
+          }
+          return 1;
+        },
+        cellStyle: params => {
+          // 소계 행인 경우 가운데 정렬
+          if (params.data && params.data.isSummary === true) {
+            return { 
+              'text-align': 'center',
+              'display': 'flex',
+              'align-items': 'center',
+              'justify-content': 'center'
+            };
+          }
+          return null;
+        }
+      },
+      { headerName: "전표번호", field: "entryNumber", minWidth: 110, maxWidth: 130, width: 120, editable: false,
+        cellRenderer: params => {
+          // 소계 행인 경우는 colSpan으로 인해 렌더링되지 않음
+          return params.value || '';
+        }
+      },
+      { headerName: "구분", field: "resentmenType", minWidth: 70, maxWidth: 90, width: 80, 
+        editable: false,
+        cellRenderer: params => {
+          // 소계 행인 경우는 colSpan으로 인해 렌더링되지 않음
+          const arr = Array.isArray(code0G) ? code0G : [];
+          const found = arr.find(v => String(v.commonCode) === String(params.value));
+          return (found && found.commonCodeName) || params.value || '';
+        },
+        valueSetter: params => {
+          const inputValue = params.newValue?.toString().trim();
+          
+          // 3 입력 시 g3으로 자동 변환
+          if (inputValue === '3') {
+            params.data.resentmenType = 'g3';
+            return true;
+          }
+          // 4 입력 시 g4로 자동 변환
+          else if (inputValue === '4') {
+            params.data.resentmenType = 'g4';
+            return true;
+          }
+          // 그 외에는 원래 값 그대로 설정
+          else {
+            params.data.resentmenType = inputValue;
+            return true;
+          }
+        }
+      },
+      { headerName: "계정과목코드", field: "accountCode", width: 65, minWidth: 60,
+        editable: false,
+        cellRenderer: params => {
+          // 소계 행인 경우는 colSpan으로 인해 렌더링되지 않음
+          return params.value || '';
+        }
+      },
+      { headerName: "계정과목명", field: "accountName", minWidth: 140, width: 120, editable: false,
+        cellRenderer: params => {
+          // 소계 행인 경우는 colSpan으로 인해 렌더링되지 않음
+          return params.value || '';
+        }
+      },
+      { headerName: "코드", field: "partnerCode", width: 65, minWidth: 60,
+        editable: params => {
+          // 소계 행은 편집 불가
+          return !(params.data && params.data.isSummary === true);
+        },
+        cellRenderer: params => {
+          // 소계 행인 경우 '차액' 표시
+          if (params.data && params.data.isSummary === true) {
+            return '차액';
+          }
+          return params.value || '';
+        }
+      },
+      { headerName: "거래처명", field: "partnerName", minWidth: 110, maxWidth: 140, width: 120, 
+        editable: false,
+        cellRenderer: params => {
+          // 소계 행인 경우 차액 금액 표시 (천단위 포맷)
+          if (params.data && params.data.isSummary === true && params.data._subtotalDiff !== undefined) {
+            return Number(params.data._subtotalDiff).toLocaleString();
+          }
+          return params.value || '';
+        }
+      },
+      { headerName: "차변", field: "debitAmount", minWidth: 90, maxWidth: 110, width: 100, cellClass: 'ag-right-aligned-cell', 
+        valueFormatter: params => {
+          const value = params.value;
+          if (value !== null && value !== undefined && value !== '' && value > 0) {
+            return Number(value).toLocaleString();
+          }
+          return '';
+        },
+        editable: false,
+        valueSetter: params => {
+          // g4이면 차변 입력 불가
+          if (params.data.resentmenType === 'g4') {
+            return false;
+          }
+          const numValue = Number(params.newValue?.toString().replace(/,/g, ''));
+          if (!isNaN(numValue) && numValue >= 0) {
+            params.data.debitAmount = numValue;
+            // 차변 입력 시 대변 초기화
+            if (numValue > 0) {
+              params.data.creditAmount = 0;
+            }
+            return true;
+          }
+          return false;
+        }
+      },
+      { headerName: "대변", field: "creditAmount", minWidth: 90, maxWidth: 110, width: 100, cellClass: 'ag-right-aligned-cell', 
+        valueFormatter: params => {
+          const value = params.value;
+          if (value !== null && value !== undefined && value !== '' && value > 0) {
+            return Number(value).toLocaleString();
+          }
+          return '';
+        },
+        editable: false,
+        valueSetter: params => {
+          // g3이면 대변 입력 불가
+          if (params.data.resentmenType === 'g3') {
+            return false;
+          }
+          const numValue = Number(params.newValue?.toString().replace(/,/g, ''));
+          if (!isNaN(numValue) && numValue >= 0) {
+            params.data.creditAmount = numValue;
+            // 대변 입력 시 차변 초기화
+            if (numValue > 0) {
+              params.data.debitAmount = 0;
+            }
+            return true;
+          }
+          return false;
+        }
+      },
+      { headerName: "적요", field: "description", minWidth: 130, maxWidth: 180, width: 150,
+        editable: params => {
+          // 소계 행은 편집 불가
+          return !(params.data && params.data.isSummary === true);
+        }
+      }
     ];
     // 일반전표(차변/대변) 예시 데이터
     const journalRowData = [
-      { type: '차변', code: '801', account: '급여', partner: '급여', debit: 8200000, credit: '', desc: '7월 귀속 급여' },
-      { type: '차변', code: '503', account: '급여', partner: '급여', debit: 18230000, credit: '', desc: '7월 귀속 급여' },
-      { type: '차변', code: '803', account: '상여금', partner: '상여금', debit: 2000000, credit: '', desc: '7월 귀속 상여금' },
-      { type: '차변', code: '505', account: '상여금', partner: '상여금', debit: 4500000, credit: '', desc: '7월 귀속 여름상여' },
-      { type: '대변', code: '254', account: '예수금', partner: '연말정산', debit: '', credit: 277650, desc: '' },
-      { type: '대변', code: '254', account: '예수금', partner: '건강보험', debit: '', credit: 1167360, desc: '' }
+      { entryNumber: 1, resentmenType: 'g3', accountCode: '801', accountName: '급여', partnerCode: '1001', partnerName: '또또상점', debitAmount: 8200000, creditAmount: '', description: '7월 귀속 급여' },
+      { entryNumber: 2, resentmenType: 'g3', accountCode: '503', accountName: '급여', partnerCode: '1001', partnerName: '급여', debitAmount: 18230000, creditAmount: '', description: '7월 귀속 급여' },
+      { entryNumber: 3, resentmenType: 'g3', accountCode: '803', accountName: '상여금', partnerCode: '1002', partnerName: '상여금', debitAmount: 2000000, creditAmount: '', description: '7월 귀속 상여금' },
+      { entryNumber: 4, resentmenType: 'g3', accountCode: '505', accountName: '상여금', partnerCode: '1002', partnerName: '상여금', debitAmount: 4500000, creditAmount: '', description: '7월 귀속 여름상여' },
+      { entryNumber: 5, resentmenType: 'g4', accountCode: '254', accountName: '예수금', partnerCode: '2001', partnerName: '연말정산', debitAmount: '', creditAmount: 277650, description: '' },
+      { entryNumber: 6, resentmenType: 'g4', accountCode: '254', accountName: '예수금', partnerCode: '2002', partnerName: '건강보험', debitAmount: '', creditAmount: 1167360, description: '' }
     ];
     document.addEventListener('DOMContentLoaded', function() {
       // 각 ag-Grid 표 생성
