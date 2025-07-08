@@ -761,4 +761,133 @@ public class BsnController {
             // ★ 주문서 상태 업데이트 실패는 출고 생성을 중단시키지 않음 (로그만 남김)
         }
     }
+
+    /*──────────────────────────────
+     * 8. 영업 대시보드 라우팅 
+     *──────────────────────────────*/
+
+    /**
+     * 📊 영업 대시보드 메인 화면
+     */
+    @GetMapping("/dashboard")
+    public String salesDashboard(Model model) {
+        String coIdx = AuthUtil.getCoIdx();
+        log.info("영업 대시보드 접근 - 회사: {}", coIdx);
+
+        try {
+            // 기본 대시보드 데이터 (선택사항)
+            // model.addAttribute("todayDate", LocalDate.now());
+            // model.addAttribute("companyInfo", getCompanyInfo(coIdx));
+
+            return "bsn/dashboard";
+        } catch (Exception e) {
+            log.error("영업 대시보드 접근 실패 - 회사: {}", coIdx, e);
+            return "redirect:/bsn";
+        }
+    }
+
+    /**
+     * 📈 고객별 매출 분석 화면
+     */
+    @GetMapping("/analytics/customer")
+    public String customerAnalytics() {
+        return "bsn/analytics/customer";
+    }
+
+    /**
+     * 📦 상품별 수익성 분석 화면  
+     */
+    @GetMapping("/analytics/product")
+    public String productAnalytics() {
+        return "bsn/analytics/product";
+    }
+
+    /**
+     * 👥 영업사원 성과 분석 화면
+     */
+    @GetMapping("/analytics/employee")
+    public String employeeAnalytics() {
+        return "bsn/analytics/employee";
+    }
+
+    /**
+     * 📊 매출 트렌드 분석 화면
+     */
+    @GetMapping("/analytics/trend")
+    public String trendAnalytics() {
+        return "bsn/analytics/trend";
+    }
+
+    /**
+     * 📋 일별 매출 리포트 화면
+     */
+    @GetMapping("/reports/daily")
+    public String dailyReport() {
+        return "bsn/reports/daily";
+    }
+
+    /**
+     * 📅 월별 실적 리포트 화면
+     */
+    @GetMapping("/reports/monthly") 
+    public String monthlyReport() {
+        return "bsn/reports/monthly";
+    }
+
+    /**
+     * 📆 연간 종합 리포트 화면
+     */
+    @GetMapping("/reports/annual")
+    public String annualReport() {
+        return "bsn/reports/annual";
+    }
+
+    /**
+     * ⚙️ 맞춤형 리포트 화면
+     */
+    @GetMapping("/reports/custom")
+    public String customReport() {
+        return "bsn/reports/custom";
+    }
+
+    /**
+     * 🔍 거래처 검색 결과 화면
+     */
+    @GetMapping("/customer_search")
+    public String customerSearch(@RequestParam String keyword, Model model) {
+        String coIdx = AuthUtil.getCoIdx();
+
+        try {
+            log.info("거래처 검색 - 회사: {}, 키워드: {}", coIdx, keyword);
+
+            List<CustomerDTO> customers = customerService.searchCustomers(keyword);
+            model.addAttribute("customers", customers);
+            model.addAttribute("keyword", keyword);
+
+            return "bsn/customer_search_results";
+        } catch (Exception e) {
+            log.error("거래처 검색 실패 - 회사: {}, 키워드: {}", coIdx, keyword, e);
+            model.addAttribute("customers", new ArrayList<>());
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("error", "검색 중 오류가 발생했습니다.");
+            return "bsn/customer_search_results";
+        }
+    }
+
+    /**
+     * 📊 오늘 실적 리포트 (팝업용)
+     */
+    @GetMapping("/reports/today")
+    public String todayReport(Model model) {
+        String coIdx = AuthUtil.getCoIdx();
+
+        try {
+            model.addAttribute("reportDate", LocalDate.now());
+
+            return "bsn/reports/today_popup";
+        } catch (Exception e) {
+            log.error("오늘 실적 리포트 조회 실패 - 회사: {}", coIdx, e);
+            return "bsn/reports/today_popup";
+        }
+    }
 }

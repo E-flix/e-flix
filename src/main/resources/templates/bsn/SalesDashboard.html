@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+      layout:decorate="~{common/layouts/default}">
+<head>
+  <title>영업 대시보드</title>
+</head>
+<div layout:fragment="content">
+  <div class="container" id="dashboard-main">
+    
+    <!-- 메인 타이틀 -->
+    <div class="page-header bg-gradient-primary text-white rounded mb-4 p-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="mb-1">📊 영업 대시보드</h2>
+          <p class="mb-0 opacity-75">실시간 영업 성과 및 비즈니스 인사이트</p>
+        </div>
+        <button class="btn btn-light btn-lg" onclick="refreshAllData()">
+          <i class="fas fa-sync-alt"></i> 새로고침
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI 카드 영역 -->
+    <div class="row mb-4">
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                  오늘 매출
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800" id="todaySales">
+                  <div class="spinner-border spinner-border-sm"></div>
+                </div>
+              </div>
+              <div class="col-auto">
+                <i class="fas fa-calendar fa-2x text-gray-300"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                  이번달 매출
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800" id="monthSales">
+                  <div class="spinner-border spinner-border-sm"></div>
+                </div>
+              </div>
+              <div class="col-auto">
+                <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                  견적→수주 전환율
+                </div>
+                <div class="row no-gutters align-items-center">
+                  <div class="col-auto">
+                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800" id="conversionRate">
+                      <div class="spinner-border spinner-border-sm"></div>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div class="progress progress-sm mr-2">
+                      <div class="progress-bar bg-info" id="conversionProgress" role="progressbar" style="width: 50%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-auto">
+                <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+          <div class="card-body">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                  대기중 주문
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingOrders">
+                  <div class="spinner-border spinner-border-sm"></div>
+                </div>
+              </div>
+              <div class="col-auto">
+                <i class="fas fa-comments fa-2x text-gray-300"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 차트 영역 -->
+    <div class="row">
+      <!-- 월별 매출 추이 -->
+      <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">월별 매출 추이</h6>
+            <div class="dropdown no-arrow">
+              <select class="form-select form-select-sm" id="salesChartPeriod" onchange="updateSalesChart()">
+                <option value="6">최근 6개월</option>
+                <option value="12" selected>최근 12개월</option>
+                <option value="24">최근 24개월</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-area">
+              <canvas id="salesChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 영업 파이프라인 -->
+      <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">영업 파이프라인</h6>
+          </div>
+          <div class="card-body">
+            <div class="chart-pie pt-4 pb-2">
+              <canvas id="pipelineChart"></canvas>
+            </div>
+            <div class="mt-4 text-center small">
+              <span class="mr-2">
+                <i class="fas fa-circle text-primary"></i> 견적
+              </span>
+              <span class="mr-2">
+                <i class="fas fa-circle text-success"></i> 주문
+              </span>
+              <span class="mr-2">
+                <i class="fas fa-circle text-info"></i> 출고
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 테이블 영역 -->
+    <div class="row">
+      <!-- TOP 고객 -->
+      <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+          <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">🏆 TOP 고객 (매출 기준)</h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered" id="topCustomersTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>고객명</th>
+                    <th>매출액</th>
+                    <th>주문수</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="4" class="text-center">
+                      <div class="spinner-border"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 주의사항 알림 -->
+      <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+          <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">🚨 주의사항</h6>
+          </div>
+          <div class="card-body">
+            <div id="alertsContainer">
+              <div class="text-center">
+                <div class="spinner-border"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 빠른 액션 버튼들 -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow mb-4">
+          <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">🚀 빠른 실행</h6>
+          </div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-md-3 mb-3">
+                <button class="btn btn-primary btn-lg btn-block" onclick="location.href='/bsn/qot'">
+                  <i class="fas fa-file-alt fa-2x mb-2"></i><br>
+                  새 견적서
+                </button>
+              </div>
+              <div class="col-md-3 mb-3">
+                <button class="btn btn-success btn-lg btn-block" onclick="location.href='/bsn/order_management'">
+                  <i class="fas fa-shopping-cart fa-2x mb-2"></i><br>
+                  주문서 관리
+                </button>
+              </div>
+              <div class="col-md-3 mb-3">
+                <button class="btn btn-info btn-lg btn-block" onclick="location.href='/bsn/soutbound'">
+                  <i class="fas fa-shipping-fast fa-2x mb-2"></i><br>
+                  출고 관리
+                </button>
+              </div>
+              <div class="col-md-3 mb-3">
+                <button class="btn btn-warning btn-lg btn-block" onclick="exportSalesReport()">
+                  <i class="fas fa-download fa-2x mb-2"></i><br>
+                  매출 리포트
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    let salesChart, pipelineChart;
+    
+    // 페이지 로드 시 초기화
+    $(document).ready(function() {
+      initCharts();
+      loadDashboardData();
+      
+      // 5분마다 자동 새로고침
+      setInterval(loadDashboardData, 5 * 60 * 1000);
+    });
+    
+    // 차트 초기화
+    function initCharts() {
+      // 매출 추이 차트
+      const salesCtx = document.getElementById('salesChart').getContext('2d');
+      salesChart = new Chart(salesCtx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: '매출액 (만원)',
+            data: [],
+            borderColor: '#4e73df',
+            backgroundColor: 'rgba(78, 115, 223, 0.1)',
+            borderWidth: 2,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return value.toLocaleString() + '만원';
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // 파이프라인 차트
+      const pipelineCtx = document.getElementById('pipelineChart').getContext('2d');
+      pipelineChart = new Chart(pipelineCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['견적', '주문', '출고'],
+          datasets: [{
+            data: [0, 0, 0],
+            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+    
+    // 대시보드 데이터 로드
+    async function loadDashboardData() {
+      try {
+        // KPI 데이터 로드
+        const overviewData = await fetchJSON('/bsn/dashboard/overview');
+        updateKPICards(overviewData);
+        
+        // 차트 데이터 로드
+        const salesData = await fetchJSON('/bsn/dashboard/monthly-sales?months=12');
+        updateSalesChart(salesData.chartData);
+        
+        const pipelineData = await fetchJSON('/bsn/dashboard/pipeline');
+        updatePipelineChart(pipelineData);
+        
+        // 테이블 데이터 로드
+        updateTopCustomersTable(overviewData.topCustomers);
+        
+        const alertsData = await fetchJSON('/bsn/dashboard/alerts');
+        updateAlertsDisplay(alertsData);
+        
+      } catch (error) {
+        console.error('대시보드 데이터 로드 실패:', error);
+        Swal.fire('오류', '대시보드 데이터를 불러오는 중 오류가 발생했습니다.', 'error');
+      }
+    }
+    
+    // KPI 카드 업데이트
+    function updateKPICards(data) {
+      $('#todaySales').text(formatCurrency(data.todaySales || 0));
+      $('#monthSales').text(formatCurrency(data.monthSales || 0));
+      
+      const conversionRate = data.conversionRate || 0;
+      $('#conversionRate').text(conversionRate + '%');
+      $('#conversionProgress').css('width', conversionRate + '%');
+      
+      $('#pendingOrders').text((data.pendingOrders || 0) + '건');
+    }
+    
+    // 매출 차트 업데이트
+    function updateSalesChart(chartData) {
+      if (!chartData || chartData.length === 0) return;
+      
+      const labels = chartData.map(item => item.month);
+      const data = chartData.map(item => Math.round(item.amount / 10000)); // 만원 단위
+      
+      salesChart.data.labels = labels;
+      salesChart.data.datasets[0].data = data;
+      salesChart.update();
+    }
+    
+    // 파이프라인 차트 업데이트
+    function updatePipelineChart(data) {
+      const chartData = [
+        data.quotationStage || 0,
+        data.orderStage || 0,
+        data.outboundStage || 0
+      ];
+      
+      pipelineChart.data.datasets[0].data = chartData;
+      pipelineChart.update();
+    }
+    
+    // TOP 고객 테이블 업데이트
+    function updateTopCustomersTable(customers) {
+      const tbody = $('#topCustomersTable tbody');
+      tbody.empty();
+      
+      if (!customers || customers.length === 0) {
+        tbody.append('<tr><td colspan="4" class="text-center">데이터가 없습니다.</td></tr>');
+        return;
+      }
+      
+      customers.slice(0, 5).forEach((customer, index) => {
+        tbody.append(`
+          <tr>
+            <td>${index + 1}</td>
+            <td>${customer.customerName}</td>
+            <td>${formatCurrency(customer.totalRevenue)}</td>
+            <td>${customer.orderCount}건</td>
+          </tr>
+        `);
+      });
+    }
+    
+    // 알림 표시 업데이트
+    function updateAlertsDisplay(alertsData) {
+      const container = $('#alertsContainer');
+      container.empty();
+      
+      let hasAlerts = false;
+      
+      // 여신 위험 고객
+      if (alertsData.creditRiskCustomers && alertsData.creditRiskCustomers.length > 0) {
+        hasAlerts = true;
+        container.append(`
+          <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>여신 위험:</strong> ${alertsData.creditRiskCustomers.length}개 거래처
+          </div>
+        `);
+      }
+      
+      // 지연 출고
+      if (alertsData.delayedOrders && alertsData.delayedOrders.length > 0) {
+        hasAlerts = true;
+        container.append(`
+          <div class="alert alert-warning" role="alert">
+            <i class="fas fa-clock"></i>
+            <strong>지연 출고:</strong> ${alertsData.delayedOrders.length}건 주문
+          </div>
+        `);
+      }
+      
+      // 견적 만료 임박
+      if (alertsData.expiringQuotations && alertsData.expiringQuotations.length > 0) {
+        hasAlerts = true;
+        container.append(`
+          <div class="alert alert-info" role="alert">
+            <i class="fas fa-calendar-times"></i>
+            <strong>견적 만료 임박:</strong> ${alertsData.expiringQuotations.length}건
+          </div>
+        `);
+      }
+      
+      if (!hasAlerts) {
+        container.append(`
+          <div class="alert alert-success" role="alert">
+            <i class="fas fa-check-circle"></i>
+            현재 주의사항이 없습니다.
+          </div>
+        `);
+      }
+    }
+    
+    // 유틸리티 함수들
+    async function fetchJSON(url) {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    }
+    
+    function formatCurrency(amount) {
+      if (amount >= 100000000) {
+        return Math.round(amount / 100000000) + '억원';
+      } else if (amount >= 10000) {
+        return Math.round(amount / 10000) + '만원';
+      } else {
+        return Math.round(amount).toLocaleString() + '원';
+      }
+    }
+    
+    function refreshAllData() {
+      Swal.fire({
+        title: '새로고침 중...',
+        text: '최신 데이터를 불러오고 있습니다.',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      loadDashboardData().then(() => {
+        Swal.fire('완료!', '데이터가 성공적으로 새로고침되었습니다.', 'success');
+      });
+    }
+    
+    function exportSalesReport() {
+      Swal.fire({
+        title: '매출 리포트 생성',
+        text: '어떤 기간의 리포트를 생성하시겠습니까?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '이번달',
+        cancelButtonText: '전체 기간',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          generateReport('month');
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          generateReport('all');
+        }
+      });
+    }
+    
+    function generateReport(period) {
+      // TODO: 리포트 생성 API 호출
+      Swal.fire('준비중', '리포트 생성 기능을 준비중입니다.', 'info');
+    }
+    
+    console.log('영업 대시보드 초기화 완료');
+  </script>
+</div>
+</html>

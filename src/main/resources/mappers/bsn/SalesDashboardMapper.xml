@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eflix.bsn.mapper.SalesDashboardMapper">
+
+  <!-- ========================================
+       매출 현황 분석
+       ======================================== -->
+
+  <!-- 오늘 매출액 -->
+  <select id="getTodaySales" parameterType="string" resultType="java.math.BigDecimal">
+    SELECT COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS todaySales
+    FROM ORDERS_DETAIL od
+    JOIN ORDERS o ON o.ORDER_NO = od.ORDER_NO AND o.CO_IDX = od.CO_IDX
+    WHERE od.CO_IDX = #{coIdx}
+      AND TRUNC(o.ORDER_DT) = TRUNC(SYSDATE)
+  </select>
+
+  <!-- 이번달 매출액 -->
+  <select id="getMonthSales" parameterType="string" resultType="java.math.BigDecimal">
+    SELECT COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS monthSales
+    FROM ORDERS_DETAIL od
+    JOIN ORDERS o ON o.ORDER_NO = od.ORDER_NO AND o.CO_IDX = od.CO_IDX
+    WHERE od.CO_IDX = #{coIdx}
+      AND TO_CHAR(o.ORDER_DT, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+  </select>
+
+  <!-- 월별 매출 차트 데이터 (최근 N개월) -->
+  <select id="getMonthlySalesChart" resultType="java.util.HashMap">
+    SELECT 
+      TO_CHAR(o.ORDER_DT, 'YYYY-MM') AS month,
+      COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS amount,
+      COUNT(DISTINCT o.ORDER_NO) AS orderCount
+    FROM ORDERS_DETAIL od
+    JOIN ORDERS o ON o.ORDER_NO = od.ORDER_NO AND o.CO_IDX = od.CO_IDX
+    WHERE od.CO_IDX = #{coIdx}
+      AND o.ORDER_DT >= ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -#{months})
+    GROUP BY TO_CHAR(o.ORDER_DT, 'YYYY-MM')
+    ORDER BY month DESC
+  </select>
+
+  <!-- 일별 매출 트렌드 (최근 N일) -->
+  <select id="getDailySalesTrend" resultType="java.util.HashMap">
+    SELECT 
+      TO_CHAR(o.ORDER_DT, 'YYYY-MM-DD') AS date,
+      COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS amount,
+      COUNT(DISTINCT o.ORDER_NO) AS orderCount
+    FROM ORDERS_DETAIL od
+    JOIN ORDERS o ON o.ORDER_NO = od.ORDER_NO AND o.CO_IDX = od.CO_IDX
+    WHERE od.CO_IDX = #{coIdx}
+      AND o.ORDER_DT >= TRUNC(SYSDATE) - #{days}
+    GROUP BY TO_CHAR(o.ORDER_DT, 'YYYY-MM-DD')
+    ORDER BY date DESC
+  </select>
+
+  <!-- ========================================
+       영업 파이프라인 분석
+       ======================================== -->
+
+  <!-- 견적서 건수 (이번달) -->
+  <select id="getQuotationCount" parameterType="string" resultType="int">
+    SELECT COUNT(*) 
+    FROM QUOTATION q
+    WHERE q.CO_IDX = #{coIdx}
+      AND TO_CHAR(q.QUOTATION_DT, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+  </select>
+
+  <!-- 주문서 건수 (이번달) -->
+  <select id="getOrderCount" parameterType="string" resultType="int">
+    SELECT COUNT(*) 
+    FROM ORDERS o
+    WHERE o.CO_IDX = #{coIdx}
+      AND TO_CHAR(o.ORDER_DT, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+  </select>
+
+  <!-- 출고 건수 (이번달) -->
+  <select id="getOutboundCount" parameterType="string" resultType="int">
+    SELECT COUNT(*) 
+    FROM SALES_OUTBOUND so
+    WHERE so.CO_IDX = #{coIdx}
+      AND TO_CHAR(so.OUTBOUND_DT, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+  </select>
+
+  <!-- 견적 → 수주 전환율 -->
+  <select id="getQuotationConversionRate" parameterType="string" resultType="java.math.BigDecimal">
+    WITH CONVERSION_DATA AS (
+      SELECT 
+        COUNT(DISTINCT q.QUOTATION_NO) AS quotation_count,
+        COUNT(DISTINCT o.ORDER_NO) AS order_count
+      FROM QUOTATION q
+      LEFT JOIN ORDERS o ON o.CUSTOMER_CD = q.CUSTOMER_CD 
+        AND o.CO_IDX = q.CO_IDX
+        AND o.ORDER_DT BETWEEN q.QUOTATION_DT AND q.QUOTATION_DT + 30
+      WHERE q.CO_IDX = #{coIdx}
+        AND q.QUOTATION_DT >= TRUNC(SYSDATE, 'MM')
+    )
+    SELECT 
+      CASE 
+        WHEN quotation_count > 0 THEN 
+          ROUND((order_count * 100.0) / quotation_count, 2)
+        ELSE 0 
+      END AS conversionRate
+    FROM CONVERSION_DATA
+  </select>
+
+  <!-- 평균 주문 금액 -->
+  <select id="getAverageOrderValue" parameterType="string" resultType="java.math.BigDecimal">
+    SELECT 
+      COALESCE(AVG(order_total.total_amount), 0) AS avgOrderValue
+    FROM (
+      SELECT 
+        o.ORDER_NO,
+        SUM(od.TOTAL_AMOUNT) AS total_amount
+      FROM ORDERS o
+      JOIN ORDERS_DETAIL od ON od.ORDER_NO = o.ORDER_NO AND od.CO_IDX = o.CO_IDX
+      WHERE o.CO_IDX = #{coIdx}
+        AND o.ORDER_DT >= TRUNC(SYSDATE, 'MM')
+      GROUP BY o.ORDER_NO
+    ) order_total
+  </select>
+
+  <!-- 대기중인 주문 건수 -->
+  <select id="getPendingOrdersCount" parameterType="string" resultType="int">
+    SELECT COUNT(DISTINCT o.ORDER_NO)
+    FROM ORDERS o
+    JOIN ORDERS_DETAIL od ON od.ORDER_NO = o.ORDER_NO AND od.CO_IDX = o.CO_IDX
+    WHERE o.CO_IDX = #{coIdx}
+      AND (od.OUT_STATE IS NULL OR od.OUT_STATE IN ('대기', '준비중'))
+  </select>
+
+  <!-- ========================================
+       고객 분석
+       ======================================== -->
+
+  <!-- 상위 고객 목록 (매출 기준) -->
+  <select id="getTopCustomers" resultType="java.util.HashMap">
+    SELECT 
+      c.CUSTOMER_CD AS customerCd,
+      c.CUSTOMER_NM AS customerName,
+      c.REPRESENTATIVE_NM AS representative,
+      COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS totalRevenue,
+      COUNT(DISTINCT o.ORDER_NO) AS orderCount,
+      COALESCE(AVG(od.TOTAL_AMOUNT), 0) AS avgOrderValue,
+      MAX(o.ORDER_DT) AS lastOrderDate
+    FROM CUSTOMERS c
+    LEFT JOIN ORDERS o ON o.CUSTOMER_CD = c.CUSTOMER_CD AND o.CO_IDX = c.CO_IDX
+    LEFT JOIN ORDERS_DETAIL od ON od.ORDER_NO = o.ORDER_NO AND od.CO_IDX = o.CO_IDX
+    WHERE c.CO_IDX = #{coIdx}
+      AND c.USE_YN = 'Y'
+      AND o.ORDER_DT >= TRUNC(SYSDATE, 'YYYY')  -- 올해 데이터만
+    GROUP BY c.CUSTOMER_CD, c.CUSTOMER_NM, c.REPRESENTATIVE_NM
+    ORDER BY totalRevenue DESC
+    FETCH FIRST #{limit} ROWS ONLY
+  </select>
+
+  <!-- 고객별 주문 빈도 분석 -->
+  <select id="getCustomerOrderFrequency" parameterType="string" resultType="java.util.HashMap">
+    SELECT 
+      c.CUSTOMER_CD AS customerCd,
+      c.CUSTOMER_NM AS customerName,
+      COUNT(DISTINCT o.ORDER_NO) AS orderCount,
+      ROUND(COUNT(DISTINCT o.ORDER_NO) / 
+        GREATEST(MONTHS_BETWEEN(SYSDATE, MIN(o.ORDER_DT)), 1), 2) AS monthlyFrequency,
+      MIN(o.ORDER_DT) AS firstOrderDate,
+      MAX(o.ORDER_DT) AS lastOrderDate,
+      ROUND(SYSDATE - MAX(o.ORDER_DT)) AS daysSinceLastOrder
+    FROM CUSTOMERS c
+    JOIN ORDERS o ON o.CUSTOMER_CD = c.CUSTOMER_CD AND o.CO_IDX = c.CO_IDX
+    WHERE c.CO_IDX = #{coIdx}
+      AND c.USE_YN = 'Y'
+      AND o.ORDER_DT >= TRUNC(SYSDATE, 'YYYY') - 365  -- 최근 2년
+    GROUP BY c.CUSTOMER_CD, c.CUSTOMER_NM
+    HAVING COUNT(DISTINCT o.ORDER_NO) >= 2
+    ORDER BY monthlyFrequency DESC
+  </select>
+
+  <!-- 여신 위험 고객 목록 -->
+  <select id="getCreditRiskCustomers" parameterType="string" resultType="java.util.HashMap">
+    SELECT 
+      c.CUSTOMER_CD AS customerCd,
+      c.CUSTOMER_NM AS customerName,
+      cr.CREDIT_LIMIT AS creditLimit,
+      cr.CREDIT_USED AS creditUsed,
+      (cr.CREDIT_LIMIT - cr.CREDIT_USED) AS remainingCredit,
+      ROUND((cr.CREDIT_USED * 100.0) / NULLIF(cr.CREDIT_LIMIT, 0), 2) AS usageRatio,
+      cr.CREDIT_STATUS AS creditStatus,
+      cr.OVERDUE_AMOUNT AS overdueAmount
+    FROM CUSTOMERS c
+    JOIN CREDIT_MANAGEMENT cr ON cr.CUSTOMER_CD = c.CUSTOMER_CD
+    WHERE c.CO_IDX = #{coIdx}
+      AND c.USE_YN = 'Y'
+      AND (
+        (cr.CREDIT_USED / NULLIF(cr.CREDIT_LIMIT, 0)) >= 0.8  -- 여신 사용률 80% 이상
+        OR cr.OVERDUE_AMOUNT > 0  -- 연체 금액 존재
+        OR cr.CREDIT_STATUS != '정상'  -- 신용 상태 불량
+      )
+    ORDER BY usageRatio DESC
+  </select>
+
+  <!-- ========================================
+       상품 분석
+       ======================================== -->
+
+  <!-- 베스트셀러 상품 목록 -->
+  <select id="getTopSellingProducts" resultType="java.util.HashMap">
+    SELECT 
+      od.ITEM_CODE AS itemCode,
+      od.ITEM_NAME AS itemName,
+      SUM(od.QTY) AS totalQty,
+      COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS totalRevenue,
+      COUNT(DISTINCT od.ORDER_NO) AS orderCount,
+      COALESCE(AVG(od.UNIT_PRICE), 0) AS avgUnitPrice,
+      COALESCE(MAX(od.UNIT_PRICE), 0) AS maxUnitPrice,
+      COALESCE(MIN(od.UNIT_PRICE), 0) AS minUnitPrice
+    FROM ORDERS_DETAIL od
+    JOIN ORDERS o ON o.ORDER_NO = od.ORDER_NO AND o.CO_IDX = od.CO_IDX
+    WHERE od.CO_IDX = #{coIdx}
+      AND o.ORDER_DT >= TRUNC(SYSDATE, 'MM')  -- 이번달
+    GROUP BY od.ITEM_CODE, od.ITEM_NAME
+    ORDER BY totalRevenue DESC
+    FETCH FIRST #{limit} ROWS ONLY
+  </select>
+
+  <!-- ========================================
+       영업사원 성과 분석
+       ======================================== -->
+
+  <!-- 영업사원별 매출 실적 -->
+  <select id="getSalesByEmployee" parameterType="string" resultType="java.util.HashMap">
+    SELECT 
+      c.SALES_EMP_CD AS employeeId,
+      COUNT(DISTINCT o.ORDER_NO) AS orderCount,
+      COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS totalRevenue,
+      COALESCE(AVG(od.TOTAL_AMOUNT), 0) AS avgOrderValue,
+      COUNT(DISTINCT o.CUSTOMER_CD) AS customerCount
+    FROM CUSTOMERS c
+    JOIN ORDERS o ON o.CUSTOMER_CD = c.CUSTOMER_CD AND o.CO_IDX = c.CO_IDX
+    JOIN ORDERS_DETAIL od ON od.ORDER_NO = o.ORDER_NO AND od.CO_IDX = o.CO_IDX
+    WHERE c.CO_IDX = #{coIdx}
+      AND c.USE_YN = 'Y'
+      AND c.SALES_EMP_CD IS NOT NULL
+      AND o.ORDER_DT >= TRUNC(SYSDATE, 'MM')  -- 이번달
+    GROUP BY c.SALES_EMP_CD
+    ORDER BY totalRevenue DESC
+  </select>
+
+  <!-- ========================================
+       알림 및 주의사항
+       ======================================== -->
+
+  <!-- 장기 미출고 주문 목록 -->
+  <select id="getDelayedOrders" parameterType="string" resultType="java.util.HashMap">
+    SELECT 
+      o.ORDER_NO AS orderNo,
+      o.ORDER_DT AS orderDate,
+      c.CUSTOMER_NM AS customerName,
+      ROUND(SYSDATE - o.ORDER_DT) AS daysDelayed,
+      COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS orderAmount
+    FROM ORDERS o
+    JOIN CUSTOMERS c ON c.CUSTOMER_CD = o.CUSTOMER_CD AND c.CO_IDX = o.CO_IDX
+    JOIN ORDERS_DETAIL od ON od.ORDER_NO = o.ORDER_NO AND od.CO_IDX = o.CO_IDX
+    WHERE o.CO_IDX = #{coIdx}
+      AND (od.OUT_STATE IS NULL OR od.OUT_STATE IN ('대기', '준비중'))
+      AND o.ORDER_DT <= SYSDATE - 7  -- 7일 이상 미출고
+    GROUP BY o.ORDER_NO, o.ORDER_DT, c.CUSTOMER_NM
+    ORDER BY daysDelayed DESC
+  </select>
+
+  <!-- 견적서 유효기간 만료 임박 목록 -->
+  <select id="getExpiringQuotations" parameterType="string" resultType="java.util.HashMap">
+    SELECT 
+      q.QUOTATION_NO AS quotationNo,
+      q.CUSTOMER_NAME AS customerName,
+      q.QUOTATION_DT AS quotationDate,
+      q.VALID_PERIOD AS validPeriod,
+      ROUND(q.VALID_PERIOD - SYSDATE) AS daysToExpire
+    FROM QUOTATION q
+    WHERE q.CO_IDX = #{coIdx}
+      AND q.VALID_PERIOD BETWEEN SYSDATE AND SYSDATE + 7  -- 7일 내 만료
+      AND NOT EXISTS (
+        SELECT 1 FROM ORDERS o 
+        WHERE o.CUSTOMER_CD = q.CUSTOMER_CD 
+          AND o.CO_IDX = q.CO_IDX
+          AND o.ORDER_DT >= q.QUOTATION_DT
+      )
+    ORDER BY daysToExpire ASC
+  </select>
+
+  <!-- 거래정지 고객 목록 -->
+  <select id="getBlockedCustomers" parameterType="string" resultType="java.util.HashMap">
+    SELECT 
+      c.CUSTOMER_CD AS customerCd,
+      c.CUSTOMER_NM AS customerName,
+      cr.TRADE_STOP_REASON AS reason,
+      cr.TRADE_STOP_DT AS stopDate,
+      cr.TRADE_RESUME_DT AS resumeDate,
+      ROUND(SYSDATE - cr.TRADE_STOP_DT) AS daysStopped
+    FROM CUSTOMERS c
+    JOIN CREDIT_MANAGEMENT cr ON cr.CUSTOMER_CD = c.CUSTOMER_CD
+    WHERE c.CO_IDX = #{coIdx}
+      AND c.USE_YN = 'Y'
+      AND cr.TRADE_STOP_FLG = 'Y'
+    ORDER BY cr.TRADE_STOP_DT DESC
+  </select>
+
+</mapper>
