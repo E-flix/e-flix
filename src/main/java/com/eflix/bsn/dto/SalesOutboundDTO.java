@@ -11,6 +11,7 @@ public class SalesOutboundDTO {
     private String writeDt;             // 작성일 (문자열)
     private String customerCd;          // 거래처 코드
     private String customerName;
+    private String representativeNm;
     private Date orderDt;               // 주문일
     private Date outboundDt;            // 실제 출고일
     private String money;               // 통화
