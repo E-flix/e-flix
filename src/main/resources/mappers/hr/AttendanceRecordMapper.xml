@@ -156,7 +156,65 @@
     ORDER BY ar.attd_date ASC
   </select>
 
-    <select id="addAttd">
-        CALL PROC_AUTO_ATTENDANCE()
-    </select>
+  <!-- V2 -->
+  <select id="selectAttdSummary" parameterType="String" resultType="AttdSummaryDTO">
+    SELECT     
+        COUNT(DISTINCT ar.attd_date) AS realDay,     
+        MAX(g.grd_annual) AS totalLeaveDay,     
+        COUNT(CASE WHEN ar.attd_status IN ('AR02','AR03','AR04') THEN 1 END) AS workDay,     
+        NVL((         
+            SELECT SUM(lr.leave_end_date - lr.leave_start_date + 1)         
+            FROM leave_requests lr         
+            WHERE lr.emp_idx = #{empIdx}         
+            AND TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}           
+            AND lr.approval_status = 'AS02'     
+        ), 0) AS usedLeaveDay,     
+        COUNT(CASE WHEN ar.is_holiday = 'Y' THEN 1 END) AS holidayWorkDay,     
+        (MAX(g.grd_annual) - NVL((         
+            SELECT SUM(lr.leave_end_date - lr.leave_start_date + 1)         
+            FROM leave_requests lr         
+            WHERE lr.emp_idx = #{empIdx}           
+            AND TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}           
+            AND lr.approval_status = 'AS02'     
+        ), 0)) AS canLeaveDay,     
+        COUNT(CASE WHEN ar.attd_status = 'AR05' THEN 1 END) AS abDay,     
+        COUNT(CASE WHEN ar.attd_status = 'AR03' THEN 1 END) AS rateCount,     
+        COUNT(CASE WHEN ar.attd_status = 'AR04' THEN 1 END) AS leaveEarlyDay 
+    FROM attendance_records ar 
+    JOIN employees e ON ar.emp_idx = e.emp_idx 
+    JOIN grade g ON e.grd_idx = g.grd_idx 
+    WHERE ar.emp_idx = #{empIdx}   
+    AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+    GROUP BY ar.emp_idx, e.emp_idx, g.grd_idx
+  </select>
+
+  <select id="selectAttdDetailList" parameterType="String" resultType="AttdDetailDTO">
+    SELECT
+        TO_CHAR(ar.attd_date, 'YYYY-MM-DD') AS attdDate,
+        (SELECT hd_name FROM holiday h WHERE h.hd_date = ar.attd_date AND h.co_idx = ar.co_idx) AS holidayType,
+        cc.common_code_name AS attdStatus,
+        TO_CHAR(ar.attd_time, 'HH24:MI') AS scheduleTime,
+        TO_CHAR(ar.attd_start, 'HH24:MI') AS startTime,
+        TO_CHAR(ar.attd_end, 'HH24:MI') AS endTime,
+        (
+            SELECT
+                CASE WHEN n.nt_idx IS NOT NULL
+                    THEN TO_CHAR(n.nt_hours, '99.99')
+                    ELSE ''
+                END
+            FROM night_records n
+            WHERE n.emp_idx = ar.emp_idx
+            AND n.nt_date = ar.attd_date
+            AND n.co_idx = ar.co_idx
+            AND ROWNUM = 1
+        ) AS nightTime
+    FROM attendance_records ar
+        LEFT JOIN COMMON_CODE cc
+            ON ar.attd_status = cc.COMMON_CODE
+            AND cc.GROUP_CODE = 'AR'
+            AND cc.CO_IDX = ar.co_idx
+    WHERE ar.emp_idx = #{empIdx}
+        AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+    ORDER BY attd_date ASC
+</select>
 </mapper>

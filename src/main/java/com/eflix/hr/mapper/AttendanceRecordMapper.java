@@ -14,8 +14,10 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.eflix.hr.dto.AttendanceRecordDTO;
+import com.eflix.hr.dto.etc.AttdDetailDTO;
 import com.eflix.hr.dto.etc.AttdRecordDTO;
 import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
+import com.eflix.hr.dto.etc.AttdSummaryDTO;
 
 @Mapper
 public interface AttendanceRecordMapper {
@@ -40,5 +42,9 @@ public interface AttendanceRecordMapper {
     public List<AttdRecordDTO> findAllByEmpIdxWithDate(String empIdx, String date);
 
     public void addAttd();
+
+    AttdSummaryDTO selectAttdSummary(String empIdx, String date);
+
+    List<AttdDetailDTO> selectAttdDetailList(String empIdx, String date);
 
 }

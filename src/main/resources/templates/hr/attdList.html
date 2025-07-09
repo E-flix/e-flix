@@ -96,123 +96,123 @@
       </div>
     </div>
   </div>
-<script th:inline="javascript">
-$("#yearMonthSelect").on("change", function() {
-const ym = $("#yearMonthSelect").val();
-if (!ym) return;
-  // 1) 기본항목 호출
-  $.ajax({
-    type: "GET",
-    url: "/hr/al/basicInfo",
-    data: { empIdx: "emp-001", yearMonth: ym },
-    dataType: 'json',
-    success: function(res) {
-      console.log("basicInfo 응답:", res);
-      const info = Array.isArray(res) ? res[0] : res;
+  <script th:inline="javascript">
+    $("#yearMonthSelect").on("change", function () {
+      const ym = $("#yearMonthSelect").val();
+      if (!ym) return;
+      // 1) 기본항목 호출
+      $.ajax({
+        type: "GET",
+        url: "/hr/al/basicInfo",
+        data: { empIdx: "emp-001", yearMonth: ym },
+        dataType: 'json',
+        success: function (res) {
+          console.log("basicInfo 응답:", res);
+          const info = Array.isArray(res) ? res[0] : res;
 
-      $("#realDay").text(info.attdDate + '일' ?? '0');
-      $("#totalLeaveDay").text(info.leaveAllDays + '일'  ?? '0');
-      $("#workDay").text(info.workDay + '일' ?? '0');
-      $("#usedLeaveDay").text(info.leaveDays + '일'   ?? '0');
-      $("#holidayWorkDay").text(info.holidayWorkDay ?? '0');
-      $("#canLeaveDay").text(info.leaveAllDays - info.leaveDays + '일' ?? '0');
-      $("#abDay").text(info.abDay + '일' ?? '0');
-      $("#rateCount").text(info.rateCount + '일' ?? '0');
-      $("#leaveEarlyDay").text(info.leaveEarlyDay + '일' ?? '0');
-    },
-    error: function(xhr, status, err) {
-      console.error("기본정보 조회 실패:", status, err);
-    }
-  });
+          $("#realDay").text(info.attdDate + '일' ?? '0');
+          $("#totalLeaveDay").text(info.leaveAllDays + '일' ?? '0');
+          $("#workDay").text(info.workDay + '일' ?? '0');
+          $("#usedLeaveDay").text(info.leaveDays + '일' ?? '0');
+          $("#holidayWorkDay").text(info.holidayWorkDay ?? '0');
+          $("#canLeaveDay").text(info.leaveAllDays - info.leaveDays + '일' ?? '0');
+          $("#abDay").text(info.abDay + '일' ?? '0');
+          $("#rateCount").text(info.rateCount + '일' ?? '0');
+          $("#leaveEarlyDay").text(info.leaveEarlyDay + '일' ?? '0');
+        },
+        error: function (xhr, status, err) {
+          console.error("기본정보 조회 실패:", status, err);
+        }
+      });
 
-  // 2) 근태현황 리스트 호출
-  $.ajax({
-    type: 'GET',
-    url: '/hr/al/list',
-    data: { empIdx: "emp-001", yearMonth: ym },
-    dataType: 'json',
-    success: function(records) {
-      console.log("list 응답:", records);
-      const $tbody = $('#attdListTable').empty();
+      // 2) 근태현황 리스트 호출
+      $.ajax({
+        type: 'GET',
+        url: '/hr/al/list',
+        data: { empIdx: "emp-001", yearMonth: ym },
+        dataType: 'json',
+        success: function (records) {
+          console.log("list 응답:", records);
+          const $tbody = $('#attdListTable').empty();
 
-      records.forEach(function(rec) {
-        const d       = new Date(rec.attdDate);
-        const monthN  = d.getMonth() + 1;
-        const day     = d.getDate();
-        const weekday = ['일','월','화','수','목','금','토'][d.getDay()];
-        const dateStr = `${monthN}월 ${day}일 (${weekday})`;
+          records.forEach(function (rec) {
+            const d = new Date(rec.attdDate);
+            const monthN = d.getMonth() + 1;
+            const day = d.getDate();
+            const weekday = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()];
+            const dateStr = `${monthN}월 ${day}일 (${weekday})`;
 
-        const $tr = $(`
+            const $tr = $(`
           <tr>
             <td>${dateStr}</td>
-            <td>${rec.hdIdx      || ''}</td>
+            <td>${rec.hdIdx || ''}</td>
             <td>${rec.attdStatus || ''}</td>
-            <td>${rec.attdTime   || ''}</td>
-            <td>${rec.attdStart  || ''}</td>
-            <td>${rec.attdEnd    || ''}</td>
-            <td>${rec.overtime   || ''}</td>
+            <td>${rec.attdTime || ''}</td>
+            <td>${rec.attdStart || ''}</td>
+            <td>${rec.attdEnd || ''}</td>
+            <td>${rec.overtime || ''}</td>
           </tr>
         `);
-        $tbody.append($tr);
-      });
-    },
-    error: function(xhr, status, error) {
-      console.error('근태 내역 조회 실패:', status, error);
-    }
-  });
-});
-
-
-  $(document).ready(function() {
-    init();
-  })
-
-  function init() {
-    
-  $.ajax({
-  url: `/hr/al/yearmonth`,
-  type: 'GET',
-  data: { empIdx: "emp-001" },
-  dataType: 'json',
-  success: function(joinDates) {
-    const selectSelector = "#yearMonthSelect";
-  if (!joinDates || !joinDates.length) return;
-  
-  // 1) 뒤에 “-DD” 잘라내고 “YYYY-MM” 파싱
-  var ym = joinDates[0].slice(0, 7);           // "2022-04"
-  var parts = ym.split('-').map(Number);       // [2022, 4]
-  var startY = parts[0], startM = parts[1];
-  
-  // 2) 오늘 기준 연도·월 구하기
-  var today    = new Date();
-  var currentY = today.getFullYear();          // e.g. 2025
-  var currentM = today.getMonth() + 1;         // JS는 0~11 → +1 → 1~12
-  
-  // 3) <select> 초기화
-  var $sel = $(selectSelector).empty()
-    .append($('<option>', { value: '', text: '선택' }));
-  
-  // 4) 입사월부터 오늘 월까지 루프
-  for (var y = startY; y <= currentY; y++) {
-    // 해당 연도의 첫월/끝월 계산
-    var mStart = (y === startY)   ? startM   : 1;
-    var mEnd   = (y === currentY) ? currentM : 12;
-    
-    for (var m = mStart; m <= mEnd; m++) {
-      var mm2   = String(m).padStart(2, '0');   // "04", "10" 등
-      var value = y + '-' + mm2;                // "2022-04"
-      var text  = y + '년 ' + m + '월';         // "2022년 4월"
-      
-      $sel.append(
-        $('<option>', { value: value, text: text })
-      );
-    }
-  }
+            $tbody.append($tr);
+          });
         },
-    error: function(xhr, status, error) {
-      console.error('연월 조회 실패:', status, error);
+        error: function (xhr, status, error) {
+          console.error('근태 내역 조회 실패:', status, error);
+        }
+      });
+    });
+
+
+    $(document).ready(function () {
+      init();
+    })
+
+    function init() {
+
+      $.ajax({
+        url: `/hr/al/yearmonth`,
+        type: 'GET',
+        data: { empIdx: "emp-001" },
+        dataType: 'json',
+        success: function (joinDates) {
+          const selectSelector = "#yearMonthSelect";
+          if (!joinDates || !joinDates.length) return;
+
+          // 1) 뒤에 “-DD” 잘라내고 “YYYY-MM” 파싱
+          var ym = joinDates[0].slice(0, 7);           // "2022-04"
+          var parts = ym.split('-').map(Number);       // [2022, 4]
+          var startY = parts[0], startM = parts[1];
+
+          // 2) 오늘 기준 연도·월 구하기
+          var today = new Date();
+          var currentY = today.getFullYear();          // e.g. 2025
+          var currentM = today.getMonth() + 1;         // JS는 0~11 → +1 → 1~12
+
+          // 3) <select> 초기화
+          var $sel = $(selectSelector).empty()
+            .append($('<option>', { value: '', text: '선택' }));
+
+          // 4) 입사월부터 오늘 월까지 루프
+          for (var y = startY; y <= currentY; y++) {
+            // 해당 연도의 첫월/끝월 계산
+            var mStart = (y === startY) ? startM : 1;
+            var mEnd = (y === currentY) ? currentM : 12;
+
+            for (var m = mStart; m <= mEnd; m++) {
+              var mm2 = String(m).padStart(2, '0');   // "04", "10" 등
+              var value = y + '-' + mm2;                // "2022-04"
+              var text = y + '년 ' + m + '월';         // "2022년 4월"
+
+              $sel.append(
+                $('<option>', { value: value, text: text })
+              );
+            }
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error('연월 조회 실패:', status, error);
+        }
+      });
     }
-  });
-  }
-</script>
+  </script>
 </div>
