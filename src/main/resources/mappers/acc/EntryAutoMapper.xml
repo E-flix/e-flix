@@ -36,6 +36,14 @@
     AND co_idx = #{coIdx}
   </select>
 
+  <!-- select max+1 line_number -->
+  <select id="selectMaxPlusOneLineNumber" parameterType="com.eflix.acc.dto.EntryDetailDTO" resultType="int">
+    SELECT COALESCE(MAX(line_number)+1, 1) AS lineNo 
+    FROM entry_detail
+    WHERE entry_number = #{entryNumber}
+    AND co_idx = #{coIdx}
+  </select>
+
   <!-- 급여관련 entry_master 생성 -->
   <!-- 
    #{entryDate}는 임시로 급여 데이터의 지급일자로 세팅 
