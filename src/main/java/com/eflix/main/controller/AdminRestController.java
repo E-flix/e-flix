@@ -24,7 +24,6 @@ import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.InquiryDTO;
 import com.eflix.main.dto.QuestionDTO;
 import com.eflix.main.dto.SubscriptionBillDTO;
-import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.UserDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
 import com.eflix.main.dto.etc.CompanySubscriptionDTO;

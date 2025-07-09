@@ -18,6 +18,7 @@ import java.util.Map;
 import org.springframework.data.repository.query.Param;
 
 import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.etc.EmpSearchDTO;
 
 public interface EmployeeMapper {
 
@@ -42,5 +43,9 @@ public interface EmployeeMapper {
     // 0708
     public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO);
     public Date findAllEmpRegdateByEmpIdx(String empIdx);
+
+    // 0709
+    public List<EmployeeDTO> findAllEmployeeSearch(EmpSearchDTO empSearchDTO);
+    public int findAllEmpCount(EmpSearchDTO empSearchDTO);
 
 }

@@ -76,14 +76,15 @@
     ORDER BY e.emp_idx ASC
 </select>
 
-  <!-- 직급 드롭다운 조회 -->
+    <!-- 직급 드롭다운 조회 -->
     <select id="gradeList" resultType="EmployeeDTO">
       SELECT DISTINCT emp_grade FROM employees WHERE co_idx = #{coIdx}
     </select>
-  <!-- 재직 상태 드롭다운 조회 -->
-  <select id="empStatusList" resultType="EmployeeDTO">
-    SELECT DISTINCT emp_status FROM employees WHERE co_idx = #{coIdx}
-  </select>
+
+    <!-- 재직 상태 드롭다운 조회 -->
+    <select id="empStatusList" resultType="EmployeeDTO">
+        SELECT DISTINCT emp_status FROM employees WHERE co_idx = #{coIdx}
+    </select>
 
 <!-- 사원 등록 -->
 <insert id="insertEmp" parameterType="EmployeeDTO">
@@ -189,10 +190,122 @@
     SELECT * FROM employees WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
 </select>
 
-<!-- 0708 -->
-<select id="findAllEmpRegdateByEmpIdx" parameterType="String" resultType="Date">
-    SELECT emp_regdate
-    FROM employees
-    WHERE emp_idx = #{empIdx}
-</select>
+    <!-- 0708 -->
+    <select id="findAllEmpRegdateByEmpIdx" parameterType="String" resultType="Date">
+        SELECT emp_regdate
+        FROM employees
+        WHERE emp_idx = #{empIdx}
+    </select>
+
+    <!-- 0709 -->
+    <select id="findAllEmployeeSearch" parameterType="EmpSearchDTO" resultType="EmployeeDTO">
+        SELECT e.emp_idx, e.emp_name, e.emp_status, e.emp_type, e.emp_regdate, e.emp_phone, e.emp_email, e.emp_contract,
+            d.dept_name,
+            g.grd_name
+        FROM employees e
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+            LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+        <where>
+            <!-- 선택한 '상위 부서'만 필터링 -->
+            <if test="deptUpIdx != null and deptUpIdx != '' and deptUpIdx != '선택'">
+                AND (d.dept_up_idx = #{deptUpIdx} OR d.dept_idx = #{deptUpIdx})
+            </if>
+            
+            <!-- 선택한 '상세 부서'만 필터링 -->
+            <if test="deptIdx != null and deptIdx != '' and deptIdx != '선택'">
+                AND e.dept_idx = #{deptIdx}
+            </if>
+            
+            <!-- 선택한 '직급'만 필터링 -->
+            <if test="empGrade != null and empGrade != '' and empGrade != '선택'">
+                AND (e.emp_grade = #{empGrade} OR e.emp_grade LIKE '%' || #{empGrade} || '%')
+            </if>
+            
+            <!-- 선택한 '재직 상태'만 필터링 -->
+            <if test="empStatus != null and empStatus != '' and empStatus != '선택'">
+                AND e.emp_status = #{empStatus}
+            </if>
+            
+
+            
+            <!-- 검색 키워드 & 옵션 처리 -->
+            <if test="keyword != null and keyword != '' and keyword != '선택'">
+                <choose>
+                    <when test="option != null and option == 'empIdx' and option != '전체'">
+                        AND e.emp_idx LIKE '%' || #{keyword} || '%'
+                    </when>
+                    <when test="option != null and option == 'empName' and option != '전체'">
+                        AND e.emp_name LIKE '%' || #{keyword} || '%'
+                    </when>
+                    <otherwise>
+                        <!-- 옵션이 없거나 그 외의 값일 때 둘 다 검색 -->
+                        AND (
+                            e.emp_idx LIKE '%' || #{keyword} || '%'
+                            OR e.emp_name LIKE '%' || #{keyword} || '%'
+                        )
+                    </otherwise>
+                </choose>
+            </if>
+            AND e.co_idx = #{coIdx}
+        </where>
+    </select>
+
+    <select id="findAllEmpCount" parameterType="EmpSearchDTO" resultType="int">
+        SELECT COUNT(*)
+        FROM employees e
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+            LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+        <where>
+            <!-- 선택한 '상위 부서'만 필터링 -->
+            <if test="deptUpIdx != null and deptUpIdx != '' and deptUpIdx != '선택'">
+                AND (d.dept_up_idx = #{deptUpIdx} OR d.dept_idx = #{deptUpIdx})
+            </if>
+            
+            <!-- 선택한 '상세 부서'만 필터링 -->
+            <if test="deptIdx != null and deptIdx != '' and deptIdx != '선택'">
+                AND e.dept_idx = #{deptIdx}
+            </if>
+            
+            <!-- 선택한 '직급'만 필터링 -->
+            <if test="empGrade != null and empGrade != '' and empGrade != '선택'">
+                AND (e.emp_grade = #{empGrade} OR e.emp_grade LIKE '%' || #{empGrade} || '%')
+            </if>
+            
+            <!-- 선택한 '재직 상태'만 필터링 -->
+            <if test="empStatus != null and empStatus != '' and empStatus != '선택'">
+                AND e.emp_status = #{empStatus}
+            </if>
+            
+
+            
+            <!-- 검색 키워드 & 옵션 처리 -->
+            <if test="keyword != null and keyword != '' and keyword != '선택'">
+                <choose>
+                    <when test="option != null and option == 'empIdx' and option != '전체'">
+                        AND e.emp_idx LIKE '%' || #{keyword} || '%'
+                    </when>
+                    <when test="option != null and option == 'empName' and option != '전체'">
+                        AND e.emp_name LIKE '%' || #{keyword} || '%'
+                    </when>
+                    <otherwise>
+                        <!-- 옵션이 없거나 그 외의 값일 때 둘 다 검색 -->
+                        AND (
+                            e.emp_idx LIKE '%' || #{keyword} || '%'
+                            OR e.emp_name LIKE '%' || #{keyword} || '%'
+                        )
+                    </otherwise>
+                </choose>
+            </if>
+            AND e.co_idx = #{coIdx}
+        </where>
+    </select>
+
+    <update id="updateEmployee" parameterType="EmployeeDTO">
+        MERGE INTO employee e
+        USING (
+            SELECT #{empIdx}, #{empName}, #{rrnPfx}, #{rrnSfx}, #{empEmail}, #{deptIdx}, #{empGrade}, #{empType}, #{empRegdate},
+                #{empAccount}, #{empPhone}, #{empPw}, #{empAddr}, #{empAddrDetail}, #{empAddrZip}, #{coIdx}, #{empImg}
+            FROM dual
+        ) src
+    </update>
 </mapper>

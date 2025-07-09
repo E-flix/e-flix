@@ -21,17 +21,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmployeeDTO {
-    private String empIdx;           // emp_idx
-    private String deptIdx;          // dept_idx
-    private String empName;          // emp_name
-    private String empEmail;         // emp_email
-    private Date empRegdate;         // emp_regdate
-    private String empGrade;         // emp_grade
-    private String empType;          // emp_type
-    private String empStatus;        // emp_status
-    private String deptName;         // deptName
-    private String empAccount;      // emp_account
-    private String empPw;           // emp_pw
+    private String empIdx; // emp_idx
+    private String deptIdx; // dept_idx
+    private String empName; // emp_name
+    private String empEmail; // emp_email
+    private Date empRegdate; // emp_regdate
+    private String empGrade; // emp_grade
+    private String empType; // emp_type
+    private String empStatus; // emp_status
+    private String deptName; // deptName
+    private String empAccount; // emp_account
+    private String empPw; // emp_pw
     private String rrnPfx;
     private String rrnSfx;
     private String empPhone;
@@ -39,7 +39,7 @@ public class EmployeeDTO {
     private String empAddr;
     private String empAddrDetail;
     private String empAddrZip;
-    
+
     private String option;
     private String keyword;
 
@@ -55,5 +55,6 @@ public class EmployeeDTO {
     private int leaveDays;
     private String empRole;
 
+    private String grdName;
     private int baseSalary;
 }

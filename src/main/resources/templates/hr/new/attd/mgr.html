@@ -1,0 +1,286 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-18
+  - 설명     : 근태 관리화면 (관리자)
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-18 (김어진): title 및 내용 추가
+  - 2025-06-19 (김어진): layout 구성
+============================================ -->
+
+<head>
+  <title>근태관리</title>
+</head>
+<div layout:fragment="content">
+  <div id="attdManager">
+    <div class="mt-4">
+      <h4 class="fw-bold mb-3">근태관리</h4>
+
+      <!-- 필터 영역 -->
+      <div class="p-3 bg-light border rounded mb-4">
+          <form>
+        <div class="row g-3 align-items-center">
+          <div class="col-md-3">
+            <label class="form-label">사원명</label>
+            <input type="text" name="empName" class="form-control" placeholder="검색어 입력 후 [enter]">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">근무상태</label>
+            <select class="form-select">
+              <option value="">선택</option>
+              <option></option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">부서명</label>
+            <select class="form-select" id="deptSelect">
+              <option value="">선택</option>
+              <option ></option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">년월</label>
+            <select class="form-select">
+              <option>2024년 11월</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">직책</label>
+            <select class="form-select">
+              <option>선택</option>
+            </select>
+          </div>
+          <div class="col-md-1 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2" id="searchBtn">조회</button>
+            <button class="btn btn-secondary">초기화</button>
+          </div>
+        </div>
+          </form>
+      </div>
+
+      <!-- 상단 근태 리스트 -->
+      <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>사번</th>
+            <th>사원명</th>
+            <th>부서</th>
+            <th>직책</th>
+            <th>총근무일수</th>
+            <th>정상근무</th>
+            <th>초과근무</th>
+            <th>지각</th>
+            <th>조퇴</th>
+            <th>결근</th>
+            <th>휴가</th>
+            <th>수정일자</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr onclick="showDetail('홍길동')">
+            <td>1</td>
+            <td>홍길동</td>
+            <td>인사부</td>
+            <td>과장</td>
+            <td>20일</td>
+            <td>19일</td>
+            <td>2시간</td>
+            <td>1회</td>
+            <td>0회</td>
+            <td>0회</td>
+            <td>1일</td>
+            <td>2025-06-15</td>
+          </tr>
+          <tr onclick="showDetail('홍윤희')">
+            <td>2</td>
+            <td>홍윤희</td>
+            <td>영업부</td>
+            <td>대리</td>
+            <td>20일</td>
+            <td>20일</td>
+            <td>1시간</td>
+            <td>0회</td>
+            <td>0회</td>
+            <td>0회</td>
+            <td>0일</td>
+            <td>-</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 상세 정보 표시 영역 -->
+      <div id="detailSection" class="mt-5" style="display:none;">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+          <!-- 사원 정보 박스 -->
+          <div class="card mb-4" style="max-width: 400px;">
+            <div class="card-body">
+              <h6 class="card-title fw-bold">📋 사원 정보</h6>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>사원명:</strong> 홍길동</li>
+                <li class="list-group-item"><strong>년월:</strong> 2024년 06월</li>
+                <li class="list-group-item"><strong>부서명:</strong> A01 본사 → 인사부</li>
+                <li class="list-group-item"><strong>정규 근무일수:</strong> 20일</li>
+                <li class="list-group-item"><strong>직책:</strong> 과장</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end mb-2">
+          <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#editModal">수정</button>
+          <button class="btn btn-secondary" onclick="hideDetail()">닫기</button>
+        </div>
+        <table class="table table-bordered text-center align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>날짜</th>
+              <th>근무상태</th>
+              <th>출근시간</th>
+              <th>퇴근시간</th>
+              <th>총 근무시간</th>
+              <th>특이사항</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>06-01</td>
+              <td>정상근무</td>
+              <td>9:00</td>
+              <td>18:00</td>
+              <td>9시간</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>06-02</td>
+              <td>지각</td>
+              <td>9:45</td>
+              <td>18:00</td>
+              <td>8시간 15분</td>
+              <td>지각 1회</td>
+            </tr>
+            <tr>
+              <td>06-03</td>
+              <td>초과근무</td>
+              <td>9:00</td>
+              <td>19:30</td>
+              <td>10시간 30분</td>
+              <td>초과 1.5시간</td>
+            </tr>
+            <!-- 추가 행들 -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 수정 모달 -->
+      <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">근태 상세 수정</h5>
+              <button class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table table-bordered text-center align-middle" id="editTable">
+                <thead class="table-light">
+                  <tr>
+                    <th>날짜</th>
+                    <th>근무상태</th>
+                    <th>출근시간</th>
+                    <th>퇴근시간</th>
+                    <th>총 근무시간</th>
+                    <th>특이사항</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>06-01</td>
+                    <td ondblclick="editCell(this)">정상근무</td>
+                    <td ondblclick="editCell(this)">9:00</td>
+                    <td ondblclick="editCell(this)">18:00</td>
+                    <td ondblclick="editCell(this)">9시간</td>
+                    <td ondblclick="editCell(this)">-</td>
+                  </tr>
+                  <!-- 추가 행들 -->
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary">저장</button>
+              <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 스크립트 -->
+    <script>
+      const coIdx = "co-201"
+      function showDetail(name) {
+        document.getElementById('detailSection').style.display = 'block';
+        // 추가적으로 선택한 사원 데이터로 갱신할 수 있음
+      }
+
+      function hideDetail() {
+        document.getElementById('detailSection').style.display = 'none';
+      }
+
+      function editCell(cell) {
+        const originalText = cell.innerText;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = originalText;
+        input.classList.add("form-control");
+        input.onblur = function () {
+          cell.innerText = input.value || originalText;
+        };
+        cell.innerText = "";
+        cell.appendChild(input);
+        input.focus();
+      }
+
+      $("#searchBtn").on("click", function() {
+        const query = {
+          empName: $("#empName").val(),
+        }
+        $.ajax({
+          url: "/hr/am/search",
+          type: "GET",
+          data: query,
+          dataType: 'json',
+          success: function(code){
+            if( code === '200' ) {
+              alert('성공')
+            } 
+          },
+          error: function(xhr, status, err) {
+            console.error(err);
+          }
+        })
+      });
+    function loadDept() {
+       $.ajax({
+          url: "/hr/dept/list/all?coIdx=" + coIdx,
+          type: "GET",
+          success: function(res){
+            $("#deptSelect").empty();
+            $.each(res, function(i, item) {
+              let option = `<option value="${item.deptIdx}">${item.deptName}</option>`;
+              $("#deptSelect").append(option);
+            });
+          },
+          error: function(xhr, status, err) {
+            console.error(err);
+          }
+        })
+    }
+    $(document).ready(function () {
+      loadDept();
+    });
+    </script>
+
+  </div>
+</div>

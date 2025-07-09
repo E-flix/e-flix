@@ -43,4 +43,6 @@ public interface AttendanceRecordService {
     public AttdRecordSummaryDTO selectAttdRecordSummaryByEmpIdx(String empIdx, String date);
     public List<AttdRecordDTO> findAllByEmpIdxWithDate(String empIdx, String date);
 
+    // 0709
+    public void addAttd();
 }

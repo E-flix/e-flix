@@ -111,7 +111,13 @@
           AND TO_CHAR(leave_start_date, 'YYYY-MM') = #{date}
           AND approval_status = 'AS02'
       ) AS usedLeaveDay,
-      e.leave_days AS canLeaveDay,
+      ( e.leave_all_days - (
+          SELECT NVL(SUM(LEAVE_END_DATE-LEAVE_START_DATE)+1,0)
+          FROM leave_requests
+          WHERE emp_idx = 'emp-201'
+          AND TO_CHAR(leave_start_date, 'YYYY-MM') = '2025-07'
+          AND approval_status = 'AS02'
+      )) AS canLeaveDay,
       COUNT(CASE WHEN attd_status = 'ABSENT' THEN 1 END) AS abDay,
       COUNT(CASE WHEN attd_status = 'LATE' THEN 1 END) AS rateCount,
       COUNT(CASE WHEN attd_status = 'LEAVE_EARLY' THEN 1 END) AS leaveEarlyDay,
@@ -141,12 +147,16 @@
             AND n.nt_start IS NOT NULL AND n.nt_end IS NOT NULL
             AND ROWNUM = 1
       ), '') AS nightTime
-  FROM attendance_records ar
-  LEFT JOIN night_records n
-      ON n.emp_idx = ar.emp_idx
-      AND n.nt_date = ar.attd_date
-  WHERE ar.emp_idx = #{empIdx}
-    AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
-  ORDER BY ar.attd_date ASC
+    FROM attendance_records ar
+    LEFT JOIN night_records n
+        ON n.emp_idx = ar.emp_idx
+        AND n.nt_date = ar.attd_date
+    WHERE ar.emp_idx = #{empIdx}
+      AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+    ORDER BY ar.attd_date ASC
   </select>
+
+    <select id="addAttd">
+        CALL PROC_AUTO_ATTENDANCE()
+    </select>
 </mapper>

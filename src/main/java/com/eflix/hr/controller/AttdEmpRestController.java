@@ -75,7 +75,7 @@ public class AttdEmpRestController {
 
         List<String> monthList = new ArrayList<>();
         if(Integer.parseInt(year) == nowYear) {
-            for(int i = 1; i < LocalDate.now().getMonthValue(); i++) {
+            for(int i = 1; i <= LocalDate.now().getMonthValue(); i++) {
                 monthList.add(String.valueOf(i));
             } 
         }

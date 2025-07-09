@@ -24,68 +24,72 @@ import com.eflix.hr.service.AttendanceRecordService;
 @Service
 public class AttendanceRecordServiceImpl implements AttendanceRecordService {
 
-  @Autowired
-  AttendanceRecordMapper attendanceRecordMapper;
+    @Autowired
+    AttendanceRecordMapper attendanceRecordMapper;
 
-  // 근태 전체조회
-  @Override
-  public List<AttendanceRecordDTO> getAllRecords() {
-    return getAllRecords();
-  }  
-  // 근태 상세조회
-  @Override
-  public List<AttendanceRecordDTO> getRecordsByEmpId(AttendanceRecordDTO attendanceRecordDTO) {
-    attendanceRecordDTO.setEmpIdx(attendanceRecordDTO.getEmpIdx());
-    return attendanceRecordMapper.getRecordsByEmpId(attendanceRecordDTO);
-  }
+    // 근태 전체조회
+    @Override
+    public List<AttendanceRecordDTO> getAllRecords() {
+        return getAllRecords();
+    }
 
-  // 로그인 사원 근태현황 년월 드롭다운
-  @Override
-  public List<LocalDate> getYearMonthList(String coIdx, String empIdx) {
-    return attendanceRecordMapper.getJoinDate(empIdx, coIdx);
-  }
+    // 근태 상세조회
+    @Override
+    public List<AttendanceRecordDTO> getRecordsByEmpId(AttendanceRecordDTO attendanceRecordDTO) {
+        attendanceRecordDTO.setEmpIdx(attendanceRecordDTO.getEmpIdx());
+        return attendanceRecordMapper.getRecordsByEmpId(attendanceRecordDTO);
+    }
 
-  // 근태관리 조회
-  @Override
-  public List<AttendanceRecordDTO> managerSearch(AttendanceRecordDTO attendanceRecordDTO) {
-    return attendanceRecordMapper.managerSearch(attendanceRecordDTO);
-  }
+    // 로그인 사원 근태현황 년월 드롭다운
+    @Override
+    public List<LocalDate> getYearMonthList(String coIdx, String empIdx) {
+        return attendanceRecordMapper.getJoinDate(empIdx, coIdx);
+    }
 
-  @Override
-  public List<AttendanceRecordDTO> getBasicInfo(AttendanceRecordDTO attendanceRecordDTO) {
-    return attendanceRecordMapper.getBasicInfo(attendanceRecordDTO);
-  }
+    // 근태관리 조회
+    @Override
+    public List<AttendanceRecordDTO> managerSearch(AttendanceRecordDTO attendanceRecordDTO) {
+        return attendanceRecordMapper.managerSearch(attendanceRecordDTO);
+    }
 
-  @Override
-  public List<AttendanceRecordDTO> userInfo(AttendanceRecordDTO attendanceRecordDTO) {
-    return attendanceRecordMapper.getBasicInfo(attendanceRecordDTO);
-  }
+    @Override
+    public List<AttendanceRecordDTO> getBasicInfo(AttendanceRecordDTO attendanceRecordDTO) {
+        return attendanceRecordMapper.getBasicInfo(attendanceRecordDTO);
+    }
 
-	@Override
-	public int createAttendanceRecord(AttendanceRecordDTO dto) {
-		throw new UnsupportedOperationException("Unimplemented method 'createAttendanceRecord'");
-	}
-	@Override
-	public int updateAttendanceRecord(AttendanceRecordDTO dto) {
-		throw new UnsupportedOperationException("Unimplemented method 'updateAttendanceRecord'");
-	}
-	@Override
-	public int deleteAttendanceRecord(String attdIdx) {
-		throw new UnsupportedOperationException("Unimplemented method 'deleteAttendanceRecord'");
-	}
+    @Override
+    public List<AttendanceRecordDTO> userInfo(AttendanceRecordDTO attendanceRecordDTO) {
+        return attendanceRecordMapper.getBasicInfo(attendanceRecordDTO);
+    }
 
-  // 0708
-  @Override
-  public AttdRecordSummaryDTO selectAttdRecordSummaryByEmpIdx(String empIdx, String date) {
-    return attendanceRecordMapper.selectAttdRecordSummaryByEmpIdx(empIdx, date);
-  }
-  @Override
-  public List<AttdRecordDTO> findAllByEmpIdxWithDate(String empIdx, String date) {
-    return attendanceRecordMapper.findAllByEmpIdxWithDate(empIdx, date);
-  }
+    @Override
+    public int createAttendanceRecord(AttendanceRecordDTO dto) {
+        throw new UnsupportedOperationException("Unimplemented method 'createAttendanceRecord'");
+    }
 
+    @Override
+    public int updateAttendanceRecord(AttendanceRecordDTO dto) {
+        throw new UnsupportedOperationException("Unimplemented method 'updateAttendanceRecord'");
+    }
 
+    @Override
+    public int deleteAttendanceRecord(String attdIdx) {
+        throw new UnsupportedOperationException("Unimplemented method 'deleteAttendanceRecord'");
+    }
 
+    // 0708
+    @Override
+    public AttdRecordSummaryDTO selectAttdRecordSummaryByEmpIdx(String empIdx, String date) {
+        return attendanceRecordMapper.selectAttdRecordSummaryByEmpIdx(empIdx, date);
+    }
 
+    @Override
+    public List<AttdRecordDTO> findAllByEmpIdxWithDate(String empIdx, String date) {
+        return attendanceRecordMapper.findAllByEmpIdxWithDate(empIdx, date);
+    }
 
+    @Override
+    public void addAttd() {
+        attendanceRecordMapper.addAttd();
+    }
 }
