@@ -30,7 +30,7 @@ public interface EmployeeMapper {
     int insertEmp(EmployeeDTO dto);
 
     // 사원수정
-    int update(EmployeeDTO dto);
+    // int update(EmployeeDTO dto);
 
     EmployeeDTO selectById(String coIdx, @Param("empIdx") String empIdx);
 
@@ -47,5 +47,10 @@ public interface EmployeeMapper {
     // 0709
     public List<EmployeeDTO> findAllEmployeeSearch(EmpSearchDTO empSearchDTO);
     public int findAllEmpCount(EmpSearchDTO empSearchDTO);
+
+    public int insert(EmployeeDTO employeeDTO);
+    public EmployeeDTO findByEmpIdx(String empIdx);
+    public int update(EmployeeDTO employeeDTO);
+    public int mergeEmployee(EmployeeDTO employeeDTO);
 
 }

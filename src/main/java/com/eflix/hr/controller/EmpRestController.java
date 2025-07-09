@@ -2,8 +2,11 @@ package com.eflix.hr.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.eflix.common.code.service.CommonService;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
@@ -16,18 +19,20 @@ import com.eflix.hr.service.DepartmentService;
 import com.eflix.hr.service.EmployeeService;
 import com.eflix.hr.service.GradeService;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
-
-
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/hr")
@@ -41,6 +46,9 @@ public class EmpRestController {
 
     @Autowired
     private GradeService gradeService;
+
+    @Value("${upload.path}")
+    private String path;
 
     public String getCoIdx() {
         return AuthUtil.getCoIdx();
@@ -94,14 +102,74 @@ public class EmpRestController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-    
-    @PostMapping("/emp/update")
-    public ResponseEntity<ResResult> postMethodName(@RequestBody EmployeeDTO employeeDTO) {
+
+    @PostMapping("/emp/insert")
+    public ResponseEntity<ResResult> postInsert(
+            @RequestPart("empData") EmployeeDTO employeeDTO,
+            @RequestPart(value = "empPhoto", required = false) MultipartFile empPhoto) throws IllegalStateException, IOException {
+
         ResResult result = null;
 
-        int affectedRows = employeeService.updateEmployee(employeeDTO);
+        employeeDTO.setCoIdx(getCoIdx());
 
-        if(affectedRows > 0) {
+        if (empPhoto != null) {
+            String uploadDir = path + "/hr/emp/";
+            File dir = new File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File dest = new File(uploadDir + empPhoto.getOriginalFilename());
+            empPhoto.transferTo(dest);
+
+            employeeDTO.setEmpImg(empPhoto.getOriginalFilename());
+        }
+        int affectedRows = employeeService.insert(employeeDTO);
+
+        if (affectedRows > 0) {
+            result = ResUtil.makeResult(ResStatus.OK, null);
+        } else {
+            result = ResUtil.makeResult("400", "등록 과정에서 오류가 발생했습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/emp/get")
+    public ResponseEntity<ResResult> getEmp(@RequestParam("empIdx") String empIdx) {
+        ResResult result = null;
+
+        EmployeeDTO employeeDTO = employeeService.findByEmpIdx(empIdx);
+
+        if (employeeDTO != null) {
+            result = ResUtil.makeResult(ResStatus.OK, employeeDTO);
+        } else {
+            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PutMapping("/emp/update")
+    public ResponseEntity<ResResult> putUpdate(
+            @RequestPart("empData") EmployeeDTO employeeDTO,
+            @RequestPart(value = "empPhoto", required = false) MultipartFile empPhoto) throws IllegalStateException, IOException {
+        ResResult result = null;
+
+        if (empPhoto != null) {
+            String uploadDir = path + "/hr/emp/";
+            File dir = new File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File dest = new File(uploadDir + empPhoto.getOriginalFilename());
+            empPhoto.transferTo(dest);
+
+            employeeDTO.setEmpImg(empPhoto.getOriginalFilename());
+        }
+        employeeDTO.setCoIdx(getCoIdx());
+        int affectedRows = employeeService.update(employeeDTO);
+
+        if (affectedRows > 0) {
             result = ResUtil.makeResult(ResStatus.OK, null);
         } else {
             result = ResUtil.makeResult("400", "저장과정에서 오류가 발생했습니다.", null);
@@ -109,5 +177,20 @@ public class EmpRestController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-    
+
+    @PostMapping("/emp/merge")
+    public ResponseEntity<ResResult> postMerge(@RequestBody EmployeeDTO employeeDTO) {
+        ResResult result = null;
+
+        int affectedRows = employeeService.mergeEmployee(employeeDTO);
+
+        if (affectedRows > 0) {
+            result = ResUtil.makeResult(ResStatus.OK, null);
+        } else {
+            result = ResUtil.makeResult("400", "저장과정에서 오류가 발생했습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 }

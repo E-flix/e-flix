@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eflix.common.security.auth.AuthContext;
 import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.dto.SalaryDTO;
@@ -27,7 +26,6 @@ import com.eflix.hr.dto.etc.EmpSearchDTO;
 import com.eflix.hr.mapper.EmployeeMapper;
 import com.eflix.hr.mapper.SalaryMapper;
 import com.eflix.hr.service.EmployeeService;
-import com.eflix.hr.service.SalaryService;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -99,5 +97,25 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public int findAllEmpCount(EmpSearchDTO empSearchDTO) {
         return employeeMapper.findAllEmpCount(empSearchDTO);
+    }
+
+    @Override
+    public int insert(EmployeeDTO employeeDTO) {
+        return employeeMapper.insert(employeeDTO);
+    }
+
+    @Override
+    public EmployeeDTO findByEmpIdx(String empIdx) {
+        return employeeMapper.findByEmpIdx(empIdx);
+    }
+
+    @Override
+    public int update(EmployeeDTO employeeDTO) {
+        return employeeMapper.update(employeeDTO);
+    }
+
+    @Override
+    public int mergeEmployee(EmployeeDTO employeeDTO) {
+        return employeeMapper.mergeEmployee(employeeDTO);
     }
 }

@@ -131,7 +131,7 @@
 </insert>
 
 <!-- 사원 수정 -->
-<update id="update" parameterType="EmployeeDTO">
+<!-- <update id="update" parameterType="EmployeeDTO">
     UPDATE employees
     <set>
         <if test="empName != null and empName != ''">
@@ -184,7 +184,7 @@
         </if>
     </set>
     WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
-</update>
+</update> -->
 <!-- 단건조회 -->
 <select id="selectById" parameterType="String" resultType="EmployeeDTO">
     SELECT * FROM employees WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
@@ -300,12 +300,120 @@
         </where>
     </select>
 
-    <update id="updateEmployee" parameterType="EmployeeDTO">
+    <insert id="insert" parameterType="EmployeeDTO">
+        <selectKey resultType="String" keyProperty="empIdx" order="BEFORE">
+            SELECT 'emp-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(emp_idx, 5))), 100) + 1) FROM employees
+        </selectKey>
+        INSERT INTO employees (emp_idx, emp_img, emp_name, rrn_pfx, rrn_sfx, emp_email, emp_phone, emp_pw,
+                    emp_regdate, dept_idx, grd_idx, role_id, emp_type,
+                    bank_code, emp_account, base_salary, emp_addr_zip, emp_addr, emp_addr_detail, emp_memo, co_idx)
+        VALUES (#{empIdx},
+            #{empImg}, #{empName}, #{rrnPfx}, #{rrnSfx}, #{empEmail},#{empPhone}, #{empPw}, 
+            #{empRegdate}, #{deptIdx}, #{grdIdx}, #{roleId}, #{empType},
+            #{bankCode}, #{empAccount}, #{baseSalary}, #{empAddrZip}, #{empAddr}, #{empAddrDetail}, #{empMemo}, #{coIdx})
+    </insert>
+
+    <select id="findByEmpIdx" parameterType="String" resultType="EmployeeDTO">
+        SELECT emp_idx, emp_img, emp_name, rrn_pfx, rrn_sfx, emp_email, emp_phone, emp_pw,
+            emp_regdate, dept_idx, grd_idx, role_id, emp_type,
+            bank_code, emp_account, base_salary, emp_addr_zip, emp_addr, emp_addr_detail, emp_memo, co_idx
+        FROM employees
+        WHERE emp_idx = #{empIdx}
+    </select>
+
+    <update id="update" parameterType="EmployeeDTO">
+        UPDATE employees
+        <set>
+            <if test="empName != null and empName != ''">
+                emp_name = #{empName},
+            </if>
+            <if test="rrnPfx != null and rrnPfx != ''">
+                rrn_pfx = #{rrnPfx},
+            </if>
+            <if test="rrnSfx != null and rrnSfx != ''">
+                rrn_sfx = #{rrnSfx},
+            </if>
+            <if test="empEmail != null and empEmail != ''">
+                emp_email = #{empEmail},
+            </if>
+            <if test="deptIdx != null and deptIdx != ''">
+                dept_idx = #{deptIdx},
+            </if>
+            <if test="empGrade != null and empGrade != ''">
+                emp_grade = #{empGrade},
+            </if>
+            <if test="empType != null and empType != ''">
+                emp_type = #{empType},
+            </if>
+            <if test="empRegdate != null">
+                emp_regdate = #{empRegdate},
+            </if>
+            <if test="empAccount != null and empAccount != ''">
+                emp_account = #{empAccount},
+            </if>
+            <if test="empPhone != null and empPhone != ''">
+                emp_phone = #{empPhone},
+            </if>
+            <if test="empPw != null and empPw != ''">
+                emp_pw = #{empPw},
+            </if>
+            <if test="empAddr != null and empAddr != ''">
+                emp_addr = #{empAddr},
+            </if>
+            <if test="empAddrDetail != null and empAddrDetail != ''">
+                emp_addr_detail = #{empAddrDetail},
+            </if>
+            <if test="empAddrZip != null and empAddrZip != ''">
+                emp_addr_zip = #{empAddrZip},
+            </if>
+            <if test="empImg != null and empImg != ''">
+                emp_img = #{empImg},
+            </if>
+            <if test="baseSalary != null and baseSalary != ''">
+                base_salary = #{baseSalary},
+            </if>
+            <if test="empMemo != null and empMemo != ''">
+                emp_memo = #{empMemo},
+            </if>
+        </set>
+        WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
+    </update>
+
+    <update id="mergeEmployee" parameterType="EmployeeDTO">
         MERGE INTO employee e
         USING (
-            SELECT #{empIdx}, #{empName}, #{rrnPfx}, #{rrnSfx}, #{empEmail}, #{deptIdx}, #{empGrade}, #{empType}, #{empRegdate},
-                #{empAccount}, #{empPhone}, #{empPw}, #{empAddr}, #{empAddrDetail}, #{empAddrZip}, #{coIdx}, #{empImg}
+            SELECT #{empIdx}, #{empImg}, #{empName}, #{rrnPfx}, #{rrnSfx}, #{empEmail},#{empPhone}, #{empPw}, 
+                #{empRegdate}, #{deptIdx}, #{grdIdx}, #{roleId}, #{empType},
+                #{bankCode}, #{empAccount}, #{baseSalary}, #{empAddrZip}, #{empAddr}, #{empAddrDetail}, #{coIdx}
             FROM dual
-        ) src
+        ) src ON (e.emp_idx = src.emp_idx)
+        WHEN MATCHED THEN
+            UPDATE SET
+                e.emp_img = src.emp_img,
+                e.emp_name = src.emp_name,
+                e.rrn_pfx = src.rrn_pfx,
+                e.rrn_sfx = src.rrn_sfx,
+                e.emp_email = src.emp_email,
+                e.emp_phone = src.emp_phone,
+                e.emp_pw = src.emp_pw,
+                e.emp_regdate = src.emp_regdate,
+                e.dept_idx = src.dept_idx,
+                e.grd_idx = src.grd_idx,
+                e.role_id = src.role_id,
+                e.emp_type = src.emp_type,
+                e.bank_code = src.bank_code,
+                e.emp_account = src.emp_accout,
+                e.emp_addr_zip = src.emp_addr_zip,
+                e.emp_addr = src.emp_addr,
+                e.emp_addr_detail = src.emp_addr_detail,
+                e.co_idx = src.co_idx
+        WHEN NOT MATCHED THEN
+            INSERT (emp_idx, emp_img, emp_name, rrn_pfx, rrn_sfx, emp_email, emp_phone, emp_pw,
+                emp_regdate, dept_idx, grd_idx, role_id, emp_type,
+                bank_code, emp_account, base_salary, emp_addr_zip, emp_addr, emp_addr_detail, co_idx)
+            VALUES (SELECT 'emp-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(emp_idx, 5))), 100) + 1) FROM employees,
+                #{empImg}, #{empName}, #{rrnPfx}, #{rrnSfx}, #{empEmail},#{empPhone}, #{empPw}, 
+                #{empRegdate}, #{deptIdx}, #{grdIdx}, #{roleId}, #{empType},
+                #{bankCode}, #{empAccount}, #{baseSalary}, #{empAddrZip}, #{empAddr}, #{empAddrDetail}, #{coIdx})
     </update>
 </mapper>
