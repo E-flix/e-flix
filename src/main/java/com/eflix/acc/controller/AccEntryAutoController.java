@@ -1,12 +1,13 @@
 package com.eflix.acc.controller;
 
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import com.eflix.acc.service.EntryAutoService;
+import com.eflix.acc.dto.EntryAutoAllDTO;
 import com.eflix.common.code.service.CommonService;
 import lombok.RequiredArgsConstructor;
 
@@ -33,19 +34,17 @@ public class AccEntryAutoController {
    */
   @GetMapping("/ena")
   public String entryAuto(Model model) {
-    model.addAttribute("code0A", commonService.getCommon("0A")); // 여부
-    model.addAttribute("code0H", commonService.getCommon("0H")); // 과세유형
-    model.addAttribute("code0G", commonService.getCommon("0G")); // 차변대변
+    model.addAttribute("code0A", commonService.getCommon("0A"));
+    model.addAttribute("code0H", commonService.getCommon("0H"));
+    model.addAttribute("code0G", commonService.getCommon("0G"));
     return "acc/entryAuto";
   }
 
-  /**
-   * 자동전표처리 상세 목록 조회
-   * 
-   * @return List<Map<String, Object>> - 자동전표처리 상세 목록
-   */
-  @GetMapping("/list")
-  public List<Map<String, Object>> getDetailList() {
-    return entryAutoService.getDetailList();
+  // 자동전표 전체(차변/대변/기간 등 프론트에서 JS로 분기)
+  @GetMapping("/ena/all")
+  @ResponseBody
+  public List<EntryAutoAllDTO> getAutoEntryAll() {
+    EntryAutoAllDTO param = new EntryAutoAllDTO();
+    return entryAutoService.selectAutoEntryAll(param);
   }
 }
