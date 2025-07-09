@@ -36,23 +36,29 @@
 			<div class="row mb-3 align-items-end">
 				<div class="col-md-2">
 					<label class="form-label">창고ID</label>
-					<input type="text" class="form-control form-control-sm" id="productName" placeholder="창고ID" />
+					<input type="text" class="form-control form-control-sm" id="warehouseIdInput" placeholder="창고ID" />
 				</div>
 				<div class="col-md-2">
 					<label class="form-label">창고위치</label>
-					<select class="form-control form-control-sm" id="category">
-						<option selected>창고위치선택</option>
-						<option value="1">test</option>
-						<option value="2">test</option>
+					<select class="form-control form-control-sm" id="warehouseLocationInput">
+						<option value=''>선택</option>
+						<option 
+								th:each="wh : ${whlocationList}" 
+								th:value="${wh.warehouseLocation}"
+								th:text="${wh.warehouseLocation}"
+						></option>
 					</select>
 				</div>
 				<div class="col-md-2">
 					<label class="form-label">창고상태</label>
-					<select class="form-control form-control-sm" id="category">
-						<option selected>창고상태선택</option>
-						<option value="1">사용가능</option>
-						<option value="2">사용불가능</option>
+					<select class="form-control form-control-sm" id="warehouseStatusSelect">
+						<option value='' selected>선택</option>
+						<option value="재고존재">재고존재</option>
+						<option value="비었음">비었음</option>
 					</select>
+				</div>
+				<div class="col-md-2">
+					<button class="btn btn-primary btn-sm mt-2" id="searchBtn">검색</button>
 				</div>
 				<!-- 쓸지 안쓸지 모름-->
 				<!-- <div class="col-md-2 d-flex justify-content-end gap-2">
@@ -69,34 +75,35 @@
 	</div>
 
 	<!-- 모달: 창고 상세 정보 -->
-<div class="modal fade" id="warehouseDetailModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" style="width: 600px; max-width: 90%; height: 400px;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">창고 상세 정보</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <table class="table table-sm table-bordered" id="warehouseDetailTable">
-          <thead>
-            <tr>
-              <th>제품ID</th>
-              <th>제품명</th>
-              <th>수량</th>
-            </tr>
-          </thead>
-          <tbody id="warehouseDetailTableBody">
-            <!-- JS로 제품 정보 삽입 -->
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <!-- 오른쪽 하단에 PDF 버튼 -->
-        <button id="downloadPdfBtn" type="button" class="btn btn-primary">PDF 다운로드</button>
-      </div>
-    </div>
-  </div>
-</div>
+	<div class="modal fade" id="warehouseDetailModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"
+			style="width: 600px; max-width: 90%; height: 400px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">창고 상세 정보</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm table-bordered" id="warehouseDetailTable">
+						<thead>
+							<tr>
+								<th>제품ID</th>
+								<th>제품명</th>
+								<th>수량</th>
+							</tr>
+						</thead>
+						<tbody id="warehouseDetailTableBody">
+							<!-- JS로 제품 정보 삽입 -->
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<!-- 오른쪽 하단에 PDF 버튼 -->
+					<button id="downloadPdfBtn" type="button" class="btn btn-primary">PDF 다운로드</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 
 </div>
@@ -105,7 +112,9 @@
 
 <script th:inline="javascript">
 	let warehouseViewList = /*[[${warehouseViewList}]]*/[];
+	let whlocationList = /*[[${whlocationList}]]*/[];
 
+	let warehouseViewGrid;
 	const gridOptions = {
 		headerHeight: 35,
 		rowHeight: 35,
@@ -121,10 +130,10 @@
 				field: "warehouseStatusName",
 				editable: false,
 				cellRenderer: (params) => {
-					if (params.value === "사용가능") {
-						return `<span class="badge bg-success">사용가능</span>`;
+					if (params.value === "재고존재") {
+						return `<span class="badge bg-success">재고존재</span>`;
 					} else {
-						return `<span class="badge bg-danger">사용불가능</span>`;
+						return `<span class="badge bg-danger">비었음</span>`;
 					}
 				}
 			}
@@ -170,8 +179,26 @@
 
 	// 그리드 초기화
 	document.addEventListener('DOMContentLoaded', () => {
-		agGrid.createGrid(document.querySelector("#warehouseViewList"), gridOptions);
+		warehouseViewGrid = agGrid.createGrid(document.querySelector("#warehouseViewList"), gridOptions);
 	});
 
+	document.querySelector('#searchBtn').addEventListener('click', function () {
+
+		let warehouseId = document.querySelector('#warehouseIdInput').value;
+		let warehouseLocation = document.querySelector('#warehouseLocationInput').value;
+		let warehouseStatus = document.querySelector('#warehouseStatusSelect').value;
+		let param = `warehouseId=${warehouseId}&warehouseLocation=${warehouseLocation}&existProd=${warehouseStatus}`
+		fetch(`/purchs/whData?${param}`)
+			.then(res => res.json())
+			.then(data => {
+				warehouseViewGrid.setGridOption("rowData", data);
+			})
+	});
+	
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- html 페이지 -->
+<script>
+
+</script>

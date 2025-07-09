@@ -11,6 +11,8 @@ public class WarehouseViewDTO {
     int warehouseCurrent; // 창고에 입고된 수량
     String warehouseManager; // 창고 관리자
     String warehouseStatusName; // 창고 상태 (사용가능 - 불가능)
+    String warehouseStatus;
+    String existProd; // 제품존재유무
     
     // 창고조회 상세 (모달)
     String prodId; // 제품ID

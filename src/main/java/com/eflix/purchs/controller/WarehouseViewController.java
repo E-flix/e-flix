@@ -21,24 +21,36 @@ public class WarehouseViewController {
     private final WarehouseViewService warehouseViewService;
 
     // 창고조회 페이지
+
         // 창고 조회
 	@GetMapping("/whv")
-	public String warehouse_view(Model model) {
-        model.addAttribute("warehouseViewList", warehouseViewService.warehouseViewList());
+	public String warehouse_view(Model model, WarehouseViewDTO warehouse) {
+        model.addAttribute("warehouseViewList", warehouseViewService.warehouseViewList(null));
+        model.addAttribute("whlocationList", warehouseViewService.searchWarehouseLocation());
 		return "purchs/warehouse_view";
 	}
-    // 창고 조회
-    // @GetMapping("/whvl")
-    // @ResponseBody
-    // public List<WarehouseViewDTO> warehouseViewList() {
-    //     return warehouseViewService.warehouseViewList();
-    // }
+
     // 창고 조회 상세
     @GetMapping("/whvld")
     @ResponseBody
     public List<WarehouseViewDTO> warehouseViewListDetail(@RequestParam String warehouseId) {
         return warehouseViewService.warehouseViewListDetail(warehouseId);
     }
+    
+    @GetMapping("/whData")
+    @ResponseBody
+    public List<WarehouseViewDTO> getMethodName(WarehouseViewDTO warehouse) {
+        return warehouseViewService.warehouseViewList(warehouse);
+    }
+
+    // @GetMapping("/whlList")
+    // @ResponseBody
+    // public List<WarehouseViewDTO> searchWarehouseLocation(WarehouseViewDTO warehouseLocation) {
+    //     return warehouseViewService.searchWarehouseLocation();
+    // }
+    
+
+    
     
     
 }
