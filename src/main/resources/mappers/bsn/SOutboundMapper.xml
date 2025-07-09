@@ -5,40 +5,40 @@
 
 <mapper namespace="com.eflix.bsn.mapper.SOutboundMapper">
 
-  <!-- ★ 출고 헤더 조회 (고객 정보 포함) -->
-  <select id="selectAllOutbound" resultType="com.eflix.bsn.dto.SalesOutboundDTO">
-    SELECT 
+  <!-- ★ 수정: parameterType 제거 (자동 매핑) -->
+  <select id="selectAllOutbound" resultType="com.eflix.bsn.dto.SalesOutboundDTO" parameterType="string">
+    SELECT
       so.OUTBOUND_NO        AS outboundNo,
       so.WRITE_DT           AS writeDt,
       so.CUSTOMER_CD        AS customerCd,
-      so.CUSTOMER_NAME      AS customerName,        -- ★ 추가
-      so.REPRESENTATIVE_NM  AS representativeNm,    -- ★ 추가
+      so.CUSTOMER_NAME      AS customerName,
+      so.REPRESENTATIVE_NM  AS representativeNm,
       so.ORDER_DT           AS orderDt,
       so.OUTBOUND_DT        AS outboundDt,
       so.MONEY              AS money,
       so.REMARKS            AS remarks,
       so.CO_IDX             AS coIdx,
-      so.CREATED_AT         AS createdAt,           -- ★ 추가
-      so.UPDATED_AT         AS updatedAt            -- ★ 추가
+      so.CREATED_AT         AS createdAt,           
+      so.UPDATED_AT         AS updatedAt           
     FROM EFLIX.SALES_OUTBOUND so
     WHERE so.CO_IDX = #{coIdx}
     ORDER BY so.OUTBOUND_DT DESC, so.CREATED_AT DESC
   </select>
 
-  <!-- ★ 출고 상세 조회 (확장된 필드 포함) -->
-  <select id="selectOutboundDetails" resultType="com.eflix.bsn.dto.SoutboundDetailDTO">
+  <!-- ★ 수정: parameterType 제거 -->
+  <select id="selectOutboundDetails" resultType="com.eflix.bsn.dto.SoutboundDetailDTO" parameterType="string">
     SELECT
-      sd.OUTBOUND_NO        AS outboundNo,          -- ★ 수정: ORDER_NO → OUTBOUND_NO
-      sd.LINE_NO            AS lineNo,              -- ★ 추가
-      sd.ITEM_CODE          AS itemCode,            -- ★ 추가
+      sd.OUTBOUND_NO        AS outboundNo,          
+      sd.LINE_NO            AS lineNo,             
+      sd.ITEM_CODE          AS itemCode,            
       sd.ITEM_NAME          AS itemName,
       sd.STANDARD           AS standard,
       sd.QTY                AS qty,
       sd.UNIT               AS unit,
-      sd.UNIT_PRICE         AS unitPrice,           -- ★ 추가
-      sd.SUPPLY_AMOUNT      AS supplyAmount,        -- ★ 추가
-      sd.TAX_AMOUNT         AS taxAmount,           -- ★ 추가
-      sd.TOTAL_AMOUNT       AS totalAmount,         -- ★ 추가
+      sd.UNIT_PRICE         AS unitPrice,           
+      sd.SUPPLY_AMOUNT      AS supplyAmount,        
+      sd.TAX_AMOUNT         AS taxAmount,           
+      sd.TOTAL_AMOUNT       AS totalAmount,        
       sd.REMARKS            AS remarks,
       sd.CO_IDX             AS coIdx
     FROM EFLIX.SOUTBOUND_DETAIL sd
@@ -89,15 +89,15 @@
 
   <!-- ★ 출고번호 생성 (옵션: 자동 채번) -->
   <select id="selectNextOutboundNo" resultType="string" parameterType="string">
-    SELECT 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || 
-           LPAD(NVL(MAX(TO_NUMBER(SUBSTR(OUTBOUND_NO, -4))), 0) + 1, 4, '0') AS nextNo
+    SELECT 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
+          LPAD(NVL(MAX(TO_NUMBER(SUBSTR(OUTBOUND_NO, -4))), 0) + 1, 4, '0') AS nextNo
     FROM EFLIX.SALES_OUTBOUND
     WHERE CO_IDX = #{coIdx}
       AND OUTBOUND_NO LIKE 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'
   </select>
 
   <!-- ★ 출고 삭제 (헤더/디테일) -->
-  <delete id="deleteOutbound" parameterType="string">
+  <delete id="deleteOutbound">
     DELETE FROM EFLIX.SALES_OUTBOUND
     WHERE OUTBOUND_NO = #{outboundNo}
       AND CO_IDX = #{coIdx}
