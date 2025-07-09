@@ -13,6 +13,8 @@ import java.util.List;
 
 import com.eflix.hr.dto.AttendanceRecordDTO;
 import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.etc.AttdRecordDTO;
+import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
 
 public interface AttendanceRecordService {
     // 근태 전체조회
@@ -22,7 +24,7 @@ public interface AttendanceRecordService {
     public List<AttendanceRecordDTO> getRecordsByEmpId(AttendanceRecordDTO attendanceRecordDTO);
 
     // 로그인 사원 근태현황 년월 드롭다운
-    public List<LocalDate> getYearMonthList(String empIdx);
+    public List<LocalDate> getYearMonthList(String coIdx, String empIdx);
 
     // 로그인 사원 근태현황 기본항목
     public List<AttendanceRecordDTO> getBasicInfo(AttendanceRecordDTO attendanceRecordDTO);
@@ -37,4 +39,10 @@ public interface AttendanceRecordService {
     int updateAttendanceRecord(AttendanceRecordDTO dto);
     int deleteAttendanceRecord(String attdIdx);
 
+    // 0708
+    public AttdRecordSummaryDTO selectAttdRecordSummaryByEmpIdx(String empIdx, String date);
+    public List<AttdRecordDTO> findAllByEmpIdxWithDate(String empIdx, String date);
+
+    // 0709
+    public void addAttd();
 }

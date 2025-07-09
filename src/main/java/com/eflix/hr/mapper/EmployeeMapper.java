@@ -11,12 +11,14 @@
 ============================================ */
 package com.eflix.hr.mapper;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.repository.query.Param;
 
 import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.etc.EmpSearchDTO;
 
 public interface EmployeeMapper {
 
@@ -28,7 +30,7 @@ public interface EmployeeMapper {
     int insertEmp(EmployeeDTO dto);
 
     // 사원수정
-    int update(EmployeeDTO dto);
+    // int update(EmployeeDTO dto);
 
     EmployeeDTO selectById(String coIdx, @Param("empIdx") String empIdx);
 
@@ -40,5 +42,15 @@ public interface EmployeeMapper {
 
     // 0708
     public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO);
+    public Date findAllEmpRegdateByEmpIdx(String empIdx);
+
+    // 0709
+    public List<EmployeeDTO> findAllEmployeeSearch(EmpSearchDTO empSearchDTO);
+    public int findAllEmpCount(EmpSearchDTO empSearchDTO);
+
+    public int insert(EmployeeDTO employeeDTO);
+    public EmployeeDTO findByEmpIdx(String empIdx);
+    public int update(EmployeeDTO employeeDTO);
+    public int mergeEmployee(EmployeeDTO employeeDTO);
 
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 0709 -->
+<mapper namespace="com.eflix.hr.mapper.GradeMapper">
+    <select id="findAllByCoIdx" parameterType="String" resultType="GradeDTO">
+        SELECT grd_idx, grd_name, grd_order, co_idx
+        FROM grade
+        WHERE co_idx = #{coIdx}
+    </select>
+</mapper>

@@ -1,0 +1,130 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-18
+  - 설명     : 근태 신청화면 (사원)
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-18 (김어진): title 및 내용 추가
+  - 2025-06-19 (김어진): layout 구성
+============================================ -->
+
+<head>
+  <title>근태신청</title>
+</head>
+<div layout:fragment="content">
+  <div id="empAdd">
+    <h2>근태신청</h2>
+    <div class="mt-4">
+
+        <!-- 버튼 -->
+        <div class="d-flex justify-content-end mb-3">
+          <button type="submit" class="btn btn-primary" id="addBtn">신청하기</button>
+        </div>
+        <div class="p-4 border rounded bg-light">
+
+          <h5 class="text-center fw-bold mb-4"> &lt; 근태 신청 &gt; </h5>
+
+          <!-- 사원 정보 -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">사원명</label>
+              <input type="text" class="form-control" value="홍길동" readonly>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">부서</label>
+              <input type="text" class="form-control" value="인사부" readonly>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">사번</label>
+              <input type="text" class="form-control" value="1001" readonly>
+            </div>
+          </div>
+
+          <!-- 신청일자 -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">신청일자</label>
+              <input type="text" class="form-control" id="regDate" readonly>
+            </div>
+          </div>
+
+          <!-- 근태 유형 -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">근태 유형</label>
+              <select class="form-select" id="editType">
+                <option value="AT01">연차</option>
+                <option>반차</option>
+                <option>병가</option>
+                <option>외근</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 날짜 및 시간 -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">시작일</label>
+              <input type="date" class="form-control" id="oldValue" value="2025-06-20">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">종료일</label>
+              <input type="date" class="form-control" id="newValue" value="2025-06-20">
+            </div>
+          </div>
+
+          <!-- 사유 -->
+          <div class="mb-3">
+            <label class="form-label">사유</label>
+            <input type="text" class="form-control" id="reason" placeholder="예: 가족 행사 참여">
+          </div>
+
+          <!-- 승인 상태 (숨김 또는 read-only용) -->
+          <input type="hidden" value="미승인">
+
+          <!-- 안내문 -->
+          <div class="alert alert-info">
+            📌 병가나 외근 신청 시, 관련 증빙서류를 반드시 첨부해주세요.
+          </div>
+
+
+        </div>
+    </div>
+    <script>
+      $(document).ready(function() {
+        const today = new Date();
+        // $("#regDate").val(today.getFullYear() + "-" + today.getMonth() + "-" + today.getDay());
+      });
+      $("#addBtn").on("click", function() {
+        const data = {
+          empIdx: "emp-107",
+          editType: $("#editType").val(),
+          oldValue: $("#oldValue").val(),
+          newValue: $("#newValue").val(),
+          reason: $("#reason").val()
+        }
+
+        $.ajax({
+          type:"POST",
+          url: "/hr/insertAttd",
+          data: JSON.stringify(data),
+          contentType: "application/json",
+          success: function(res) {
+            if(res) {
+              Swal.fire("성공", "성공적으로 반영되었습니다.", "success");
+            } else {
+              Swal.fire("실패", "데이터를 반영하던 중 오류가 발생했습니다.", "error");
+            }
+          },
+          error: function(xhr, status, err) {
+            console.error(err);
+            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+          }
+        });
+      });
+    </script>
+
+  </div>
+</div>

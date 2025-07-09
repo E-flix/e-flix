@@ -10,13 +10,12 @@ package com.eflix.hr.mapper;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.data.repository.query.Param;
 
 import com.eflix.hr.dto.AttendanceRecordDTO;
-import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.etc.AttdRecordDTO;
+import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
 
 @Mapper
 public interface AttendanceRecordMapper {
@@ -35,5 +34,11 @@ public interface AttendanceRecordMapper {
 
     // 근태관리 조회
     List<AttendanceRecordDTO> managerSearch(AttendanceRecordDTO dto);
+
+    // 0708
+	  public AttdRecordSummaryDTO selectAttdRecordSummaryByEmpIdx(String empIdx, String date);
+    public List<AttdRecordDTO> findAllByEmpIdxWithDate(String empIdx, String date);
+
+    public void addAttd();
 
 }

@@ -1,0 +1,201 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+
+<head>
+    <title>근태현황</title>
+</head>
+<div layout:fragment="content">
+    <div id="attdList">
+        <h2>근태현황</h2>
+        <div class="mt-4">
+            <h4 class="fw-bold mb-4">사원 페이지</h4>
+
+            <!-- 상단 정보 박스 -->
+            <div class="row mb-4">
+                <!-- 사용자 정보 -->
+                <div class="col-md-6">
+                    <div class="p-3 bg-light border rounded">
+                        <div class="mb-3">
+                            <label class="form-label">년</label>
+                            <select class="form-select w-50" id="yearSelect">
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">월</label>
+                            <select class="form-select w-50" id="monthSelect">
+                            </select>
+                        </div>
+                        <!-- <div class="mb-2">
+              <label class="form-label">부서명</label>
+              <p class="form-control-plaintext">A01 본사 → 인사부</p>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">정규 근무일수</label>
+              <p class="form-control-plaintext">22일</p>
+            </div> -->
+                    </div>
+                </div>
+
+                <!-- 기본 항목 -->
+                <div class="col-md-6">
+                    <div class="p-3 bg-light border rounded">
+                        <h6 class="fw-bold mb-3">기본 항목</h6>
+                        <div class="row mb-2">
+                            <div class="col-6">실제 근무일수: <strong id="realDay"></strong></div>
+                            <div class="col-6">총 연차: <strong id="totalLeaveDay"></strong></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6">평일 출근일수: <strong id="workDay"></strong></div>
+                            <div class="col-6">연차 사용: <strong id="usedLeaveDay"></strong></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6">휴일 출근일수: <strong id="holidayWorkDay"></strong></div>
+                            <div class="col-6">남은 연차: <strong id="canLeaveDay"></strong></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6">결근일수: <strong id="abDay"></strong></div>
+                            <div class="col-6">지각 횟수: <strong id="rateCount"></strong></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">조퇴 횟수: <strong id="leaveEarlyDay"></strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 근태 상세 테이블 -->
+            <div class="table-responsive">
+                <table class="table table-bordered text-center align-middle">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>날짜</th>
+                            <th>휴일 구분</th>
+                            <th>근태 상황</th>
+                            <th>근무 스케줄 시간</th>
+                            <th>출근 시간</th>
+                            <th>퇴근 시간</th>
+                            <th>잔업 시간</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attdListTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            loadYear();
+
+
+
+            $("#yearSelect").on("change", function () {
+                loadMonth();
+            });
+
+            $("#monthSelect").on("change", function() {
+                loadSummary();
+                loadList();
+            });
+
+            function loadYear() {
+                $.ajax({
+                    type: "GET",
+                    url: "/hr/attd/emp/year",
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+                            $("#yearSelect").empty();
+                            $.each(data, function (i, item) {
+                                $("#yearSelect").append(`<option value="${item}">${item}년</option>`)
+                            });
+                        } else {
+
+                        }
+                    },
+                    error: function (xhr, status, err) {
+
+                    }
+                })
+            }
+
+            function loadMonth() {
+                const year = $("#yearSelect").val();
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/attd/emp/month?year=${year}`,
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+                            $("#monthSelect").empty();
+                            $.each(data, function (i, item) {
+                                $("#monthSelect").append(`<option value="${item}">${item}월</option>`)
+                            });
+                        } else {
+
+                        }
+                    },
+                    error: function (xhr, status, err) {
+
+                    }
+                })
+            }
+
+            function loadSummary() {
+                const date = $("#yearSelect").val() + "-" + ($("#monthSelect").val() < 10 ? "0" + $("#monthSelect").val() : $("#monthSelect").val());
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/attd/emp/summary?date=${date}`,
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+                            $("#realDay").text(data.realDay || 0);
+                            $("#totalLeaveDay").text(data.totalLeaveDay || 0);
+                            $("#workDay").text(data.workDay || 0);
+                            $("#usedLeaveDay").text(data.usedLeaveDay || 0);
+                            $("#canLeaveDay").text(data.canLeaveDay || 0);
+                            $("#abDay").text(data.abDay || 0);
+                            $("#rateCount").text(data.rateCount || 0);
+                            $("#leaveEarlyDay").text(data.leaveEarlyDay || 0);
+                            $("#holidayWorkDay").text(data.holidayWorkDay || 0);
+                        } else {
+
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                    }
+                });
+            }
+
+            function loadList() {
+                const date = $("#yearSelect").val() + "-" + ($("#monthSelect").val() < 10 ? "0" + $("#monthSelect").val() : $("#monthSelect").val());
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/attd/emp/list?date=${date}`,
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+                            const rows = data.map(r =>
+                                `<tr>
+                                    <td>${r.attdDate||''}</td>
+                                    <td>${r.holidayType||''}</td>
+                                    <td>${r.attdStatus||''}</td>
+                                    <td>${r.scheduleTime||''}</td>
+                                    <td>${r.startTime||''}</td>
+                                    <td>${r.endTime||''}</td>
+                                    <td>${r.nightTime||''}</td>
+                                </tr>`
+                            ).join('');
+                            $("#attdListTable").html(rows);
+                        } else {
+
+                        }
+                    },
+                    error: function (xhr, status, err) {
+
+                    }
+                });
+            }
+        })
+    </script>
+</div>

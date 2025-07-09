@@ -11,10 +11,12 @@
 ============================================ */
 package com.eflix.hr.service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.etc.EmpSearchDTO;
 
 public interface EmployeeService {
   // 사원관리 페이지 검색조건 드롭다운 조회
@@ -33,4 +35,15 @@ public interface EmployeeService {
 
     // 0708
     public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO);
+    public Date findAllEmpRegdateByEmpIdx(String empIdx);
+
+    // 0709
+    public List<EmployeeDTO> findAllEmployeeSearch(EmpSearchDTO empSearchDTO);
+    public int findAllEmpCount(EmpSearchDTO empSearchDTO);
+
+    public int insert(EmployeeDTO employeeDTO);
+    public EmployeeDTO findByEmpIdx(String empIdx);
+    public int update(EmployeeDTO employeeDTO);
+
+    public int mergeEmployee(EmployeeDTO employeeDTO);
 }

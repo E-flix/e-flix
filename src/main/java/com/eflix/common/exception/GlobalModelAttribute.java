@@ -57,6 +57,22 @@ public class GlobalModelAttribute {
 
         if (parts.length >= 3) {
             return parts[2]; // "el", "cgy"
+        } else if(parts.length >= 2) {
+            return "";
+        }
+
+        return "home";
+    }
+
+    @ModelAttribute("active3rdMenu")
+    public String setActive3rdMenu(HttpServletRequest request) {
+        String uri = request.getRequestURI(); // 예: /hr/el, /purchs/cgy
+        String[] parts = uri.split("/");
+
+        if (parts.length >= 4) {
+            return parts[3]; // "attd"
+        } else if(parts.length >=3) {
+            return "";
         }
 
         return "home";
