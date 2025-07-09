@@ -13,13 +13,15 @@ import java.util.List;
 
 import com.eflix.hr.dto.AttendanceRecordDTO;
 import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.etc.AttdDetailDTO;
 import com.eflix.hr.dto.etc.AttdRecordDTO;
 import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
+import com.eflix.hr.dto.etc.AttdSummaryDTO;
 
 public interface AttendanceRecordService {
     // 근태 전체조회
     public List<AttendanceRecordDTO> getAllRecords();
-    
+
     // 근태 상세조회
     public List<AttendanceRecordDTO> getRecordsByEmpId(AttendanceRecordDTO attendanceRecordDTO);
 
@@ -36,13 +38,20 @@ public interface AttendanceRecordService {
     public List<AttendanceRecordDTO> managerSearch(AttendanceRecordDTO dto);
 
     int createAttendanceRecord(AttendanceRecordDTO dto);
+
     int updateAttendanceRecord(AttendanceRecordDTO dto);
+
     int deleteAttendanceRecord(String attdIdx);
 
     // 0708
     public AttdRecordSummaryDTO selectAttdRecordSummaryByEmpIdx(String empIdx, String date);
+
     public List<AttdRecordDTO> findAllByEmpIdxWithDate(String empIdx, String date);
 
     // 0709
     public void addAttd();
+    
+    public AttdSummaryDTO selectAttdSummary(String empIdx, String date);
+    public List<AttdDetailDTO> selectAttdDetailList(String empIdx, String date);
+
 }

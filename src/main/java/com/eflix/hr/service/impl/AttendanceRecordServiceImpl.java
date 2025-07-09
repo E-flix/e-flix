@@ -16,8 +16,10 @@ import org.springframework.stereotype.Service;
 
 import com.eflix.common.security.auth.AuthContext;
 import com.eflix.hr.dto.AttendanceRecordDTO;
+import com.eflix.hr.dto.etc.AttdDetailDTO;
 import com.eflix.hr.dto.etc.AttdRecordDTO;
 import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
+import com.eflix.hr.dto.etc.AttdSummaryDTO;
 import com.eflix.hr.mapper.AttendanceRecordMapper;
 import com.eflix.hr.service.AttendanceRecordService;
 
@@ -91,5 +93,15 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
     @Override
     public void addAttd() {
         attendanceRecordMapper.addAttd();
+    }
+
+    @Override
+    public AttdSummaryDTO selectAttdSummary(String empIdx, String date) {
+        return attendanceRecordMapper.selectAttdSummary(empIdx, date);
+    }
+
+    @Override
+    public List<AttdDetailDTO> selectAttdDetailList(String empIdx, String date) {
+        return attendanceRecordMapper.selectAttdDetailList(empIdx, date);
     }
 }

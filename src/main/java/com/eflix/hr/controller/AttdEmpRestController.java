@@ -7,8 +7,10 @@ import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
 import com.eflix.common.security.auth.AuthUtil;
+import com.eflix.hr.dto.etc.AttdDetailDTO;
 import com.eflix.hr.dto.etc.AttdRecordDTO;
 import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
+import com.eflix.hr.dto.etc.AttdSummaryDTO;
 import com.eflix.hr.service.AttendanceRecordService;
 import com.eflix.hr.service.EmployeeService;
 
@@ -100,10 +102,11 @@ public class AttdEmpRestController {
 
         System.out.println(date);
 
-        AttdRecordSummaryDTO attdRecordSummaryDTO = attendanceRecordService.selectAttdRecordSummaryByEmpIdx(getEmpIdx(), date);
+        // AttdRecordSummaryDTO attdRecordSummaryDTO = attendanceRecordService.selectAttdRecordSummaryByEmpIdx(getEmpIdx(), date);
+        AttdSummaryDTO attdSummaryDTO = attendanceRecordService.selectAttdSummary(getEmpIdx(), date);
 
-        if(attdRecordSummaryDTO != null) {
-            result = ResUtil.makeResult(ResStatus.OK, attdRecordSummaryDTO);
+        if(attdSummaryDTO != null) {
+            result = ResUtil.makeResult(ResStatus.OK, attdSummaryDTO);
         } else {
             result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
         }
@@ -115,10 +118,11 @@ public class AttdEmpRestController {
     public ResponseEntity<ResResult> getList(@RequestParam String date) {
         ResResult result = null;
 
-        List<AttdRecordDTO> attd = attendanceRecordService.findAllByEmpIdxWithDate(getEmpIdx(), date);
+        // List<AttdRecordDTO> attd = attendanceRecordService.findAllByEmpIdxWithDate(getEmpIdx(), date);
+        List<AttdDetailDTO> attdDetailDTOs = attendanceRecordService.selectAttdDetailList(getEmpIdx(), date);
 
-        if(attd != null) {
-            result = ResUtil.makeResult(ResStatus.OK, attd);
+        if(attdDetailDTOs != null) {
+            result = ResUtil.makeResult(ResStatus.OK, attdDetailDTOs);
         } else {
             result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
         }
