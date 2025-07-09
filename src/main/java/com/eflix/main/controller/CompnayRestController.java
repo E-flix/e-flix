@@ -120,7 +120,6 @@ public class CompnayRestController {
 
     @PutMapping("/update")
     public ResponseEntity<ResResult> update(@RequestBody CompanyDTO companyDTO) {
-        //TODO: process POST request
         ResResult result = null;
         
         int affectedRows = companyService.updateCompany(companyDTO);

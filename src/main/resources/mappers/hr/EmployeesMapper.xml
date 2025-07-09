@@ -106,7 +106,8 @@
         emp_addr,
         emp_addr_detail,
         emp_addr_zip,
-        co_idx
+        co_idx,
+        emp_img
     ) VALUES (
         #{empIdx},
         #{empName},
@@ -123,7 +124,8 @@
         #{empAddr},
         #{empAddrDetail},
         #{empAddrZip},
-        #{coIdx}
+        #{coIdx},
+        #{empImg}
     )
 </insert>
 
@@ -172,6 +174,12 @@
         </if>
         <if test="empAddrZip != null and empAddrZip != ''">
             emp_addr_zip = #{empAddrZip},
+        </if>
+        <if test="empImg != null and empImg != ''">
+            emp_img = #{empImg},
+        </if>
+        <if test="baseSalary != null and baseSalary != ''">
+            base_salary = #{baseSalary},
         </if>
     </set>
     WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}

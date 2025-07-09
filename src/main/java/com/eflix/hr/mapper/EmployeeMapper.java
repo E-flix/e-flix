@@ -38,4 +38,7 @@ public interface EmployeeMapper {
     // 재직 상태 드롭다운 조회
     public List<EmployeeDTO> empStatusList();
 
+    // 0708
+    public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO);
+
 }

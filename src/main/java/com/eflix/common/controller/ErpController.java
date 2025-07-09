@@ -5,21 +5,14 @@ import java.util.Collection;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import com.eflix.common.security.auth.AuthUtil;
-
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.GetMapping;
 
 // 최초 생성 6 27
-
 @Controller
-@RequestMapping("/erp")
 public class ErpController {
 
-    @GetMapping()
+    @GetMapping("/erp")
     public String main(Authentication authentication) {
 
         Collection<? extends GrantedAuthority> roles = authentication.getAuthorities();
@@ -40,5 +33,4 @@ public class ErpController {
             return "erp/pb";
         return "error/404";
     }
-
 }

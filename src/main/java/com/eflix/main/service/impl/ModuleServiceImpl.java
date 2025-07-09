@@ -17,8 +17,6 @@ public class ModuleServiceImpl implements ModuleService {
 
     @Override
     public List<ModuleDTO> findAll() {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method 'findAll'");
         return mapper.findAll();
     }
 }

@@ -21,7 +21,7 @@ public class SalaryDTO {
     private String salaryIdx;        // salary_idx
     private String empIdx;           // emp_idx
     private String salaryMonth;      // salary_month
-    private Double baseSalary;   // base_salary
+    private int baseSalary;   // base_salary
     private Double bonus;        // bonus
     private Double overtimePay;  // overtime_pay
     private Double nightWorkPay; // night_work_pay
