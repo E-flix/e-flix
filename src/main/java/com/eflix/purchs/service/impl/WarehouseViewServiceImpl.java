@@ -17,8 +17,8 @@ public class WarehouseViewServiceImpl implements WarehouseViewService {
     private final WarehouseViewMapper warehouseViewMapper;
 
     @Override
-    public List<WarehouseViewDTO> warehouseViewList() {
-        return warehouseViewMapper.warehouseViewList();
+        public List<WarehouseViewDTO> warehouseViewList(WarehouseViewDTO warehouse) {
+        return warehouseViewMapper.warehouseViewList(warehouse);
     }
 
     @Override
@@ -26,5 +26,10 @@ public class WarehouseViewServiceImpl implements WarehouseViewService {
         WarehouseViewDTO warehouseViewDTO = new WarehouseViewDTO();
         warehouseViewDTO.setWarehouseId(warehouseId);
         return warehouseViewMapper.warehouseViewListDetail(warehouseId);
+    }
+
+    @Override
+    public List<WarehouseViewDTO> searchWarehouseLocation() {
+        return warehouseViewMapper.searchWarehouseLocation();
     }
 }

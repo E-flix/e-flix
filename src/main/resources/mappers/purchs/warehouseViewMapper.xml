@@ -13,7 +13,12 @@
         warehouse_manager,
         c.common_code_name AS warehouse_status_name
     FROM
-        warehouse w JOIN common_code c ON w.warehouse_status = c.common_code
+        warehouse w JOIN common_code c ON w.exist_prod = c.common_code
+    <where>
+       <if test='existProd != null and existProd != "" '> common_code_name = #{existProd} </if>
+        <if test='warehouseId != null and warehouseId != "" '> AND warehouse_id LIKE '%' || #{warehouseId} || '%' </if>
+       <if test='warehouseLocation != null and warehouseLocation != "" '> AND warehouse_location = #{warehouseLocation} </if>
+    </where>
     ORDER BY
         warehouse_id
 </select>
@@ -30,4 +35,12 @@
     ORDER BY 
         i.prod_id
 </select>
+
+<select id="searchWarehouseLocation" resultType="WarehouseViewDTO">
+    SELECT DISTINCT
+        warehouse_location
+    FROM
+        warehouse
+</select>
+
 </mapper>
