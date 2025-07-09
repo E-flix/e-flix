@@ -43,9 +43,6 @@ public class AttendanceRecordController {
     @Autowired
     private EmployeeService employeeService;
 
-    @Autowired
-    private AuthContext authContext;
-
     // 근태 현황 화면(사원)
     @GetMapping("/al")
     public String attdList() {
@@ -59,7 +56,6 @@ public class AttendanceRecordController {
             @RequestParam String yearMonth // e.g. "2025-05"
     ) {
         // 테스트용으로 empIdx 고정하실 거면 유지
-        empIdx = "emp-001";
 
         YearMonth ym = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
         LocalDate start = ym.atDay(1);
@@ -78,7 +74,7 @@ public class AttendanceRecordController {
     public List<LocalDate> getYearMonthList(@RequestParam String empIdx) {
         // empIdx를 무시하고 고정값으로 테스트하신다면 이 한 줄만 유지하셔도 됩니다.
         empIdx = "emp-001";
-        return attendanceRecordService.getYearMonthList(empIdx);
+        return attendanceRecordService.getYearMonthList(AuthUtil.getCoIdx(), empIdx);
     }
 
     /** 관리자용 근태 리스트 조회 **/

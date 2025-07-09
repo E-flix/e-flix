@@ -188,4 +188,11 @@
 <select id="selectById" parameterType="String" resultType="EmployeeDTO">
     SELECT * FROM employees WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
 </select>
+
+<!-- 0708 -->
+<select id="findAllEmpRegdateByEmpIdx" parameterType="String" resultType="Date">
+    SELECT emp_regdate
+    FROM employees
+    WHERE emp_idx = #{empIdx}
+</select>
 </mapper>

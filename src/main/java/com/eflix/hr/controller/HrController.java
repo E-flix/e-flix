@@ -218,4 +218,10 @@ public class HrController {
   public String salaryPayslip() {
       return "hr/salaryPayslip";
   }
+
+  @GetMapping("/attd")
+  public String attd() {
+      return "hr/new/attd/list";
+  }
+  
 }

@@ -11,6 +11,7 @@
 ============================================ */
 package com.eflix.hr.mapper;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -40,5 +41,6 @@ public interface EmployeeMapper {
 
     // 0708
     public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO);
+    public Date findAllEmpRegdateByEmpIdx(String empIdx);
 
 }

@@ -17,6 +17,8 @@ import org.springframework.data.repository.query.Param;
 
 import com.eflix.hr.dto.AttendanceRecordDTO;
 import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.etc.AttdRecordDTO;
+import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
 
 @Mapper
 public interface AttendanceRecordMapper {
@@ -35,5 +37,9 @@ public interface AttendanceRecordMapper {
 
     // 근태관리 조회
     List<AttendanceRecordDTO> managerSearch(AttendanceRecordDTO dto);
+
+    // 0708
+	  AttdRecordSummaryDTO selectAttdRecordSummaryByEmpIdx(String empIdx, String date);
+    List<AttdRecordDTO> findAllByEmpIdxWithDate(String empIdx, String date);
 
 }

@@ -11,6 +11,7 @@
 ============================================ */
 package com.eflix.hr.service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -33,4 +34,5 @@ public interface EmployeeService {
 
     // 0708
     public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO);
+    public Date findAllEmpRegdateByEmpIdx(String empIdx);
 }

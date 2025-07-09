@@ -9,7 +9,6 @@
 package com.eflix.hr.service.impl;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,8 @@ import org.springframework.stereotype.Service;
 
 import com.eflix.common.security.auth.AuthContext;
 import com.eflix.hr.dto.AttendanceRecordDTO;
-import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.etc.AttdRecordDTO;
+import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
 import com.eflix.hr.mapper.AttendanceRecordMapper;
 import com.eflix.hr.service.AttendanceRecordService;
 
@@ -26,10 +26,6 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
 
   @Autowired
   AttendanceRecordMapper attendanceRecordMapper;
-  
-
-    @Autowired
-    AuthContext authContext;
 
   // 근태 전체조회
   @Override
@@ -40,14 +36,13 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
   @Override
   public List<AttendanceRecordDTO> getRecordsByEmpId(AttendanceRecordDTO attendanceRecordDTO) {
     attendanceRecordDTO.setEmpIdx(attendanceRecordDTO.getEmpIdx());
-    attendanceRecordDTO.setCoIdx(authContext.getCoIdx());
     return attendanceRecordMapper.getRecordsByEmpId(attendanceRecordDTO);
   }
 
   // 로그인 사원 근태현황 년월 드롭다운
   @Override
-  public List<LocalDate> getYearMonthList(String empIdx) {
-    return attendanceRecordMapper.getJoinDate(empIdx, authContext.getCoIdx());
+  public List<LocalDate> getYearMonthList(String coIdx, String empIdx) {
+    return attendanceRecordMapper.getJoinDate(empIdx, coIdx);
   }
 
   // 근태관리 조회
@@ -78,6 +73,16 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
 	public int deleteAttendanceRecord(String attdIdx) {
 		throw new UnsupportedOperationException("Unimplemented method 'deleteAttendanceRecord'");
 	}
+
+  // 0708
+  @Override
+  public AttdRecordSummaryDTO selectAttdRecordSummaryByEmpIdx(String empIdx, String date) {
+    return attendanceRecordMapper.selectAttdRecordSummaryByEmpIdx(empIdx, date);
+  }
+  @Override
+  public List<AttdRecordDTO> findAllByEmpIdxWithDate(String empIdx, String date) {
+    return attendanceRecordMapper.findAllByEmpIdxWithDate(empIdx, date);
+  }
 
 
 

@@ -11,6 +11,7 @@
 ============================================ */
 package com.eflix.hr.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -82,5 +83,10 @@ public class EmployeeServiceImpl implements EmployeeService {
   // 0708
   public List<EmployeeDTO> findAllEmployee(EmployeeDTO employeeDTO) {
     return employeeMapper.findAllEmployee(employeeDTO);
+  }
+
+  @Override
+  public Date findAllEmpRegdateByEmpIdx(String empIdx) {
+    return employeeMapper.findAllEmpRegdateByEmpIdx(empIdx);
   }
 }

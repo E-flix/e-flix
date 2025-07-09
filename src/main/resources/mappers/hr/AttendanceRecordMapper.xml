@@ -96,4 +96,57 @@
     </if>
   </where>
   </select>
+
+
+  <!-- 0708 -->
+  <select id="selectAttdRecordSummaryByEmpIdx" parameterType="String" resultType="AttdRecordSummaryDTO">
+    SELECT
+      COUNT(DISTINCT attd_date) AS realDay,
+      e.leave_all_days AS totalLeaveDay,
+      COUNT(CASE WHEN TO_CHAR(attd_date,'DY','NLS_DATE_LANGUAGE=AMERICAN') NOT IN ('SAT','SUN') THEN 1 END) AS workDay,
+      (
+          SELECT NVL(SUM(LEAVE_END_DATE-LEAVE_START_DATE)+1,0)
+          FROM leave_requests
+          WHERE emp_idx = #{empIdx}
+          AND TO_CHAR(leave_start_date, 'YYYY-MM') = #{date}
+          AND approval_status = 'AS02'
+      ) AS usedLeaveDay,
+      e.leave_days AS canLeaveDay,
+      COUNT(CASE WHEN attd_status = 'ABSENT' THEN 1 END) AS abDay,
+      COUNT(CASE WHEN attd_status = 'LATE' THEN 1 END) AS rateCount,
+      COUNT(CASE WHEN attd_status = 'LEAVE_EARLY' THEN 1 END) AS leaveEarlyDay,
+      COUNT(CASE WHEN TO_CHAR(attd_date,'DY','NLS_DATE_LANGUAGE=AMERICAN') IN ('SAT','SUN') THEN 1 END) AS holidayWorkDay
+    FROM attendance_records ar
+    JOIN employees e ON ar.emp_idx = e.emp_idx
+    WHERE ar.emp_idx = #{empIdx}
+      AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+    GROUP BY e.leave_all_days, e.leave_days
+  </select>
+
+  <select id="findAllByEmpIdxWithDate" parameterType="String" resultType="AttdRecordDTO">
+    SELECT
+      TO_CHAR(ar.attd_date, 'YYYY-MM-DD') AS attdDate,
+      (SELECT hd_name FROM holiday h WHERE h.hd_idx = ar.hd_idx) AS holidayType,
+      ar.attd_status AS attdStatus,
+      TO_CHAR(ar.attd_time, 'HH24:MI') AS scheduleTime,
+      TO_CHAR(ar.attd_start, 'HH24:MI') AS startTime,
+      TO_CHAR(ar.attd_end, 'HH24:MI') AS endTime,
+      NVL((
+          SELECT 
+              LPAD(TRUNC((n.nt_end - n.nt_start) * 24), 2, '0') || ':' ||
+              LPAD(MOD(TRUNC((n.nt_end - n.nt_start) * 24 * 60), 60), 2, '0')
+          FROM night_records n
+          WHERE n.emp_idx = ar.emp_idx
+            AND n.nt_date = ar.attd_date
+            AND n.nt_start IS NOT NULL AND n.nt_end IS NOT NULL
+            AND ROWNUM = 1
+      ), '') AS nightTime
+  FROM attendance_records ar
+  LEFT JOIN night_records n
+      ON n.emp_idx = ar.emp_idx
+      AND n.nt_date = ar.attd_date
+  WHERE ar.emp_idx = #{empIdx}
+    AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+  ORDER BY ar.attd_date ASC
+  </select>
 </mapper>
