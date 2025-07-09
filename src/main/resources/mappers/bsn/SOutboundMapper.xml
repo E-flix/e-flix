@@ -89,8 +89,8 @@
 
   <!-- ★ 출고번호 생성 (옵션: 자동 채번) -->
   <select id="selectNextOutboundNo" resultType="string" parameterType="string">
-    SELECT 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || 
-           LPAD(NVL(MAX(TO_NUMBER(SUBSTR(OUTBOUND_NO, -4))), 0) + 1, 4, '0') AS nextNo
+    SELECT 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
+          LPAD(NVL(MAX(TO_NUMBER(SUBSTR(OUTBOUND_NO, -4))), 0) + 1, 4, '0') AS nextNo
     FROM EFLIX.SALES_OUTBOUND
     WHERE CO_IDX = #{coIdx}
       AND OUTBOUND_NO LIKE 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'

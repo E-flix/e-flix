@@ -15,7 +15,7 @@
       margin-bottom: 15px;
       box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
     }
-    
+
     .section-box h6 {
       margin-bottom: 12px;
       color: #5a5c69;
@@ -23,19 +23,19 @@
       border-bottom: 2px solid #4e73df;
       padding-bottom: 8px;
     }
-    
+
     .btn-create { background-color: #1cc88a; border-color: #1cc88a; color: white; }
     .btn-create:hover { background-color: #17a673; border-color: #17a673; }
-    
+
     .btn-edit { background-color: #36b9cc; border-color: #36b9cc; color: white; }
     .btn-edit:hover { background-color: #2c9faf; border-color: #2c9faf; }
-    
+
     .btn-delete { background-color: #e74a3b; border-color: #e74a3b; color: white; }
     .btn-delete:hover { background-color: #c0392b; border-color: #c0392b; }
-    
+
     .header-grid { height: 280px; }
     .detail-grid { height: 320px; }
-    
+
     /* AG-Grid 커스텀 스타일 */
     .ag-theme-alpine {
       --ag-background-color: #ffffff;
@@ -47,8 +47,7 @@
     }
   </style>
 </head>
-<body>
-  <div layout:fragment="content" class="container-fluid px-3 py-2">
+<div layout:fragment="content" class="container-fluid px-3 py-2">
 
     <!-- 페이지 헤더 -->
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -77,326 +76,174 @@
     <!-- 출고 헤더 그리드 -->
     <div class="section-box">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="mb-0">
-          <i class="fas fa-list mr-2"></i>출고 목록
-        </h6>
-        <button type="button" class="btn btn-secondary btn-sm" id="btnRefresh">
-          <i class="fas fa-sync"></i> 새로고침
-        </button>
+        <h6><i class="fas fa-list mr-2"></i>출고 목록</h6>
+        <button id="btnRefresh" class="btn btn-secondary btn-sm"><i class="fas fa-sync"></i> 새로고침</button>
       </div>
       <div id="headerGrid" class="ag-theme-alpine header-grid"></div>
     </div>
-
     <!-- 출고 디테일 그리드 -->
     <div class="section-box">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="mb-0">
-          <i class="fas fa-boxes mr-2"></i>출고 상세 <span id="selectedOutboundNo" class="text-muted fs-6"></span>
+        <h6>
+          <i class="fas fa-boxes mr-2"></i>출고 상세
+          <span id="selectedOutboundNo" class="text-muted fs-6"></span>
         </h6>
         <div>
-          <button type="button" class="btn btn-info btn-sm" id="btnAddDetailRow">
-            <i class="fas fa-plus"></i> 행 추가
-          </button>
-          <button type="button" class="btn btn-warning btn-sm" id="btnDeleteDetailRow">
-            <i class="fas fa-minus"></i> 행 삭제
-          </button>
+          <button id="btnAddDetailRow" class="btn btn-info btn-sm"><i class="fas fa-plus"></i> 행 추가</button>
+          <button id="btnDeleteDetailRow" class="btn btn-warning btn-sm"><i class="fas fa-minus"></i> 행 삭제</button>
         </div>
       </div>
       <div id="detailGrid" class="ag-theme-alpine detail-grid"></div>
     </div>
 
-  </div>
-
-  <script th:inline="javascript">
+  
+  <!-- 기존에 쓰던 ag-grid-community.min.noStyle.js 대신 이걸로 교체 -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.umd.min.js"></script>
+      
+    <script th:inline="javascript">
     /*<![CDATA[*/
     $(function() {
-      
-      /*─────────────── 전역 변수 ───────────────*/
-      let headerGridApi, detailGridApi;
-      let selectedOutbound = null;
-      
-      /*─────────────── 헤더 그리드 설정 ───────────────*/
-      const headerColDefs = [
-        { headerName: '선택', checkboxSelection: true, headerCheckboxSelection: true, width: 60 },
-        { headerName: '출고번호', field: 'outboundNo', width: 150, cellClass: 'font-weight-bold text-primary' },
-        { headerName: '작성일자', field: 'writeDt', width: 100 },
-        { headerName: '거래처코드', field: 'customerCd', width: 120 },
-        { headerName: '거래처명', field: 'customerName', width: 200, flex: 1 },
-        { headerName: '대표명', field: 'representativeNm', width: 100 },
-        { headerName: '주문일자', field: 'orderDt', width: 100,
-          valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : '' },
-        { headerName: '출고일자', field: 'outboundDt', width: 100,
-          valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString() : '' },
-        { headerName: '통화', field: 'money', width: 80 },
-        { headerName: '비고', field: 'remarks', width: 150 }
+      console.log('▶ 출고관리 스크립트 시작, agGrid 객체:', window.agGrid);
+    
+      // UMD 번들에서 Grid 생성자 찾기
+      const GridCtor =
+        (window.agGrid && window.agGrid.Grid) ||
+        (window.agGrid && window.agGrid.default && window.agGrid.default.Grid) ||
+        (typeof window.agGrid === 'function' ? window.agGrid : null);
+    
+      if (!GridCtor) {
+        console.error('❌ Grid 생성자(Ctor)를 찾을 수 없습니다!', window.agGrid);
+        return;
+      }
+    
+      let headerApi, detailApi;
+    
+      const headerCols = [
+        { headerName: '선택', checkboxSelection:true, headerCheckboxSelection:true, width:60 },
+        { headerName: '출고번호', field:'outboundNo', width:150, cellClass:'font-weight-bold text-primary' },
+        { headerName: '작성일자', field:'writeDt', width:100 },
+        { headerName: '거래처코드', field:'customerCd', width:120 },
+        { headerName: '거래처명', field:'customerName', width:200, flex:1 },
+        { headerName: '대표명', field:'representativeNm', width:100 },
+        {
+          headerName:'주문일자', field:'orderDt', width:100,
+          valueFormatter:p=>p.value?new Date(p.value).toLocaleDateString():''
+        },
+        {
+          headerName:'출고일자', field:'outboundDt', width:100,
+          valueFormatter:p=>p.value?new Date(p.value).toLocaleDateString():''
+        },
+        { headerName:'통화', field:'money', width:80 },
+        { headerName:'비고', field:'remarks', width:150 }
       ];
-
-      /*─────────────── 디테일 그리드 설정 ───────────────*/
-      const detailColDefs = [
-        { headerName: '선택', checkboxSelection: true, headerCheckboxSelection: true, width: 60 },
-        { headerName: '순번', field: 'lineNo', width: 80, cellClass: 'text-center' },
-        { headerName: '품목코드', field: 'itemCode', width: 120 },
-        { headerName: '품목명', field: 'itemName', width: 200, flex: 1 },
-        { headerName: '규격', field: 'standard', width: 120 },
-        { headerName: '수량', field: 'qty', width: 100, type: 'numericColumn',
-          valueFormatter: p => Number(p.value || 0).toLocaleString() },
-        { headerName: '단위', field: 'unit', width: 80 },
-        { headerName: '단가', field: 'unitPrice', width: 110, type: 'numericColumn',
-          valueFormatter: p => Number(p.value || 0).toLocaleString() },
-        { headerName: '공급가액', field: 'supplyAmount', width: 120, type: 'numericColumn',
-          valueFormatter: p => Number(p.value || 0).toLocaleString() },
-        { headerName: '부가세', field: 'taxAmount', width: 100, type: 'numericColumn',
-          valueFormatter: p => Number(p.value || 0).toLocaleString() },
-        { headerName: '합계', field: 'totalAmount', width: 120, type: 'numericColumn',
-          cellClass: 'font-weight-bold',
-          valueFormatter: p => Number(p.value || 0).toLocaleString() },
-        { headerName: '비고', field: 'remarks', width: 150 }
+      
+      const detailCols = [
+        { headerName:'선택', checkboxSelection:true, headerCheckboxSelection:true, width:60 },
+        { headerName:'순번', field:'lineNo', width:80, cellClass:'text-center' },
+        { headerName:'품목코드', field:'itemCode', width:120 },
+        { headerName:'품목명', field:'itemName', width:200, flex:1 },
+        { headerName:'규격', field:'standard', width:120 },
+        {
+          headerName:'수량', field:'qty', width:100, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString()
+        },
+        { headerName:'단위', field:'unit', width:80 },
+        {
+          headerName:'단가', field:'unitPrice', width:110, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString()
+        },
+        {
+          headerName:'공급가액', field:'supplyAmount', width:120, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString()
+        },
+        {
+          headerName:'부가세', field:'taxAmount', width:100, type:'numericColumn',
+          valueFormatter:p=>Number(p.value||0).toLocaleString()
+        },
+        {
+          headerName:'합계', field:'totalAmount', width:120, type:'numericColumn',
+          cellClass:'font-weight-bold',
+          valueFormatter:p=>Number(p.value||0).toLocaleString()
+        },
+        { headerName:'비고', field:'remarks', width:150 }
       ];
-
-      /*─────────────── 그리드 초기화 ───────────────*/
-      const headerGridOptions = {
-        columnDefs: headerColDefs,
-        defaultColDef: { sortable: true, filter: true, resizable: true },
-        rowSelection: 'single',
-        onRowClicked: onHeaderRowClicked,
-        onGridReady: p => {
-          headerGridApi = p.api;
-          loadHeaderData();
+      
+      const headerOpts = {
+        columnDefs: headerCols,
+        defaultColDef:{sortable:true,filter:true,resizable:true},
+        rowSelection:'single',
+        onRowClicked:onHeaderClick,
+        onGridReady: params=>{
+          headerApi = params.api;
+          headerApi.sizeColumnsToFit();
+          loadHeaders();
         }
       };
-
-      const detailGridOptions = {
-        columnDefs: detailColDefs,
-        defaultColDef: { sortable: true, filter: true, resizable: true },
-        rowSelection: 'multiple',
-        onGridReady: p => {
-          detailGridApi = p.api;
+      const detailOpts = {
+        columnDefs: detailCols,
+        defaultColDef:{sortable:true,filter:true,resizable:true},
+        rowSelection:'multiple',
+        onGridReady: params=>{
+          detailApi = params.api;
+          detailApi.sizeColumnsToFit();
         }
       };
-
-      // 그리드 생성
-      headerGridApi = agGrid.createGrid(document.getElementById('headerGrid'), headerGridOptions).api;
-      detailGridApi = agGrid.createGrid(document.getElementById('detailGrid'), detailGridOptions).api;
-
-      /*─────────────── 데이터 로드 함수 ───────────────*/
-      function loadHeaderData() {
-        console.log('출고 헤더 데이터 로드 시작');
-        
-        // ★ 수정: API 경로 변경 /api/soutbounds → /bsn/soutbounds
+    
+      // 실제 그리드 생성
+      new GridCtor(document.getElementById('headerGrid'), headerOpts);
+      new GridCtor(document.getElementById('detailGrid'), detailOpts);
+    
+      function loadHeaders() {
         fetch('/bsn/soutbounds')
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-          })
-          .then(data => {
-            console.log('출고 헤더 데이터 로드 성공:', data);
-            headerGridApi.setRowData(data);
-            headerGridApi.sizeColumnsToFit();
-          })
-          .catch(error => {
-            console.error('출고 헤더 데이터 로드 실패:', error);
-            Swal.fire('오류', '출고 목록을 불러오는데 실패했습니다.', 'error');
-            headerGridApi.setRowData([]);
+          .then(r=>r.ok? r.json(): Promise.reject(r))
+          .then(data=> headerApi.setRowData(data))
+          .catch(e=> {
+            console.error('헤더 로드 실패', e);
+            headerApi.setRowData([]);
           });
       }
-
-      function onHeaderRowClicked(event) {
-        selectedOutbound = event.data;
-        const outboundNo = selectedOutbound.outboundNo;
-        
-        console.log('출고 헤더 선택:', outboundNo);
-        
-        // 선택된 출고번호 표시
-        document.getElementById('selectedOutboundNo').textContent = `(${outboundNo})`;
-        
-        // ★ 수정: API 경로 변경 및 URL 패턴 변경
-        fetch(`/bsn/soutbounds/${encodeURIComponent(outboundNo)}/details`)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-          })
-          .then(data => {
-            console.log('출고 상세 데이터 로드 성공:', data);
-            detailGridApi.setRowData(data);
-            detailGridApi.sizeColumnsToFit();
-          })
-          .catch(error => {
-            console.error('출고 상세 데이터 로드 실패:', error);
-            Swal.fire('오류', '출고 상세 정보를 불러오는데 실패했습니다.', 'error');
-            detailGridApi.setRowData([]);
+    
+      function onHeaderClick(e) {
+        const no = e.data.outboundNo;
+        $('#selectedOutboundNo').text(`(${no})`);
+        fetch(`/bsn/soutbounds/${encodeURIComponent(no)}/details`)
+          .then(r=>r.ok? r.json(): Promise.reject(r))
+          .then(data=> detailApi.setRowData(data))
+          .catch(e=> {
+            console.error('상세 로드 실패', e);
+            detailApi.setRowData([]);
           });
       }
-
-      /*─────────────── 버튼 이벤트 ───────────────*/
-      
-      // 새로고침
-      $('#btnRefresh').click(function() {
-        loadHeaderData();
-        detailGridApi.setRowData([]);
-        document.getElementById('selectedOutboundNo').textContent = '';
-        selectedOutbound = null;
+    
+      $('#btnRefresh').click(()=>{
+        loadHeaders();
+        detailApi && detailApi.setRowData([]);
+        $('#selectedOutboundNo').text('');
       });
-
-      // 신규
-      $('#btnNew').click(function() {
-        Swal.fire({
-          title: '신규 출고',
-          text: '신규 출고를 등록하시겠습니까?',
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonColor: '#1cc88a',
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: '등록',
-          cancelButtonText: '취소'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // TODO: 신규 출고 등록 모달 또는 페이지로 이동
-            Swal.fire('준비중', '신규 출고 등록 기능을 준비중입니다.', 'info');
-          }
-        });
-      });
-
-      // 주문서에서 생성
-      $('#btnCreateFromOrder').click(function() {
-        Swal.fire({
-          title: '주문서에서 출고 생성',
-          html: `
-            <div class="mb-3">
-              <label class="form-label">주문서 번호</label>
-              <input id="orderNoInput" type="text" class="form-control" placeholder="주문서 번호를 입력하세요">
-            </div>
-          `,
-          showCancelButton: true,
-          confirmButtonColor: '#1cc88a',
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: '생성',
-          cancelButtonText: '취소',
-          preConfirm: () => {
-            const orderNo = document.getElementById('orderNoInput').value;
-            if (!orderNo || !orderNo.trim()) {
-              Swal.showValidationMessage('주문서 번호를 입력해주세요.');
-              return false;
-            }
-            return orderNo.trim();
-          }
-        }).then((result) => {
-          if (result.isConfirmed) {
-            createOutboundFromOrder(result.value);
-          }
-        });
-      });
-
-      // 주문서 기반 출고 생성
-      function createOutboundFromOrder(orderNo) {
-        Swal.fire({
-          title: '생성 중...',
-          text: '주문서를 기반으로 출고를 생성하고 있습니다.',
-          allowOutsideClick: false,
-          showConfirmButton: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
-
-        // TODO: 실제 API 구현 필요
-        fetch(`/bsn/soutbounds/create-from-order`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ orderNo: orderNo })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            Swal.fire({
-              title: '생성 완료!',
-              text: `출고 "${data.outboundNo}"가 성공적으로 생성되었습니다.`,
-              icon: 'success'
-            });
-            loadHeaderData(); // 목록 새로고침
-          } else {
-            throw new Error(data.message || '출고 생성에 실패했습니다.');
-          }
-        })
-        .catch(error => {
-          console.error('주문서 기반 출고 생성 실패:', error);
-          Swal.fire({
-            title: '생성 실패',
-            text: error.message || '출고 생성 중 오류가 발생했습니다.',
-            icon: 'error'
-          });
-        });
-      }
-
-      // 삭제
-      $('#btnDelete').click(function() {
-        const selectedRows = headerGridApi.getSelectedRows();
-        if (selectedRows.length === 0) {
-          Swal.fire('알림', '삭제할 출고를 선택해 주세요.', 'info');
-          return;
-        }
-
-        Swal.fire({
-          title: '삭제 확인',
-          text: `선택한 ${selectedRows.length}건의 출고를 삭제하시겠습니까?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#e74a3b',
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: '삭제',
-          cancelButtonText: '취소'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // TODO: 삭제 API 구현
-            Swal.fire('준비중', '삭제 기능을 준비중입니다.', 'info');
-          }
-        });
-      });
-
-      // 상세 행 추가
-      $('#btnAddDetailRow').click(function() {
-        if (!selectedOutbound) {
-          Swal.fire('알림', '먼저 출고를 선택해 주세요.', 'info');
-          return;
-        }
-        
-        const newRowData = {
-          outboundNo: selectedOutbound.outboundNo,
-          lineNo: detailGridApi.getDisplayedRowCount() + 1,
-          itemCode: '',
-          itemName: '',
-          standard: '',
-          qty: 1,
-          unit: '',
-          unitPrice: 0,
-          supplyAmount: 0,
-          taxAmount: 0,
-          totalAmount: 0,
-          remarks: ''
+    
+      $('#btnAddDetailRow').click(()=>{
+        const sel = headerApi.getSelectedRows();
+        if(!sel.length) return Swal.fire('알림','먼저 출고를 선택해 주세요.','info');
+        const newRow={
+          outboundNo: sel[0].outboundNo,
+          lineNo: (detailApi.getDisplayedRowCount()||0)+1,
+          itemCode:'',itemName:'',standard:'',
+          qty:1,unit:'',unitPrice:0,
+          supplyAmount:0,taxAmount:0,totalAmount:0,
+          remarks:''
         };
-        
-        detailGridApi.applyTransaction({ add: [newRowData] });
+        detailApi.applyTransaction({add:[newRow]});
       });
-
-      // 상세 행 삭제
-      $('#btnDeleteDetailRow').click(function() {
-        const selectedRows = detailGridApi.getSelectedRows();
-        if (selectedRows.length === 0) {
-          Swal.fire('알림', '삭제할 상세 행을 선택해 주세요.', 'info');
-          return;
-        }
-
-        detailGridApi.applyTransaction({ remove: selectedRows });
+    
+      $('#btnDeleteDetailRow').click(()=>{
+        const rows = detailApi.getSelectedRows();
+        if(!rows.length) return Swal.fire('알림','삭제할 상세 행을 선택해 주세요.','info');
+        detailApi.applyTransaction({remove:rows});
       });
-
-      console.log('출고 관리 페이지 초기화 완료');
+    
+      console.log('▶ 출고관리 초기화 완료');
     });
     /*]]>*/
-  </script>
-</body>
-</html>
+    </script>
+    
+</div>
