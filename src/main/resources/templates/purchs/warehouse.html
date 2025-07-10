@@ -19,25 +19,23 @@
 </head>
 <!--container-fluid 시작-->
 <div layout:fragment="content" class="container-fluid">
-	<div class="d-flex justify-content-between align-items-center mb-4">
+	<div class="d-flex justify-content-between align-items-center mb-0">
 		<h2>창고관리</h2>
-	</div>
-	<div class="col-md-12">
-		<div class="radio-group">
-			<input type="radio" class="btn-check" name="accountFilter" id="warehouse" autocomplete="off" checked>
-			<label class="btn btn-outline-secondary btn-sm me-1" for="warehouse">창고관리</label>
-			<input type="radio" class="btn-check" name="accountFilter" id="warehouse_mnt" autocomplete="off">
-			<label class="btn btn-outline-secondary btn-sm me-1" for="warehouse_mnt">창고이동</label>
+		<div class="d-flex justify-content-end mb-2 gap-2 mb-0">
+			<button type="button" class="btn btn-outline-secondary btn-sm" id="addBtn">저장</button>
+			<button type="button" class="btn btn-outline-secondary btn-sm" id="delBtn">삭제</button>
 		</div>
 	</div>
-
-	<div class="d-flex justify-content-end mb-2 gap-2">
-		<button type="button" class="btn btn-success btn-sm" id="addBtn">저장</button>
-		<button type="button" class="btn btn-danger btn-sm" id="delBtn">삭제</button>
+	<div class="col-md-12 ps-0">
+		<div class="radio-group">
+			<input type="radio" class="btn-check" name="accountFilter" id="warehouse" autocomplete="off" checked>
+			<label class="btn btn-outline-secondary btn-sm" for="warehouse">창고관리</label>
+			<input type="radio" class="btn-check" name="accountFilter" id="warehouse_mnt" autocomplete="off">
+			<label class="btn btn-outline-secondary btn-sm" for="warehouse_mnt">창고이동</label>
+		</div>
 	</div>
-
 	<div class="card border-0">
-		<div class="card-body" style="padding: 1px;">
+		<div class="card-body ps-0 pt-0">
 			<div class="row" style="height: 75vh;">
 				<!-- 왼쪽: AG Grid -->
 				<div class="col-md-9">
@@ -59,7 +57,7 @@
 									id="warehouseLocation" placeholder="창고위치">
 							</div>
 							<div class="mb-3">
-								<label for="warehouseScale" class="form-label">창고크기 (단위 : L)</label>
+								<label for="warehouseScale" class="form-label">창고크기</label>
 								<input type="text" class="form-control form-control-sm text-center" id="warehouseScale"
 									placeholder="창고크기">
 							</div>
@@ -82,7 +80,6 @@
 <!-- AG Grid 설정 -->
 <script th:inline="javascript">
 	let warehouseList = /*[[${whList}]]*/[];
-
 	const gridOptions = {
 		headerHeight: 35,
 		rowHeight: 35,
@@ -90,7 +87,7 @@
 		columnDefs: [
 			{ headerName: "창고ID", field: "warehouseId", editable: false },
 			{ headerName: "창고위치", field: "warehouseLocation", editable: false },
-			{ headerName: "창고크기", field: "warehouseScale", editable: false, valueFormatter: params => params.value + "L" },
+			{ headerName: "창고크기", field: "warehouseScale", editable: false, cellStyle: {textAlign: "right"} },
 			{ headerName: "담당자", field: "warehouseManager", editable: false },
 			{
 				headerName: "창고상태",
@@ -216,7 +213,6 @@
 			});
 		});
 	});
-
 	// 페이지 이동
 	document.getElementById('warehouse_mnt').addEventListener('change', function () {
 		if (this.checked) {

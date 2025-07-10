@@ -13,25 +13,27 @@
 	<title>창고이동관리</title>
 </head>
 <div layout:fragment="content" class="container-fluid">
-	<div class="d-flex justify-content-between align-items-center mb-4">
+	<div class="d-flex justify-content-between align-items-center mb-0">
 		<h2>창고이동관리</h2>
+
+			<!-- 버튼 -->
+	<div class="d-flex justify-content-end mb-2 gap-2 mb-0">
+		<button type="button" class="btn btn-outline-secondary btn-sm" onclick="saveTransfer()">저장</button>
+		<button type="button" class="btn btn-outline-secondary btn-sm" id="addTransferRow" onclick="addTransferRow()">+ 행
+			추가</button>
+		<button type="button" class="btn btn-outline-secondary btn-sm" onclick="deleteSelectedRows()">선택 삭제</button>
+	</div>
 	</div>
 	<!-- 상단 탭 -->
-	<div class="col-md-12 mb-2">
+	<div class="col-md-12 ps-0">
 		<div class="radio-group">
 			<input type="radio" class="btn-check" name="accountFilter" id="warehouse" autocomplete="off">
-			<label class="btn btn-outline-secondary btn-sm me-1" for="warehouse">창고관리</label>
+			<label class="btn btn-outline-secondary btn-sm" for="warehouse">창고관리</label>
 			<input type="radio" class="btn-check" name="accountFilter" id="warehouse_mnt" autocomplete="off" checked>
-			<label class="btn btn-outline-secondary btn-sm me-1" for="warehouse_mnt">창고이동</label>
+			<label class="btn btn-outline-secondary btn-sm" for="warehouse_mnt">창고이동</label>
 		</div>
 	</div>
-	<!-- 버튼 -->
-	<div class="d-flex justify-content-end mb-2 gap-2">
-		<button type="button" class="btn btn-success btn-sm" onclick="saveTransfer()">저장</button>
-		<button type="button" class="btn btn-primary btn-sm" id="addTransferRow" onclick="addTransferRow()">+ 행
-			추가</button>
-		<button type="button" class="btn btn-danger btn-sm" onclick="deleteSelectedRows()">선택 삭제</button>
-	</div>
+
 	<!-- AG Grid 테이블 영역 -->
 	<div class="grid-container mb-4" style="height: 45vh; width: 100%;">
 		<div id="whMovementGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
@@ -116,7 +118,7 @@
 							field: "currentQuantity",
 							editable: false,
 							width: 100,
-							cellStyle: { color: 'blue' },
+							cellStyle: { color: 'blue' , textAlign: 'right'},
 							valueGetter: (params) => params.data.currentQuantity || 0
 						}
 					]
@@ -150,7 +152,7 @@
 							field: "remainingCapacity",
 							editable: false,
 							width: 100,
-							cellStyle: { color: 'green' },
+							cellStyle: { color: 'green', textAlign: 'right' },
 							valueGetter: (params) => params.data.remainingCapacity || 0
 						}
 					]
@@ -160,7 +162,7 @@
 					field: "transferQty",
 					editable: true,
 					width: 100,
-					cellStyle: { color: 'red', fontWeight: 'bold' }
+					cellStyle: { color: 'red', fontWeight: 'bold', textAlign: 'right' }
 				},
 				{
 					headerName: "담당자",

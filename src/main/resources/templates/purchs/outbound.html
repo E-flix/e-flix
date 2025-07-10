@@ -11,35 +11,35 @@
 	<title>출고관리</title>
 </head>
 <div layout:fragment="content" class="container-fluid">
-	<div class="d-flex justify-content-between align-items-center mb-4">
+	<div class="d-flex justify-content-between align-items-center mb-0">
 		<h2>출고관리</h2>
 	</div>
-	<div class="col-md-12 mb-3">
+	<div class="col-md-12 mb-3 ps-0">
 		<div class="d-flex justify-content-between align-items-center">
 			<div class="radio-group">
 				<input type="radio" class="btn-check" name="accountFilter" id="ibd" autocomplete="off">
-				<label class="btn btn-outline-secondary btn-sm me-1" for="ibd">입고</label>
+				<label class="btn btn-outline-secondary btn-sm" for="ibd">입고</label>
 				<input type="radio" class="btn-check" name="accountFilter" id="obd" autocomplete="off" checked>
-				<label class="btn btn-outline-secondary btn-sm me-1" for="obd">출고</label>
+				<label class="btn btn-outline-secondary btn-sm" for="obd">출고</label>
 			</div>
 			<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#inquiryModal">출하 의뢰서 조회</button>
 		</div>
 	</div>
 
 	<div class="card border-0">
-		<div class="card-body">
+		<div class="card-body ps-0 pt-0">
 			<!-- <h5 class="text-center mb-4">출고 요청</h5> -->
 			<div class="row mb-3 align-items-end">
 				<div class="col-md-2">
-					<label class="form-label">일자</label>
+					<label class="form-label mb-0">일자</label>
 					<input type="date" name="date" id="date" class="form-control form-control-sm" />
 				</div>
 				<div class="col-md-2">
-					<label class="form-label">제품명</label>
+					<label class="form-label mb-0">제품명</label>
 					<input type="text" class="form-control form-control-sm" id="productName" placeholder="제품명" />
 				</div>
 				<div class="col-md-2">
-					<label class="form-label">제품분류</label>
+					<label class="form-label mb-0">제품분류</label>
 					<select class="form-control form-control-sm" id="category">
 						<option selected>제품분류선택</option>
 						<option value="1">완제품</option>
@@ -47,7 +47,7 @@
 					</select>
 				</div>
 				<div class="col-md-2">
-					<label class="form-label">제품수량</label>
+					<label class="form-label mb-0">제품수량</label>
 					<input type="number" class="form-control form-control-sm" id="quantity" placeholder="제품수량" />
 				</div>
 				<div class="col-md-2 d-flex justify-content-end gap-2">
