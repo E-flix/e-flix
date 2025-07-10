@@ -96,21 +96,30 @@ public class OrdersServiceImpl implements OrdersService {
             throw e;
         }
         
-        boolean isNew = !StringUtils.hasText(dto.getOrderNo());
+        // ==========================================================
+        // ★★★★★★★★★★★★★★★★★★★★★ FIX START ★★★★★★★★★★★★★★★★★★★★★
+        // ==========================================================
+        // 기존 로직은 신규 주문임에도 주문번호가 있다는 이유로 수정으로 판단하는 오류가 있었음.
+        // 데이터베이스에 해당 주문번호가 실제로 존재하는지 확인하여 신규/수정 여부를 판단하도록 변경.
+        OrdersDTO queryDto = new OrdersDTO();
+        queryDto.setOrderNo(dto.getOrderNo());
+        queryDto.setCoIdx(coIdx);
+        OrdersDTO existingOrder = ordersMapper.selectOrderHeader(queryDto);
+        boolean isNew = (existingOrder == null);
+        // ==========================================================
+        // ★★★★★★★★★★★★★★★★★★★★★★ FIX END ★★★★★★★★★★★★★★★★★★★★★★
+        // ==========================================================
+        
         log.info("저장 모드: {}", isNew ? "신규" : "수정");
         
         try {
-            /* ① 신규라면 주문번호 채번 후 헤더 INSERT */
+            /* ① 신규라면 헤더 INSERT */
             if (isNew) {
-                String newOrderNo = generateNextOrderNo();
-                dto.setOrderNo(newOrderNo);
-                log.info("새 주문번호 생성: {}", newOrderNo);
+                // 주문번호는 클라이언트에서 이미 생성했으므로 다시 생성하지 않음.
+                log.info("새 주문번호 {} 로 헤더 INSERT 시작", dto.getOrderNo());
                 
                 // ★ 필수 필드 재검증 및 기본값 설정
                 setDefaultValues(dto, empIdx);
-                
-                log.info("헤더 INSERT 시작 - 회사: {}, 주문번호: {}, 거래처: {}, 담당자: {}", 
-                        coIdx, dto.getOrderNo(), dto.getCustomerCd(), dto.getOrderWriter());
                 
                 // ★ 헤더 INSERT 실행
                 int headerResult = ordersMapper.insertOrder(dto);
@@ -167,8 +176,8 @@ public class OrdersServiceImpl implements OrdersService {
             
             // ★ 구체적인 오류 메시지 제공
             String userMessage = "주문서 저장 중 오류가 발생했습니다.";
-            if (e instanceof java.sql.SQLException) {
-                userMessage = "데이터베이스 오류가 발생했습니다. 관리자에게 문의하세요.";
+            if (e instanceof org.springframework.dao.DataIntegrityViolationException) {
+                userMessage = "데이터베이스 제약 조건 위반 오류가 발생했습니다. 입력값을 확인해주세요.";
             } else if (e instanceof IllegalArgumentException) {
                 userMessage = e.getMessage(); // 검증 오류는 사용자에게 직접 표시
             }
