@@ -3,5 +3,31 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.eflix.purchs.mapper.OutboundMapper">
-
+<!-- 출하 의뢰서 조회 -->
+<!-- <select id="selectOutboundRequest" resultType="OutboundDTO">
+  SELECT
+    outbound_no,
+    write_dt,
+    customer_name,
+    representative_nm,
+    order_dt,
+    outbound_dt,
+    remarks
+FROM 
+    sales_outbound
+ORDER BY 
+    outbound_no
+</select> -->
+<!-- 출하 의뢰서 조회 상세 -->
+<!-- <select id="OutboundRequestDetail" resultType="OutboundDTO" parameterType="String">
+  SELECT
+    so.outbound_no,
+    sd.item_name,
+    sd.standard,
+    sd.qty,
+    sd.remarks
+FROM soutbound_detail sd JOIN sales_outbound so ON (sd.outbound_no = so.outbound_no)
+WHERE
+    so.outbound_no = #{outbound_no}
+</select> -->
 </mapper>
