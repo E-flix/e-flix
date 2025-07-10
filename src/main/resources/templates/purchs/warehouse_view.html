@@ -15,42 +15,27 @@
 
 <div layout:fragment="content" class="container-fluid">
 
-	<div class="d-flex justify-content-between align-items-center mb-4">
+	<div class="d-flex justify-content-between align-items-center mb-0">
 		<h2>창고조회</h2>
 	</div>
-	<!-- <div class="col-md-12 mb-3">
-		<div class="d-flex justify-content-between align-items-center">
-			<div class="radio-group">
-				<input type="radio" class="btn-check" name="accountFilter" id="ibd" autocomplete="off">
-				<label class="btn btn-outline-secondary btn-sm me-1" for="ibd">입고</label>
-				<input type="radio" class="btn-check" name="accountFilter" id="obd" autocomplete="off" checked>
-				<label class="btn btn-outline-secondary btn-sm me-1" for="obd">출고</label>
-			</div>
-			<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#inquiryModal">PDF</button>
-		</div>
-	</div> -->
-
 	<div class="card border-0">
-		<div class="card-body">
+		<div class="card-body ps-0 	pt-0">
 			<!-- <h5 class="text-center mb-4">출고 요청</h5> -->
 			<div class="row mb-3 align-items-end">
 				<div class="col-md-2">
-					<label class="form-label">창고ID</label>
+					<label class="form-label mb-0">창고ID</label>
 					<input type="text" class="form-control form-control-sm" id="warehouseIdInput" placeholder="창고ID" />
 				</div>
 				<div class="col-md-2">
-					<label class="form-label">창고위치</label>
+					<label class="form-label mb-0">창고위치</label>
 					<select class="form-control form-control-sm" id="warehouseLocationInput">
 						<option value=''>선택</option>
-						<option 
-								th:each="wh : ${whlocationList}" 
-								th:value="${wh.warehouseLocation}"
-								th:text="${wh.warehouseLocation}"
-						></option>
+						<option th:each="wh : ${whlocationList}" th:value="${wh.warehouseLocation}"
+							th:text="${wh.warehouseLocation}"></option>
 					</select>
 				</div>
 				<div class="col-md-2">
-					<label class="form-label">창고상태</label>
+					<label class="form-label mb-0">창고상태</label>
 					<select class="form-control form-control-sm" id="warehouseStatusSelect">
 						<option value='' selected>선택</option>
 						<option value="재고존재">재고존재</option>
@@ -60,20 +45,13 @@
 				<div class="col-md-2">
 					<button class="btn btn-primary btn-sm mt-2" id="searchBtn">검색</button>
 				</div>
-				<!-- 쓸지 안쓸지 모름-->
-				<!-- <div class="col-md-2 d-flex justify-content-end gap-2">
-					<button type="button" class="btn btn-outline-secondary btn-sm" id="saveBtn">저장</button>
-					<button type="button" class="btn btn-outline-secondary btn-sm" id="deleteBtn">삭제</button>
-				</div> -->
 			</div>
-
 			<!-- AG Grid: 창고조회 -->
 			<div class="grid-container mb-4" style="height: 40vh; width: 100%;">
 				<div id="warehouseViewList" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 			</div>
 		</div>
 	</div>
-
 	<!-- 모달: 창고 상세 정보 -->
 	<div class="modal fade" id="warehouseDetailModal" tabindex="-1">
 		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"
@@ -104,8 +82,6 @@
 			</div>
 		</div>
 	</div>
-
-
 </div>
 
 </html>
@@ -113,8 +89,8 @@
 <script th:inline="javascript">
 	let warehouseViewList = /*[[${warehouseViewList}]]*/[];
 	let whlocationList = /*[[${whlocationList}]]*/[];
-
 	let warehouseViewGrid;
+
 	const gridOptions = {
 		headerHeight: 35,
 		rowHeight: 35,
@@ -122,8 +98,8 @@
 		columnDefs: [
 			{ headerName: "창고ID", field: "warehouseId", editable: false },
 			{ headerName: "창고위치", field: "warehouseLocation", editable: false },
-			{ headerName: "창고크기", field: "warehouseScale", editable: false },
-			{ headerName: "입고된제품량", field: "warehouseCurrent", editable: false },
+			{ headerName: "창고크기", field: "warehouseScale", editable: false, cellStyle: {textAlign: 'right'} },
+			{ headerName: "입고된제품량", field: "warehouseCurrent", editable: false, cellStyle: {textAlign: 'right'} },
 			{ headerName: "창고담당자", field: "warehouseManager", editable: false },
 			{
 				headerName: "창고상태",
@@ -194,11 +170,5 @@
 				warehouseViewGrid.setGridOption("rowData", data);
 			})
 	});
-	
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- html 페이지 -->
-<script>
-
-</script>

@@ -9,8 +9,7 @@
          prod_id, 
          prod_name, 
          make_prod_date, 
-         prod_quantity, 
-         safety_stock_amount, 
+         prod_quantity,
          product_type
       from 
         prod
@@ -34,7 +33,7 @@
                        #{prodName},
                        #{makeProdDate},
                        #{prodQuantity},
-                       #{safetyStockAmount},
+                       0,
                        #{productType},
                        'pis02',
                        'co-101')

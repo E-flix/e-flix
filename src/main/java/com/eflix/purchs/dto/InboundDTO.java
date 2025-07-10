@@ -23,7 +23,7 @@ public class InboundDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     Date makeProdDate;
     int prodQuantity;
-    int safetyStockAmount;
+    // int safetyStockAmount;
     String productType;
     String prodInboundStatus;
 
