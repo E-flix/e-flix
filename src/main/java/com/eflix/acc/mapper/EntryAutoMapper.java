@@ -8,7 +8,7 @@ import com.eflix.acc.dto.EntryMasterDTO;
 
 @Mapper
 public interface EntryAutoMapper {
-    List<EntryAutoAllDTO> selectSalaryList(EntryAutoAllDTO param);
+    List<EntryAutoAllDTO> selectSalaryList(String coIdx);
     Integer selectMaxPlusOneEntryNumber(EntryAutoAllDTO param);
     Integer selectMaxPlusOneLineNumber(EntryAutoAllDTO param);
     EntryAutoAllDTO selectEntryMasterByRemarks(EntryAutoAllDTO param);

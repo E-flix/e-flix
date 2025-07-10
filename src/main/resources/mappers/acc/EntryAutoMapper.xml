@@ -4,7 +4,7 @@
   <!-- 급여 데이터 받아오기 -->
   <!-- 기본급, 상여금, 잔업근무_수당, 야간근무_수당, 원천세, 건강보험, 국민연금, 고용보험, 기타공제, 귀속월, 지급월 -->
   <!-- 조건 : 급여상태가 st-03(급여확정), 회사코드 -->
-  <select id="selectSalaryList" resultType="com.eflix.acc.dto.EntryAutoAllDTO" parameterType="com.eflix.acc.dto.EntryAutoAllDTO">
+  <select id="selectSalaryList" resultType="com.eflix.acc.dto.EntryAutoAllDTO" parameterType="String">
     SELECT
       att_month,
       pay_month,
@@ -59,11 +59,11 @@
     VALUES (
       #{entryNumber},
       '일반',
-      ${entryDate},
+      #{entryDate},
       'a2',
       #{creator},
       sysdate,
-      '인건비 자동전표',
+      #{remarks},
       63,
       'a2',
       0,

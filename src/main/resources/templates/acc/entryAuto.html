@@ -9,9 +9,6 @@
 ============================================ -->
 <head>
   <title>자동전표처리</title>
-  <!-- 최신 ag-Grid 테마만 사용: ag-grid.css 제거, ag-theme-alpine.css만 남김 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css" />
-  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
   <style>
     /* ag-Grid 컬럼 최소/최대/기본 너비 조정 */
     #grid-periods, #grid-debits, #grid-credits, #grid-journal {
@@ -156,7 +153,7 @@
         }
       }
     };
-    // 그리드 데이터 설정 함수 (setRowData 사용 금지, rowData 직접 할당)
+    // 그리드 데이터 설정 함수 
     function setGridData(gridName, rowData) {
       const gridOptions = defaultGridOptions[`${gridName}GridOptions`];
       if (gridOptions && gridOptions.api) {
@@ -164,7 +161,7 @@
         gridOptions.api.refreshClientSideRowModel('filter');
       }
     }
-    // 그리드 초기화 (setRowData 사용 금지, rowData 직접 할당)
+    // 그리드 초기화 
     function clearGrids() {
       for (const key of ['periods', 'debits', 'credits', 'journal']) {
         const gridOptions = defaultGridOptions[`${key}GridOptions`];
@@ -225,18 +222,22 @@
     let periodsGrid, debitsGrid, creditsGrid, journalGrid;
     let periodsGridData = [], debitsGridData = [], creditsGridData = [], journalGridData = [];
     document.addEventListener('DOMContentLoaded', function() {
-      // fetch로 데이터 먼저 받아온 뒤, 그리드 동적 생성
-      fetch('/acc/ena/all')
+      // 자동전표 생성 먼저 실행
+      fetch('/acc/ena/auto-salary-entry', { method: 'POST' })
         .then(res => {
-          if (!res.ok) throw new Error('서버 오류: ' + res.status);
-          return res.json();
+          if (!res.ok) throw new Error('전표 생성 실패');
+          return res.text();
         })
+        .then(msg => {
+          // alert(msg); // "자동전표 생성 완료"
+          // 자동전표 생성 후 데이터 조회
+          return fetch('/acc/ena/all');
+        })
+        .then(res => res.json())
         .then(data => {
-          console.log('Fetched data:', data);
-          if (!Array.isArray(data)) data = [];
-          // periods: 귀속월, 지급월, 전표일자만 추출
-          const periodsData = data.map(item => ({ attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate }));
-          periodsGridData = periodsData;
+          // 그리드 데이터 갱신 (기존 데이터 세팅 코드와 동일하게)
+          // 예시:
+          periodsGridData = data.map(item => ({ attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate }));
           debitsGridData = [];
           data.forEach(item => {
             if (item.baseSalary && item.baseSalary !== 0) debitsGridData.push({ item: '기본급', code: '503', account: '급여', amount: item.baseSalary });
@@ -320,118 +321,3 @@
     showDebugPanel('Thymeleaf code0G', code0G);
   </script>
 </div>
-<!-- ===== 디버그 패널 (Thymeleaf + ag-Grid 데이터 실시간 확인) ===== -->
-<div id="debug-panel" style="position:fixed; bottom:0; left:0; right:0; background:#222; color:#fff; z-index:9999; font-size:13px; display:none; box-shadow:0 -2px 8px #0008;">
-  <div style="display:flex; align-items:center; background:#111; padding:4px 10px; border-bottom:1px solid #444;">
-    <b style="margin-right:16px;">디버그 패널</b>
-    <div id="debug-tabs" style="display:flex; gap:8px;">
-      <button class="debug-tab-btn" data-tab="thymeleaf">Thymeleaf 변수</button>
-      <button class="debug-tab-btn" data-tab="periods">periods</button>
-      <button class="debug-tab-btn" data-tab="debits">debits</button>
-      <button class="debug-tab-btn" data-tab="credits">credits</button>
-      <button class="debug-tab-btn" data-tab="journal">journal</button>
-    </div>
-    <button id="debug-close" style="margin-left:auto; background:#333; color:#fff; border:none; padding:2px 10px; border-radius:3px;">닫기</button>
-  </div>
-  <div id="debug-content" style="max-height:30vh; overflow:auto; background:#222; padding:10px; font-family:monospace;"></div>
-</div>
-<button id="debug-open" style="position:fixed; bottom:10px; right:10px; z-index:10000; background:#222; color:#fff; border:none; border-radius:4px; padding:6px 16px; font-size:14px; opacity:0.7;">디버그</button>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script>
-  // 디버그 패널 열기/닫기
-  $(function() {
-    $('#debug-open').on('click', function() {
-      $('#debug-panel').show();
-      $(this).hide();
-      renderDebugTab('thymeleaf');
-    });
-    $('#debug-close').on('click', function() {
-      $('#debug-panel').hide();
-      $('#debug-open').show();
-    });
-    $('.debug-tab-btn').on('click', function() {
-      const tab = $(this).data('tab');
-      renderDebugTab(tab);
-      $('.debug-tab-btn').removeClass('active');
-      $(this).addClass('active');
-    });
-    // 기본 탭 활성화
-    $('.debug-tab-btn[data-tab="thymeleaf"]').addClass('active');
-  });
-  // 디버그 데이터 렌더링 함수
-  function renderDebugTab(tab) {
-    let html = '';
-    if (tab === 'thymeleaf') {
-      html += '<b>code0H</b> = ' + syntaxHighlightJson(window.code0H) + '<br><br>';
-      html += '<b>code0A</b> = ' + syntaxHighlightJson(window.code0A) + '<br><br>';
-      html += '<b>code0G</b> = ' + syntaxHighlightJson(window.code0G) + '<br>';
-    } else if (tab === 'periods') {
-      html = syntaxHighlightJson(periodsGrid?.gridOptions?.rowData || []);
-    } else if (tab === 'debits') {
-      html = syntaxHighlightJson(debitsGrid?.gridOptions?.rowData || []);
-    } else if (tab === 'credits') {
-      html = syntaxHighlightJson(creditsGrid?.gridOptions?.rowData || []);
-    } else if (tab === 'journal') {
-      html = syntaxHighlightJson(journalGrid?.gridOptions?.rowData || []);
-    }
-    $('#debug-content').html(html);
-  }
-  // JSON pretty print + syntax highlight
-  function syntaxHighlightJson(json) {
-    if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
-    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-      let cls = 'json-number';
-      if (/^"/.test(match)) {
-        if (/:$/.test(match)) {
-          cls = 'json-key';
-        } else {
-          cls = 'json-string';
-        }
-      } else if (/true|false/.test(match)) {
-        cls = 'json-boolean';
-      } else if (/null/.test(match)) {
-        cls = 'json-null';
-      }
-      return '<span class="' + cls + '">' + match + '</span>';
-    });
-  }
-  // 디버그 패널 스타일 추가
-  const debugStyle = document.createElement('style');
-  debugStyle.innerHTML = `
-    #debug-panel { border-top:2px solid #444; }
-    #debug-panel .active { background:#444; color:#fff; }
-    #debug-content { white-space:pre; }
-    .json-key { color:#ffb347; }
-    .json-string { color:#b5f7ff; }
-    .json-number { color:#ffd700; }
-    .json-boolean { color:#ffb347; }
-    .json-null { color:#f88; }
-    #debug-open:hover { opacity:1; }
-  `;
-  document.head.appendChild(debugStyle);
-  // ag-Grid 데이터 fetch 후 디버그 패널 갱신
-  function updateDebugPanel() {
-    if ($('#debug-panel').is(':visible')) {
-      const tab = $('.debug-tab-btn.active').data('tab');
-      renderDebugTab(tab);
-    }
-  }
-  // fetch 후마다 패널 갱신
-  [periodsGrid, debitsGrid, creditsGrid, journalGrid] = [undefined, undefined, undefined, undefined];
-  const origCreateGrid = agGrid.createGrid;
-  agGrid.createGrid = function(el, opts) {
-    const grid = origCreateGrid(el, opts);
-    setTimeout(updateDebugPanel, 200);
-    return grid;
-  };
-  // fetch 후마다 패널 갱신
-  const origFetch = window.fetch;
-  window.fetch = function() {
-    return origFetch.apply(this, arguments).then(res => {
-      setTimeout(updateDebugPanel, 200);
-      return res;
-    });
-  };
-</script>
-</html>
