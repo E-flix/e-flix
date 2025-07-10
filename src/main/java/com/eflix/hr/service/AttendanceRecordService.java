@@ -51,7 +51,7 @@ public interface AttendanceRecordService {
     // 0709
     public void addAttd();
     
-    public AttdSummaryDTO selectAttdSummary(String empIdx, String date);
-    public List<AttdDetailDTO> selectAttdDetailList(String empIdx, String date);
+    public AttdSummaryDTO findAttdSummaryByEmpIdxWithDate(String empIdx, String date);
+    public List<AttdDetailDTO> findAttdDetailListByEmpIdxWithDate(String empIdx, String date);
 
 }

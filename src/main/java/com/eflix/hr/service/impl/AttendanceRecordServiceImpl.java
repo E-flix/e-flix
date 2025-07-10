@@ -96,12 +96,12 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
     }
 
     @Override
-    public AttdSummaryDTO selectAttdSummary(String empIdx, String date) {
-        return attendanceRecordMapper.selectAttdSummary(empIdx, date);
+    public AttdSummaryDTO findAttdSummaryByEmpIdxWithDate(String empIdx, String date) {
+        return attendanceRecordMapper.findAttdSummaryByEmpIdxWithDate(empIdx, date);
     }
 
     @Override
-    public List<AttdDetailDTO> selectAttdDetailList(String empIdx, String date) {
-        return attendanceRecordMapper.selectAttdDetailList(empIdx, date);
+    public List<AttdDetailDTO> findAttdDetailListByEmpIdxWithDate(String empIdx, String date) {
+        return attendanceRecordMapper.findAttdDetailListByEmpIdxWithDate(empIdx, date);
     }
 }
