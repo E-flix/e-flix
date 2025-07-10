@@ -156,7 +156,7 @@
     </select>
 
     <!-- V2 -->
-    <select id="selectAttdSummary" parameterType="String" resultType="AttdSummaryDTO">
+    <select id="findAttdSummaryByEmpIdxWithDate" parameterType="String" resultType="AttdSummaryDTO">
         SELECT     
             COUNT(DISTINCT ar.attd_date) AS realDay,     
             MAX(g.grd_annual) AS totalLeaveDay,     
@@ -187,7 +187,7 @@
         GROUP BY ar.emp_idx, e.emp_idx, g.grd_idx
     </select>
 
-    <select id="selectAttdDetailList" parameterType="String" resultType="AttdDetailDTO">
+    <select id="findAttdDetailListByEmpIdxWithDate" parameterType="String" resultType="AttdDetailDTO">
         SELECT
             TO_CHAR(ar.attd_date, 'YYYY-MM-DD') AS attdDate,
             (SELECT hd_name FROM holiday h WHERE h.hd_date = ar.attd_date AND h.co_idx = ar.co_idx) AS holidayType,
@@ -215,6 +215,57 @@
         WHERE ar.emp_idx = #{empIdx}
             AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
         ORDER BY attd_date ASC
+    </select>
+
+    <select id="findAllAttdCount" parameterType="AttdSearchDTO" resultType="int">
+      SELECT COUNT(*)
+        FROM employees e
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+            LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+            LEFT JOIN (
+                SELECT
+                    ar.emp_idx,
+                    COUNT(DISTINCT ar.attd_date) AS totalDay,
+                    COUNT(CASE WHEN ar.attd_status IN ('AR02','AR03','AR04') THEN 1 END) AS workDay,
+                    COUNT(CASE WHEN ar.attd_status = 'AR05' THEN 1 END) AS lateCount,
+                    COUNT(CASE WHEN ar.attd_status = 'AR04' THEN 1 END) AS leaveEarlyCount,
+                    COUNT(CASE WHEN ar.attd_status = 'AR06' THEN 1 END) AS abCount,
+                    MAX(ar.attd_moddate) AS lastModDate
+                FROM attendance_records ar
+                WHERE TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                GROUP BY ar.emp_idx
+            ) attd ON e.emp_idx = attd.emp_idx
+            LEFT JOIN (
+                SELECT
+                    nr.emp_idx,
+                    SUM(nr.nt_hours) AS nightHours
+                FROM night_records nr
+                WHERE TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                GROUP BY nr.emp_idx
+            ) night ON e.emp_idx = night.emp_idx
+            LEFT JOIN (
+                SELECT
+                    lr.emp_idx,
+                    SUM(lr.leave_end_date - lr.leave_start_date + 1) AS usedLeaveDay
+                FROM leave_requests lr
+                WHERE TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                AND lr.approval_status = 'AS02'
+                GROUP BY lr.emp_idx
+            ) lv ON e.emp_idx = lv.emp_idx
+        WHERE e.co_idx = #{coIdx}
+          <if test="empName != null and empName != ''">
+            AND e.emp_name LIKE '%' || #{empName} || '%'
+          </if>
+          <if test="attdStatus != null and attdStatus != ''">
+            AND ar.attd_status = #{attdStatus}
+          </if>
+          <if test="deptIdx != null and deptIdx != ''">
+            AND e.dept_idx = #{deptIdx}
+          </if>
+          <if test="grdIdx != null and grdIdx != ''">
+            AND e.grd_idx = #{grdIdx}
+          </if>
+        ORDER BY e.emp_idx
     </select>
 
     <select id="findAttdMgrListByCoIdxWithDate" parameterType="String" resultType="AttdMgrListDTO">
@@ -265,7 +316,19 @@
                 GROUP BY lr.emp_idx
             ) lv ON e.emp_idx = lv.emp_idx
         WHERE e.co_idx = #{coIdx}
-        ORDER BY e.emp_idx;
+            <if test="empName != null and empName != ''">
+                AND e.emp_name LIKE '%' || #{empName} || '%'
+            </if>
+            <if test="attdStatus != null and attdStatus != ''">
+                AND ar.attd_status = #{attdStatus}
+            </if>
+            <if test="deptIdx != null and deptIdx != ''">
+                AND e.dept_idx = #{deptIdx}
+            </if>
+            <if test="grdIdx != null and grdIdx != ''">
+                AND e.grd_idx = #{grdIdx}
+            </if>
+        ORDER BY e.emp_idx
     </select>
 
     <select id="findAttdRemarkListByEmpIdxWithDate" parameterType="String" resultType="AttdRemarkDTO">
@@ -290,6 +353,6 @@
         WHERE ar.emp_idx = #{empIdx}
             AND ar.attd_status != 'AR02'
             AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
-        ORDER BY ar.attd_date ASC;
+        ORDER BY ar.attd_date ASC
     </select>
 </mapper>
