@@ -4,8 +4,8 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.eflix.purchs.mapper.OutboundMapper">
 <!-- 출하 의뢰서 조회 -->
-<!-- <select id="selectOutboundRequest" resultType="OutboundDTO">
-  SELECT
+<select id="selectOutboundRequest" resultType="OutboundDTO">
+SELECT
     outbound_no,
     write_dt,
     customer_name,
@@ -17,17 +17,17 @@ FROM
     sales_outbound
 ORDER BY 
     outbound_no
-</select> -->
+</select>
 <!-- 출하 의뢰서 조회 상세 -->
-<!-- <select id="OutboundRequestDetail" resultType="OutboundDTO" parameterType="String">
-  SELECT
-    so.outbound_no,
-    sd.item_name,
-    sd.standard,
-    sd.qty,
-    sd.remarks
-FROM soutbound_detail sd JOIN sales_outbound so ON (sd.outbound_no = so.outbound_no)
+<select id="outboundRequestDetail" resultType="OutboundDTO" parameterType="String">
+SELECT
+    sd.outbound_no AS outbound_no,
+    sd.item_name AS item_name,
+    sd.standard AS standard,
+    sd.qty AS qty,
+    sd.remarks AS remarks
+FROM sales_outbound so JOIN soutbound_detail sd ON ( so.outbound_no = sd.outbound_no)
 WHERE
-    so.outbound_no = #{outbound_no}
-</select> -->
+    so.outbound_no = #{outboundNo}
+</select>
 </mapper>

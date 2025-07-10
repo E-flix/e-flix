@@ -74,8 +74,8 @@
 							editable: true,
 							cellEditor: "agSelectCellEditor",
 							width: 100,
-							valueGetter: params => params.data.prodId || "제품ID",
-							cellStyle: params => params.value === "제품ID" ? { color: 'gray' } : { color: 'black' },
+							valueGetter: params => params.data.prodId || "제품ID선택",
+							cellStyle: params => params.value === "제품ID선택" ? { color: 'gray' } : { color: 'black' },
 							cellEditorParams: params => {
 								if (!params.data.fromWhId) return { values: [] };
 								return {
@@ -102,8 +102,8 @@
 							editable: true,
 							cellEditor: "agSelectCellEditor",
 							width: 100,
-							valueGetter: params => params.data.fromWhId || "창고선택",
-							cellStyle: params => params.value === "창고선택" ? { color: 'gray' } : { color: 'black' },
+							valueGetter: params => params.data.fromWhId || "보내는 창고선택",
+							cellStyle: params => params.value === "보내는 창고선택" ? { color: 'gray' } : { color: 'black' },
 							cellEditorParams: gridFromWhList
 						},
 						{
@@ -114,11 +114,11 @@
 							valueGetter: (params) => params.data.fromLocation || "위치"
 						},
 						{
-							headerName: "현재수량",
+							headerName: "제품수량",
 							field: "currentQuantity",
 							editable: false,
 							width: 100,
-							cellStyle: { color: 'blue' , textAlign: 'right'},
+							cellStyle: { color: 'black' , textAlign: 'right'},
 							valueGetter: (params) => params.data.currentQuantity || 0
 						}
 					]
@@ -132,8 +132,8 @@
 							editable: true,
 							cellEditor: "agSelectCellEditor",
 							width: 100,
-							valueGetter: (params) => params.data.toWhId || "창고선택",
-							cellStyle: (params) => params.value === "창고선택" ? { color: 'gray' } : { color: 'black' },
+							valueGetter: (params) => params.data.toWhId || "받는 창고선택",
+							cellStyle: (params) => params.value === "받는 창고선택" ? { color: 'gray' } : { color: 'black' },
 							cellEditorParams: (params) => {
 								return {
 									values: toWhList.filter(wh => wh.toWhId !== params.data.fromWhId).map(wh => wh.toWhId)
@@ -148,11 +148,11 @@
 							valueGetter: (params) => params.data.toLocation || "위치"
 						},
 						{
-							headerName: "남은용량",
+							headerName: "입고가능수량",
 							field: "remainingCapacity",
 							editable: false,
 							width: 100,
-							cellStyle: { color: 'green', textAlign: 'right' },
+							cellStyle: { color: 'black', textAlign: 'right' },
 							valueGetter: (params) => params.data.remainingCapacity || 0
 						}
 					]
