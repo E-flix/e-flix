@@ -16,6 +16,9 @@ public class AttdSearchDTO extends PagingDTO {
     private String attdStatus;
     private String coIdx;
 
+    private String deptUpIdx;
+    private String deptDownIdx;
+
     public int getOffset() {
         return (getPage() - 1) * getPageUnit();
     }

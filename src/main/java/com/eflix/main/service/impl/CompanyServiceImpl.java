@@ -1,5 +1,6 @@
 package com.eflix.main.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,5 +57,10 @@ public class CompanyServiceImpl implements CompanyService {
     // 0703
     public SubscriptionDTO findSubscriptionByCoIdx(String coIdx) {
         return companyMapper.findSubscriptionByCoIdx(coIdx);
+    }
+
+    @Override
+    public Date findCoRegdateByCoIdx(String coIdx) {
+        return companyMapper.findCoRegdateByCoIdx(coIdx);
     }
 }

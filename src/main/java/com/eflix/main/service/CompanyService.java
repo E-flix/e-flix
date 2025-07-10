@@ -1,5 +1,6 @@
 package com.eflix.main.service;
 
+import java.util.Date;
 import java.util.List;
 
 import com.eflix.main.dto.CompanyDTO;
@@ -57,4 +58,7 @@ public interface CompanyService {
 
     // 0703
     public SubscriptionDTO findSubscriptionByCoIdx(String coIdx);
+
+    // 0710
+    public Date findCoRegdateByCoIdx(String coIdx);
 }

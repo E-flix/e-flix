@@ -218,7 +218,7 @@
     </select>
 
     <select id="findAllAttdCount" parameterType="AttdSearchDTO" resultType="int">
-      SELECT COUNT(*)
+        SELECT COUNT(*)
         FROM employees e
             LEFT JOIN departments d ON e.dept_idx = d.dept_idx
             LEFT JOIN grade g ON e.grd_idx = g.grd_idx
@@ -232,39 +232,71 @@
                     COUNT(CASE WHEN ar.attd_status = 'AR06' THEN 1 END) AS abCount,
                     MAX(ar.attd_moddate) AS lastModDate
                 FROM attendance_records ar
-                WHERE TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                    <when test="date != null and date != ''">
+                        TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                    </when>
+                    <otherwise>
+                        TO_CHAR(ar.attd_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                    </otherwise>
+                </choose>
+                </where>
                 GROUP BY ar.emp_idx
-            ) attd ON e.emp_idx = attd.emp_idx
+                ) attd ON e.emp_idx = attd.emp_idx
             LEFT JOIN (
                 SELECT
                     nr.emp_idx,
                     SUM(nr.nt_hours) AS nightHours
                 FROM night_records nr
-                WHERE TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                        <when test="date != null and date != ''">
+                            TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                        </when>
+                        <otherwise>
+                            TO_CHAR(nr.nt_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                        </otherwise>
+                    </choose>
+                </where>
                 GROUP BY nr.emp_idx
-            ) night ON e.emp_idx = night.emp_idx
+                ) night ON e.emp_idx = night.emp_idx
             LEFT JOIN (
                 SELECT
                     lr.emp_idx,
                     SUM(lr.leave_end_date - lr.leave_start_date + 1) AS usedLeaveDay
                 FROM leave_requests lr
-                WHERE TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                        <when test="date != null and date != ''">
+                            TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                        </when>
+                        <otherwise>
+                            TO_CHAR(lr.leave_start_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                        </otherwise>
+                    </choose>
+                </where>
                 AND lr.approval_status = 'AS02'
                 GROUP BY lr.emp_idx
             ) lv ON e.emp_idx = lv.emp_idx
         WHERE e.co_idx = #{coIdx}
-          <if test="empName != null and empName != ''">
-            AND e.emp_name LIKE '%' || #{empName} || '%'
-          </if>
-          <if test="attdStatus != null and attdStatus != ''">
-            AND ar.attd_status = #{attdStatus}
-          </if>
-          <if test="deptIdx != null and deptIdx != ''">
-            AND e.dept_idx = #{deptIdx}
-          </if>
-          <if test="grdIdx != null and grdIdx != ''">
-            AND e.grd_idx = #{grdIdx}
-          </if>
+            <if test="empName != null and empName != ''">
+                AND e.emp_name LIKE '%' || #{empName} || '%'
+            </if>
+            <if test="attdStatus != null and attdStatus != ''">
+                AND ar.attd_status = #{attdStatus}
+            </if>
+            <if test="deptUpIdx != null and deptUpIdx != ''">
+                    <if test="deptDownIdx != null and deptDownIdx != ''">
+                        AND e.dept_idx = #{deptDownIdx}
+                    </if>
+                    <if test="deptDownIdx == null or deptDownIdx == ''">
+                        AND e.dept_idx = #{deptUpIdx}
+                    </if>
+                </if>
+            <if test="grdIdx != null and grdIdx != ''">
+                AND e.grd_idx = #{grdIdx}
+            </if>
         ORDER BY e.emp_idx
     </select>
 
@@ -295,23 +327,50 @@
                     COUNT(CASE WHEN ar.attd_status = 'AR06' THEN 1 END) AS abCount,
                     MAX(ar.attd_moddate) AS lastModDate
                 FROM attendance_records ar
-                WHERE TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                    <when test="date != null and date != ''">
+                        TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                    </when>
+                    <otherwise>
+                        TO_CHAR(ar.attd_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                    </otherwise>
+                </choose>
+                </where>
                 GROUP BY ar.emp_idx
-            ) attd ON e.emp_idx = attd.emp_idx
+                ) attd ON e.emp_idx = attd.emp_idx
             LEFT JOIN (
                 SELECT
                     nr.emp_idx,
                     SUM(nr.nt_hours) AS nightHours
                 FROM night_records nr
-                WHERE TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                        <when test="date != null and date != ''">
+                            TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                        </when>
+                        <otherwise>
+                            TO_CHAR(nr.nt_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                        </otherwise>
+                    </choose>
+                </where>
                 GROUP BY nr.emp_idx
-            ) night ON e.emp_idx = night.emp_idx
+                ) night ON e.emp_idx = night.emp_idx
             LEFT JOIN (
                 SELECT
                     lr.emp_idx,
                     SUM(lr.leave_end_date - lr.leave_start_date + 1) AS usedLeaveDay
                 FROM leave_requests lr
-                WHERE TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                        <when test="date != null and date != ''">
+                            TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                        </when>
+                        <otherwise>
+                            TO_CHAR(lr.leave_start_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                        </otherwise>
+                    </choose>
+                </where>
                 AND lr.approval_status = 'AS02'
                 GROUP BY lr.emp_idx
             ) lv ON e.emp_idx = lv.emp_idx
@@ -322,9 +381,14 @@
             <if test="attdStatus != null and attdStatus != ''">
                 AND ar.attd_status = #{attdStatus}
             </if>
-            <if test="deptIdx != null and deptIdx != ''">
-                AND e.dept_idx = #{deptIdx}
-            </if>
+            <if test="deptUpIdx != null and deptUpIdx != ''">
+                    <if test="deptDownIdx != null and deptDownIdx != ''">
+                        AND e.dept_idx = #{deptDownIdx}
+                    </if>
+                    <if test="deptDownIdx == null or deptDownIdx == ''">
+                        AND e.dept_idx = #{deptUpIdx}
+                    </if>
+                </if>
             <if test="grdIdx != null and grdIdx != ''">
                 AND e.grd_idx = #{grdIdx}
             </if>
@@ -335,6 +399,8 @@
         SELECT
             ar.attd_idx      AS attdIdx,
             ar.emp_idx       AS empIdx,
+            TO_CHAR(ar.attd_start, 'HH24:MI') AS startTime,
+            TO_CHAR(ar.attd_end, 'HH24:MI') AS endTime,
             TO_CHAR(ar.attd_date, 'YYYY-MM-DD') AS attdDate,
             cc.common_code_name AS attdStatus,
             CASE

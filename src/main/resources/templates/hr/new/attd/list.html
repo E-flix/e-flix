@@ -178,7 +178,7 @@
                                     <td>${r.attdDate||''}</td>
                                     <td>${r.holidayType||''}</td>
                                     <td>${r.attdStatus||''}</td>
-                                    <td>${r.scheduleTime||''}</td>
+                                    <td>${formatHourMinuteToTimeStr(r.scheduleTime)||''}</td>
                                     <td>${r.startTime||''}</td>
                                     <td>${r.endTime||''}</td>
                                     <td>${r.nightTime||''}</td>
@@ -193,6 +193,14 @@
 
                     }
                 });
+            }
+
+            function formatHourMinuteToTimeStr(timeStr) {
+                if (!timeStr) return '';
+                const [h, m] = timeStr.split(':');
+                let result = parseInt(h, 10) + "시간";
+                if (m !== '00') result += " " + parseInt(m, 10) + "분";
+                return result;
             }
         })
     </script>

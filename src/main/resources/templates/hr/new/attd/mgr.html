@@ -41,64 +41,38 @@
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <label class="form-label fw-semibold">근무상태</label>
-                                <select class="form-select" id="searchEmpType">
+                                <select class="form-select" id="searchEmpStatus">
                                     <option value="">전체</option>
-                                    <option value="정상">정상근무</option>
-                                    <option value="지각">지각</option>
-                                    <option value="조퇴">조퇴</option>
-                                    <option value="결근">결근</option>
                                 </select>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <label class="form-label fw-semibold">부서</label>
                                 <select name="deptUpIdx" class="form-select" id="searchDeptUpIdx">
                                     <option value="">전체</option>
-                                    <option value="본사">본사</option>
                                 </select>
                             </div>
                             <div class="col-md-6 col-lg-3">
                                 <label class="form-label fw-semibold">상세 부서</label>
                                 <select name="deptIdx" class="form-select" id="searchDeptDownIdx">
                                     <option value="">전체</option>
-                                    <option value="인사부">인사부</option>
-                                    <option value="영업부">영업부</option>
                                 </select>
                             </div>
                             <div class="col-md-6 col-lg-2">
                                 <label class="form-label fw-semibold">년도</label>
                                 <select class="form-select" id="searchAttdYear">
-                                    <option value="">선택</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2025">2025</option>
+                                    <option value="">전체</option>
                                 </select>
                             </div>
                             <div class="col-md-6 col-lg-2">
                                 <label class="form-label fw-semibold">월</label>
                                 <select class="form-select" id="searchAttdMonth">
-                                    <option value="">선택</option>
-                                    <option value="1">1월</option>
-                                    <option value="2">2월</option>
-                                    <option value="3">3월</option>
-                                    <option value="4">4월</option>
-                                    <option value="5">5월</option>
-                                    <option value="6">6월</option>
-                                    <option value="7">7월</option>
-                                    <option value="8">8월</option>
-                                    <option value="9">9월</option>
-                                    <option value="10">10월</option>
-                                    <option value="11">11월</option>
-                                    <option value="12">12월</option>
+                                    <option value="">전체</option>
                                 </select>
                             </div>
                             <div class="col-md-6 col-lg-2">
                                 <label class="form-label fw-semibold">직책</label>
                                 <select class="form-select" id="searchGradeIdx">
                                     <option value="">전체</option>
-                                    <option value="사원">사원</option>
-                                    <option value="대리">대리</option>
-                                    <option value="과장">과장</option>
-                                    <option value="차장">차장</option>
-                                    <option value="부장">부장</option>
                                 </select>
                             </div>
                             <div class="col-md-6 col-lg-4 d-flex align-items-end gap-2">
@@ -180,274 +154,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="empListBody">
-                                    <tr data-bs-toggle="collapse" data-bs-target="#detailRow1" aria-expanded="false"
-                                        class="cursor-pointer">
-                                        <td class="text-center">EMP001</td>
-                                        <td class="text-center fw-semibold">홍길동</td>
-                                        <td class="text-center">인사부</td>
-                                        <td class="text-center">과장</td>
-                                        <td class="text-center">20일</td>
-                                        <td class="text-center"><span class="badge bg-success">19일</span></td>
-                                        <td class="text-center">2시간</td>
-                                        <td class="text-center"><span class="badge bg-warning">1회</span></td>
-                                        <td class="text-center">0회</td>
-                                        <td class="text-center">0회</td>
-                                        <td class="text-center">1일</td>
-                                        <td class="text-center text-muted">2025-06-15</td>
-                                    </tr>
-                                    <tr class="collapse" id="detailRow1">
-                                        <td colspan="12" class="p-0">
-                                            <div class="border-top bg-light p-4">
-                                                <div class="row g-4">
-                                                    <div class="col-md-4">
-                                                        <div class="card border-0 shadow-sm">
-                                                            <div class="card-header bg-primary text-white">
-                                                                <h6 class="card-title mb-0">
-                                                                    <i class="bi bi-person-circle me-2"></i>사원 정보
-                                                                </h6>
-                                                            </div>
-                                                            <div class="card-body">
-                                                                <div class="row g-2">
-                                                                    <div class="col-12">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <span class="text-muted">사원명:</span>
-                                                                            <span class="fw-semibold">홍길동</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-12">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <span class="text-muted">년월:</span>
-                                                                            <span class="fw-semibold">2024년 06월</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-12">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <span class="text-muted">부서명:</span>
-                                                                            <span class="fw-semibold">본사 → 인사부</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-12">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <span class="text-muted">정규 근무일수:</span>
-                                                                            <span class="fw-semibold">20일</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-12">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <span class="text-muted">직책:</span>
-                                                                            <span class="fw-semibold">과장</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-8">
-                                                        <div class="card border-0 shadow-sm">
-                                                            <div
-                                                                class="card-header bg-white d-flex justify-content-between align-items-center">
-                                                                <h6 class="card-title mb-0">
-                                                                    <i class="bi bi-calendar-check me-2"></i>상세 근태 현황
-                                                                </h6>
-                                                                <button class="btn btn-success btn-sm"
-                                                                    data-bs-toggle="modal" data-bs-target="#editModal">
-                                                                    <i class="bi bi-pencil"></i> 수정
-                                                                </button>
-                                                            </div>
-                                                            <div class="card-body p-0">
-                                                                <div class="table-responsive">
-                                                                    <table class="table table-sm mb-0">
-                                                                        <thead class="table-light">
-                                                                            <tr>
-                                                                                <th class="text-center">날짜</th>
-                                                                                <th class="text-center">근무상태</th>
-                                                                                <th class="text-center">출근시간</th>
-                                                                                <th class="text-center">퇴근시간</th>
-                                                                                <th class="text-center">총 근무시간</th>
-                                                                                <th class="text-center">특이사항</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td class="text-center">06-01</td>
-                                                                                <td class="text-center">
-                                                                                    <span
-                                                                                        class="badge bg-success">정상근무</span>
-                                                                                </td>
-                                                                                <td class="text-center">9:00</td>
-                                                                                <td class="text-center">18:00</td>
-                                                                                <td class="text-center">9시간</td>
-                                                                                <td class="text-center text-muted">-
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="text-center">06-02</td>
-                                                                                <td class="text-center">
-                                                                                    <span
-                                                                                        class="badge bg-warning">지각</span>
-                                                                                </td>
-                                                                                <td class="text-center">9:45</td>
-                                                                                <td class="text-center">18:00</td>
-                                                                                <td class="text-center">8시간 15분</td>
-                                                                                <td class="text-center text-warning">지각
-                                                                                    1회</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="text-center">06-03</td>
-                                                                                <td class="text-center">
-                                                                                    <span
-                                                                                        class="badge bg-success">정상근무</span>
-                                                                                </td>
-                                                                                <td class="text-center">8:55</td>
-                                                                                <td class="text-center">18:00</td>
-                                                                                <td class="text-center">9시간 5분</td>
-                                                                                <td class="text-center text-muted">-
-                                                                                </td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="d-flex justify-content-end mt-3">
-                                                            <button class="btn btn-outline-secondary btn-sm"
-                                                                data-bs-toggle="collapse" data-bs-target="#detailRow1">
-                                                                <i class="bi bi-chevron-up"></i> 닫기
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr data-bs-toggle="collapse" data-bs-target="#detailRow2" aria-expanded="false"
-                                        class="cursor-pointer">
-                                        <td class="text-center">EMP002</td>
-                                        <td class="text-center fw-semibold">홍윤희</td>
-                                        <td class="text-center">영업부</td>
-                                        <td class="text-center">대리</td>
-                                        <td class="text-center">20일</td>
-                                        <td class="text-center"><span class="badge bg-success">20일</span></td>
-                                        <td class="text-center">1시간</td>
-                                        <td class="text-center">0회</td>
-                                        <td class="text-center">0회</td>
-                                        <td class="text-center">0회</td>
-                                        <td class="text-center">0일</td>
-                                        <td class="text-center text-muted">-</td>
-                                    </tr>
-                                    <tr class="collapse" id="detailRow2">
-                                        <td colspan="12" class="p-0">
-                                            <div class="border-top bg-light p-4">
-                                                <div class="row g-4">
-                                                    <div class="col-md-4">
-                                                        <div class="card border-0 shadow-sm">
-                                                            <div class="card-header bg-primary text-white">
-                                                                <h6 class="card-title mb-0">
-                                                                    <i class="bi bi-person-circle me-2"></i>사원 정보
-                                                                </h6>
-                                                            </div>
-                                                            <div class="card-body">
-                                                                <div class="row g-2">
-                                                                    <div class="col-12">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <span class="text-muted">사원명:</span>
-                                                                            <span class="fw-semibold">홍윤희</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-12">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <span class="text-muted">년월:</span>
-                                                                            <span class="fw-semibold">2024년 06월</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-12">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <span class="text-muted">부서명:</span>
-                                                                            <span class="fw-semibold">본사 → 영업부</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-12">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <span class="text-muted">정규 근무일수:</span>
-                                                                            <span class="fw-semibold">20일</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-12">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <span class="text-muted">직책:</span>
-                                                                            <span class="fw-semibold">대리</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-8">
-                                                        <div class="card border-0 shadow-sm">
-                                                            <div
-                                                                class="card-header bg-white d-flex justify-content-between align-items-center">
-                                                                <h6 class="card-title mb-0">
-                                                                    <i class="bi bi-calendar-check me-2"></i>상세 근태 현황
-                                                                </h6>
-                                                                <button class="btn btn-success btn-sm"
-                                                                    data-bs-toggle="modal" data-bs-target="#editModal">
-                                                                    <i class="bi bi-pencil"></i> 수정
-                                                                </button>
-                                                            </div>
-                                                            <div class="card-body p-0">
-                                                                <div class="table-responsive">
-                                                                    <table class="table table-sm mb-0">
-                                                                        <thead class="table-light">
-                                                                            <tr>
-                                                                                <th class="text-center">날짜</th>
-                                                                                <th class="text-center">근무상태</th>
-                                                                                <th class="text-center">출근시간</th>
-                                                                                <th class="text-center">퇴근시간</th>
-                                                                                <th class="text-center">총 근무시간</th>
-                                                                                <th class="text-center">특이사항</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <td class="text-center">06-01</td>
-                                                                                <td class="text-center">
-                                                                                    <span
-                                                                                        class="badge bg-success">정상근무</span>
-                                                                                </td>
-                                                                                <td class="text-center">8:50</td>
-                                                                                <td class="text-center">18:00</td>
-                                                                                <td class="text-center">9시간 10분</td>
-                                                                                <td class="text-center text-muted">-
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="text-center">06-02</td>
-                                                                                <td class="text-center">
-                                                                                    <span
-                                                                                        class="badge bg-success">정상근무</span>
-                                                                                </td>
-                                                                                <td class="text-center">9:00</td>
-                                                                                <td class="text-center">18:00</td>
-                                                                                <td class="text-center">9시간</td>
-                                                                                <td class="text-center text-muted">-
-                                                                                </td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="d-flex justify-content-end mt-3">
-                                                            <button class="btn btn-outline-secondary btn-sm"
-                                                                data-bs-toggle="collapse" data-bs-target="#detailRow2">
-                                                                <i class="bi bi-chevron-up"></i> 닫기
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
+
                                 </tbody>
                             </table>
                         </div>
@@ -457,20 +164,7 @@
                 <!-- 페이징 -->
                 <div class="d-flex justify-content-center mt-4">
                     <nav aria-label="Page navigation">
-                        <ul class="pagination">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
+                        <ul class="pagination" id="paginationArea">
                         </ul>
                     </nav>
                 </div>
@@ -552,6 +246,8 @@
 
             // 1) 최초 로딩, 검색은 항상 1페이지부터
             loadEmpList(1);
+            loadYear();
+            loadSearchSelect();
 
             $("#searchBtn").on("click", function () {
                 loadEmpList(1);
@@ -570,25 +266,80 @@
                 const target = $(this).attr("data-bs-target");
                 currentDetailEmpIdx = $(this).data("emp-idx");
 
-                // 다른 열려있는 건 닫고
+                // 1. 다른 row 닫기 (DOM상에 있는 것만)
                 $("#empListBody .collapse").not(target).collapse("hide");
-                // 자신 토글
-                $(target).collapse("toggle");
 
-                loadEmpDetail(currentDetailEmpIdx);
+                // 2. 만약 이미 상세 row가 DOM에 있다면 토글(즉, 숨김/보임 전환)
+                if ($(target).length) {
+                    $(target).collapse('toggle');
+                } else {
+                    // 3. 상세 정보 요청 및 렌더링 (AJAX)
+                    loadEmpDetail(currentDetailEmpIdx);
+                    // 상세 데이터 렌더링 후, 직접 show 처리 (아래 renderEmpDetail 참고)
+                }
             });
+
+            $("#searchDeptUpIdx").on("change", function() {
+                const deptUpIdx = $(this).val();
+                loadDownDept(deptUpIdx);
+            });
+
+            $("#searchAttdYear").on("change", function() {
+                const year = $(this).val();
+                loadMonth(year);
+            });
+
+            $('#editModal').on('show.bs.modal', function(event) {
+                const btn = $(event.relatedTarget); // 클릭한 버튼
+                const empIdx = btn.data('emp-idx');
+
+                // 선택 연월 처리 (검색 조건에서 가져오거나 디폴트)
+                const year = $("#searchAttdYear").val() || new Date().getFullYear();
+                const month = $("#searchAttdMonth").val().padStart(2, "0") || String(new Date().getMonth() + 1).padStart(2, "0");
+
+                // AJAX로 상세 데이터 요청
+                $.ajax({
+                    type: 'GET',
+                    url: `/hr/attd/mgr/detail?empIdx=${empIdx}&year=${year}&month=${month}`,
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            renderEditModalTable(res.body);
+                        } else {
+                            Swal.fire("실패", res.body, "error");
+                        }
+                    },
+                    error: function() {
+                        Swal.fire("오류", "데이터 로딩 오류", "error");
+                    }
+                });
+            });
+
+            function renderEditModalTable(attds) {
+                const $tbody = $("#editTable tbody").empty();
+                attds.forEach(row => {
+                    $tbody.append(`
+                        <tr>
+                            <td>${row.attdDate || '-'}</td>
+                            <td ondblclick="editCell(this)" class="cursor-pointer">${row.attdStatus || '-'}</td>
+                            <td ondblclick="editCell(this)" class="cursor-pointer">${row.startTime || '-'}</td>
+                            <td ondblclick="editCell(this)" class="cursor-pointer">${row.endTime || '-'}</td>
+                            <td ondblclick="editCell(this)" class="cursor-pointer">${row.totalTime || '-'}</td>
+                        </tr>
+                    `);
+                });
+            }
 
             function loadEmpList(page = 1) {
                 currentPage = page;
 
                 const searchData = {
                     empName: $('input[name="SearchEmpName"]').val(),  // id 대신 name으로 가져오도록
-                    empType: $("#searchEmpType").val(),
+                    empStatus: $("#searchEmpStatus").val(),
                     deptUpIdx: $("#searchDeptUpIdx").val(),
                     deptDownIdx: $("#searchDeptDownIdx").val(),
                     gradeIdx: $("#searchGradeIdx").val(),
-                    attdYear: $("#searchAttdYear").val(),
-                    attdMonth: $("#searchAttdMonth").val(),
+                    dateYear: $("#searchAttdYear").val(),
+                    dateMonth: $("#searchAttdMonth").val(),
                 };
 
                 const queryString = $.param(searchData);
@@ -640,81 +391,82 @@
 
                 let html = `
         <tr class="collapse bg-light" id="${rowId}">
-          <td colspan="12" class="p-0">
+        <td colspan="12" class="p-0">
             <div class="border-top bg-light p-4">
-              <div class="row g-4">
-                <div class="col-md-4">
-                  <!-- 사원 정보 카드 (필요시 동적으로 채워도 됩니다) -->
-                </div>
-                <div class="col-md-8">
-                  <div class="card border-0 shadow-sm">
+            <div class="row g-4">
+                <div class="col-md">
+                <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                      <h6 class="card-title mb-0"><i class="bi bi-calendar-check me-2"></i>상세 근태 현황</h6>
-                      <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editModal">
+                    <h6 class="card-title mb-0"><i class="bi bi-calendar-check me-2"></i>상세 근태 현황</h6>
+                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editModal" data-attd-indx="${currentDetailEmpIdx}">
                         <i class="bi bi-pencil"></i> 수정
-                      </button>
+                    </button>
                     </div>
                     <div class="card-body p-0">
-                      <div class="table-responsive">
+                    <div class="table-responsive">
                         <table class="table table-sm mb-0 text-center">
-                          <thead class="table-light">
+                        <thead class="table-light">
                             <tr>
-                              <th>날짜</th><th>근무상태</th><th>출근시간</th><th>퇴근시간</th>
-                              <th>총 근무시간</th><th>특이사항</th>
+                            <th>날짜</th><th>근무상태</th><th>출근시간</th><th>퇴근시간</th>
+                            <th>총 근무시간</th><th>특이사항</th>
                             </tr>
-                          </thead>
-                          <tbody>`;
+                        </thead>
+                        <tbody>`;
+
+                let detailRow = "";
                 attds.forEach(item => {
-                    html += `
+                    detailRow += `
             <tr>
-              <td>${item.date}</td>
-              <td>${item.status}</td>
-              <td>${item.start}</td>
-              <td>${item.end}</td>
-              <td>${item.totalTime}</td>
-              <td>${item.note || '-'}</td>
+            <td>${item.attdDate || '-'}</td>
+            <td>${item.attdStatus || '-'}</td>
+            <td>${item.startTime || '-'}</td>
+            <td>${item.endTime || '-'}</td>
+            <td>${item.totalTime || '-'}</td>
+            <td>${item.abReason || '-'}</td>
             </tr>`;
                 });
+                html += detailRow;
                 html += `
-                          </tbody>
+                        </tbody>
                         </table>
-                      </div>
-                      <div class="d-flex justify-content-end mt-3">
-                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#${rowId}">
-                          <i class="bi bi-chevron-up"></i> 닫기
-                        </button>
-                      </div>
                     </div>
-                  </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#${rowId}">
+                        <i class="bi bi-chevron-up"></i> 닫기
+                        </button>
+                    </div>
+                    </div>
                 </div>
-              </div>
+                </div>
             </div>
-          </td>
+            </div>
+        </td>
         </tr>`;
-
-                // 해당 사원 행 바로 아래에 삽입
                 $(`tr.tr-item[data-emp-idx="${currentDetailEmpIdx}"]`).after(html);
+
+                // 바로 show (Bootstrap collapse 애니메이션 적용)
+                $(`#detailRow-${currentDetailEmpIdx}`).collapse('show');
             }
 
             function renderEmpListBody(emps) {
                 const $body = $("#empListBody").empty();
                 emps.forEach((item, i) => {
                     $body.append(`
-            <tr class="tr-item" data-bs-toggle="collapse" data-bs-target="#detailRow-${item.empIdx}"
-                style="cursor:pointer;" data-emp-idx="${item.empIdx}">
-              <td>${i + 1}</td>
-              <td>${item.empName}</td>
-              <td>${item.deptName}</td>
-              <td>${item.grdName}</td>
-              <td>${item.totalDay}</td>
-              <td>${item.workDay}</td>
-              <td>${item.nightHours}</td>
-              <td>${item.lateCount}</td>
-              <td>${item.leaveEarlyCount}</td>
-              <td>${item.abCount}</td>
-              <td>${item.usedLeaveDay}</td>
-              <td>${item.lastModDate || '-'}</td>
-            </tr>`);
+                    <tr class="tr-item" data-bs-toggle="collapse" data-bs-target="#detailRow-${item.empIdx}"
+                        style="cursor:pointer;" data-emp-idx="${item.empIdx}">
+                    <td>${i + 1}</td>
+                    <td>${item.empName}</td>
+                    <td>${item.deptName}</td>
+                    <td>${item.grdName}</td>
+                    <td>${item.totalDay}</td>
+                    <td>${item.workDay}</td>
+                    <td>${item.nightHours}</td>
+                    <td>${item.lateCount}</td>
+                    <td>${item.leaveEarlyCount}</td>
+                    <td>${item.abCount}</td>
+                    <td>${item.usedLeaveDay}</td>
+                    <td>${item.lastModDate || '-'}</td>
+                    </tr>`);
                 });
             }
 
@@ -743,14 +495,16 @@
           </li>`);
             }
 
-            function loadUpDept() {
+            function loadSearchSelect(selectedUpValue, selectedDownValue) {
                 $.ajax({
-                    type: "",
-                    url: "",
+                    type: "GET",
+                    url: "/hr/attd/mgr/searchOptions",
                     success: function (res) {
                         if (res.head.res_code === "200") {
                             const data = res.body;
-
+                            renderStatus(data.status);
+                            renderUpDept(data.depts);
+                            renderGrade(data.grades);
                         } else {
                             Swal.fire("실패", res.body, "error");
                         }
@@ -762,14 +516,66 @@
                 });
             }
 
-            function loadYears() {
+            function renderStatus(status) {
+                const $searchEmpStatus = $("#searchEmpStatus");
+                $.each(status, function (i, item) {
+                    $searchEmpStatus.append(`<option value="${item.commonCode}">${item.commonCodeName}</option>`);
+                });
+            }
+
+            function renderGrade(grades) {
+                const $searchGradeIdx = $("#searchGradeIdx");
+                $.each(grades, function(i, item) {
+                    $searchGradeIdx.append(`<option value="${item.grdIdx}">${item.grdName}</option>`);
+                });
+            }
+
+            function loadDownDept(deptUpIdx) {
                 $.ajax({
-                    type: "",
-                    url: "",
+                        type: "GET",
+                        url: `/hr/dept/list/down?deptUpIdx=${deptUpIdx}`,
+                        success: function (res) {
+                            if (res.head.res_code === "200") {
+                                const data = res.body;
+
+                                renderDownDept(data);
+                            } else {
+                                Swal.fire("실패", res.body, "error");
+                            }
+                        },
+                        error: function (xhr, status, err) {
+                            console.error(err);
+                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                        }
+                    });
+            }
+
+            function renderUpDept(upDept) {
+                const $searchDeptUpIdx = $("#searchDeptUpIdx");
+                $.each(upDept, function (i, item) {
+                    $searchDeptUpIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
+                });
+            }
+
+            function renderDownDept(downDept) {
+                const $searchDeptDownIdx = $("#searchDeptDownIdx");
+                $.each(downDept, function (i, item) {
+                    $searchDeptDownIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`)
+                });
+            }
+
+            function loadYear() {
+                $.ajax({
+                    type: "GET",
+                    url: "/hr/attd/mgr/year",
                     success: function (res) {
                         if (res.head.res_code === "200") {
                             const data = res.body;
 
+                            const $searchAttdYear = $("#searchAttdYear");
+                            $.each(data, function(i, item) {
+                                $searchAttdYear.append(`<option value="${item}">${item}</option>`)
+                            });
                         } else {
                             Swal.fire("실패", res.body, "error");
                         }
@@ -781,14 +587,18 @@
                 });
             }
 
-            function loadMonth() {
+            function loadMonth(year) {
                 $.ajax({
-                    type: "",
-                    url: "",
+                    type: "GET",
+                    url: `/hr/attd/mgr/month?year=${year}`,
                     success: function (res) {
                         if (res.head.res_code === "200") {
                             const data = res.body;
 
+                            const $searchAttdMonth = $("#searchAttdMonth");
+                            $.each(data, function(i, item) {
+                                $searchAttdMonth.append(`<option value="${item > 10 ? item : '0' + item}">${item}</option>`)
+                            });
                         } else {
                             Swal.fire("실패", res.body, "error");
                         }
