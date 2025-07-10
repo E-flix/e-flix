@@ -503,24 +503,12 @@ $(function () {
     });
   }
 
+
   /*──────────────── 주문서 헤더 업데이트 함수 ────────────────*/
   function updateOrderHeader(quotation) {
     console.log('📝 헤더 정보 업데이트 시작');
     
     try {
-      // 헤더 그리드에서 현재 주문서 행 찾기
-      let targetNode = null;
-      headerGridApi.forEachNode(node => {
-        if (node.data.orderNo === currentOrder.orderNo) {
-          targetNode = node;
-          return false; // 찾으면 중단
-        }
-      });
-      
-      if (!targetNode) {
-        throw new Error('대상 주문서 행을 찾을 수 없습니다.');
-      }
-      
       // 매핑할 데이터 준비
       const customerCd = quotation.customerCd || '';
       const customerNm = quotation.customerName || quotation.customerNm || '';
@@ -548,17 +536,7 @@ $(function () {
         throw new Error('견적서에 거래처 정보가 없습니다.');
       }
       
-      // AG-Grid 노드 데이터 업데이트
-      targetNode.setDataValue('customerCd', customerCd);
-      targetNode.setDataValue('customerNm', customerNm);
-      targetNode.setDataValue('representativeNm', representativeNm);
-      targetNode.setDataValue('phoneNo', phoneNo);
-      targetNode.setDataValue('salesEmpCd', salesEmpCd);
-      targetNode.setDataValue('discountRate', discountRate);
-      targetNode.setDataValue('paymentTerms', paymentTerms);
-      targetNode.setDataValue('orderWriter', orderWriter);
-      
-      // ⭐ 중요: 전역 currentOrder 상태 완전 동기화
+      // ⭐ 전역 currentOrder 상태 업데이트 (우선)
       currentOrder = {
         ...currentOrder,
         customerCd: customerCd,
@@ -571,8 +549,73 @@ $(function () {
         orderWriter: orderWriter
       };
       
-      console.log('✅ 헤더 정보 업데이트 완료');
       console.log('📝 업데이트된 currentOrder:', currentOrder);
+      
+      // ⭐ 방법 1: 전체 헤더 데이터 다시 로드
+      const allRowData = [];
+      headerGridApi.forEachNode(node => {
+        if (node.data.orderNo === currentOrder.orderNo) {
+          // 현재 주문서 행 업데이트
+          allRowData.push({
+            ...node.data,
+            customerCd: customerCd,
+            customerNm: customerNm,
+            representativeNm: representativeNm,
+            phoneNo: phoneNo,
+            salesEmpCd: salesEmpCd,
+            discountRate: discountRate,
+            paymentTerms: paymentTerms,
+            orderWriter: orderWriter
+          });
+        } else {
+          allRowData.push(node.data);
+        }
+      });
+      
+      // AG-Grid 데이터 재설정
+      safeSetRowData(headerGridApi, allRowData);
+      
+      // ⭐ 방법 2: 트랜잭션으로 업데이트 (백업)
+      try {
+        let targetNode = null;
+        headerGridApi.forEachNode(node => {
+          if (node.data.orderNo === currentOrder.orderNo) {
+            targetNode = node;
+            return false;
+          }
+        });
+        
+        if (targetNode) {
+          // 개별 필드 업데이트
+          targetNode.setDataValue('customerCd', customerCd);
+          targetNode.setDataValue('customerNm', customerNm);
+          targetNode.setDataValue('representativeNm', representativeNm);
+          targetNode.setDataValue('phoneNo', phoneNo);
+          targetNode.setDataValue('salesEmpCd', salesEmpCd);
+          targetNode.setDataValue('discountRate', discountRate);
+          targetNode.setDataValue('paymentTerms', paymentTerms);
+          targetNode.setDataValue('orderWriter', orderWriter);
+          
+          console.log('✅ setDataValue로 개별 필드 업데이트 완료');
+        }
+      } catch (setDataError) {
+        console.warn('⚠️ setDataValue 실패 (백업 방법):', setDataError);
+      }
+      
+      // ⭐ 그리드 강제 새로고침
+      setTimeout(() => {
+        if (headerGridApi && typeof headerGridApi.refreshCells === 'function') {
+          headerGridApi.refreshCells({ force: true });
+          console.log('🔄 헤더 그리드 강제 새로고침 완료');
+        }
+        
+        // 첫 번째 행으로 스크롤하여 변경사항 확인
+        if (headerGridApi && typeof headerGridApi.ensureIndexVisible === 'function') {
+          headerGridApi.ensureIndexVisible(0);
+        }
+      }, 100);
+      
+      console.log('✅ 헤더 정보 업데이트 완료');
       
     } catch (error) {
       console.error('❌ 헤더 업데이트 실패:', error);
