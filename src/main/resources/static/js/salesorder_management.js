@@ -57,7 +57,32 @@ $(function () {
     else if (api.setGridOption)     api.setGridOption('pinnedBottomRowData', rows);
   }
 
-  
+  /*─────────────── 날짜 포맷 유틸리티 ───────────────*/
+  function formatDate(dateString) {
+    if (!dateString) return '';
+    try {
+      // 다양한 날짜 형식 지원
+      let date;
+      if (dateString instanceof Date) {
+        date = dateString;
+      } else if (typeof dateString === 'string') {
+        date = new Date(dateString);
+      } else {
+        return '';
+      }
+      
+      // 유효한 날짜인지 확인
+      if (isNaN(date.getTime())) {
+        return dateString; // 원본 반환
+      }
+      
+      // YYYY-MM-DD 형식으로 반환
+      return date.toISOString().split('T')[0];
+    } catch (e) {
+      console.warn('날짜 포맷 오류:', e, dateString);
+      return dateString || '';
+    }
+  }
 
   /*──────────────── 1. 헤더 그리드 ────────────────*/
   const headerGridOptions = {
@@ -190,96 +215,130 @@ $(function () {
 
   /*──────────────── 견적서 조회 버튼 클릭 ────────────────*/
   $('#btnQuotationSearch').click(function() {
+    console.log('🔍 견적서 조회 버튼 클릭');
+    console.log('editMode:', editMode);
+    console.log('currentOrder:', currentOrder);
+    
     if (!editMode) {
       Swal.fire('알림', '신규 모드에서만 견적서 조회가 가능합니다.', 'info');
       return;
     }
     
-    console.log('견적서 조회 버튼 클릭 - editMode:', editMode);
+    // 모달 표시 전 로딩 상태 초기화
+    $('#quotationSearchResults').html('<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> 견적서를 불러오는 중...</td></tr>');
     
-    // ★ 견적서 목록 로드 전 테스트
     $('#quotationModal').modal('show');
-    loadQuotationList();
+    
+    // 모달이 완전히 열린 후 데이터 로드
+    setTimeout(() => {
+      loadQuotationList();
+    }, 300);
   });
 
   /*──────────────── 견적서 목록 로드 ────────────────*/
   function loadQuotationList(filter = {}) {
-    console.log('견적서 목록 로드 시작:', filter);
+    console.log('📋 견적서 목록 로드 시작:', filter);
     
-    // 검색 필터가 있다면 검색 API 사용, 없다면 전체 목록 API 사용
-    const hasFilter = filter.quotationNo || filter.customerName || filter.dateFrom || filter.dateTo;
-    
-    // ★ 로딩 표시
     const $tbody = $('#quotationSearchResults');
-    $tbody.html('<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> 로딩 중...</td></tr>');
     
+    // 검색 필터 유무 확인
+    const hasFilter = filter.quotationNo || filter.customerName || filter.dateFrom || filter.dateTo;
+    const apiUrl = hasFilter ? '/bsn/quotation/search' : '/bsn/quotation/list';
+    
+    console.log('🌐 API 호출:', apiUrl, hasFilter ? filter : '전체 목록');
+    
+    // AJAX 요청 설정
+    const ajaxConfig = {
+      url: apiUrl,
+      method: 'GET',
+      dataType: 'json',
+      timeout: 15000, // 15초 타임아웃
+      cache: false
+    };
+    
+    // 필터가 있으면 파라미터 추가
     if (hasFilter) {
-      // 검색 API 사용
-      console.log('필터 검색 API 호출:', filter);
-      $.getJSON('/bsn/quotation/search', filter)
-        .done(function(data) {
-          console.log('검색 결과:', data);
-          quotationList = data;
-          displayQuotationList(data);
-        })
-        .fail(function(xhr, status, error) {
-          console.error('견적서 검색 실패:', { xhr, status, error });
-          Swal.fire('오류', `견적서 검색에 실패했습니다: ${error}`, 'error');
-          quotationList = [];
-          displayQuotationList([]);
-        });
-    } else {
-      // 전체 목록 API 사용
-      console.log('전체 목록 API 호출');
-      $.getJSON('/bsn/quotation/list')
-        .done(function(data) {
-          console.log('전체 목록 결과:', data);
-          quotationList = data;
-          displayQuotationList(data);
-        })
-        .fail(function(xhr, status, error) {
-          console.error('견적서 목록 로드 실패:', { xhr, status, error });
-          Swal.fire('오류', `견적서 목록을 불러올 수 없습니다: ${error}`, 'error');
-          quotationList = [];
-          displayQuotationList([]);
-        });
+      ajaxConfig.data = filter;
     }
+    
+    $.ajax(ajaxConfig)
+      .done(function(data) {
+        console.log('✅ 견적서 목록 조회 성공:', data);
+        console.log('📊 데이터 타입:', typeof data, Array.isArray(data));
+        console.log('📊 데이터 길이:', data?.length);
+        
+        quotationList = data || [];
+        displayQuotationList(quotationList);
+      })
+      .fail(function(xhr, status, error) {
+        console.error('❌ 견적서 목록 조회 실패:', {
+          status: xhr.status,
+          statusText: xhr.statusText,
+          responseText: xhr.responseText,
+          error: error
+        });
+        
+        quotationList = [];
+        displayQuotationList([]);
+        
+        Swal.fire({
+          title: '오류',
+          text: `견적서 목록을 불러올 수 없습니다.\n상태: ${xhr.status} ${xhr.statusText}`,
+          icon: 'error',
+          footer: '잠시 후 다시 시도하거나 관리자에게 문의하세요.'
+        });
+      });
   }
 
   /*──────────────── 견적서 목록 표시 ────────────────*/
   function displayQuotationList(list) {
+    console.log('🖼️ 견적서 목록 표시:', list);
+    
     const $tbody = $('#quotationSearchResults').empty();
     
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       $tbody.append(`
         <tr>
-          <td colspan="9" class="text-center text-muted">검색된 견적서가 없습니다.</td>
+          <td colspan="9" class="text-center text-muted">
+            <i class="fas fa-search"></i><br>
+            검색된 견적서가 없습니다.
+          </td>
         </tr>
       `);
       return;
     }
 
-    list.forEach(quotation => {
-      const quotationJson = encodeURIComponent(JSON.stringify(quotation));
-      $tbody.append(`
-        <tr>
-          <td>
-            <button class="btn btn-select-quotation btn-sm" 
-                    data-quotation="${quotationJson}">
-              선택
-            </button>
-          </td>
-          <td>${quotation.quotationNo || ''}</td>
-          <td>${formatDate(quotation.quotationDt)}</td>
-          <td>${quotation.customerName || ''}</td>
-          <td>${quotation.representativeNm || ''}</td>
-          <td>${quotation.phone || ''}</td>
-          <td>${formatDate(quotation.validPeriod)}</td>
-          <td>${formatDate(quotation.expectedDeliveryDt)}</td>
-          <td>${quotation.remarks || ''}</td>
-        </tr>
-      `);
+    list.forEach((quotation, index) => {
+      try {
+        // JSON 데이터를 안전하게 인코딩
+        const quotationJson = encodeURIComponent(JSON.stringify(quotation));
+        
+        $tbody.append(`
+          <tr>
+            <td>
+              <button class="btn btn-select-quotation btn-sm" 
+                      data-quotation="${quotationJson}"
+                      data-quotation-no="${quotation.quotationNo || ''}"
+                      data-index="${index}">
+                <i class="fas fa-check"></i> 선택
+              </button>
+            </td>
+            <td class="fw-bold text-primary">${quotation.quotationNo || '-'}</td>
+            <td>${formatDate(quotation.quotationDt)}</td>
+            <td>${quotation.customerName || quotation.customerNm || '-'}</td>
+            <td>${quotation.representativeNm || '-'}</td>
+            <td>${quotation.phone || '-'}</td>
+            <td>${formatDate(quotation.validPeriod)}</td>
+            <td>${formatDate(quotation.expectedDeliveryDt)}</td>
+            <td>${quotation.remarks || '-'}</td>
+          </tr>
+        `);
+      } catch (error) {
+        console.error('⚠️ 견적서 행 생성 오류:', error, quotation);
+      }
     });
+    
+    console.log(`✅ ${list.length}개 견적서 표시 완료`);
   }
 
   /*──────────────── 견적서 검색 필터 ────────────────*/
@@ -299,187 +358,331 @@ $(function () {
   });
 
   /*──────────────── 견적서 선택 및 변환 ────────────────*/
-  $('#quotationSearchResults').on('click', '.btn-select-quotation', function() {
-    const quotation = JSON.parse(decodeURIComponent($(this).data('quotation')));
+  $('#quotationSearchResults').off('click', '.btn-select-quotation').on('click', '.btn-select-quotation', function() {
+    console.log('🎯 견적서 선택 버튼 클릭');
     
-    Swal.fire({
-      title: '견적서 변환',
-      text: `견적서 "${quotation.quotationNo}"를 주문서로 변환하시겠습니까?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#1cc88a',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: '변환',
-      cancelButtonText: '취소'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        convertQuotationToOrder(quotation);
+    try {
+      const quotationData = $(this).data('quotation');
+      const quotationNo = $(this).data('quotation-no');
+      const index = $(this).data('index');
+      
+      console.log('📄 선택된 견적서 번호:', quotationNo);
+      console.log('📄 인덱스:', index);
+      
+      if (!quotationData) {
+        throw new Error('견적서 데이터가 없습니다.');
       }
-    });
+      
+      const quotation = JSON.parse(decodeURIComponent(quotationData));
+      console.log('📄 파싱된 견적서 데이터:', quotation);
+      
+      // 확인 대화상자
+      Swal.fire({
+        title: '견적서 변환',
+        html: `
+          <div class="text-start">
+            <p><strong>견적서:</strong> ${quotation.quotationNo}</p>
+            <p><strong>거래처:</strong> ${quotation.customerName || quotation.customerNm}</p>
+            <p><strong>견적일자:</strong> ${formatDate(quotation.quotationDt)}</p>
+            <hr>
+            <p class="text-muted">이 견적서를 주문서로 변환하시겠습니까?</p>
+          </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#1cc88a',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fas fa-exchange-alt"></i> 변환',
+        cancelButtonText: '<i class="fas fa-times"></i> 취소',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          convertQuotationToOrder(quotation);
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ 견적서 선택 처리 오류:', error);
+      Swal.fire('오류', `견적서 데이터 처리 중 오류가 발생했습니다:\n${error.message}`, 'error');
+    }
   });
 
   /*──────────────── 견적서 → 주문서 변환 로직 ────────────────*/
   function convertQuotationToOrder(quotation) {
-    console.log('=== 견적서 변환 시작 ===');
-    console.log('선택된 견적서:', quotation);
+    console.log('🔄 ==> 견적서 변환 시작 <==');
+    console.log('📋 선택된 견적서:', quotation);
     
-    // 1. 견적서 상세 정보 가져오기
-    $.getJSON(`/bsn/quotation/details?quotationNo=${encodeURIComponent(quotation.quotationNo)}`)
-      .done(function(details) {
-        console.log('견적서 상세 조회 결과:', details);
+    // 로딩 표시
+    Swal.fire({
+      title: '변환 중...',
+      text: '견적서 상세 정보를 불러오고 있습니다.',
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    // 1단계: 견적서 상세 정보 조회
+    $.ajax({
+      url: `/bsn/quotation/details`,
+      method: 'GET',
+      data: { quotationNo: quotation.quotationNo },
+      dataType: 'json',
+      timeout: 15000
+    })
+    .done(function(details) {
+      console.log('📋 견적서 상세 조회 성공:', details);
+      
+      if (!details || details.length === 0) {
+        Swal.fire('경고', '견적서 상세 정보가 없습니다.', 'warning');
+        return;
+      }
+      
+      // 2단계: 현재 주문서 확인
+      if (!currentOrder || !currentOrder.orderNo) {
+        Swal.fire('오류', '먼저 신규 주문서를 생성해주세요.', 'error');
+        return;
+      }
+      
+      console.log('📝 현재 주문서:', currentOrder);
+      
+      try {
+        // 3단계: 헤더 정보 매핑 및 업데이트
+        updateOrderHeader(quotation);
         
-        if (!details || details.length === 0) {
-          Swal.fire('경고', '견적서 상세 정보가 없습니다.', 'warning');
-          return;
-        }
+        // 4단계: 상세 정보 매핑 및 업데이트
+        updateOrderDetails(details);
         
-        // 2. 주문서 헤더 정보 매핑
-        if (currentOrder && currentOrder.orderNo) {
-          console.log('현재 주문서:', currentOrder);
-          
-          // 헤더 그리드에서 현재 주문서 행 찾기
-          let targetNode = null;
-          headerGridApi.forEachNode(node => {
-            if (node.data.orderNo === currentOrder.orderNo) {
-              targetNode = node;
-            }
-          });
-          
-          if (targetNode) {
-            console.log('대상 노드 찾음:', targetNode.data);
-            
-            // ★ 필수 필드들을 모두 설정
-            const customerCd = quotation.customerCd || '';
-            const customerNm = quotation.customerName || '';
-            const representativeNm = quotation.representativeNm || '';
-            const phoneNo = quotation.phone || '';
-            const salesEmpCd = quotation.salesEmpCd || 'emp-101';
-            const discountRate = quotation.discountRate || 0;
-            const paymentTerms = 'Net 30';
-            
-            // ★ 중요: ORDER_WRITER (담당자) 설정 - 여러 후보에서 선택
-            let orderWriter = 'emp-101'; // 기본값 (사원 코드 형태)
-            if (quotation.sender && quotation.sender.trim()) {
-              orderWriter = quotation.sender.trim();
-            } else if (quotation.salesEmpCd && quotation.salesEmpCd.trim()) {
-              orderWriter = quotation.salesEmpCd.trim();
-            }
-            
-            console.log('설정할 헤더 값들:', {
-              customerCd, customerNm, representativeNm, phoneNo, 
-              salesEmpCd, discountRate, paymentTerms, orderWriter
-            });
-            
-            // ★ 필수 필드 검증
-            if (!customerCd.trim()) {
-              Swal.fire('오류', '견적서에 거래처 정보가 없습니다.', 'error');
-              return;
-            }
-            
-            // 헤더 데이터 설정 (AG-Grid 노드에 직접 값 설정)
-            targetNode.setDataValue('customerCd', customerCd);
-            targetNode.setDataValue('customerNm', customerNm);
-            targetNode.setDataValue('representativeNm', representativeNm);
-            targetNode.setDataValue('phoneNo', phoneNo);
-            targetNode.setDataValue('salesEmpCd', salesEmpCd);
-            targetNode.setDataValue('discountRate', discountRate);
-            targetNode.setDataValue('paymentTerms', paymentTerms);
-            targetNode.setDataValue('orderWriter', orderWriter);
-            
-            // currentOrder 변수를 업데이트된 노드 데이터로 갱신
-            currentOrder = targetNode.data;
-            
-            console.log('헤더 설정 완료:', currentOrder);
-          } else {
-            console.error('대상 노드를 찾을 수 없음');
-            Swal.fire('오류', '주문서 헤더를 찾을 수 없습니다.', 'error');
-            return;
-          }
+        // 5단계: 여신 정보 업데이트 (거래처가 있는 경우)
+        if (quotation.customerCd) {
+          updateCreditInfo(quotation.customerCd);
         } else {
-          console.error('현재 주문서가 없음');
-          Swal.fire('오류', '먼저 신규 주문서를 생성해주세요.', 'error');
-          return;
-        }
-
-        // 3. 주문서 디테일 정보 매핑
-        console.log('디테일 변환 시작:', details);
-        
-        const orderDetails = details.map((detail, index) => {
-          const lineData = {
-            lineNo: index + 1,
-            itemCode: detail.itemCode || '',
-            itemName: detail.itemName || '',
-            spec: detail.spec || '',
-            qty: detail.qty || 1,
-            unitPrice: detail.unitPrice || 0,
-            supplyAmount: detail.supplyAmount || 0,
-            taxAmount: detail.taxAmount || 0,
-            totalAmount: detail.totalMoney || detail.totalAmount || 0,
-            remarks: detail.remarks || '',
-            outboundDt: null,
-            catchDt: null,
-            outState: '대기'
-          };
-          
-          console.log(`디테일 ${index + 1}:`, lineData);
-          return lineData;
-        });
-
-        console.log('변환된 주문서 디테일:', orderDetails);
-        
-        // ★ 디테일 필수 필드 검증
-        const invalidDetails = orderDetails.filter(d => !d.itemCode || !d.itemCode.trim());
-        if (invalidDetails.length > 0) {
-          Swal.fire('경고', `${invalidDetails.length}개 행에 품목코드가 없습니다. 그래도 진행하시겠습니까?`, 'warning');
-        }
-
-        safeSetRowData(detailGridApi, orderDetails);
-        calcTotals();
-
-        // 4. 여신 정보 로드 (거래처 정보가 있다면)
-        if (quotation.customerCd && quotation.customerCd.trim()) {
-          console.log('여신 정보 로드 시작:', quotation.customerCd);
-          $.getJSON(`/bsn/customer/${quotation.customerCd}/credit`)
-            .done(function(creditData) {
-              console.log('여신 정보 로드 성공:', creditData);
-              showCredit(creditData);
-            })
-            .fail(function(xhr, status, error) {
-              console.warn('여신 정보 로드 실패:', { xhr, status, error });
-              safeSetRowData(creditGridApi, getInitCreditRows());
-            });
-        } else {
-          console.log('거래처 코드가 없어 기본 여신 정보 설정');
           safeSetRowData(creditGridApi, getInitCreditRows());
         }
-
+        
+        // 6단계: 완료 처리
         $('#quotationModal').modal('hide');
         
-        console.log('=== 견적서 변환 완료 ===');
-        
         Swal.fire({
-          title: '변환 완료!',
-          text: '견적서가 주문서로 성공적으로 변환되었습니다.\n필수 정보를 확인 후 등록해 주세요.',
+          title: '변환 완료! 🎉',
+          html: `
+            <div class="text-center">
+              <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+              <p class="mt-3">견적서가 주문서로 성공적으로 변환되었습니다.</p>
+              <p class="text-muted">필수 정보를 확인 후 등록해 주세요.</p>
+            </div>
+          `,
           icon: 'success',
           timer: 3000,
-          showConfirmButton: true
+          showConfirmButton: true,
+          confirmButtonText: '확인'
         });
-
-      })
-      .fail(function(xhr, status, error) {
-        console.error('견적서 상세 조회 실패:', { xhr, status, error });
-        Swal.fire('오류', `견적서 상세 정보를 불러올 수 없습니다: ${error}`, 'error');
+        
+        console.log('✅ ==> 견적서 변환 완료 <==');
+        
+      } catch (error) {
+        console.error('❌ 변환 처리 중 오류:', error);
+        Swal.fire('오류', `변환 처리 중 오류가 발생했습니다:\n${error.message}`, 'error');
+      }
+      
+    })
+    .fail(function(xhr, status, error) {
+      console.error('❌ 견적서 상세 조회 실패:', {
+        status: xhr.status,
+        statusText: xhr.statusText,
+        responseText: xhr.responseText,
+        error: error
       });
+      
+      Swal.fire({
+        title: '오류',
+        text: `견적서 상세 정보를 불러올 수 없습니다.\n상태: ${xhr.status} ${error}`,
+        icon: 'error'
+      });
+    });
   }
 
-  /*──────────────── 날짜 포맷 유틸리티 ────────────────*/
-  function formatDate(dateString) {
-    if (!dateString) return '';
+
+  /*──────────────── 주문서 헤더 업데이트 함수 ────────────────*/
+  function updateOrderHeader(quotation) {
+    console.log('📝 헤더 정보 업데이트 시작');
+    
     try {
-      return dayjs(dateString).format('YYYY-MM-DD');
-    } catch (e) {
-      return dateString;
+      // 매핑할 데이터 준비
+      const customerCd = quotation.customerCd || '';
+      const customerNm = quotation.customerName || quotation.customerNm || '';
+      const representativeNm = quotation.representativeNm || '';
+      const phoneNo = quotation.phone || '';
+      const salesEmpCd = quotation.salesEmpCd || 'emp-101';
+      const discountRate = quotation.discountRate || 0;
+      const paymentTerms = 'Net 30';
+      
+      // 담당자 설정 (우선순위: sender > salesEmpCd > 기본값)
+      let orderWriter = 'emp-101';
+      if (quotation.sender && quotation.sender.trim()) {
+        orderWriter = quotation.sender.trim();
+      } else if (quotation.salesEmpCd && quotation.salesEmpCd.trim()) {
+        orderWriter = quotation.salesEmpCd.trim();
+      }
+      
+      console.log('📝 설정할 헤더 값들:', {
+        customerCd, customerNm, representativeNm, phoneNo, 
+        salesEmpCd, discountRate, paymentTerms, orderWriter
+      });
+      
+      // 필수 필드 검증
+      if (!customerCd.trim()) {
+        throw new Error('견적서에 거래처 정보가 없습니다.');
+      }
+      
+      // ⭐ 전역 currentOrder 상태 업데이트 (우선)
+      currentOrder = {
+        ...currentOrder,
+        customerCd: customerCd,
+        customerNm: customerNm,
+        representativeNm: representativeNm,
+        phoneNo: phoneNo,
+        salesEmpCd: salesEmpCd,
+        discountRate: discountRate,
+        paymentTerms: paymentTerms,
+        orderWriter: orderWriter
+      };
+      
+      console.log('📝 업데이트된 currentOrder:', currentOrder);
+      
+      // ⭐ 방법 1: 전체 헤더 데이터 다시 로드
+      const allRowData = [];
+      headerGridApi.forEachNode(node => {
+        if (node.data.orderNo === currentOrder.orderNo) {
+          // 현재 주문서 행 업데이트
+          allRowData.push({
+            ...node.data,
+            customerCd: customerCd,
+            customerNm: customerNm,
+            representativeNm: representativeNm,
+            phoneNo: phoneNo,
+            salesEmpCd: salesEmpCd,
+            discountRate: discountRate,
+            paymentTerms: paymentTerms,
+            orderWriter: orderWriter
+          });
+        } else {
+          allRowData.push(node.data);
+        }
+      });
+      
+      // AG-Grid 데이터 재설정
+      safeSetRowData(headerGridApi, allRowData);
+      
+      // ⭐ 방법 2: 트랜잭션으로 업데이트 (백업)
+      try {
+        let targetNode = null;
+        headerGridApi.forEachNode(node => {
+          if (node.data.orderNo === currentOrder.orderNo) {
+            targetNode = node;
+            return false;
+          }
+        });
+        
+        if (targetNode) {
+          // 개별 필드 업데이트
+          targetNode.setDataValue('customerCd', customerCd);
+          targetNode.setDataValue('customerNm', customerNm);
+          targetNode.setDataValue('representativeNm', representativeNm);
+          targetNode.setDataValue('phoneNo', phoneNo);
+          targetNode.setDataValue('salesEmpCd', salesEmpCd);
+          targetNode.setDataValue('discountRate', discountRate);
+          targetNode.setDataValue('paymentTerms', paymentTerms);
+          targetNode.setDataValue('orderWriter', orderWriter);
+          
+          console.log('✅ setDataValue로 개별 필드 업데이트 완료');
+        }
+      } catch (setDataError) {
+        console.warn('⚠️ setDataValue 실패 (백업 방법):', setDataError);
+      }
+      
+      // ⭐ 그리드 강제 새로고침
+      setTimeout(() => {
+        if (headerGridApi && typeof headerGridApi.refreshCells === 'function') {
+          headerGridApi.refreshCells({ force: true });
+          console.log('🔄 헤더 그리드 강제 새로고침 완료');
+        }
+        
+        // 첫 번째 행으로 스크롤하여 변경사항 확인
+        if (headerGridApi && typeof headerGridApi.ensureIndexVisible === 'function') {
+          headerGridApi.ensureIndexVisible(0);
+        }
+      }, 100);
+      
+      console.log('✅ 헤더 정보 업데이트 완료');
+      
+    } catch (error) {
+      console.error('❌ 헤더 업데이트 실패:', error);
+      throw error;
     }
+  }
+
+  /*──────────────── 주문서 상세 업데이트 함수 ────────────────*/
+  function updateOrderDetails(details) {
+    console.log('📋 상세 정보 업데이트 시작:', details);
+    
+    try {
+      // 상세 데이터 변환
+      const orderDetails = details.map((detail, index) => {
+        const lineData = {
+          lineNo: index + 1,
+          itemCode: detail.itemCode || '',
+          itemName: detail.itemName || '',
+          spec: detail.spec || '',
+          qty: Number(detail.qty) || 1,
+          unitPrice: Number(detail.unitPrice) || 0,
+          supplyAmount: Number(detail.supplyAmount) || 0,
+          taxAmount: Number(detail.taxAmount) || 0,
+          totalAmount: Number(detail.totalMoney || detail.totalAmount) || 0,
+          remarks: detail.remarks || '',
+          outboundDt: null,
+          catchDt: null,
+          outState: '대기'
+        };
+        
+        console.log(`📋 디테일 ${index + 1}:`, lineData);
+        return lineData;
+      });
+      
+      // AG-Grid에 데이터 설정
+      safeSetRowData(detailGridApi, orderDetails);
+      
+      // 합계 계산
+      calcTotals();
+      
+      console.log('✅ 상세 정보 업데이트 완료:', orderDetails.length, '건');
+      
+    } catch (error) {
+      console.error('❌ 상세 정보 업데이트 실패:', error);
+      throw error;
+    }
+  }
+
+  /*──────────────── 여신 정보 업데이트 함수 ────────────────*/
+  function updateCreditInfo(customerCd) {
+    console.log('💳 여신 정보 업데이트 시작:', customerCd);
+    
+    $.ajax({
+      url: `/bsn/customer/${customerCd}/credit`,
+      method: 'GET',
+      dataType: 'json',
+      timeout: 10000
+    })
+    .done(function(creditData) {
+      console.log('💳 여신 정보 조회 성공:', creditData);
+      showCredit(creditData);
+    })
+    .fail(function(xhr, status, error) {
+      console.warn('⚠️ 여신 정보 조회 실패:', error);
+      // 실패해도 기본 여신 정보로 설정
+      safeSetRowData(creditGridApi, getInitCreditRows());
+    });
   }
 
   /*──────────────── 5. 헤더 inline 편집 저장 ────────────────*/
@@ -1021,34 +1224,17 @@ $(function () {
     }
   }
   function numFmt(v){ return Number(v||0).toLocaleString()+'원'; }
-  function getInitCreditRows(){
-    return [{ creditLimit:0, remainingCredit:0, creditUsed:0,
-              creditStatus:'', creditHoldFlg:'', tradeStopFlg:'' }];
-  }
-  function getInitCreditObj(){
-    return { creditLimit:0, remainingCredit:0, creditUsed:0,
-            creditStatus:'', creditHoldFlg:'', tradeStopFlg:'' };
-  }
-  function setEditMode(flag){
-    editMode = flag;
-    detailGridApi.refreshCells({force:true});
-    headerGridApi.refreshCells({force:true});
-    $('#btnSave,#btnAddRow,#btnDeleteRow').prop('disabled', !flag);
-    
-    // 편집 모드가 아닐 때는 견적서 조회 버튼 비활성화
-    if (!flag) {
-      $('#btnQuotationSearch').prop('disabled', true);
-    }
-  }
-  function numFmt(v){ return Number(v||0).toLocaleString()+'원'; }
 
   // 모달 이벤트 리스너 추가
   $('#quotationModal').on('shown.bs.modal', function() {
-    loadQuotationList(); // 모달이 열릴 때 견적서 목록 로드
+    console.log('📋 견적서 모달 열림');
+    setTimeout(() => {
+      loadQuotationList(); // 모달이 열릴 때 견적서 목록 로드
+    }, 100);
   });
 
   // 견적서 검색 필터 엔터키 이벤트
-  $('#quotationNoFilter, #customerNameFilter').on('keypress', function(e) {
+  $('#quotationNoFilter, #customerNameFilter').off('keypress').on('keypress', function(e) {
     if (e.which === 13) { // 엔터키
       $('#btnQuotationFilter').click();
     }
@@ -1068,6 +1254,9 @@ $(function () {
           </button>
           <button class="btn btn-success btn-sm" onclick="testQuotationAPI()">
             <i class="fas fa-api"></i> 견적서 API 테스트
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="debugQuotationSystem()">
+            <i class="fas fa-cog"></i> 시스템 디버그
           </button>
           <button class="btn btn-secondary btn-sm" onclick="clearConsole()">
             <i class="fas fa-broom"></i> 콘솔 초기화
@@ -1182,13 +1371,55 @@ $(function () {
       });
   };
 
+  window.debugQuotationSystem = function() {
+    console.log('=== 견적서 시스템 디버깅 ===');
+    console.log('editMode:', editMode);
+    console.log('currentOrder:', currentOrder);
+    console.log('quotationList:', quotationList);
+    console.log('headerGridApi:', !!headerGridApi);
+    console.log('detailGridApi:', !!detailGridApi);
+    console.log('creditGridApi:', !!creditGridApi);
+    
+    const debugInfo = {
+      editMode: editMode,
+      currentOrder: currentOrder,
+      quotationListLength: quotationList?.length || 0,
+      hasHeaderGrid: !!headerGridApi,
+      hasDetailGrid: !!detailGridApi,
+      hasCreditGrid: !!creditGridApi,
+      quotationButtonDisabled: $('#btnQuotationSearch').prop('disabled')
+    };
+    
+    Swal.fire({
+      title: '시스템 디버그 정보',
+      html: `
+        <div class="text-start">
+          <strong>편집 모드:</strong> ${debugInfo.editMode ? '✅' : '❌'}<br>
+          <strong>현재 주문서:</strong> ${debugInfo.currentOrder ? '✅' : '❌'}<br>
+          <strong>견적서 목록:</strong> ${debugInfo.quotationListLength}건<br>
+          <strong>헤더 그리드:</strong> ${debugInfo.hasHeaderGrid ? '✅' : '❌'}<br>
+          <strong>디테일 그리드:</strong> ${debugInfo.hasDetailGrid ? '✅' : '❌'}<br>
+          <strong>여신 그리드:</strong> ${debugInfo.hasCreditGrid ? '✅' : '❌'}<br>
+          <strong>견적서 버튼:</strong> ${debugInfo.quotationButtonDisabled ? '비활성' : '활성'}<br>
+          <hr>
+          <small>콘솔에서 상세 정보를 확인하세요.</small>
+        </div>
+      `,
+      icon: 'info'
+    });
+  };
+
   window.clearConsole = function() {
     console.clear();
     console.log('콘솔이 초기화되었습니다.');
     Swal.fire('완료', '콘솔이 초기화되었습니다.', 'success');
   };
 
-  console.log('견적서 변환 기능이 포함된 주문서 관리 JS 초기화 완료');
-  console.log('디버그 기능: 우상단 디버그 버튼을 클릭하세요.');
+  console.log('🎉 견적서 변환 기능이 포함된 주문서 관리 JS 초기화 완료');
+  console.log('🐛 디버그 기능: 우상단 디버그 버튼을 클릭하세요.');
+  console.log('💡 디버깅 명령어:');
+  console.log('  - debugQuotationSystem() : 시스템 상태 확인');
+  console.log('  - testQuotationAPI() : API 연결 테스트'); 
+  console.log('  - checkQuotationData() : 견적서 데이터 확인');
 
 });
