@@ -8,7 +8,7 @@ import lombok.Data;
 public class AttdRemarkDTO {
     private String attdIdx;
     private String empIdx;
-    private Date attdDate;
+    private String attdDate;
     private String attdStatus;
     private String abReason;
     private String memo;
