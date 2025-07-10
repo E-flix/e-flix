@@ -15,8 +15,11 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.eflix.hr.dto.AttendanceRecordDTO;
 import com.eflix.hr.dto.etc.AttdDetailDTO;
+import com.eflix.hr.dto.etc.AttdMgrListDTO;
 import com.eflix.hr.dto.etc.AttdRecordDTO;
 import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
+import com.eflix.hr.dto.etc.AttdRemarkDTO;
+import com.eflix.hr.dto.etc.AttdSearchDTO;
 import com.eflix.hr.dto.etc.AttdSummaryDTO;
 
 @Mapper
@@ -43,8 +46,16 @@ public interface AttendanceRecordMapper {
 
     public void addAttd();
 
-    AttdSummaryDTO selectAttdSummary(String empIdx, String date);
+    AttdSummaryDTO findAttdSummaryByEmpIdxWithDate(String empIdx, String date);
 
-    List<AttdDetailDTO> selectAttdDetailList(String empIdx, String date);
+    List<AttdDetailDTO> findAttdDetailListByEmpIdxWithDate(String empIdx, String date);
+
+    List<AttdRemarkDTO> findAttdRemarkList(String empIdx, String date);
+
+    int findAllAttdCount(AttdSearchDTO attdSearchDTO);
+
+    List<AttdMgrListDTO> findAttdMgrListByCoIdxWithDate(AttdSearchDTO attdSearchDTO);
+
+    List<AttdRemarkDTO> findAttdRemarkListByEmpIdxWithDate(String empIdx, String date);
 
 }

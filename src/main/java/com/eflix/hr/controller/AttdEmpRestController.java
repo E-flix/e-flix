@@ -103,7 +103,7 @@ public class AttdEmpRestController {
         System.out.println(date);
 
         // AttdRecordSummaryDTO attdRecordSummaryDTO = attendanceRecordService.selectAttdRecordSummaryByEmpIdx(getEmpIdx(), date);
-        AttdSummaryDTO attdSummaryDTO = attendanceRecordService.selectAttdSummary(getEmpIdx(), date);
+        AttdSummaryDTO attdSummaryDTO = attendanceRecordService.findAttdSummaryByEmpIdxWithDate(getEmpIdx(), date);
 
         if(attdSummaryDTO != null) {
             result = ResUtil.makeResult(ResStatus.OK, attdSummaryDTO);
@@ -119,7 +119,7 @@ public class AttdEmpRestController {
         ResResult result = null;
 
         // List<AttdRecordDTO> attd = attendanceRecordService.findAllByEmpIdxWithDate(getEmpIdx(), date);
-        List<AttdDetailDTO> attdDetailDTOs = attendanceRecordService.selectAttdDetailList(getEmpIdx(), date);
+        List<AttdDetailDTO> attdDetailDTOs = attendanceRecordService.findAttdDetailListByEmpIdxWithDate(getEmpIdx(), date);
 
         if(attdDetailDTOs != null) {
             result = ResUtil.makeResult(ResStatus.OK, attdDetailDTOs);

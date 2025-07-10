@@ -14,8 +14,11 @@ import java.util.List;
 import com.eflix.hr.dto.AttendanceRecordDTO;
 import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.dto.etc.AttdDetailDTO;
+import com.eflix.hr.dto.etc.AttdMgrListDTO;
 import com.eflix.hr.dto.etc.AttdRecordDTO;
 import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
+import com.eflix.hr.dto.etc.AttdRemarkDTO;
+import com.eflix.hr.dto.etc.AttdSearchDTO;
 import com.eflix.hr.dto.etc.AttdSummaryDTO;
 
 public interface AttendanceRecordService {
@@ -51,7 +54,13 @@ public interface AttendanceRecordService {
     // 0709
     public void addAttd();
     
-    public AttdSummaryDTO selectAttdSummary(String empIdx, String date);
-    public List<AttdDetailDTO> selectAttdDetailList(String empIdx, String date);
+    public AttdSummaryDTO findAttdSummaryByEmpIdxWithDate(String empIdx, String date);
+    public List<AttdDetailDTO> findAttdDetailListByEmpIdxWithDate(String empIdx, String date);
 
+    // 0710
+
+    public int findAllAttdCount(AttdSearchDTO attdSearchDTO);
+
+    public List<AttdMgrListDTO> findAttdMgrListByCoIdxWithDate(AttdSearchDTO attdSearchDTO);
+    public List<AttdRemarkDTO> findAttdRemarkListByEmpIdxWithDate(String empIdx, String date);
 }

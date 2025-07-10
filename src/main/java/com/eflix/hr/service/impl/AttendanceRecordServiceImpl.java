@@ -14,11 +14,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.eflix.common.security.auth.AuthContext;
 import com.eflix.hr.dto.AttendanceRecordDTO;
 import com.eflix.hr.dto.etc.AttdDetailDTO;
+import com.eflix.hr.dto.etc.AttdMgrListDTO;
 import com.eflix.hr.dto.etc.AttdRecordDTO;
 import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
+import com.eflix.hr.dto.etc.AttdRemarkDTO;
+import com.eflix.hr.dto.etc.AttdSearchDTO;
 import com.eflix.hr.dto.etc.AttdSummaryDTO;
 import com.eflix.hr.mapper.AttendanceRecordMapper;
 import com.eflix.hr.service.AttendanceRecordService;
@@ -96,12 +98,28 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
     }
 
     @Override
-    public AttdSummaryDTO selectAttdSummary(String empIdx, String date) {
-        return attendanceRecordMapper.selectAttdSummary(empIdx, date);
+    public AttdSummaryDTO findAttdSummaryByEmpIdxWithDate(String empIdx, String date) {
+        return attendanceRecordMapper.findAttdSummaryByEmpIdxWithDate(empIdx, date);
     }
 
     @Override
-    public List<AttdDetailDTO> selectAttdDetailList(String empIdx, String date) {
-        return attendanceRecordMapper.selectAttdDetailList(empIdx, date);
+    public List<AttdDetailDTO> findAttdDetailListByEmpIdxWithDate(String empIdx, String date) {
+        return attendanceRecordMapper.findAttdDetailListByEmpIdxWithDate(empIdx, date);
+    }
+    
+
+    @Override
+    public int findAllAttdCount(AttdSearchDTO attdSearchDTO) {
+        return attendanceRecordMapper.findAllAttdCount(attdSearchDTO);
+    }
+
+    @Override
+    public List<AttdMgrListDTO> findAttdMgrListByCoIdxWithDate(AttdSearchDTO attdSearchDTO) {
+        return attendanceRecordMapper.findAttdMgrListByCoIdxWithDate(attdSearchDTO);
+    }
+
+    @Override
+    public List<AttdRemarkDTO> findAttdRemarkListByEmpIdxWithDate(String empIdx, String date) {
+        return attendanceRecordMapper.findAttdRemarkListByEmpIdxWithDate(empIdx, date);
     }
 }
