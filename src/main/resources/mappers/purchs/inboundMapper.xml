@@ -52,9 +52,15 @@
   </delete>
 	<!--'제품 => 창고' 입고 후 제품 상태 값 update  프로시저 사용 -->
 	<insert id="prodToWarehouse" parameterType="InboundDTO">
-    BEGIN
-      PROD_TO_WAREHOUSE(#{inboundId}, #{prodId}, #{inboundQuantity}, #{inboundLot},#{inboundDate}, #{inboundManager}, #{warehouseId});
-    END;
+    CALL PROD_TO_WAREHOUSE(
+      #{inboundId}, 
+      #{prodId}, 
+      #{inboundQuantity}, 
+      #{inboundLot},
+      #{inboundDate}, 
+      #{inboundManager}, 
+      #{warehouseId}
+      )
   </insert>
 	<!--가장 마지막 inbound_id 가져오기-->
 	<select id="getNextInboundId" resultType="String">

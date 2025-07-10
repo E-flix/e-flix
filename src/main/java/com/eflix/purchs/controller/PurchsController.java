@@ -23,12 +23,6 @@ public class PurchsController {
 		return "purchs/category";
 	}
 
-	// 출고관리
-	@GetMapping("/obd")
-	public String outbound() {
-		return "purchs/outbound";
-	}
-
 	// 입고조회
 	@GetMapping("/ibdv")
 	public String inbound_view() {
