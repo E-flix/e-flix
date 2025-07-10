@@ -1,12 +1,12 @@
 package com.eflix.acc.service;
 
 import java.util.List;
+import com.eflix.acc.dto.EntryAutoAllDTO;
 import com.eflix.acc.dto.EntryDetailDTO;
 import com.eflix.acc.dto.EntryMasterDTO;
-import com.eflix.acc.dto.EntryAutoAllDTO;
 
 public interface EntryAutoService {
-    List<EntryAutoAllDTO> selectSalaryList(EntryAutoAllDTO param);
+    List<EntryAutoAllDTO> selectSalaryList();
     Integer selectMaxPlusOneEntryNumber(EntryAutoAllDTO param);
     Integer selectMaxPlusOneLineNumber(EntryAutoAllDTO param);
     EntryAutoAllDTO selectEntryMasterByRemarks(EntryAutoAllDTO param);
@@ -15,4 +15,5 @@ public interface EntryAutoService {
     void updateEntryDetail(EntryDetailDTO detail);
     void updateEntryMaster(EntryMasterDTO master);
     List<EntryAutoAllDTO> selectAutoEntryAll(EntryAutoAllDTO param);
+    void createSalaryEntryMasters();
 }

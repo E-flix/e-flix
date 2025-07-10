@@ -4,10 +4,11 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.eflix.acc.service.EntryAutoService;
 import com.eflix.acc.dto.EntryAutoAllDTO;
+import com.eflix.acc.service.EntryAutoService;
 import com.eflix.common.code.service.CommonService;
 import lombok.RequiredArgsConstructor;
 
@@ -46,5 +47,15 @@ public class AccEntryAutoController {
   public List<EntryAutoAllDTO> getAutoEntryAll() {
     EntryAutoAllDTO param = new EntryAutoAllDTO();
     return entryAutoService.selectAutoEntryAll(param);
+  }
+
+  /**
+   * 급여기준 자동전표 생성
+   */
+  @PostMapping("/ena/auto-salary-entry")
+  @ResponseBody
+  public String createAutoSalaryEntry() {
+    entryAutoService.createSalaryEntryMasters();
+    return "자동전표 생성 완료";
   }
 }
