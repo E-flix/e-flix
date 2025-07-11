@@ -1,9 +1,7 @@
 package com.eflix.bsn.service.impl;
 
-import com.eflix.bsn.dto.OrdersDTO;
 import com.eflix.bsn.dto.SalesOutboundDTO;
 import com.eflix.bsn.dto.SoutboundDetailDTO;
-import com.eflix.bsn.mapper.OrdersMapper;
 import com.eflix.bsn.mapper.SOutboundMapper;
 import com.eflix.bsn.service.SOutboundService;
 import com.eflix.common.security.auth.AuthUtil;
@@ -26,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SOutboundServiceImpl implements SOutboundService {
 
     private final SOutboundMapper outboundMapper;
-    private final OrdersMapper ordersMapper; // 주문서 상태 업데이트를 위해 추가
 
     @Override
     @Transactional(readOnly = true)
@@ -46,12 +43,12 @@ public class SOutboundServiceImpl implements SOutboundService {
         String coIdx = AuthUtil.getCoIdx();
         dto.setCoIdx(coIdx);
 
-        // 1. 출하번호 생성
+        // 1. 출하번호가 없으면 새로 채번합니다.
         if (!StringUtils.hasText(dto.getOutboundNo())) {
             dto.setOutboundNo(generateNextOutboundNo());
         }
         
-        // 2. 기본값 설정
+        // 2. 작성일, 출고일 등 기본값을 설정합니다.
         if (!StringUtils.hasText(dto.getWriteDt())) {
             dto.setWriteDt(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         }
@@ -59,10 +56,10 @@ public class SOutboundServiceImpl implements SOutboundService {
             dto.setOutboundDt(java.sql.Date.valueOf(LocalDate.now()));
         }
 
-        // 3. 헤더 저장
+        // 3. 헤더 정보를 데이터베이스에 저장합니다.
         outboundMapper.insertOutbound(dto);
 
-        // 4. 상세 저장
+        // 4. 상세 품목 정보가 있으면 함께 저장합니다.
         if (dto.getDetails() != null && !dto.getDetails().isEmpty()) {
             prepareDetailData(dto.getDetails(), dto.getOutboundNo(), coIdx);
             outboundMapper.insertOutboundDetailBatch(dto.getDetails());
@@ -77,7 +74,7 @@ public class SOutboundServiceImpl implements SOutboundService {
         String coIdx = AuthUtil.getCoIdx();
         log.info("주문서 기반 출하 의뢰서 생성 시작 - 주문번호: {}", orderNo);
 
-        // 1. 주문서 정보 조회
+        // 1. 주문서 정보를 조회하여 출하 의뢰서 데이터를 구성합니다.
         SalesOutboundDTO outboundHeader = outboundMapper.selectOrderForOutbound(orderNo, coIdx);
         if (outboundHeader == null) {
             throw new IllegalArgumentException("주문서를 찾을 수 없습니다: " + orderNo);
@@ -89,24 +86,8 @@ public class SOutboundServiceImpl implements SOutboundService {
         }
         outboundHeader.setDetails(outboundDetails);
 
-        // 2. 출하 의뢰서 생성 (기존 로직 재사용)
+        // 2. 공통 생성 로직을 호출하여 출하 의뢰서를 최종 생성합니다.
         String outboundNo = createOutbound(outboundHeader);
-
-        // 3. 원본 주문서의 출고 상태 업데이트
-        try {
-            OrdersDTO orderToUpdate = new OrdersDTO();
-            orderToUpdate.setOrderNo(orderNo);
-            orderToUpdate.setCoIdx(coIdx);
-            // 예시: 주문서의 비고란에 출고번호 기록
-            OrdersDTO existingOrder = ordersMapper.selectOrderHeader(orderToUpdate);
-            if(existingOrder != null) {
-                existingOrder.setRemarks((existingOrder.getRemarks() == null ? "" : existingOrder.getRemarks()) + " [출고완료: " + outboundNo + "]");
-                ordersMapper.updateOrder(existingOrder);
-            }
-        } catch(Exception e) {
-            log.error("주문서 상태 업데이트 실패 - 주문번호: {}", orderNo, e);
-            // 출고는 생성되었으므로 이 오류가 전체 트랜잭션을 롤백시키지 않도록 처리
-        }
 
         log.info("주문서 기반 출하 의뢰서 생성 완료: {} -> {}", orderNo, outboundNo);
         return outboundNo;
@@ -117,17 +98,13 @@ public class SOutboundServiceImpl implements SOutboundService {
         String coIdx = AuthUtil.getCoIdx();
         dto.setCoIdx(coIdx);
         
-        // 1. 헤더 업데이트
-        outboundMapper.updateOutbound(dto);
-
-        // 2. 상세 업데이트 (기존 상세 모두 삭제 후 재등록)
-        outboundMapper.deleteOutbound(dto.getOutboundNo(), coIdx); // Cascade로 상세 삭제
-        outboundMapper.insertOutbound(dto); // 헤더 다시 삽입
-        if (dto.getDetails() != null && !dto.getDetails().isEmpty()) {
-            prepareDetailData(dto.getDetails(), dto.getOutboundNo(), coIdx);
-            outboundMapper.insertOutboundDetailBatch(dto.getDetails());
+        // 헤더 정보만 수정합니다. (상세 정보 수정은 별도 로직 필요)
+        int updatedRows = outboundMapper.updateOutbound(dto);
+        if (updatedRows == 0) {
+            throw new RuntimeException("수정할 출하 의뢰서가 없거나 권한이 없습니다: " + dto.getOutboundNo());
         }
-        log.info("출하 의뢰서 수정 완료: {}", dto.getOutboundNo());
+        
+        log.info("출하 의뢰서 헤더 수정 완료: {}", dto.getOutboundNo());
     }
 
     @Override
@@ -144,7 +121,13 @@ public class SOutboundServiceImpl implements SOutboundService {
     @Transactional(readOnly = true)
     public String generateNextOutboundNo() {
         String coIdx = AuthUtil.getCoIdx();
-        return outboundMapper.selectNextOutboundNo(coIdx);
+        String nextNo = outboundMapper.selectNextOutboundNo(coIdx);
+        // DB에서 채번 실패 시 대체 번호 생성
+        if (!StringUtils.hasText(nextNo)) {
+            String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            nextNo = "OUT-" + today + "-0001";
+        }
+        return nextNo;
     }
     
     @Override
@@ -154,6 +137,9 @@ public class SOutboundServiceImpl implements SOutboundService {
         return outboundMapper.selectOutboundStatusStats(coIdx);
     }
 
+    /**
+     * 상세 품목 데이터를 일괄 저장하기 전에 필요한 값(출하번호, 순번 등)을 설정합니다.
+     */
     private void prepareDetailData(List<SoutboundDetailDTO> details, String outboundNo, String coIdx) {
         AtomicInteger lineNo = new AtomicInteger(1);
         details.forEach(detail -> {
@@ -163,7 +149,7 @@ public class SOutboundServiceImpl implements SOutboundService {
             if (!StringUtils.hasText(detail.getOutboundStatus())) {
                 detail.setOutboundStatus("대기");
             }
-            detail.calculateAmounts();
+            // ★★★ 변경: 가격 관련 필드가 제거되었으므로, 금액 계산 로직을 삭제합니다. ★★★
         });
     }
 }
