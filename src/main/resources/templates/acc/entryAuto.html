@@ -190,6 +190,10 @@
         debitsGrid.api.applyTransaction({ remove: debitsGrid.api.getDisplayedRowAtIndex ? Array.from({length: debitsGrid.api.getDisplayedRowCount()}, (_, i) => debitsGrid.api.getDisplayedRowAtIndex(i).data) : [] });
         creditsGrid.api.applyTransaction({ remove: creditsGrid.api.getDisplayedRowAtIndex ? Array.from({length: creditsGrid.api.getDisplayedRowCount()}, (_, i) => creditsGrid.api.getDisplayedRowAtIndex(i).data) : [] });
         journalGrid.api.applyTransaction({ remove: journalGrid.api.getDisplayedRowAtIndex ? Array.from({length: journalGrid.api.getDisplayedRowCount()}, (_, i) => journalGrid.api.getDisplayedRowAtIndex(i).data) : [] });
+
+        // 합계행도 즉시 제거
+        safeSetPinnedBottomRow(debitsGrid.api, []);
+        safeSetPinnedBottomRow(creditsGrid.api, []);
         return;
       }
       const { attMonth, payMonth, entryDate, entryNumber } = selectedPeriod;
