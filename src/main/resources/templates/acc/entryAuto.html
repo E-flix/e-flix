@@ -209,6 +209,36 @@
 
       journalGrid.api.applyTransaction({ remove: journalGrid.api.getDisplayedRowAtIndex ? Array.from({length: journalGrid.api.getDisplayedRowCount()}, (_, i) => journalGrid.api.getDisplayedRowAtIndex(i).data) : [] });
       journalGrid.api.applyTransaction({ add: filteredJournal });
+
+      // 합계 행 추가
+      setPinnedBottomTotals(); 
+    }
+
+    function safeSetPinnedBottomRow(api, rows) { // 안전하게 핀된 하단 행 설정
+      if (!api) return; // api가 없으면 아무 작업도 하지 않음
+      if (api.setPinnedBottomRowData) api.setPinnedBottomRowData(rows); // 핀된 하단 행 데이터 설정
+      else if (api.setGridOption)      api.setGridOption('pinnedBottomRowData', rows); // 핀된 하단 행 데이터 설정 (구버전 호환)
+    }
+
+    // 합계 행 추가 함수
+    function setPinnedBottomTotals() { // 차변/대변 그리드의 합계 행 설정
+      // 차변 합계 
+      let debitsTotal = 0; // 차변 합계 계산
+      debitsGrid.api.forEachNode(n => { // 각 노드의 금액 합산
+        debitsTotal += Number(n.data.amount || 0); // 금액이 없으면 0으로 처리
+      });
+      safeSetPinnedBottomRow(debitsGrid.api, [ // 차변 합계 행 설정
+        { item: '합계', code: '', account: '', amount: debitsTotal } // 합계 행 데이터
+      ]);
+
+      // 대변 합계
+      let creditsTotal = 0; // 대변 합계 계산
+      creditsGrid.api.forEachNode(n => { // 각 노드의 금액 합산
+        creditsTotal += Number(n.data.amount || 0); // 금액이 없으면 0으로 처리
+      });
+      safeSetPinnedBottomRow(creditsGrid.api, [ // 대변 합계 행 설정
+        { item: '합계', code: '', account: '', amount: creditsTotal } // 합계 행 데이터
+      ]);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
