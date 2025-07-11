@@ -1,7 +1,9 @@
 package com.eflix.acc.dto;
 
+import java.util.Date;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /* ============================================
   - 작성자   : 김희정
@@ -10,21 +12,24 @@ import lombok.Getter;
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-19 (김희정): DTO 임시 생성 
+  - 2025-06-20 (김희정): DTO 데이터타입 설정 
 =============================================== */
 
-@Getter
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class AccountDTO {
-  private String account_code;
-  private String account_name;
-  private String account_type;
-  private String standard_account_name;
-  private String standard_english_name;
-  private String major_category;
-  private String middle_category;
-  private String minor_category;
-  private String use_flag;
-  private String created_at;
-  private String updated_at;
+  private int accountCode;
+  private String accountName;
+  private String accountType;
+  private String standardAccountName;
+  private String standardEnglishName;
+  private String majorCategory;
+  private String middleCategory;
+  private String minorCategory;
+  private String useFlag;
+  private Date createdAt;
+  private Date updatedAt;
   private String remarks;
+  private String coIdx;
 }

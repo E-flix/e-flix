@@ -1,0 +1,562 @@
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-18
+	- 설명    : E-FLIX 페이지 메인 모듈
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-18 (복성민): 파일생성 및 기본 코드 추가
+	- 2025-06-25 (복성민): sweetAlert 및 회원가입 로직 추가
+============================================
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+    crossorigin="anonymous"></script>
+<head>
+    <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+	<meta name="description" content="" />
+	<meta name="author" content="" />
+	<title>E-FLIX</title>
+	<link rel="icon" type="image/x-icon" th:href="@{/main/assets/favicon.ico}" />
+	<!-- Bootstrap icons-->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+	<!-- Google fonts-->
+	<link rel="preconnect" href="https://fonts.gstatic.com" />
+	<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,600;1,600&amp;display=swap"
+		rel="stylesheet" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,300;0,500;0,600;0,700;1,300;1,500;1,600;1,700&amp;display=swap"
+		rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;1,400&amp;display=swap"
+		rel="stylesheet" />
+
+	<!-- Jquery CDN -->
+	<script src="https://code.jquery.com/jquery-3.7.1.js"
+		integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+	<!-- Core theme CSS (includes Bootstrap)-->
+	<link th:href="@{/main/css/styles.css}" rel="stylesheet" />
+	<style>
+		.form-check-label {
+			margin-left: 0.25rem;
+		}
+        .modal-header {
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6.4.4.4-.4M5.8 8.4l.4-.4.4.4M3.6 5.8l.4.4-.4.4M8.4 5.8l-.4.4.4.4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .is-valid {
+            border-color: #198754;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 1.88 1.88 3.75-3.75.94.94-4.69 4.69z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .invalid-feedback {
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+        
+        .valid-feedback {
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #198754;
+        }
+        
+        .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+        }
+        
+        .form-floating > label {
+            opacity: 0.65;
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            opacity: 1;
+            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+        }
+    </style>
+	</style>
+</head>
+
+<body id="page-top">
+	
+    <!-- Navigation-->
+	<div th:replace="~{common/main/fragments/topbar::topbar}"></div>
+
+    <!-- Mashead header-->
+    <div layout:fragment="content" class="content"></div>
+    
+    <!-- Footer -->
+    <div th:replace="~{common/main/fragments/footer::footer}"></div>
+
+	<!-- Modal -->
+	<!-- 문의 Modal -->
+    <div class="modal fade" id="qnaModal" tabindex="-1" aria-labelledby="qnaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-primary-to-secondary">
+                    <h5 class="modal-title text-white" id="qnaModalLabel">
+                        <i class="fas fa-question-circle me-2"></i>문의하기
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contactForm">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="qstWriter" name="qstWriter" type="text" placeholder="이름..." />
+                            <label for="qstWriter">성함</label>
+                            <div class="invalid-feedback">성함을 입력해주세요.</div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="qstEmail" name="qstEmail" type="email" placeholder="name@example.com" />
+                            <label for="qstEmail">이메일</label>
+                            <div class="invalid-feedback">올바른 이메일 주소를 입력해주세요.</div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="qstTitle" name="qstTitle" type="text" placeholder="제목..." />
+                            <label for="qstTitle">제목</label>
+                            <div class="invalid-feedback">제목을 입력해주세요.</div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="qstContent" name="qstContent" placeholder="내용..." style="height: 120px"></textarea>
+                            <label for="qstContent">문의 내용</label>
+                            <div class="invalid-feedback">내용을 입력해주세요.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="submit" class="btn btn-primary" form="contactForm">
+                        <i class="fas fa-paper-plane me-2"></i>제출
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로그인 Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-primary-to-secondary">
+                    <h5 class="modal-title text-white" id="loginModalLabel">
+                        <i class="fas fa-sign-in-alt me-2"></i>로그인
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm" action="/login" method="post">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="username" name="username" type="text" placeholder="아이디..." />
+                            <label for="username">아이디</label>
+                            <div class="invalid-feedback">아이디를 입력해주세요.</div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="password" name="password" type="password" placeholder="비밀번호" />
+                            <label for="password">비밀번호</label>
+                            <div class="invalid-feedback">비밀번호를 입력해주세요.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="submit" class="btn btn-primary" form="loginForm">
+                        <i class="fas fa-sign-in-alt me-2"></i>로그인
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 회원가입 Modal -->
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-primary-to-secondary">
+                    <h5 class="modal-title text-white" id="signupModalLabel">
+                        <i class="fas fa-user-plus me-2"></i>회원가입
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="signupForm">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="userId" name="userId" type="text" placeholder="아이디..." />
+                            <label for="userId">아이디</label>
+                            <div class="invalid-feedback">아이디를 입력해주세요.</div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input class="form-control" id="userPw" name="userPw" type="password" placeholder="비밀번호" />
+                                    <label for="userPw">비밀번호</label>
+                                    <div class="invalid-feedback">비밀번호를 입력해주세요.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input class="form-control" id="userPw_check" name="userPw_check" type="password" placeholder="비밀번호 확인" />
+                                    <label for="userPw_check">비밀번호 확인</label>
+                                    <div class="invalid-feedback">비밀번호가 일치하지 않습니다.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="userName" name="userName" type="text" placeholder="이름..." />
+                            <label for="userName">이름</label>
+                            <div class="invalid-feedback">이름을 입력해주세요.</div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="userTel" name="userTel" type="tel" placeholder="연락처..." />
+                            <label for="userTel">연락처</label>
+                            <div class="invalid-feedback">연락처를 입력해주세요.</div>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="userEmail" name="userEmail" type="email" placeholder="이메일..." />
+                            <label for="userEmail">이메일</label>
+                            <div class="invalid-feedback">올바른 이메일 주소를 입력해주세요.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="submit" class="btn btn-primary" form="signupForm">
+                        <i class="fas fa-user-plus me-2"></i>회원가입
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+	<script>
+		 $(document).ready(function() {
+            // 이메일 유효성 검사 함수
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+            
+            // 전화번호 유효성 검사 함수
+            function isValidPhone(phone) {
+                const phoneRegex = /^[0-9-+().\s]+$/;
+                return phoneRegex.test(phone) && phone.length >= 10;
+            }
+            
+            // 필드 유효성 검사 및 피드백 표시
+            function validateField(field, isValid, message) {
+                const $field = $(field);
+                const $feedback = $field.next('.invalid-feedback');
+                
+                if (isValid) {
+                    $field.removeClass('is-invalid').addClass('is-valid');
+                    $feedback.hide();
+                } else {
+                    $field.removeClass('is-valid').addClass('is-invalid');
+                    if (message) {
+                        $feedback.text(message);
+                    }
+                    $feedback.show();
+                }
+                
+                return isValid;
+            }
+            
+            // 실시간 유효성 검사
+            $('#qstWriter, #userName, #userId').on('input', function() {
+                const value = $(this).val().trim();
+                validateField(this, value.length >= 2, '2자 이상 입력해주세요.');
+            });
+            
+            $('#qstEmail, #userEmail').on('input', function() {
+                const value = $(this).val().trim();
+                if (value.length === 0) {
+                    validateField(this, false, '이메일을 입력해주세요.');
+                } else {
+                    validateField(this, isValidEmail(value), '올바른 이메일 주소를 입력해주세요.');
+                }
+            });
+            
+            $('#qstTitle').on('input', function() {
+                const value = $(this).val().trim();
+                validateField(this, value.length >= 1, '제목을 입력해주세요.');
+            });
+            
+            $('#qstContent').on('input', function() {
+                const value = $(this).val().trim();
+                validateField(this, value.length >= 5, '5자 이상 입력해주세요.');
+            });
+            
+            $('#username, #password').on('input', function() {
+                const value = $(this).val().trim();
+                validateField(this, value.length >= 1, '필수 항목입니다.');
+            });
+            
+            $('#userPw').on('input', function() {
+                const value = $(this).val();
+                const isValid = value.length >= 6;
+                validateField(this, isValid, '6자 이상 입력해주세요.');
+                
+                // 비밀번호 확인 재검사
+                const confirmPw = $('#userPw_check').val();
+                if (confirmPw) {
+                    validateField('#userPw_check', value === confirmPw, '비밀번호가 일치하지 않습니다.');
+                }
+            });
+            
+            $('#userPw_check').on('input', function() {
+                const value = $(this).val();
+                const password = $('#userPw').val();
+                validateField(this, value === password && value.length > 0, '비밀번호가 일치하지 않습니다.');
+            });
+            
+            $('#userTel').on('input', function() {
+                const value = $(this).val().trim();
+                if (value.length === 0) {
+                    validateField(this, false, '연락처를 입력해주세요.');
+                } else {
+                    validateField(this, isValidPhone(value), '올바른 연락처를 입력해주세요.');
+                }
+            });
+            
+            // 문의 폼 제출
+            $('#contactForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                // 유효성 검사
+                const writer = $('#qstWriter').val().trim();
+                const email = $('#qstEmail').val().trim();
+                const title = $('#qstTitle').val().trim();
+                const content = $('#qstContent').val().trim();
+                
+                let isValid = true;
+                
+                isValid &= validateField('#qstWriter', writer.length >= 2, '성함을 입력해주세요.');
+                isValid &= validateField('#qstEmail', email.length > 0 && isValidEmail(email), '올바른 이메일 주소를 입력해주세요.');
+                isValid &= validateField('#qstTitle', title.length >= 1, '제목을 입력해주세요.');
+                isValid &= validateField('#qstContent', content.length >= 5, '내용을 5자 이상 입력해주세요.');
+                
+                if (!isValid) {
+                    return;
+                }
+                
+                const contactData = $(this).serializeArray().reduce(function(obj, item) {
+                    obj[item.name] = item.value;
+                    return obj;
+                }, {});
+                
+                console.log(contactData);
+                
+                // 제출 버튼 비활성화
+                const $submitBtn = $('button[form="contactForm"]');
+                $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>제출 중...');
+                
+                $.ajax({
+                    type: "POST",
+                    url: "/inquiry/qst",
+                    data: JSON.stringify(contactData),
+                    contentType: "application/json",
+                    success: function(res) {
+                        console.log(res);
+                        if(res.head.res_code === "200") {
+                            Swal.fire("성공", "문의 등록이 완료되었습니다.", "success");
+                            $('#qnaModal').modal('hide');
+                            $('#contactForm')[0].reset();
+                            $('#contactForm .form-control').removeClass('is-valid is-invalid');
+                        } else {
+                            Swal.fire("실패", res.head.res_result, "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+                    },
+                    complete: function() {
+                        $submitBtn.prop('disabled', false).html('<i class="fas fa-paper-plane me-2"></i>제출');
+                    }
+                });
+            });
+            
+            // 로그인 폼 제출
+            $('#loginForm').on('submit', function (e) {
+				 e.preventDefault();
+
+				 const username = $('#username').val().trim();
+				 const password = $('#password').val().trim();
+
+				 let isValid = true;
+
+				 isValid &= validateField('#username', username.length > 0, '아이디를 입력해주세요.');
+				 isValid &= validateField('#password', password.length > 0, '비밀번호를 입력해주세요.');
+
+				 if (!isValid) {
+					 return;
+				 }
+
+				 const $submitBtn = $('button[form="loginForm"]');
+				 $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>로그인 중...');
+
+				 $.ajax({
+					 url: '/login',
+					 type: 'POST',
+					 data: {
+						 username: username,
+						 password: password
+					 },
+					 success: function (res) {
+						 window.location.href = "/";
+					 },
+					 error: function (xhr) {
+						 Swal.fire("실패", "아이디 또는 비밀번호가 올바르지 않습니다.", "error");
+					 },
+					 complete: function () {
+						 $submitBtn.prop('disabled', false).html('<i class="fas fa-sign-in-alt me-2"></i>로그인');
+					 }
+				 });
+			 });
+            
+            // 회원가입 폼 제출
+            $('#signupForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const userId = $('#userId').val().trim();
+                const userPw = $('#userPw').val();
+                const userPwCheck = $('#userPw_check').val();
+                const userName = $('#userName').val().trim();
+                const userTel = $('#userTel').val().trim();
+                const userEmail = $('#userEmail').val().trim();
+                
+                let isValid = true;
+                
+                isValid &= validateField('#userId', userId.length >= 2, '아이디를 2자 이상 입력해주세요.');
+                isValid &= validateField('#userPw', userPw.length >= 6, '비밀번호를 6자 이상 입력해주세요.');
+                isValid &= validateField('#userPw_check', userPw === userPwCheck && userPwCheck.length > 0, '비밀번호가 일치하지 않습니다.');
+                isValid &= validateField('#userName', userName.length >= 2, '이름을 입력해주세요.');
+                isValid &= validateField('#userTel', userTel.length > 0 && isValidPhone(userTel), '올바른 연락처를 입력해주세요.');
+                isValid &= validateField('#userEmail', userEmail.length > 0 && isValidEmail(userEmail), '올바른 이메일 주소를 입력해주세요.');
+                
+                if (!isValid) {
+                    return;
+                }
+                
+                const signupData = $(this).serializeArray().reduce(function(obj, item) {
+                    obj[item.name] = item.value;
+                    return obj;
+                }, {});
+                
+                const $submitBtn = $('button[form="signupForm"]');
+                $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>가입 중...');
+                
+                $.ajax({
+                    type: "POST",
+                    url: "/signup",
+                    data: JSON.stringify(signupData),
+                    contentType: "application/json",
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            Swal.fire("성공", "회원가입이 완료되었습니다.", "success");
+                            $('#signupModal').modal('hide');
+                            $('#signupForm')[0].reset();
+                            $('#signupForm .form-control').removeClass('is-valid is-invalid');
+							$('.modal-backdrop').remove(); 
+                        } else {
+                            Swal.fire("실패", res.head.res_result, "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+                    },
+                    complete: function() {
+                        $submitBtn.prop('disabled', false).html('<i class="fas fa-user-plus me-2"></i>회원가입');
+                    }
+                });
+            });
+            
+            // 로그아웃 버튼
+            $('#signoutBtn').on('click', function() {
+                Swal.fire({
+                    title: "정말로 로그아웃 하시겠습니까?",
+                    showDenyButton: true,
+                    confirmButtonText: "확인",
+                    denyButtonText: "취소",
+                    icon: 'question'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: "/logout",
+                            contentType: "application/json",
+                            success: function(res) {
+                                Swal.fire("성공", "로그아웃되었습니다.", "success").then(() => {
+                                    window.location.href = "/";
+									$('.modal-backdrop').remove(); 
+                                });
+                            },
+                            error: function(xhr, status, err) {
+                                Swal.fire("오류", "로그아웃 중 오류가 발생했습니다.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+            
+            // 모달 닫힐 때 유효성 검사 상태 초기화
+            $('.modal').on('hidden.bs.modal', function() {
+                $(this).find('.form-control').removeClass('is-valid is-invalid');
+                $(this).find('.invalid-feedback').hide();
+            });
+        });
+    </script>
+	
+    <!-- Bootstrap core JS-->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+	<!-- SweetAlert2 CSS/JS CDN  -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<!-- Core theme JS-->
+	<script th:src="@{/main/js/scripts.js}"></script>
+
+	<!-- <script th:src="@{/erp/js/home.js}"></script> -->
+	<!-- <script th:src="@{/erp/js/erp_home.js}"></script> -->
+</body>
+
+</html>

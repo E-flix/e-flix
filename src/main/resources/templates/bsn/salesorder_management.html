@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{common/layouts/default}">
+
+<head>
+  <meta charset="UTF-8" />  
+  <title>주문서 관리</title>
+  
+  <!-- 외부 CSS 파일 연결 -->
+  <link rel="stylesheet" th:href="@{/css/salesorder_management.css}" />
+  
+  <!-- jQuery 및 jQuery UI (기존 의존성 유지) -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+</head>
+
+<div layout:fragment="content" class="management-container">
+  
+  <!-- 페이지 제목 -->
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h4 class="mb-0">
+          <i class="fas fa-clipboard-list mr-2"></i>주문서 관리
+        </h4>
+        <small class="opacity-75">주문서 등록, 수정, 삭제 및 조회</small>
+      </div>
+      
+      <!-- 액션 버튼들 -->
+      <div>
+        <button type="button" class="btn btn-quotation btn-sm me-1" id="btnQuotationSearch" disabled>
+          <i class="fas fa-file-alt"></i> 견적서 조회
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm me-1" id="btnDebug" style="background-color: #6c757d;">
+          <i class="fas fa-bug"></i> 디버그
+        </button>
+        <button type="button" class="btn btn-create btn-sm me-1" id="btnNew">
+          <i class="fas fa-plus"></i> 신규
+        </button>
+        <button type="button" class="btn btn-edit btn-sm me-1" id="btnEdit">
+          <i class="fas fa-edit"></i> 수정
+        </button>
+        <button type="button" class="btn btn-delete btn-sm me-1" id="btnDelete">
+          <i class="fas fa-trash"></i> 삭제
+        </button>
+        <button type="button" class="btn btn-save btn-sm" id="btnSave">
+          <i class="fas fa-save"></i> 등록
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card section-box">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-list mr-2"></i>주문서 헤더 목록
+          </h6>
+          <button type="button" class="btn btn-save btn-sm" id="btnSaveHeader">
+            <i class="fas fa-save"></i>헤더 저장
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="headerGrid" class="ag-theme-alpine header-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ────────────── 여신 정보 ──────────────-->
+  <div class="row">
+    <div class="col-12">
+      <div class="card section-box">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+          <h6 class="m-0 font-weight-bold text-success">
+            <i class="fas fa-credit-card mr-2"></i>여신 정보
+          </h6>
+          <span id="credit-status-badge" class="badge bg-secondary">거래처를 선택하세요</span>
+        </div>
+        <div class="card-body">
+          <div id="creditGrid" class="ag-theme-alpine credit-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 주문서 디테일 그리드 -->
+  <div class="card section-box">
+    <div class="card-header py-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-info">
+          <i class="fas fa-boxes mr-2"></i>주문서 디테일
+        </h6>
+        <div>
+          <button type="button" class="btn btn-info btn-sm" id="btnAddRow">
+            <i class="fas fa-plus"></i> 행 추가
+          </button>
+          <button type="button" class="btn btn-warning btn-sm" id="btnDeleteRow">
+            <i class="fas fa-minus"></i> 행 삭제
+          </button>
+          <button type="button" class="btn btn-save btn-sm" id="btnSaveDetail">
+            <i class="fas fa-save"></i>저장
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="detailGrid" class="ag-theme-alpine detail-grid"></div>
+    </div>
+  </div>
+
+  <!-- 견적서 조회 모달 -->
+  <div class="modal fade" id="quotationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-file-alt mr-2"></i>견적서 조회 및 변환
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- 견적서 검색 필터 -->
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label class="form-label">견적서 번호</label>
+              <input id="quotationNoFilter" type="text" class="form-control form-control-sm" placeholder="견적서 번호">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">거래처명</label>
+              <input id="customerNameFilter" type="text" class="form-control form-control-sm" placeholder="거래처명">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">견적일자(시작)</label>
+              <input id="quotationDateFrom" type="date" class="form-control form-control-sm">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">견적일자(종료)</label>
+              <input id="quotationDateTo" type="date" class="form-control form-control-sm">
+            </div>
+          </div>
+          <div class="text-center mb-3">
+            <button id="btnQuotationFilter" class="btn btn-primary btn-sm">
+              <i class="fas fa-search"></i> 검색
+            </button>
+            <button id="btnQuotationFilterReset" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-undo"></i> 초기화
+            </button>
+          </div>
+          
+          <!-- 견적서 목록 -->
+          <div class="table-responsive">
+            <table class="table table-bordered quotation-modal-table mb-0">
+              <thead>
+                <tr>
+                  <th width="80">선택</th>
+                  <th width="150">견적서 번호</th>
+                  <th width="100">견적일자</th>
+                  <th width="150">거래처명</th>
+                  <th width="100">대표명</th>
+                  <th width="120">연락처</th>
+                  <th width="100">유효기간</th>
+                  <th width="100">납기예정일</th>
+                  <th>비고</th>
+                </tr>
+              </thead>
+              <tbody id="quotationSearchResults"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> 취소
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 거래처 검색 모달 -->
+  <div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-search mr-2"></i>거래처 조회
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group mb-3">
+            <input id="customerSearchInput" type="text" class="form-control" placeholder="거래처명 검색">
+            <button id="btnCustomerSearch" class="btn btn-outline-primary">
+              <i class="fas fa-search"></i> 검색
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>선택</th><th>코드</th><th>이름</th><th>대표명</th><th>전화번호</th>
+                </tr>
+              </thead>
+              <tbody id="customerSearchResults"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 품목 검색 모달 -->
+  <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-cube mr-2"></i>품목 목록
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="table-responsive">
+            <table class="table table-bordered m-0">
+              <thead class="table-light">
+                <tr>
+                  <th>선택</th><th>코드</th><th>이름</th><th>규격</th><th>단위</th><th>단가</th>
+                </tr>
+              </thead>
+              <tbody id="itemSearchResults"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 외부 JavaScript 파일 연결 -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script th:src="@{/js/salesorder_management.js}"></script>
+</div>
+</html>

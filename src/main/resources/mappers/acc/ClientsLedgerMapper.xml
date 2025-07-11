@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================
+  - 작성자   : 김희정
+  - 최초작성 : 2025-06-26
+  - 설명     : clientsLedgerMapper query xml
+  [ 변경 이력 ]
+	- 2025-06-26 (김희정): 잔액 전체 조회 작성
+	- 2025-06-27 (김희정): 내용 전체 조회 작성
+	                     : property 계정과목 대분류 추가 / 잔액 전체 조회에 accountCode 필수조건 추가 
+=============================================== -->
+<mapper namespace="com.eflix.acc.mapper.ClientsLedgerMapper">
+  <!-- property == DTO의 필드명, column == 쿼리 결과의 컬럼명 (alias 포함) -->
+  <!-- EntryDetailDTO 매핑 정의 -->
+  <resultMap id="entryDetailResultMap" type="com.eflix.acc.dto.EntryDetailDTO">
+    <id property="lineNumber" column="line_number" />
+    <result property="entryNumber" column="entry_number" />
+    <result property="partnerCode" column="partner_code" />
+    <result property="partnerName" column="partner_name" />
+    <result property="accountCode" column="account_code" />
+    <result property="resentmenType" column="resentmen_type" />
+    <result property="amount" column="amount" />
+    <result property="description" column="description" />
+    <result property="coIdx" column="co_idx"/>
+    
+    <result property="accountName" column="account_name"/>
+    <result property="majorCategory" column="major_category"/>
+    <result property="businessNumber" column="business_number"/>
+    <result property="residentNumber" column="resident_number"/>
+    <result property="representativeName" column="representative_name"/> 
+    <result property="institutionName" column="institution_name"/>
+    <result property="accountNumber" column="account_number"/>
+    <result property="cardName" column="card_name"/>
+    <result property="cardNumber" column="card_number"/>
+  </resultMap>
+
+  <!-- EntryMasterDTO + details 매핑 정의 -->
+  <resultMap id="entryMasterResultMap" type="com.eflix.acc.dto.EntryMasterDTO">
+    <id property="entryNumber" column="entry_number" />
+    <result property="entryType" column="entry_type" />
+    <result property="entryDate" column="entry_date" />
+    <result property="transactionType" column="transaction_type" />
+    <result property="remarks" column="remarks" />
+    <result property="coIdx" column="co_idx"/>
+    <!-- 디테일 부분 컬렉션 매핑 => 하위 컬렉션 매핑 (1:N 관계) 
+     ofType == collection에서 리스트 안에 들어가는 객체의 타입을 알려주는 속성 -->
+    <collection property="details" ofType="com.eflix.acc.dto.EntryDetailDTO" resultMap="entryDetailResultMap" />
+  </resultMap>
+
+  <!-- 잔액 => 전표 전체 조회 => 마스터 + 디테일 전체 조회 -->
+  <select id="getList" resultMap="entryMasterResultMap"> 
+    SELECT 
+      m.entry_number,
+      m.entry_type,
+      m.entry_date, 
+      m.transaction_type,
+      m.remarks, 
+      d.line_number, 
+      d.partner_code,
+      d.account_code,
+      d.resentmen_type, 
+      d.amount, 
+      d.description, 
+      a.account_name,
+      a.major_category,
+      pd.partner_name, 
+      pd.business_number,
+      pd.resident_number,
+      pd.representative_name,
+      fd.institution_name, 
+      fd.account_number,
+      cd.card_name,
+      cd.card_number
+    FROM entry_master m
+    LEFT JOIN entry_detail d 
+      ON m.entry_number = d.entry_number 
+      AND m.co_idx = #{coIdx}
+      AND d.co_idx = #{coIdx}
+    LEFT JOIN account a 
+      ON d.account_code = a.account_code
+      AND a.co_idx = #{coIdx}
+    LEFT JOIN partner_number_master pm 
+      ON d.partner_code = pm.partner_code
+    LEFT JOIN partner_detail pd 
+      ON pm.partner_code = pd.partner_code 
+      AND pm.partner_type = 'd1'
+      AND pd.co_idx = #{coIdx}
+    LEFT JOIN financial_institution_detail fd 
+      ON pm.partner_code = fd.partner_code 
+      AND pm.partner_type = 'd2'
+      AND fd.co_idx = #{coIdx}
+    LEFT JOIN card_detail cd 
+      ON pm.partner_code = cd.partner_code 
+      AND pm.partner_type = 'd3'
+      AND cd.co_idx = #{coIdx}
+    <where>
+      <choose>
+        <!-- accountCode가 있는 경우 조건 추가 -->
+        <when test="accountCode != null and accountCode != ''">
+          d.account_code = #{accountCode}
+          AND m.ledger_check = 'a1'
+          <if test="startDate != null and startDate != ''">
+            <![CDATA[
+              AND m.entry_date >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+            ]]>
+          </if>
+          <if test="endDate != null and endDate != ''">
+            <![CDATA[
+              AND m.entry_date <= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+            ]]>
+          </if>
+          <if test="partnerCode != null and partnerCode != ''">
+              AND d.partner_code = #{partnerCode}
+          </if>
+        </when>
+        <!-- accountCode가 없으면 결과 없음 -->
+        <otherwise>
+          1 = 0
+        </otherwise>
+      </choose>
+    </where>
+  </select>
+
+   <!-- 내용 => 전표 전체 조회 => 마스터 + 디테일 전체 조회 -->
+  <select id="getListDetail" resultMap="entryMasterResultMap"> 
+    SELECT 
+      m.entry_type,
+      m.entry_date, 
+      m.transaction_type,
+      m.remarks, 
+      d.entry_number,
+      d.partner_code,
+      d.account_code,
+      d.resentmen_type, 
+      d.amount, 
+      d.description, 
+      a.account_name,
+      a.major_category
+    FROM entry_master m 
+    LEFT JOIN entry_detail d ON m.entry_number = d.entry_number 
+    LEFT JOIN account a ON d.account_code = a.account_code
+  <where>
+    <choose>
+      <!-- accountCode가 있는 경우 조건 추가 -->
+      <when test="accountCode != null and accountCode != ''">
+        d.account_code = #{accountCode}
+        AND m.ledger_check = 'a1'
+        AND m.co_idx = #{coIdx}
+        AND d.co_idx = #{coIdx}
+        AND a.co_idx = #{coIdx}
+        <if test="startDate != null and startDate != ''">
+          <![CDATA[
+            AND m.entry_date >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+          ]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+          <![CDATA[
+            AND m.entry_date <= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+          ]]>
+        </if>
+        <if test="partnerCode != null and partnerCode != ''">
+            AND d.partner_code = #{partnerCode}
+        </if>
+      </when>
+      <!-- accountCode가 없으면 결과 없음 -->
+      <otherwise>
+        1 = 0
+      </otherwise>
+    </choose>
+  </where>
+    ORDER BY m.entry_date, entry_number
+  </select>
+</mapper>

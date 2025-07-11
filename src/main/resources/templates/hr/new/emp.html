@@ -1,0 +1,920 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-18
+  - 설명     : 사원 조회화면 (관리자)
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-18 (김어진): title 및 내용 추가
+  - 2025-06-19 (김어진): layout 구성 및 모달창 생성
+  - 2025-06-20 (김어진): 사원 전체조회 구현
+  - 2025-06-23 (김어진): 조건별 검색 구현
+  - 2025-06-24 (김어진): 사원등록 구현 중
+  - 2025-06-26 (김어진): 사원등록 구현완료 및 사원수정 구현
+============================================ -->
+
+<head>
+    <title>사원관리</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+
+<div layout:fragment="content">
+    <div class="w-100" id="empList">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>사원관리asd</h3>
+        </div>
+        <div class="py-4">
+            <!-- 사원등록 / 수정 버튼 -->
+            <div class="d-flex justify-content-end mb-2 gap-2">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#employeeModal"
+                    id="insertEmp">
+                    사원등록
+                </button>
+            </div>
+
+            <!-- 검색 필터 -->
+            <div class="p-4 bg-light rounded mb-4">
+                <div class="row g-3 align-items-center mb-3">
+                    <div class="col-md-2"><label class="form-label">검색 기준</label></div>
+                    <div class="col-md-2">
+                        <select name="option" class="form-select" id="searchSelect">
+                            <option value="">전체</option>
+                            <option value="empName">사원명</option>
+                            <option value="empIdx">사원ID</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="keyword" class="form-control" id="searchKeyword"
+                            placeholder="검색어 입력 후 [enter]">
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-2">
+                        <label class="form-label">부서</label>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="deptUpIdx" class="form-select" id="searchDeptUpIdx">
+                            <option value="">전체</option>
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">상세 부서</label>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="deptIdx" class="form-select" id="searchDeptDownIdx">
+                            <option value="">전체</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-3 mb-3 align-items-center">
+                    <div class="col-md-2">
+                        <label class="form-label">직급</label>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="empGrade" class="form-select" id="searchGrade">
+                            <option value="">전체</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">재직 상태</label>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="empStatusType" class="form-select" id="searchEmpStatus">
+                            <option value="">전체</option>
+                            <option value="ES01">재직자</option>
+                            <option value="ES02">퇴사자</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">근무 유형</label>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="empType" class="form-select" id="searchEmpType">
+                            <option value="">전체</option>
+                            <option value="EP01">정규직</option>
+                            <option value="EP02">계약직</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-primary" id="searchBtn">조회</button>
+                    <button class="btn btn-secondary">초기화</button>
+                </div>
+            </div>
+
+            <!-- 2. 사원 테이블 -->
+            <!-- 사원 목록 테이블 -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 text-primary">
+                            <i class="bi bi-list-ul me-2"></i>사원 목록
+                        </h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary">총 <span id="totalCount">150</span>명</span>
+                            <select class="form-select form-select-sm" style="width: auto;" id="itemSizeSelect">
+                                <option value="10">10개씩</option>
+                                <option value="25">25개씩</option>
+                                <option value="50">50개씩</option>
+                                <option value="100">100개씩</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="text-center">
+                                        <input type="checkbox" class="form-check-input position-static">
+                                    </th>
+                                    <th scope="col">사원번호</th>
+                                    <th scope="col">사원명</th>
+                                    <th scope="col">부서</th>
+                                    <th scope="col">직급</th>
+                                    <th scope="col">연락처</th>
+                                    <th scope="col">이메일</th>
+                                    <th scope="col">입사일</th>
+                                    <th scope="col">상태</th>
+                                    <th scope="col" class="text-center">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="empListBody">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top">
+                    <nav aria-label="페이지 네비게이션">
+                        <ul class="pagination justify-content-center mb-0" id="paginationArea">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <!-- 사원등록 모달 -->
+        <div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content shadow">
+
+                    <!-- 헤더 -->
+                    <div class="modal-header bg-primary text-white border-0">
+                        <h5 class="modal-title fw-bold" id="employeeModalLabel">
+                            <i class="bi bi-person-plus me-2"></i>사원등록
+                        </h5>
+                        <button type="button" id="employeeModalCloseX" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <!-- 2) 바디 -->
+                    <div class="modal-body p-4">
+                        <!-- 기본 정보 섹션 -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="text-primary fw-bold border-bottom border-primary pb-2 mb-3">
+                                    <i class="bi bi-person-badge me-2"></i>기본 정보
+                                </h6>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="d-flex justify-content-center align-items-start">
+                                    <div class="text-center">
+                                        <div class="position-relative">
+                                            <img id="empPhotoPreview"
+                                                src="https://via.placeholder.com/120x150/e9ecef/6c757d?text=사진"
+                                                class="img-thumbnail rounded"
+                                                style="width: 120px; height: 150px; object-fit: cover;" alt="사원 사진">
+                                            <!-- 사진 업로드 버튼 -->
+                                            <button type="button" id="photoUploadBtn"
+                                                class="btn btn-sm btn-primary position-absolute bottom-0 start-50 translate-middle-x mb-1"
+                                                style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                <i class="bi bi-camera"></i>
+                                            </button>
+                                        </div>
+                                        <!-- 파일 입력 -->
+                                        <input type="file" name="empPhoto" id="empPhoto" class="d-none"
+                                            accept="image/*">
+                                        <small class="text-muted d-block mt-1">사진 업로드</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                                // 버튼 클릭 시 파일 선택창 열기
+                                $("#photoUploadBtn").on("click", function () {
+                                    $("#empPhoto").trigger("click");
+                                });
+
+                                // 파일 선택 시 미리보기 이미지 변경
+                                $("#empPhoto").on("change", function (e) {
+                                    if (e.target.files.length > 0) {
+                                        const file = e.target.files[0];
+                                        if (!file.type.match('image.*')) {
+                                            alert('이미지 파일만 업로드 가능합니다.');
+                                            $(this).val(""); // 선택 초기화
+                                            return;
+                                        }
+                                        const reader = new FileReader();
+                                        reader.onload = function (event) {
+                                            $("#empPhotoPreview").attr("src", event.target.result);
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                });
+                            </script>
+                            <div class="col-md-9">
+                                <!-- 사원번호 / 사원명 -->
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <label for="empIdx" class="col-form-label fw-semibold text-dark">
+                                            <i class="bi bi-hash text-muted me-1"></i>사원번호
+                                        </label>
+                                        <input type="text" name="empIdx" class="form-control form-control bg-light"
+                                            placeholder="사원번호는 자동생성 됩니다." id="modalEmpIdx" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="empName" class="col-form-label fw-semibold text-dark">
+                                            <i class="bi bi-person text-muted me-1"></i>사원명 <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" name="empName" class="form-control form-control"
+                                            placeholder="사원명을 입력하세요" id="modalEmpName">
+                                    </div>
+                                </div>
+                                <!-- 주민번호 -->
+                                <div class="row mb-2">
+                                    <div class="col-md-3"> </div>
+                                    <div class="col-md-3"> </div>
+                                    <div class="col-md-6">
+                                        <label class="col-form-label fw-semibold text-dark">
+                                            <i class="bi bi-card-text text-muted me-1"></i>주민번호 <span
+                                                class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group input-group">
+                                            <input type="text" name="rrnPfx" class="form-control" placeholder="앞 6자리"
+                                                maxlength="6" id="modalRrnPfx">
+                                            <span class="input-group-text bg-light fw-bold">-</span>
+                                            <input type="password" name="rrnSfx" class="form-control"
+                                                placeholder="뒤 7자리" maxlength="7" id="modalRrnSfx">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 연락 정보 섹션 -->
+                        <div class="row mb-3 mt-3">
+                            <div class="col-12">
+                                <h6 class="text-primary fw-bold border-bottom border-primary pb-2 mb-3">
+                                    <i class="bi bi-telephone me-2"></i>연락 정보
+                                </h6>
+                            </div>
+                        </div>
+                        <!-- 이메일 / 연락처 -->
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label for="empEmail" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-envelope text-muted me-1"></i>이메일(ID) <span
+                                        class="text-danger">*</span>
+                                </label>
+                                <input type="email" name="empEmail" class="form-control form-control"
+                                    placeholder="이메일을 입력하세요" id="modalEmpEmail">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="empPhone" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-phone text-muted me-1"></i>연락처 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="empPhone" class="form-control form-control"
+                                    placeholder="'-' 없이 숫자만 입력" id="modalEmpPhone">
+                            </div>
+                        </div>
+
+                        <!-- 비밀번호 / 입사일 -->
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label for="empPassword" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-key text-muted me-1"></i>비밀번호 <span class="text-danger">*</span>
+                                </label>
+                                <input type="password" name="empPw" class="form-control form-control" id="modalEmpPw">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="empRegdate" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-calendar text-muted me-1"></i>입사일 <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="empRegdate" class="form-control form-control"
+                                    id="modalEmpRegdate">
+                            </div>
+                        </div>
+
+                        <!-- 조직 정보 섹션 -->
+                        <div class="row mb-3 mt-3">
+                            <div class="col-12">
+                                <h6 class="text-primary fw-bold border-bottom border-primary pb-2 mb-3">
+                                    <i class="bi bi-diagram-3 me-2"></i>조직 정보
+                                </h6>
+                            </div>
+                        </div>
+
+                        <!-- 부서 / 상세부서 -->
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label for="insertDeptSelect" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-building text-muted me-1"></i>부서 <span class="text-danger">*</span>
+                                </label>
+                                <select id="modalDeptUpIdx" name="deptUpIdx" class="form-select form-select">
+                                    <option value="">선택</option>
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="insertDetailDeptSelect" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-diagram-2 text-muted me-1"></i>상세 부서
+                                </label>
+                                <select id="modalDeptDownIdx" name="deptIdx" class="form-select form-select">
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <!-- 직급 / 권한 -->
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label for="empGrade" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-award text-muted me-1"></i>직급 <span class="text-danger">*</span>
+                                </label>
+                                <select name="empGrade" class="form-select form-select" id="modalGrade">
+                                    <option value="">선택</option>
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="authority" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-shield-check text-muted me-1"></i>권한 <span
+                                        class="text-danger">*</span>
+                                </label>
+                                <select name="roleName" class="form-select form-select" id="modalRoleId">
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <!-- 근무유형 -->
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label for="empType" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-clock text-muted me-1"></i>근무유형 <span class="text-danger">*</span>
+                                </label>
+                                <select name="empType" class="form-select form-select" id="modalEmpType">
+                                    <option value="">선택</option>
+                                    <option value="EP01">정규직</option>
+                                    <option value="EP02">계약직</option>
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 급여 정보 섹션 -->
+                        <div class="row mb-3 mt-3">
+                            <div class="col-12">
+                                <h6 class="text-primary fw-bold border-bottom border-primary pb-2 mb-3">
+                                    <i class="bi bi-credit-card me-2"></i>급여 정보
+                                </h6>
+                            </div>
+                        </div>
+
+                        <!-- 급여계좌 / 계좌번호 -->
+                        <div class="row mb-2">
+                            <div class="col-md-5">
+                                <label for="bankListSelect" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-bank text-muted me-1"></i>급여계좌
+                                </label>
+                                <select name="bankCode" class="form-select form-select" id="modalBank">
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="empAccount" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-credit-card-2-front text-muted me-1"></i>계좌번호
+                                </label>
+                                <input type="text" name="empAccount" class="form-control form-control"
+                                    placeholder="계좌번호를 입력하세요" id="modalEmpAccount">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="baseSalary" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-credit-card-2-front text-muted me-1"></i>기본급
+                                </label>
+                                <input type="number" name="baseSalary" class="form-control form-control" step="0.01"
+                                    placeholder="기본급" id="modalBaseSalary">
+                            </div>
+                        </div>
+
+                        <!-- 주소 정보 섹션 -->
+                        <div class="row mb-3 mt-3">
+                            <div class="col-12">
+                                <h6 class="text-primary fw-bold border-bottom border-primary pb-2 mb-3">
+                                    <i class="bi bi-geo-alt me-2"></i>주소 정보
+                                </h6>
+                            </div>
+                        </div>
+
+                        <!-- 주소 -->
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <label class="col-form-label fw-semibold text-dark mb-2">
+                                    <i class="bi bi-house text-muted me-1"></i>주소
+                                </label>
+                                <div class="input-group input-group mb-3">
+                                    <button class="btn btn-outline-primary" type="button"
+                                        onclick="sample6_execDaumPostcode()">
+                                        <i class="bi bi-search me-1"></i>우편번호 검색
+                                    </button>
+                                    <input type="text" name="empAddrZip" id="addEmpAddrZip" class="form-control"
+                                        placeholder="우편번호" readonly>
+                                </div>
+                                <input type="text" name="empAddr" id="addEmpAddr" class="form-control form-control mb-3"
+                                    placeholder="기본 주소" readonly>
+                                <input type="text" name="empAddrDetail" id="addEmpAddrDetail"
+                                    class="form-control form-control" placeholder="상세주소를 입력하세요">
+                            </div>
+                        </div>
+                        <!-- 추가 정보 섹션 -->
+                        <div class="row mb-3 mt-3">
+                            <div class="col-12">
+                                <h6 class="text-primary fw-bold border-bottom border-primary pb-2 mb-3">
+                                    <i class="bi bi-chat-text me-2"></i>추가 정보
+                                </h6>
+                            </div>
+                        </div>
+
+                        <!-- 메모 -->
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <label for="empMemo" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-journal-text text-muted me-1"></i>메모
+                                </label>
+                                <textarea name="empMemo" class="form-control" rows="4" placeholder="필요시 메모를 입력하세요"
+                                    id="modalEmpMemo"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3) 푸터 -->
+                    <div class="modal-footer justify-content-end">
+                        <input name="mode" value="insert" hidden>
+                        <button type="button" form="employeeForm" class="btn btn-primary" id="modalBtn">저장</button>
+                        <button type="button" id="employeeModalCloseBtn" class="btn btn-secondary"
+                            data-bs-dismiss="modal">취소</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+        <script>
+            function sample6_execDaumPostcode() {
+                new daum.Postcode({
+                    oncomplete: function (data) {
+                        // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                        // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                        // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                        var addr = ''; // 주소 변수
+                        var extraAddr = ''; // 참고항목 변수
+
+                        //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                        if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                            addr = data.roadAddress;
+                        } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                            addr = data.jibunAddress;
+                        }
+
+                        // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                        if (data.userSelectedType === 'R') {
+                            // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                            // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                            if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                                extraAddr += data.bname;
+                            }
+                            // 건물명이 있고, 공동주택일 경우 추가한다.
+                            if (data.buildingName !== '' && data.apartment === 'Y') {
+                                extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                            }
+                            // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                            if (extraAddr !== '') {
+                                extraAddr = ' (' + extraAddr + ')';
+                            }
+                            // 조합된 참고항목을 해당 필드에 넣는다.
+                            // document.getElementById("sample6_extraAddress").value = extraAddr;
+
+                        } else {
+                            // document.getElementById("sample6_extraAddress").value = '';
+                        }
+
+                        // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                        document.getElementById('addEmpAddrZip').value = data.zonecode;
+                        document.getElementById("addEmpAddr").value = addr;
+                        // 커서를 상세주소 필드로 이동한다.
+                        document.getElementById("addEmpAddrDetail").focus();
+                    }
+                }).open();
+            }
+        </script>
+        <script>
+            $(function () {
+                let currentPage = 1;
+                loadSearchSelect("search");
+                loadEmpList(1);
+
+                let empMode = "insert";
+                let selectedEmpIdx = null;
+
+                $("#searchDeptUpIdx").on("change", function () {
+                    const deptUpIdx = $(this).val();
+                    loadDownDept("search", deptUpIdx);
+                });
+
+                $("#searchBtn").on("click", function () {
+                    loadEmpList();
+                });
+
+                $("#insertEmp").on("click", function () {
+                    empMode = "insert";
+                    selectedEmpIdx = null;
+
+                    $("#employeeModalLabel").text("사원등록");
+                    // input 초기화
+                    $("#modalEmpIdx").val("");
+                    $("#modalEmpName").val("");
+                    $("#modalRrnPfx").val("");
+                    $("#modalRrnSfx").val("");
+                    $("#modalEmpEmail").val("");
+                    $("#modalEmpPhone").val("");
+                    $("#modalEmpPw").val("");
+                    $("#modalEmpRegdate").val("");
+                    $("#modalDeptUpIdx").val("");
+                    $("#modalDeptDownIdx").val("");
+                    $("#modalGrade").val("");
+                    $("#modalRoleId").val("");
+                    $("#modalEmpType").val("");
+                    $("#modalBank").val("");
+                    $("#modalEmpAccount").val("");
+                    $("#modalBaseSalary").val("");
+                    $("#addEmpAddrZip").val("");
+                    $("#addEmpAddr").val("");
+                    $("#addEmpAddrDetail").val("");
+                    $("#modalEmpMemo").val("");
+                    $("#empPhotoPreview").attr("src", "https://via.placeholder.com/120x150/e9ecef/6c757d?text=사진");
+                    $("#employeeModal").modal("show");
+                    loadSearchSelect("modal");
+                    loadBankList();
+                });
+
+                $("#modalDeptUpIdx").on("change", function () {
+                    const deptUpIdx = $(this).val();
+                    loadDownDept("modal", deptUpIdx);
+                });
+
+                $("#empListBody").on("click", ".update-emp", function () {
+                    empMode = "update";
+                    selectedEmpIdx = $(this).data("emp-idx");
+
+                    $.ajax({
+                        type: "GET",
+                        url: `/hr/emp/get?empIdx=${selectedEmpIdx}`,
+                        success: function (res) {
+                            if (res.head.res_code === "200") {
+                                const data = res.body;
+                                $("#employeeModalLabel").text("사원정보 수정");
+                                $("#modalEmpIdx").val(data.empIdx);
+                                $("#empPhotoPreview").attr("src", "/images/hr/emp/" + res.empImg),
+                                $("#modalEmpName").val(data.empName);
+                                $("#modalRrnPfx").val(data.rrnPfx);
+                                $("#modalRrnSfx").val(data.rrnSfx);
+                                $("#modalEmpEmail").val(data.empEmail);
+                                $("#modalEmpPhone").val(data.empPhone);
+                                $("#modalEmpPw").val(""); // 비밀번호 초기화
+                                $("#modalEmpRegdate").val(data.empRegdate);
+                                $("#modalDeptUpIdx").val(data.deptUpIdx);
+                                $("#modalDeptDownIdx").val(data.deptIdx);
+                                loadSearchSelect("modal", data.UpIdx, data.deptIdx);
+                                $("#modalGrade").val(data.grdIdx);
+                                $("#modalRoleId").val(data.roleId);
+                                $("#modalEmpType").val(data.empType);
+                                // $("#modalBank").val(data.bankCode);
+                                loadBankList(data.bankCode);
+
+                                $("#modalEmpAccount").val(data.empAccount);
+                                $("#modalBaseSalary").val(data.baseSalary);
+                                $("#addEmpAddrZip").val(data.empAddrZip);
+                                $("#addEmpAddr").val(data.empAddr);
+                                $("#addEmpAddrDetail").val(data.empAddrDetail);
+                                $("#modalEmpMemo").val(data.empMemo);
+                                $("#empPhotoPreview").attr("src", data.empImg ? `/images/hr/emp/${data.empImg}` : "https://via.placeholder.com/120x150/e9ecef/6c757d?text=사진");
+                                $("#employeeModal").modal("show");
+                            } else {
+                                Swal.fire("실패", "데이터를 불러오는데 실패했습니다.", "error");
+                                $("#employeeModal").modal("hide");
+                            }
+                        },
+                        error: function (xhr, status, err) {
+                            console.error(err);
+                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                            $("#employeeModal").modal("hide");
+                        }
+                    })
+                });
+
+                $("#modalBtn").on("click", function (e) {
+                    const empData = {
+                        empIdx: $("#modalEmpIdx").val(),
+                        empName: $("#modalEmpName").val(),
+                        rrnPfx: $("#modalRrnPfx").val(),
+                        rrnSfx: $("#modalRrnSfx").val(),
+                        empEmail: $("#modalEmpEmail").val(),
+                        empPhone: $("#modalEmpPhone").val(),
+                        empPw: $("#modalEmpPw").val(),
+                        empRegdate: $("#modalEmpRegdate").val(),
+                        deptUpIdx: $("#modalDeptUpIdx").val(),
+                        deptIdx: $("#modalDeptDownIdx").val(),
+                        grdIdx: $("#modalGrade").val(),
+                        roleId: $("#modalRoleId").val(),
+                        empType: $("#modalEmpType").val(),
+                        bankCode: $("#modalBank").val(),
+                        empAccount: $("#modalEmpAccount").val(),
+                        baseSalary: $("#modalBaseSalary").val(),
+                        empAddrZip: $("#addEmpAddrZip").val(),
+                        empAddr: $("#addEmpAddr").val(),
+                        empAddrDetail: $("#addEmpAddrDetail").val(),
+                        empMemo: $("#modalEmpMemo").val()
+                    };
+
+                    let url = empMode === "insert" ? "/hr/emp/insert" : "/hr/emp/update";
+                    let method = empMode === "insert" ? "POST" : "PUT";
+
+                    var formData = new FormData();
+                    formData.append("empData", new Blob([JSON.stringify(empData)], {type: "application/json"}));
+                    const fileInput = $("#empPhoto")[0];
+                    const file = fileInput && fileInput.files && fileInput.files[0];
+                    if(file) {
+                        formData.append("empPhoto", file);
+                    }
+
+                    $.ajax({
+                        url: url,
+                        type: method,
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        enctype: "multipart/form-data",
+                        success: function (res) {
+                            if (res.head.res_code === "200") {
+                                Swal.fire("성공", "성공적으로 저장되었습니다.", "success");
+                                $("#employeeModal").modal("hide");
+                                loadEmpList(currentPage);
+                            } else {
+                                Swal.fire("실패", "등록에 실패했습니다.", "error");
+                            }
+                        },
+                        error: function (xhr, status, err) {
+                            console.error(err);
+                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                        }
+                    });
+                });
+
+                $("#updateBtn").on("click", function () {
+                    loadEmpList();
+                });
+
+                function loadEmpList(page = 1) {
+                    currentPage = page;
+
+                    const searchData = {
+                        option: $("#searchOption").val(),
+                        keyword: $("#searchKeyword").val(),
+                        deptUpIdx: $("#searchDeptUpIdx").val(),
+                        deptIdx: $("#searchDeptDownIdx").val(),
+                        grdIdx: $("#searchGrade").val(),
+                        empStatus: $("#searchEmpStatus").val(),
+                        empType: $("#searchEmpType").val(),
+                    }
+
+                    const queryString = $.param(searchData);
+
+                    $.ajax({
+                        type: "GET",
+                        url: `/hr/emp/list?${queryString}&page=${page}`,
+                        success: function (res) {
+                            if (res.head.res_code === "200") {
+                                const data = res.body;
+
+                                renderEmpListBody(data.emps);
+                                renderPagination(data.page, data.pageSize, data.total);
+                            } else {
+                                Swal.fire("실패", res.body, "error");
+                            }
+                        },
+                        error: function (xhr, status, err) {
+                            console.error(err);
+                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                        }
+                    });
+                }
+
+                function loadBankList(selectedValue) {
+                    $.ajax({
+                        type: "GET",
+                        url: `/common/bank`,
+                        success: function (res) {
+                            if (res.head.res_code === "200") {
+                                const data = res.body;
+
+                                renderBankList(data);
+
+                                if(selectedValue) {
+                                    $("#modalBank").val(selectedValue);
+                                }
+
+                            } else {
+                                Swal.fire("실패", res.body, "error");
+                            }
+                        },
+                        error: function (xhr, status, err) {
+                            console.error(err);
+                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                        }
+                    });
+                }
+
+                function renderBankList(banks) {
+                    const $modalBank = $("#modalBank");
+                    $.each(banks, function(i, item) {
+                        $modalBank.append(`<option value="${item.commonCode}">${item.commonCodeName}</option>`);
+                    });
+                }
+
+                function renderEmpListBody(data) {
+                    const $empListBody = $("#empListBody").empty();
+                    let empList = "";
+                    $.each(data, function (i, item) {
+                        empList += `
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input">
+                                </td>
+                                <td class="fw-semibold">${item.empIdx}</td>
+                                <td>${item.empName}</td>
+                                <td>${item.deptName}</td>
+                                <td><span class="badge bg-info">${item.grdName}</span></td>
+                                <td>${item.empPhone}</td>
+                                <td>${item.empEmail}</td>
+                                <td>${item.empRegdate}</td>
+                                <td><span class="badge bg-success">${item.empStatus}</span></td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" title="상세보기">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning update-emp" data-emp-idx="${item.empIdx}" title="수정">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" title="삭제">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    $empListBody.html(empList);
+                }
+
+                function renderPagination(page, pageSize, total) {
+                    const totalPages = Math.ceil(total / pageSize);
+                    const $pagination = $("#paginationArea");
+                    $pagination.empty();
+
+                    $pagination.append(`
+                        <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                            <span class="page-link" data-page="${page - 1}">이전</span>
+                        </li>
+                    `);
+
+                    for (let i = 0; i <= totalPages; i++) {
+                        $pagination.append(`
+                            <li class="page-item ${i === page ? 'active' : ''}">
+                                <span class="page-link" data-page="${i}">${i}</span>
+                            </li>
+                        `);
+                    }
+
+                    $pagination.append(`
+                        <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                            <a class="page-link" data-page="${page + 1}">다음</a>
+                        </li>
+                    `);
+                }
+
+                function loadSearchSelect(mode, selectedUpValue, selectedDownValue) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/hr/emp/searchOptions",
+                        success: function (res) {
+                            if (res.head.res_code === "200") {
+                                const data = res.body;
+                                renderUpDept(mode, data.depts);
+                                if(selectedUpValue) {
+                                    $("#modalDeptUpIdx").val(selectedUpValue);
+                                }
+                                renderGrade(mode, data.grades);
+                                if(selectedDownValue) {
+                                    $("#modalDeptDownIdx").val(selectedDownValue);
+                                }
+                            } else {
+                                Swal.fire("실패", res.body, "error");
+                            }
+                        },
+                        error: function (xhr, status, err) {
+                            console.error(err);
+                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                        }
+                    });
+                }
+
+                function loadDownDept(mode, deptUpIdx) {
+                    $.ajax({
+                        type: "GET",
+                        url: `/hr/dept/list/down?deptUpIdx=${deptUpIdx}`,
+                        success: function (res) {
+                            if (res.head.res_code === "200") {
+                                const data = res.body;
+
+                                renderDownDept(mode, data);
+                            } else {
+                                Swal.fire("실패", res.body, "error");
+                            }
+                        },
+                        error: function (xhr, status, err) {
+                            console.error(err);
+                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                        }
+                    });
+                };
+
+                function renderUpDept(mode, upDept) {
+                    if (mode === "search") {
+                        const $searchDeptUpIdx = $("#searchDeptUpIdx");
+                        $.each(upDept, function (i, item) {
+                            $searchDeptUpIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
+                        });
+                    } else if (mode === "modal") {
+                        const $modalDeptUpIdx = $("#modalDeptUpIdx");
+                        $.each(upDept, function (i, item) {
+                            $modalDeptUpIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
+                        })
+                    }
+                }
+
+                function renderDownDept(mode, downDept) {
+                    if (mode === "search") {
+                        const $searchDeptDownIdx = $("#searchDeptDownIdx");
+
+                        $.each(downDept, function (i, item) {
+                            $searchDeptDownIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`)
+                        });
+                    } else if (mode === "modal") {
+                        const $modalDeptDownIdx = $("#modalDeptDownIdx");
+                        $.each(downDept, function (i, item) {
+                            $modalDeptDownIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
+                        })
+                    }
+                }
+
+                function renderGrade(mode, grades) {
+                    if (mode === "search") {
+                        const $searchGrade = $("#searchGrade");
+
+                        $.each(grades, function (i, item) {
+                            $searchGrade.append(`<option value="${item.grdIdx}">${item.grdName}</option>`);
+                        });
+                    } else if (mode === "modal") {
+                        const $modalGrade = $("#modalGrade");
+
+                        $.each(grades, function (i, item) {
+                            $modalGrade.append(`<option value="${item.grdIdx}">${item.grdName}</option>`);
+                        });
+                    }
+                }
+            });
+        </script>
+    </div>
+</div>

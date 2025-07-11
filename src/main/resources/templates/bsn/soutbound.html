@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{common/layouts/default}">
+<head>
+  <meta charset="UTF-8" />
+  <title>출고 관리</title>
+  <style>
+    .section-box {
+      padding: 15px;
+      border: 1px solid #e3e6f0;
+      border-radius: 8px;
+      background-color: #ffffff;
+      margin-bottom: 15px;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+
+    .section-box h6 {
+      margin-bottom: 12px;
+      color: #5a5c69;
+      font-weight: 700;
+      border-bottom: 2px solid #4e73df;
+      padding-bottom: 8px;
+    }
+
+    .btn-create { background-color: #1cc88a; border-color: #1cc88a; color: white; }
+    .btn-create:hover { background-color: #17a673; border-color: #17a673; }
+
+    .btn-edit { background-color: #36b9cc; border-color: #36b9cc; color: white; }
+    .btn-edit:hover { background-color: #2c9faf; border-color: #2c9faf; }
+
+    .btn-delete { background-color: #e74a3b; border-color: #e74a3b; color: white; }
+    .btn-delete:hover { background-color: #c0392b; border-color: #c0392b; }
+
+    .header-grid { height: 350px; width: 100%; }
+    .detail-grid { height: 320px; width: 100%; }
+
+    /* AG-Grid 커스텀 스타일 */
+    .ag-theme-alpine {
+      --ag-background-color: #ffffff;
+      --ag-header-background-color: #f8f9fc;
+      --ag-header-foreground-color: #5a5c69;
+      --ag-border-color: #e3e6f0;
+      --ag-row-hover-color: #f8f9fc;
+      --ag-selected-row-background-color: #eaecf4;
+      --ag-font-size: 14px;
+      width: 100% !important;
+    }
+
+    /* 그리드 컨테이너 스타일 */
+    #headerGrid, #detailGrid {
+      width: 100% !important;
+      min-width: 100%;
+    }
+
+    /* 수치 컬럼 우측 정렬 */
+    .ag-theme-alpine .text-end {
+      text-align: right !important;
+    }
+
+    /* 체크박스 컬럼 중앙 정렬 */
+    .ag-theme-alpine .ag-checkbox-input-wrapper {
+      text-align: center;
+    }
+
+    /* 그리드 헤더 스타일 개선 */
+    .ag-theme-alpine .ag-header-cell {
+      font-weight: 600;
+      border-right: 1px solid #e3e6f0;
+    }
+
+    /* 출고상태 배지 스타일 */
+    .ag-theme-alpine .badge {
+      font-size: 0.75rem;
+      padding: 0.25em 0.5em;
+      border-radius: 0.375rem;
+      font-weight: 600;
+    }
+
+    .ag-theme-alpine .bg-success {
+      background-color: #198754 !important;
+      color: white;
+    }
+
+    .ag-theme-alpine .bg-primary {
+      background-color: #0d6efd !important;
+      color: white;
+    }
+
+    .ag-theme-alpine .bg-danger {
+      background-color: #dc3545 !important;
+      color: white;
+    }
+
+    .ag-theme-alpine .bg-warning {
+      background-color: #ffc107 !important;
+    }
+
+    .ag-theme-alpine .bg-secondary {
+      background-color: #6c757d !important;
+      color: white;
+    }
+  </style>
+</head>
+<div layout:fragment="content" class="container-fluid px-3 py-2">
+
+    <!-- 페이지 헤더 -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h4 class="mb-0">
+          <i class="fas fa-shipping-fast mr-2"></i>출고 관리
+        </h4>
+        <small class="text-muted">출고 등록, 수정, 삭제 및 조회</small>
+      </div>
+      <div>
+        <button type="button" class="btn btn-warning btn-sm me-1" id="btnCreateFromOrder">
+          <i class="fas fa-plus-circle"></i> 주문서에서 생성
+        </button>
+        <button type="button" class="btn btn-create btn-sm me-1" id="btnNew">
+          <i class="fas fa-plus"></i> 신규
+        </button>
+        <button type="button" class="btn btn-edit btn-sm me-1" id="btnEdit">
+          <i class="fas fa-edit"></i> 수정
+        </button>
+        <button type="button" class="btn btn-delete btn-sm me-1" id="btnDelete">
+          <i class="fas fa-trash"></i> 삭제
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnDebug">
+          <i class="fas fa-bug"></i> 디버그
+        </button>
+      </div>
+    </div>
+
+    <!-- 출고 헤더 그리드 -->
+    <div class="section-box">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6><i class="fas fa-list mr-2"></i>출고 목록</h6>
+        <button id="btnRefresh" class="btn btn-secondary btn-sm"><i class="fas fa-sync"></i> 새로고침</button>
+      </div>
+      <div id="headerGrid" class="ag-theme-alpine header-grid"></div>
+    </div>
+
+    <!-- 출고 디테일 그리드 -->
+    <div class="section-box">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6>
+          <i class="fas fa-boxes mr-2"></i>출고 상세
+          <span id="selectedOutboundNo" class="text-muted fs-6"></span>
+        </h6>
+        <div>
+          <button id="btnAddDetailRow" class="btn btn-info btn-sm"><i class="fas fa-plus"></i> 행 추가</button>
+          <button id="btnDeleteDetailRow" class="btn btn-warning btn-sm"><i class="fas fa-minus"></i> 행 삭제</button>
+        </div>
+      </div>
+      <div id="detailGrid" class="ag-theme-alpine detail-grid"></div>
+    </div>
+
+    <!-- 주문서 선택 모달 -->
+    <div class="modal fade" id="orderSelectModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-clipboard-list mr-2"></i>주문서 선택
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead class="table-light">
+                  <tr>
+                    <th>선택</th>
+                    <th>주문번호</th>
+                    <th>주문일자</th>
+                    <th>거래처명</th>
+                    <th>합계금액</th>
+                    <th>출고상태</th>
+                  </tr>
+                </thead>
+                <tbody id="orderListBody">
+                  <tr>
+                    <td colspan="6" class="text-center">
+                      <div class="spinner-border spinner-border-sm"></div>
+                      주문서를 불러오는 중...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+    $(document).ready(function() {
+      console.log('✅ 출고관리 페이지 로드 시작');
+      
+      // ===== 전역 변수 =====
+      let headerGridApi, detailGridApi;
+      let selectedOutboundData = null;
+
+      // ===== AG-Grid 안전한 데이터 설정 함수 =====
+      function safeSetRowData(gridApi, data) {
+        if (!gridApi) {
+          console.warn('⚠️ Grid API가 없습니다.');
+          return;
+        }
+        
+        try {
+          // AG-Grid 버전별 대응
+          if (typeof gridApi.setRowData === 'function') {
+            console.log('📊 setRowData 사용');
+            gridApi.setRowData(data);
+          } else if (typeof gridApi.setGridOption === 'function') {
+            console.log('📊 setGridOption 사용');
+            gridApi.setGridOption('rowData', data);
+          } else if (gridApi.gridOptions) {
+            console.log('📊 gridOptions 직접 설정');
+            gridApi.gridOptions.rowData = data;
+            gridApi.refreshCells();
+          } else {
+            console.error('❌ 지원되는 데이터 설정 방법을 찾을 수 없습니다.');
+            console.log('🔍 사용 가능한 gridApi 메서드:', Object.keys(gridApi));
+          }
+        } catch (error) {
+          console.error('❌ 데이터 설정 실패:', error);
+        }
+      }
+
+      // ===== AG-Grid 초기화 =====
+      function initializeGrids() {
+        try {
+          console.log('🚀 AG-Grid 초기화 시작');
+          
+          if (typeof agGrid === 'undefined') {
+            throw new Error('AG-Grid가 로드되지 않았습니다.');
+          }
+
+          // 헤더 그리드 설정 (레이아웃 개선)
+          const headerColumnDefs = [
+            { 
+              headerName: '선택', 
+              checkboxSelection: true, 
+              headerCheckboxSelection: true, 
+              width: 60,
+              maxWidth: 60,
+              pinned: 'left',
+              suppressSizeToFit: true
+            },
+            { 
+              headerName: '출고번호', 
+              field: 'outboundNo', 
+              width: 150,
+              minWidth: 130,
+              cellClass: 'font-weight-bold text-primary',
+              pinned: 'left'
+            },
+            { 
+              headerName: '작성일자', 
+              field: 'writeDt', 
+              width: 110,
+              minWidth: 100
+            },
+            { 
+              headerName: '거래처코드', 
+              field: 'customerCd', 
+              width: 120,
+              minWidth: 100
+            },
+            { 
+              headerName: '거래처명', 
+              field: 'customerName', 
+              flex: 2,
+              minWidth: 150
+            },
+            { 
+              headerName: '대표명', 
+              field: 'representativeNm', 
+              flex: 1,
+              minWidth: 100
+            },
+            {
+              headerName: '주문일자', 
+              field: 'orderDt', 
+              width: 110,
+              minWidth: 100,
+              valueFormatter: params => {
+                if (!params.value) return '';
+                try {
+                  return new Date(params.value).toLocaleDateString('ko-KR');
+                } catch (e) {
+                  return params.value;
+                }
+              }
+            },
+            {
+              headerName: '출고일자', 
+              field: 'outboundDt', 
+              width: 110,
+              minWidth: 100,
+              valueFormatter: params => {
+                if (!params.value) return '';
+                try {
+                  return new Date(params.value).toLocaleDateString('ko-KR');
+                } catch (e) {
+                  return params.value;
+                }
+              }
+            },
+            { 
+              headerName: '통화', 
+              field: 'money', 
+              width: 80,
+              maxWidth: 80
+            },
+            { 
+              headerName: '비고', 
+              field: 'remarks', 
+              flex: 1,
+              minWidth: 120
+            }
+          ];
+
+          const headerGridOptions = {
+            columnDefs: headerColumnDefs,
+            rowData: [], // 초기 빈 데이터
+            defaultColDef: {
+              sortable: true,
+              filter: true,
+              resizable: true,
+              flex: 0 // flex 기본값을 0으로 설정
+            },
+            rowSelection: 'single',
+            onRowClicked: onHeaderRowClicked,
+            onGridReady: function(params) {
+              console.log('📊 헤더 그리드 준비 완료');
+              headerGridApi = params.api;
+              
+              // 컬럼 크기 조정 - 여러 방법 시도
+              setTimeout(() => {
+                if (headerGridApi) {
+                  try {
+                    // 방법 1: sizeColumnsToFit 시도
+                    if (typeof headerGridApi.sizeColumnsToFit === 'function') {
+                      headerGridApi.sizeColumnsToFit();
+                      console.log('✅ sizeColumnsToFit 적용됨');
+                    }
+                    
+                    // 방법 2: autoSizeAllColumns 시도
+                    if (typeof headerGridApi.autoSizeAllColumns === 'function') {
+                      headerGridApi.autoSizeAllColumns();
+                      console.log('✅ autoSizeAllColumns 적용됨');
+                    }
+                    
+                    // 방법 3: 수동으로 컬럼 크기 조정
+                    if (typeof headerGridApi.setColumnWidths === 'function') {
+                      headerGridApi.setColumnWidths([
+                        { key: 'outboundNo', newWidth: 150 },
+                        { key: 'customerName', newWidth: 200 },
+                        { key: 'representativeNm', newWidth: 120 }
+                      ]);
+                      console.log('✅ 수동 컬럼 크기 조정 적용됨');
+                    }
+                    
+                  } catch (error) {
+                    console.warn('⚠️ 컬럼 크기 조정 오류:', error);
+                  }
+                }
+              }, 200);
+              
+              loadOutboundList();
+            },
+            onFirstDataRendered: function(params) {
+              // 데이터 렌더링 후 컬럼 크기 재조정
+              console.log('📊 헤더 그리드 첫 데이터 렌더링 완료');
+              setTimeout(() => {
+                if (params.api && typeof params.api.sizeColumnsToFit === 'function') {
+                  params.api.sizeColumnsToFit();
+                }
+              }, 100);
+            },
+            suppressHorizontalScroll: false, // 가로 스크롤 허용
+            localeText: {
+              noRowsToShow: '출고 데이터가 없습니다.'
+            }
+          };
+
+          // 디테일 그리드 설정 (레이아웃 개선)
+          const detailColumnDefs = [
+            { 
+              headerName: '선택', 
+              checkboxSelection: true, 
+              headerCheckboxSelection: true, 
+              width: 60,
+              maxWidth: 60,
+              suppressSizeToFit: true
+            },
+            { 
+              headerName: '순번', 
+              field: 'lineNo', 
+              width: 80,
+              maxWidth: 80, 
+              cellClass: 'text-center' 
+            },
+            { 
+              headerName: '품목코드', 
+              field: 'itemCode', 
+              width: 120,
+              minWidth: 100
+            },
+            { 
+              headerName: '품목명', 
+              field: 'itemName', 
+              flex: 2,
+              minWidth: 150
+            },
+            { 
+              headerName: '규격', 
+              field: 'standard', 
+              flex: 1,
+              minWidth: 100
+            },
+            {
+              headerName: '수량', 
+              field: 'qty', 
+              width: 100,
+              maxWidth: 120, 
+              type: 'numericColumn',
+              valueFormatter: params => Number(params.value || 0).toLocaleString(),
+              cellClass: 'text-end'
+            },
+            { 
+              headerName: '단위', 
+              field: 'unit', 
+              width: 80,
+              maxWidth: 80
+            },
+            {
+              headerName: '단가', 
+              field: 'unitPrice', 
+              width: 110,
+              minWidth: 100, 
+              type: 'numericColumn',
+              valueFormatter: params => Number(params.value || 0).toLocaleString(),
+              cellClass: 'text-end'
+            },
+            {
+              headerName: '공급가액', 
+              field: 'supplyAmount', 
+              width: 120,
+              minWidth: 100, 
+              type: 'numericColumn',
+              valueFormatter: params => Number(params.value || 0).toLocaleString(),
+              cellClass: 'text-end'
+            },
+            {
+              headerName: '부가세', 
+              field: 'taxAmount', 
+              width: 100,
+              minWidth: 90, 
+              type: 'numericColumn',
+              valueFormatter: params => Number(params.value || 0).toLocaleString(),
+              cellClass: 'text-end'
+            },
+            {
+              headerName: '합계', 
+              field: 'totalAmount', 
+              width: 120,
+              minWidth: 100, 
+              type: 'numericColumn',
+              cellClass: 'font-weight-bold text-end',
+              valueFormatter: params => Number(params.value || 0).toLocaleString()
+            },
+            {
+              headerName: '출고상태',
+              field: 'outboundStatus',
+              width: 100,
+              minWidth: 90,
+              cellClass: 'text-center',
+              cellRenderer: function(params) {
+                const status = params.value || '대기';
+                let badgeClass = 'badge ';
+                
+                switch(status) {
+                  case '완료':
+                    badgeClass += 'bg-success';
+                    break;
+                  case '진행중':
+                    badgeClass += 'bg-primary';
+                    break;
+                  case '취소':
+                    badgeClass += 'bg-danger';
+                    break;
+                  case '보류':
+                    badgeClass += 'bg-warning text-dark';
+                    break;
+                  default:
+                    badgeClass += 'bg-secondary';
+                }
+                
+                return `<span class="${badgeClass}">${status}</span>`;
+              }
+            },
+            { 
+              headerName: '비고', 
+              field: 'remarks', 
+              flex: 1,
+              minWidth: 100
+            }
+          ];
+
+          const detailGridOptions = {
+            columnDefs: detailColumnDefs,
+            rowData: [], // 초기 빈 데이터
+            defaultColDef: {
+              sortable: true,
+              filter: true,
+              resizable: true,
+              flex: 0 // flex 기본값을 0으로 설정
+            },
+            rowSelection: 'multiple',
+            onGridReady: function(params) {
+              console.log('📋 디테일 그리드 준비 완료');
+              detailGridApi = params.api;
+              
+              // 컬럼 크기 조정 - 여러 방법 시도
+              setTimeout(() => {
+                if (detailGridApi) {
+                  try {
+                    // 방법 1: sizeColumnsToFit 시도
+                    if (typeof detailGridApi.sizeColumnsToFit === 'function') {
+                      detailGridApi.sizeColumnsToFit();
+                      console.log('✅ 디테일 sizeColumnsToFit 적용됨');
+                    }
+                    
+                    // 방법 2: autoSizeAllColumns 시도
+                    if (typeof detailGridApi.autoSizeAllColumns === 'function') {
+                      detailGridApi.autoSizeAllColumns();
+                      console.log('✅ 디테일 autoSizeAllColumns 적용됨');
+                    }
+                    
+                  } catch (error) {
+                    console.warn('⚠️ 디테일 컬럼 크기 조정 오류:', error);
+                  }
+                }
+              }, 200);
+            },
+            onFirstDataRendered: function(params) {
+              // 데이터 렌더링 후 컬럼 크기 재조정
+              console.log('📋 디테일 그리드 첫 데이터 렌더링 완료');
+              setTimeout(() => {
+                if (params.api && typeof params.api.sizeColumnsToFit === 'function') {
+                  params.api.sizeColumnsToFit();
+                }
+              }, 100);
+            },
+            suppressHorizontalScroll: false, // 가로 스크롤 허용
+            localeText: {
+              noRowsToShow: '출고 상세 데이터가 없습니다.'
+            }
+          };
+
+          // 그리드 생성
+          console.log('🏗️ 헤더 그리드 생성 중...');
+          const headerGridDiv = document.getElementById('headerGrid');
+          if (agGrid.createGrid) {
+            agGrid.createGrid(headerGridDiv, headerGridOptions);
+          } else {
+            new agGrid.Grid(headerGridDiv, headerGridOptions);
+          }
+          
+          console.log('🏗️ 디테일 그리드 생성 중...');
+          const detailGridDiv = document.getElementById('detailGrid');
+          if (agGrid.createGrid) {
+            agGrid.createGrid(detailGridDiv, detailGridOptions);
+          } else {
+            new agGrid.Grid(detailGridDiv, detailGridOptions);
+          }
+          
+          console.log('✅ AG-Grid 초기화 완료');
+
+        } catch (error) {
+          console.error('❌ AG-Grid 초기화 실패:', error);
+          showErrorAlert('AG-Grid 초기화에 실패했습니다: ' + error.message);
+        }
+      }
+
+      // ===== 데이터 로드 함수들 =====
+      function loadOutboundList() {
+        console.log('📥 출고 목록 로드 시작');
+        
+        // 로딩 상태 표시
+        if (headerGridApi) {
+          safeSetRowData(headerGridApi, []);
+        }
+        
+        fetch('/bsn/soutbounds')
+          .then(response => {
+            console.log('📡 API 응답 상태:', response.status, response.statusText);
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('📊 출고 목록 데이터:', data);
+            console.log('📊 데이터 타입:', typeof data, Array.isArray(data));
+            console.log('📊 데이터 길이:', data?.length);
+            
+            if (headerGridApi) {
+              safeSetRowData(headerGridApi, data || []);
+              console.log(`✅ 출고 목록 로드 완료: ${data?.length || 0}건`);
+              
+              // 데이터 로드 후 컬럼 크기 재조정
+              setTimeout(() => {
+                if (headerGridApi && typeof headerGridApi.sizeColumnsToFit === 'function') {
+                  headerGridApi.sizeColumnsToFit();
+                  console.log('📊 데이터 로드 후 헤더 그리드 크기 재조정');
+                }
+              }, 200);
+            } else {
+              console.warn('⚠️ headerGridApi가 준비되지 않았습니다.');
+            }
+          })
+          .catch(error => {
+            console.error('❌ 출고 목록 로드 실패:', error);
+            if (headerGridApi) {
+              safeSetRowData(headerGridApi, []);
+            }
+            showErrorAlert('출고 목록을 불러오는데 실패했습니다: ' + error.message);
+          });
+      }
+
+      function onHeaderRowClicked(event) {
+        const outboundNo = event.data.outboundNo;
+        selectedOutboundData = event.data;
+        
+        console.log('🎯 출고 헤더 클릭:', outboundNo);
+        $('#selectedOutboundNo').text(`(${outboundNo})`);
+        
+        loadOutboundDetails(outboundNo);
+      }
+
+      function loadOutboundDetails(outboundNo) {
+        console.log('📥 출고 상세 로드 시작:', outboundNo);
+        
+        // 로딩 상태 표시
+        if (detailGridApi) {
+          safeSetRowData(detailGridApi, []);
+        }
+        
+        fetch(`/bsn/soutbounds/${encodeURIComponent(outboundNo)}/details`)
+          .then(response => {
+            console.log('📡 상세 API 응답 상태:', response.status, response.statusText);
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('📋 출고 상세 데이터:', data);
+            
+            if (detailGridApi) {
+              safeSetRowData(detailGridApi, data || []);
+              console.log(`✅ 출고 상세 로드 완료: ${data?.length || 0}건`);
+              
+              // 데이터 로드 후 컬럼 크기 재조정
+              setTimeout(() => {
+                if (detailGridApi && typeof detailGridApi.sizeColumnsToFit === 'function') {
+                  detailGridApi.sizeColumnsToFit();
+                  console.log('📋 데이터 로드 후 디테일 그리드 크기 재조정');
+                }
+              }, 200);
+            } else {
+              console.warn('⚠️ detailGridApi가 준비되지 않았습니다.');
+            }
+          })
+          .catch(error => {
+            console.error('❌ 출고 상세 로드 실패:', error);
+            if (detailGridApi) {
+              safeSetRowData(detailGridApi, []);
+            }
+            showErrorAlert('출고 상세를 불러오는데 실패했습니다: ' + error.message);
+          });
+      }
+
+      // ===== 유틸리티 함수들 =====
+      function showErrorAlert(message) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire('오류', message, 'error');
+        } else {
+          alert('오류: ' + message);
+        }
+      }
+
+      function showSuccessAlert(message) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire('성공', message, 'success');
+        } else {
+          alert('성공: ' + message);
+        }
+      }
+
+      // ===== 버튼 이벤트 핸들러 =====
+      $('#btnRefresh').click(function() {
+        console.log('🔄 새로고침 버튼 클릭');
+        loadOutboundList();
+        if (detailGridApi) {
+          safeSetRowData(detailGridApi, []);
+        }
+        $('#selectedOutboundNo').text('');
+        selectedOutboundData = null;
+      });
+
+      $('#btnCreateFromOrder').click(function() {
+        console.log('📋 주문서에서 생성 버튼 클릭');
+        loadOrderList();
+        $('#orderSelectModal').modal('show');
+      });
+
+      $('#btnNew').click(function() {
+        console.log('➕ 신규 버튼 클릭');
+        showErrorAlert('신규 출고 생성 기능을 준비중입니다.');
+      });
+
+      $('#btnEdit').click(function() {
+        console.log('✏️ 수정 버튼 클릭');
+        if (!selectedOutboundData) {
+          showErrorAlert('수정할 출고를 선택해주세요.');
+          return;
+        }
+        showErrorAlert('출고 수정 기능을 준비중입니다.');
+      });
+
+      $('#btnDelete').click(function() {
+        console.log('🗑️ 삭제 버튼 클릭');
+        
+        // AG-Grid에서 선택된 행 가져오기
+        let selectedRows = [];
+        if (headerGridApi && typeof headerGridApi.getSelectedRows === 'function') {
+          selectedRows = headerGridApi.getSelectedRows();
+        }
+        
+        if (selectedRows.length === 0) {
+          showErrorAlert('삭제할 출고를 선택해주세요.');
+          return;
+        }
+        
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: '삭제 확인',
+            text: `선택한 ${selectedRows.length}건의 출고를 삭제하시겠습니까?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '삭제',
+            cancelButtonText: '취소'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              deleteOutbounds(selectedRows);
+            }
+          });
+        }
+      });
+
+      $('#btnDebug').click(function() {
+        console.log('🐛 디버그 버튼 클릭');
+        
+        const debugInfo = {
+          agGridLoaded: typeof agGrid !== 'undefined',
+          headerGridApi: !!headerGridApi,
+          detailGridApi: !!detailGridApi,
+          selectedData: selectedOutboundData,
+          currentPath: window.location.pathname,
+          headerGridMethods: headerGridApi ? Object.keys(headerGridApi).filter(key => typeof headerGridApi[key] === 'function').slice(0, 10) : [],
+          detailGridMethods: detailGridApi ? Object.keys(detailGridApi).filter(key => typeof detailGridApi[key] === 'function').slice(0, 10) : []
+        };
+        
+        console.log('🔍 디버그 정보:', debugInfo);
+        
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: '디버그 정보',
+            html: `
+              <div class="text-start">
+                <strong>AG-Grid 로드:</strong> ${debugInfo.agGridLoaded ? '✅' : '❌'}<br>
+                <strong>헤더 그리드:</strong> ${debugInfo.headerGridApi ? '✅' : '❌'}<br>
+                <strong>디테일 그리드:</strong> ${debugInfo.detailGridApi ? '✅' : '❌'}<br>
+                <strong>선택된 데이터:</strong> ${debugInfo.selectedData ? '✅' : '❌'}<br>
+                <strong>현재 경로:</strong> ${debugInfo.currentPath}<br>
+                <hr>
+                <strong>헤더 그리드 메서드 (일부):</strong><br>
+                <small>${debugInfo.headerGridMethods.join(', ')}</small><br>
+                <hr>
+                <small>자세한 정보는 콘솔을 확인하세요.</small>
+              </div>
+            `,
+            icon: 'info',
+            width: 600
+          });
+        }
+      });
+
+      $('#btnAddDetailRow').click(function() {
+        console.log('➕ 상세 행 추가 클릭');
+        if (!selectedOutboundData) {
+          showErrorAlert('먼저 출고를 선택해주세요.');
+          return;
+        }
+        
+        // 현재 행 개수 확인
+        let currentRowCount = 0;
+        if (detailGridApi && typeof detailGridApi.getDisplayedRowCount === 'function') {
+          currentRowCount = detailGridApi.getDisplayedRowCount();
+        }
+        
+        const newRow = {
+          outboundNo: selectedOutboundData.outboundNo,
+          lineNo: currentRowCount + 1,
+          itemCode: '',
+          itemName: '',
+          standard: '',
+          qty: 1,
+          unit: '',
+          unitPrice: 0,
+          supplyAmount: 0,
+          taxAmount: 0,
+          totalAmount: 0,
+          outboundStatus: '대기', // 기본 출고상태
+          remarks: ''
+        };
+        
+        if (detailGridApi && typeof detailGridApi.applyTransaction === 'function') {
+          detailGridApi.applyTransaction({ add: [newRow] });
+          console.log('✅ 새 상세 행 추가됨');
+        } else {
+          console.warn('⚠️ applyTransaction 메서드를 사용할 수 없습니다.');
+        }
+      });
+
+      $('#btnDeleteDetailRow').click(function() {
+        console.log('🗑️ 상세 행 삭제 클릭');
+        
+        let selectedRows = [];
+        if (detailGridApi && typeof detailGridApi.getSelectedRows === 'function') {
+          selectedRows = detailGridApi.getSelectedRows();
+        }
+        
+        if (selectedRows.length === 0) {
+          showErrorAlert('삭제할 상세 행을 선택해주세요.');
+          return;
+        }
+        
+        if (detailGridApi && typeof detailGridApi.applyTransaction === 'function') {
+          detailGridApi.applyTransaction({ remove: selectedRows });
+          console.log(`✅ ${selectedRows.length}개 상세 행 삭제됨`);
+        } else {
+          console.warn('⚠️ applyTransaction 메서드를 사용할 수 없습니다.');
+        }
+      });
+
+      // ===== 비즈니스 로직 함수들 =====
+      function loadOrderList() {
+        const tbody = $('#orderListBody');
+        tbody.html('<tr><td colspan="6" class="text-center"><div class="spinner-border spinner-border-sm"></div> 주문서를 불러오는 중...</td></tr>');
+        
+        fetch('/bsn/orders')
+          .then(response => response.json())
+          .then(orders => {
+            tbody.empty();
+            if (orders && orders.length > 0) {
+              orders.forEach(order => {
+                tbody.append(`
+                  <tr>
+                    <td>
+                      <button class="btn btn-sm btn-success select-order" data-order-no="${order.orderNo}">
+                        선택
+                      </button>
+                    </td>
+                    <td>${order.orderNo}</td>
+                    <td>${order.orderDt}</td>
+                    <td>${order.customerNm || ''}</td>
+                    <td class="text-end">-</td>
+                    <td><span class="badge bg-warning">대기</span></td>
+                  </tr>
+                `);
+              });
+            } else {
+              tbody.html('<tr><td colspan="6" class="text-center text-muted">출고 가능한 주문서가 없습니다.</td></tr>');
+            }
+          })
+          .catch(error => {
+            console.error('주문서 목록 로드 실패:', error);
+            tbody.html('<tr><td colspan="6" class="text-center text-danger">주문서 목록을 불러오는데 실패했습니다.</td></tr>');
+          });
+      }
+
+      // 주문서 선택 이벤트
+      $(document).on('click', '.select-order', function() {
+        const orderNo = $(this).data('order-no');
+        console.log('📋 주문서 선택:', orderNo);
+        
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: '출고 생성',
+            text: `주문서 "${orderNo}"를 기반으로 출고를 생성하시겠습니까?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#1cc88a',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '생성',
+            cancelButtonText: '취소'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              createOutboundFromOrder(orderNo);
+            }
+          });
+        }
+      });
+
+      function createOutboundFromOrder(orderNo) {
+        console.log('🚚 주문서 기반 출고 생성:', orderNo);
+        
+        fetch('/bsn/soutbounds/create-from-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ orderNo: orderNo })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showSuccessAlert(`출고 "${data.outboundNo}"가 성공적으로 생성되었습니다.`);
+            $('#orderSelectModal').modal('hide');
+            loadOutboundList(); // 목록 새로고침
+          } else {
+            showErrorAlert(data.message || '출고 생성에 실패했습니다.');
+          }
+        })
+        .catch(error => {
+          console.error('출고 생성 실패:', error);
+          showErrorAlert('출고 생성 중 오류가 발생했습니다.');
+        });
+      }
+
+      function deleteOutbounds(outbounds) {
+        console.log('🗑️ 출고 삭제 시작:', outbounds);
+        
+        const deletePromises = outbounds.map(outbound => 
+          fetch(`/bsn/soutbounds/${outbound.outboundNo}`, {
+            method: 'DELETE'
+          })
+        );
+        
+        Promise.all(deletePromises)
+          .then(responses => {
+            const allSuccess = responses.every(response => response.ok);
+            if (allSuccess) {
+              showSuccessAlert(`${outbounds.length}건의 출고가 삭제되었습니다.`);
+              loadOutboundList(); // 목록 새로고침
+              if (detailGridApi) {
+                safeSetRowData(detailGridApi, []);
+              }
+              $('#selectedOutboundNo').text('');
+              selectedOutboundData = null;
+            } else {
+              showErrorAlert('일부 출고 삭제에 실패했습니다.');
+            }
+          })
+          .catch(error => {
+            console.error('출고 삭제 실패:', error);
+            showErrorAlert('출고 삭제 중 오류가 발생했습니다.');
+          });
+      }
+
+      // ===== 초기화 =====
+      console.log('🎯 출고관리 초기화 시작');
+      
+      // AG-Grid가 로드될 때까지 대기
+      function waitForAgGrid() {
+        if (typeof agGrid !== 'undefined') {
+          console.log('✅ AG-Grid 로드 확인됨');
+          setTimeout(initializeGrids, 100); // 약간의 지연 후 초기화
+        } else {
+          console.log('⏳ AG-Grid 로드 대기 중...');
+          setTimeout(waitForAgGrid, 100); // 100ms 후 재시도
+        }
+      }
+      
+      // 페이지 로드 후 초기화
+      setTimeout(waitForAgGrid, 500); // 500ms 후 시작
+      
+      console.log('🎉 출고관리 스크립트 초기화 완료');
+    });
+
+    // ===== AG-Grid 백업 로더 =====
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        if (typeof agGrid === 'undefined') {
+          console.warn('⚠️ AG-Grid CDN 로드 실패 감지 - 백업 로드 시도');
+          
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/ag-grid-community@30.2.1/dist/ag-grid-community.min.js';
+          script.onload = function() {
+            console.log('✅ 백업 AG-Grid 로드 완료');
+          };
+          script.onerror = function() {
+            console.error('❌ 백업 AG-Grid 로드도 실패');
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                title: 'AG-Grid 로드 실패',
+                text: 'AG-Grid를 불러올 수 없습니다. 페이지를 새로고침하거나 관리자에게 문의하세요.',
+                icon: 'error',
+                confirmButtonText: '새로고침',
+                allowOutsideClick: false
+              }).then(() => {
+                location.reload();
+              });
+            } else {
+              alert('AG-Grid 로드에 실패했습니다. 페이지를 새로고침해주세요.');
+              location.reload();
+            }
+          };
+          document.head.appendChild(script);
+        }
+      }, 2000); // 2초 후 체크
+    });
+
+    // ===== 추가 디버깅 함수들 =====
+    window.debugOutbound = function() {
+      console.log('=== 출고관리 디버그 정보 ===');
+      console.log('AG-Grid 타입:', typeof agGrid);
+      console.log('AG-Grid 객체:', agGrid);
+      console.log('headerGridApi:', headerGridApi);
+      console.log('detailGridApi:', detailGridApi);
+      
+      if (headerGridApi) {
+        console.log('headerGridApi 메서드들:');
+        console.log('- setRowData:', typeof headerGridApi.setRowData);
+        console.log('- setGridOption:', typeof headerGridApi.setGridOption);
+        console.log('- getSelectedRows:', typeof headerGridApi.getSelectedRows);
+        console.log('- applyTransaction:', typeof headerGridApi.applyTransaction);
+      }
+      
+      // 간단한 API 테스트
+      fetch('/bsn/soutbounds')
+        .then(r => r.json())
+        .then(data => {
+          console.log('API 테스트 결과:', data);
+          console.log('데이터 타입:', typeof data, Array.isArray(data));
+          console.log('데이터 개수:', data?.length);
+        })
+        .catch(e => console.error('API 테스트 실패:', e));
+    };
+
+    // 콘솔에서 사용할 수 있는 디버그 명령어
+    console.log('💡 디버그 명령어: debugOutbound() - 콘솔에 입력하여 디버그 정보 확인');
+    /*]]>*/
+    </script>
+
+</div>
+</html>

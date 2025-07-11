@@ -6,13 +6,624 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-06-26 (김희정): DB조회 후 ag-gird 전체조회 기능 구현 (날짜/계정과목코드/거래처코드 필터가능)
+  - 2025-06-27 (김희정): 대분류까지 불러오기 => loadLedger함수의 잔액 필터 수정
+                       : 계정과목코드(필수조회조건)를 반드시 입력해야 데이터 나오도록 수정
+                       : 거래처원장 탭 구분 (잔액/내용)
+  - 2025-06-29 (김희정): 검색조건 (계정과목/거래처) 코드 입력시 계정과목명/거래처명 자동 불러오기
+                       : 검색조건 (계정과목/거래처) 모달 연동하기
+                       : 거래처 없는 거래도 내역 조회 추가 (계정과목코드o 거래처코드x)
+                       : 월 소계 및 누계 행 추가
+  [ to-do ]
+  - pdf기능 추가
 ============================================ -->
+
 <head>
   <title>거래처원장</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <style>
+    .ag-overlay-no-rows-center {
+      font-size: 1rem; 
+      /* font-weight: bold; */
+      color: #444; 
+    }
+    .ag-theme-alpine .ag-row-even, 
+    .ag-theme-alpine .ag-row-odd {
+      background: white !important;
+    }
+    .ag-theme-alpine .subtotal-row {
+      background: #f3f6fa !important;
+      font-weight: bold !important;
+    }
+  </style>
 </head>
 <div layout:fragment="content">
-  <div id="clients-ledger">
-    <h2>거래처원장</h2>
-    <p>거래처원장 화면입니다.</p>
+  <!-- 모달 불러오기 -->
+  <div th:replace="acc/modal/modal :: modals"></div>
+  <div class="w-100" id="clients-ledger">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <!-- 왼쪽: 거래처원장 제목 -->
+      <h3 class="mb-0">거래처원장</h3>
+      <!-- 오른쪽: 버튼 모음 -->
+      <div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="인쇄()">인쇄</button>
+      </div>
+    </div>
+    <!-- 탭 버튼 -->
+    <div class="mb-2">
+      <button type="button" class="btn btn-outline-primary btn-sm active" id="tab-balance" style="margin-right:3px;">잔액</button>
+      <button type="button" class="btn btn-outline-primary btn-sm" id="tab-detail">내용</button>
+    </div>
+    <!-- 검색조건 영역 -->
+    <div class="d-flex mb-2 align-items-end flex-nowrap" style="flex-wrap:nowrap;">
+      <div class="d-flex align-items-center me-2">
+        <label class="form-label me-2 mb-0">일자</label>
+        2025 년
+        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" style="width:45px;"> 월
+        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startDay" style="width:45px;"> 일 ~
+        2025 년
+        <input type="number" value="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" style="width:45px;"> 월
+        <input type="number" value="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" style="width:45px;"> 일
+      </div>
+      <div class="d-flex align-items-center me-2">
+        <label class="me-2 mb-0" style="white-space:nowrap;">계정과목</label>
+        <input type="text" id="accountCode" class="form-control form-control-sm d-inline-block me-1" style="width:45px;">
+        <button class="btn btn-outline-secondary btn-sm me-1" id="accountBtn"><i class="bi bi-search"></i></button>
+        <input type="text" id="accountName" class="form-control form-control-sm d-inline-block" style="width:120px;" readonly>
+      </div>
+      <div class="d-flex align-items-center me-2">
+        <label class="me-2 mb-0" style="white-space:nowrap;">거래처</label>
+        <input type="text" id="partnerCode" class="form-control form-control-sm d-inline-block me-1" style="width:60px;">
+        <button class="btn btn-outline-secondary btn-sm me-1" id="partnerBtn"><i class="bi bi-search"></i></button>
+        <input type="text" id="partnerName" class="form-control form-control-sm d-inline-block" style="min-width:120px;" readonly>
+      </div>
+    </div>
+    <!-- 탭 컨텐츠 -->
+    <div id="tab-content-balance">
+      <!-- 본문 ag-Grid -->
+      <div class="grid-container" style="height:75vh;">
+        <div id="ledgerGrid" class="ag-theme-alpine" style="width:100%; height:100%;"></div>
+      </div>
+    </div>
+    <div id="tab-content-detail" style="display:none;">
+      <div class="grid-container" style="height:75vh;">
+        <div id="ledgerDetailGrid" class="ag-theme-alpine" style="width:100%; height:100%;"></div>
+      </div>
+    </div>
+
   </div>
+  <script th:inline="javascript">
+    let year = 2025;
+    // 잔액 grid옵션
+    const gridOptions = {
+      // 헤더 높이 지정
+      headerHeight: 35,
+      // 행 높이 지정
+      rowHeight: 35,
+      // 그리드 values 배열
+      rowData: [],
+      // 행 ID 생성
+      getRowId: params => {
+        if (params.data.partnerName === '[합계]') {
+          return 'total-row';
+        }
+        if (params.data.partnerName === '[거래처코드 없음]') {
+          return 'no-partner-code-row';
+        }
+        return params.data.partnerCode; // partnerCode는 고유함
+      },
+      // noRows 메시지 설정
+      localeText: { noRowsToShow: '조회할 [계정과목]을 선택해주세요.' },
+      // 헤더 설정
+      columnDefs: [
+        { headerName: '코드', field: 'partnerCode' },
+        { headerName: '거래처명', field: 'partnerName' },
+        { headerName: '전기이월', field: 'openingBalance', valueFormatter: p => p.value?.toLocaleString() },
+        { headerName: '차변', field: 'debit', valueFormatter: p => p.value?.toLocaleString() },
+        { headerName: '대변', field: 'credit', valueFormatter: p => p.value?.toLocaleString() },
+        { headerName: '잔액', field: 'balance', valueFormatter: p => p.value?.toLocaleString() },
+        { headerName: '등록번호', field: 'businessNumber' },
+        { headerName: '대표자명', field: 'representativeName' }
+      ],
+      // 합계행 스타일 적용 (getRowClass)
+      getRowClass: params => {
+        if (params.data && params.data.partnerName && params.data.partnerName === '[합계]') {
+          return 'subtotal-row';
+        }
+        return '';
+      }
+    };
+    const api = agGrid.createGrid(document.querySelector("#ledgerGrid"), gridOptions);
+    const columnApi = api.columnApi;
+
+    // 내용 grid옵션
+    const detailGridOptions = {
+      // 헤더 높이 지정
+      headerHeight: 35,
+      // 행 높이 지정
+      rowHeight: 35,
+      // 그리드 values 배열
+      rowData: [],
+      // 행 ID 생성
+      getRowId: params => {
+        // 소계/누계/전기이월 행은 description으로 고유 ID 부여
+        if (params.data.description && (params.data.description.includes('월 소계') || params.data.description === '[누계]' || params.data.description === '[전기이월]')) {
+          return params.data.description;
+        }
+        // 일반 데이터 행은 entryNumber와 resentmenType을 조합하여 고유 ID 생성
+        if (params.data.entryNumber && params.data.resentmenType) {
+            return `${params.data.entryNumber}_${params.data.resentmenType}`;
+        }
+        // 비상시를 대비한 ID (데이터에 문제가 있을 경우를 대비)
+        return Math.random().toString();
+      },
+      // noRows 메시지 설정
+      localeText: { noRowsToShow: '조회할 [계정과목]과 [거래처]를 선택해주세요.' },
+      // 헤더 설정
+      columnDefs: [
+        { headerName: '날짜', field: 'entryDate' },
+        { headerName: '적요', field: 'description' },
+        { headerName: '차변', field: 'debit', valueFormatter: p => p.value?.toLocaleString() },
+        { headerName: '대변', field: 'credit', valueFormatter: p => p.value?.toLocaleString() },
+        { headerName: '잔액', field: 'balance', valueFormatter: p => p.value !== undefined && p.value !== null ? p.value.toLocaleString() : '' },
+        { headerName: '전표번호', field: 'entryNumber' },
+      ],
+      // 월 소계 행 스타일 적용 (getRowClass로 변경)
+      getRowClass: params => {
+        if (params.data && params.data.description && params.data.description.includes('월 소계')) {
+          return 'subtotal-row';
+        }
+        if (params.data && params.data.description && params.data.description === '[합계]') {
+          return 'subtotal-row';
+        }
+        return '';
+      }
+    };
+    const detailApi = agGrid.createGrid(document.querySelector("#ledgerDetailGrid"), detailGridOptions);
+    const detailColumnApi = detailApi.columnApi;
+
+    loadLedger();
+    // 이벤트 등록 (초기에는 잔액탭이 active이므로 잔액용만 등록)
+    $('input[name=startMonth], input[name=startDay], input[name=endMonth], input[name=endDay], #accountCode, #partnerCode').on('change', onBalanceInputChange);
+
+    // 탭 전환
+    $('#tab-balance').on('click', function() {
+      $('#tab-content-balance').show();
+      $('#tab-content-detail').hide();
+      $(this).addClass('active');
+      $('#tab-detail').removeClass('active');
+      $('#partnerCode').val(null);
+      $('#partnerName').val(null);
+      // 잔액탭용 이벤트 등록, 내용탭용 이벤트 해제
+      $('input[name=startMonth], input[name=startDay], input[name=endMonth], input[name=endDay], #accountCode, #partnerCode')
+        .off('change', onDetailInputChange)
+        .on('change', onBalanceInputChange);
+    });
+    $('#tab-detail').on('click', function() {
+      $('#tab-content-balance').hide();
+      $('#tab-content-detail').show();
+      $(this).addClass('active');
+      $('#tab-balance').removeClass('active');
+      // 항상 문자열로 변환해서 전달
+      const accountCode = String($('#accountCode').val() ?? '');
+      const partnerCode = String($('#partnerCode').val() ?? '');
+      loadLedgerDetale(accountCode, partnerCode);
+      // 내용탭용 이벤트 등록, 잔액탭용 이벤트 해제
+      $('input[name=startMonth], input[name=startDay], input[name=endMonth], input[name=endDay], #accountCode, #partnerCode')
+        .off('change', onBalanceInputChange)
+        .on('change', onDetailInputChange);
+    });
+
+    // 잔액에서 행 클릭시 내용으로 이동
+    api.addEventListener('rowClicked', function(event) {
+      // 탭 전환 => 잔액탭 숨기고 내용탭 보이게
+      $('#tab-content-balance').hide();
+      $('#tab-content-detail').show();
+      $('#tab-detail').addClass('active');
+      $('#tab-balance').removeClass('active');
+      $('#partnerCode').val(event.data.partnerCode);
+      $('#partnerName').val(event.data.partnerName); 
+      // 상세 데이터 조회 (선택한 거래처코드로) 
+      const partnerCode = String(event.data.partnerCode || '');
+      const accountCode = String($('#accountCode').val() || '');
+      loadLedgerDetale(accountCode, partnerCode);
+    });
+    
+    // change 이벤트 핸들러 함수 정의
+    function onBalanceInputChange() {
+      if ($('#tab-balance').hasClass('active')) {
+        loadLedger();
+      }
+    }
+    function onDetailInputChange() {
+      if ($('#tab-detail').hasClass('active')) {
+        const accountCode = String($('#accountCode').val() ?? '');
+        const partnerCode = String($('#partnerCode').val() ?? '');
+        loadLedgerDetale(accountCode, partnerCode);
+      }
+    }
+
+    // 말일 함수
+    function getLastDayOfMonth(year, month) {
+      return new Date(year, month, 0).getDate();
+    }
+    // 날짜 검증 함수
+    function isValidDate(year, month, day) {
+      const d = new Date(year, month - 1, day);
+      return d.getFullYear() == year && (d.getMonth() + 1) == month && d.getDate() == day;
+    }
+    // 날짜 보정(말일) 및 year-month-day 날짜포맷
+    function getDateString(year, monthInputName, dayInputName) {
+      let month = $(`[name=${monthInputName}]`).val();
+      let day = $(`[name=${dayInputName}]`).val();
+      if (!isValidDate(year, month, day)) {
+        day = getLastDayOfMonth(year, month);
+        $(`[name=${dayInputName}]`).val(day); // input 값 보정(수정)
+      }
+      return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    }
+    
+    // 잔액 => DB조회하고 ag-grid 데이터 파싱 및 추가
+    async function loadLedger() {
+      let startDate = getDateString(year, 'startMonth', 'startDay'); // 검사 시작일 포맷
+      let endDate = getDateString(year, 'endMonth', 'endDay'); // 검사 종료일 포맷
+      // 검색 계정과목코드
+      let accountCode = $('#accountCode').val();
+      // 검색 거래처코드
+      let partnerCode = $('#partnerCode').val();
+      // DB 조회
+      const response = await fetch(`/acc/cl/list?startDate=${startDate}&endDate=${endDate}&accountCode=${accountCode}&partnerCode=${partnerCode}`);
+      // 조회한 DB 데이터 json 파싱
+      let data = await response.json();
+      // ag-grid에서 사용할 rowData 구성하기
+      let rowMap = new Map();
+      data.forEach(master => {
+        master.details.forEach(detail => {
+          const key = detail.partnerCode || '[거래처코드 없음]';
+          const existing = rowMap.get(key); // 지정한 key(partnerCode)에 해당하는 값
+
+          const debit = detail.resentmenType === 'g3' ? detail.amount : 0;
+          const credit = detail.resentmenType === 'g4' ? detail.amount : 0;
+
+          if (existing) {
+            existing.debit += debit;
+            existing.credit += credit;
+            // 잔액 갱신
+            if ( detail.majorCategory === '자산' || detail.majorCategory === '비용' ) { // 대분류가 자산/비용이면
+              existing.balance = existing.openingBalance + existing.debit - existing.credit;
+            } else { // 대분류가 부채/자본/수익이면 
+              existing.balance = existing.openingBalance - existing.debit + existing.credit;
+            }
+          } else {
+            const openingBalance = 0; // 전기이월
+            let balance = 0; // 잔액
+            // 잔액 계산
+            if ( detail.majorCategory === '자산' || detail.majorCategory === '비용' ) { // 대분류가 자산/비용이면
+              balance = openingBalance + debit - credit;
+            } else { // 대분류가 부채/자본/수익이면 
+              balance = openingBalance - debit + credit;
+            }
+            rowMap.set(key, { 
+              partnerCode: detail.partnerCode, // 거래처코드
+              partnerName: detail.partnerName || detail.institutionName || detail.cardName ||'[거래처코드 없음]', // 거래처명
+              openingBalance: openingBalance, // 전기이월 
+              debit: debit, // 차변
+              credit: credit, // 대변
+              balance: balance, //잔액
+              businessNumber: detail.businessNumber || detail.residentNumber || detail.accountNumber || detail.cardNumber || null, // 등록번호
+              representativeName: detail.representativeName || null // 대표자명
+            });
+          }
+        });
+      });
+      // rowMap.values(): Map 내부 값들만 순서대로 꺼낼 수 있는 반복자(iterator)
+      // Array.from(): 반복자나 유사 배열 객체를 배열로 변환하는 함수
+      let rowData = Array.from(rowMap.values()); // rowMap 에 들어 있는 값들을 배열로 변환
+
+      // 거래처코드 기준으로 오름차순 정렬 + 거래처코드가 없다면 가장 마지막으로 정렬
+      rowData.sort((a, b) => {
+        if (!a.partnerCode) return 1;
+        if (!b.partnerCode) return -1;
+        // 두 partnerCode 가 모두 값이 있으면 숫자형으로 변환하여 오름차순 정렬 (작은 값이 앞에 오도록)
+        return Number(a.partnerCode) - Number(b.partnerCode);
+      });
+      // 합계 계산
+      if (rowData.length > 0) {
+        let totalOpening = 0, totalDebit = 0, totalCredit = 0, totalBalance = 0;
+        rowData.forEach(r => {
+          totalOpening += Number(r.openingBalance) || 0;
+          totalDebit += Number(r.debit) || 0;
+          totalCredit += Number(r.credit) || 0;
+          totalBalance += Number(r.balance) || 0;
+        });
+        rowData.push({
+          partnerCode: null,
+          partnerName: '[합계]',
+          openingBalance: totalOpening,
+          debit: totalDebit,
+          credit: totalCredit,
+          balance: totalBalance,
+          businessNumber: '',
+          representativeName: ''
+        });
+      }
+      api.updateGridOptions({ rowData: rowData });
+    }
+
+    // 내용 => DB조회하고 ag-grid 데이터 파싱 및 추가
+    async function loadLedgerDetale(setAccountCode, setPartnerCode) {
+      let startDate = getDateString(year, 'startMonth', 'startDay'); // 검사 시작일 포맷
+      let endDate = getDateString(year, 'endMonth', 'endDay'); // 검사 종료일 포맷
+      // 검색 계정과목코드
+      let accountCode = String(setAccountCode || $('#accountCode').val() || '');
+      // 검색 거래처코드
+      let partnerCode = String(setPartnerCode || $('#partnerCode').val() || '');
+      // DB 조회
+      const response = await fetch(`/acc/cl/listDetail?startDate=${startDate}&endDate=${endDate}&accountCode=${accountCode}&partnerCode=${partnerCode}`);
+      // 조회한 DB 데이터 json 파싱
+      let data = await response.json();
+      console.log("조회 데이터", data);
+      let rowData = [];
+      let balance = 0; // 잔액 => for문에서 누적시켜서 잔액 표시
+      let totalDebit = 0, totalCredit = 0;
+      // 전기이월 행 첫줄 세팅
+      let preValue = 50000; // 테스트용
+      // let preValue = data[0].detail[0].전기이월;
+      let majorCategory = null;
+      if (
+        data && data.length > 0 &&
+        Array.isArray(data[0].details) &&
+        data[0].details.length > 0
+      ) {
+        majorCategory = data[0].details[0].majorCategory;
+      }
+      if ( preValue && majorCategory ){ // 전기이월이 있다면
+        let preDebit, preCredit = 0;
+        balance += preValue; // 잔액에 전기이월 누적
+        // 자산/비용이면 차변에 금액을, 부채/자본/수익이면 대변에 금액을 부여
+        if ( data[0].details[0].majorCategory === '자산' || data[0].detail[0].majorCategory === '비용' ) { // 대분류가 자산/비용
+          preDebit = preValue; // 차변
+        } else { // 대분류가 부채/자본/수익이면 
+          preCredit = preValue; // 대변
+        }
+        // rowData에 값 할당
+        rowData.push({
+          entryDate: null,
+          description: '[전기이월]',
+          debit: preDebit,
+          credit: preCredit,
+          balance: balance,
+          entryNumber: null
+        });
+      }
+      // ag-grid에서 사용할 rowData 구성하기 + 월 소계 및 누계 행 추가
+      let currentMonth = null;
+      let monthDebit = 0, monthCredit = 0;
+      let tempRows = [];
+      data.forEach(master => {
+        master.details.forEach(detail => {
+          if (partnerCode) {
+            if (String(detail.partnerCode || '') !== partnerCode) return;
+          } else {
+            if (detail.partnerCode) return;
+          }
+          let entryDate = master.entryDate ? master.entryDate.substring(0, 10) : null;
+          let entryMonth = entryDate ? entryDate.substring(0, 7) : null; // yyyy-MM
+          // 월이 바뀌면 이전 월의 거래들을 rowData에 추가하고, 소계 행도 추가
+          if (currentMonth && entryMonth && currentMonth !== entryMonth) {
+            tempRows.forEach(r => rowData.push(r));
+            tempRows = [];
+            // 소계 행 push (잔액은 표시하지 않음, 월만 표시)
+            let monthOnly = currentMonth ? currentMonth.split('-')[1] : '';
+            rowData.push({
+              entryDate: '',
+              description: `[${monthOnly}월 소계]`,
+              debit: monthDebit,
+              credit: monthCredit,
+              balance: null,
+              entryNumber: ''
+            });
+            monthDebit = 0;
+            monthCredit = 0;
+          }
+          currentMonth = entryMonth || currentMonth;
+          // 차변, 대변, 잔액 처리
+          let debit = 0, credit = 0;
+          const isAssetOrExpense = detail.majorCategory === '자산' || detail.majorCategory === '비용';
+          if (detail.resentmenType === 'g3') {
+            debit = detail.amount;
+            balance = isAssetOrExpense ? balance + detail.amount : balance - detail.amount;
+          } else {
+            credit = detail.amount;
+            balance = isAssetOrExpense ? balance - detail.amount : balance + detail.amount;
+          }
+          monthDebit += debit;
+          monthCredit += credit;
+          totalDebit += debit;
+          totalCredit += credit;
+          let desc = detail.description;
+          if (!detail.partnerCode) {
+            desc = '[거래처 없음] ' + (desc || '');
+          }
+          // 월별 거래를 임시 배열에 저장
+          tempRows.push({ 
+            entryDate: entryDate, // 날짜
+            description: desc, // 적요
+            debit: debit, // 차변
+            credit: credit, // 대변
+            balance: balance, // 잔액(누계)
+            entryNumber: detail.entryNumber, // 전표번호
+            resentmenType: detail.resentmenType // 차/대변 구분
+          });
+        });
+      });
+      // 마지막 월의 거래 push
+      tempRows.forEach(r => rowData.push(r));
+      // 마지막 월 소계 행 추가 (잔액은 표시하지 않음, 월만 표시)
+      if (currentMonth && (monthDebit !== 0 || monthCredit !== 0)) {
+        let monthOnly = currentMonth ? currentMonth.split('-')[1] : '';
+        rowData.push({
+          entryDate: '',
+          description: `[${monthOnly}월 소계]`,
+          debit: monthDebit,
+          credit: monthCredit,
+          balance: null,
+          entryNumber: ''
+        });
+      }
+      // 합계 행 추가 (잔액은 표시하지 않음)
+      if (rowData.length > 0) {
+        rowData.push({
+          entryDate: '',
+          description: '[누계]',
+          debit: totalDebit,
+          credit: totalCredit,
+          balance: null,
+          entryNumber: ''
+        });
+      }
+      detailApi.updateGridOptions({ rowData: rowData });
+    }
+
+    // 모달이 닫힐 때 포커스를 원래 입력 필드로 되돌림
+    $(document).ready(function() {
+      $('#accountModal').on('hidden.bs.modal', function () {
+        $('#accountCode').focus();
+      });
+      $('#partnerModal').on('hidden.bs.modal', function () {
+        $('#partnerCode').focus();
+      });
+    });
+
+    function windowOpenAccountModal() {
+      window.openAccountModal(null, function(code, name) {
+        $('#accountCode').val(code).trigger('change');
+        $('#accountName').val(name);
+      });
+    }
+
+    function windowOpenPartnerModal() {
+      window.openPartnerModal(null, function(code, name) {
+        $('#partnerCode').val(code).trigger('change');
+        $('#partnerName').val(name);
+      });
+    }
+
+    // 계정과목 input에서 F4 누르면 계정과목 모달 오픈
+    $('#accountCode').on('keydown', function(e) {
+      if (e.key === 'F4' || e.keyCode === 115) {
+        e.preventDefault();
+        windowOpenAccountModal();
+      }
+    });
+    // 거래처 input에서 F4 누르면 거래처 모달 오픈
+    $('#partnerCode').on('keydown', function(e) {
+      if (e.key === 'F4' || e.keyCode === 115) {
+        e.preventDefault();
+        windowOpenPartnerModal();
+      }
+    });
+    // 계정과목 검색 버튼 클릭 시 모달 오픈
+    $('#accountBtn').on('click', function(e) {
+      e.preventDefault();
+      windowOpenAccountModal();
+    });
+    // 거래처 검색 버튼 클릭 시 모달 오픈
+    $('#partnerBtn').on('click', function(e) {
+      e.preventDefault();
+      windowOpenPartnerModal();
+    });
+
+    // 마지막 유효 계정과목/거래처 코드 저장 변수
+    let lastValidAccountCode = '';
+    let lastValidPartnerCode = '';
+
+    // 계정과목번호 입력 시 계정과목명 자동 조회 및 롤백 처리
+    $('#accountCode').on('change', function() {
+      const code = $(this).val();
+      if (!code) {
+        $('#accountName').val('');
+        lastValidAccountCode = '';
+        // 코드가 없을 때도 그리드 새로고침
+        if ($('#tab-balance').hasClass('active')) loadLedger();
+        else if ($('#tab-detail').hasClass('active')) loadLedgerDetale($('#accountCode').val(), $('#partnerCode').val());
+        return;
+      }
+      fetch('/acc/act/' + code)
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(data => {
+          if (data && data.accountName) {
+            $('#accountName').val(data.accountName);
+            lastValidAccountCode = code; // 유효값 저장
+          } else {
+            throw new Error('Invalid account code');
+          }
+        })
+        .catch(() => {
+          // 유효하지 않으면 이전 값으로 롤백
+          if (lastValidAccountCode) {
+            $('#accountCode').val(lastValidAccountCode);
+            // 이전 값으로 복원 후 이름도 다시 조회
+            fetch('/acc/act/' + lastValidAccountCode)
+              .then(res => res.ok ? res.json() : null)
+              .then(data2 => {
+                $('#accountName').val(data2 && data2.accountName ? data2.accountName : '');
+              });
+          } else {
+            $('#accountCode').val('');
+            $('#accountName').val('');
+          }
+        })
+        .finally(()=>{
+            // 유효성 검사 후 그리드 새로고침
+            if ($('#tab-balance').hasClass('active')) loadLedger();
+            else if ($('#tab-detail').hasClass('active')) loadLedgerDetale($('#accountCode').val(), $('#partnerCode').val());
+        });
+    });
+    // 거래처번호 입력 시 거래처명 자동 조회 및 롤백 처리
+    $('#partnerCode').on('change', function() {
+      const code = $(this).val();
+      if (!code) {
+        $('#partnerName').val('');
+        lastValidPartnerCode = '';
+        // 코드가 없을 때도 그리드 새로고침
+        if ($('#tab-balance').hasClass('active')) loadLedger();
+        else if ($('#tab-detail').hasClass('active')) loadLedgerDetale($('#accountCode').val(), $('#partnerCode').val());
+        return;
+      }
+      fetch('/acc/pt/' + code)
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(data => {
+          if (data && data.partnerName) {
+            $('#partnerName').val(data.partnerName);
+            lastValidPartnerCode = code; // 유효값 저장
+          } else {
+            throw new Error('Invalid partner code');
+          }
+        })
+        .catch(() => {
+          // 유효하지 않으면 이전 값으로 롤백
+          if (lastValidPartnerCode) {
+            $('#partnerCode').val(lastValidPartnerCode);
+            fetch('/acc/pt/' + lastValidPartnerCode)
+              .then(res => res.ok ? res.json() : null)
+              .then(data2 => {
+                $('#partnerName').val(data2 && data2.partnerName ? data2.partnerName : '');
+              });
+          } else {
+            $('#partnerCode').val('');
+            $('#partnerName').val('');
+          }
+        })
+        .finally(()=>{
+            // 유효성 검사 후 그리드 새로고침
+            if ($('#tab-balance').hasClass('active')) loadLedger();
+            else if ($('#tab-detail').hasClass('active')) loadLedgerDetale($('#accountCode').val(), $('#partnerCode').val());
+        });
+    });
+
+    function 인쇄() {
+      alert('인쇄 기능을 준비 중입니다.');
+    }
+  </script>
 </div>

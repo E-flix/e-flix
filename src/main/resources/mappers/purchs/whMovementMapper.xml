@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.purchs.mapper.WhMovementMapper">
+<!-- 이동전 창고 목록 작동 OK-->
+<select id="fromWarehouse" resultType="WhMovementDTO">
+SELECT 
+    warehouse_id AS from_wh_id,
+    warehouse_location AS from_location
+FROM warehouse
+WHERE exist_prod = 'ep01'
+ORDER BY warehouse_id
+</select>
+
+<!-- 선택한 이동 전 창고 안에 있는 제품 목록 + 수량 작동 OK-->
+<select id="fromProd" parameterType="String" resultType="WhMovementDTO">
+SELECT 
+    i.prod_id,
+    p.prod_name,
+    i.iv_current_quantity AS current_quantity
+FROM inventory i
+JOIN prod p ON i.prod_id = p.prod_id
+WHERE i.warehouse_id = #{fromWhId}
+AND i.iv_current_quantity &gt; 0
+ORDER BY p.prod_name
+</select>
+
+<!-- 이동 후 창고 목록 + 남은 수용 가능 수량 (출발창고 제외) 작동OK --> 
+<select id="toWarehouse" parameterType="String" resultType="WhMovementDTO">
+    SELECT 
+        warehouse_id AS to_wh_id,
+        warehouse_location AS to_location,
+        warehouse_current AS to_before_qty,
+        warehouse_scale,
+        (warehouse_scale - warehouse_current) AS remaining_capacity
+    FROM warehouse
+    WHERE warehouse_id != #{fromWhId}
+    ORDER BY warehouse_id
+  </select>
+
+  <!-- 창고이동 프로시저 -->
+<select id="executeWarehouseTransfer" parameterType="WhMovementDTO">
+    CALL WAREHOUSE_TRANSFER_PROCEDURE(
+        #{prodId},
+        #{fromWhId},
+        #{toWhId},
+        #{transferQty},
+        #{manager}
+    )
+</select>
+
+</mapper>

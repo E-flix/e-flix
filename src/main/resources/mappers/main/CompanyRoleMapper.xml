@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+===========================================
+  - 파일명   : CompanyRoleMapper.xml
+  - 설명     : 회사 권한 관련 SQL 정의
+===========================================
+  [작성 정보]
+  - 작성자   : 복성민 (bokseongmin@gmail.com)
+  - 최초작성 : 2025-07-02
+===========================================
+  [변경 이력]
+  - 2025-07-02: 최초 생성 (복성민)
+===========================================
+-->
+<mapper namespace="com.eflix.main.mapper.CompanyRoleMapper">
+    <insert id="insertCompanyRoleByCoIdx" parameterType="CompanyRoleDTO">
+        INSERT INTO erp_company_roles(co_idx, role_code)
+        VALUES(#{coIdx}, #{roleCode})
+    </insert>
+</mapper>

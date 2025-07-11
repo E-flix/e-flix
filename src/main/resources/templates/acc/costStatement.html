@@ -6,13 +6,209 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-07-04 (김희정): 원가명세서 레이아웃
 ============================================ -->
+
 <head>
   <title>원가명세서</title>
+  <style>
+    .cost-header {
+      border-bottom: 3px solid #fd7e14;
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .ag-header-cell-style {
+      background-color: #6c757d !important;
+      color: white !important;
+      font-weight: 500;
+    }
+    
+    .ag-subsection-header {
+      background-color: #adb5bd !important;
+      color: white !important;
+      font-weight: 500;
+    }
+    
+    .ag-total-cell-style {
+      background-color: #f8f9fa !important;
+      font-weight: 500;
+    }
+    
+    .ag-grand-total-cell-style {
+      background-color: #e9ecef !important;
+      font-weight: 600;
+    }
+    
+    @media print {
+      .btn, .d-print-none {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
+
 <div layout:fragment="content">
-  <div id="cost-statement">
-    <h2>원가명세서</h2>
-    <p>원가명세서 화면입니다.</p>
+  <div class="container-fluid">
+    <!-- 원가명세서 섹션 -->
+    <div class="row">
+      <div class="col-12">
+        <div class="cost-header">
+          <h1 class="display-6 fw-bold text-warning">원가명세서</h1>
+          <p class="text-muted mb-0">한국제조(주) - 2024년 1월 1일부터 2024년 12월 31일까지 (단위: 백만원)</p>
+        </div>
+
+        <div class="row mb-3 d-print-none">
+          <div class="col-12 d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-warning btn-sm" onclick="printReport('cost-statement')">
+              <i class="bi bi-printer"></i> 출력
+            </button>
+            <button class="btn btn-outline-primary btn-sm" onclick="exportToExcel()">
+              <i class="bi bi-file-earmark-excel"></i> Excel
+            </button>
+          </div>
+        </div>
+
+        <div class="grid-container" style="height:100vh;">
+          <div id="costStatementGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <script th:inline="javascript">
+    // 원가명세서 데이터
+    const costStatementData = [
+      { section: "Ⅰ. 직접재료비", division: "", costItem: "", currentAmount: "", previousAmount: "", isHeader: true, level: 0 },
+      { section: "", division: "1-1", costItem: "기초재료재고", currentAmount: "500,000", previousAmount: "480,000", isHeader: false, level: 1 },
+      { section: "", division: "1-2", costItem: "당기재료매입", currentAmount: "3,200,000", previousAmount: "3,000,000", isHeader: false, level: 1 },
+      { section: "", division: "1-3", costItem: "기말재료재고", currentAmount: "(600,000)", previousAmount: "(500,000)", isHeader: false, level: 1 },
+      { section: "", division: "", costItem: "직접재료비 소계", currentAmount: "3,100,000", previousAmount: "2,980,000", isHeader: false, level: 0, isTotal: true },
+      
+      { section: "Ⅱ. 직접노무비", division: "", costItem: "", currentAmount: "", previousAmount: "", isHeader: true, level: 0 },
+      { section: "", division: "2-1", costItem: "생산직급여", currentAmount: "1,500,000", previousAmount: "1,400,000", isHeader: false, level: 1 },
+      { section: "", division: "2-2", costItem: "제수당", currentAmount: "300,000", previousAmount: "280,000", isHeader: false, level: 1 },
+      { section: "", division: "2-3", costItem: "상여금", currentAmount: "200,000", previousAmount: "190,000", isHeader: false, level: 1 },
+      { section: "", division: "", costItem: "직접노무비 소계", currentAmount: "2,000,000", previousAmount: "1,870,000", isHeader: false, level: 0, isTotal: true },
+      
+      { section: "Ⅲ. 제조간접비", division: "", costItem: "", currentAmount: "", previousAmount: "", isHeader: true, level: 0 },
+      { section: "간접재료비", division: "", costItem: "", currentAmount: "", previousAmount: "", isHeader: true, level: 1, isSubsection: true },
+      { section: "", division: "3-1", costItem: "소모품비", currentAmount: "150,000", previousAmount: "140,000", isHeader: false, level: 2 },
+      { section: "", division: "3-2", costItem: "수선재료비", currentAmount: "80,000", previousAmount: "75,000", isHeader: false, level: 2 },
+      
+      { section: "간접노무비", division: "", costItem: "", currentAmount: "", previousAmount: "", isHeader: true, level: 1, isSubsection: true },
+      { section: "", division: "3-3", costItem: "간접노무비", currentAmount: "400,000", previousAmount: "380,000", isHeader: false, level: 2 },
+      { section: "", division: "3-4", costItem: "복리후생비", currentAmount: "200,000", previousAmount: "190,000", isHeader: false, level: 2 },
+      
+      { section: "기타 제조경비", division: "", costItem: "", currentAmount: "", previousAmount: "", isHeader: true, level: 1, isSubsection: true },
+      { section: "", division: "3-5", costItem: "전력비", currentAmount: "300,000", previousAmount: "280,000", isHeader: false, level: 2 },
+      { section: "", division: "3-6", costItem: "감가상각비", currentAmount: "400,000", previousAmount: "380,000", isHeader: false, level: 2 },
+      { section: "", division: "3-7", costItem: "보험료", currentAmount: "120,000", previousAmount: "115,000", isHeader: false, level: 2 },
+      { section: "", division: "3-8", costItem: "임차료", currentAmount: "150,000", previousAmount: "140,000", isHeader: false, level: 2 },
+      { section: "", division: "", costItem: "제조간접비 소계", currentAmount: "1,800,000", previousAmount: "1,700,000", isHeader: false, level: 0, isTotal: true },
+      
+      { section: "", division: "", costItem: "당기총제조비용", currentAmount: "6,900,000", previousAmount: "6,550,000", isHeader: false, level: 0, isGrandTotal: true },
+      
+      { section: "", division: "4-1", costItem: "기초재공품재고", currentAmount: "300,000", previousAmount: "280,000", isHeader: false, level: 1 },
+      { section: "", division: "4-2", costItem: "기말재공품재고", currentAmount: "(350,000)", previousAmount: "(300,000)", isHeader: false, level: 1 },
+      
+      { section: "", division: "", costItem: "완성품원가", currentAmount: "6,850,000", previousAmount: "6,530,000", isHeader: false, level: 0, isGrandTotal: true },
+      
+      { section: "", division: "5-1", costItem: "기초제품재고", currentAmount: "400,000", previousAmount: "380,000", isHeader: false, level: 1 },
+      { section: "", division: "5-2", costItem: "기말제품재고", currentAmount: "(450,000)", previousAmount: "(400,000)", isHeader: false, level: 1 },
+      
+      { section: "", division: "", costItem: "매출원가", currentAmount: "6,800,000", previousAmount: "6,510,000", isHeader: false, level: 0, isGrandTotal: true, isFinal: true }
+    ];
+
+    // ag-Grid 세팅
+    const gridOptions = {
+      headerHeight: 35,
+      rowHeight: 35,
+      rowData: costStatementData,
+      columnDefs: [
+        { 
+          headerName: "구분", 
+          field: "division", 
+          width: 100,
+          cellClass: params => {
+            if (params.data.isHeader) return params.data.isSubsection ? 'ag-subsection-header' : 'ag-header-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "원가항목", 
+          field: "costItem",
+          flex: 1,
+          cellRenderer: params => {
+            if (params.data.section && !params.data.isSubsection) return `<strong>${params.data.section}</strong>`;
+            if (params.data.section && params.data.isSubsection) return `<strong>${params.data.section}</strong>`;
+            if (params.data.isTotal || params.data.isGrandTotal || params.data.isFinal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return params.data.isSubsection ? 'ag-subsection-header' : 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal || params.data.isFinal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "당기", 
+          field: "currentAmount", 
+          width: 150,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            if (params.data.isTotal || params.data.isGrandTotal || params.data.isFinal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return params.data.isSubsection ? 'ag-subsection-header' : 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal || params.data.isFinal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        },
+        { 
+          headerName: "전기", 
+          field: "previousAmount", 
+          width: 150,
+          cellStyle: { textAlign: 'right' },
+          cellRenderer: params => {
+            if (!params.value) return '';
+            if (params.data.isTotal || params.data.isGrandTotal || params.data.isFinal) return `<strong>${params.value}</strong>`;
+            return params.value;
+          },
+          cellClass: params => {
+            if (params.data.isHeader) return params.data.isSubsection ? 'ag-subsection-header' : 'ag-header-cell-style';
+            if (params.data.isTotal) return 'ag-total-cell-style';
+            if (params.data.isGrandTotal || params.data.isFinal) return 'ag-grand-total-cell-style';
+            return '';
+          }
+        }
+      ],
+      rowSelection: { mode: 'multiRow' },
+      suppressRowClickSelection: true,
+      onGridReady: (params) => {
+        gridOptions.api = params.api;
+      }
+    };
+
+    // 그리드 생성
+    agGrid.createGrid(document.querySelector("#costStatementGrid"), gridOptions);
+
+    // 기능 함수들
+    function printReport(reportType) {
+      window.print();
+    }
+
+    function exportToExcel() {
+      alert('Excel 내보내기 기능을 준비 중입니다.');
+    }
+
+    // 전역 함수 등록
+    window.printReport = printReport;
+    window.exportToExcel = exportToExcel;
+  </script>
 </div>
+</html>

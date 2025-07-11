@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.acc.mapper.EntryAutoMapper">
+  <!-- 급여 데이터 받아오기 -->
+  <!-- 기본급, 상여금, 잔업근무_수당, 야간근무_수당, 원천세, 건강보험, 국민연금, 고용보험, 기타공제, 귀속월, 지급월 -->
+  <!-- 조건 : 급여상태가 st-03(급여확정), 회사코드 -->
+  <select id="selectSalaryList" resultType="com.eflix.acc.dto.EntryAutoAllDTO" parameterType="String">
+    SELECT
+      att_month,
+      pay_month,
+      SUM(base_salary)         AS base_salary,
+      SUM(bonus)               AS bonus,
+      SUM(overtime_pay)        AS overtime_pay,
+      SUM(night_work_pay)      AS night_work_pay,
+      SUM(tax)                 AS tax,
+      SUM(health_insurance)    AS health_insurance,
+      SUM(national_pension)    AS national_pension,
+      SUM(employment_ins)      AS employment_ins,
+      SUM(other_deductions)    AS other_deductions
+    FROM salary
+    WHERE co_idx = #{coIdx}
+      AND salary_type = 'st-03'
+    GROUP BY att_month, pay_month
+    ORDER BY att_month, pay_month
+  </select> 
+
+  <!-- select max+1 entry_number -->
+  <select id="selectMaxPlusOneEntryNumber" parameterType="com.eflix.acc.dto.EntryAutoAllDTO" resultType="int">
+    SELECT COALESCE(MAX(entry_number)+1, 1) AS enNo
+    FROM entry_master
+    WHERE entry_type = '일반'
+    AND co_idx = #{coIdx}
+  </select>
+
+  <!-- select max+1 line_number -->
+  <select id="selectMaxPlusOneLineNumber" parameterType="com.eflix.acc.dto.EntryAutoAllDTO" resultType="int">
+    SELECT COALESCE(MAX(line_number)+1, 1) AS lineNo
+    FROM entry_detail
+    WHERE entry_number = #{entryNumber}
+    AND co_idx = #{coIdx}
+  </select>
+
+  <!-- 급여관련 entry_master 생성 -->
+  <insert id="insertSalaryEntryMaster" parameterType="com.eflix.acc.dto.EntryMasterDTO">
+    INSERT INTO entry_master (
+      entry_number,
+      entry_type,
+      entry_date,
+      entry_status,
+      creator,
+      created_at,
+      remarks,
+      transaction_type,
+      electronic_type,
+      total_supply_amount,
+      total_tax_amount,
+      co_idx,
+      ledger_check)
+    VALUES (
+      #{entryNumber},
+      '일반',
+      #{entryDate},
+      'a2',
+      #{creator},
+      sysdate,
+      #{remarks},
+      63,
+      'a2',
+      0,
+      0,
+      #{coIdx},
+      'a2')
+  </insert>
+
+  <!-- master 조회 -->
+  <select id="selectEntryMasterByRemarks" resultType="com.eflix.acc.dto.EntryAutoAllDTO" parameterType="com.eflix.acc.dto.EntryAutoAllDTO">
+    SELECT entry_number, remarks
+    FROM entry_master
+    WHERE remarks = #{remarks}
+      AND co_idx = #{coIdx}
+  </select>
+
+  <!-- master 수정 -->
+  <update id="updateEntryMaster" parameterType="com.eflix.acc.dto.EntryMasterDTO">
+    UPDATE entry_master
+    SET ledger_check = 'a1',
+        entry_date = #{entryDate},
+        updated_at = sysdate
+    WHERE remarks = #{remarks}
+      AND ledger_check = 'a2'
+      AND co_idx = #{coIdx}
+  </update>
+
+  <!-- detail 생성 -->
+  <insert id="insertEntryDetail" parameterType="com.eflix.acc.dto.EntryDetailDTO">
+    INSERT INTO entry_detail (
+      entry_number,
+      line_number,
+      partner_code,
+      partner_name,
+      account_code,
+      resentmen_type,
+      amount,
+      description,
+      created_at,
+      updated_at,
+      co_idx)
+    VALUES (
+      #{entryNumber},
+      #{lineNumber},
+      #{partnerCode},
+      #{partnerName},
+      #{accountCode},
+      #{resentmenType},
+      #{amount},
+      #{description},
+      #{createdAt},
+      #{updatedAt},
+      #{coIdx})
+  </insert>
+
+  <!-- EntryDetail Update -->
+  <update id="updateEntryDetail" parameterType="com.eflix.acc.dto.EntryDetailDTO">
+    UPDATE entry_detail
+    SET partner_code = #{partnerCode},
+        partner_name = #{partnerName},
+        account_code = #{accountCode},
+        resentmen_type = #{resentmenType},
+        amount = #{amount},
+        description = #{description},
+        updated_at = #{updatedAt}
+    WHERE entry_number = #{entryNumber}
+    AND line_number = #{lineNumber}
+    AND co_idx = #{coIdx}
+  </update>
+
+  <!-- 자동전표 조회 (급여+master+detail) -->
+  <!-- 인건비 yyyy년 MM월 귀속 yyyy년 MM월 dd일 지급 자동전표 -->
+  <select id="selectAutoEntryAll" resultType="com.eflix.acc.dto.EntryAutoAllDTO" parameterType="com.eflix.acc.dto.EntryAutoAllDTO">
+    SELECT DISTINCT
+      s.att_month, 
+      s.pay_month, 
+      m.entry_date, 
+      m.entry_number, 
+      sum_salaries.sum_base_salary       AS base_salary,
+      sum_salaries.sum_bonus             AS bonus,
+      sum_salaries.sum_overtime_pay      AS overtime_pay,
+      sum_salaries.sum_night_work_pay    AS night_work_pay,
+      sum_salaries.sum_tax               AS tax,
+      sum_salaries.sum_health_insurance  AS health_insurance,
+      sum_salaries.sum_national_pension  AS national_pension,
+      sum_salaries.sum_employment_ins    AS employment_ins,
+      sum_salaries.sum_other_deductions  AS other_deductions,
+      d.line_number, 
+      d.entry_number AS d_entry_number, 
+      d.partner_code,
+      d.partner_name, 
+      d.account_code,
+      d.resentmen_type, 
+      d.amount, 
+      d.description
+    FROM salary s
+    JOIN entry_master m 
+      ON s.co_idx = m.co_idx 
+    AND m.remarks = '인건비 ' || SUBSTR(s.att_month,1,4) || '년 ' || SUBSTR(s.att_month,6,2) || '월 귀속 ' ||
+                    SUBSTR(s.pay_month,1,4) || '년 ' || SUBSTR(s.pay_month,6,2) || '월 ' || SUBSTR(s.pay_month,9,2) || '일 지급 자동전표'
+    LEFT JOIN entry_detail d 
+      ON m.entry_number = d.entry_number
+    LEFT JOIN (
+      SELECT 
+        att_month,
+        pay_month,
+        SUM(base_salary)         AS sum_base_salary,
+        SUM(bonus)               AS sum_bonus,
+        SUM(overtime_pay)        AS sum_overtime_pay,
+        SUM(night_work_pay)      AS sum_night_work_pay,
+        SUM(tax)                 AS sum_tax,
+        SUM(health_insurance)    AS sum_health_insurance,
+        SUM(national_pension)    AS sum_national_pension,
+        SUM(employment_ins)      AS sum_employment_ins,
+        SUM(other_deductions)    AS sum_other_deductions
+      FROM salary
+      WHERE co_idx = #{coIdx}
+      AND salary_type = 'st-03'
+      GROUP BY att_month, pay_month
+    ) sum_salaries
+    ON s.att_month = sum_salaries.att_month
+    AND s.pay_month = sum_salaries.pay_month
+    WHERE s.co_idx = #{coIdx}
+    AND s.salary_type = 'st-03'
+  </select>
+</mapper>

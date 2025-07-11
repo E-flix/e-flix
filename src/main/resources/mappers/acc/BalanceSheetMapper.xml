@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================
+  - 작성자   : 김희정
+  - 최초작성 : 2025-07-05
+  - 설명     : BalanceSheetMapper query xml
+  [ 변경 이력 ]
+  - 2025-07-05 (김희정): BalanceSheetMapper 생성
+=============================================== -->
+<mapper namespace="com.eflix.acc.mapper.BalanceSheetMapper">
+	<select id="getBalanceSheetByYear" parameterType="map" resultType="com.eflix.acc.dto.BalanceSheetDTO">
+    SELECT
+      a.standard_account_name,
+      a.major_category,
+      a.middle_category,
+      a.minor_category,
+      SUM(
+        CASE 
+          WHEN a.major_category = '자산' AND e.resentmen_type = 'g3' THEN e.amount
+          WHEN a.major_category = '자산' AND e.resentmen_type = 'g4' THEN -e.amount
+          WHEN a.major_category IN ('부채', '자본') AND e.resentmen_type = 'g3' THEN -e.amount
+          WHEN a.major_category IN ('부채', '자본') AND e.resentmen_type = 'g4' THEN e.amount
+          ELSE 0
+        END
+      ) AS sum_amount
+    FROM account a
+    JOIN entry_detail e
+      ON a.account_code = e.account_code
+    JOIN entry_master m
+      ON e.entry_number = m.entry_number
+    WHERE TO_CHAR(m.entry_date, 'YYYY') = #{year}
+      AND TO_NUMBER(TO_CHAR(m.entry_date, 'MM')) <![CDATA[<=]]> #{endMonth}
+      AND a.co_idx = #{coIdx}
+      AND e.co_idx = #{coIdx}
+      AND m.co_idx = #{coIdx}
+    GROUP BY a.standard_account_name, a.major_category, a.middle_category, a.minor_category
+	</select>
+</mapper>

@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+===========================================
+  - 파일명   : SubscriptionMapper.xml
+  - 설명     : 구독 정보 관련 SQL 정의
+===========================================
+  [작성 정보]
+  - 작성자   : 복성민 (bokseongmin@gmail.com)
+  - 최초작성 : 2025-06-20
+===========================================
+  [변경 이력]
+  - 2025-06-20 : 최초 생성 (복성민)
+  - 2025-06-22 : 구독 패키지 정보 조회 (복성민)
+  - 2025-06-23 : 결제 성공 후 구독 정보 등록 (복성민)
+===========================================
+-->
+<mapper namespace="com.eflix.main.mapper.SubscriptionMapper">
+    <!-- 
+     * 모든 구독 정보를 가져온다.
+     *
+     * @param
+     * @return SubscriptionDTO
+	-->
+    <select id="findAll" resultType="SubscriptionDTO">
+        SELECT * FROM subscription
+    </select>
+
+    <!-- 
+     * 구독 패키지 정보를 가져온다.
+     *
+     * @param String
+     * @return SubscriptionPackageDTO
+	-->
+    <select id="findById" parameterType="String" resultType="SubscriptionPackageDTO">
+        SELECT spk_idx, spk_name, spk_max, spk_price
+        FROM subscription_packages
+        WHERE spk_idx = #{spkIdx}
+    </select>
+
+    <!-- 
+     * 구독 정보를 등록한다.
+     *
+     * @param SubscriptionDTO
+     * @return int
+	-->
+    <insert id="insertSubscription" parameterType="SubscriptionDTO">
+        <selectKey resultType="String" keyProperty="spiIdx" order="BEFORE">
+            SELECT 'spi-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(spi_idx, 5))), 100) + 1) FROM subscription
+        </selectKey>
+        INSERT INTO subscription(spi_idx, spk_idx, co_idx, emp_idx, spi_pay, spi_status, spi_start, spi_end, spi_period, spi_ctrt, spi_uid)
+        VALUES(#{spiIdx}, #{spkIdx}, #{coIdx}, #{empIdx}, #{spiPay}, #{spiStatus}, SYSDATE, ADD_MONTHS(SYSDATE, #{spiPeriod}) , #{spiPeriod}, #{spiCtrt}, #{spiUid})
+    </insert>
+
+    <!-- 
+     * 구독 패키지 상세를 등록한다.
+     *
+     * @param SubscriptionPackageDetailDTO
+     * @return int
+	-->
+    <insert id="insertSubscriptionPackageDetail" parameterType="SubscriptionPackageDetailDTO">
+        <selectKey resultType="String" keyProperty="spdIdx" order="BEFORE">
+            SELECT 'spd-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(spd_idx, 5))), 100) + 1) FROM subscription_package_details
+        </selectKey>
+        INSERT INTO subscription_package_details(spd_idx, spi_idx, spk_idx, module_idx)
+        VALUES(#{spdIdx}, #{spiIdx}, #{spkIdx}, #{moduleIdx})
+    </insert>
+
+
+    <!-- <resultMap id="subscriptionInfoMap" type="SubscriptionInfoDTO">
+      <id property="spiIdx" column="spi_idx" />
+        <association property="subscriptionDTO" javaType="SubscriptionDTO">
+            <id property="spiIdx" column="spi_idx" />
+            <result property="spkIdx" column="spk_idx" />
+            <result property="coIdx" column="co_idx" />
+            <result property="empIdx" column="emp_idx" />
+            <result property="spiPay" column="spi_pay" />
+            <result property="spiStatus" column="spi_status" />
+            <result property="spiStart" column="spi_start" />
+            <result property="spiEnd" column="spi_end" />
+            <result property="spiPeriod" column="spi_period" />
+            <result property="spiCtrt" column="spi_ctrt" />
+            <result property="spiUid" column="spi_uid" />
+        </association>
+
+        <association property="subscriptionPackageDTO" javaType="SubscriptionPackageDTO">
+            <id property="spkIdx" column="spk_idx" />
+            <result property="spkName" column="spk_name" />
+            <result property="spkPrice" column="spk_price" />
+            <result property="spkMax" column="spk_max" />
+        </association>
+
+        <collection property="moduleDTOs" ofType="ModuleDTO">
+            <id property="moduleIdx" column="module_idx" />
+            <result property="moduleName" column="module_name" />
+        </collection>
+    </resultMap>
+
+    <select id="findSubscriptionByCoIdx" parameterType="String" resultMap="subscriptionInfoMap">
+        SELECT
+            spi.spi_idx, spi.spk_idx, spi.co_idx, spi.emp_idx, spi.spi_pay, spi.spi_status,
+            spi.spi_start, spi.spi_end, spi.spi_period, spi.spi_ctrt, spi.spi_uid,
+            spk.spk_name, spk.spk_price, spk.spk_max,
+            mou.module_idx, mou.module_name
+        FROM subscription spi
+        JOIN subscription_packages spk ON spi.spk_idx = spk.spk_idx
+        LEFT JOIN subscription_package_details spd ON spi.spi_idx = spd.spi_idx
+        LEFT JOIN modules mou ON spd.module_idx = mou.module_idx
+        WHERE spi.co_idx = #{coIdx}
+    </select> -->
+
+    <!-- 0705 -->
+    <resultMap id="subscriptionInfoMap" type="SubscriptionInfoDTO">
+        <id property="spiIdx" column="spi_idx" />
+        <result property="recentPayDate" column="recent_pay_date"/>
+        <association property="subscriptionDTO" javaType="SubscriptionDTO">
+            <id property="spiIdx" column="spi_idx" />
+            <result property="spkIdx" column="spk_idx" />
+            <result property="coIdx" column="co_idx" />
+            <result property="empIdx" column="emp_idx" />
+            <result property="spiPay" column="spi_pay" />
+            <result property="spiStatus" column="spi_status" />
+            <result property="spiStart" column="spi_start" />
+            <result property="spiEnd" column="spi_end" />
+            <result property="spiPeriod" column="spi_period" />
+            <result property="spiCycle" column="spi_cycle" />
+            <result property="spiNext" column="spi_next" />
+            <result property="spiCtrt" column="spi_ctrt" />
+            <result property="spiUid" column="spi_uid" />
+            <result property="spiMid" column="spi_mid" />
+            </association>
+
+        <association property="companyDTO" javaType="companyDTO">
+            <result property="coName" column="co_name" />
+            <result property="ceoName" column="ceo_name" />
+            <result property="pschName" column="psch_name" />
+            <result property="pschTel" column="psch_tel" />
+            <result property="pschEmail" column="psch_email" />
+            <result property="svcStatus" column="svc_status" />
+        </association>
+        <association property="subscriptionPackageDTO" javaType="SubscriptionPackageDTO">
+            <id property="spkIdx" column="spk_idx" />
+            <result property="spkName" column="spk_name" />
+            <result property="spkPrice" column="spk_price" />
+            <result property="spkMax" column="spk_max" />
+        </association>
+
+        <collection property="moduleDTOs" ofType="ModuleDTO">
+            <id property="moduleIdx" column="module_idx" />
+            <result property="moduleName" column="module_name" />
+        </collection>
+    </resultMap>
+
+    <select id="findSubscriptionByCoIdx" parameterType="String" resultMap="subscriptionInfoMap">
+        SELECT
+            spi.spi_idx,
+            spi.spk_idx,
+            spi.co_idx,
+            spi.emp_idx,
+            spi.spi_pay,
+            spi.spi_status,
+            spi.spi_start,
+            spi.spi_end,
+            spi.spi_period,
+            spi.spi_cycle,
+            spi.spi_next,
+            spi.spi_ctrt,
+            spi.spi_uid,
+            spi.spi_mid,
+
+            co.co_name,
+            co.ceo_name,
+            co.psch_name,
+            co.psch_tel,
+            co.psch_email,
+            co.svc_status,
+
+            spk.spk_name,
+            spk.spk_price,
+            spk.spk_max,
+
+            (
+                SELECT MAX(log.change_date)
+                FROM subscription_status_log log
+                WHERE log.spi_idx = spi.spi_idx
+                AND log.new_status = 'SS01'
+            ) AS recent_pay_date,
+
+            mou.module_idx,
+            mou.module_name
+
+        FROM subscription spi
+            JOIN subscription_packages spk ON spi.spk_idx = spk.spk_idx
+            LEFT JOIN companies co ON spi.co_idx = co.co_idx
+            LEFT JOIN subscription_package_details spd ON spi.spi_idx = spd.spi_idx
+            LEFT JOIN modules mou ON spd.module_idx = mou.module_idx
+        WHERE spi.co_idx = #{coIdx}
+        AND spi.spi_status = 'SS01'
+    </select>
+
+    <!-- 0629 -->
+    <select id="findAllSubscriptionByCoIdx" parameterType="String" resultType="SubscriptionDTO">
+        SELECT s.spi_idx, s.spk_idx, s.co_idx, s.emp_idx, s.spi_pay, s.spi_status, s.spi_start, s.spi_end, s.spi_period,
+            s.spi_ctrt, s.spi_uid, p.spk_name, p.spk_price
+        FROM subscription s
+        JOIN subscription_packages p ON s.spk_idx = p.spk_idx
+        WHERE s.co_idx = #{coIdx}
+    </select>
+
+    <select id="findAllSubscriptionBillByCoIdx" parameterType="String" resultType="SubscriptionBillDTO">
+        SELECT spb_idx, spb_file, spb_type, spb_issued
+        FROM subscription_bill
+        WHERE spi_idx = #{spiIdx}
+    </select>
+
+    <!-- 0630 -->
+    <select id="findActiveSubscriptionByCoIdx" parameterType="String" resultType="int">
+        SELECT COUNT(spi_idx)
+        FROM subscription
+        WHERE co_idx = #{coIdx} AND spi_status = 'SS01'
+    </select>
+
+    <select id="findSubscriptionBySpiIdx" parameterType="String" resultType="StatementDTO">
+        SELECT
+            spi.spi_idx, spi.emp_idx, spi.spi_pay, spi.spi_status, spi.spi_start, spi.spi_end, spi.spi_period, spi.spi_ctrt, spi.spi_uid,
+            co.co_idx, co.co_name, co.ceo_name, co.psch_name, co.psch_tel, co.psch_email,
+            spk.spk_idx, spk.spk_name, spk.spk_price,
+            LISTAGG(mou.module_name, ',') WITHIN GROUP (ORDER BY mou.module_name) AS module_names
+        FROM
+            subscription spi
+        JOIN companies co ON spi.co_idx = co.co_idx
+            LEFT JOIN subscription_packages spk ON spi.spk_idx = spk.spk_idx
+            LEFT JOIN subscription_package_details spd ON spi.spi_idx = spd.spi_idx
+            LEFT JOIN modules mou ON spd.module_idx = mou.module_idx
+        WHERE
+            spi.spi_idx = #{spiIdx}
+        GROUP BY
+            spi.spi_idx, spi.emp_idx, spi.spi_pay, spi.spi_status, spi.spi_start, spi.spi_end, spi.spi_period, spi.spi_ctrt, spi.spi_uid,
+            co.co_idx, co.co_name, co.ceo_name, co.psch_name, co.psch_tel, co.psch_email,
+            spk.spk_idx, spk.spk_name, spk.spk_price
+    </select>
+
+    <select id="findSubscriptionInvoiceBySpiIdx" parameterType="String" resultType="InvoiceDTO">
+        SELECT co.co_name, co.bizr_no, co.ceo_name, co.ceo_tel, co.co_addr, co.co_addr_detail, co.co_zip, co.psch_name, co.psch_tel, co.psch_email,
+            s.spi_idx, s.spk_idx, s.co_idx, s.spi_start, s.spi_end, s.spi_pay, s.spi_period,
+            spk.spk_name, spk.spk_price,
+            LISTAGG(mou.module_name, ', ') WITHIN GROUP (ORDER BY mou.module_name) AS module_names
+        FROM subscription s
+            JOIN companies co ON s.co_idx = co.co_idx
+            JOIN subscription_packages spk ON s.spk_idx = spk.spk_idx
+            JOIN subscription_package_details spd ON s.spi_idx = spd.spi_idx
+            JOIN modules mou ON spd.module_idx = mou.module_idx
+        WHERE s.spi_idx = #{spiIdx}
+        GROUP BY co.co_name, co.bizr_no, co.ceo_name, co.ceo_tel, co.co_addr, co.co_addr_detail, co.co_zip, co.psch_name, co.psch_tel, co.psch_email,
+            s.spi_idx, s.spk_idx, s.co_idx, s.spi_start, s.spi_end, s.spi_pay, s.spi_period,
+            spk.spk_name, spk.spk_price
+    </select>
+
+    <select id="callInsertSubscription" parameterType="SubscriptionProcedureDTO">
+        <![CDATA[
+            CALL PROC_INSERT_SUBSCRIPTION(
+                #{dto.spkIdx, mode=IN, jdbcType=VARCHAR},
+                #{dto.coIdx, mode=IN, jdbcType=VARCHAR},
+                #{dto.empIdx, mode=IN, jdbcType=VARCHAR},
+                #{dto.spiPay, mode=IN, jdbcType=VARCHAR},
+                #{dto.spiPeriod, mode=IN, jdbcType=NUMERIC},
+                #{dto.spiCycle, mode=IN, jdbcType=NUMERIC},
+                #{dto.spiCtrt, mode=IN, jdbcType=VARCHAR},
+                #{dto.spiUid, mode=IN, jdbcType=VARCHAR},
+                #{dto.spiMid, mode=IN, jdbcType=VARCHAR},
+                #{dto.checkedModules, mode=IN, jdbcType=VARCHAR},
+                #{dto.mstId, mode=IN, jdbcType=VARCHAR},
+                #{dto.mstPw, mode=IN, jdbcType=VARCHAR},
+                #{dto.mstName, mode=IN, jdbcType=VARCHAR},
+                #{dto.mstEmail, mode=IN, jdbcType=VARCHAR},
+                #{dto.mstTel, mode=IN, jdbcType=VARCHAR}
+            )
+        ]]>
+    </select>
+
+    <select id="findAllModuleBySpiIdx" parameterType="String" resultType="ModuleDTO">
+        SELECT module_idx
+        FROM subscription_package_details
+        WHERE spi_idx = #{spiIdx}
+    </select>
+
+    <!-- 0704 -->
+    <select id="findAllByStatus" parameterType="String" resultType="SubscriptionPaymentDTO">
+        SELECT *
+        FROM subscription
+        WHERE spi_status = #{spiStatus}
+    </select>
+</mapper>

@@ -11,8 +11,165 @@
   <title>전자(세금)계산서관리</title>
 </head>
 <div layout:fragment="content">
-  <div id="electronic-tax-invoice">
-    <h2>전자(세금)계산서관리</h2>
-    <p>전자(세금)계산서관리 화면입니다.</p>
+<!-- 헤더 영역 -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h4 class="mb-0">전자(세금)계산서관리</h4>
+      <div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="deleteSelectedRows()">삭제</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">인쇄</button>
+      </div>
+    </div>
+
+    <!-- 탭 버튼 -->
+    <div class="mb-2">
+      <button type="button" class="btn btn-outline-primary btn-sm active" id="tab-balance" style="margin-right:3px;">매출</button>
+      <button type="button" class="btn btn-outline-primary btn-sm" id="tab-detail">매입</button>
+    </div>
+    <!-- 필터 영역 -->
+    <div class="d-flex mb-2 align-items-end flex-nowrap" style="flex-wrap:nowrap;">
+      <div class="d-flex align-items-center me-2">
+        <label class="form-label me-2 mb-0">일자</label>
+        2025 년
+        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" style="width:45px;"> 월
+        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startDay" style="width:45px;"> 일 ~
+        2025 년
+        <input type="number" value="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" style="width:45px;"> 월
+        <input type="number" value="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" style="width:45px;"> 일
+      </div>
+      <div class="d-flex align-items-center me-2">
+        <label class="me-2 mb-0" style="white-space:nowrap;">계정과목</label>
+        <input type="text" id="accountCode" class="form-control form-control-sm d-inline-block me-1" style="width:45px;">
+        <button class="btn btn-outline-secondary btn-sm me-1" id="accountBtn"><i class="bi bi-search"></i></button>
+        <input type="text" id="accountName" class="form-control form-control-sm d-inline-block" style="width:120px;" readonly>
+      </div>
+      <div class="d-flex align-items-center me-2">
+        <label class="me-2 mb-0" style="white-space:nowrap;">거래처</label>
+        <input type="text" id="partnerCode" class="form-control form-control-sm d-inline-block me-1" style="width:60px;">
+        <button class="btn btn-outline-secondary btn-sm me-1" id="partnerBtn"><i class="bi bi-search"></i></button>
+        <input type="text" id="partnerName" class="form-control form-control-sm d-inline-block" style="min-width:120px;" readonly>
+      </div>
+      <div class="d-flex align-items-center">
+        <label class="me-2 mb-0" style="white-space:nowrap;" for="status-filter">상태</label>
+        <select id="status-filter" class="form-select">
+          <option selected>전체</option>
+          <option value="1">전송성공</option>
+          <option value="2">미발행</option>
+        </select>
+      </div>
+    </div>
+    <!-- 메인 매입매출전표 그리드 -->
+    <div class="grid-container mb-2" style="height:38vh;">
+      <div id="purchaseSalesGrid" class="ag-theme-alpine" style="width:100%; height:100%;"></div>
+    </div>
+
+    <!-- 중간 상세정보 영역 -->
+    <div class="mb-2" style="height:18.3vh;">
+      <div id="detailGrid" class="ag-theme-alpine" style="width:100%; height:100%"></div>
+    </div>
+    
+    <!-- Summary Section -->
+    <div th:replace="~{acc/entryPurchaseSalesGrid :: entryPurchaseSalesGridFragment}"></div>
   </div>
+
+<script layout:fragment="script" type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    // Tab switching logic
+    $('.nav-tabs .nav-link').on('click', function(e) {
+        e.preventDefault();
+        $(this).tab('show');
+        
+        const isSalesTab = $(this).attr('id') === 'tab-sales';
+
+        // Use setTimeout to avoid grid rendering issues
+        setTimeout(() => {
+            if (isSalesTab) {
+                taxInvoiceGridOptions.api.setRowData(salesData);
+            } else {
+                taxInvoiceGridOptions.api.setRowData(purchaseData);
+            }
+        }, 0);
+    });
+
+    const formatNumber = params => params.value != null ? params.value.toLocaleString() : '';
+
+    const taxInvoiceGridOptions = {
+        columnDefs: [
+            { headerName: '', field: 'chk', width: 50 }, // checkboxSelection, headerCheckboxSelection removed
+            { headerName: '월', field: 'month', width: 60 },
+            { headerName: '일', field: 'day', width: 60 },
+            { headerName: '코드', field: 'clientCode', width: 80 },
+            { headerName: '거래처', field: 'clientName', width: 150 },
+            { headerName: '품목', field: 'itemName', width: 250 },
+            { headerName: '수량', field: 'qty', width: 80, type: 'numericColumn' },
+            { headerName: '단가', field: 'unitPrice', width: 120, type: 'numericColumn', valueFormatter: formatNumber },
+            { headerName: '공급가액', field: 'supplyPrice', width: 120, type: 'numericColumn', valueFormatter: formatNumber },
+            { headerName: '세액', field: 'tax', width: 100, type: 'numericColumn', valueFormatter: formatNumber },
+            { headerName: '상태', field: 'status', width: 100 },
+            { headerName: '승인번호', field: 'approvalNo', width: 180 },
+            { headerName: '복수', field: 'isMultiple', width: 60, cellRenderer: params => params.value ? 'O' : '' },
+            { headerName: '전표', field: 'hasJournal', width: 60, cellRenderer: params => params.value ? 'O' : '' }
+        ],
+        defaultColDef: {
+            sortable: true,
+            resizable: true
+        },
+        rowSelection: {
+            mode: 'multiple',
+            enableClickSelection: false, // suppressRowClickSelection: true -> enableClickSelection: false
+            checkboxes: true,
+            headerCheckbox: true
+        }
+    };
+
+    const journalEntryGridOptions = {
+        columnDefs: [
+            { headerName: '', field: 'chk', width: 50 }, // checkboxSelection, headerCheckboxSelection removed
+            { headerName: '월', field: 'month', width: 60, editable: true },
+            { headerName: '일', field: 'day', width: 60, editable: true },
+            { headerName: '번호', field: 'no', width: 70 },
+            { headerName: '유형', field: 'type', width: 80, editable: true },
+            { headerName: '구분', field: 'category', width: 80, editable: true },
+            { headerName: '코드', field: 'accountCode', width: 80, editable: true },
+            { headerName: '계정과목', field: 'accountName', width: 150, editable: true },
+            { headerName: '코드', field: 'clientCode', width: 80, editable: true },
+            { headerName: '거래처', field: 'clientName', width: 150, editable: true },
+            { headerName: '차변', field: 'debit', width: 120, type: 'numericColumn', editable: true, valueFormatter: params => params.value ? params.value.toLocaleString() : '' },
+            { headerName: '대변', field: 'credit', width: 120, type: 'numericColumn', editable: true, valueFormatter: params => params.value ? params.value.toLocaleString() : '' },
+            { headerName: '적요', field: 'description', width: 200, editable: true }
+        ],
+        rowData: [{}, {}, {}, {}], // Empty rows
+        defaultColDef: {
+            sortable: true,
+            resizable: true
+        },
+        rowSelection: {
+            mode: 'multiple',
+            enableClickSelection: false,
+            checkboxes: true,
+            headerCheckbox: true
+        },
+        // Pinned bottom row for summary
+        pinnedBottomRowData: [
+            { accountName: '전표 소계', debit: 0, credit: 0 },
+            { accountName: '잔액', debit: 0 }
+        ]
+    };
+
+    const salesData = [
+        { month: 3, day: 6, clientCode: '00100', clientName: '자바유통', itemName: '열심히 공부하는 자바', qty: 2, unitPrice: 30000, supplyPrice: 60000, tax: 6000, status: '전송성공', approvalNo: '20250331-12345678', isMultiple: false, hasJournal: true },
+        { month: 10, day: 25, clientCode: '00100', clientName: '자바유통', itemName: '스프링 부트 처음부터 공부하기', qty: 10, unitPrice: 27500, supplyPrice: 275000, tax: 27500, status: '전송성공', approvalNo: '20251026-12345678', isMultiple: true, hasJournal: true },
+        { month: 11, day: 12, clientCode: '00100', clientName: '자바유통', itemName: '열심히 공부하는 자바 외', qty: null, unitPrice: null, supplyPrice: 450000, tax: 45000, status: '미발행', approvalNo: '', isMultiple: true, hasJournal: false }
+    ];
+    
+    const purchaseData = [
+        { month: 9, day: 3, clientCode: '00102', clientName: '서블릿 문구', itemName: '사무용품', qty: 2, unitPrice: 30000, supplyPrice: 60000, tax: 6000, status: '전송성공', approvalNo: '20250331-12345678', isMultiple: false, hasJournal: true }
+    ];
+
+    taxInvoiceGridOptions.rowData = salesData;
+
+    agGrid.createGrid(document.querySelector('#tax-invoice-grid'), taxInvoiceGridOptions);
+    agGrid.createGrid(document.querySelector('#journal-entry-grid'), journalEntryGridOptions);
+});
+</script>
 </div>
+</html>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.bsn.mapper.ItemMapper">
+
+  <resultMap id="ItemMap" type="com.eflix.bsn.dto.BsnItemDTO">
+    <id     property="itemCode"  column="ITEM_CODE"/>
+    <result property="itemName"  column="ITEM_NAME"/>
+    <result property="spec"      column="SPEC"/>
+    <result property="unit"      column="UNIT"/>
+    <result property="salePrice" column="SALE_PRICE"/>
+    <result property="taxRate"   column="TAX_RATE"/>
+    <result property="remark"    column="REMARK"/>
+    <result property="createdAt" column="CREATED_AT"/>
+    <result property="updatedAt" column="UPDATED_AT"/>
+  </resultMap>
+
+  <select id="selectAllItems" resultMap="ItemMap">
+    SELECT ITEM_CODE,
+          ITEM_NAME,
+          SPEC,
+          UNIT,
+          SALE_PRICE,
+          TAX_RATE,
+          REMARK,
+          CREATED_AT,
+          UPDATED_AT
+      FROM BSN_ITEM
+      ORDER BY ITEM_CODE
+  </select>
+
+  <select id="selectItemByCode" parameterType="string" resultMap="ItemMap">
+    SELECT * 
+    FROM BSN_ITEM
+    WHERE ITEM_CODE = #{itemCode}
+  </select>
+
+  <select id="selectItemsByName" parameterType="string" resultMap="ItemMap">
+    SELECT * 
+    FROM BSN_ITEM
+    WHERE ITEM_NAME LIKE '%' || #{itemName} || '%'
+    ORDER BY ITEM_CODE
+  </select>
+
+  <!-- 전체 품목 조회 -->
+  <select id="selectAll" resultType="com.eflix.bsn.dto.BsnItemDTO">
+    SELECT
+      ITEM_CODE   AS itemCode,
+      ITEM_NAME   AS itemName,
+      SPEC        AS spec,
+      UNIT        AS unit,
+      SALE_PRICE  AS salePrice,
+      TAX_RATE    AS taxRate,
+      REMARK      AS remark,
+      CREATED_AT  AS createdAt,
+      UPDATED_AT  AS updatedAt
+    FROM EFLIX.BSN_ITEM
+  </select>
+
+  <!-- 이름으로 품목 검색 -->
+  <select id="selectByName" parameterType="string" resultType="com.eflix.bsn.dto.BsnItemDTO">
+    SELECT
+      ITEM_CODE   AS itemCode,
+      ITEM_NAME   AS itemName,
+      SPEC        AS spec,
+      UNIT        AS unit,
+      SALE_PRICE  AS salePrice,
+      TAX_RATE    AS taxRate,
+      REMARK      AS remark,
+      CREATED_AT  AS createdAt,
+      UPDATED_AT  AS updatedAt
+    FROM EFLIX.BSN_ITEM
+    WHERE ITEM_NAME LIKE '%' || #{name} || '%'
+  </select>
+
+</mapper>

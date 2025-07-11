@@ -41,14 +41,14 @@
         </div>
       </div>
     </div>
-    
-    <div class="my-1">
-        <div id="accountGrid" class="ag-theme-alpine" style="width:100%; height:400px;"></div>
+    <!-- 본문 ag-Grid -->
+    <div class="grid-container" style="height:100vh;">
+      <div id="accountGrid" class="ag-theme-alpine" style="width:100%; height:75%;"></div>
     </div>
   </div>
   <script th:inline="javascript">
     // 전체조회 API
-    let accountList = /*[[${accountList}]]*/[];
+    let accountList = /*[[${accountList}]]*/ [];
 
     // ag-Grid 세팅
     const gridOptions = {
@@ -56,17 +56,15 @@
       headerHeight: 35,
       // 행 높이 지정
       rowHeight: 35,
-      theme: 'legacy',
       // 그리드 values 배열
       rowData: accountList,
       // 그리드 필드명 정의
       columnDefs: [
-        { headerName: "코드", field: "account_code", editable: true, minWidth:60, maxWidth: 60 },
-        { headerName: "계정과목명", field: "account_name", editable: true },
-        {
-          headerName: "구분", field: "account_type", editable: true, minWidth:70, maxWidth: 70,
+        { headerName: "코드", field: "accountCode", editable: false, minWidth: 60, maxWidth: 60 },
+        { headerName: "계정과목명", field: "accountName", editable: true },
+        { headerName: "구분", field: "accountType", editable: false, minWidth: 70, maxWidth: 70,
           cellEditor: 'agSelectCellEditor', // 드롭다운 세팅 (사용자정의)
-          cellEditorParams: { values: ['일반', '차감'] }, // 실제 DB 값
+          cellEditorParams: {  values: ['일반', '차감'] }, // 실제 DB 값
           valueFormatter: params => { // 보여줄때
             if (params.value === 'i1') return '일반';
             if (params.value === 'i2') return '차감';
@@ -78,21 +76,20 @@
             return params.newValue;
           }
         },
-        { headerName: "표준계정과목명", field: "standard_account_name", editable: true, minWidth: 210 ,maxWidth: 210 },
-        { headerName: "표준영문명", field: "standard_english_name", editable: true },
-        { headerName: "대분류", field: "major_category", editable: true, filter: true, minWidth: 90, maxWidth: 90 }, // 필터 적용
-        { headerName: "중분류", field: "middle_category", editable: true, minWidth: 130, maxWidth: 130 },
-        { headerName: "소분류", field: "minor_category", editable: true, minWidth: 130, maxWidth: 130 },
-        {
-          headerName: "사용", field: "use_flag", editable: true, minWidth:60, maxWidth: 60,
+        { headerName: "표준계정과목명", field: "standardAccountName", editable: false, minWidth: 210, maxWidth: 210 },
+        { eaderName: "표준영문명", field: "standardEnglishName", editable: false },
+        { headerName: "대분류", field: "majorCategory", editable: false, filter: true, minWidth: 90, maxWidth: 90 }, // 필터 적용
+        { headerName: "중분류", field: "middleCategory", editable: false, minWidth: 130, maxWidth: 130 },
+        { headerName: "소분류", field: "minorCategory", editable: false, minWidth: 130, maxWidth: 130 },
+        { headerName: "사용", field: "useFlag", editable: true, minWidth: 60, maxWidth: 60,
           cellEditor: 'agCheckboxCellEditor', // 체크박스 세팅
           cellRenderer: 'agCheckboxCellRenderer', // 체크박스 렌더러(체크박스 UI 표시)
-          valueGetter: params => params.data.use_flag === 'a1', // DB 값이 'a1'이면 체크됨 'a1' => true 변환 (렌더러/에디터가 받는 값)
+          valueGetter: params => params.data.useFlag === 'a1', // DB 값이 'a1'이면 체크됨 'a1' => true 변환 (렌더러/에디터가 받는 값)
           valueParser: params => params.newValue ? 'a1' : 'a2', // 사용자가 체크박스를 클릭했을 때 저장할 값
         }
       ],
       // 행 선택 방식을 지정
-      rowSelection: { 
+      rowSelection: {
         mode: 'multiRow', // 'single'==> 단일 선택, 'multiRow' ==> 다중 선택
       },
       // onGridReady => 그리드가 완전히 로드되고 준비되었을 때 실행되는 콜백 함수
@@ -112,7 +109,7 @@
             gridOptions.api.setFilterModel(null); // 필터 해제
           } else {
             gridOptions.api.setFilterModel({
-              major_category: {
+              majorCategory: {
                 type: 'equals',
                 filter: category
               }

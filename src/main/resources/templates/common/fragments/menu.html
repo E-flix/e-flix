@@ -1,19 +1,45 @@
-  <html xmlns:th="http://www.thymeleaf.org">
- <div th:fragment="menu">
-	<!-- divider -->
-	<hr class="sidebar-divider d-none d-md-block">
- 	<li th:replace="~{common/fragments/item/hr::hr}"></li>
-	<!-- divider -->
-	<hr class="sidebar-divider d-none d-md-block">
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-18 
+	- 설명    : ERP 페이지 메뉴 모듈
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-18 (복성민): 파일생성 및 기본 코드 추가
+============================================
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="menu">
 	
- 	<li th:replace="~{common/fragments/item/bsn::bsn}"></li>
 	<!-- divider -->
-	<hr class="sidebar-divider d-none d-md-block">
- 	
- 	<li th:replace="~{common/fragments/item/purchs::purchs}"></li>
+	<div class="" sec:authorize="hasRole('MASTER')">
+		<hr class="sidebar-divider d-none d-md-block">
+		<li th:replace="~{common/fragments/item/mgr::mgr}"></li>
+	</div>
+
 	<!-- divider -->
-	<hr class="sidebar-divider d-none d-md-block">
- 	
- 	<li th:replace="~{common/fragments/item/acc::acc}"></li>
+	<div class="" sec:authorize="hasAnyRole('HR', 'ACC')">
+		<hr class="sidebar-divider d-none d-md-block">
+		<li th:replace="~{common/fragments/item/hr::hr}"></li>
+	</div>
+
+	<!-- divider -->
+	<div class="" sec:authorize="hasAnyRole('HR', 'ACC')">
+		<hr class="sidebar-divider d-none d-md-block">
+		<li th:replace="~{common/fragments/item/acc::acc}"></li>
+	</div>
+
+	<!-- divider -->
+	<div class="" sec:authorize="hasAnyRole('BNZ', 'PURCHS')">
+		<hr class="sidebar-divider d-none d-md-block">
+		<li th:replace="~{common/fragments/item/bsn::bsn}"></li>
+	</div>
+
+	<!-- divider -->
+	<div class="" sec:authorize="hasAnyRole('BNZ', 'PURCHS')">
+		<hr class="sidebar-divider d-none d-md-block">
+		<li th:replace="~{common/fragments/item/purchs::purchs}"></li>
+	</div>
 </div>
+
 </html>

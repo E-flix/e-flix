@@ -6,13 +6,59 @@
   -----------------------------------------------
   [ 변경 이력 ]
   - 2025-06-18 (김희정): title 및 내용 추가
+  - 2025-06-20 (김희정): 임시 레이아웃
 ============================================ -->
+
 <head>
   <title>고정자산관리</title>
 </head>
 <div layout:fragment="content">
-  <div id="fixed-asset">
-    <h2>고정자산관리</h2>
-    <p>고정자산관리 화면입니다.</p>
+  <!-- 고정자산관리 -->
+  <div id="assets" class="content-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>고정자산관리</h2>
+      <button class="btn btn-primary">
+        <i class="bi bi-plus me-1"></i>신규 자산
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>자산코드</th>
+            <th>자산명</th>
+            <th>계정과목</th>
+            <th>취득일자</th>
+            <th>상각방법</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>00001</td>
+            <td>대구 동구 625-191 2층 사무실</td>
+            <td>202 - 건물</td>
+            <td>2025-06-11</td>
+            <td><span class="badge bg-info">정액법</span></td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary">수정</button>
+              <button class="btn btn-sm btn-outline-danger ms-1">삭제</button>
+            </td>
+          </tr>
+          <tr>
+            <td>00002</td>
+            <td>마티즈(30가8470)</td>
+            <td>208 - 차량운반구</td>
+            <td>2023-11-12</td>
+            <td><span class="badge bg-info">정액법</span></td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary">수정</button>
+              <button class="btn btn-sm btn-outline-danger ms-1">삭제</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

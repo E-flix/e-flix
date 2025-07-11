@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-20
+  - 설명     : AttendanceRequestMapper query xml
+  [ 변경 이력 ]
+  - 2025-06-19 (김어진): 계정과목 전체조회 작성
+=============================================== -->
+<mapper namespace="com.eflix.hr.mapper.AttendanceRequestMapper">
+  <insert id="insert" parameterType="AttendanceRequestDTO">
+    <selectKey resultType="String" keyProperty="editIdx" order="BEFORE">
+      SELECT 'edit-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(edit_idx, 6))), 100) + 1) FROM attendance_requests
+    </selectKey>
+    INSERT INTO attendance_requests
+      (edit_idx, emp_idx, edit_type, old_value, new_value, reason, request_date, co_idx)
+    VALUES
+      (#{editIdx}, #{empIdx}, #{editType}, #{oldValue}, #{newValue}, #{reason}, SYSDATE, #{coIdx})
+  </insert>
+</mapper>

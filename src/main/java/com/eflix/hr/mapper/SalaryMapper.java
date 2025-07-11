@@ -9,10 +9,14 @@
 package com.eflix.hr.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.repository.query.Param;
 
 import com.eflix.hr.dto.SalaryDTO;
+import com.eflix.hr.dto.etc.SalaryDetailDTO;
+import com.eflix.hr.dto.etc.SalaryFullDetailDTO;
+import com.eflix.hr.dto.etc.SalarySummaryDTO;
 
 public interface SalaryMapper {
     List<SalaryDTO> selectAll();
@@ -20,4 +24,18 @@ public interface SalaryMapper {
     int insert(SalaryDTO dto);
     int update(SalaryDTO dto);
     int deleteById(@Param("salaryIdx") String salaryIdx);
+    
+    List<SalaryDTO> bankList();
+
+    List<SalarySummaryDTO> findSalaryList(String coIdx, String attMonth, String payMonth, String empName, String deptIdx);
+
+    // 0707
+    List<SalaryDetailDTO> findSalaryDetail(String coIdx, String salaryIdx);
+    List<SalaryFullDetailDTO> getSalaryDetailItems(String coIdx, String salaryIdx);
+    void calculateSalary(String coIdx, String salaryIdx);
+    void confirmSalary(Map<String,Object> map);
+    List<SalaryDetailDTO> selectSalaryDetail(String coIdx, String salaryIdx);
+
+    // 0708
+    int insertSalary(SalaryDTO salaryDTO);
 }

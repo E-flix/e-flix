@@ -1,0 +1,430 @@
+<!--
+============================================
+	- 작성자   : 복성민
+	- 최초작성 : 2025-06-18
+	- 설명    : E-FLIX 마이페이지 구독정보 페이지
+--------------------------------------------
+	[ 변경 이력 ]
+	- 2025-06-18 (복성민): 레이아웃 구성
+============================================
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/main/layouts/default}">
+
+<div layout:fragment="content">
+    <!-- main -->
+    <div class="masthead" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh;">
+        <div class="container">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-lg border-0 gradient-card">
+                        <div class="card-body text-center pb-4">
+                            <i class="fas fa-crown fa-3x mb-3"></i>
+                            <div>
+                                <a href="/mypage/info" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-user"></i>정보 관리
+                                </a>
+                            </div>
+                            <h1 class="display-6 fw-bold mt-2 mb-2">구독 정보 관리</h1>
+                            <p class="lead mb-0">현재 활성화된 구독 서비스를 관리하세요</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="row g-4">
+                <!-- 구독 패키지 정보 -->
+                <div class="col-xl-4 col-lg-6">
+                    <div class="card h-100 shadow-lg border-0">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-box me-2"></i>구독 패키지
+                            </h5>
+                            <span class="badge bg-success status-badge">
+                                <i class="fas fa-check-circle me-1"></i>활성
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-muted">패키지명</label>
+                                <input type="text" class="form-control form-control-lg" id="spkName" readonly>
+                                <input type="text" id="spiIdx" hidden>
+                            </div>
+                            
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-list-check me-2"></i>포함 서비스
+                            </h6>
+                            
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="card service-item border-0 bg-light" id="hr">
+                                        <div class="card-body text-center py-3">
+                                            <i class="fas fa-user-tie fa-2x text-info mb-2"></i>
+                                            <h6 class="mb-1">인사</h6>
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="card service-item border-0 bg-light" id="purchs">
+                                        <div class="card-body text-center py-3">
+                                            <i class="fas fa-boxes fa-2x text-success mb-2"></i>
+                                            <h6 class="mb-1">재고</h6>
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="card service-item border-0 bg-light" id="acc">
+                                        <div class="card-body text-center py-3">
+                                            <i class="fas fa-calculator fa-2x text-warning mb-2"></i>
+                                            <h6 class="mb-1">회계</h6>
+                                            <i class="fas fa-times-circle text-danger"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="card service-item border-0 bg-light" id="bnz">
+                                        <div class="card-body text-center py-3">
+                                            <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
+                                            <h6 class="mb-1">영업</h6>
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 계약 및 결제 정보 -->
+                <div class="col-xl-5 col-lg-6">
+                    <div class="card h-100 shadow-lg border-0">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-file-contract me-2"></i>계약 및 결제 정보
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="info-card card border-0 bg-light h-100">
+                                        <div class="card-body">
+                                            <label class="form-label fw-bold text-primary">
+                                                <i class="fas fa-calendar-alt me-2"></i>계약 기간
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="spiPeriod" readonly>
+                                                <span class="input-group-text bg-primary text-white">개월</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="info-card card border-0 bg-light h-100">
+                                        <div class="card-body">
+                                            <label class="form-label fw-bold text-success">
+                                                <i class="fas fa-credit-card me-2"></i>최근 결제일
+                                            </label>
+                                            <input type="date" class="form-control" id="recentPayDate" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="info-card card border-0 bg-light">
+                                        <div class="card-body">
+                                            <label class="form-label fw-bold text-info">
+                                                <i class="fas fa-calendar-week me-2"></i>서비스 기간
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="date" class="form-control" id="spiStart" readonly>
+                                                <span class="input-group-text bg-info text-white">
+                                                    <i class="fas fa-arrow-right"></i>
+                                                </span>
+                                                <input type="date" class="form-control" id="spiEnd" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="info-card card border-0 bg-light">
+                                        <div class="card-body">
+                                            <label class="form-label fw-bold text-danger">
+                                                <i class="fas fa-clock me-2"></i>다음 결제 예정일
+                                            </label>
+                                            <input type="date" class="form-control" id="spiNext" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 문서 및 관리 -->
+                <div class="col-xl-3 col-lg-12">
+                    <div class="row g-4 h-100">
+                        <!-- 관련 문서 -->
+                        <div class="col-xl-12 col-lg-6">
+                            <div class="card shadow-lg border-0 h-100">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0 fw-bold">
+                                        <i class="fas fa-file-alt me-2"></i>관련 문서
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-2">
+
+                                        <!-- 계약서 -->
+                                        <div class="col-12">
+                                            <div class="card border-secondary">
+                                                <div class="card-body py-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <i class="fas fa-file-contract text-secondary me-2"></i>
+                                                            <span class="fw-semibold">계약서</span>
+                                                        </div>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button" class="btn btn-outline-secondary preview-btn" data-type="contract">
+                                                                <i class="fas fa-eye"></i>미리보기
+                                                            </button>
+                                                            <button type="button" class="btn btn-secondary download-btn" data-type="contract">
+                                                                <i class="fas fa-download"></i>다운로드
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 거래 명세서 -->
+                                        <div class="col-12">
+                                            <div class="card border-primary">
+                                                <div class="card-body py-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <i class="fas fa-receipt text-primary me-2"></i>
+                                                            <span class="fw-semibold">거래 명세서</span>
+                                                        </div>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button" class="btn btn-outline-secondary preview-btn" data-type="statement">
+                                                                <i class="fas fa-eye"></i>미리보기
+                                                            </button>
+                                                            <button type="button" class="btn btn-secondary download-btn" data-type="statement">
+                                                                <i class="fas fa-download"></i>다운로드
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 세금 계산서 -->
+                                        <div class="col-12">
+                                            <div class="card border-success">
+                                                <div class="card-body py-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <i class="fas fa-file-invoice-dollar text-success me-2"></i>
+                                                            <span class="fw-semibold">세금 계산서</span>
+                                                        </div>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button" class="btn btn-outline-secondary preview-btn" data-type="invoice">
+                                                                <i class="fas fa-eye"></i>미리보기
+                                                            </button>
+                                                            <button type="button" class="btn btn-secondary download-btn" data-type="invoice">
+                                                                <i class="fas fa-download"></i>다운로드
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 정보 다운로드 -->
+                        <div class="col-xl-12 col-lg-6">
+                            <div class="card shadow-lg border-0 h-100">
+                                <div class="card-header bg-secondary text-white">
+                                    <h6 class="mb-0 fw-bold">
+                                        <i class="fas fa-download me-2"></i>정보 다운로드
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="department" id="hr">
+                                                <label class="form-check-label small" for="hr">
+                                                    <i class="fas fa-user-tie me-1 text-info"></i>인사
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="department" id="inventory">
+                                                <label class="form-check-label small" for="inventory">
+                                                    <i class="fas fa-boxes me-1 text-success"></i>재고
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="department" id="accounting" checked>
+                                                <label class="form-check-label small" for="accounting">
+                                                    <i class="fas fa-calculator me-1 text-warning"></i>회계
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="department" id="sales">
+                                                <label class="form-check-label small" for="sales">
+                                                    <i class="fas fa-chart-line me-1 text-primary"></i>영업
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-outline-success btn-sm w-100 mt-3">
+                                        <i class="fas fa-download me-2"></i>다운로드
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 구독 해지 -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-body text-center py-4">
+                            <h6 class="text-muted mb-3">구독 서비스가 만족스럽지 않으신가요?</h6>
+                            <button class="btn btn-outline-danger btn-lg">
+                                <i class="fas fa-times-circle me-2"></i>구독 해지
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 거래 명세서 모달 -->
+    <div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="transactionModalLabel">
+                        <i class="fas fa-receipt me-2"></i>거래 명세서
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" style="height: 75vh;">
+                    <iframe th:src="@{/contract/contract_1750732323931.html}" class="w-100 h-100 border-0"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>닫기
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>인쇄하기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            loadSubscription();
+
+            function loadSubscription() {
+                $.ajax({
+                    type: "GET",
+                    url: "/user/api/service",
+                    success: function(res) {
+                        const data = res.body;
+                        if(res.head.res_code === "200") {
+                            $('#spkName').val(data.subscriptionPackageDTO.spkName);
+                            $('#spiIdx').val(data.subscriptionDTO.spiIdx);
+                            $('#spiPeriod').val(data.subscriptionDTO.spiPeriod);
+                            $('#spiStart').val(data.subscriptionDTO.spiStart.substring(0, 10));
+                            $('#spiEnd').val(data.subscriptionDTO.spiEnd.substring(0, 10));
+                            $('#spiNext').val(data.subscriptionDTO.spiNext.substring(0, 10));
+                            $('#recentPayDate').val(data.subscriptionDTO.spiNext.substring(0, 10));
+
+                            const activeModules = data.moduleDTOs;
+
+                            $.each(activeModules, function(index, item) {
+                                if(item.moduleIdx === "mou-101") {
+                                    $("#hr").removeClass("bg-light").addClass("bg-success text-white");
+                                    $("#hr").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
+                                } else if(item.moduleIdx === "mou-102") {
+                                    $("#acc").removeClass("bg-light").addClass("bg-success text-white");
+                                    $("#acc").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
+                                } else if(item.moduleIdx === "mou-103") {
+                                    $("#purchs").removeClass("bg-light").addClass("bg-success text-white");
+                                    $("#purchs").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
+                                } else if(item.moduleIdx === "mou-104") {
+                                    $("#bnz").removeClass("bg-light").addClass("bg-success text-white");
+                                    $("#bnz").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
+                                }
+                            });
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+						Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            $(".preview-btn").on("click", function(e) {
+                let spiIdx = $("#spiIdx").val();
+                let type= $(this).data("type");
+                let url = "";
+
+                if(type === "contract") {
+
+                } else if(type === "statement") {
+                    url = `/subscription/report/preview/${type}/${spiIdx}`;
+                } else if(type === "invoice") {
+                    url = `/subscription/report/preview/${type}/${spiIdx}`;
+                }
+                // 팝업 창 옵션
+                const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+
+                // 새 창 열기
+                window.open(url, "_blank", popupOptions);
+            });
+
+            $(".download-btn").on("click", function(e) {
+                let spiIdx = $("#spiIdx").val();
+                let type = $(this).data("type");
+                let url = "";
+
+                if(type === "contract") {
+                } else if(type === "statement") {
+                    url = `/subscription/report/${type}/${spiIdx}`;
+                } else if(type === "invoice") {
+                    url = `/subscription/report/${type}/${spiIdx}`;
+                }
+                // 팝업 창 옵션
+                const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+
+                // 새 창 열기
+                window.open(url, "_blank", popupOptions);
+            });
+        });
+    </script>
+</div>

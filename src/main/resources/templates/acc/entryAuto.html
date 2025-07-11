@@ -9,10 +9,315 @@
 ============================================ -->
 <head>
   <title>자동전표처리</title>
+  <style>
+    /* ag-Grid 컬럼 최소/최대/기본 너비 조정 */
+    #grid-periods, #grid-debits, #grid-credits, #grid-journal {
+      min-width: 0;
+      max-width: 100%;
+    }
+    /* ag-Grid group header 가운데 정렬 */
+    .ag-header-center .ag-header-group-cell-label {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+    .ag-header-center .ag-header-cell-label {
+      justify-content: center !important;
+      text-align: center;
+    }
+  </style>
 </head>
 <div layout:fragment="content">
-  <div id="entry-auto">
-    <h2>자동전표처리</h2>
-    <p>자동전표처리 화면입니다.</p>
+  <div id="entry-auto" class="entry-auto-container">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <!-- 왼쪽: 매입매출장 제목 -->
+      <h3 class="mb-0">자동전표처리</h3>
+      <!-- 오른쪽: 버튼 모음 -->
+      <div>
+        <button class="btn btn-outline-secondary btn-sm">전표추가</button>
+      </div>
+    </div>
+    <div class="entry-auto-section entry-auto-row d-flex mb-2" style="gap:7px;">
+      <!-- 귀속월/지급일/전표일자 목록 ag-Grid -->
+      <div class="entry-auto-col d-flex flex-column flex-fill" style="height:48vh;">
+        <div id="grid-periods" class="ag-theme-alpine" style="width:100%; height:100%"></div>
+      </div>
+      <!-- 지급항목(차변) ag-Grid -->
+      <div class="entry-auto-col d-flex flex-column flex-fill"  style="height:48vh;">
+        <div id="grid-debits" class="ag-theme-alpine" style="width:100%; height:100%"></div>
+      </div>
+      <!-- 공제항목(대변) ag-Grid -->
+      <div class="entry-auto-col d-flex flex-column flex-fill"  style="height:48vh;">
+        <div id="grid-credits" class="ag-theme-alpine" style="width:100%; height:100%"></div>
+      </div>
+    </div>
+    <!-- 일반전표(차변/대변) ag-Grid -->
+    <div class="mb-2" style="height:23vh;">
+      <div id="grid-journal" class="ag-theme-alpine" style="width:100%; height:100%"></div>
+    </div>
   </div>
+  <script th:inline="javascript">
+    // 공통 코드(과세유형, 차변/대변 등) Thymeleaf에서 받아옴
+    const code0H = /*[[${code0H}]]*/ [];
+    const code0A = /*[[${code0A}]]*/ [];
+    const code0G = /*[[${code0G}]]*/ [];
+    // 각 ag-Grid 컬럼 정의 (서버에서 받아올 데이터 구조에 맞춤)
+    // periods: 귀속월/지급월/전표일자 목록
+    const periodsColumnDefs = [
+      { headerName: '귀속월', field: 'attMonth', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
+      { headerName: '지급월', field: 'payMonth', flex: 1, minWidth: 100, headerClass: 'ag-header-center' },
+      { headerName: '전표일자', field: 'entryDate', flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
+    ];
+    // debits: 지급항목(차변)
+    const debitsColumnDefs = [
+      { headerName: '지급항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center'},
+      { headerName: '코드', field: 'code', width: 65, minWidth: 60, headerClass: 'ag-header-center', editable: true },
+      { headerName: '계정과목', field: 'account', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
+      { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
+    ];
+    // credits: 공제항목(대변)
+    const creditsColumnDefs = [
+      { headerName: '공제항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
+      { headerName: '코드', field: 'code', width: 65, minWidth: 60, headerClass: 'ag-header-center', editable: true },
+      { headerName: '계정과목', field: 'account', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
+      { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
+    ];
+    // journal: 일반전표(차변/대변)
+    const journalColumnDefs =  [
+      { headerName: "일자", field: "entryDate", minWidth: 70, maxWidth: 90, width: 80 },
+      { headerName: "전표번호", field: "entryNumber", minWidth: 110, maxWidth: 130, width: 120 },
+      { headerName: "구분", field: "resentmenType", minWidth: 70, maxWidth: 90, width: 80 },
+      { headerName: "계정과목코드", field: "accountCode", width: 65, minWidth: 60 },
+      { headerName: "계정과목명", field: "accountName", minWidth: 140, width: 120 },
+      { headerName: "코드", field: "partnerCode", width: 65, minWidth: 60 },
+      { headerName: "거래처명", field: "partnerName", minWidth: 110, maxWidth: 140, width: 120 },
+      { headerName: "차변", field: "debitAmount", minWidth: 90, maxWidth: 110, width: 100 },
+      { headerName: "대변", field: "creditAmount", minWidth: 90, maxWidth: 110, width: 100 }
+    ];
+    // ag-Grid 기본 옵션
+    const defaultGridOptions = {
+      // 공통으로 사용할 기본 옵션 설정
+      defaultColDef: {
+        sortable: true,
+        filter: true,
+        resizable: true,
+        minWidth: 50,
+        headerClass: 'ag-header-center',
+        cellClass: 'ag-cell-center',
+        // cellStyle: params => {
+        //   // 소계 행인 경우 가운데 정렬
+        //   if (params.data && params.data.isSummary === true) {
+        //     return { 
+        //       'text-align': 'center',
+        //       'display': 'flex',
+        //       'align-items': 'center',
+        //       'justify-content': 'center'
+        //     };
+        //   }
+        //   return null;
+        // }
+      },
+      // 각 그리드별 고유 옵션
+      periodsGridOptions: {
+        columnDefs: periodsColumnDefs,
+        rowData: [],
+        onGridReady: params => {
+          // 그리드 크기 조정
+          params.api.sizeColumnsToFit();
+        }
+      },
+      debitsGridOptions: {
+        columnDefs: debitsColumnDefs,
+        rowData: [],
+        onGridReady: params => {
+          // 그리드 크기 조정
+          params.api.sizeColumnsToFit();
+        }
+      },
+      creditsGridOptions: {
+        columnDefs: creditsColumnDefs,
+        rowData: [],
+        onGridReady: params => {
+          // 그리드 크기 조정
+          params.api.sizeColumnsToFit();
+        }
+      },
+      journalGridOptions: {
+        columnDefs: journalColumnDefs,
+        rowData: [],
+        onGridReady: params => {
+          // 그리드 크기 조정
+          params.api.sizeColumnsToFit();
+        }
+      }
+    };
+    // 그리드 데이터 설정 함수 
+    function setGridData(gridName, rowData) {
+      const gridOptions = defaultGridOptions[`${gridName}GridOptions`];
+      if (gridOptions && gridOptions.api) {
+        gridOptions.rowData = Array.isArray(rowData) ? rowData : [];
+        gridOptions.api.refreshClientSideRowModel('filter');
+      }
+    }
+    // 그리드 초기화 
+    function clearGrids() {
+      for (const key of ['periods', 'debits', 'credits', 'journal']) {
+        const gridOptions = defaultGridOptions[`${key}GridOptions`];
+        if (gridOptions && gridOptions.api) {
+          gridOptions.rowData = [];
+          gridOptions.api.refreshClientSideRowModel('filter');
+        }
+      }
+    }
+    // 전표 추가 버튼 클릭 시 동작
+    document.querySelector('.btn.btn-outline-secondary.btn-sm').addEventListener('click', () => {
+      // 전표 추가 로직
+      // 1. 현재 선택된 행 정보 가져오기
+      const selectedRows = defaultGridOptions.journalGridOptions.api.getSelectedRows();
+      if (selectedRows.length === 0) {
+        alert('전표를 추가할 행을 선택해 주십시오.');
+        return;
+      }
+      const selectedData = selectedRows[0];
+      // 2. 새로운 전표 데이터 생성
+      const newEntry = {
+        entryNumber: '', // 전표번호는 자동 생성
+        resentmenType: selectedData.resentmenType,
+        accountCode: selectedData.accountCode,
+        accountName: selectedData.accountName,
+        partnerCode: selectedData.partnerCode,
+        partnerName: selectedData.partnerName,
+        debitAmount: 0,
+        creditAmount: 0,
+        entryDate: selectedData.entryDate
+      };
+      // 3. 전표 데이터 전송 (예: AJAX)
+      fetch('/api/addEntry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newEntry)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('전표가 추가되었습니다.');
+          // 그리드 데이터 새로 고침
+          clearGrids();
+          // 공통 코드 및 그리드 데이터 재로드
+          window.dispatchEvent(new Event('load'));
+        } else {
+          alert('전표 추가에 실패하였습니다: ' + (data.message || '알 수 없는 오류'));
+        }
+      })
+      .catch(error => {
+        console.error('전표 추가 중 오류 발생:', error);
+        alert('전표 추가 중 오류 발생: ' + error.message);
+      });
+    });
+    // ag-Grid 인스턴스 변수 선언
+    let periodsGrid, debitsGrid, creditsGrid, journalGrid;
+    let periodsGridData = [], debitsGridData = [], creditsGridData = [], journalGridData = [];
+    document.addEventListener('DOMContentLoaded', function() {
+      // 자동전표 생성 먼저 실행
+      fetch('/acc/ena/auto-salary-entry', { method: 'POST' })
+        .then(res => {
+          if (!res.ok) throw new Error('전표 생성 실패');
+          return res.text();
+        })
+        .then(msg => {
+          // alert(msg); // "자동전표 생성 완료"
+          // 자동전표 생성 후 데이터 조회
+          return fetch('/acc/ena/all');
+        })
+        .then(res => res.json())
+        .then(data => {
+          // 그리드 데이터 갱신 (기존 데이터 세팅 코드와 동일하게)
+          // 예시:
+          periodsGridData = data.map(item => ({ attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate }));
+          debitsGridData = [];
+          data.forEach(item => {
+            if (item.baseSalary && item.baseSalary !== 0) debitsGridData.push({ item: '기본급', code: '503', account: '급여', amount: item.baseSalary });
+            if (item.bonus && item.bonus !== 0) debitsGridData.push({ item: '상여금', code: '803', account: '상여금', amount: item.bonus });
+            if (item.overtimePay && item.overtimePay !== 0) debitsGridData.push({ item: '잔업근무수당', code: '804', account: '잔업수당', amount: item.overtimePay });
+            if (item.nightWorkPay && item.nightWorkPay !== 0) debitsGridData.push({ item: '야간근무수당', code: '805', account: '야간수당', amount: item.nightWorkPay });
+          });
+          creditsGridData = [];
+          data.forEach(item => {
+            if (item.tax && item.tax !== 0) creditsGridData.push({ item: '원천세', code: '254', account: '예수금', amount: item.tax });
+            if (item.healthInsurance && item.healthInsurance !== 0) creditsGridData.push({ item: '건강보험', code: '254', account: '예수금', amount: item.healthInsurance });
+            if (item.nationalPension && item.nationalPension !== 0) creditsGridData.push({ item: '국민연금', code: '254', account: '예수금', amount: item.nationalPension });
+            if (item.employmentIns && item.employmentIns !== 0) creditsGridData.push({ item: '고용보험', code: '254', account: '예수금', amount: item.employmentIns });
+            if (item.otherDeductions && item.otherDeductions !== 0) creditsGridData.push({ item: '기타공제', code: '254', account: '예수금', amount: item.otherDeductions });
+          });
+          journalGridData = data.map(item => ({
+            entryDate: item.entryDate,
+            entryNumber: item.entryNumber,
+            resentmenType: item.resentmenType || '',
+            accountCode: item.accountCode || '',
+            accountName: '',
+            partnerCode: item.partnerCode || '',
+            partnerName: item.partnerName || '',
+            debitAmount: (item.baseSalary || item.bonus || item.overtimePay || item.nightWorkPay) || 0,
+            creditAmount: (item.tax || item.healthInsurance || item.nationalPension || item.employmentIns || item.otherDeductions) || 0
+          }));
+          // 데이터가 준비된 후에만 ag-Grid 인스턴스 생성
+          periodsGrid = agGrid.createGrid(document.getElementById('grid-periods'), {
+            columnDefs: periodsColumnDefs,
+            rowData: periodsGridData,
+            defaultColDef: { resizable: true },
+            headerHeight: 30,
+            rowHeight: 28,
+            onGridReady: params => {
+              window.periodsGridApi = params.api;
+              params.api.sizeColumnsToFit();
+            }
+          });
+          debitsGrid = agGrid.createGrid(document.getElementById('grid-debits'), {
+            columnDefs: debitsColumnDefs,
+            rowData: debitsGridData,
+            defaultColDef: { resizable: true },
+            headerHeight: 30,
+            groupHeaderHeight: 30,
+            rowHeight: 28
+          });
+          creditsGrid = agGrid.createGrid(document.getElementById('grid-credits'), {
+            columnDefs: creditsColumnDefs,
+            rowData: creditsGridData,
+            defaultColDef: { resizable: true },
+            headerHeight: 30,
+            groupHeaderHeight: 30,
+            rowHeight: 28
+          });
+          journalGrid = agGrid.createGrid(document.getElementById('grid-journal'), {
+            columnDefs: journalColumnDefs,
+            rowData: journalGridData,
+            domLayout: 'autoHeight',
+            defaultColDef: { resizable: true },
+            headerHeight: 30,
+            rowHeight: 28
+          });
+        })
+        .catch(error => {
+          alert('데이터를 불러오는 중 오류가 발생했습니다.\n' + error.message);
+        });
+    });
+    function showDebugPanel(title, data) {
+      $('#debug-panel').show();
+      $('#debug-panel-content').prepend(
+        `<div style='margin-bottom:10px;border-bottom:1px solid #444;padding-bottom:6px;'><b style='color:#ffd700;'>${title}</b>\n<code style='color:#b2f7ef;'>${JSON.stringify(data, null, 2)}</code></div>`
+      );
+    }
+    $('#debug-panel-toggle').on('click', function() {
+      $('#debug-panel').hide();
+      $('#debug-panel-content').empty();
+    });
+    // Thymeleaf 변수도 디버그 패널에 표시
+    showDebugPanel('Thymeleaf code0H', code0H);
+    showDebugPanel('Thymeleaf code0A', code0A);
+    showDebugPanel('Thymeleaf code0G', code0G);
+  </script>
 </div>

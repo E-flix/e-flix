@@ -1,131 +1,429 @@
-<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{common/layouts/default}">
 
+<head>
+	<title>입고관리</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
 <div layout:fragment="content" class="container-fluid">
-	<div class="col-md-12">
-		<div class="radio-group">
+	<div class="d-flex justify-content-between align-items-center mb-0">
+		<h2>입고관리</h2>
+		<div class="d-flex justify-content-end mb-2 gap-2">
+			<button type="button" class="btn btn-outline-secondary btn-sm fw-bold" id="makeBtn"
+				style="min-width: 80px;">제품생산요청</button>
+			<button type="button" class="btn btn-outline-secondary btn-sm fw-bold" id="rejectBtn"
+				style="min-width: 80px;">제품폐기</button>
+			<button type="button" class="btn btn-outline-secondary btn-sm fw-bold" id="inboundBtn"
+				style="min-width: 80px;">제품창고입고</button>
+		</div>
+	</div>
+	<div class="col-md-12 ps-0">
+		<div class="radio-group" role="group">
 			<input type="radio" class="btn-check" name="accountFilter" id="ibd" autocomplete="off" checked>
-			<label class="btn btn-outline-secondary btn-sm me-1" for="ibd">입고</label>
-
+			<label class="btn btn-outline-secondary btn-sm" for="ibd">입고</label>
 			<input type="radio" class="btn-check" name="accountFilter" id="obd" autocomplete="off">
-			<label class="btn btn-outline-secondary btn-sm me-1" for="obd">출고</label>
-			<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#inquiryModal">입고요청</button>
+			<label class="btn btn-outline-secondary btn-sm" for="obd">출고</label>
 		</div>
 	</div>
-
-	<div class="card shadow mb-4">
-		<div class="card-body">
-			<h5 class="text-center mb-4">입고 요청</h5>
-			<div class="row mb-3">
+	<div class="card border-0">
+		<div class="card-body ps-0 pt-0">
+			<div class="row">
+				<h5 class="mb-0">
+					입고 대기 제품
+					<small class="text-muted fw-light" style="font-size: 0.8rem;">※입고할 제품을 선택하세요.</small>
+				</h5>
+				<!-- 왼쪽: AG Grid-->
+				<div class="col-md-9">
+					<div id="inboundGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
+				</div>
+				<!-- 오른쪽: 입력 폼 -->
+				<div class="col-md-3">
+					<div class="border rounded p-3 shadow-sm bg-gray d-flex flex-column justify-content-between">
+						<div>
+							<h5 class="mb-1 text-center">제품 생산 요청</h5>
+							<div class="mb-1">
+								<label class="form-label" for="todayDate">생산날짜</label>
+								<input type="text" class="form-control form-control-sm" id="todayDate" readonly>
+								<input type="hidden" id="fullDateTime">
+							</div>
+							<div class="mb-1">
+								<label class="form-label">제품명</label>
+								<input type="text" class="form-control form-control-sm" id="prodName" placeholder="제품명">
+							</div>
+							<div class="mb-1">
+								<label class="form-label">제품분류</label>
+								<select class="form-control form-control-sm" id="productType">
+									<option selected>제품분류선택</option>
+									<option th:each="cd: ${ibdp}" th:value="${cd.commonCode}"
+										th:text="${cd.commonCodeName}"></option>
+								</select>
+							</div>
+							<div class="mb-1">
+								<label class="form-label">제품수량</label>
+								<input type="text" class="form-control form-control-sm" id="prodQuantity"
+									placeholder="제품수량">
+							</div>
+							<!-- <div class="mb-1">
+								<label class="form-label">안전재고량</label>
+								<input type="text" class="form-control form-control-sm" id="safetyStockAmount"
+									placeholder="안전재고량">
+							</div> -->
+						</div>
+					</div>
+				</div>
 			</div>
-			<form class="row g-3">
-				<div class="col-lg-2 col-md-4 col-sm-6">
-					<label for="date" class="form-label">입고날짜</label>
-					<input type="date" class="form-control" id="date" readonly>
+			<div class="row">
+				<h5 class="mt-3 mb-0">
+					입고 가능 창고
+					<small class="text-muted fw-light" style="font-size: 0.8rem;">※입고시킬 창고를 선택하세요.</small>
+				</h5>
+				<div class="grid-container mt-0" style="height: 30vh; width: 100%;">
+					<div id="warehouseGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 				</div>
-				<div class="col-lg-2 col-md-4 col-sm-6">
-					<label for="prodName" class="form-label">제품명</label>
-					<input type="text" class="form-control" id="prodName" placeholder="제품명">
+			</div>
+			
+			<div id="selectionSummary" class="card p-3 mt-3" style="display: none;">
+				<h6 class="fw-bold border-bottom pb-2 mb-2">입고 예정 정보</h6>
+				<div class="row mb-2">
+					<div class="col">
+						<small class="text-muted">제품ID</small>
+						<div id="summaryProdId" class="fw-bold"></div>
+					</div>
+					<div class="col">
+						<small class="text-muted">요청량</small>
+						<div id="summaryQuantity" class="fw-bold text-danger"></div>
+					</div>
+					<div class="col">
+						<small class="text-muted">도착창고</small>
+						<div id="summaryWarehouseId" class="fw-bold"></div>
+					</div>
+					<div class="col">
+						<small class="text-muted">입고가능</small>
+						<div id="summaryWarehouseAmount" class="fw-bold text-success"></div>
+					</div>
+					<div class="col">
+						<small class="text-muted">입고후</small>
+						<div id="summaryAmountAfter" class="fw-bold text-primary"></div>
+					</div>
 				</div>
-				<div class="col-lg-2 col-md-4 col-sm-6">
-					<label for="prod" class="form-label">제품분류</label>
-					<select class="form-control" id="prod">
-						<option selected>제품분류선택</option>
-						<option value="1">완제품</option>
-						<option value="2">반제품</option>
-					</select>
-				</div>
-				<div class="col-lg-2 col-md-4 col-sm-6">
-					<label for="prodAmount" class="form-label">제품수량</label>
-					<input type="text" class="form-control" id="prodAmount" placeholder="제품수량">
-				</div>
-				<div class="col-lg-2 col-md-4 col-sm-6">
-					<label for="safeyStockAmount" class="form-label">안전재고량</label>
-					<input type="text" class="form-control" id="safeyStockAmount" placeholder="안전재고량">
-				</div>
-			</form>
+			</div>
 		</div>
-	</div>
-
-	<!-- 반응형 테이블 -->
-	<div class="table-responsive">
-		<table class="table table-striped table-bordered w-100">
-			<thead>
-				<tr>
-					<th scope="col">no</th>
-					<th scope="col">제품생성일자</th>
-					<th scope="col">제품명</th>
-					<th scope="col">제품수량</th>
-					<th scope="col">제품분류</th>
-					<th scope="col">안전재고량</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<th scope="row">1</th>
-					<td>2025-06-18</td>
-					<td>비누</td>
-					<td>500</td>
-					<td>완제품</td>
-					<td>300</td>
-				</tr>
-				<tr>
-					<th scope="row">2</th>
-					<td>2025-06-18</td>
-					<td>비누</td>
-					<td>500</td>
-					<td>완제품</td>
-					<td>300</td>
-				</tr>
-				<tr>
-					<th scope="row">3</th>
-					<td>2025-06-18</td>
-					<td>비누</td>
-					<td>500</td>
-					<td>완제품</td>
-					<td>300</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-
-	<div class="table-responsive">
-		<table class="table table-striped table-bordered w-100">
-			<thead>
-				<tr>
-					<th scope="col">no</th>
-					<th scope="col">창고번호</th>
-					<th scope="col">창고위치</th>
-					<th scope="col">제품부피</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<th scope="row">1</th>
-					<td>WH001</td>
-					<td>대구</td>
-					<td>400</td>
-				</tr>
-			</tbody>
-		</table>
 	</div>
 </div>
 
 </html>
 
+<!-- AG Grid 및 페이지 스크립트 -->
+<script th:inline="javascript">
+	// 데이터 가져오기
+	let inboundList =  /*[[${ibdList}]]*/[];
+	let warehouseList = /*[[${vwh}]]*/[];
+	// AG Grid: 제품
+	const ibdGridOptions = {
+		headerHeight: 35,
+		rowHeight: 35,
+		rowData: inboundList,
+		// defaultColDef: { resizable: true },
+		columnDefs: [
+			{ headerName: "제품ID", field: "prodId", editable: false },
+			{ headerName: "제품명", field: "prodName", editable: false },
+			{ headerName: "생산일자", field: "makeProdDate", editable: false },
+			{
+				headerName: "제품분류", field: "productType", editable: false,
+				valueFormatter: (params) => {
+					if (params.value === 'p01') return '반제품';
+					if (params.value === 'p02') return '완제품';
+					return params.value;
+				}
+			},
+			{ headerName: "제품수량", field: "prodQuantity", editable: false, cellStyle: { textAlign: "right" } },
+			// { headerName: "안전재고량 지정", field: "safetyStockAmount", editable: false },
+		],
+		rowSelection: {
+			mode: "multiRow"
+		},
+		onGridReady: (params) => {
+			ibdGridOptions.api = params.api;
+			params.api.sizeColumnsToFit();
+		}
+	};
+	// 창 크기 바뀔 때도 다시 꽉 채우기
+	window.addEventListener('resize', () => {
+		if (ibdGridOptions.api) {
+			ibdGridOptions.api.sizeColumnsToFit();
+		}
+	});
+	// AG Grid: 창고
+	const whGridOptions = {
+		rowData: warehouseList,
+		rowHeight: 35,
+		headerHeight: 35,
+		defaultColDef: { resizable: true },
+		columnDefs: [
+			{ headerName: "창고ID", field: "warehouseId", editable: false },
+			{ headerName: "창고위치", field: "warehouseLocation", editable: false },
+			{ headerName: "최대용량", field: "warehouseScale", editable: false, cellStyle: { color: 'orange', textAlign: "right" } },
+			{ headerName: "현재용량", field: "warehouseCurrent", editable: false, cellStyle: { color: 'green', textAlign: "right" } },
+			{ headerName: "입고가능용량", field: "conf", editable: false, cellStyle: { color: 'blue', textAlign: "right" } },
+		],
+		rowSelection: {
+			mode: "multiRow"
+		},
+		onGridReady: (params) => {
+			whGridOptions.api = params.api;
+			params.api.sizeColumnsToFit();
+		}
+	};
+	// 창 크기 바뀔 때도 다시 꽉 채우기
+	window.addEventListener('resize', () => {
+		if (whGridOptions.api) {
+			whGridOptions.api.sizeColumnsToFit();
+		}
+	});
+	// 그리드 초기화
+	document.addEventListener("DOMContentLoaded", () => {
+		agGrid.createGrid(document.querySelector("#inboundGrid"), ibdGridOptions);
+		agGrid.createGrid(document.querySelector("#warehouseGrid"), whGridOptions);
+		// 창 크기 변화 대응
+		window.addEventListener("resize", () => {
+			ibdGridOptions.api?.sizeColumnsToFit();
+			whGridOptions.api?.sizeColumnsToFit();
+		});
+	});
+</script>
+
 <script>
+	// 오늘 날짜 자동 세팅(표시용)
 	const today = new Date();
 	const year = today.getFullYear();
 	const month = String(today.getMonth() + 1).padStart(2, '0');
 	const day = String(today.getDate()).padStart(2, '0');
 	const formattedDate = `${year}-${month}-${day}`;
-	document.getElementById('date').value = formattedDate;
+	$('#todayDate').val(formattedDate);
+	// 서버 전송용 (yyyy-MM-dd HH:mm:ss)
+	const hour = String(today.getHours()).padStart(2, '0');
+	const minute = String(today.getMinutes()).padStart(2, '0');
+	const second = String(today.getSeconds()).padStart(2, '0');
+	const fullFormattedDate = `${formattedDate} ${hour}:${minute}:${second}`;
+	document.getElementById('fullDateTime').value = fullFormattedDate;
 
-	//입고 - 출고 이동
+	// 입고 → 출고 전환
 	document.getElementById('obd').addEventListener('change', function () {
 		if (this.checked) {
-			window.location.href = '/purchs/outbound';
+			window.location.href = '/purchs/obd';
 		}
-	})
+	});
+
+	// 등록(생산요청)
+	$("#makeBtn").on("click", () => {
+		const prodName = $("#prodName").val();
+		const makeProdDate = $("#fullDateTime").val();
+		const prodQuantity = $("#prodQuantity").val();
+		// const safetyStockAmount = $("#safetyStockAmount").val();
+		const productType = $("#productType").val();
+
+		$.ajax({
+			type: 'GET',
+			url: '/purchs/lprd',
+			success: function (prodId) {
+				const data = {
+					prodId,
+					prodName,
+					makeProdDate,
+					prodQuantity,
+					// safetyStockAmount,
+					productType,
+				};
+				$.ajax({
+					type: 'POST',
+					url: '/purchs/ibdp',
+					contentType: 'application/json',
+					data: JSON.stringify(data),
+					success: function () {
+						Swal.fire({
+							icon: "success",
+							title: "성공",
+							text: "제품입고요청 되었습니다.",
+							showConfirmButton: false,
+							timer: 1000
+						}).then(() => window.location.reload());
+					},
+					error: function () {
+						Swal.fire({
+							icon: "warning",
+							title: "경고",
+							text: "입고할 제품 정보를 입력하세요.",
+							showConfirmButton: false,
+							timer: 1000
+						});
+					}
+				});
+			},
+			error: function () {
+				alert("제품 ID를 받아오는 데 실패했습니다.");
+			}
+		});
+	});
+
+	// 폐기
+	$("#rejectBtn").on("click", () => {
+		const selectedRows = ibdGridOptions.api.getSelectedRows();
+		const selectedIds = selectedRows.map(row => row.prodId);
+		if (selectedIds.length === 0) {
+			Swal.fire({
+				icon: "warning",
+				title: "선택 필요",
+				text: "반려할 제품을 선택하세요.",
+				showConfirmButton: false,
+				timer: 1000
+			});
+			return;
+		}
+		Promise.all(selectedIds.map(id => {
+			return $.ajax({
+				type: "DELETE",
+				url: "/purchs/dprd",
+				contentType: "application/json",
+				data: JSON.stringify({ prodId: id })
+			});
+		})).then(() => {
+			Swal.fire({
+				icon: "success",
+				title: "반려 완료",
+				text: "선택된 제품이 폐기되었습니다.",
+				timer: 1000,
+				showConfirmButton: false
+			}).then(() => window.location.reload());
+		}).catch(() => {
+			Swal.fire({
+				icon: "error",
+				title: "오류",
+				text: "폐기 중 오류가 발생했습니다.",
+				timer: 1500,
+				showConfirmButton: false
+			});
+		});
+	});
+
+	let latestInboundId = "";
+	let latestInboundLot = "";
+	// 마지막 입고번호 가져오기
+	$(document).ready(() => {
+		$.ajax({
+			type: 'GET',
+			url: '/purchs/gnpi',
+			success: function (id) {
+				latestInboundId = id;
+			},
+			error: function () {
+				alert("오류");
+			}
+		});
+	});
+	// 마지막 로트번호 가져오기
+	$(document).ready(() => {
+		$.ajax({
+			type: 'GET',
+			url: '/purchs/gnpl',
+			success: function (id) {
+				latestInboundLot = id;
+			},
+			error: function () {
+				alert("오류");
+			}
+		});
+	});
+
+	// 입고버튼
+	$("#inboundBtn").on("click", async () => {
+		const selectedProducts = ibdGridOptions.api.getSelectedRows();
+		const selectedWarehouse = whGridOptions.api.getSelectedRows();
+
+		if (selectedProducts.length === 0 || selectedWarehouse.length !== 1) {
+			Swal.fire({
+				icon: "warning",
+				title: "선택 오류",
+				text: "제품 및 창고를 선택하세요.",
+				timer: 1500,
+				showConfirmButton: false
+			});
+			return;
+		}
+
+		try {
+			const [inboundId, inboundLot] = await Promise.all([
+				$.get('/purchs/gnpi'),
+				$.get('/purchs/gnpl')
+			]);
+
+			const inboundManager = "admin"; // 임시 값 서버에서 받아와야 함 (로그인된 사람)
+
+			const payload = {
+				inboundId,
+				prodId: selectedProducts.map(p => p.prodId).join(","),
+				inboundQuantity: selectedProducts.map(p => p.prodQuantity).join(","),
+				inboundLot,
+				inboundDate: document.getElementById("fullDateTime").value,
+				inboundManager,
+				warehouseId: selectedWarehouse[0].warehouseId
+			};
+
+			await $.ajax({
+				type: "POST",
+				url: "/purchs/pibd",
+				contentType: "application/json",
+				data: JSON.stringify(payload)
+			});
+			console.log(payload);
+			Swal.fire({
+				icon: "success",
+				title: "입고 완료",
+				text: "제품이 창고에 입고되었습니다.",
+				showConfirmButton: false,
+				timer: 1500
+			}).then(() => window.location.reload());
+
+		} catch (error) {
+			Swal.fire({
+				icon: "error",
+				title: "입고 실패",
+				text: "입고할 공간이 부족합니다.",
+				timer: 1500,
+				showConfirmButton: false
+			});
+		}
+	});
+
+	function updateSelectionSummary() {
+		const selectedProducts = ibdGridOptions.api.getSelectedRows();
+		const selectedWarehouse = whGridOptions.api.getSelectedRows();
+		const summarySection = document.getElementById("selectionSummary");
+
+		if (selectedProducts.length > 0) {
+
+			summarySection.style.display = "block";
+
+			const prodIds = selectedProducts.map(p => p.prodId).join(", "); // 제품ID
+			const quantities = selectedProducts.map(p => p.prodQuantity).join(", "); // 입고요청량
+			const warehouseId = selectedWarehouse[0]?.warehouseId || ""; // 창고ID
+			const warehouseScale = selectedWarehouse[0]?.warehouseScale || ""; // 전체용량
+			const warehouseCurrent = selectedWarehouse[0]?.warehouseCurrent || ""; // 현재용량
+			const conf = selectedWarehouse[0]?.conf || "" // 사용가능용량
+			// 계산
+			const result = conf - quantities;
+			// 출력
+			document.getElementById("summaryProdId").innerText = prodIds; // 제품ID
+			document.getElementById("summaryQuantity").innerText = quantities; // 입고요청량
+			document.getElementById("summaryWarehouseId").innerText = warehouseId; // 창고ID
+			document.getElementById("summaryWarehouseAmount").innerText = conf; // 입고가능량
+			document.getElementById("summaryAmountAfter").innerText = result; // 입고후용량
+		} else {
+			// 숨기기
+			summarySection.style.display = "none";
+		}
+	}
+	// 제품 테이블에서 선택 시
+	ibdGridOptions.onSelectionChanged = updateSelectionSummary;
+	// 창고 테이블에서 선택 시
+	whGridOptions.onSelectionChanged = updateSelectionSummary;
 </script>

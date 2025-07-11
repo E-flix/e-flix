@@ -10,14 +10,12 @@ package com.eflix.hr.mapper;
 
 import java.util.List;
 
-import org.springframework.data.repository.query.Param;
-
-import com.eflix.hr.dto.SalaryMappingDTO;
+import com.eflix.hr.dto.etc.SalaryMappingDTO;
 
 public interface SalaryMappingMapper {
-    List<SalaryMappingDTO> selectAll();
-    SalaryMappingDTO selectById(@Param("mpIdx") String mpIdx);
-    int insert(SalaryMappingDTO dto);
-    int update(SalaryMappingDTO dto);
-    int deleteById(@Param("mpIdx") String mpIdx);
+    List<SalaryMappingDTO> findAllByCoIdx(String coIdx);
+    SalaryMappingDTO findByMpIdx(String coIdx, String mpIdx);
+    int insert(SalaryMappingDTO salaryMappingDTO);
+    int update(SalaryMappingDTO salaryMappingDTO);
+    int delete(String mpIdx);
 }

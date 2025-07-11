@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================
+  - 작성자   : 김희정
+  - 최초작성 : 2025-06-23
+  - 설명     : parterMapper query xml
+  [ 변경 이력 ]
+  - 2025-06-23 (김희정): 일반거래처 전체조회 작성
+  - 2025-07-03 (김희정): 조회조건 회사번호(coIdx) 추가
+=============================================== -->
+<mapper namespace="com.eflix.acc.mapper.PartnerMapper">
+
+  <resultMap id="PartnerDetailResultMap" type="com.eflix.acc.dto.PartnerDetailDTO">
+    <id property="partnerCode" column="partner_code"/>
+    <result property="partnerName" column="partner_name"/>
+    <result property="partnerType" column="partner_type"/>
+    <result property="businessNumber" column="business_number"/>
+    <result property="residentNumber" column="resident_number"/>
+    <result property="representativeName" column="representative_name"/>
+    <result property="businessType" column="business_type"/>
+    <result property="businessItem" column="business_item"/>
+    <result property="postalCode" column="postal_code"/>
+    <result property="address" column="address"/>
+    <result property="addressDetail" column="address_detail"/>
+    <result property="phoneNumber" column="phone_number"/>
+    <result property="extensionNumber" column="extension_number"/>
+    <result property="faxNumber" column="fax_number"/>
+    <result property="bankCode" column="bank_code"/>
+    <result property="bankBranch" column="bank_branch"/>
+    <result property="accountHolder" column="account_holder"/>
+    <result property="accountNumber" column="account_number"/>
+    <result property="tradeStartDate" column="trade_start_date"/>
+    <result property="tradeEndDate" column="trade_end_date"/>
+    <result property="useFlag" column="use_flag"/>
+    <result property="createdAt" column="created_at"/>
+    <result property="updatedAt" column="updated_at"/>
+    <result property="remarks" column="remarks"/>
+    <result property="coIdx" column="co_idx"/>
+  </resultMap>
+
+	<!-- 모든 일반거래처 조회 -->
+  <select id="getList" parameterType="String" resultMap="PartnerDetailResultMap">
+    SELECT * 
+    FROM partner_detail
+    WHERE use_flag = 'a1'
+    AND co_idx = #{coIdx}
+    ORDER BY partner_code
+  </select>
+
+  <!-- 거래처 코드로 일반거래처 조회 -->
+  <select id="getListByCode" parameterType="PartnerDetailDTO" resultMap="PartnerDetailResultMap">
+    SELECT * 
+    FROM partner_detail 
+    WHERE partner_code = #{partnerCode} 
+    AND use_flag = 'a1'
+    AND co_idx = #{coIdx}
+  </select>
+
+  <!-- 거래처 이름으로 일반거래처 조회 (부분검색) -->
+  <select id="getListByName" parameterType="PartnerDetailDTO" resultMap="PartnerDetailResultMap">
+    SELECT * 
+    FROM partner_detail 
+    WHERE partner_name 
+    LIKE CONCAT('%', #{partnerName}, '%') 
+    AND use_flag = 'a1'
+    AND co_idx = #{coIdx}
+  </select>
+</mapper>

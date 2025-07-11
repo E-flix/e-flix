@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-20
+  - 설명     : AttendanceRecordsMapper query xml
+  [ 변경 이력 ]
+  - 2025-06-19 (김어진): 사원 전체조회 작성
+=============================================== -->
+<mapper namespace="com.eflix.hr.mapper.AttendanceRecordMapper">
+  <!-- 근태 전체조회-->
+  <select id="getAllRecords" resultType="AttendanceRecordDTO">
+  SELECT *
+  FROM attendance_records
+  </select>
+
+  <!--근태현황 상세조회-->
+  <select id="getRecordsByEmpId"
+          parameterType="AttendanceRecordDTO"
+          resultType="AttendanceRecordDTO">
+    <![CDATA[
+      SELECT
+        ar.attd_date AS attd_date,
+        ar.hd_idx,
+        ar.attd_status,
+        TO_CHAR(ar.attd_time,  'HH24:MI') AS attd_time,
+        TO_CHAR(ar.attd_start, 'HH24:MI') AS attd_start,
+        TO_CHAR(ar.attd_end,   'HH24:MI') AS attd_end,
+        CASE
+          WHEN (ar.attd_end - ar.attd_start) > (8/24)
+          THEN
+            FLOOR((ar.attd_end - ar.attd_start)*24 - 8)
+            || '시간 '
+            || LPAD(
+                TO_CHAR(
+                  FLOOR(
+                    MOD((ar.attd_end - ar.attd_start)*24 - 8,1) * 60
+                  )
+                ), 2, '0')
+            || '분'
+          ELSE NULL
+        END AS overtime
+      FROM attendance_records ar
+      WHERE ar.emp_idx = #{empIdx}
+        AND ar.attd_date BETWEEN #{attdStart} AND #{attdEnd}
+        AND ar.co_idx = #{coIdx}
+      ORDER BY ar.attd_date
+    ]]>
+  </select>
+
+  <select id="getJoinDate" parameterType="String" resultType="java.time.LocalDate">
+    SELECT 
+      TRUNC(e.emp_regdate) AS emp_regdate
+    FROM employees e
+    WHERE e.emp_idx = #{empIdx}
+      AND e.co_idx  = #{coIdx}
+  </select>
+  <!-- 로그인 사원 기본정보 조회-->
+  <select id="getBasicInfo" resultType="AttendanceRecordDTO">
+  SELECT 
+    ar.attd_date,
+    h.hd_date AS hd_date,
+    h.hd_type AS hd_type,
+    e.leave_all_days AS leave_all_days,
+    e.leave_days AS leave_days
+  FROM attendance_records ar
+  LEFT JOIN employees e ON ar.emp_idx = e.emp_idx
+  LEFT JOIN holiday h ON ar.hd_idx = h.hd_idx
+  WHERE e.emp_idx = #{empIdx} AND e.co_idx = #{coIdx} AND ar.attd_date BETWEEN #{attdStart} AND #{attdEnd}
+  </select>
+
+  <!-- 근태관리 조회 -->
+  <select id="managerSearch" parameterType="map" resultType="AttendanceRecordDTO">
+  SELECT DISTINCT
+    e.emp_name,
+    ar.attd_status,
+    d.dept_name,
+    e.emp_grade
+  FROM employees e
+  LEFT JOIN attendance_records ar ON e.emp_idx = ar.emp_idx
+  LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+  <where>
+    <!-- '사원명' 필터링 -->
+    <if test="empName != null and empName != ''">
+      AND e.emp_name LIKE '%' || #{empName} || '%'
+    </if>
+    <!-- 예: 추가로 상태나 부서, 등급 필터가 필요하면 아래처럼 더 넣을 수 있음 -->
+    <if test="attdStatus != null and attdStatus != ''">
+      AND ar.attd_status = #{attdStatus}
+    </if>
+    <if test="deptName != null and deptName != ''">
+      AND d.dept_name LIKE '%' || #{deptName} || '%'
+    </if>
+    <if test="empGrade != null and empGrade != ''">
+      AND e.emp_grade = #{empGrade}
+    </if>
+  </where>
+  </select>
+
+
+  <!-- 0708 -->
+    <select id="selectAttdRecordSummaryByEmpIdx" parameterType="String" resultType="AttdRecordSummaryDTO">
+        SELECT
+        COUNT(DISTINCT attd_date) AS realDay,
+        e.leave_all_days AS totalLeaveDay,
+        COUNT(CASE WHEN TO_CHAR(attd_date,'DY','NLS_DATE_LANGUAGE=AMERICAN') NOT IN ('SAT','SUN') THEN 1 END) AS workDay,
+        (
+            SELECT NVL(SUM(LEAVE_END_DATE-LEAVE_START_DATE)+1,0)
+            FROM leave_requests
+            WHERE emp_idx = #{empIdx}
+            AND TO_CHAR(leave_start_date, 'YYYY-MM') = #{date}
+            AND approval_status = 'AS02'
+        ) AS usedLeaveDay,
+        ( e.leave_all_days - (
+            SELECT NVL(SUM(LEAVE_END_DATE-LEAVE_START_DATE)+1,0)
+            FROM leave_requests
+            WHERE emp_idx = 'emp-201'
+            AND TO_CHAR(leave_start_date, 'YYYY-MM') = '2025-07'
+            AND approval_status = 'AS02'
+        )) AS canLeaveDay,
+        COUNT(CASE WHEN attd_status = 'ABSENT' THEN 1 END) AS abDay,
+        COUNT(CASE WHEN attd_status = 'LATE' THEN 1 END) AS rateCount,
+        COUNT(CASE WHEN attd_status = 'LEAVE_EARLY' THEN 1 END) AS leaveEarlyDay,
+        COUNT(CASE WHEN TO_CHAR(attd_date,'DY','NLS_DATE_LANGUAGE=AMERICAN') IN ('SAT','SUN') THEN 1 END) AS holidayWorkDay
+        FROM attendance_records ar
+            JOIN employees e ON ar.emp_idx = e.emp_idx
+        WHERE ar.emp_idx = #{empIdx} AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+        GROUP BY e.leave_all_days, e.leave_days
+    </select>
+
+    <select id="findAllByEmpIdxWithDate" parameterType="String" resultType="AttdRecordDTO">
+        SELECT
+        TO_CHAR(ar.attd_date, 'YYYY-MM-DD') AS attdDate,
+        (SELECT hd_name FROM holiday h WHERE h.hd_idx = ar.hd_idx) AS holidayType,
+        ar.attd_status AS attdStatus,
+        TO_CHAR(ar.attd_time, 'HH24:MI') AS scheduleTime,
+        TO_CHAR(ar.attd_start, 'HH24:MI') AS startTime,
+        TO_CHAR(ar.attd_end, 'HH24:MI') AS endTime,
+        NVL((
+            SELECT 
+                LPAD(TRUNC((n.nt_end - n.nt_start) * 24), 2, '0') || ':' ||
+                LPAD(MOD(TRUNC((n.nt_end - n.nt_start) * 24 * 60), 60), 2, '0')
+            FROM night_records n
+            WHERE n.emp_idx = ar.emp_idx
+                AND n.nt_date = ar.attd_date
+                AND n.nt_start IS NOT NULL AND n.nt_end IS NOT NULL
+                AND ROWNUM = 1
+        ), '') AS nightTime
+        FROM attendance_records ar
+        LEFT JOIN night_records n
+            ON n.emp_idx = ar.emp_idx
+            AND n.nt_date = ar.attd_date
+        WHERE ar.emp_idx = #{empIdx}
+        AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+        ORDER BY ar.attd_date ASC
+    </select>
+
+    <!-- V2 -->
+    <select id="findAttdSummaryByEmpIdxWithDate" parameterType="String" resultType="AttdSummaryDTO">
+        SELECT     
+            COUNT(DISTINCT ar.attd_date) AS realDay,     
+            MAX(g.grd_annual) AS totalLeaveDay,     
+            COUNT(CASE WHEN ar.attd_status IN ('AR02','AR03','AR04') THEN 1 END) AS workDay,     
+            NVL((         
+                SELECT SUM(lr.leave_end_date - lr.leave_start_date + 1)         
+                FROM leave_requests lr         
+                WHERE lr.emp_idx = #{empIdx}         
+                AND TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}           
+                AND lr.approval_status = 'AS02'     
+            ), 0) AS usedLeaveDay,     
+            COUNT(CASE WHEN ar.is_holiday = 'Y' THEN 1 END) AS holidayWorkDay,     
+            (MAX(g.grd_annual) - NVL((         
+                SELECT SUM(lr.leave_end_date - lr.leave_start_date + 1)         
+                FROM leave_requests lr         
+                WHERE lr.emp_idx = #{empIdx}           
+                AND TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}           
+                AND lr.approval_status = 'AS02'     
+            ), 0)) AS canLeaveDay,     
+            COUNT(CASE WHEN ar.attd_status = 'AR05' THEN 1 END) AS abDay,     
+            COUNT(CASE WHEN ar.attd_status = 'AR03' THEN 1 END) AS rateCount,     
+            COUNT(CASE WHEN ar.attd_status = 'AR04' THEN 1 END) AS leaveEarlyDay 
+        FROM attendance_records ar 
+        JOIN employees e ON ar.emp_idx = e.emp_idx 
+        JOIN grade g ON e.grd_idx = g.grd_idx 
+        WHERE ar.emp_idx = #{empIdx}   
+        AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+        GROUP BY ar.emp_idx, e.emp_idx, g.grd_idx
+    </select>
+
+    <select id="findAttdDetailListByEmpIdxWithDate" parameterType="String" resultType="AttdDetailDTO">
+        SELECT
+            TO_CHAR(ar.attd_date, 'YYYY-MM-DD') AS attdDate,
+            (SELECT hd_name FROM holiday h WHERE h.hd_date = ar.attd_date AND h.co_idx = ar.co_idx) AS holidayType,
+            cc.common_code_name AS attdStatus,
+            TO_CHAR(ar.attd_time, 'HH24:MI') AS scheduleTime,
+            TO_CHAR(ar.attd_start, 'HH24:MI') AS startTime,
+            TO_CHAR(ar.attd_end, 'HH24:MI') AS endTime,
+            (
+                SELECT
+                    CASE WHEN n.nt_idx IS NOT NULL
+                        THEN TO_CHAR(n.nt_hours, '99.99')
+                        ELSE ''
+                    END
+                FROM night_records n
+                WHERE n.emp_idx = ar.emp_idx
+                AND n.nt_date = ar.attd_date
+                AND n.co_idx = ar.co_idx
+                AND ROWNUM = 1
+            ) AS nightTime
+        FROM attendance_records ar
+            LEFT JOIN COMMON_CODE cc
+                ON ar.attd_status = cc.COMMON_CODE
+                AND cc.GROUP_CODE = 'AR'
+                AND cc.CO_IDX = ar.co_idx
+        WHERE ar.emp_idx = #{empIdx}
+            AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+        ORDER BY attd_date ASC
+    </select>
+
+    <select id="findAllAttdCount" parameterType="AttdSearchDTO" resultType="int">
+      SELECT COUNT(*)
+        FROM employees e
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+            LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+            LEFT JOIN (
+                SELECT
+                    ar.emp_idx,
+                    COUNT(DISTINCT ar.attd_date) AS totalDay,
+                    COUNT(CASE WHEN ar.attd_status IN ('AR02','AR03','AR04') THEN 1 END) AS workDay,
+                    COUNT(CASE WHEN ar.attd_status = 'AR05' THEN 1 END) AS lateCount,
+                    COUNT(CASE WHEN ar.attd_status = 'AR04' THEN 1 END) AS leaveEarlyCount,
+                    COUNT(CASE WHEN ar.attd_status = 'AR06' THEN 1 END) AS abCount,
+                    MAX(ar.attd_moddate) AS lastModDate
+                FROM attendance_records ar
+                WHERE TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                GROUP BY ar.emp_idx
+            ) attd ON e.emp_idx = attd.emp_idx
+            LEFT JOIN (
+                SELECT
+                    nr.emp_idx,
+                    SUM(nr.nt_hours) AS nightHours
+                FROM night_records nr
+                WHERE TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                GROUP BY nr.emp_idx
+            ) night ON e.emp_idx = night.emp_idx
+            LEFT JOIN (
+                SELECT
+                    lr.emp_idx,
+                    SUM(lr.leave_end_date - lr.leave_start_date + 1) AS usedLeaveDay
+                FROM leave_requests lr
+                WHERE TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                AND lr.approval_status = 'AS02'
+                GROUP BY lr.emp_idx
+            ) lv ON e.emp_idx = lv.emp_idx
+        WHERE e.co_idx = #{coIdx}
+          <if test="empName != null and empName != ''">
+            AND e.emp_name LIKE '%' || #{empName} || '%'
+          </if>
+          <if test="attdStatus != null and attdStatus != ''">
+            AND ar.attd_status = #{attdStatus}
+          </if>
+          <if test="deptIdx != null and deptIdx != ''">
+            AND e.dept_idx = #{deptIdx}
+          </if>
+          <if test="grdIdx != null and grdIdx != ''">
+            AND e.grd_idx = #{grdIdx}
+          </if>
+        ORDER BY e.emp_idx
+    </select>
+
+    <select id="findAttdMgrListByCoIdxWithDate" parameterType="String" resultType="AttdMgrListDTO">
+        SELECT
+            e.emp_idx                AS empIdx,
+            e.emp_name               AS empName,
+            d.dept_name              AS deptName,
+            g.grd_name               AS grdName,
+            NVL(attd.totalDay, 0)        AS totalDay,
+            NVL(attd.workDay, 0)         AS workDay,
+            NVL(night.nightHours, 0)     AS nightHours,
+            NVL(attd.lateCount, 0)       AS lateCount,
+            NVL(attd.leaveEarlyCount, 0) AS leaveEarlyCount,
+            NVL(attd.abCount, 0)         AS abCount,
+            NVL(lv.usedLeaveDay, 0)      AS usedLeaveDay,
+            attd.lastModDate
+        FROM employees e
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+            LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+            LEFT JOIN (
+                SELECT
+                    ar.emp_idx,
+                    COUNT(DISTINCT ar.attd_date) AS totalDay,
+                    COUNT(CASE WHEN ar.attd_status IN ('AR02','AR03','AR04') THEN 1 END) AS workDay,
+                    COUNT(CASE WHEN ar.attd_status = 'AR05' THEN 1 END) AS lateCount,
+                    COUNT(CASE WHEN ar.attd_status = 'AR04' THEN 1 END) AS leaveEarlyCount,
+                    COUNT(CASE WHEN ar.attd_status = 'AR06' THEN 1 END) AS abCount,
+                    MAX(ar.attd_moddate) AS lastModDate
+                FROM attendance_records ar
+                WHERE TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                GROUP BY ar.emp_idx
+            ) attd ON e.emp_idx = attd.emp_idx
+            LEFT JOIN (
+                SELECT
+                    nr.emp_idx,
+                    SUM(nr.nt_hours) AS nightHours
+                FROM night_records nr
+                WHERE TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                GROUP BY nr.emp_idx
+            ) night ON e.emp_idx = night.emp_idx
+            LEFT JOIN (
+                SELECT
+                    lr.emp_idx,
+                    SUM(lr.leave_end_date - lr.leave_start_date + 1) AS usedLeaveDay
+                FROM leave_requests lr
+                WHERE TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                AND lr.approval_status = 'AS02'
+                GROUP BY lr.emp_idx
+            ) lv ON e.emp_idx = lv.emp_idx
+        WHERE e.co_idx = #{coIdx}
+            <if test="empName != null and empName != ''">
+                AND e.emp_name LIKE '%' || #{empName} || '%'
+            </if>
+            <if test="attdStatus != null and attdStatus != ''">
+                AND ar.attd_status = #{attdStatus}
+            </if>
+            <if test="deptIdx != null and deptIdx != ''">
+                AND e.dept_idx = #{deptIdx}
+            </if>
+            <if test="grdIdx != null and grdIdx != ''">
+                AND e.grd_idx = #{grdIdx}
+            </if>
+        ORDER BY e.emp_idx
+    </select>
+
+    <select id="findAttdRemarkListByEmpIdxWithDate" parameterType="String" resultType="AttdRemarkDTO">
+        SELECT
+            ar.attd_idx      AS attdIdx,
+            ar.emp_idx       AS empIdx,
+            TO_CHAR(ar.attd_date, 'YYYY-MM-DD') AS attdDate,
+            cc.common_code_name AS attdStatus,
+            CASE
+                WHEN h.hd_idx IS NOT NULL AND h.hd_type = 'HT01' THEN '휴일'
+                ELSE ar.ab_reason
+            END AS abReason,
+            ar.memo          AS memo,
+            ar.co_idx        AS coIdx
+        FROM attendance_records ar
+            LEFT JOIN common_code cc ON cc.common_code = ar.attd_status
+                AND cc.group_code = 'AR'
+                AND cc.co_idx = ar.co_idx
+            LEFT JOIN holiday h ON h.hd_date = ar.attd_date
+                AND h.co_idx = ar.co_idx
+                AND h.hd_type = 'HT01'
+        WHERE ar.emp_idx = #{empIdx}
+            AND ar.attd_status != 'AR02'
+            AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+        ORDER BY ar.attd_date ASC
+    </select>
+</mapper>
