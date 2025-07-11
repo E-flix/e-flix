@@ -39,6 +39,27 @@
         <button class="btn btn-outline-secondary btn-sm">전표추가</button>
       </div>
     </div>
+    <!-- 전표일자, 차변/대변 계정과목 합치기/개별 필터 UI 추가 -->
+    <div class="mb-2 d-flex align-items-center" style="gap:20px;">
+      <label>전표일자 설정:
+        <select id="journal-date-type" class="form-select form-select-sm" style="width:120px;display:inline-block;">
+          <option value="payMonth">지급년월일</option>
+          <option value="attMonthEnd">귀속월말</option>
+        </select>
+      </label>
+      <label>차변 계정과목:
+        <select id="journal-debit-type" class="form-select form-select-sm" style="width:120px;display:inline-block;">
+          <option value="merge">합치기</option>
+          <option value="split">개별</option>
+        </select>
+      </label>
+      <label>대변 계정과목:
+        <select id="journal-credit-type" class="form-select form-select-sm" style="width:120px;display:inline-block;">
+          <option value="split">개별</option>
+          <option value="merge">합치기</option>
+        </select>
+      </label>
+    </div>
     <div class="entry-auto-section entry-auto-row d-flex mb-2" style="gap:7px;">
       <!-- 귀속월/지급일/전표일자 목록 ag-Grid -->
       <div class="entry-auto-col d-flex flex-column flex-fill" style="height:48vh;">
@@ -58,6 +79,8 @@
       <div id="grid-journal" class="ag-theme-alpine" style="width:100%; height:100%"></div>
     </div>
   </div>
+  <!-- 모달 불러오기 -->
+  <div th:replace="acc/modal/modal :: modals"></div>
   <script th:inline="javascript">
     // 공통 코드(과세유형, 차변/대변 등) Thymeleaf에서 받아옴
     const code0H = /*[[${code0H}]]*/ [];
@@ -68,25 +91,30 @@
     const periodsColumnDefs = [
       { headerName: '귀속월', field: 'attMonth', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
       { headerName: '지급월', field: 'payMonth', flex: 1, minWidth: 100, headerClass: 'ag-header-center' },
-      { headerName: '전표일자', field: 'entryDate', flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
+      { headerName: '전표일자', field: 'entryDate', flex: 1, minWidth: 100, headerClass: 'ag-header-center',
+        valueGetter: params => params.data && params.data.ledgerCheck === 'a1' ? params.data.entryDate : null },
+      { headerName: '전표번호', field: 'entryNumber', flex: 1, minWidth: 100, headerClass: 'ag-header-center',
+        valueGetter: params => params.data && params.data.ledgerCheck === 'a1' ? params.data.entryNumber : null}
     ];
     // debits: 지급항목(차변)
     const debitsColumnDefs = [
       { headerName: '지급항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center'},
-      { headerName: '코드', field: 'code', width: 65, minWidth: 60, headerClass: 'ag-header-center', editable: true },
-      { headerName: '계정과목', field: 'account', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
+      { headerName: '계정과목코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center',
+        editable: params => params.data.ledgerCheck !== 'a1' },// ledgerCheck이 'a1'이면 입력불가
+      { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
       { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
     ];
     // credits: 공제항목(대변)
     const creditsColumnDefs = [
       { headerName: '공제항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
-      { headerName: '코드', field: 'code', width: 65, minWidth: 60, headerClass: 'ag-header-center', editable: true },
-      { headerName: '계정과목', field: 'account', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
+      { headerName: '계정과목코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center',
+        editable: params => params.data.ledgerCheck !== 'a1' },// ledgerCheck이 'a1'이면 입력불가
+      { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
       { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
     ];
     // journal: 일반전표(차변/대변)
     const journalColumnDefs =  [
-      { headerName: "일자", field: "entryDate", minWidth: 70, maxWidth: 90, width: 80 },
+      { headerName: "일자", field: "entryDate", minWidth: 100, width: 100},
       { headerName: "전표번호", field: "entryNumber", minWidth: 110, maxWidth: 130, width: 120 },
       { headerName: "구분", field: "resentmenType", minWidth: 70, maxWidth: 90, width: 80 },
       { headerName: "계정과목코드", field: "accountCode", width: 65, minWidth: 60 },
@@ -94,63 +122,20 @@
       { headerName: "코드", field: "partnerCode", width: 65, minWidth: 60 },
       { headerName: "거래처명", field: "partnerName", minWidth: 110, maxWidth: 140, width: 120 },
       { headerName: "차변", field: "debitAmount", minWidth: 90, maxWidth: 110, width: 100 },
-      { headerName: "대변", field: "creditAmount", minWidth: 90, maxWidth: 110, width: 100 }
+      { headerName: "대변", field: "creditAmount", minWidth: 90, maxWidth: 110, width: 100 },
+      { headerName: "적요", field: "description", minWidth: 120, width: 120 }
     ];
     // ag-Grid 기본 옵션
     const defaultGridOptions = {
       // 공통으로 사용할 기본 옵션 설정
       defaultColDef: {
-        sortable: true,
-        filter: true,
-        resizable: true,
+        sortable: false,      // 정렬 불가
+        filter: false,        // 필터 비활성화
+        resizable: false,     // 컬럼 크기 조정 불가
+        suppressMovable: true, // 헤더 이동 불가
         minWidth: 50,
         headerClass: 'ag-header-center',
-        cellClass: 'ag-cell-center',
-        // cellStyle: params => {
-        //   // 소계 행인 경우 가운데 정렬
-        //   if (params.data && params.data.isSummary === true) {
-        //     return { 
-        //       'text-align': 'center',
-        //       'display': 'flex',
-        //       'align-items': 'center',
-        //       'justify-content': 'center'
-        //     };
-        //   }
-        //   return null;
-        // }
-      },
-      // 각 그리드별 고유 옵션
-      periodsGridOptions: {
-        columnDefs: periodsColumnDefs,
-        rowData: [],
-        onGridReady: params => {
-          // 그리드 크기 조정
-          params.api.sizeColumnsToFit();
-        }
-      },
-      debitsGridOptions: {
-        columnDefs: debitsColumnDefs,
-        rowData: [],
-        onGridReady: params => {
-          // 그리드 크기 조정
-          params.api.sizeColumnsToFit();
-        }
-      },
-      creditsGridOptions: {
-        columnDefs: creditsColumnDefs,
-        rowData: [],
-        onGridReady: params => {
-          // 그리드 크기 조정
-          params.api.sizeColumnsToFit();
-        }
-      },
-      journalGridOptions: {
-        columnDefs: journalColumnDefs,
-        rowData: [],
-        onGridReady: params => {
-          // 그리드 크기 조정
-          params.api.sizeColumnsToFit();
-        }
+        cellClass: 'ag-cell-center'
       }
     };
     // 그리드 데이터 설정 함수 
@@ -207,8 +192,6 @@
           alert('전표가 추가되었습니다.');
           // 그리드 데이터 새로 고침
           clearGrids();
-          // 공통 코드 및 그리드 데이터 재로드
-          window.dispatchEvent(new Event('load'));
         } else {
           alert('전표 추가에 실패하였습니다: ' + (data.message || '알 수 없는 오류'));
         }
@@ -221,6 +204,192 @@
     // ag-Grid 인스턴스 변수 선언
     let periodsGrid, debitsGrid, creditsGrid, journalGrid;
     let periodsGridData = [], debitsGridData = [], creditsGridData = [], journalGridData = [];
+
+    // 선택된 periods row에 따라 하위 그리드 데이터 필터링 함수
+    function updateDetailGrids(selectedPeriod) {
+      // 필터 값을 직접 읽어옴 (window 변수, setTimeout 불필요)
+      const dateType = document.getElementById('journal-date-type')?.value || 'payMonth';
+      const debitType = document.getElementById('journal-debit-type')?.value || 'merge';
+      const creditType = document.getElementById('journal-credit-type')?.value || 'split';
+      console.log('[updateDetailGrids] selectedPeriod:', selectedPeriod);
+      if (!selectedPeriod) {
+        debitsGrid.api.applyTransaction({ remove: debitsGrid.api.getDisplayedRowAtIndex ? Array.from({length: debitsGrid.api.getDisplayedRowCount()}, (_, i) => debitsGrid.api.getDisplayedRowAtIndex(i).data) : [] });
+        creditsGrid.api.applyTransaction({ remove: creditsGrid.api.getDisplayedRowAtIndex ? Array.from({length: creditsGrid.api.getDisplayedRowCount()}, (_, i) => creditsGrid.api.getDisplayedRowAtIndex(i).data) : [] });
+        journalGrid.api.applyTransaction({ remove: journalGrid.api.getDisplayedRowAtIndex ? Array.from({length: journalGrid.api.getDisplayedRowCount()}, (_, i) => journalGrid.api.getDisplayedRowAtIndex(i).data) : [] });
+
+        // 합계행도 즉시 제거
+        safeSetPinnedBottomRow(debitsGrid.api, []);
+        safeSetPinnedBottomRow(creditsGrid.api, []);
+        return;
+      }
+      const { attMonth, payMonth, entryDate, entryNumber } = selectedPeriod;
+
+      const filteredDebits = debitsGridData.filter(item =>
+        item.attMonth === attMonth && item.payMonth === payMonth && item.entryDate === entryDate && item.entryNumber === entryNumber
+      );
+      const filteredCredits = creditsGridData.filter(item =>
+        item.attMonth === attMonth && item.payMonth === payMonth && item.entryDate === entryDate && item.entryNumber === entryNumber
+      );
+
+      // journalGrid 데이터 생성 (전표일자: 지급년월일, 차변: 합치기, 대변: 개별)
+      function getJournalEntryDate(selectedPeriod, dateType) {
+        if (dateType === 'payMonth') return selectedPeriod.payMonth;
+        if (dateType === 'attMonthEnd') {
+          // 귀속월말: 귀속월의 마지막날 (예: 2025-07 -> 2025-07-31)
+          const [year, month] = selectedPeriod.attMonth.split('-');
+          const lastDay = new Date(year, month, 0).getDate();
+          return `${year}-${month.padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+        }
+        return selectedPeriod.payMonth;
+      }
+
+      function generateJournalGridData() {
+        const entryDateValue = getJournalEntryDate(selectedPeriod, dateType);
+        console.log('[generateJournalGridData] entryDateValue:', entryDateValue, 'debitType:', debitType, 'creditType:', creditType);
+        // 차변
+        let debitRows = [];
+        if (debitType === 'merge') {
+          const debitMap = {};
+          filteredDebits.forEach(item => {
+            if (!debitMap[item.accountCode]) {
+              debitMap[item.accountCode] = {
+                entryDate: entryDateValue,
+                entryNumber: entryNumber,
+                resentmenType: 'g3',
+                accountCode: item.accountCode,
+                accountName: item.accountName,
+                partnerCode: null,
+                partnerName: null,
+                debitAmount: 0,
+                creditAmount: null,
+                description: null
+              };
+            }
+            debitMap[item.accountCode].debitAmount += Number(item.amount || 0);
+          });
+          debitRows = Object.values(debitMap);
+        } else {
+          debitRows = filteredDebits.map(item => ({
+            entryDate: entryDateValue,
+            entryNumber: entryNumber,
+            resentmenType: 'g3',
+            accountCode: item.accountCode,
+            accountName: item.accountName,
+            partnerCode: null,
+            partnerName: null,
+            debitAmount: Number(item.amount || 0),
+            creditAmount: null,
+            description: null
+          }));
+        }
+        // 대변
+        let creditRows = [];
+        if (creditType === 'merge') {
+          const creditMap = {};
+          filteredCredits.forEach(item => {
+            if (!creditMap[item.accountCode]) {
+              creditMap[item.accountCode] = {
+                entryDate: entryDateValue,
+                entryNumber: entryNumber,
+                resentmenType: 'g4',
+                accountCode: item.accountCode,
+                accountName: item.accountName,
+                partnerCode: null,
+                partnerName: null,
+                debitAmount: null,
+                creditAmount: 0,
+                description: null
+              };
+            }
+            creditMap[item.accountCode].creditAmount += Number(item.amount || 0);
+          });
+          creditRows = Object.values(creditMap);
+        } else {
+          creditRows = filteredCredits.map(item => ({
+            entryDate: entryDateValue,
+            entryNumber: entryNumber,
+            resentmenType: 'g4',
+            accountCode: item.accountCode,
+            accountName: item.accountName,
+            partnerCode: null,
+            partnerName: null,
+            debitAmount: null,
+            creditAmount: Number(item.amount || 0),
+            description: null
+          }));
+        }
+        console.log('[generateJournalGridData] result:', [...debitRows, ...creditRows]);
+        return [
+          ...debitRows,
+          ...creditRows
+        ];
+      }
+      const generatedJournalRows = generateJournalGridData();
+      console.log('[updateDetailGrids] generatedJournalRows:', generatedJournalRows);
+
+      // 기존 데이터 모두 제거 후 새 데이터 추가 (ag-Grid v33.x 안전 방식)
+      // debitsGrid 안전 교체
+      const allDebitsRows = [];
+      for (let i = 0; i < debitsGrid.api.getDisplayedRowCount(); i++) {
+        allDebitsRows.push(debitsGrid.api.getDisplayedRowAtIndex(i).data);
+      }
+      debitsGrid.api.applyTransaction({ remove: allDebitsRows });
+      debitsGrid.api.applyTransaction({ add: filteredDebits });
+      debitsGrid.api.deselectAll();
+      debitsGrid.api.refreshCells({ force: true });
+
+      // creditsGrid 안전 교체
+      const allCreditsRows = [];
+      for (let i = 0; i < creditsGrid.api.getDisplayedRowCount(); i++) {
+        allCreditsRows.push(creditsGrid.api.getDisplayedRowAtIndex(i).data);
+      }
+      creditsGrid.api.applyTransaction({ remove: allCreditsRows });
+      creditsGrid.api.applyTransaction({ add: filteredCredits });
+      creditsGrid.api.deselectAll();
+      creditsGrid.api.refreshCells({ force: true });
+
+      // journalGrid 안전 교체
+      const allJournalRows = [];
+      for (let i = 0; i < journalGrid.api.getDisplayedRowCount(); i++) {
+        allJournalRows.push(journalGrid.api.getDisplayedRowAtIndex(i).data);
+      }
+      journalGrid.api.applyTransaction({ remove: allJournalRows });
+      journalGrid.api.applyTransaction({ add: generatedJournalRows });
+      journalGrid.api.deselectAll();
+      journalGrid.api.refreshCells({ force: true });
+      console.log('[journalGrid] after applyTransaction', journalGrid.api.getDisplayedRowCount());
+
+      // 합계 행 추가
+      setPinnedBottomTotals(); 
+    }
+
+    function safeSetPinnedBottomRow(api, rows) { // 안전하게 핀된 하단 행 설정
+      if (!api) return; // api가 없으면 아무 작업도 하지 않음
+      if (api.setPinnedBottomRowData) api.setPinnedBottomRowData(rows); // 핀된 하단 행 데이터 설정
+      else if (api.setGridOption)      api.setGridOption('pinnedBottomRowData', rows); // 핀된 하단 행 데이터 설정 (구버전 호환)
+    }
+
+    // 합계 행 추가 함수
+    function setPinnedBottomTotals() { // 차변/대변 그리드의 합계 행 설정
+      // 차변 합계 
+      let debitsTotal = 0; // 차변 합계 계산
+      debitsGrid.api.forEachNode(n => { // 각 노드의 금액 합산
+        debitsTotal += Number(n.data.amount || 0); // 금액이 없으면 0으로 처리
+      });
+      safeSetPinnedBottomRow(debitsGrid.api, [ // 차변 합계 행 설정
+        { item: '합계', code: null, account: '', amount: debitsTotal } // 합계 행 데이터
+      ]);
+
+      // 대변 합계
+      let creditsTotal = 0; // 대변 합계 계산
+      creditsGrid.api.forEachNode(n => { // 각 노드의 금액 합산
+        creditsTotal += Number(n.data.amount || 0); // 금액이 없으면 0으로 처리
+      });
+      safeSetPinnedBottomRow(creditsGrid.api, [ // 대변 합계 행 설정
+        { item: '합계', code: null, account: '', amount: creditsTotal } // 합계 행 데이터
+      ]);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       // 자동전표 생성 먼저 실행
       fetch('/acc/ena/auto-salary-entry', { method: 'POST' })
@@ -237,23 +406,70 @@
         .then(data => {
           // 그리드 데이터 갱신 (기존 데이터 세팅 코드와 동일하게)
           // 예시:
-          periodsGridData = data.map(item => ({ attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate }));
+          console.log(data);
+          periodsGridData = data.map(item => ({ attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber }));
           debitsGridData = [];
           data.forEach(item => {
-            if (item.baseSalary && item.baseSalary !== 0) debitsGridData.push({ item: '기본급', code: '503', account: '급여', amount: item.baseSalary });
-            if (item.bonus && item.bonus !== 0) debitsGridData.push({ item: '상여금', code: '803', account: '상여금', amount: item.bonus });
-            if (item.overtimePay && item.overtimePay !== 0) debitsGridData.push({ item: '잔업근무수당', code: '804', account: '잔업수당', amount: item.overtimePay });
-            if (item.nightWorkPay && item.nightWorkPay !== 0) debitsGridData.push({ item: '야간근무수당', code: '805', account: '야간수당', amount: item.nightWorkPay });
+            if (item.baseSalary && item.baseSalary !== 0) debitsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '기본급', accountCode: 802, accountName: '직원급여', amount: item.baseSalary
+            });
+            if (item.bonus && item.bonus !== 0) debitsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '상여금', accountCode: 803, accountName: '상여금', amount: item.bonus
+            });
+            if (item.overtimePay && item.overtimePay !== 0) debitsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '잔업근무수당', accountCode: 802, accountName: '직원급여', amount: item.overtimePay
+            });
+            if (item.nightWorkPay && item.nightWorkPay !== 0) debitsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '야간근무수당', accountCode: 802, accountName: '직원급여', amount: item.nightWorkPay
+            });
           });
           creditsGridData = [];
           data.forEach(item => {
-            if (item.tax && item.tax !== 0) creditsGridData.push({ item: '원천세', code: '254', account: '예수금', amount: item.tax });
-            if (item.healthInsurance && item.healthInsurance !== 0) creditsGridData.push({ item: '건강보험', code: '254', account: '예수금', amount: item.healthInsurance });
-            if (item.nationalPension && item.nationalPension !== 0) creditsGridData.push({ item: '국민연금', code: '254', account: '예수금', amount: item.nationalPension });
-            if (item.employmentIns && item.employmentIns !== 0) creditsGridData.push({ item: '고용보험', code: '254', account: '예수금', amount: item.employmentIns });
-            if (item.otherDeductions && item.otherDeductions !== 0) creditsGridData.push({ item: '기타공제', code: '254', account: '예수금', amount: item.otherDeductions });
+            if (item.tax && item.tax !== 0) creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '원천세', accountCode: 254, accountName: '예수금', amount: item.tax
+            });
+            if (item.healthInsurance && item.healthInsurance !== 0) creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '건강보험', accountCode: 254, accountName: '예수금', amount: item.healthInsurance
+            });
+            if (item.nationalPension && item.nationalPension !== 0) creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '국민연금', accountCode: 254, accountName: '예수금', amount: item.nationalPension
+            });
+            if (item.employmentIns && item.employmentIns !== 0) creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '고용보험', accountCode: 254, accountName: '예수금', amount: item.employmentIns
+            });
+            if (item.otherDeductions && item.otherDeductions !== 0) creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '기타공제', accountCode: 254, accountName: '예수금', amount: item.otherDeductions
+            });
+
+            // 차인지급액 추가
+            const payment =
+              (Number(item.baseSalary || 0) +
+               Number(item.bonus || 0) +
+               Number(item.overtimePay || 0) +
+               Number(item.nightWorkPay || 0)) -
+              (Number(item.tax || 0) +
+               Number(item.healthInsurance || 0) +
+               Number(item.nationalPension || 0) +
+               Number(item.employmentIns || 0) +
+               Number(item.otherDeductions || 0));
+
+            creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '차인지급액', accountCode: 262, accountName: '미지급비용', amount: payment
+            });
           });
           journalGridData = data.map(item => ({
+            attMonth: item.attMonth,
+            payMonth: item.payMonth,
             entryDate: item.entryDate,
             entryNumber: item.entryNumber,
             resentmenType: item.resentmenType || '',
@@ -264,41 +480,80 @@
             debitAmount: (item.baseSalary || item.bonus || item.overtimePay || item.nightWorkPay) || 0,
             creditAmount: (item.tax || item.healthInsurance || item.nationalPension || item.employmentIns || item.otherDeductions) || 0
           }));
-          // 데이터가 준비된 후에만 ag-Grid 인스턴스 생성
+
+          // 그리드 인스턴스 생성
           periodsGrid = agGrid.createGrid(document.getElementById('grid-periods'), {
             columnDefs: periodsColumnDefs,
             rowData: periodsGridData,
-            defaultColDef: { resizable: true },
+            defaultColDef: { resizable: true, sortable: false },
+            suppressMovableColumns: true,
             headerHeight: 30,
             rowHeight: 28,
+            rowSelection: {
+              mode: 'singleRow',
+              enableClickSelection: true
+            },
             onGridReady: params => {
-              window.periodsGridApi = params.api;
+              periodsGrid.api = params.api;
               params.api.sizeColumnsToFit();
+            },
+            onSelectionChanged: function(event) {
+              // 필터 옵션 값 미리 세팅
+              window.dateType = document.getElementById('journal-date-type')?.value || 'payMonth';
+              window.debitType = document.getElementById('journal-debit-type')?.value || 'merge';
+              window.creditType = document.getElementById('journal-credit-type')?.value || 'split';
+              const selected = event.api.getSelectedRows();
+              if (selected.length > 0) {
+                updateDetailGrids(selected[0]);
+              } else {
+                updateDetailGrids(null);
+              }
             }
           });
           debitsGrid = agGrid.createGrid(document.getElementById('grid-debits'), {
             columnDefs: debitsColumnDefs,
-            rowData: debitsGridData,
-            defaultColDef: { resizable: true },
+            rowData: [], // 최초엔 빈 배열
+            defaultColDef: { resizable: true, sortable: false },
+            suppressMovableColumns: true,
             headerHeight: 30,
             groupHeaderHeight: 30,
-            rowHeight: 28
+            rowHeight: 28,
+            onGridReady: params => {
+              debitsGrid.api = params.api;
+              params.api.sizeColumnsToFit && params.api.sizeColumnsToFit();
+              bindAccountCodeAutoMapping(debitsGrid); 
+              bindAccountCodeF4Modal(debitsGrid);
+              bindJournalSyncOnAccountChange(debitsGrid);
+            }
           });
           creditsGrid = agGrid.createGrid(document.getElementById('grid-credits'), {
             columnDefs: creditsColumnDefs,
-            rowData: creditsGridData,
-            defaultColDef: { resizable: true },
+            rowData: [], // 최초엔 빈 배열
+            defaultColDef: { resizable: true, sortable: false },
+            suppressMovableColumns: true,
             headerHeight: 30,
             groupHeaderHeight: 30,
-            rowHeight: 28
+            rowHeight: 28,
+            onGridReady: params => {
+              creditsGrid.api = params.api;
+              params.api.sizeColumnsToFit && params.api.sizeColumnsToFit();
+              bindAccountCodeAutoMapping(creditsGrid); 
+              bindAccountCodeF4Modal(creditsGrid); 
+              bindJournalSyncOnAccountChange(creditsGrid);
+            }
           });
           journalGrid = agGrid.createGrid(document.getElementById('grid-journal'), {
             columnDefs: journalColumnDefs,
-            rowData: journalGridData,
+            rowData: [], // 최초엔 빈 배열
             domLayout: 'autoHeight',
-            defaultColDef: { resizable: true },
+            defaultColDef: { resizable: true, sortable: false },
+            suppressMovableColumns: true,
             headerHeight: 30,
-            rowHeight: 28
+            rowHeight: 28,
+            onGridReady: params => {
+              journalGrid.api = params.api; // 반드시 추가!
+              params.api.sizeColumnsToFit && params.api.sizeColumnsToFit();
+            }
           });
         })
         .catch(error => {
@@ -319,5 +574,179 @@
     showDebugPanel('Thymeleaf code0H', code0H);
     showDebugPanel('Thymeleaf code0A', code0A);
     showDebugPanel('Thymeleaf code0G', code0G);
+    // 계정과목/거래처 모달 오픈 함수
+    function windowOpenAccountModal() {
+      window.openAccountModal(null, function(code, name) {
+        $('#accountCode').val(code).trigger('change');
+        $('#accountName').val(name);
+      });
+    }
+    function windowOpenPartnerModal() {
+      window.openPartnerModal(null, function(code, name) {
+        $('#partnerCode').val(code).trigger('change');
+        $('#partnerName').val(name);
+      });
+    }
+
+    // 계정과목 input에서 F4 누르면 계정과목 모달 오픈
+    $('#accountCode').on('keydown', function(e) {
+      if (e.key === 'F4' || e.keyCode === 115) {
+        e.preventDefault();
+        windowOpenAccountModal();
+      }
+    });
+    // 거래처 input에서 F4 누르면 거래처 모달 오픈
+    $('#partnerCode').on('keydown', function(e) {
+      if (e.key === 'F4' || e.keyCode === 115) {
+        e.preventDefault();
+        windowOpenPartnerModal();
+      }
+    });
+
+    // 모달이 닫힐 때 포커스를 원래 입력 필드로 되돌림
+    $(document).ready(function() {
+      $('#accountModal').on('hidden.bs.modal', function () {
+        $('#accountCode').focus();
+      });
+      $('#partnerModal').on('hidden.bs.modal', function () {
+        $('#partnerCode').focus();
+      });
+    });
+
+    // 계정과목번호 입력 시 계정과목명 자동 조회 및 롤백 처리
+    let lastValidAccountCode = '';
+    $('#accountCode').on('change', function() {
+      const code = $(this).val();
+      if (!code) {
+        $('#accountName').val('');
+        lastValidAccountCode = '';
+        return;
+      }
+      fetch('/acc/act/' + code)
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(data => {
+          if (data && data.accountName) {
+            $('#accountName').val(data.accountName);
+            lastValidAccountCode = code;
+          } else {
+            throw new Error('Invalid account code');
+          }
+        })
+        .catch(() => {
+          if (lastValidAccountCode) {
+            $('#accountCode').val(lastValidAccountCode);
+            fetch('/acc/act/' + lastValidAccountCode)
+              .then(res => res.ok ? res.json() : null)
+              .then(data2 => {
+                $('#accountName').val(data2 && data2.accountName ? data2.accountName : '');
+              });
+          } else {
+            $('#accountCode').val('');
+            $('#accountName').val('');
+          }
+        });
+    });
+
+    // 거래처번호 입력 시 거래처명 자동 조회 및 롤백 처리
+    let lastValidPartnerCode = '';
+    $('#partnerCode').on('change', function() {
+      const code = $(this).val();
+      if (!code) {
+        $('#partnerName').val('');
+        lastValidPartnerCode = '';
+        return;
+      }
+      fetch('/acc/pt/' + code)
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(data => {
+          if (data && data.partnerName) {
+            $('#partnerName').val(data.partnerName);
+            lastValidPartnerCode = code;
+          } else {
+            throw new Error('Invalid partner code');
+          }
+        })
+        .catch(() => {
+          if (lastValidPartnerCode) {
+            $('#partnerCode').val(lastValidPartnerCode);
+            fetch('/acc/pt/' + lastValidPartnerCode)
+              .then(res => res.ok ? res.json() : null)
+              .then(data2 => {
+                $('#partnerName').val(data2 && data2.partnerName ? data2.partnerName : '');
+              });
+          } else {
+            $('#partnerCode').val('');
+            $('#partnerName').val('');
+          }
+        });
+    });
+
+    // 차변/대변 그리드에서 계정과목코드 입력 시 계정과목명 자동 매핑 (clientsLedger.html 방식 참고)
+    function bindAccountCodeAutoMapping(grid) {
+      grid.api.addEventListener('cellValueChanged', function(event) {
+        if (event.colDef.field === 'accountCode') {
+          const code = event.newValue;
+          if (!code) {
+            event.node.setDataValue('accountName', '');
+            return;
+          }
+          fetch('/acc/act/' + code)
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(data => {
+              if (data && data.accountName) {
+                event.node.setDataValue('accountName', data.accountName);
+              } else {
+                event.node.setDataValue('accountName', '');
+              }
+            })
+            .catch(() => {
+              event.node.setDataValue('accountName', '');
+            });
+        }
+      });
+    }
+    // 차변/대변 그리드에서 계정과목코드 셀 F4 누르면 모달 오픈 (ledgerCheck !== 'a1'일 때만)
+    function bindAccountCodeF4Modal(grid) {
+      grid.api.addEventListener('cellKeyDown', function(event) {
+        if (
+          event.colDef.field === 'accountCode' &&
+          (event.event.key === 'F4' || event.event.keyCode === 115) &&
+          event.node.data.ledgerCheck !== 'a1'
+        ) {
+          event.event.preventDefault();
+          window.openAccountModal(null, function(code, name) {
+            event.node.setDataValue('accountCode', code);
+            event.node.setDataValue('accountName', name);
+          });
+        }
+      });
+    }
+    // 차변/대변 그리드에서 계정과목코드 변경 시 journalGrid도 동기화
+    function syncJournalGridWithDebitsCredits() {
+      const selected = periodsGrid && periodsGrid.api ? periodsGrid.api.getSelectedRows() : [];
+      if (!selected || selected.length === 0) return;
+      updateDetailGrids(selected[0]);
+    }
+    // debits/credits 그리드 cellValueChanged 이벤트에 동기화 함수 바인딩
+    function bindJournalSyncOnAccountChange(grid) {
+      grid.api.addEventListener('cellValueChanged', function(event) {
+        if (event.colDef.field === 'accountCode' || event.colDef.field === 'accountName') {
+          syncJournalGridWithDebitsCredits();
+        }
+      });
+    }
+    // 필터 옵션 변경 시 자동 반영 (window/setTimeout 없이 간단하게)
+    document.getElementById('journal-date-type').addEventListener('change', function() {
+      const selected = periodsGrid && periodsGrid.api ? periodsGrid.api.getSelectedRows() : [];
+      if (selected && selected.length > 0) updateDetailGrids(selected[0]);
+    });
+    document.getElementById('journal-debit-type').addEventListener('change', function() {
+      const selected = periodsGrid && periodsGrid.api ? periodsGrid.api.getSelectedRows() : [];
+      if (selected && selected.length > 0) updateDetailGrids(selected[0]);
+    });
+    document.getElementById('journal-credit-type').addEventListener('change', function() {
+      const selected = periodsGrid && periodsGrid.api ? periodsGrid.api.getSelectedRows() : [];
+      if (selected && selected.length > 0) updateDetailGrids(selected[0]);
+    });
   </script>
 </div>
