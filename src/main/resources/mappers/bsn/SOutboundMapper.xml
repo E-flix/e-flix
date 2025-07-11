@@ -6,33 +6,19 @@
 <mapper namespace="com.eflix.bsn.mapper.SOutboundMapper">
 
   <!-- 출고 목록 조회 -->
-  <!-- 
-    ★★★ 출고 목록 조회 쿼리 수정 ★★★
-    - SOUTBOUND_DETAIL 테이블과 LEFT JOIN하여 전체 상태를 계산하는 로직 추가
-  -->
   <select id="selectAllOutbound" resultType="com.eflix.bsn.dto.SalesOutboundDTO" parameterType="string">
     SELECT
-        so.OUTBOUND_NO        AS outboundNo,
-        so.WRITE_DT           AS writeDt,
-        so.CUSTOMER_CD        AS customerCd,
-        so.CUSTOMER_NAME      AS customerName,
-        so.REPRESENTATIVE_NM  AS representativeNm,
-        so.ORDER_DT           AS orderDt,
-        so.OUTBOUND_DT        AS outboundDt,
-        so.MONEY              AS money,
-        so.REMARKS            AS remarks,
-        so.CO_IDX             AS coIdx,
-        -- 전체 상태 계산 로직
+        so.OUTBOUND_NO,
+        so.WRITE_DT,
+        so.CUSTOMER_NAME,
+        so.OUTBOUND_DT,
+        so.REMARKS,
+        so.CO_IDX,
+        -- ★★★ 변경: 전체 상태 계산 로직을 '출고완료'와 '대기' 2가지로 단순화 ★★★
         CASE
-            -- 하나라도 '취소'가 있으면 '취소'
-            WHEN status_summary.cancelled_count > 0 THEN '취소'
-            -- 전체 품목 수와 '출고완료' 수가 같으면 '출고완료'
+            -- 모든 품목이 출고완료 상태이면 '출고완료'
             WHEN status_summary.total_count = status_summary.completed_count THEN '출고완료'
-            -- 하나라도 '출고중'이 있으면 '출고중'
-            WHEN status_summary.shipping_count > 0 THEN '출고중'
-            -- 하나라도 '준비중'이 있으면 '준비중'
-            WHEN status_summary.preparing_count > 0 THEN '준비중'
-            -- 그 외에는 '대기'
+            -- 그 외 (하나라도 대기 상태가 있으면) '대기'
             ELSE '대기'
         END AS overallStatus
     FROM 
@@ -41,10 +27,7 @@
         SELECT 
             OUTBOUND_NO,
             COUNT(*) AS total_count,
-            SUM(CASE WHEN OUTBOUND_STATUS = '출고완료' THEN 1 ELSE 0 END) AS completed_count,
-            SUM(CASE WHEN OUTBOUND_STATUS = '준비중' THEN 1 ELSE 0 END) AS preparing_count,
-            SUM(CASE WHEN OUTBOUND_STATUS = '출고중' THEN 1 ELSE 0 END) AS shipping_count,
-            SUM(CASE WHEN OUTBOUND_STATUS = '취소' THEN 1 ELSE 0 END) AS cancelled_count
+            SUM(CASE WHEN OUTBOUND_STATUS = '출고완료' THEN 1 ELSE 0 END) AS completed_count
         FROM EFLIX.SOUTBOUND_DETAIL
         GROUP BY OUTBOUND_NO
     ) status_summary ON so.OUTBOUND_NO = status_summary.OUTBOUND_NO
@@ -54,7 +37,7 @@
         so.OUTBOUND_DT DESC, so.CREATED_AT DESC
   </select>
 
-  <!-- 출고 상세 조회 -->
+  <!-- ★★★ 변경: 출고 상세 조회 쿼리에서 가격 관련 컬럼 제거 ★★★ -->
   <select id="selectOutboundDetails" resultType="com.eflix.bsn.dto.SoutboundDetailDTO" parameterType="string">
     SELECT
       sd.OUTBOUND_NO        AS outboundNo,
@@ -64,10 +47,6 @@
       sd.STANDARD           AS standard,
       sd.QTY                AS qty,
       sd.UNIT               AS unit,
-      sd.UNIT_PRICE         AS unitPrice,
-      sd.SUPPLY_AMOUNT      AS supplyAmount,
-      sd.TAX_AMOUNT         AS taxAmount,
-      sd.TOTAL_AMOUNT       AS totalAmount,
       sd.OUTBOUND_STATUS    AS outboundStatus,
       sd.REMARKS            AS remarks,
       sd.CO_IDX             AS coIdx
@@ -191,12 +170,11 @@
     ORDER BY od.LINE_NO
   </select>
 
-  <!-- 출고 상태별 통계 조회 -->
+  <!-- ★★★ 변경: 출고 상태 통계 조회 쿼리에서 금액 합계(SUM) 제거 ★★★ -->
   <select id="selectOutboundStatusStats" resultType="java.util.HashMap" parameterType="string">
     SELECT 
       OUTBOUND_STATUS as status,
-      COUNT(*) as count,
-      SUM(TOTAL_AMOUNT) as totalAmount
+      COUNT(*) as count
     FROM EFLIX.SOUTBOUND_DETAIL
     WHERE CO_IDX = #{coIdx}
       AND OUTBOUND_STATUS IS NOT NULL
@@ -204,11 +182,8 @@
     ORDER BY 
       CASE OUTBOUND_STATUS
         WHEN '대기' THEN 1
-        WHEN '준비중' THEN 2
-        WHEN '출고중' THEN 3
-        WHEN '출고완료' THEN 4
-        WHEN '취소' THEN 5
-        ELSE 6
+        WHEN '출고완료' THEN 2
+        ELSE 3
       END
   </select>
 
