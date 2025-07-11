@@ -142,6 +142,7 @@
       s.pay_month, 
       m.entry_date, 
       m.entry_number, 
+      m.ledger_check,
       sum_salaries.sum_base_salary       AS base_salary,
       sum_salaries.sum_bonus             AS bonus,
       sum_salaries.sum_overtime_pay      AS overtime_pay,

@@ -68,7 +68,10 @@
     const periodsColumnDefs = [
       { headerName: '귀속월', field: 'attMonth', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
       { headerName: '지급월', field: 'payMonth', flex: 1, minWidth: 100, headerClass: 'ag-header-center' },
-      { headerName: '전표일자', field: 'entryDate', flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
+      { headerName: '전표일자', field: 'entryDate', flex: 1, minWidth: 100, headerClass: 'ag-header-center',
+        valueGetter: params => params.data && params.data.ledgerCheck === 'a1' ? params.data.entryDate : null },
+      { headerName: '전표번호', field: 'entryNumber', flex: 1, minWidth: 100, headerClass: 'ag-header-center',
+        valueGetter: params => params.data && params.data.ledgerCheck === 'a1' ? params.data.entryNumber : null}
     ];
     // debits: 지급항목(차변)
     const debitsColumnDefs = [
@@ -100,57 +103,13 @@
     const defaultGridOptions = {
       // 공통으로 사용할 기본 옵션 설정
       defaultColDef: {
-        sortable: true,
-        filter: true,
-        resizable: true,
+        sortable: false,      // 정렬 불가
+        filter: false,        // 필터 비활성화
+        resizable: false,     // 컬럼 크기 조정 불가
+        suppressMovable: true, // 헤더 이동 불가
         minWidth: 50,
         headerClass: 'ag-header-center',
-        cellClass: 'ag-cell-center',
-        // cellStyle: params => {
-        //   // 소계 행인 경우 가운데 정렬
-        //   if (params.data && params.data.isSummary === true) {
-        //     return { 
-        //       'text-align': 'center',
-        //       'display': 'flex',
-        //       'align-items': 'center',
-        //       'justify-content': 'center'
-        //     };
-        //   }
-        //   return null;
-        // }
-      },
-      // 각 그리드별 고유 옵션
-      periodsGridOptions: {
-        columnDefs: periodsColumnDefs,
-        rowData: [],
-        onGridReady: params => {
-          // 그리드 크기 조정
-          params.api.sizeColumnsToFit();
-        }
-      },
-      debitsGridOptions: {
-        columnDefs: debitsColumnDefs,
-        rowData: [],
-        onGridReady: params => {
-          // 그리드 크기 조정
-          params.api.sizeColumnsToFit();
-        }
-      },
-      creditsGridOptions: {
-        columnDefs: creditsColumnDefs,
-        rowData: [],
-        onGridReady: params => {
-          // 그리드 크기 조정
-          params.api.sizeColumnsToFit();
-        }
-      },
-      journalGridOptions: {
-        columnDefs: journalColumnDefs,
-        rowData: [],
-        onGridReady: params => {
-          // 그리드 크기 조정
-          params.api.sizeColumnsToFit();
-        }
+        cellClass: 'ag-cell-center'
       }
     };
     // 그리드 데이터 설정 함수 
@@ -207,8 +166,6 @@
           alert('전표가 추가되었습니다.');
           // 그리드 데이터 새로 고침
           clearGrids();
-          // 공통 코드 및 그리드 데이터 재로드
-          window.dispatchEvent(new Event('load'));
         } else {
           alert('전표 추가에 실패하였습니다: ' + (data.message || '알 수 없는 오류'));
         }
@@ -221,6 +178,39 @@
     // ag-Grid 인스턴스 변수 선언
     let periodsGrid, debitsGrid, creditsGrid, journalGrid;
     let periodsGridData = [], debitsGridData = [], creditsGridData = [], journalGridData = [];
+
+    // 선택된 periods row에 따라 하위 그리드 데이터 필터링 함수
+    function updateDetailGrids(selectedPeriod) {
+      console.log('Selected Period:', selectedPeriod);
+      if (!selectedPeriod) {
+        debitsGrid.api.applyTransaction({ remove: debitsGrid.api.getDisplayedRowAtIndex ? Array.from({length: debitsGrid.api.getDisplayedRowCount()}, (_, i) => debitsGrid.api.getDisplayedRowAtIndex(i).data) : [] });
+        creditsGrid.api.applyTransaction({ remove: creditsGrid.api.getDisplayedRowAtIndex ? Array.from({length: creditsGrid.api.getDisplayedRowCount()}, (_, i) => creditsGrid.api.getDisplayedRowAtIndex(i).data) : [] });
+        journalGrid.api.applyTransaction({ remove: journalGrid.api.getDisplayedRowAtIndex ? Array.from({length: journalGrid.api.getDisplayedRowCount()}, (_, i) => journalGrid.api.getDisplayedRowAtIndex(i).data) : [] });
+        return;
+      }
+      const { attMonth, payMonth, entryDate, entryNumber } = selectedPeriod;
+
+      const filteredDebits = debitsGridData.filter(item =>
+        item.attMonth === attMonth && item.payMonth === payMonth && item.entryDate === entryDate && item.entryNumber === entryNumber
+      );
+      const filteredCredits = creditsGridData.filter(item =>
+        item.attMonth === attMonth && item.payMonth === payMonth && item.entryDate === entryDate && item.entryNumber === entryNumber
+      );
+      const filteredJournal = journalGridData.filter(item =>
+        item.attMonth === attMonth && item.payMonth === payMonth && item.entryDate === entryDate && item.entryNumber === entryNumber
+      );
+
+      // 기존 데이터 모두 제거 후 새 데이터 추가
+      debitsGrid.api.applyTransaction({ remove: debitsGrid.api.getDisplayedRowAtIndex ? Array.from({length: debitsGrid.api.getDisplayedRowCount()}, (_, i) => debitsGrid.api.getDisplayedRowAtIndex(i).data) : [] });
+      debitsGrid.api.applyTransaction({ add: filteredDebits });
+
+      creditsGrid.api.applyTransaction({ remove: creditsGrid.api.getDisplayedRowAtIndex ? Array.from({length: creditsGrid.api.getDisplayedRowCount()}, (_, i) => creditsGrid.api.getDisplayedRowAtIndex(i).data) : [] });
+      creditsGrid.api.applyTransaction({ add: filteredCredits });
+
+      journalGrid.api.applyTransaction({ remove: journalGrid.api.getDisplayedRowAtIndex ? Array.from({length: journalGrid.api.getDisplayedRowCount()}, (_, i) => journalGrid.api.getDisplayedRowAtIndex(i).data) : [] });
+      journalGrid.api.applyTransaction({ add: filteredJournal });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       // 자동전표 생성 먼저 실행
       fetch('/acc/ena/auto-salary-entry', { method: 'POST' })
@@ -237,23 +227,53 @@
         .then(data => {
           // 그리드 데이터 갱신 (기존 데이터 세팅 코드와 동일하게)
           // 예시:
-          periodsGridData = data.map(item => ({ attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate }));
+          console.log(data);
+          periodsGridData = data.map(item => ({ attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber }));
           debitsGridData = [];
           data.forEach(item => {
-            if (item.baseSalary && item.baseSalary !== 0) debitsGridData.push({ item: '기본급', code: '503', account: '급여', amount: item.baseSalary });
-            if (item.bonus && item.bonus !== 0) debitsGridData.push({ item: '상여금', code: '803', account: '상여금', amount: item.bonus });
-            if (item.overtimePay && item.overtimePay !== 0) debitsGridData.push({ item: '잔업근무수당', code: '804', account: '잔업수당', amount: item.overtimePay });
-            if (item.nightWorkPay && item.nightWorkPay !== 0) debitsGridData.push({ item: '야간근무수당', code: '805', account: '야간수당', amount: item.nightWorkPay });
+            if (item.baseSalary && item.baseSalary !== 0) debitsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '기본급', code: '503', account: '급여', amount: item.baseSalary
+            });
+            if (item.bonus && item.bonus !== 0) debitsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '상여금', code: '803', account: '상여금', amount: item.bonus
+            });
+            if (item.overtimePay && item.overtimePay !== 0) debitsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '잔업근무수당', code: '804', account: '잔업수당', amount: item.overtimePay
+            });
+            if (item.nightWorkPay && item.nightWorkPay !== 0) debitsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '야간근무수당', code: '805', account: '야간수당', amount: item.nightWorkPay
+            });
           });
           creditsGridData = [];
           data.forEach(item => {
-            if (item.tax && item.tax !== 0) creditsGridData.push({ item: '원천세', code: '254', account: '예수금', amount: item.tax });
-            if (item.healthInsurance && item.healthInsurance !== 0) creditsGridData.push({ item: '건강보험', code: '254', account: '예수금', amount: item.healthInsurance });
-            if (item.nationalPension && item.nationalPension !== 0) creditsGridData.push({ item: '국민연금', code: '254', account: '예수금', amount: item.nationalPension });
-            if (item.employmentIns && item.employmentIns !== 0) creditsGridData.push({ item: '고용보험', code: '254', account: '예수금', amount: item.employmentIns });
-            if (item.otherDeductions && item.otherDeductions !== 0) creditsGridData.push({ item: '기타공제', code: '254', account: '예수금', amount: item.otherDeductions });
+            if (item.tax && item.tax !== 0) creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '원천세', code: '254', account: '예수금', amount: item.tax
+            });
+            if (item.healthInsurance && item.healthInsurance !== 0) creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '건강보험', code: '254', account: '예수금', amount: item.healthInsurance
+            });
+            if (item.nationalPension && item.nationalPension !== 0) creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '국민연금', code: '254', account: '예수금', amount: item.nationalPension
+            });
+            if (item.employmentIns && item.employmentIns !== 0) creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '고용보험', code: '254', account: '예수금', amount: item.employmentIns
+            });
+            if (item.otherDeductions && item.otherDeductions !== 0) creditsGridData.push({
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              item: '기타공제', code: '254', account: '예수금', amount: item.otherDeductions
+            });
           });
           journalGridData = data.map(item => ({
+            attMonth: item.attMonth,
+            payMonth: item.payMonth,
             entryDate: item.entryDate,
             entryNumber: item.entryNumber,
             resentmenType: item.resentmenType || '',
@@ -264,41 +284,66 @@
             debitAmount: (item.baseSalary || item.bonus || item.overtimePay || item.nightWorkPay) || 0,
             creditAmount: (item.tax || item.healthInsurance || item.nationalPension || item.employmentIns || item.otherDeductions) || 0
           }));
-          // 데이터가 준비된 후에만 ag-Grid 인스턴스 생성
+
+          // 그리드 인스턴스 생성
           periodsGrid = agGrid.createGrid(document.getElementById('grid-periods'), {
             columnDefs: periodsColumnDefs,
             rowData: periodsGridData,
-            defaultColDef: { resizable: true },
+            defaultColDef: { resizable: true, sortable: false },
+            suppressMovableColumns: true,
             headerHeight: 30,
             rowHeight: 28,
+            rowSelection: {
+              mode: 'singleRow',
+              enableClickSelection: true
+            },
             onGridReady: params => {
-              window.periodsGridApi = params.api;
+              periodsGrid.api = params.api;
               params.api.sizeColumnsToFit();
+            },
+            onSelectionChanged: function(event) {
+              const selected = event.api.getSelectedRows();
+              selected.length > 0 ? updateDetailGrids(selected[0]) : updateDetailGrids(null);
             }
           });
           debitsGrid = agGrid.createGrid(document.getElementById('grid-debits'), {
             columnDefs: debitsColumnDefs,
-            rowData: debitsGridData,
-            defaultColDef: { resizable: true },
+            rowData: [], // 최초엔 빈 배열
+            defaultColDef: { resizable: true, sortable: false },
+            suppressMovableColumns: true,
             headerHeight: 30,
             groupHeaderHeight: 30,
-            rowHeight: 28
+            rowHeight: 28,
+            onGridReady: params => {
+              debitsGrid.api = params.api; // 반드시 추가!
+              params.api.sizeColumnsToFit && params.api.sizeColumnsToFit();
+            }
           });
           creditsGrid = agGrid.createGrid(document.getElementById('grid-credits'), {
             columnDefs: creditsColumnDefs,
-            rowData: creditsGridData,
-            defaultColDef: { resizable: true },
+            rowData: [], // 최초엔 빈 배열
+            defaultColDef: { resizable: true, sortable: false },
+            suppressMovableColumns: true,
             headerHeight: 30,
             groupHeaderHeight: 30,
-            rowHeight: 28
+            rowHeight: 28,
+            onGridReady: params => {
+              creditsGrid.api = params.api; // 반드시 추가!
+              params.api.sizeColumnsToFit && params.api.sizeColumnsToFit();
+            }
           });
           journalGrid = agGrid.createGrid(document.getElementById('grid-journal'), {
             columnDefs: journalColumnDefs,
-            rowData: journalGridData,
+            rowData: [], // 최초엔 빈 배열
             domLayout: 'autoHeight',
-            defaultColDef: { resizable: true },
+            defaultColDef: { resizable: true, sortable: false },
+            suppressMovableColumns: true,
             headerHeight: 30,
-            rowHeight: 28
+            rowHeight: 28,
+            onGridReady: params => {
+              journalGrid.api = params.api; // 반드시 추가!
+              params.api.sizeColumnsToFit && params.api.sizeColumnsToFit();
+            }
           });
         })
         .catch(error => {
