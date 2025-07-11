@@ -21,13 +21,27 @@ ORDER BY
 <!-- 출하 의뢰서 조회 상세 -->
 <select id="outboundRequestDetail" resultType="OutboundDTO" parameterType="String">
 SELECT
-    sd.outbound_no AS outbound_no,
-    sd.item_name AS item_name,
+    sd.order_no AS outbound_no,
+    sd.item_name AS prod_name,
     sd.standard AS standard,
-    sd.qty AS qty,
+    sd.qty AS outbound_quantity,
+    sd.outbound_detail_status AS status,
     sd.remarks AS remarks
-FROM sales_outbound so JOIN soutbound_detail sd ON ( so.outbound_no = sd.outbound_no)
-WHERE
-    so.outbound_no = #{outboundNo}
+FROM 
+    soutbound_detail sd
+WHERE 
+    sd.order_no = #{outboundNo}
+</select>
+
+<!-- 출고 기능-->
+<select id="outboundProcedure" resultType="OutboundDTO" parameterType="OutboundDTO">
+CALL OUTBOUND_PROCEDURE(
+    #{memo},
+    #{manager},
+    #{outboundNo},
+    #{warehouseId},
+    #{prodId},
+    #{outbound_quantity}
+)
 </select>
 </mapper>

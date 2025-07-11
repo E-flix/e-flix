@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class OutboundDTO {
     String outboundNo;
+    int outbound_quantity; // 출고요청량
 
     String writeDt;
     String customerName;
@@ -20,5 +21,10 @@ public class OutboundDTO {
 
     String itemName;
     String standard;
-    int qty;
+
+    String memo;
+    String manager;
+    String warehouseId;
+    String prodId;
+
 }
