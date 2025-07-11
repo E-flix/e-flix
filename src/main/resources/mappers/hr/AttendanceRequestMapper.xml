@@ -8,13 +8,36 @@
   - 2025-06-19 (김어진): 계정과목 전체조회 작성
 =============================================== -->
 <mapper namespace="com.eflix.hr.mapper.AttendanceRequestMapper">
-  <insert id="insert" parameterType="AttendanceRequestDTO">
-    <selectKey resultType="String" keyProperty="editIdx" order="BEFORE">
-      SELECT 'edit-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(edit_idx, 6))), 100) + 1) FROM attendance_requests
-    </selectKey>
-    INSERT INTO attendance_requests
-      (edit_idx, emp_idx, edit_type, old_value, new_value, reason, request_date, co_idx)
-    VALUES
-      (#{editIdx}, #{empIdx}, #{editType}, #{oldValue}, #{newValue}, #{reason}, SYSDATE, #{coIdx})
-  </insert>
+    <insert id="insert" parameterType="AttendanceRequestDTO">
+        <selectKey resultType="String" keyProperty="editIdx" order="BEFORE">
+        SELECT 'edit-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(edit_idx, 6))), 100) + 1) FROM attendance_requests
+        </selectKey>
+        INSERT INTO attendance_requests (edit_idx, emp_idx, edit_type, old_value, new_value, reason, request_date, co_idx, approval_status, req_file)
+        VALUES (#{editIdx}, #{empIdx}, #{editType}, #{oldValue}, #{newValue}, #{reason}, SYSDATE, #{coIdx}, 'AE01', #{reqFile})
+    </insert>
+
+    <select id="findAttdReqListByEmpIdx" parameterType="String" resultType="AttendanceRequestDTO">
+        SELECT
+            ar.edit_idx    AS editIdx,
+            ar.emp_idx     AS empIdx,
+            ar.approver_idx AS approverIdx,
+            ar.attd_idx    AS attdIdx,
+            ar.edit_type   AS editType,
+            ar.old_value   AS oldValue,
+            ar.new_value   AS newValue,
+            ar.reason      AS reason,
+            ar.request_date AS requestDate,
+            ar.approval_status AS approvalStatus,
+            ar.approved_date   AS approvedDate,
+            ar.co_idx      AS coIdx
+        FROM attendance_requests ar
+        WHERE ar.emp_idx = #{empIdx}
+        <if test="editType != null and editType != ''">
+            AND ar.edit_type = #{editType}
+        </if>
+        <if test="fromDate != null and toDate != null">
+            AND ar.request_date BETWEEN #{fromDate} AND #{toDate}
+        </if>
+        ORDER BY ar.request_date DESC
+    </select>
 </mapper>

@@ -421,4 +421,10 @@
             AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
         ORDER BY ar.attd_date ASC
     </select>
+
+    <select id="findAllByEmpIdx" parameterType="String" resultType="AttendanceRecordDTO">
+        SELECT attd_idx, emp_idx, attd_date, attd_time, attd_start, attd_end, attd_status, ab_reason, memo, co_idx, attd_pay, is_holiday, attd_moddate
+        FROM attendance_records
+        WHERE emp_idx = #{empIdx}
+    </select>
 </mapper>

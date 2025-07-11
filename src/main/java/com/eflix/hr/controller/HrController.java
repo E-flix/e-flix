@@ -72,6 +72,10 @@ public class HrController {
     @Autowired
     private CommonService commonService;
 
+    private String getEmpIdx() {
+        return AuthUtil.getEmpIdx();
+    }
+
     // 인사 메인 화면
     @GetMapping("")
     public String hrMain() {
@@ -230,7 +234,16 @@ public class HrController {
     }
 
     @GetMapping("/attd/req")
-    public String req() {
+    public String req(Model model) {
+        EmployeeDTO employeeDTO = employeeService.findByEmpIdx(getEmpIdx());
+        DepartmentDTO DepartmentDTO = departmentService.findByEmpIdx(getEmpIdx());
+        List<CommonDTO> AttdReqType = commonService.getCommon("AT");
+
+        model.addAttribute("empName", employeeDTO.getEmpName());
+        model.addAttribute("empIdx", employeeDTO.getEmpIdx());
+        model.addAttribute("deptName", DepartmentDTO.getDeptName());
+        model.addAttribute("attdReqType", AttdReqType);
+        
         return "hr/new/attd/req";
     }
     

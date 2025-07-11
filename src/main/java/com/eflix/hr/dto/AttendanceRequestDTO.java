@@ -21,6 +21,7 @@ public class AttendanceRequestDTO {
     private String editIdx;          // edit_idx
     private String attdIdx;          // attd_idx
     private String empIdx;           // emp_idx
+    private String approver_idx;
     private String editType;         // edit_type
     private Date oldValue;  // old_value
     private Date newValue;  // new_value
@@ -28,6 +29,7 @@ public class AttendanceRequestDTO {
     private Date requestDate;   // request_date
     private String approvalStatus;   // approval_status
     private Date approvedDate;  // approved_date
+    private String reqFile;
 
     private String coIdx;
 

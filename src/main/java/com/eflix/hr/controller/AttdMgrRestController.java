@@ -1,5 +1,6 @@
 package com.eflix.hr.controller;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,6 +54,9 @@ public class AttdMgrRestController {
 
     @Autowired
     private CommonService commonService;
+
+    @Value("${upload.path}")
+    private String path;
 
     private String getCoIdx() {
         return AuthUtil.getCoIdx();
@@ -170,7 +175,7 @@ public class AttdMgrRestController {
 
     @GetMapping("/detail")
     public ResponseEntity<ResResult> getDetail(@RequestParam String empIdx, @RequestParam String year,
-            @RequestParam String month) {
+        @RequestParam String month) {
         ResResult result = null;
 
         // String date = year + "-" + month;
@@ -186,5 +191,5 @@ public class AttdMgrRestController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-
+    
 }
