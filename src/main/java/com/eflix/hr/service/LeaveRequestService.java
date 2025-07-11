@@ -11,6 +11,9 @@ package com.eflix.hr.service;
 import java.util.List;
 
 import com.eflix.hr.dto.LeaveRequestDTO;
+import com.eflix.hr.dto.etc.VaDTO;
+import com.eflix.hr.dto.etc.VaSearchDTO;
+import com.eflix.hr.dto.etc.VaSummaryDTO;
 
 public interface LeaveRequestService {
     public List<LeaveRequestDTO> getAllLeaveRequests();
@@ -18,4 +21,10 @@ public interface LeaveRequestService {
     int createLeaveRequest(LeaveRequestDTO dto);
     int updateLeaveRequest(LeaveRequestDTO dto);
     int deleteLeaveRequest(String leaveReqIdx);
+
+    // 0711
+    public int insert(VaDTO vaDTO);
+    public VaSummaryDTO findSummaryByEmpIdxWithCoIdx(String empIdx, String coIdx);
+    public List<VaDTO> findAllByEmpIdxWithCoIdx(String empIdx, String coIdx);
+    public List<VaDTO> findAllBySearch(VaSearchDTO vaSearchDTO);
 }

@@ -48,7 +48,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/subscription")
 public class SubscriptionRestController {
     
-    @Value("${file.path}")
+    @Value("${upload.path}")
     private String path;
 
     @Autowired

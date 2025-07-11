@@ -1,0 +1,577 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+<head>
+    <title>연차 신청</title>
+</head>
+<div layout:fragment="content">
+    <div class="container-fluid py-4">
+        <!-- 헤더 섹션 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="text-dark mb-1">
+                            <i class="bi bi-clipboard-check text-primary"></i> 휴가 승인 관리
+                        </h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">홈</a></li>
+                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">인사관리</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">휴가 승인 관리</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-muted small">오늘 날짜</div>
+                        <div class="fw-bold">2025-07-10 (목)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 검색 및 필터 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-search"></i> 검색 및 필터
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">승인 상태</label>
+                                <select class="form-select" id="searchStatus">
+                                    <option value="">전체</option>
+                                    <option value="AS01">대기</option>
+                                    <option value="AS02">승인</option>
+                                    <option value="AS03">반려</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">휴가 유형</label>
+                                <select class="form-select" id="searchReqType">
+                                    <option value="">전체</option>
+                                    <option value="AT01">연차</option>
+                                    <option value="AT03">병가</option>
+                                    <option value="AT05">개인사</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">신청일 범위</label>
+                                <input type="date" class="form-control" id="searchReqStart">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">～</label>
+                                <input type="date" class="form-control" id="searchReqEnd">
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-clockwise"></i> 초기화
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" id="searchBtn">
+                                        <i class="bi bi-search"></i> 검색
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 승인 대기 현황 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-warning">
+                    <div class="card-body text-center">
+                        <i class="bi bi-clock-history text-warning fs-1"></i>
+                        <h4 class="mt-2 mb-1">5</h4>
+                        <p class="text-muted mb-0">승인 대기</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-success">
+                    <div class="card-body text-center">
+                        <i class="bi bi-check-circle text-success fs-1"></i>
+                        <h4 class="mt-2 mb-1">23</h4>
+                        <p class="text-muted mb-0">승인 완료</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-danger">
+                    <div class="card-body text-center">
+                        <i class="bi bi-x-circle text-danger fs-1"></i>
+                        <h4 class="mt-2 mb-1">2</h4>
+                        <p class="text-muted mb-0">반려</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-info">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-event text-info fs-1"></i>
+                        <h4 class="mt-2 mb-1">30</h4>
+                        <p class="text-muted mb-0">총 신청</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 휴가 신청 목록 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-list-check"></i> 휴가 신청 목록
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-light btn-sm">
+                                    <i class="bi bi-download"></i> 엑셀 다운로드
+                                </button>
+                                <button type="button" class="btn btn-outline-light btn-sm">
+                                    <i class="bi bi-printer"></i> 인쇄
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" class="text-center">
+                                            <input type="checkbox" class="form-check-input" id="checkAll">
+                                        </th>
+                                        <th scope="col">신청자</th>
+                                        <th scope="col">부서</th>
+                                        <th scope="col">휴가 유형</th>
+                                        <th scope="col">휴가 기간</th>
+                                        <th scope="col">일수</th>
+                                        <th scope="col">신청일</th>
+                                        <th scope="col">상태</th>
+                                        <th scope="col" class="text-center">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaveRequestTable">
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://via.placeholder.com/32" class="rounded-circle me-2" width="32" height="32">
+                                                <div>
+                                                    <div class="fw-semibold">김영희</div>
+                                                    <small class="text-muted">emp-001</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>개발팀</td>
+                                        <td><span class="badge bg-primary">연차</span></td>
+                                        <td>2025-07-15 ~ 2025-07-16</td>
+                                        <td>2일</td>
+                                        <td>2025-07-10</td>
+                                        <td><span class="badge bg-warning">대기</span></td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approvalModal">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-success btn-sm">
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://via.placeholder.com/32" class="rounded-circle me-2" width="32" height="32">
+                                                <div>
+                                                    <div class="fw-semibold">박민수</div>
+                                                    <small class="text-muted">emp-002</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>마케팅팀</td>
+                                        <td><span class="badge bg-danger">병가</span></td>
+                                        <td>2025-07-12 ~ 2025-07-12</td>
+                                        <td>1일</td>
+                                        <td>2025-07-11</td>
+                                        <td><span class="badge bg-warning">대기</span></td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approvalModal">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-success btn-sm">
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://via.placeholder.com/32" class="rounded-circle me-2" width="32" height="32">
+                                                <div>
+                                                    <div class="fw-semibold">이준호</div>
+                                                    <small class="text-muted">emp-003</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>인사팀</td>
+                                        <td><span class="badge bg-success">개인사</span></td>
+                                        <td>2025-07-20 ~ 2025-07-22</td>
+                                        <td>3일</td>
+                                        <td>2025-07-09</td>
+                                        <td><span class="badge bg-success">승인</span></td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approvalModal">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" class="form-check-input">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://via.placeholder.com/32" class="rounded-circle me-2" width="32" height="32">
+                                                <div>
+                                                    <div class="fw-semibold">최수진</div>
+                                                    <small class="text-muted">emp-004</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>재무팀</td>
+                                        <td><span class="badge bg-primary">연차</span></td>
+                                        <td>2025-07-18 ~ 2025-07-19</td>
+                                        <td>2일</td>
+                                        <td>2025-07-08</td>
+                                        <td><span class="badge bg-danger">반려</span></td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approvalModal">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted">총 30건 중 1-4건 표시</span>
+                            </div>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item disabled">
+                                        <span class="page-link">이전</span>
+                                    </li>
+                                    <li class="page-item active">
+                                        <span class="page-link">1</span>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">2</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">3</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">다음</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 일괄 처리 버튼 -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-start gap-2">
+                    <button type="button" class="btn btn-success">
+                        <i class="bi bi-check-all"></i> 선택 항목 승인
+                    </button>
+                    <button type="button" class="btn btn-danger">
+                        <i class="bi bi-x-circle"></i> 선택 항목 반려
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 승인/반려 모달 -->
+    <div class="modal fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approvalModalLabel">
+                        <i class="bi bi-clipboard-check"></i> 휴가 신청 상세 및 승인
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 신청자 정보 -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3 text-secondary">
+                                <i class="bi bi-person-badge"></i> 신청자 정보
+                            </h6>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">사원명</label>
+                            <input type="text" class="form-control bg-light" value="김영희" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">부서</label>
+                            <input type="text" class="form-control bg-light" value="개발팀" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">사번</label>
+                            <input type="text" class="form-control bg-light" value="emp-001" readonly>
+                        </div>
+                    </div>
+
+                    <!-- 휴가 신청 내용 -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3 text-secondary">
+                                <i class="bi bi-calendar-range"></i> 휴가 신청 내용
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">휴가 유형</label>
+                            <input type="text" class="form-control bg-light" value="연차" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">신청일자</label>
+                            <input type="text" class="form-control bg-light" value="2025-07-10" readonly>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <label class="form-label fw-semibold">시작일</label>
+                            <input type="text" class="form-control bg-light" value="2025-07-15" readonly>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <label class="form-label fw-semibold">종료일</label>
+                            <input type="text" class="form-control bg-light" value="2025-07-16" readonly>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <label class="form-label fw-semibold">총 일수</label>
+                            <input type="text" class="form-control bg-light" value="2일" readonly>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <label class="form-label fw-semibold">신청 사유</label>
+                            <textarea class="form-control bg-light" rows="3" readonly>가족 여행으로 인한 휴가 신청</textarea>
+                        </div>
+                    </div>
+
+                    <!-- 승인 처리 -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3 text-secondary">
+                                <i class="bi bi-check-circle"></i> 승인 처리
+                            </h6>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">승인 의견</label>
+                            <textarea class="form-control" rows="3" placeholder="승인 또는 반려 사유를 입력하세요"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x"></i> 닫기
+                    </button>
+                    <button type="button" class="btn btn-danger">
+                        <i class="bi bi-x-circle"></i> 반려
+                    </button>
+                    <button type="button" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> 승인
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 전체 선택 체크박스 기능
+        document.getElementById('checkAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // 개별 체크박스 상태 관리
+        document.querySelectorAll('tbody input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const allCheckboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+                const checkedBoxes = document.querySelectorAll('tbody input[type="checkbox"]:checked');
+                const checkAllBox = document.getElementById('checkAll');
+                
+                if (checkedBoxes.length === allCheckboxes.length) {
+                    checkAllBox.checked = true;
+                    checkAllBox.indeterminate = false;
+                } else if (checkedBoxes.length === 0) {
+                    checkAllBox.checked = false;
+                    checkAllBox.indeterminate = false;
+                } else {
+                    checkAllBox.checked = false;
+                    checkAllBox.indeterminate = true;
+                }
+            });
+        });
+
+        $(function () {
+            let currentPage = 1;
+            loadVaList(1);
+
+            $("#searchBtn").on("click", function() {
+                loadVaList(1);
+            });
+
+            function loadSummary() {
+                $.ajax({
+                    type: "",
+                    url: "",
+                    success: function(res) {
+                        if(res.head.res_code) {
+
+                        } else {
+
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function loadVaList(page = 1) {
+
+                currentPage = page;
+
+                const searchData = {
+                    approvalStatus: $("#searchStatus").val(),
+                    reqType: $("#searchReqType").val(),
+                    reqStart: $("#searchReqStart").val(),
+                    reqEnd: $("#searchReqEnd").val(),
+                };
+
+                const queryString = $.param(searchData);
+
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/va/mgr/list?${queryString}&page=${page}`,
+                    success: function(res) {
+                        if(res.head.res_code) {
+                            const data = res.body;
+                            rednerVaList(data);
+                        } else {
+
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            };
+
+            function rednerVaList(data) {
+                const $leaveRequestTable = $("#leaveRequestTable");
+                
+                let html = "";
+
+                $.each(data, function(i, item) {
+                const typeBadge = item.reqType === "AT01" ? "bg-info" : item.approvalStatus === "AT03" ? "bg-warning" : "bg-danger";
+                const statusBadge = item.approvalStatus === "AS01" ? "bg-primary" : item.approvalStatus === "AS03" ? "bg-success" : "bg-danger";
+                    html += `
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="${item.empImg}" class="rounded-circle me-2" width="32" height="32">
+                                <div>
+                                    <div class="fw-semibold">${item.empName}</div>
+                                    <small class="text-muted">${item.empIdx}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>개발팀</td>
+                        <td><span class="badge ${typeBadge}">${item.reqType === "AT01" ? "연차" : item.reqType === "AT03" ? "병가" : "개인사"}</span></td>
+                        <td>${item.leaveStartDate} ~ ${item.leaveEndDate}</td>
+                        <td>2일</td>
+                        <td>2025-07-10</td>
+                        <td><span class="badge ${statusBadge}">${item.approvalStatus === "AS01" ? "대기" : item.approvalStatus === "AT03" ? "승인" : "반려"}</span></td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approvalModal">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-success btn-sm">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    `;
+                });
+
+                $leaveRequestTable.html(html);
+            };
+
+            function renderPagination() {
+
+            }
+        });
+    </script>
+</div>

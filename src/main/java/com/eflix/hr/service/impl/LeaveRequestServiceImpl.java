@@ -10,37 +10,64 @@ package com.eflix.hr.service.impl;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.LeaveRequestDTO;
+import com.eflix.hr.dto.etc.VaDTO;
+import com.eflix.hr.dto.etc.VaSearchDTO;
+import com.eflix.hr.dto.etc.VaSummaryDTO;
+import com.eflix.hr.mapper.LeaveRequestMapper;
 import com.eflix.hr.service.LeaveRequestService;
 
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
 
-  @Override
-  public List<LeaveRequestDTO> getAllLeaveRequests() {
-    throw new UnsupportedOperationException("Unimplemented method 'getAllLeaveRequests'");
-  }
+    @Autowired
+    private LeaveRequestMapper leaveRequestMapper;
 
-  @Override
-  public LeaveRequestDTO getLeaveRequestById(String leaveReqIdx) {
-    throw new UnsupportedOperationException("Unimplemented method 'getLeaveRequestById'");
-  }
+    @Override
+    public int insert(VaDTO vaDTO) {
+        return leaveRequestMapper.insert(vaDTO);
+    }
 
-  @Override
-  public int createLeaveRequest(LeaveRequestDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'createLeaveRequest'");
-  }
+    @Override
+    public List<LeaveRequestDTO> getAllLeaveRequests() {
+        return null;
+    }
 
-  @Override
-  public int updateLeaveRequest(LeaveRequestDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'updateLeaveRequest'");
-  }
+    @Override
+    public LeaveRequestDTO getLeaveRequestById(String leaveReqIdx) {
+        return null;
+    }
 
-  @Override
-  public int deleteLeaveRequest(String leaveReqIdx) {
-    throw new UnsupportedOperationException("Unimplemented method 'deleteLeaveRequest'");
-  }
+    @Override
+    public int createLeaveRequest(LeaveRequestDTO dto) {
+        return 0;
+    }
 
+    @Override
+    public int updateLeaveRequest(LeaveRequestDTO dto) {
+        return 0;
+    }
+
+    @Override
+    public int deleteLeaveRequest(String leaveReqIdx) {
+        return 0;
+    }
+
+    @Override
+    public VaSummaryDTO findSummaryByEmpIdxWithCoIdx(String empIdx, String coIdx) {
+        return leaveRequestMapper.findSummaryByEmpIdxWithCoIdx(empIdx, coIdx);
+    }
+
+    @Override
+    public List<VaDTO> findAllByEmpIdxWithCoIdx(String empIdx, String coIdx) {
+        return leaveRequestMapper.findAllByEmpIdxWithCoIdx(empIdx, coIdx);
+    }
+
+    @Override
+    public List<VaDTO> findAllBySearch(VaSearchDTO vaSearchDTO) {
+        return leaveRequestMapper.findAllBySearch(vaSearchDTO);
+    }
 }

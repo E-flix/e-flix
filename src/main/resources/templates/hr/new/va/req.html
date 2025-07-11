@@ -1,0 +1,393 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+<head>
+    <title>연차 신청</title>
+</head>
+<div layout:fragment="content">
+    <div class="container-fluid py-4">
+        <!-- 헤더 섹션 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="text-dark mb-1">
+                            <i class="bi bi-calendar-plus text-primary"></i> 휴가 신청
+                        </h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">홈</a></li>
+                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">인사관리</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">휴가 신청</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-muted small">오늘 날짜</div>
+                        <div class="fw-bold">2025-07-10 (목)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="row">
+            <div class="col-xl-8 col-lg-12">
+                <!-- 신청 폼 카드 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-file-earmark-plus"></i> 휴가 신청서
+                            </h5>
+                            <small class="opacity-75">필수 항목 *</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="vacationRequestForm">
+                            <!-- 신청자 정보 -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3 text-secondary">
+                                        <i class="bi bi-person-badge"></i> 신청자 정보
+                                    </h6>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">사원명</label>
+                                    <input type="text" class="form-control bg-light" th:value="${empName}" readonly>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">부서</label>
+                                    <input type="text" class="form-control bg-light" th:value="${deptName}" readonly>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold">사번</label>
+                                    <input type="text" class="form-control bg-light" th:value="${empIdx}" readonly>
+                                </div>
+                            </div>
+
+                            <!-- 신청 정보 -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3 text-secondary">
+                                        <i class="bi bi-calendar-range"></i> 신청 정보
+                                    </h6>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">신청일자</label>
+                                    <input type="text" class="form-control bg-light" id="reqDate" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">유형<span class="text-danger">*</span></label>
+                                    <select name="leaveType" class="form-select" id="reqType" required>
+                                        <option value="">선택하세요</option>
+                                        <option value="AT01">연차</option>
+                                        <option value="AT03">병가</option>
+                                        <option value="AT05">개인사</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 기간 설정 -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="border-bottom pb-2 mb-3 text-secondary">
+                                        <i class="bi bi-calendar-week"></i> 휴가 기간
+                                    </h6>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label fw-semibold">시작일 <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="reqStart" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label fw-semibold">종료일 <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="reqEnd" required>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label fw-semibold">총 일수</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bg-light" value="1" id="reqTotal" readonly>
+                                        <span class="input-group-text">일</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 사유 -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">신청 사유 <span class="text-danger">*</span></label>
+                                <textarea class="form-control" rows="4" placeholder="휴가 사유를 구체적으로 입력해주세요. (예: 가족 행사 참여, 개인 사정, 병원 진료 등)" required></textarea>
+                            </div>
+
+                            <!-- 첨부파일 -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">첨부파일</label>
+                                <input type="file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle"></i> 
+                                    병가, 외근 등의 경우 관련 증빙서류를 첨부해주세요. (최대 10MB)
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사이드바 -->
+            <div class="col-xl-4 col-lg-12">
+                <!-- 내 휴가 현황 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-graph-up"></i> 내 휴가 현황
+                        </h6>
+                    </div>
+                    <div class="card-body" id="summaryBody">
+                        
+                    </div>
+                </div>
+
+                <!-- 안내사항 -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-info-circle"></i> 신청 안내사항
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <small>연차 신청은 최소 1일 전에 신청해주세요</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <small>병가 신청 시 진단서를 첨부해주세요</small>
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <small>승인 후 변경 시 담당자에게 연락바랍니다</small>
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <small>대리자 지정은 필수가 아닙니다</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 최근 신청 내역 -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-clock-history"></i> 최근 신청 내역
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush" id="recordBody">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 버튼 영역 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#attendanceModal">
+                        <i class="bi bi-calendar-event"></i> 근태 조회
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> 취소
+                    </button>
+                    <button type="button" class="btn btn-outline-primary">
+                        <i class="bi bi-save"></i> 임시저장
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="reqBtn">
+                        <i class="bi bi-check-circle"></i> 신청하기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            let currentPage = 1;
+
+            loadTime();
+            loadSummary();
+            loadRecord();
+
+            $("#reqBtn").on("click", function () {
+                const reqData = {
+                    reqType: $("#reqType").val(),
+                    leaveStartDate: $("#reqStart").val(),
+                    leaveEndDate: $("#reqEnd").val(),
+                    newValue: $("#reqNewValue").val(),
+                    reason: $("#reqReason").val()
+                }
+
+                console.log(reqData);
+
+                var formData = new FormData();
+                formData.append("reqData", new Blob([JSON.stringify(reqData)], { type: "application/json" }));
+                const fileInput = $("#attFile")[0];
+                const file = fileInput && fileInput.files && fileInput.files[0];
+
+                if (file) {
+                    formData.append("reqFile", file);
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/hr/va/emp/req",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    enctype: "multipart/form-data",
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            Swal.fire("성공", "성공적으로 반영되었습니다.", "success");
+                        } else {
+                            Swal.fire("실패", "데이터를 반영하던 중 오류가 발생했습니다.", "error");
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            });
+
+            
+            $("#reqStart, #reqEnd").on("change", function () {
+                const start = $("#reqStart").val();
+                const end = $("#reqEnd").val();
+                if (start && end) {
+                    const startDate = new Date(start);
+                    const endDate = new Date(end);
+                    const diff = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1;
+                    if (!isNaN(diff) && diff >= 1) {
+                        $("#reqTotal").val(diff + "일");
+                    } else {
+                        $("#reqTotal").val("-");
+                    }
+                } else {
+                    $("#reqTotal").val("-");
+                }
+            });
+            function loadTime() {
+                let date = new Date()
+                let offset = date.getTimezoneOffset() * 60000;
+                let dateOffset = new Date(date.getTime() - offset).toISOString().substring(0, 10);
+                $("#reqDate").val(dateOffset);
+                $("#reqStart").val(dateOffset);
+                $("#reqEnd").val(dateOffset);
+            }
+
+            function loadSummary() {
+                $.ajax({
+                    type: "GET",
+                    url: "/hr/va/emp/summary",
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body;
+                            renderSummary(data);
+                        } else {
+
+                        }
+                    },
+                    error: function(err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function loadRecord() {
+                $.ajax({
+                    type: "GET",
+                    url: "/hr/va/emp/record",
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body;
+                            renderRecord(data);
+                        } else {
+
+                        }
+                    },
+                    error: function(err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function renderSummary(data) {
+                let html = `
+                    <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <div class="h4 text-primary mb-1">${data.total}</div>
+                                    <small class="text-muted">총 연차</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="h4 text-success mb-1">${data.total - data.used}</div>
+                                <small class="text-muted">잔여 연차</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="h6 text-info mb-1">${data.pending}</div>
+                                <small class="text-muted">대기</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="h6 text-warning mb-1">${data.approved}</div>
+                                <small class="text-muted">승인</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="h6 text-danger mb-1">${data.rejected}</div>
+                                <small class="text-muted">반려</small>
+                            </div>
+                        </div>
+                `;
+                $("#summaryBody").html(html);
+            }
+
+            function renderRecord(data) {
+                let html = "";
+
+                $.each(data, function(i, item) {
+                    const days = calculateDays(item.leaveStartDate, item.leaveEndDate);
+                    const bagdeStyle = item.approvalStatus === "AS01" ? "bg-info" : item.approvalStatus === "AS02" ? "bg-success" : "bg-dangder";
+
+                    html += `
+                        <div class="list-group-item px-0 py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold">${item.leaveStartDate} ~ ${item.leaveEndDate}</div>
+                                        <small class="text-muted">${item.reqType === "AT01" ? "연차" : item.reqType === "AT03" ? "병가" : "개인사"} (${days}일)</small>
+                                    </div>
+                                    <span class="badge ${bagdeStyle}">${item.approvalStatus === "AS01" ? "대기" : item.approvalStatus === "AS02" ? "승인" : "반려"}</span>
+                                </div>
+                            </div>
+                    `;
+                });
+                $("#recordBody").html(html);
+            }
+
+            function calculateDays(startStr, endStr) {
+                const start = new Date(startStr + 'T00:00:00');
+                const end = new Date(endStr + 'T00:00:00');
+
+                const msPerDay = 24 * 60 * 60 * 1000;
+
+                const diff = Math.floor((end.getTime() - start.getTime()) / msPerDay);
+
+                return diff + 1;
+            }
+        });
+    </script>
+</div>

@@ -30,12 +30,18 @@
 			<h6 class="collapse-header">근태관리:</h6>
 			<a class="" th:class="${activeSubMenu == 'attd' && active3rdMenu == ''} ? 'collapse-item active' : 'collapse-item'"
 				href="/hr/attd">근태현황(사원)</a>
-			<a class="" th:class="${active3rdMenu == 'mgr'} ? 'collapse-item active' : 'collapse-item'"
+			<a class="" th:class="${activeSubMenu == 'attd' && active3rdMenu == 'mgr'} ? 'collapse-item active' : 'collapse-item'"
 				href="/hr/attd/mgr">근태관리(관리자)</a>
-			<a class="" th:class="${active3rdMenu == 'req'} ? 'collapse-item active' : 'collapse-item'"
+			<a class="" th:class="${activeSubMenu == 'attd' && active3rdMenu == 'req'} ? 'collapse-item active' : 'collapse-item'"
 				href="/hr/attd/req">근태신청(사원)</a>
 			<a class="" th:class="${active3rdMenu == 'reqMgr'} ? 'collapse-item active' : 'collapse-item'"
 				href="/hr/attd/reqMgr">근태신청승인(관리자)</a>
+
+			<h6 class="collapse-header">휴가관리:</h6>
+			<a class="" th:class="${activeSubMenu == 'va' && active3rdMenu == 'req'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/va/req">휴가 신청</a>
+			<a class="" th:class="${activeSubMenu == 'va' && active3rdMenu == 'mgr'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/va/mgr">휴가 관리(관리자)</a>
 
 			<h6 class="collapse-header">급여관리:</h6>
 			<a class="" th:class="${activeSubMenu == 'sc'} ? 'collapse-item active' : 'collapse-item'"

@@ -2,6 +2,7 @@ package com.eflix.main.dto.etc;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.eflix.main.dto.ModuleDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -36,4 +37,8 @@ public class StatementDTO {
 
     private List<ModuleDTO> checkedModules;
     private String moduleNames;
+
+    public String getCheckedModulesStr() {
+        return checkedModules.stream().map(modules -> modules.getModuleName()).collect(Collectors.toList()).toString();
+    }
 }

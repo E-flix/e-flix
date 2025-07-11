@@ -2,6 +2,8 @@ package com.eflix.main.dto;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import groovy.transform.builder.Builder;
 import lombok.Data;
 
@@ -38,5 +40,7 @@ public class CompanyDTO {
     private String pschTel;
     private String pschEmail;
     private String svcStatus;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private Date coRegdate;
 }

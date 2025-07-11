@@ -27,6 +27,8 @@ import com.eflix.hr.service.EmployeeService;
 import com.eflix.hr.service.HrWorkTypeService;
 import com.eflix.hr.service.RoleService;
 import com.eflix.hr.service.SalaryService;
+import com.eflix.main.dto.CompanyDTO;
+import com.eflix.main.service.CompanyService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,8 +74,15 @@ public class HrController {
     @Autowired
     private CommonService commonService;
 
+    @Autowired
+    private CompanyService companyService;
+
     private String getEmpIdx() {
         return AuthUtil.getEmpIdx();
+    }
+
+    private String getCoIdx() {
+        return AuthUtil.getCoIdx();
     }
 
     // 인사 메인 화면
@@ -237,12 +246,10 @@ public class HrController {
     public String req(Model model) {
         EmployeeDTO employeeDTO = employeeService.findByEmpIdx(getEmpIdx());
         DepartmentDTO DepartmentDTO = departmentService.findByEmpIdx(getEmpIdx());
-        List<CommonDTO> AttdReqType = commonService.getCommon("AT");
 
         model.addAttribute("empName", employeeDTO.getEmpName());
         model.addAttribute("empIdx", employeeDTO.getEmpIdx());
         model.addAttribute("deptName", DepartmentDTO.getDeptName());
-        model.addAttribute("attdReqType", AttdReqType);
         
         return "hr/new/attd/req";
     }
@@ -261,6 +268,24 @@ public class HrController {
     public String dept() {
         return "hr/new/dept";
     }
+
+    @GetMapping("/va/req")
+    public String vaEmp(Model model) {
+        EmployeeDTO employeeDTO = employeeService.findByEmpIdx(getEmpIdx());
+        DepartmentDTO DepartmentDTO = departmentService.findByEmpIdx(getEmpIdx());
+        List<CommonDTO> AttdReqType = commonService.getCommon("AT");
+
+        model.addAttribute("empName", employeeDTO.getEmpName());
+        model.addAttribute("empIdx", employeeDTO.getEmpIdx());
+        model.addAttribute("deptName", DepartmentDTO.getDeptName());
+        model.addAttribute("attdReqType", AttdReqType);
+
+        return "hr/new/va/req";
+    }
     
+    @GetMapping("/va/mgr")
+    public String vaMgr() {
+        return "hr/new/va/mgr";
+    }
     
 }
