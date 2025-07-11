@@ -1,4 +1,5 @@
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/layouts/default}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 이혁진
   - 최초작성 : 2025-06-23
@@ -7,6 +8,7 @@
   [ 변경 이력 ]
   - 2025-06-23 (이혁진): AG Grid 스타일 및 구조 통일 적용
 ============================================ -->
+
 <head>
 	<title>출고관리</title>
 </head>
@@ -22,7 +24,8 @@
 				<input type="radio" class="btn-check" name="accountFilter" id="obd" autocomplete="off" checked>
 				<label class="btn btn-outline-secondary btn-sm" for="obd">출고</label>
 			</div>
-			<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#inquiryModal">출하 의뢰서 조회</button>
+			<button class="btn btn-success btn-sm" id="outboundRequest" data-bs-toggle="modal" data-bs-target="#outboundRequest">출하 의뢰서
+				조회</button>
 		</div>
 	</div>
 
@@ -69,15 +72,15 @@
 	</div>
 
 	<!-- 의뢰서 모달 -->
-	<div class="modal fade" id="inquiryModal" tabindex="-1" aria-labelledby="inquiryModalLabel" aria-hidden="true">
+	<div class="modal fade" id="outboundRequest" tabindex="-1" aria-labelledby="inquiryModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-xl">
 			<div class="modal-content">
 				<div class="modal-header bg-success text-white">
 					<h5 class="modal-title">의뢰서 조회</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					<!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
 				</div>
 				<div class="modal-body">
-					<form class="row g-3 mb-3">
+					<!-- <form class="row g-3 mb-3">
 						<div class="col-md-3">
 							<label class="form-label">의뢰일자</label>
 							<input type="date" class="form-control" name="inquiryDate">
@@ -93,11 +96,15 @@
 						<div class="col-md-3 d-flex align-items-end">
 							<button type="submit" class="btn btn-primary w-100">검색</button>
 						</div>
-					</form>
+					</form> -->
 
 					<div class="table-responsive">
 						<table class="table table-bordered table-sm text-center">
-							<thead class="table-light">
+							<div class="grid-container mt-0" style="height: 30vh; width: 100%;">
+								<div id="outboundRequestList" class="ag-theme-alpine" style="width: 100%; height: 100%;">
+								</div>
+							</div>
+							<!-- <thead class="table-light">
 								<tr>
 									<th>No</th>
 									<th>의뢰일자</th>
@@ -118,7 +125,7 @@
 									<td>대기</td>
 									<td><button class="btn btn-sm btn-outline-primary">선택</button></td>
 								</tr>
-							</tbody>
+							</tbody> -->
 						</table>
 					</div>
 				</div>
@@ -141,16 +148,12 @@
 </script>
 
 <script th:inline="javascript">
-	const requestData = [
-		{ no: 1, date: '2025-06-18', name: '비누', amount: 500, type: '완제품' },
-		{ no: 2, date: '2025-06-18', name: '샴푸', amount: 300, type: '반제품' }
-	];
+	$("outboundRequest").on("click", () => {
+		fetch('/purchs/obr')
+		.then(res => res.json())
+	})
 
-	const detailData = [
-		{ no: 1, code: 'WH001', location: '대구', volume: 400 }
-	];
-
-	const requestGridOptions = {
+	const outbound = {
 		rowData: requestData,
 		columnDefs: [
 			{ headerName: 'no', field: 'no' },

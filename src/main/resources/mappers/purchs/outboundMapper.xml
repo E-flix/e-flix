@@ -6,17 +6,35 @@
 <!-- 출하 의뢰서 조회 -->
 <select id="selectOutboundRequest" resultType="OutboundDTO">
 SELECT
-    outbound_no,
-    write_dt,
-    customer_name,
-    representative_nm,
-    order_dt,
-    outbound_dt,
-    remarks
-FROM 
-    sales_outbound
-ORDER BY 
-    outbound_no
+    so.outbound_no,
+    so.write_dt,
+    so.customer_name,
+    so.representative_nm,
+    so.order_dt,
+    so.outbound_dt,
+    so.remarks,
+        -- ★★★ 변경: 전체 상태 계산 로직을 '출고완료'와 '대기' 2가지로 단순화 ★★★
+        CASE
+            -- 모든 품목이 출고완료 상태이면 '출고완료'
+            WHEN status_summary.total_count = status_summary.completed_count THEN '출고완료'
+            -- 그 외 (하나라도 대기 상태가 있으면) '대기'
+            ELSE '대기'
+        END AS overallStatus
+    FROM
+        EFLIX.SALES_OUTBOUND so
+    LEFT JOIN (
+        SELECT 
+            OUTBOUND_NO,
+            COUNT(*) AS total_count,
+            SUM(CASE WHEN OUTBOUND_STATUS = '출고완료' THEN 1 ELSE 0 END) AS completed_count
+        FROM EFLIX.SOUTBOUND_DETAIL
+        GROUP BY OUTBOUND_NO
+    ) status_summary ON so.OUTBOUND_NO = status_summary.OUTBOUND_NO
+    WHERE 
+        so.CO_IDX = 'co-101'
+    AND status_summary.completed_count =0
+    ORDER BY 
+        so.OUTBOUND_DT DESC, so.CREATED_AT DESC
 </select>
 <!-- 출하 의뢰서 조회 상세 -->
 <select id="outboundRequestDetail" resultType="OutboundDTO" parameterType="String">

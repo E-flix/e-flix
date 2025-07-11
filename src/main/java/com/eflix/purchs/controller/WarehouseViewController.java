@@ -24,6 +24,7 @@ public class WarehouseViewController {
 
         // 창고 조회
 	@GetMapping("/whv")
+    @ResponseBody
 	public String warehouse_view(Model model, WarehouseViewDTO warehouse) {
         model.addAttribute("warehouseViewList", warehouseViewService.warehouseViewList(null));
         model.addAttribute("whlocationList", warehouseViewService.searchWarehouseLocation());
