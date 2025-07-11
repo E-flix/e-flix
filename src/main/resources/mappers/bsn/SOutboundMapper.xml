@@ -1,31 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "[http://mybatis.org/dtd/mybatis-3-mapper.dtd](http://mybatis.org/dtd/mybatis-3-mapper.dtd)">
 
 <mapper namespace="com.eflix.bsn.mapper.SOutboundMapper">
 
-  <!-- ★ 출고 목록 조회 (새로운 테이블 구조 반영) -->
+  <!-- 출고 목록 조회 -->
+  <!-- 
+    ★★★ 출고 목록 조회 쿼리 수정 ★★★
+    - SOUTBOUND_DETAIL 테이블과 LEFT JOIN하여 전체 상태를 계산하는 로직 추가
+  -->
   <select id="selectAllOutbound" resultType="com.eflix.bsn.dto.SalesOutboundDTO" parameterType="string">
     SELECT
-      so.OUTBOUND_NO        AS outboundNo,
-      so.WRITE_DT           AS writeDt,
-      so.CUSTOMER_CD        AS customerCd,
-      so.CUSTOMER_NAME      AS customerName,
-      so.REPRESENTATIVE_NM  AS representativeNm,
-      so.ORDER_DT           AS orderDt,
-      so.OUTBOUND_DT        AS outboundDt,
-      so.MONEY              AS money,
-      so.REMARKS            AS remarks,
-      so.CO_IDX             AS coIdx,
-      so.CREATED_AT         AS createdAt,
-      so.UPDATED_AT         AS updatedAt
-    FROM EFLIX.SALES_OUTBOUND so
-    WHERE so.CO_IDX = #{coIdx}
-    ORDER BY so.OUTBOUND_DT DESC, so.CREATED_AT DESC
+        so.OUTBOUND_NO        AS outboundNo,
+        so.WRITE_DT           AS writeDt,
+        so.CUSTOMER_CD        AS customerCd,
+        so.CUSTOMER_NAME      AS customerName,
+        so.REPRESENTATIVE_NM  AS representativeNm,
+        so.ORDER_DT           AS orderDt,
+        so.OUTBOUND_DT        AS outboundDt,
+        so.MONEY              AS money,
+        so.REMARKS            AS remarks,
+        so.CO_IDX             AS coIdx,
+        -- 전체 상태 계산 로직
+        CASE
+            -- 하나라도 '취소'가 있으면 '취소'
+            WHEN status_summary.cancelled_count > 0 THEN '취소'
+            -- 전체 품목 수와 '출고완료' 수가 같으면 '출고완료'
+            WHEN status_summary.total_count = status_summary.completed_count THEN '출고완료'
+            -- 하나라도 '출고중'이 있으면 '출고중'
+            WHEN status_summary.shipping_count > 0 THEN '출고중'
+            -- 하나라도 '준비중'이 있으면 '준비중'
+            WHEN status_summary.preparing_count > 0 THEN '준비중'
+            -- 그 외에는 '대기'
+            ELSE '대기'
+        END AS overallStatus
+    FROM 
+        EFLIX.SALES_OUTBOUND so
+    LEFT JOIN (
+        SELECT 
+            OUTBOUND_NO,
+            COUNT(*) AS total_count,
+            SUM(CASE WHEN OUTBOUND_STATUS = '출고완료' THEN 1 ELSE 0 END) AS completed_count,
+            SUM(CASE WHEN OUTBOUND_STATUS = '준비중' THEN 1 ELSE 0 END) AS preparing_count,
+            SUM(CASE WHEN OUTBOUND_STATUS = '출고중' THEN 1 ELSE 0 END) AS shipping_count,
+            SUM(CASE WHEN OUTBOUND_STATUS = '취소' THEN 1 ELSE 0 END) AS cancelled_count
+        FROM EFLIX.SOUTBOUND_DETAIL
+        GROUP BY OUTBOUND_NO
+    ) status_summary ON so.OUTBOUND_NO = status_summary.OUTBOUND_NO
+    WHERE 
+        so.CO_IDX = #{coIdx}
+    ORDER BY 
+        so.OUTBOUND_DT DESC, so.CREATED_AT DESC
   </select>
 
-  <!-- ★ 출고 상세 조회 (OUTBOUND_STATUS 필드 추가) -->
+  <!-- 출고 상세 조회 -->
   <select id="selectOutboundDetails" resultType="com.eflix.bsn.dto.SoutboundDetailDTO" parameterType="string">
     SELECT
       sd.OUTBOUND_NO        AS outboundNo,
@@ -47,32 +76,28 @@
     ORDER BY sd.LINE_NO
   </select>
 
-  <!-- ★ 출고 헤더 INSERT (새로운 테이블 구조) -->
+  <!-- 출고번호 자동 생성 (회사별, 일자별 채번) -->
+  <select id="selectNextOutboundNo" resultType="string" parameterType="string">
+    SELECT 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
+           LPAD(NVL(MAX(TO_NUMBER(SUBSTR(OUTBOUND_NO, -4))), 0) + 1, 4, '0') AS nextNo
+    FROM EFLIX.SALES_OUTBOUND
+    WHERE CO_IDX = #{coIdx}
+      AND OUTBOUND_NO LIKE 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'
+  </select>
+
+  <!-- 출고 헤더 INSERT -->
   <insert id="insertOutbound" parameterType="com.eflix.bsn.dto.SalesOutboundDTO">
     INSERT INTO EFLIX.SALES_OUTBOUND (
       OUTBOUND_NO, WRITE_DT, CUSTOMER_CD, CUSTOMER_NAME, REPRESENTATIVE_NM,
       ORDER_DT, OUTBOUND_DT, MONEY, REMARKS, CO_IDX
     ) VALUES (
       #{outboundNo}, #{writeDt}, #{customerCd}, #{customerName}, #{representativeNm},
-      #{orderDt}, #{outboundDt}, #{money}, #{remarks}, #{coIdx}
+      #{orderDt}, #{outboundDt}, #{money, jdbcType=VARCHAR}, #{remarks, jdbcType=VARCHAR}, #{coIdx}
     )
   </insert>
 
-  <!-- ★ 출고 상세 INSERT (OUTBOUND_STATUS 필드 추가) -->
-  <insert id="insertOutboundDetail" parameterType="com.eflix.bsn.dto.SoutboundDetailDTO">
-    INSERT INTO EFLIX.SOUTBOUND_DETAIL (
-      OUTBOUND_NO, LINE_NO, ITEM_CODE, ITEM_NAME, STANDARD,
-      QTY, UNIT, UNIT_PRICE, SUPPLY_AMOUNT, TAX_AMOUNT, TOTAL_AMOUNT,
-      OUTBOUND_STATUS, REMARKS, CO_IDX
-    ) VALUES (
-      #{outboundNo}, #{lineNo}, #{itemCode}, #{itemName}, #{standard},
-      #{qty}, #{unit}, #{unitPrice}, #{supplyAmount}, #{taxAmount}, #{totalAmount},
-      #{outboundStatus}, #{remarks}, #{coIdx}
-    )
-  </insert>
-
-  <!-- ★ 출고 상세 일괄 INSERT (OUTBOUND_STATUS 필드 추가) -->
-  <insert id="insertOutboundDetailBatch">
+  <!-- 출고 상세 일괄 INSERT -->
+  <insert id="insertOutboundDetailBatch" parameterType="java.util.List">
     INSERT ALL
     <foreach collection="list" item="d">
       INTO EFLIX.SOUTBOUND_DETAIL (
@@ -87,66 +112,8 @@
     </foreach>
     SELECT 1 FROM DUAL
   </insert>
-
-  <!-- ★ 출고번호 생성 (회사별 채번) -->
-  <select id="selectNextOutboundNo" resultType="string" parameterType="string">
-    SELECT 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
-          LPAD(NVL(MAX(TO_NUMBER(SUBSTR(OUTBOUND_NO, -4))), 0) + 1, 4, '0') AS nextNo
-    FROM EFLIX.SALES_OUTBOUND
-    WHERE CO_IDX = #{coIdx}
-      AND OUTBOUND_NO LIKE 'OUT-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-%'
-  </select>
-
-  <!-- ★ 출고 삭제 (CASCADE로 상세도 자동 삭제) -->
-  <delete id="deleteOutbound">
-    DELETE FROM EFLIX.SALES_OUTBOUND
-    WHERE OUTBOUND_NO = #{outboundNo}
-      AND CO_IDX = #{coIdx}
-  </delete>
-
-  <!-- ★ 주문서 기반 출고 생성: 주문서 헤더 정보 조회 -->
-  <select id="selectOrderForOutbound" resultType="com.eflix.bsn.dto.SalesOutboundDTO">
-    SELECT 
-      o.ORDER_NO            AS outboundNo,        -- 임시로 orderNo를 outboundNo에 매핑
-      TO_CHAR(SYSDATE, 'YYYY-MM-DD') AS writeDt, -- 작성일은 오늘
-      o.CUSTOMER_CD         AS customerCd,
-      c.CUSTOMER_NM         AS customerName,
-      c.REPRESENTATIVE_NM   AS representativeNm,
-      o.ORDER_DT            AS orderDt,
-      NULL                  AS outboundDt,        -- 출고일은 Service에서 설정
-      'KRW'                 AS money,
-      o.REMARKS             AS remarks,
-      o.CO_IDX              AS coIdx
-    FROM EFLIX.ORDERS o
-    JOIN EFLIX.CUSTOMERS c ON c.CUSTOMER_CD = o.CUSTOMER_CD AND c.CO_IDX = o.CO_IDX
-    WHERE o.ORDER_NO = #{orderNo}
-      AND o.CO_IDX = #{coIdx}
-  </select>
-
-  <!-- ★ 주문서 기반 출고 생성: 주문서 상세 정보 조회 (OUTBOUND_STATUS 기본값 설정) -->
-  <select id="selectOrderDetailsForOutbound" resultType="com.eflix.bsn.dto.SoutboundDetailDTO">
-    SELECT
-      NULL                  AS outboundNo,        -- Service에서 설정
-      od.LINE_NO            AS lineNo,
-      od.ITEM_CODE          AS itemCode,
-      od.ITEM_NAME          AS itemName,
-      od.SPEC               AS standard,          -- SPEC → STANDARD 매핑
-      od.QTY                AS qty,
-      '개'                  AS unit,              -- 기본 단위 (필요시 BSN_ITEM 조인)
-      od.UNIT_PRICE         AS unitPrice,
-      od.SUPPLY_AMOUNT      AS supplyAmount,
-      od.TAX_AMOUNT         AS taxAmount,
-      od.TOTAL_AMOUNT       AS totalAmount,
-      '대기'                AS outboundStatus,    -- ★ 기본 출고 상태
-      od.REMARKS            AS remarks,
-      od.CO_IDX             AS coIdx
-    FROM EFLIX.ORDERS_DETAIL od
-    WHERE od.ORDER_NO = #{orderNo}
-      AND od.CO_IDX = #{coIdx}
-    ORDER BY od.LINE_NO
-  </select>
-
-  <!-- ★ 출고 헤더 수정 -->
+  
+  <!-- 출고 헤더 UPDATE -->
   <update id="updateOutbound" parameterType="com.eflix.bsn.dto.SalesOutboundDTO">
     UPDATE EFLIX.SALES_OUTBOUND
     SET WRITE_DT = #{writeDt},
@@ -156,13 +123,12 @@
         ORDER_DT = #{orderDt},
         OUTBOUND_DT = #{outboundDt},
         MONEY = #{money},
-        REMARKS = #{remarks},
-        UPDATED_AT = SYSTIMESTAMP
+        REMARKS = #{remarks}
     WHERE OUTBOUND_NO = #{outboundNo}
       AND CO_IDX = #{coIdx}
   </update>
 
-  <!-- ★ 출고 상세 수정 (OUTBOUND_STATUS 포함) -->
+  <!-- 출고 상세 UPDATE (상태 변경 등) -->
   <update id="updateOutboundDetail" parameterType="com.eflix.bsn.dto.SoutboundDetailDTO">
     UPDATE EFLIX.SOUTBOUND_DETAIL
     SET ITEM_CODE = #{itemCode},
@@ -181,7 +147,51 @@
       AND CO_IDX = #{coIdx}
   </update>
 
-  <!-- ★ 출고 상태별 통계 조회 (대시보드용) -->
+  <!-- 출고 삭제 (ON DELETE CASCADE로 상세도 자동 삭제됨) -->
+  <delete id="deleteOutbound">
+    DELETE FROM EFLIX.SALES_OUTBOUND
+    WHERE OUTBOUND_NO = #{outboundNo}
+      AND CO_IDX = #{coIdx}
+  </delete>
+
+  <!-- 주문서 기반 출고 생성: 주문서 헤더 정보 조회 -->
+  <select id="selectOrderForOutbound" resultType="com.eflix.bsn.dto.SalesOutboundDTO">
+    SELECT 
+      o.CUSTOMER_CD         AS customerCd,
+      c.CUSTOMER_NM         AS customerName,
+      c.REPRESENTATIVE_NM   AS representativeNm,
+      o.ORDER_DT            AS orderDt,
+      o.REMARKS             AS remarks,
+      o.CO_IDX              AS coIdx
+    FROM EFLIX.ORDERS o
+    JOIN EFLIX.CUSTOMERS c ON c.CUSTOMER_CD = o.CUSTOMER_CD AND c.CO_IDX = o.CO_IDX
+    WHERE o.ORDER_NO = #{orderNo}
+      AND o.CO_IDX = #{coIdx}
+  </select>
+
+  <!-- 주문서 기반 출고 생성: 주문서 상세 정보 조회 -->
+  <select id="selectOrderDetailsForOutbound" resultType="com.eflix.bsn.dto.SoutboundDetailDTO">
+    SELECT
+      od.LINE_NO            AS lineNo,
+      od.ITEM_CODE          AS itemCode,
+      od.ITEM_NAME          AS itemName,
+      od.SPEC               AS standard,
+      od.QTY                AS qty,
+      'EA'                  AS unit,
+      od.UNIT_PRICE         AS unitPrice,
+      od.SUPPLY_AMOUNT      AS supplyAmount,
+      od.TAX_AMOUNT         AS taxAmount,
+      od.TOTAL_AMOUNT       AS totalAmount,
+      '대기'                AS outboundStatus,
+      od.REMARKS            AS remarks,
+      od.CO_IDX             AS coIdx
+    FROM EFLIX.ORDERS_DETAIL od
+    WHERE od.ORDER_NO = #{orderNo}
+      AND od.CO_IDX = #{coIdx}
+    ORDER BY od.LINE_NO
+  </select>
+
+  <!-- 출고 상태별 통계 조회 -->
   <select id="selectOutboundStatusStats" resultType="java.util.HashMap" parameterType="string">
     SELECT 
       OUTBOUND_STATUS as status,
@@ -200,26 +210,6 @@
         WHEN '취소' THEN 5
         ELSE 6
       END
-  </select>
-
-  <!-- ★ 출고 지연 현황 조회 (3일 이상 대기 상태) -->
-  <select id="selectDelayedOutbounds" resultType="java.util.HashMap" parameterType="string">
-    <![CDATA[
-    SELECT 
-      so.OUTBOUND_NO as outboundNo,
-      so.CUSTOMER_NAME as customerName,
-      so.WRITE_DT as writeDt,
-      COUNT(sd.LINE_NO) as itemCount,
-      SUM(sd.TOTAL_AMOUNT) as totalAmount,
-      TRUNC(SYSDATE - TO_DATE(so.WRITE_DT, 'YYYY-MM-DD')) as delayDays
-    FROM EFLIX.SALES_OUTBOUND so
-    JOIN EFLIX.SOUTBOUND_DETAIL sd ON sd.OUTBOUND_NO = so.OUTBOUND_NO
-    WHERE so.CO_IDX = #{coIdx}
-      AND sd.OUTBOUND_STATUS = '대기'
-      AND TRUNC(SYSDATE - TO_DATE(so.WRITE_DT, 'YYYY-MM-DD')) >= 3
-    GROUP BY so.OUTBOUND_NO, so.CUSTOMER_NAME, so.WRITE_DT
-    ORDER BY delayDays DESC
-    ]]>
   </select>
 
 </mapper>
