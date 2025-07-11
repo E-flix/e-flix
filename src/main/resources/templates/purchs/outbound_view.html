@@ -1,73 +1,159 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{common/layouts/default}">
-<!-- ============================================
-  - 작성자   : 이혁진
-  - 최초작성 : 2025-00-00
-  - 설명     : 재고 조회 (AG Grid 적용)
-  -----------------------------------------------
-  [ 변경 이력 ]
-  - 2025-00-00 (이혁진): 페이지 작업중
-============================================ -->
 <head>
-	<title>출고조회</title>
+	<title>창고조회</title>
 </head>
+
 <div layout:fragment="content" class="container-fluid">
+
 	<div class="d-flex justify-content-between align-items-center mb-0">
 		<h2>출고조회</h2>
 	</div>
-  	<div class="col-md-12 mb-3 ps-0">
-		<div class="d-flex justify-content-between align-items-center">
-			<div class="radio-group">
-				<input type="radio" class="btn-check" name="accountFilter" id="ibd" autocomplete="off">
-				<label class="btn btn-outline-secondary btn-sm" for="ibd">입고</label>
-				<input type="radio" class="btn-check" name="accountFilter" id="obd" autocomplete="off" checked>
-				<label class="btn btn-outline-secondary btn-sm" for="obd">출고</label>
-			</div>
-			<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#inquiryModal">의뢰서 조회</button>
-		</div>
-	</div>
-
 	<div class="card border-0">
-		<div class="card-body ps-0 pt-0">
+		<div class="card-body ps-0 	pt-0">
 			<!-- <h5 class="text-center mb-4">출고 요청</h5> -->
 			<div class="row mb-3 align-items-end">
 				<div class="col-md-2">
-					<label class="form-label">일자</label>
-					<input type="date" name="date" id="date" class="form-control form-control-sm" />
-				</div>
-				<div class="col-md-2">
-					<label class="form-label">제품명</label>
-					<input type="text" class="form-control form-control-sm" id="productName" placeholder="제품명" />
-				</div>
-				<div class="col-md-2">
-					<label class="form-label">제품분류</label>
-					<select class="form-control form-control-sm" id="category">
-						<option selected>제품분류선택</option>
-						<option value="1">완제품</option>
-						<option value="2">반제품</option>
+					<label class="form-label mb-0">출고ID</label>
+					<select class="form-control form-control-sm" id="outboundList">
+						<option value=''>선택</option>
+						<option th:each="ob : ${searchId}" th:value="${ob.outboundId}"
+							th:text="${wh.outboundId}"></option>
 					</select>
 				</div>
 				<div class="col-md-2">
-					<label class="form-label">제품수량</label>
-					<input type="number" class="form-control form-control-sm" id="quantity" placeholder="제품수량" />
+					<label class="form-label mb-0">출고일자</label>
+					<select class="form-control form-control-sm" id="warehouseLocationInput">
+						<option value=''>선택</option>
+						<option th:each="wh : ${whlocationList}" th:value="${wh.warehouseLocation}"
+							th:text="${wh.warehouseLocation}"></option>
+					</select>
 				</div>
-				<div class="col-md-2 d-flex justify-content-end gap-2">
-					<button type="button" class="btn btn-outline-secondary btn-sm" id="saveBtn">저장</button>
-					<button type="button" class="btn btn-outline-secondary btn-sm" id="deleteBtn">삭제</button>
+				<!-- <div class="col-md-2">
+					<label class="form-label mb-0">창고상태</label>
+					<select class="form-control form-control-sm" id="warehouseStatusSelect">
+						<option value='' selected>선택</option>
+						<option value="재고존재">재고존재</option>
+						<option value="비었음">비었음</option>
+					</select>
+				</div> -->
+				<div class="col-md-2">
+					<button class="btn btn-primary btn-sm mt-2" id="searchBtn">검색</button>
 				</div>
 			</div>
-
-			<!-- AG Grid: 출고요청내역 -->
+			<!-- AG Grid: 창고조회 -->
 			<div class="grid-container mb-4" style="height: 40vh; width: 100%;">
-				<div id="requestGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
+				<div id="outboundViewList" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 			</div>
-
-			<!-- AG Grid: 제품상세 -->
-			<div class="grid-container" style="height: 30vh; width: 100%;">
-				<div id="detailGrid" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
+		</div>
+	</div>
+	<!-- 모달: 창고 상세 정보 -->
+	<div class="modal fade" id="outboundDetailModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"
+			style="width: 600px; max-width: 90%; height: 400px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">출고 상세 정보</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm table-bordered" id="outboundDetailTable">
+						<thead>
+							<tr>
+								<th>출고ID</th>
+								<th>창고ID</th>
+								<th>제품ID</th>
+								<!-- <th>제품명</th> -->
+								<th>수량</th>
+							</tr>
+						</thead>
+						<tbody id="outboundDetailTableBody">
+							<!-- JS로 제품 정보 삽입 -->
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<!-- 오른쪽 하단에 PDF 버튼 -->
+					<button id="downloadPdfBtn" type="button" class="btn btn-primary">PDF 다운로드</button>
+				</div>
 			</div>
 		</div>
 	</div>
 </div>
 
 </html>
+<script th:inline="javascript">
+	let outboundViewList = /*[[${obdView}]]*/ [];
+	let searchId = /*[[${searchId}]]*/ [];
+	let outboundViewGrid;
+
+	const gridOptions = {
+		headerHeight: 35,
+		rowHeight: 35,
+		rowData: outboundViewList,
+		columnDefs: [
+			{ headerName: "출고ID", field: "outboundId", editable: false },
+			{ headerName: "출고로트", field: "outboundLot", editable: false },
+			{ headerName: "출고의로번호", field: "outboundNumber", editable: false, cellStyle: {textAlign: 'right'} },
+			{ headerName: "출고일", field: "outboundDate", editable: false, cellStyle: {textAlign: 'right'} },
+			{ headerName: "출고담당자", field: "outboundManager", editable: false }
+		],
+		onRowClicked: (event) => {
+			const outboundId = event.data.outboundId;
+
+			fetch(`/purchs/obdViewDetail?outboundId=${outboundId}`)
+				.then(res => res.json())
+				.then(data => {
+					const tbody = document.getElementById("outboundDetailTableBody");
+
+					if (data.length === 0) {
+						tbody.innerHTML = `<tr><td colspan="3" class="text-center">제품 정보 없음</td></tr>`;
+					} else {
+						tbody.innerHTML = data.map(item => `
+          <tr>
+            <td>${item.outboundId}</td>
+            <td>${item.warehouseId}</td>
+            <td>${item.prodId}</td>
+            <td>${item.outboundQuantity}</td>
+          </tr>
+        `).join("");
+					}
+
+					const modal = new bootstrap.Modal(document.getElementById("outboundDetailModal"));
+					modal.show();
+				})
+				.catch(err => {
+					console.error("모달 로딩 실패", err);
+				});
+		},
+		onGridReady: (params) => {
+			gridOptions.api = params.api;
+			params.api.sizeColumnsToFit();
+		}
+	};
+
+	window.addEventListener('resize', () => {
+		if (gridOptions.api) {
+			gridOptions.api.sizeColumnsToFit();
+		}
+	});
+
+	// 그리드 초기화
+	document.addEventListener('DOMContentLoaded', () => {
+		warehouseViewGrid = agGrid.createGrid(document.querySelector("#outboundViewList"), gridOptions);
+	});
+
+	document.querySelector('#searchBtn').addEventListener('click', function () {
+
+		let outboundId = document.querySelector('#warehouseIdInput').value;
+		let warehouseLocation = document.querySelector('#warehouseLocationInput').value;
+		let warehouseStatus = document.querySelector('#warehouseStatusSelect').value;
+		let param = `warehouseId=${warehouseId}&warehouseLocation=${warehouseLocation}&existProd=${warehouseStatus}`
+		fetch(`/purchs/whData?${param}`)
+			.then(res => res.json())
+			.then(data => {
+				outboundViewGrid.setGridOption("rowData", data);
+			})
+	});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

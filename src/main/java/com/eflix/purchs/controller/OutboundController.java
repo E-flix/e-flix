@@ -3,7 +3,6 @@ package com.eflix.purchs.controller;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +34,6 @@ public class OutboundController {
         return outboundService.selectOutboundRequest();
     }
     
-
     @GetMapping("/obrd")
     @ResponseBody
     public List<OutboundDTO> outboundRequestDetail(@RequestParam String outboundNo) {
