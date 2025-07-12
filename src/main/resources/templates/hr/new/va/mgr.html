@@ -326,6 +326,11 @@
                 loadVaList(1);
             });
 
+            $("#paginationArea").on("click", ".page-link", function(e) {
+                const page = parseInt($(this).data("page"), 10);
+                loadVaList(page);
+            });
+
             $("#leaveRequestTable").on("click", ".view-detail-btn", function () {
                 const leaveReqIdx = $(this).data("leave-id");
                 $.ajax({
@@ -463,7 +468,6 @@
             }
 
             function loadVaList(page = 1) {
-
                 currentPage = page;
 
                 const searchData = {
@@ -471,10 +475,9 @@
                     reqType: $("#searchReqType").val(),
                     reqStart: $("#searchReqStart").val(),
                     reqEnd: $("#searchReqEnd").val(),
+                    page: page,
                 };
-
                 const queryString = $.param(searchData);
-
                 $.ajax({
                     type: "GET",
                     url: `/hr/va/mgr/list?${queryString}&page=${page}`,
@@ -581,24 +584,24 @@
                 $pagination.empty();
 
                 $pagination.append(`
-                        <li class="page-item ${page === 1 ? 'disabled' : ''}">
-                            <span class="page-link" data-page="${page - 1}">이전</span>
+                    <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                        <a class="page-link" data-page="${page - 1}">이전</a>
+                    </li>
+                `);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    $pagination.append(`
+                        <li class="page-item ${i === page ? 'active' : ''}">
+                            <a class="page-link" data-page="${i}">${i}</a>
                         </li>
                     `);
-
-                for (let i = 0; i <= totalPages; i++) {
-                    $pagination.append(`
-                            <li class="page-item ${i === page ? 'active' : ''}">
-                                <span class="page-link" data-page="${i}">${i}</span>
-                            </li>
-                        `);
                 }
 
                 $pagination.append(`
-                        <li class="page-item ${page === totalPages ? 'disabled' : ''}">
-                            <a class="page-link" data-page="${page + 1}">다음</a>
-                        </li>
-                    `);
+                    <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" data-page="${page + 1}">다음</a>
+                    </li>
+                `);
             }
 
             function detailModalFill(data) {

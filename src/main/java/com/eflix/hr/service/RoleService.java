@@ -19,4 +19,7 @@ public interface RoleService {
     int updateRole(RoleDTO dto);
     int deleteRole(String roleId);
     public List<RoleDTO> roleList();
+
+    // 0712
+    public List<RoleDTO> findAllByCoIdx(String coIdx);
 }

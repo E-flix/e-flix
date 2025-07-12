@@ -80,6 +80,7 @@ public class VaMgrController {
             searchResult.put("total", empCount);
             searchResult.put("page", vaSearchDTO.getPage());
             searchResult.put("startPage", vaSearchDTO.getStartPage());
+            searchResult.put("pageSize", vaSearchDTO.getPageUnit());
             searchResult.put("endPage", vaSearchDTO.getEndPage());
             searchResult.put("lastPage", vaSearchDTO.getLastPage());
             result = ResUtil.makeResult(ResStatus.OK, searchResult);

@@ -116,31 +116,40 @@
     </select>
 
     <select id="findAllBySearch" parameterType="VaSearchDTO" resultType="VaDTO">
-        SELECT lr.leave_req_idx, lr.emp_idx, lr.approver_idx, lr.leave_Start_date, lr.leave_end_date,
-            lr.reason, lr.request_date, lr.approval_status, lr.approved_date, lr.att_file, lr.co_idx, lr.req_type,
-            e.emp_img, e.emp_name,
-            d.dept_name
-        FROM leave_requests lr
-            LEFT JOIN employees e ON lr.emp_idx = e.emp_idx
-            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
-        <where>
-            <if test="approvalStatus != null and approvalStatus !=''">
-                lr.approval_status = #{approvalStatus}
-            </if>
-            <if test="reqType != null and reqType != ''">
-                lr.req_type = #{reqType}
-            </if>
-            <choose>
-                <when test ="reqStart != null and reqEnd != null and reqStart != '' and reqEnd != ''">
-                    AND lr.request_date BETWEEN TO_DATE(#{reqStart}, 'YYYY-MM-DD') AND TO_DATE(#{reqEnd}, 'YYYY-MM-DD')
-                </when>
-                <when test="reqStart != null and reqStart != '' and (reqEnd == null or reqEnd == '')">
-                    AND lr.request_date BETWEEN TO_DATE(#{reqStart}, 'YYYY-MM-DD') AND TRUNC(SYSDATE)
-                </when>
-                <otherwise />
-            </choose>
-            AND e.co_idx = #{coIdx}
-        </where>
+        SELECT *
+        FROM (
+            SELECT a.*, ROWNUM AS rn
+            FROM (
+                SELECT lr.leave_req_idx, lr.emp_idx, lr.approver_idx, lr.leave_Start_date, lr.leave_end_date,
+                    lr.reason, lr.request_date, lr.approval_status, lr.approved_date, lr.att_file, lr.co_idx, lr.req_type,
+                    e.emp_img, e.emp_name,
+                    d.dept_name
+                FROM leave_requests lr
+                    LEFT JOIN employees e ON lr.emp_idx = e.emp_idx
+                    LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+                <where>
+                    <if test="approvalStatus != null and approvalStatus !=''">
+                        lr.approval_status = #{approvalStatus}
+                    </if>
+                    <if test="reqType != null and reqType != ''">
+                        lr.req_type = #{reqType}
+                    </if>
+                    <choose>
+                        <when test ="reqStart != null and reqEnd != null and reqStart != '' and reqEnd != ''">
+                            AND lr.request_date BETWEEN TO_DATE(#{reqStart}, 'YYYY-MM-DD') AND TO_DATE(#{reqEnd}, 'YYYY-MM-DD')
+                        </when>
+                        <when test="reqStart != null and reqStart != '' and (reqEnd == null or reqEnd == '')">
+                            AND lr.request_date BETWEEN TO_DATE(#{reqStart}, 'YYYY-MM-DD') AND TRUNC(SYSDATE)
+                        </when>
+                        <otherwise />
+                    </choose>
+                    AND e.co_idx = #{coIdx}
+                </where>
+                ORDER BY lr.request_date DESC, e.emp_idx DESC
+            ) a
+            WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rn &gt; #{offset}
     </select>
 
     <select id="findByLeaveReqIdx" parameterType="String" resultType="VaDTO">

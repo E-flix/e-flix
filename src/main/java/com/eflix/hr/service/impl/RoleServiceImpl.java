@@ -20,38 +20,42 @@ import com.eflix.hr.service.RoleService;
 @Service
 public class RoleServiceImpl implements RoleService {
 
-  @Autowired
-  private RoleMapper roleMapper;
+    @Autowired
+    private RoleMapper roleMapper;
 
-  @Override
-  public List<RoleDTO> getAllRoles() {
-    throw new UnsupportedOperationException("Unimplemented method 'getAllRoles'");
-  }
+    @Override
+    public List<RoleDTO> getAllRoles() {
+        throw new UnsupportedOperationException("Unimplemented method 'getAllRoles'");
+    }
 
-  @Override
-  public RoleDTO getRoleById(String roleId) {
-    throw new UnsupportedOperationException("Unimplemented method 'getRoleById'");
-  }
+    @Override
+    public RoleDTO getRoleById(String roleId) {
+        throw new UnsupportedOperationException("Unimplemented method 'getRoleById'");
+    }
 
-  @Override
-  public int createRole(RoleDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'createRole'");
-  }
+    @Override
+    public int createRole(RoleDTO dto) {
+        throw new UnsupportedOperationException("Unimplemented method 'createRole'");
+    }
 
-  @Override
-  public int updateRole(RoleDTO dto) {
-    throw new UnsupportedOperationException("Unimplemented method 'updateRole'");
-  }
+    @Override
+    public int updateRole(RoleDTO dto) {
+        throw new UnsupportedOperationException("Unimplemented method 'updateRole'");
+    }
 
-  @Override
-  public int deleteRole(String roleId) {
-    throw new UnsupportedOperationException("Unimplemented method 'deleteRole'");
-  }
+    @Override
+    public int deleteRole(String roleId) {
+        throw new UnsupportedOperationException("Unimplemented method 'deleteRole'");
+    }
 
-  // 사원관리 페이지 권한 드롭다운
-  @Override
-  public List<RoleDTO> roleList() {
-    return roleMapper.roleList();
-  }
+    // 사원관리 페이지 권한 드롭다운
+    @Override
+    public List<RoleDTO> roleList() {
+        return roleMapper.roleList();
+    }
 
+    @Override
+    public List<RoleDTO> findAllByCoIdx(String coIdx) {
+        return roleMapper.findAllByCoIdx(coIdx);
+    }
 }

@@ -23,7 +23,7 @@
 <div layout:fragment="content">
     <div class="w-100" id="empList">
         <div class="d-flex justify-content-between align-items-center mb-1">
-            <h3>사원관리asd</h3>
+            <h3>사원관리</h3>
         </div>
         <div class="py-4">
             <!-- 사원등록 / 수정 버튼 -->
@@ -531,6 +531,8 @@
         <script>
             $(function () {
                 let currentPage = 1;
+                let currentPageSize = parseInt($("#itemSizeSelect").val(), 10);
+
                 loadSearchSelect("search");
                 loadEmpList(1);
 
@@ -544,6 +546,20 @@
 
                 $("#searchBtn").on("click", function () {
                     loadEmpList();
+                });
+
+                $("#itemSizeSelect").on("change", function() {
+                    currentPageSize = parseInt(this.value, 10);
+                    loadEmpList(1);
+                });
+                $("#paginationArea").on("click", ".page-link", function(e) {
+                    const page = parseInt($(this).data("page"), 10);
+                    loadEmpList(page);
+                });
+
+                $("#paginationArea").on("click", ".page-link", function(e) {
+                    const page = parseInt($(this).data("page"), 10);
+                    loadEmpList(page);
                 });
 
                 $("#insertEmp").on("click", function () {
@@ -661,10 +677,10 @@
                     let method = empMode === "insert" ? "POST" : "PUT";
 
                     var formData = new FormData();
-                    formData.append("empData", new Blob([JSON.stringify(empData)], {type: "application/json"}));
+                    formData.append("empData", new Blob([JSON.stringify(empData)], { type: "application/json" }));
                     const fileInput = $("#empPhoto")[0];
                     const file = fileInput && fileInput.files && fileInput.files[0];
-                    if(file) {
+                    if (file) {
                         formData.append("empPhoto", file);
                     }
 
@@ -706,6 +722,8 @@
                         grdIdx: $("#searchGrade").val(),
                         empStatus: $("#searchEmpStatus").val(),
                         empType: $("#searchEmpType").val(),
+                        page: page,
+                        pageUnit: currentPageSize
                     }
 
                     const queryString = $.param(searchData);
@@ -719,6 +737,9 @@
 
                                 renderEmpListBody(data.emps);
                                 renderPagination(data.page, data.pageSize, data.total);
+
+                                $("#totalCount").text(data.total);
+                                $("#itemSizeSelect").val(data.pageSize);
                             } else {
                                 Swal.fire("실패", res.body, "error");
                             }
@@ -740,7 +761,7 @@
 
                                 renderBankList(data);
 
-                                if(selectedValue) {
+                                if (selectedValue) {
                                     $("#modalBank").val(selectedValue);
                                 }
 
@@ -757,7 +778,8 @@
 
                 function renderBankList(banks) {
                     const $modalBank = $("#modalBank");
-                    $.each(banks, function(i, item) {
+                    $modalBank.html('<option value="">선택</option>');
+                    $.each(banks, function (i, item) {
                         $modalBank.append(`<option value="${item.commonCode}">${item.commonCodeName}</option>`);
                     });
                 }
@@ -805,14 +827,14 @@
 
                     $pagination.append(`
                         <li class="page-item ${page === 1 ? 'disabled' : ''}">
-                            <span class="page-link" data-page="${page - 1}">이전</span>
+                            <a class="page-link" data-page="${page - 1}">이전</a>
                         </li>
                     `);
 
-                    for (let i = 0; i <= totalPages; i++) {
+                    for (let i = 1; i <= totalPages; i++) {
                         $pagination.append(`
                             <li class="page-item ${i === page ? 'active' : ''}">
-                                <span class="page-link" data-page="${i}">${i}</span>
+                                <a class="page-link" data-page="${i}">${i}</a>
                             </li>
                         `);
                     }
@@ -832,13 +854,14 @@
                             if (res.head.res_code === "200") {
                                 const data = res.body;
                                 renderUpDept(mode, data.depts);
-                                if(selectedUpValue) {
+                                if (selectedUpValue) {
                                     $("#modalDeptUpIdx").val(selectedUpValue);
                                 }
                                 renderGrade(mode, data.grades);
-                                if(selectedDownValue) {
+                                if (selectedDownValue) {
                                     $("#modalDeptDownIdx").val(selectedDownValue);
                                 }
+                                renderRole(mode, data.roles);
                             } else {
                                 Swal.fire("실패", res.body, "error");
                             }
@@ -873,11 +896,15 @@
                 function renderUpDept(mode, upDept) {
                     if (mode === "search") {
                         const $searchDeptUpIdx = $("#searchDeptUpIdx");
+                        $searchDeptUpIdx.html('<option value="">선택</option>');
+
                         $.each(upDept, function (i, item) {
                             $searchDeptUpIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
                         });
                     } else if (mode === "modal") {
                         const $modalDeptUpIdx = $("#modalDeptUpIdx");
+                        $modalDeptUpIdx.html('<option value="">선택</option>');
+
                         $.each(upDept, function (i, item) {
                             $modalDeptUpIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
                         })
@@ -887,12 +914,15 @@
                 function renderDownDept(mode, downDept) {
                     if (mode === "search") {
                         const $searchDeptDownIdx = $("#searchDeptDownIdx");
+                        $searchDeptDownIdx.html('<option value="">선택</option>');
 
                         $.each(downDept, function (i, item) {
                             $searchDeptDownIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`)
                         });
                     } else if (mode === "modal") {
                         const $modalDeptDownIdx = $("#modalDeptDownIdx");
+                        $modalDeptDownIdx.html('<option value="">선택</option>');
+
                         $.each(downDept, function (i, item) {
                             $modalDeptDownIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
                         })
@@ -902,17 +932,28 @@
                 function renderGrade(mode, grades) {
                     if (mode === "search") {
                         const $searchGrade = $("#searchGrade");
+                        $searchGrade.html('<option value="">선택</option>');
 
                         $.each(grades, function (i, item) {
                             $searchGrade.append(`<option value="${item.grdIdx}">${item.grdName}</option>`);
                         });
                     } else if (mode === "modal") {
                         const $modalGrade = $("#modalGrade");
+                        $modalGrade.html('<option value="">선택</option>');
 
                         $.each(grades, function (i, item) {
                             $modalGrade.append(`<option value="${item.grdIdx}">${item.grdName}</option>`);
                         });
                     }
+                }
+
+                function renderRole(mode, roles) {
+                    const $modalGrade = $("#modalRoleId");
+                    $modalGrade.html('<option value="">선택</option>');
+
+                    $.each(roles, function (i, item) {
+                        $modalGrade.append(`<option value="${item.roleId}">${item.roleName}</option>`);
+                    });
                 }
             });
         </script>
