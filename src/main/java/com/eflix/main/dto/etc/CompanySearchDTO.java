@@ -14,7 +14,7 @@ public class CompanySearchDTO extends PagingDTO {
     private String coNameEn;
     private String coAddr;
     private String coAddrDetail;
-    private Integer coZip;
+    private String coZip;
     private String bizrNo;
     private String bizrCert;
     private String ceoName;

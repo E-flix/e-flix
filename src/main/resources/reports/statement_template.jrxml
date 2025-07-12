@@ -3,25 +3,13 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="subscription_invoice" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="30" bottomMargin="25" uuid="c068b97b-1408-4462-8257-7ca467abadb4">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<parameter name="COMPANY_NAME" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["주식회사 예시"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["E-FLIX"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="COMPANY_ADDRESS" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["서울시 강남구 테헤란로 123"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["대구광역시 중구 중앙대로 403 (남일동 135-1, 5층)"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="COMPANY_PHONE" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["02-1234-5678"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="CUSTOMER_NAME" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["담당자명"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="CUSTOMER_PHONE" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["010-0000-0000"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="CUSTOMER_EMAIL" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["customer@example.com"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="EMP_NAME" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["담당자명"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["053-421-2460"]]></defaultValueExpression>
 	</parameter>
 	<field name="spiIdx" class="java.lang.String"/>
 	<field name="coIdx" class="java.lang.String"/>
@@ -48,16 +36,16 @@
                 $F{spiPay}.equals("SP01") ? "무통장입금" :
                 $F{spiPay}.equals("SP02") ? "신용카드" :
                 $F{spiPay}.equals("SP03") ? "계좌이체" :
-                $F{spiPay}.equals("SP04") ? "카카오페이" :
+                $F{spiPay}.equals("kakaopay") ? "카카오페이" :
                 $F{spiPay}.equals("SP05") ? "네이버페이" : "기타"
             ) : "미설정"]]></variableExpression>
 	</variable>
 	<variable name="statusText" class="java.lang.String">
-		<variableExpression><![CDATA[$F{spiStatus} != null ? (
-                $F{spiStatus}.equals("SS01") ? "정상 서비스" :
-                $F{spiStatus}.equals("SS02") ? "서비스 해지" :
-                $F{spiStatus}.equals("SS03") ? "일시정지" : "상태미확인"
-            ) : "상태미확인"]]></variableExpression>
+		<variableExpression><![CDATA[$F{spiStatus} == null ? "상태미확인" :
+        "SS01".equals($F{spiStatus}.trim()) ? "정상 서비스" :
+        "SS02".equals($F{spiStatus}.trim()) ? "서비스 해지" :
+        "SS03".equals($F{spiStatus}.trim()) ? "일시정지" :
+        "상태미확인"]]></variableExpression>
 	</variable>
 	<variable name="statusColor" class="java.awt.Color">
 		<variableExpression><![CDATA[$F{spiStatus} != null ? (
@@ -159,7 +147,11 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Malgun Gothic" size="13" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{statusText}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{spiStatus} == null ? "상태미확인" :
+        "SS01".equals($F{spiStatus}.trim()) ? "정상 서비스" :
+        "SS02".equals($F{spiStatus}.trim()) ? "서비스 해지" :
+        "SS03".equals($F{spiStatus}.trim()) ? "일시정지" :
+        "상태미확인"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="350" y="105" width="205" height="25" uuid="a19b1c20-f758-4e4c-80ff-89688adda5f2">
@@ -213,7 +205,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Malgun Gothic" size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{EMP_NAME} + " (" + ($F{ceoName} != null ? $F{ceoName} : "N/A") + ")"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ceoName} != null ? $F{ceoName} : "N/A"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="15" y="78" width="80" height="18" uuid="1cc85ecc-2881-454b-8018-0d7d9b8d3bf9"/>
@@ -227,7 +219,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Malgun Gothic" size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{CUSTOMER_NAME} + " (" + ($F{pschName} != null ? $F{pschName} : "N/A") + ")"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{pschName} != null ? $F{pschName} : "N/A"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="15" y="101" width="80" height="18" uuid="0c9c9c17-ed3d-4075-b96f-929188715c1c"/>
@@ -241,7 +233,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Malgun Gothic" size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{CUSTOMER_PHONE} + " (" + ($F{pschTel} != null ? $F{pschTel} : "N/A") + ")"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{pschTel} != null ? $F{pschTel} : "N/A"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="15" y="124" width="80" height="18" uuid="1fddc7e8-d7ea-4f20-ac80-bb5d8188dada"/>
@@ -255,7 +247,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Malgun Gothic" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{CUSTOMER_EMAIL} + " (" + ($F{pschEmail} != null ? $F{pschEmail} : "N/A") + ")"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{pschEmail} != null ? $F{pschEmail} : "N/A"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="285" y="10" width="100" height="25" uuid="b9f98624-ef72-46bb-8ee8-cd190de58bdc"/>

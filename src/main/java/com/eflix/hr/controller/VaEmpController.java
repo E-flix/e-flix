@@ -9,7 +9,6 @@ import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
 import com.eflix.common.security.auth.AuthUtil;
-import com.eflix.hr.dto.AttendanceRequestDTO;
 import com.eflix.hr.dto.etc.VaDTO;
 import com.eflix.hr.dto.etc.VaSummaryDTO;
 import com.eflix.hr.service.LeaveRequestService;
@@ -23,9 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -63,10 +60,13 @@ public class VaEmpController {
             reqFile.transferTo(dest);
 
             vaDTO.setAttFile(reqFile.getOriginalFilename());
+            System.out.println(reqFile.getOriginalFilename());
         }
 
         vaDTO.setCoIdx(getCoIdx());
         vaDTO.setEmpIdx(getEmpIdx());
+
+        System.out.println(vaDTO.toString());
 
         int affectedRows = leaveRequestService.insert(vaDTO);
 

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.LeaveRequestDTO;
 import com.eflix.hr.dto.etc.VaDTO;
+import com.eflix.hr.dto.etc.VaReqSummaryDTO;
 import com.eflix.hr.dto.etc.VaSearchDTO;
 import com.eflix.hr.dto.etc.VaSummaryDTO;
 import com.eflix.hr.mapper.LeaveRequestMapper;
@@ -67,7 +68,22 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
+    public VaReqSummaryDTO findReqSummaryBySearch(VaSearchDTO vaSearchDTO) {
+        return leaveRequestMapper.findReqSummaryBySearch(vaSearchDTO);
+    }
+
+    @Override
+    public int findCountBySearch(VaSearchDTO vaSearchDTO) {
+        return leaveRequestMapper.findCountBySearch(vaSearchDTO);
+    }
+
+    @Override
     public List<VaDTO> findAllBySearch(VaSearchDTO vaSearchDTO) {
         return leaveRequestMapper.findAllBySearch(vaSearchDTO);
+    }
+
+    @Override
+    public VaDTO findByLeaveReqIdx(String leaveReqIdx) {
+        return leaveRequestMapper.findByLeaveReqIdx(leaveReqIdx);
     }
 }

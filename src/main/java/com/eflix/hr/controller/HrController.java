@@ -27,7 +27,6 @@ import com.eflix.hr.service.EmployeeService;
 import com.eflix.hr.service.HrWorkTypeService;
 import com.eflix.hr.service.RoleService;
 import com.eflix.hr.service.SalaryService;
-import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.service.CompanyService;
 
 import org.springframework.web.bind.annotation.GetMapping;

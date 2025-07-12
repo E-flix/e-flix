@@ -36,7 +36,7 @@ public class InvoiceDTO {
     private String userIdx;       // user-000
     private String coAddr;
     private String coAddrDetail;
-    private Integer coZip;
+    private String coZip;
     private String bizrNo;
     private String bizrCert;
     private String ceoTel;
