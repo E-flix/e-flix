@@ -211,17 +211,17 @@ public class HrController {
         return "hr/attdApproval";
     }
 
-    // 급여 계산 화면
-    @GetMapping("/sc")
-    public String salaryCalculate() {
-        return "hr/salaryCalculate";
-    }
+    // // 급여 계산 화면
+    // @GetMapping("/sc")
+    // public String salaryCalculate() {
+    //     return "hr/salaryCalculate";
+    // }
 
-    // 급여 항목 화면
-    @GetMapping("/si")
-    public String salaryItem() {
-        return "hr/salaryItem";
-    }
+    // // 급여 항목 화면
+    // @GetMapping("/si")
+    // public String salaryItem() {
+    //     return "hr/salaryItem";
+    // }
 
     // 급여 명세서 화면
     @GetMapping("/sp")
@@ -285,6 +285,21 @@ public class HrController {
     @GetMapping("/va/mgr")
     public String vaMgr() {
         return "hr/new/va/mgr";
+    }
+    
+    @GetMapping("/salary/calc")
+    public String salaryCalc() {
+        return "hr/new/salary/calc";
+    }
+
+    @GetMapping("/salary/item")
+    public String salaryItem() {
+        return "hr/new/salary/item";
+    }
+
+    @GetMapping("/salary/stub")
+    public String salaryPay() {
+        return "hr/new/salary/stub";
     }
     
 }

@@ -44,12 +44,12 @@
 				href="/hr/va/mgr">휴가 관리(관리자)</a>
 
 			<h6 class="collapse-header">급여관리:</h6>
-			<a class="" th:class="${activeSubMenu == 'sc'} ? 'collapse-item active' : 'collapse-item'"
-				href="/hr/sc">급여계산</a>
-			<a class="" th:class="${activeSubMenu == 'si'} ? 'collapse-item active' : 'collapse-item'"
-				href="/hr/si">급여항목</a>
-			<a class="" th:class="${activeSubMenu == 'sp'} ? 'collapse-item active' : 'collapse-item'"
-				href="/hr/sp">급여명세서</a>
+			<a class="" th:class="${active3rdMenu == 'calc'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/salary/calc">급여계산</a>
+			<a class="" th:class="${active3rdMenu == 'item'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/salary/item">급여항목</a>
+			<a class="" th:class="${active3rdMenu == 'stub'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/salary/stub">급여명세서</a>
 
 		</div>
 	</div>

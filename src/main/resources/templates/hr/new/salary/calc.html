@@ -1,0 +1,519 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-18
+  - 설명     : 근태 관리화면 (관리자)
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-18 (김어진): title 및 내용 추가
+  - 2025-06-19 (김어진): layout 구성
+============================================ -->
+
+<head>
+    <title>급여계산</title>
+</head>
+
+<div layout:fragment="content">
+    <div class="container-fluid p-4">
+        <div class="row">
+            <div class="col-12">
+                <!-- 페이지 헤더 -->
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                    <div>
+                        <h2 class="text-primary mb-1">
+                            <i class="fas fa-calculator me-2"></i>급여계산
+                        </h2>
+                        <small class="text-muted">직원 급여 계산 및 관리</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-info fs-6">2025년 5월 급여</span>
+                    </div>
+                </div>
+
+                <!-- 기능 버튼 그룹 -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body py-3">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-check-square me-1"></i>전체선택
+                                    </button>
+                                    <button class="btn btn-warning btn-sm" id="calcBtn">
+                                        <i class="fas fa-calculator me-1"></i>급여계산
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" id="confirmBtn">
+                                        <i class="fas fa-check-circle me-1"></i>급여확정
+                                    </button>
+                                    <div class="vr"></div>
+                                    <button class="btn btn-success btn-sm">
+                                        <i class="fas fa-file-excel me-1"></i>EXCEL
+                                    </button>
+                                    <button class="btn btn-danger btn-sm">
+                                        <i class="fas fa-file-pdf me-1"></i>PDF생성
+                                    </button>
+                                    <button class="btn btn-info btn-sm">
+                                        <i class="fas fa-paper-plane me-1"></i>명세서일괄발송
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 검색 조건 -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-search me-2"></i>검색조건
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">귀속년월</label>
+                                        <select id="attMonth" class="form-select">
+                                            <option>2025년 05월</option>
+                                            <option>2025년 04월</option>
+                                            <option>2025년 03월</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">지급년월</label>
+                                        <select id="payMonth" class="form-select">
+                                            <option>2025년 06월</option>
+                                            <option>2025년 05월</option>
+                                            <option>2025년 04월</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">사원명</label>
+                                        <input type="text" class="form-control" placeholder="사원명 입력">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">부서명</label>
+                                        <select class="form-select">
+                                            <option>전체</option>
+                                            <option>인사팀</option>
+                                            <option>개발팀</option>
+                                            <option>마케팅팀</option>
+                                            <option>영업팀</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">직급</label>
+                                        <select class="form-select">
+                                            <option>전체</option>
+                                            <option>사원</option>
+                                            <option>대리</option>
+                                            <option>과장</option>
+                                            <option>차장</option>
+                                            <option>부장</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end gap-2">
+                                        <button class="btn btn-primary">
+                                            <i class="fas fa-search me-1"></i>조회
+                                        </button>
+                                        <button class="btn btn-outline-secondary">
+                                            <i class="fas fa-redo me-1"></i>초기화
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 급여 리스트 -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div
+                                class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>급여 리스트
+                                </h6>
+                                <span class="badge bg-light text-primary">총 5건</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-center" width="50">
+                                                    <input type="checkbox" class="form-check-input">
+                                                </th>
+                                                <th class="text-center">사번</th>
+                                                <th class="text-center">이름</th>
+                                                <th class="text-center">부서</th>
+                                                <th class="text-center">직급</th>
+                                                <th class="text-center">귀속년월</th>
+                                                <th class="text-center">지급년월</th>
+                                                <th class="text-center">기본급</th>
+                                                <th class="text-center">수당합계</th>
+                                                <th class="text-center">공제합계</th>
+                                                <th class="text-center">실수령액</th>
+                                                <th class="text-center">계산상태</th>
+                                                <th class="text-center">관리</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="salaryTableBody">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted">
+                                        <small>총 급여액: <span class="fw-bold text-primary">13,520,000원</span></small>
+                                    </div>
+                                    <nav>
+                                        <ul class="pagination pagination-sm mb-0">
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#"><i class="fas fa-angle-left"></i></a>
+                                            </li>
+                                            <li class="page-item active">
+                                                <a class="page-link" href="#">1</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="#">2</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="#">3</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="#"><i class="fas fa-angle-right"></i></a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 급여 상세조회 모달 -->
+    <div class="modal fade" id="salaryDetailModal" tabindex="-1" aria-labelledby="salaryDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="salaryDetailModalLabel">
+                        <i class="fas fa-user-circle me-2"></i>급여 상세조회 - 김철수 (EMP001)
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="row g-0">
+                        <div class="col-md-4 bg-light p-3">
+                            <div class="text-center mb-3">
+                                <div class="bg-primary rounded-circle mx-auto mb-2"
+                                    style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-user text-white fa-2x"></i>
+                                </div>
+                                <h6 class="mb-1">김철수</h6>
+                                <small class="text-muted">개발팀 과장</small>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">귀속년월</small>
+                                <strong>2025년 05월</strong>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">지급년월</small>
+                                <strong>2025년 06월</strong>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-1"></i>
+                                <small>계산완료 상태입니다</small>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th>항목</th>
+                                            <th class="text-end">금액</th>
+                                            <th class="text-center">비고</th>
+                                            <th class="text-center">과세구분</th>
+                                            <th class="text-center">구분</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-semibold">기본급</td>
+                                            <td class="text-end">2,500,000</td>
+                                            <td class="text-center">-</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-warning">과세</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary">지급</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>직책수당</td>
+                                            <td class="text-end">150,000</td>
+                                            <td class="text-center">정액</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-warning">과세</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary">지급</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>식대수당</td>
+                                            <td class="text-end">200,000</td>
+                                            <td class="text-center">정액</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">비과세</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary">지급</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>교통비</td>
+                                            <td class="text-end">100,000</td>
+                                            <td class="text-center">정액</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">비과세</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary">지급</span>
+                                            </td>
+                                        </tr>
+                                        <tr class="table-light">
+                                            <td colspan="5" class="fw-semibold text-muted">공제 항목</td>
+                                        </tr>
+                                        <tr>
+                                            <td>국민연금</td>
+                                            <td class="text-end text-danger">-119,250</td>
+                                            <td class="text-center">4.5%</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">비과세</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-danger">공제</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>건강보험</td>
+                                            <td class="text-end text-danger">-92,625</td>
+                                            <td class="text-center">3.495%</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">비과세</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-danger">공제</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>고용보험</td>
+                                            <td class="text-end text-danger">-26,500</td>
+                                            <td class="text-center">1.0%</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">비과세</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-danger">공제</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>소득세</td>
+                                            <td class="text-end text-danger">-46,625</td>
+                                            <td class="text-center">자동계산</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">비과세</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-danger">공제</span>
+                                            </td>
+                                        </tr>
+                                        <tr class="table-primary">
+                                            <td class="fw-bold">실수령액</td>
+                                            <td class="text-end fw-bold fs-5">2,665,000</td>
+                                            <td class="text-center">자동계산</td>
+                                            <td class="text-center">-</td>
+                                            <td class="text-center">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">
+                        <i class="fas fa-print me-1"></i>명세서 인쇄
+                    </button>
+                    <button type="button" class="btn btn-danger">
+                        <i class="fas fa-file-pdf me-1"></i>PDF 다운로드
+                    </button>
+                    <button type="button" class="btn btn-success">
+                        <i class="fas fa-paper-plane me-1"></i>명세서 발송
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>닫기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 지급월 자동 설정 -->
+    <script>
+        $(function () {
+            let currentPage = 1;
+            // 초기 로딩
+            loadSalaryList(1);
+
+            // 1) 조회 클릭 → 목록 로딩
+            $('#btnSearch').on('click', function () {
+                loadSalaryList(1);
+            });
+
+            // 2) 기본귀속월 변경 시 자동으로 지급월 설정
+            $('#attMonth').on('change', function () {
+                const val = $(this).val();
+                const m = val.match(/(\d{4})년\s*(\d{1,2})월/);
+                if (m) {
+                    let year = parseInt(m[1], 10);
+                    let month = parseInt(m[2], 10) + 1;
+                    if (month > 12) {
+                        month = 1;
+                        year++;
+                    }
+                    const monthStr = month < 10 ? '0' + month : month;
+                    $('#payMonth').val(`${year}년 ${monthStr}월`);
+                }
+            });
+
+            // 3) 급여 목록 AJAX 호출
+            function loadSalaryList() {
+                const attMonthVal = $('#attMonth').val().replace('년 ', '-').replace('월', '');
+                const payMonthVal = $('#payMonth').val().replace('년 ', '-').replace('월', '');
+                const empName = $('#empName').val();
+                const deptIdx = $('#deptSelect').val();
+
+                $.ajax({
+                    url: '/hr/sc/list',
+                    method: 'GET',
+                    data: {
+                        attMonth: attMonthVal,
+                        payMonth: payMonthVal,
+                        empName: empName,
+                        deptIdx: deptIdx
+                    },
+                    dataType: 'json',
+                    success: function (list) {
+                        renderSalaryTable(list);
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+
+            function renderSalaryTable(salaries) {
+                const $salaryTableBody = ("#salaryTableBody");
+                $salaryTableBody.empty();
+                let html = "";
+                $.each(salaries, function (i, item) {
+                    html += `
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input">
+                        </td>
+                        <td class="text-center">EMP001</td>
+                        <td class="text-center fw-semibold">김철수</td>
+                        <td class="text-center">개발팀</td>
+                        <td class="text-center">과장</td>
+                        <td class="text-center">2025.05</td>
+                        <td class="text-center">2025.06</td>
+                        <td class="text-end">2,500,000</td>
+                        <td class="text-end">450,000</td>
+                        <td class="text-end">285,000</td>
+                        <td class="text-end fw-bold text-primary">2,665,000</td>
+                        <td class="text-center">
+                            <span class="badge bg-success">계산완료</span>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                data-bs-toggle="modal" data-bs-target="#salaryDetailModal">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `
+                });
+
+                $salaryTableBody.html(html);
+            }
+
+            function renderDetail(detail) {
+                const $salaryDetailModal = $("#salaryDetailModal");
+                $salaryDetailModal.empty();
+
+                let html = ""
+                $.each(detail, function(i, item) {
+                    html += `
+                        <tr>
+                            <td class="fw-semibold">기본급</td>
+                            <td class="text-end">2,500,000</td>
+                            <td class="text-center">-</td>
+                            <td class="text-center">
+                                <span class="badge bg-warning">과세</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-primary">지급</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+                html += `
+                    <tr class="table-light">
+                        <td colspan="5" class="fw-semibold text-muted">공제 항목</td>
+                    </tr>
+                `;
+                html += `
+                    <tr>
+                        <td>국민연금</td>
+                        <td class="text-end text-danger">-119,250</td>
+                        <td class="text-center">4.5%</td>
+                        <td class="text-center">
+                            <span class="badge bg-info">비과세</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-danger">공제</span>
+                        </td>
+                    </tr>
+                `;
+                html += `
+                    <tr class="table-primary">
+                        <td class="fw-bold">실수령액</td>
+                        <td class="text-end fw-bold fs-5">2,665,000</td>
+                        <td class="text-center">자동계산</td>
+                        <td class="text-center">-</td>
+                        <td class="text-center">-</td>
+                    </tr>
+                `;
+            }
+        });
+    </script>
+</div>
+
+</html>

@@ -37,7 +37,9 @@
             <!-- 검색 필터 -->
             <div class="p-4 bg-light rounded mb-4">
                 <div class="row g-3 align-items-center mb-3">
-                    <div class="col-md-2"><label class="form-label">검색 기준</label></div>
+                    <div class="col-md-2">
+                        <label class="form-label">검색 기준</label>
+                    </div>
                     <div class="col-md-2">
                         <select name="option" class="form-select" id="searchSelect">
                             <option value="">전체</option>
@@ -715,7 +717,7 @@
                     currentPage = page;
 
                     const searchData = {
-                        option: $("#searchOption").val(),
+                        option: $("#searchSelect").val(),
                         keyword: $("#searchKeyword").val(),
                         deptUpIdx: $("#searchDeptUpIdx").val(),
                         deptIdx: $("#searchDeptDownIdx").val(),

@@ -134,35 +134,35 @@
   <!-- 급여 상세항목 (salary + salary_mapping) -->
   <select id="selectSalaryDetail" parameterType="String" resultType="SalaryDetailDTO">
     SELECT
-      '기본급'              AS itemName,
-      s.base_salary         AS amount,
-      '-'                   AS remark,
-      '과세'                AS taxType,
-      '지급'                AS payType
+        '기본급'              AS itemName,
+        s.base_salary         AS amount,
+        '-'                   AS remark,
+        '과세'                AS taxType,
+        '지급'                AS payType
     FROM salary s
     WHERE s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
     
     UNION ALL
     
     SELECT
-      sm.al_name            AS itemName,
-      CASE sm.type WHEN 'sm-02' THEN -sm.al_amount ELSE sm.al_amount END AS amount,
-      '-'                   AS remark,
-      DECODE(sm.type, 'sm-01', '과세', '비과세') AS taxType,
-      DECODE(sm.type, 'sm-01', '지급', '공제') AS payType
+        sm.al_name            AS itemName,
+        CASE sm.type WHEN 'sm-02' THEN -sm.al_amount ELSE sm.al_amount END AS amount,
+        '-'                   AS remark,
+        DECODE(sm.type, 'sm-01', '과세', '비과세') AS taxType,
+        DECODE(sm.type, 'sm-01', '지급', '공제') AS payType
     FROM salary_mapping sm
     JOIN salary s ON sm.co_idx = s.co_idx
     WHERE sm.use_status = 'Y'
-      AND s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
-    
+        AND s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
+
     UNION ALL
 
     SELECT
-      '세금' AS itemName,
-      -s.tax AS amount,
-      '-' AS remark,
-      '과세'                AS taxType,
-      '공제'                AS payType
+        '세금' AS itemName,
+        -s.tax AS amount,
+        '-' AS remark,
+        '과세'                AS taxType,
+        '공제'                AS payType
     FROM salary s
     WHERE s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
   </select>
