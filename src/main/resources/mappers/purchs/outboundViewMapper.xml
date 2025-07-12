@@ -13,6 +13,17 @@ SELECT
     outbound_manager
 FROM
     outbound
+<where>
+    <if test= 'outboundId != null and outboundId != "" '> 
+        outbound_id = #{outboundId} 
+    </if>
+   <if test="startDate != null and startDate != ''">
+    AND outbound_date &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+</if>
+<if test="endDate != null and endDate != ''">
+    AND outbound_date &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+</if>
+</where>
 ORDER BY
     outbound_id
 </select>
