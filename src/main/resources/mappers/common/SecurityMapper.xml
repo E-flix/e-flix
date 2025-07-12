@@ -51,5 +51,12 @@
         SELECT role_code
         FROM erp_company_roles
         WHERE co_idx = #{coIdx}
-  </select>
+    </select>
+
+    <!-- 0712 -->
+    <select id="findRoleId" parameterType="String" resultType="String">
+        SELECT role_id
+        FROM employees
+        WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
+    </select>
 </mapper>

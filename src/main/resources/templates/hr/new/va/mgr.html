@@ -185,10 +185,10 @@
         <div class="row mt-4">
             <div class="col-12">
                 <div class="d-flex justify-content-start gap-2">
-                    <button type="button" class="btn btn-success">
+                    <button type="button" class="btn btn-success" id="acceptBulkBtn">
                         <i class="bi bi-check-all"></i> 선택 항목 승인
                     </button>
-                    <button type="button" class="btn btn-danger">
+                    <button type="button" class="btn btn-danger" id="rejectBulkBtn">
                         <i class="bi bi-x-circle"></i> 선택 항목 반려
                     </button>
                 </div>
@@ -275,13 +275,14 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <input type="hidden" id="modalLeaveReqIdx">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x"></i> 닫기
                     </button>
-                    <button type="button" class="btn btn-danger">
+                    <button type="button" class="btn btn-danger" id="rejectBtn">
                         <i class="bi bi-x-circle"></i> 반려
                     </button>
-                    <button type="button" class="btn btn-success">
+                    <button type="button" class="btn btn-success" id="acceptBtn">
                         <i class="bi bi-check-circle"></i> 승인
                     </button>
                 </div>
@@ -327,7 +328,6 @@
 
             $("#leaveRequestTable").on("click", ".view-detail-btn", function () {
                 const leaveReqIdx = $(this).data("leave-id");
-
                 $.ajax({
                     type: "GET",
                     url: `/hr/va/mgr/detail/${leaveReqIdx}`,
@@ -348,6 +348,119 @@
             $("#approvalModal").on("hidden.bs.modal", function () {
                 $(this).find("input, textarea").val("");
             });
+
+            $("#acceptBtn").on("click", function() {
+                reqApp("AS02");
+            });
+
+            $("#rejectBtn").on("click", function() {
+                console.log("test");
+                reqApp("AS03");
+            });
+
+            $("#acceptBulkBtn").on("click", function () {
+                const selected = getSelectedLeaveReqIdxs();
+                if (selected.length === 0) {
+                    Swal.fire("알림", "선택된 항목이 없습니다.", "warning");
+                    return;
+                }
+
+                Swal.fire({
+                    title: "선택 항목을 승인하시겠나요?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonText: "승인",
+                    cancelButtonText: "취소"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const acceptData = {
+                            leaveReqIdxs: selected,
+                            type: "AS02"
+                        }
+                        bulk(acceptData);
+                    }
+                });
+            });
+
+            $("#rejectBulkBtn").on("click", function() {
+                const selected = getSelectedLeaveReqIdxs();
+                if (selected.length === 0) {
+                    Swal.fire("알림", "선택된 항목이 없습니다.", "warning");
+                    return;
+                }
+
+                Swal.fire({
+                    title: "선택 항목을 반려하시겠습니까?",
+                    input: "text",
+                    inputLabel: "반려 사유를 입력하세요",
+                    showCancelButton: true,
+                    confirmButtonText: "반려",
+                    cancelButtonText: "취소",
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return "반려 사유를 입력해야 합니다!";
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const rejectData = {
+                            leaveReqIdxs: selected,
+                            type: "AS03",
+                            abReason: result.vaule
+                        }
+                        bulk(rejectData);
+                    }
+                });
+            });
+
+            function bulk(data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/hr/va/mgr/bulk",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        Swal.fire("성공", "일괄 처리되었습니다.", "success");
+                        loadVaList();
+                    },
+                    error: function () {
+                        Swal.fire("오류", "처리 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function getSelectedLeaveReqIdxs() {
+                return $("tbody input[type='checkbox']:checked").map(function() {
+                    return $(this).data("leave-idx");
+                }).get();
+            }
+
+            function reqApp(type) {
+                const leaveReqIdx = $("#modalLeaveReqIdx").val();
+
+                const appData = {
+                    leaveReqIdx: leaveReqIdx,
+                    status: type,
+                    abReason: $("#reqReason").val()
+                }
+                $.ajax({
+                    type: "PUT",
+                    url: `/hr/va/mgr/approval/${leaveReqIdx}`,
+                    data: JSON.stringify(appData),
+                    contentType: "application/json",
+                    success: function(res) {
+                        if(res.head.res_code ==="200") {
+                            Swal.fire("성공", "정상적으로 승인되었습니다.", "success");
+                        } else {
+                            Swal.fire("실패", res.head.res_result, "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", 'error');
+                    }
+                });
+            }
 
             function loadVaList(page = 1) {
 
@@ -404,11 +517,15 @@
 
                 $.each(data, function (i, item) {
                     const typeBadge = item.reqType === "AT01" ? "bg-info" : item.approvalStatus === "AT03" ? "bg-warning" : "bg-danger";
-                    const statusBadge = item.approvalStatus === "AS01" ? "bg-primary" : item.approvalStatus === "AS03" ? "bg-success" : "bg-danger";
+                    const statusBadge = item.approvalStatus === "AS01" ? "bg-primary" : item.approvalStatus === "AS02" ? "bg-success" : "bg-danger";
                     html += `
                     <tr data-leave-id="${item.leaveReqIdx}">
                         <td class="text-center">
-                            <input type="checkbox" class="form-check-input">
+                            ${
+                                item.approvalStatus === "AS01"
+                                    ? `<input type="checkbox" class="form-check-input leave-req-check" data-leave-idx="${item.leaveReqIdx}">`
+                                    : ''
+                            }
                         </td>
                         <td>
                             <div class="d-flex align-items-center">
@@ -423,19 +540,25 @@
                         <td><span class="badge ${typeBadge}">${item.reqType === "AT01" ? "연차" : item.reqType === "AT03" ? "병가" : "개인사"}</span></td>
                         <td>${item.leaveStartDate} ~ ${item.leaveEndDate}</td>
                         <td>2일</td>
-                        <td>2025-07-10</td>
-                        <td><span class="badge ${statusBadge}">${item.approvalStatus === "AS01" ? "대기" : item.approvalStatus === "AT03" ? "승인" : "반려"}</span></td>
+                        <td>${item.requestDate}</td>
+                        <td><span class="badge ${statusBadge}">${item.approvalStatus === "AS01" ? "대기" : item.approvalStatus === "AS02" ? "승인" : "반려"}</span></td>
                         <td class="text-center">
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-outline-primary btn-sm view-detail-btn" data-leave-id="${item.leaveReqIdx}" data-bs-toggle="modal" data-bs-target="#approvalModal">
                                     <i class="bi bi-eye"></i>
                                 </button>
-                                <button type="button" class="btn btn-outline-success btn-sm">
-                                    <i class="bi bi-check"></i>
-                                </button>
-                                <button type="button" class="btn btn-outline-danger btn-sm">
-                                    <i class="bi bi-x"></i>
-                                </button>
+                                ${
+                                    item.approvalStatus === "AS01"
+                                    ? `
+                                        <button type="button" class="btn btn-outline-success btn-sm">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    `
+                                    : ''
+                                }
                             </div>
                         </td>
                     </tr>
@@ -488,6 +611,8 @@
                 $("#modalLeaveEndDate").val(data.leaveEndDate);
                 $("#modalTotalDate").val(data.leaveDays + "일");
                 $("#modalReason").val(data.reason);
+
+                $("#modalLeaveReqIdx").val(data.leaveReqIdx);
             }
         });
     </script>

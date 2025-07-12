@@ -13,6 +13,7 @@ import java.util.List;
 import org.springframework.data.repository.query.Param;
 
 import com.eflix.hr.dto.LeaveRequestDTO;
+import com.eflix.hr.dto.etc.LeaveRequestAppDTO;
 import com.eflix.hr.dto.etc.VaDTO;
 import com.eflix.hr.dto.etc.VaReqSummaryDTO;
 import com.eflix.hr.dto.etc.VaSearchDTO;
@@ -31,4 +32,5 @@ public interface LeaveRequestMapper {
     public int findCountBySearch(VaSearchDTO vaSearchDTO);
     public List<VaDTO> findAllBySearch(VaSearchDTO vaSearchDTO);
     public VaDTO findByLeaveReqIdx(String leaveReqIdx);
+    public int insertReqApprover(LeaveRequestAppDTO leaveRequestAppDTO);
 }

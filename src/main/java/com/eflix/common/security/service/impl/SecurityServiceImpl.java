@@ -41,5 +41,10 @@ public class SecurityServiceImpl implements SecurityService {
     public List<String> findCompanyRolesByCoIdx(String coIdx) {
         return securityMapper.findCompanyRolesByCoIdx(coIdx);
     }
+
+    @Override
+    public String findRoleIdByEmpIdx(String empIdx, String coIdx) {
+        return securityMapper.findRoleIdxByEmpIdx(empIdx, coIdx);
+    }
     
 }

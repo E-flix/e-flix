@@ -145,7 +145,7 @@
 
     <select id="findByLeaveReqIdx" parameterType="String" resultType="VaDTO">
         SELECT lr.leave_req_idx, lr.emp_idx, lr.approver_idx, lr.leave_Start_date, lr.leave_end_date,
-            lr.reason, lr.request_date, lr.approval_status, lr.approved_date, lr.att_file, lr.co_idx, lr.req_type,
+            lr.reason, lr.request_date, lr.approval_status, lr.approved_date, lr.att_file, lr.co_idx, lr.req_type, lr.ab_reason,
             e.emp_name,
             d.dept_name
         FROM leave_requests lr
@@ -153,4 +153,8 @@
             LEFT JOIN departments d ON e.dept_idx = d.dept_idx
         WHERE lr.leave_req_idx = #{leaveReqIdx}
     </select>
+
+    <update id="insertReqApprover" parameterType="LeaveRequestAppDTO">
+        CALL APPROVE_LEAVE(#{leaveReqIdx},#{approverIdx}, #{status}, #{abReason})
+    </update>
 </mapper>

@@ -17,6 +17,7 @@ public class VaDTO extends PagingDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private Date leaveEndDate;   // leave_end_date
     private String reason;           // reason
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private Date requestDate;   // request_date
     private String approvalStatus;   // approval_status
     private Date approvedDate;  // approved_date
@@ -29,6 +30,7 @@ public class VaDTO extends PagingDTO {
     private String empImg;
     private String empName;
     private String deptName;
+    private String abReason;
 
     public int getOffset() {
         return (getPage() - 1) * getPageUnit();

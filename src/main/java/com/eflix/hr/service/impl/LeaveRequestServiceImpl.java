@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.LeaveRequestDTO;
+import com.eflix.hr.dto.etc.LeaveRequestAppDTO;
 import com.eflix.hr.dto.etc.VaDTO;
 import com.eflix.hr.dto.etc.VaReqSummaryDTO;
 import com.eflix.hr.dto.etc.VaSearchDTO;
@@ -85,5 +86,20 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     @Override
     public VaDTO findByLeaveReqIdx(String leaveReqIdx) {
         return leaveRequestMapper.findByLeaveReqIdx(leaveReqIdx);
+    }
+
+    @Override
+    public int insertReqApprover(LeaveRequestAppDTO leaveRequestAppDTO) {
+        return leaveRequestMapper.insertReqApprover(leaveRequestAppDTO);
+    }
+
+    @Override
+    public int insertReqApprover(List<LeaveRequestAppDTO> list) {
+        int affectedRows = 0;
+        for(LeaveRequestAppDTO dto: list) {
+            leaveRequestMapper.insertReqApprover(dto);
+            affectedRows++;
+        }
+        return affectedRows;
     }
 }
