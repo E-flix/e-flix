@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     private SalaryMapper salaryMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public EmployeeDTO selectById(String empIdx) {
@@ -68,6 +72,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public int insertEmp(EmployeeDTO emp) {
+        emp.setEmpPw(passwordEncoder.encode(emp.getEmpPw()));
         if (employeeMapper.insertEmp(emp) <= 0) {
             return 0;
         }
@@ -111,6 +116,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public int update(EmployeeDTO employeeDTO) {
+        employeeDTO.setEmpPw(passwordEncoder.encode(employeeDTO.getEmpPw()));
         return employeeMapper.update(employeeDTO);
     }
 
