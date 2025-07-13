@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/purchs")
+@RequestMapping("/purchs") 
 public class WarehouseViewController {
     private final WarehouseViewService warehouseViewService;
 
@@ -39,15 +39,15 @@ public class WarehouseViewController {
     
     @GetMapping("/whData")
     @ResponseBody
-    public List<WarehouseViewDTO> getMethodName(WarehouseViewDTO warehouse) {
+    public List<WarehouseViewDTO> warehouseViewList(WarehouseViewDTO warehouse) {
         return warehouseViewService.warehouseViewList(warehouse);
     }
 
-    // @GetMapping("/whlList")
-    // @ResponseBody
-    // public List<WarehouseViewDTO> searchWarehouseLocation(WarehouseViewDTO warehouseLocation) {
-    //     return warehouseViewService.searchWarehouseLocation();
-    // }
+    @GetMapping("/whlList")
+    @ResponseBody
+    public List<WarehouseViewDTO> searchWarehouseLocation(WarehouseViewDTO warehouseLocation) {
+        return warehouseViewService.searchWarehouseLocation();
+    }
     
 
     

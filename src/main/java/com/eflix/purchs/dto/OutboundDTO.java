@@ -8,17 +8,22 @@ import lombok.Data;
 @Data
 public class OutboundDTO {
     String outboundNo;
-
-    String writeDt;
     String customerName;
     String representativeNm;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     Date orderDt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     Date outboundDt;
-    String remarks;
-
-    String itemName;
+    
+    String prodName;
     String standard;
-    int qty;
+    int outboundQuantity; // 출고요청량
+    String outboundStatus;
+    String memo;
+    
+    String manager;
+    String warehouseId;
+    String prodId;
+    
+    // String writeDt;
 }

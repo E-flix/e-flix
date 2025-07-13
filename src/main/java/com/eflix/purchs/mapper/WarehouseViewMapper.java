@@ -11,7 +11,7 @@ public interface WarehouseViewMapper {
     // 창고 조회 상세 (모달)
     public List<WarehouseViewDTO> warehouseViewListDetail(String warehouseId);
 
-    // 창고 위치 드롭다운
+    // // 창고 위치 드롭다운
     public List<WarehouseViewDTO> searchWarehouseLocation();
 
 

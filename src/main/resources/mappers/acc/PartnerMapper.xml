@@ -11,9 +11,12 @@
 <mapper namespace="com.eflix.acc.mapper.PartnerMapper">
 
   <resultMap id="PartnerDetailResultMap" type="com.eflix.acc.dto.PartnerDetailDTO">
+    <!-- master -->
     <id property="partnerCode" column="partner_code"/>
-    <result property="partnerName" column="partner_name"/>
     <result property="partnerType" column="partner_type"/>
+    <result property="coIdx" column="co_idx"/>
+    <!-- partner_detail -->
+    <result property="partnerName" column="partner_name"/>
     <result property="businessNumber" column="business_number"/>
     <result property="residentNumber" column="resident_number"/>
     <result property="representativeName" column="representative_name"/>
@@ -35,34 +38,47 @@
     <result property="createdAt" column="created_at"/>
     <result property="updatedAt" column="updated_at"/>
     <result property="remarks" column="remarks"/>
-    <result property="coIdx" column="co_idx"/>
+    <!-- financial_institution_detail -->
+    <result property="partnerName" column="institution_name"/>
+    <result property="fiPartnerCode" column="fi_partner_code"/>
+    <!-- card_detail -->
+    <result property="partnerName" column="card_name"/>
+    <result property="cardPartnerCode" column="card_partner_code"/>
   </resultMap>
 
-	<!-- 모든 일반거래처 조회 -->
+	<!-- 모든 거래처 master 기준 partner_type별 detail JOIN 전체조회 -->
   <select id="getList" parameterType="String" resultMap="PartnerDetailResultMap">
-    SELECT * 
-    FROM partner_detail
-    WHERE use_flag = 'a1'
-    AND co_idx = #{coIdx}
-    ORDER BY partner_code
+    SELECT m.*, d.*, fi.*, c.*
+    FROM partner_number_master m
+    LEFT JOIN partner_detail d ON m.partner_type = 'd1' AND m.partner_code = d.partner_code
+    LEFT JOIN financial_institution_detail fi ON m.partner_type = 'd2' AND m.partner_code = fi.partner_code
+    LEFT JOIN card_detail c ON m.partner_type = 'd3' AND m.partner_code = c.partner_code
+    WHERE m.co_idx = #{coIdx}
+    ORDER BY m.partner_code
   </select>
 
-  <!-- 거래처 코드로 일반거래처 조회 -->
+  <!-- 거래처 코드로 master 기준 partner_type별 detail JOIN 조회 -->
   <select id="getListByCode" parameterType="PartnerDetailDTO" resultMap="PartnerDetailResultMap">
-    SELECT * 
-    FROM partner_detail 
-    WHERE partner_code = #{partnerCode} 
-    AND use_flag = 'a1'
-    AND co_idx = #{coIdx}
+    SELECT m.*, d.*, fi.*, c.*
+    FROM partner_number_master m
+    LEFT JOIN partner_detail d ON m.partner_type = 'd1' AND m.partner_code = d.partner_code
+    LEFT JOIN financial_institution_detail fi ON m.partner_type = 'd2' AND m.partner_code = fi.partner_code
+    LEFT JOIN card_detail c ON m.partner_type = 'd3' AND m.partner_code = c.partner_code
+    WHERE m.partner_code = #{partnerCode} AND m.co_idx = #{coIdx}
   </select>
 
-  <!-- 거래처 이름으로 일반거래처 조회 (부분검색) -->
+  <!-- 거래처 이름으로 master 기준 partner_type별 detail JOIN 조회 (부분검색) -->
   <select id="getListByName" parameterType="PartnerDetailDTO" resultMap="PartnerDetailResultMap">
-    SELECT * 
-    FROM partner_detail 
-    WHERE partner_name 
-    LIKE CONCAT('%', #{partnerName}, '%') 
-    AND use_flag = 'a1'
-    AND co_idx = #{coIdx}
+    SELECT m.*, d.*, fi.*, c.*
+    FROM partner_number_master m
+    LEFT JOIN partner_detail d ON m.partner_type = 'd1' AND m.partner_code = d.partner_code
+    LEFT JOIN financial_institution_detail fi ON m.partner_type = 'd2' AND m.partner_code = fi.partner_code
+    LEFT JOIN card_detail c ON m.partner_type = 'd3' AND m.partner_code = c.partner_code
+    WHERE (
+      (m.partner_type = 'd1' AND d.partner_name LIKE CONCAT('%', #{partnerName}, '%'))
+      OR (m.partner_type = 'd2' AND fi.institution_name LIKE CONCAT('%', #{partnerName}, '%'))
+      OR (m.partner_type = 'd3' AND c.card_name LIKE CONCAT('%', #{partnerName}, '%'))
+    )
+    AND m.co_idx = #{coIdx}
   </select>
 </mapper>

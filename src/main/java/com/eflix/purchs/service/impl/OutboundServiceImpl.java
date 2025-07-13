@@ -25,4 +25,9 @@ public class OutboundServiceImpl implements OutboundService {
         return outboundMapper.outboundRequestDetail(outboundNo);
     }
 
+    @Override
+    public List<OutboundDTO> outboundProcedure(OutboundDTO outboundDTO) {
+        return outboundMapper.outboundProcedure(outboundDTO);
+    }
+
 }

@@ -29,12 +29,6 @@ public class PurchsController {
 		return "purchs/inbound_view";
 	}
 
-	// 출고조회
-	@GetMapping("/obdv")
-	public String outbound_view() {
-		return "purchs/outbound_view";
-	}
-
 	// 재고조회
 	@GetMapping("/ivyv")
 	public String inventory_view() {

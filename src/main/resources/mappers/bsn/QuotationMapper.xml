@@ -14,18 +14,20 @@ SELECT QUOTATION_NO
         )
     WHERE ROWNUM = 1
 </select>
+
 <!-- 2) 메인 INSERT -->
 <insert id="insertQuotation" parameterType="com.eflix.bsn.dto.QuotationDTO">
 INSERT INTO QUOTATION (
     QUOTATION_NO, CUSTOMER_CD, CUSTOMER_NAME, QUOTATION_DT, VALID_PERIOD,
     PHONE, EXPECTED_DELIVERY_DT, ATTACHMENT_PATH,
-    REPRESENTATIVE_NM, SENDER, DISCOUNT_RATE
+    REPRESENTATIVE_NM, SENDER, DISCOUNT_RATE, STATUS
 ) VALUES (
     #{quotationNo}, #{customerCd}, #{customerName}, SYSDATE, #{validPeriod},
     #{phone}, #{expectedDeliveryDt}, #{attachmentPath},
-    #{representativeNm}, #{sender}, #{discountRate}
+    #{representativeNm}, #{sender}, #{discountRate}, 'ACTIVE'
 )
 </insert>
+
 <!-- 3) 디테일 INSERT -->
 <insert id="insertQuotationDetail"
         parameterType="com.eflix.bsn.dto.QuotationDetailDTO">
@@ -43,7 +45,8 @@ INSERT INTO QUOTATION_DETAIL (
     #{remarks}
 )
 </insert>
-<!-- 4) 목록 조회 -->
+
+<!-- 4) 활성 견적서 목록 조회 -->
 <select id="getQuotationList" resultType="com.eflix.bsn.dto.QuotationDTO">
 SELECT
     QUOTATION_NO       AS quotationNo,
@@ -56,12 +59,73 @@ SELECT
     ATTACHMENT_PATH    AS attachmentPath,
     REPRESENTATIVE_NM  AS representativeNm,
     SENDER             AS sender,
-    DISCOUNT_RATE      AS discountRate
+    DISCOUNT_RATE      AS discountRate,
+    STATUS             AS status,
+    ARCHIVED_AT        AS archivedAt
 FROM QUOTATION
+WHERE STATUS = 'ACTIVE'
 ORDER BY QUOTATION_NO DESC
 </select>
 
-<!-- 견적서 상세 조회 -->
+<!-- 5) 휴지통 견적서 목록 조회 -->
+<select id="getArchivedQuotationList" resultType="com.eflix.bsn.dto.QuotationDTO">
+SELECT
+    QUOTATION_NO       AS quotationNo,
+    CUSTOMER_CD        AS customerCd,
+    CUSTOMER_NAME      AS customerName,
+    QUOTATION_DT       AS quotationDt,
+    VALID_PERIOD       AS validPeriod,
+    PHONE              AS phone,
+    EXPECTED_DELIVERY_DT AS expectedDeliveryDt,
+    ATTACHMENT_PATH    AS attachmentPath,
+    REPRESENTATIVE_NM  AS representativeNm,
+    SENDER             AS sender,
+    DISCOUNT_RATE      AS discountRate,
+    STATUS             AS status,
+    ARCHIVED_AT        AS archivedAt
+FROM QUOTATION
+WHERE STATUS = 'ARCHIVED'
+ORDER BY ARCHIVED_AT DESC
+</select>
+
+<!-- 6) 만료된 견적서 자동 아카이브 - CDATA 섹션 사용 -->
+<update id="archiveExpiredQuotations">
+<![CDATA[
+UPDATE QUOTATION 
+SET STATUS = 'ARCHIVED', 
+    ARCHIVED_AT = SYSDATE
+WHERE STATUS = 'ACTIVE' 
+  AND VALID_PERIOD < SYSDATE
+]]>
+</update>
+
+<!-- 7) 견적서 복원 -->
+<update id="restoreQuotation" parameterType="string">
+UPDATE QUOTATION 
+SET STATUS = 'ACTIVE', 
+    ARCHIVED_AT = NULL
+WHERE QUOTATION_NO = #{quotationNo}
+  AND STATUS = 'ARCHIVED'
+</update>
+
+<!-- 8) 견적서 완전 삭제 -->
+<update id="deleteQuotationPermanently" parameterType="string">
+UPDATE QUOTATION 
+SET STATUS = 'DELETED'
+WHERE QUOTATION_NO = #{quotationNo}
+  AND STATUS = 'ARCHIVED'
+</update>
+
+<!-- 9) 견적서 휴지통으로 이동 -->
+<update id="moveToTrash" parameterType="string">
+UPDATE QUOTATION 
+SET STATUS = 'ARCHIVED', 
+    ARCHIVED_AT = SYSDATE
+WHERE QUOTATION_NO = #{quotationNo}
+  AND STATUS = 'ACTIVE'
+</update>
+
+<!-- 10) 견적서 상세 조회 -->
 <select id="selectQuotationDetails" resultType="com.eflix.bsn.dto.QuotationDetailDTO">
     SELECT
     LINE_NO       AS lineNo,
@@ -78,4 +142,15 @@ ORDER BY QUOTATION_NO DESC
     WHERE QUOTATION_NO = #{quotationNo}
     ORDER BY LINE_NO
 </select>
+
+<!-- 11) 만료 예정 견적서 개수 조회 - CDATA 섹션 사용 -->
+<select id="getExpiringSoonCount" resultType="int">
+<![CDATA[
+SELECT COUNT(*)
+FROM QUOTATION
+WHERE STATUS = 'ACTIVE'
+  AND VALID_PERIOD BETWEEN SYSDATE AND SYSDATE + 7
+]]>
+</select>
+
 </mapper>

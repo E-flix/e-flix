@@ -3,12 +3,8 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<!--  Orders & OrdersDetail 매퍼  -->
 <mapper namespace="com.eflix.bsn.mapper.OrdersMapper">
 
-  <!--─────────────────────────────-->
-  <!-- 1. 주문 목록 (헤더 그리드)  -->
-  <!--─────────────────────────────-->
   <select id="selectAllOrders" resultType="com.eflix.bsn.dto.OrdersDTO" parameterType="String">
   SELECT
         o.ORDER_NO          AS orderNo,
@@ -30,10 +26,6 @@
     ORDER  BY o.ORDER_DT DESC
   </select>
 
-  <!--─────────────────────────────-->
-  <!-- 2. 주문 단건 헤더              -->
-  <!--─────────────────────────────-->
-  <!-- 단건 헤더 (상세 조회용)도 동일하게 JOIN -->
   <select id="selectOrderHeader" resultType="com.eflix.bsn.dto.OrdersDTO" parameterType = "OrdersDTO">
   SELECT
         o.ORDER_NO          AS orderNo,
@@ -55,43 +47,35 @@
     and o.co_idx = #{coIdx}
   </select>
 
-  <!--─────────────────────────────-->
-  <!-- 3. 주문 상세 목록              -->
-  <!--─────────────────────────────-->
   <select id="selectOrderDetails" resultType="com.eflix.bsn.dto.OrdersDetailDTO" parameterType="OrdersDetailDTO">
     SELECT
-      ORDER_NO        AS orderNo,
-      LINE_NO         AS lineNo,
-      ITEM_CODE       AS itemCode,
-      ITEM_NAME       AS itemName,
-      SPEC            AS spec,
-      QTY             AS qty,
-      UNIT_PRICE      AS unitPrice,
-      SUPPLY_AMOUNT   AS supplyAmount,
-      TAX_AMOUNT      AS taxAmount,
-      TOTAL_AMOUNT    AS totalAmount,
-      REMARKS         AS remarks,
-      CO_IDX          AS coIdx,
-      OUTBOUND_DT     AS outboundDt,
-      CATCH_DT        AS catchDt,
-      OUT_STATE       AS outState
-    FROM ORDERS_DETAIL
-    WHERE ORDER_NO = #{orderNo}
-    and co_idx = #{coIdx}
-    ORDER BY LINE_NO
+      od.ORDER_NO        AS orderNo,
+      od.LINE_NO         AS lineNo,
+      od.ITEM_CODE       AS itemCode,
+      od.ITEM_NAME       AS itemName,
+      od.SPEC            AS spec,
+      od.QTY             AS qty,
+      od.UNIT_PRICE      AS unitPrice,
+      od.SUPPLY_AMOUNT   AS supplyAmount,
+      od.TAX_AMOUNT      AS taxAmount,
+      od.TOTAL_AMOUNT    AS totalAmount,
+      od.REMARKS         AS remarks,
+      od.CO_IDX          AS coIdx,
+      od.OUTBOUND_DT     AS outboundDt,
+      od.CATCH_DT        AS catchDt,
+      od.OUT_STATE       AS outState
+    FROM ORDERS_DETAIL od
+    JOIN ORDERS o ON od.ORDER_NO = o.ORDER_NO
+    WHERE od.ORDER_NO = #{orderNo}
+      AND o.CO_IDX = #{coIdx}
+    ORDER BY od.LINE_NO
   </select>
 
-  <!--─────────────────────────────-->
-  <!-- 4. 주문번호 채번               -->
-  <!--─────────────────────────────-->
   <select id="selectNextOrderNo" resultType="string" parameterType = "String">
     SELECT FN_NEXT_ORDER_NO FROM DUAL
     WHERE  co_idx = #{coIdx}
   </select>
 
-  <!--─────────────────────────────-->
-  <!-- 5. 주문 INSERT                -->
-  <!--─────────────────────────────-->
   <insert id="insertOrder" parameterType="com.eflix.bsn.dto.OrdersDTO">
     INSERT INTO ORDERS (
       ORDER_NO, ORDER_DT, PAYMENT_TERMS,
@@ -102,22 +86,18 @@
     )
   </insert>
 
-  <!--─────────────────────────────-->
-  <!-- 6. 주문 UPDATE                -->
-  <!--─────────────────────────────-->
-    <!-- 주문 헤더 업데이트 -->
   <update id="updateOrder" parameterType="com.eflix.bsn.dto.OrdersDTO">
     UPDATE EFLIX.ORDERS
-      SET ORDER_DT      = TO_DATE(#{orderDt},      'YYYY-MM-DD'),
+      SET 
+          ORDER_DT      = #{orderDt},
           PAYMENT_TERMS = #{paymentTerms},
           ORDER_WRITER  = #{orderWriter},
           REMARKS       = #{remarks},
-          CUSTOMER_CD   = #{customerCd}  /* ★ 거래처 변경 가능하도록 추가 */
+          CUSTOMER_CD   = #{customerCd}
     WHERE ORDER_NO     = #{orderNo}
     AND CO_IDX         = #{coIdx}
   </update>
 
-  <!-- 주문 상세(라인) 업데이트 -->
   <update id="updateOrderDetail" parameterType="com.eflix.bsn.dto.OrdersDetailDTO">
   UPDATE EFLIX.ORDERS_DETAIL
     SET ITEM_CODE     = #{itemCode},
@@ -137,26 +117,18 @@
     AND CO_IDX       = #{coIdx}
 </update>
 
-  <!--─────────────────────────────-->
-  <!-- 7. 주문 DELETE (헤더)          -->
-  <!--─────────────────────────────-->
-  <!-- 디테일 전부 삭제 -->
   <delete id="deleteOrderDetailAll" parameterType="string">
       DELETE FROM ORDERS_DETAIL
       WHERE ORDER_NO = #{orderNo}
       and co_idx = #{coIdx}
   </delete>
   
-  <!-- 헤더 삭제  -->
   <delete id="deleteOrder" parameterType="string">
       DELETE FROM ORDERS
       WHERE ORDER_NO = #{orderNo}
       and co_idx = #{coIdx}
   </delete>
 
-  <!--─────────────────────────────-->
-  <!-- 9. 상세 INSERT ALL             -->
-  <!--─────────────────────────────-->
   <insert id="insertOrderDetailBatch">
     INSERT ALL
     <foreach collection="list" item="d">

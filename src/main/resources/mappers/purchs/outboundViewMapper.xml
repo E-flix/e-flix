@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.purchs.mapper.OutboundViewMapper">
+<select id="outboundViewList" resultType="OutboundViewDTO" parameterType="OutboundViewDTO">
+SELECT
+    outbound_id,
+    outbound_lot,
+    outbound_number,
+    outbound_date,
+    memo,
+    outbound_manager
+FROM
+    outbound
+<where>
+    <if test= 'outboundId != null and outboundId != "" '> 
+        outbound_id = #{outboundId} 
+    </if>
+   <if test="startDate != null and startDate != ''">
+    AND outbound_date &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+</if>
+<if test="endDate != null and endDate != ''">
+    AND outbound_date &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+</if>
+</where>
+ORDER BY
+    outbound_id
+</select>
+
+<select id="outboundViewDetailList" resultType="OutboundViewDTO" parameterType="String">
+SELECT
+    outbound_detail_id,
+    outbound_id,
+    warehouse_id,
+    prod_id,
+    outbound_quantity
+FROM
+    outbound_detail
+WHERE
+    outbound_id = #{outboundId}
+</select>
+
+<select id="searchOutboundId" resultType="OutboundViewDTO">
+SELECT DISTINCT
+    outbound_id
+FROM
+    outbound
+ORDER BY
+    outbound_id
+</select>
+
+</mapper>

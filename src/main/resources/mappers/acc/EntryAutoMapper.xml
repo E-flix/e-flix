@@ -19,7 +19,7 @@
       SUM(other_deductions)    AS other_deductions
     FROM salary
     WHERE co_idx = #{coIdx}
-      AND salary_type = 'st-03'
+      AND salary_type = 'ST03'
     GROUP BY att_month, pay_month
     ORDER BY att_month, pay_month
   </select> 
@@ -86,7 +86,7 @@
     SET ledger_check = 'a1',
         entry_date = #{entryDate},
         updated_at = sysdate
-    WHERE remarks = #{remarks}
+    WHERE entry_number = #{entryNumber}
       AND ledger_check = 'a2'
       AND co_idx = #{coIdx}
   </update>
@@ -142,6 +142,7 @@
       s.pay_month, 
       m.entry_date, 
       m.entry_number, 
+      m.ledger_check,
       sum_salaries.sum_base_salary       AS base_salary,
       sum_salaries.sum_bonus             AS bonus,
       sum_salaries.sum_overtime_pay      AS overtime_pay,
@@ -150,22 +151,12 @@
       sum_salaries.sum_health_insurance  AS health_insurance,
       sum_salaries.sum_national_pension  AS national_pension,
       sum_salaries.sum_employment_ins    AS employment_ins,
-      sum_salaries.sum_other_deductions  AS other_deductions,
-      d.line_number, 
-      d.entry_number AS d_entry_number, 
-      d.partner_code,
-      d.partner_name, 
-      d.account_code,
-      d.resentmen_type, 
-      d.amount, 
-      d.description
+      sum_salaries.sum_other_deductions  AS other_deductions
     FROM salary s
     JOIN entry_master m 
       ON s.co_idx = m.co_idx 
     AND m.remarks = '인건비 ' || SUBSTR(s.att_month,1,4) || '년 ' || SUBSTR(s.att_month,6,2) || '월 귀속 ' ||
                     SUBSTR(s.pay_month,1,4) || '년 ' || SUBSTR(s.pay_month,6,2) || '월 ' || SUBSTR(s.pay_month,9,2) || '일 지급 자동전표'
-    LEFT JOIN entry_detail d 
-      ON m.entry_number = d.entry_number
     LEFT JOIN (
       SELECT 
         att_month,
@@ -181,12 +172,53 @@
         SUM(other_deductions)    AS sum_other_deductions
       FROM salary
       WHERE co_idx = #{coIdx}
-      AND salary_type = 'st-03'
+      AND salary_type = 'ST03'
       GROUP BY att_month, pay_month
     ) sum_salaries
     ON s.att_month = sum_salaries.att_month
     AND s.pay_month = sum_salaries.pay_month
     WHERE s.co_idx = #{coIdx}
-    AND s.salary_type = 'st-03'
+    AND s.salary_type = 'ST03'
+  </select>
+
+  <!-- EntryDetailDTO 매핑 정의 -->
+  <resultMap id="entryDetailResultMap" type="com.eflix.acc.dto.EntryDetailDTO">
+    <id property="lineNumber" column="line_number" />
+    <result property="entryNumber" column="d_entry_number" />
+    <result property="partnerCode" column="d_partner_code" />
+    <result property="partnerName" column="partner_name" />
+    <result property="accountCode" column="account_code" />
+    <result property="resentmenType" column="resentmen_type" />
+    <result property="amount" column="amount" />
+    <result property="description" column="description" />
+    <result property="createdAt" column="created_at" />
+    <result property="updatedAt" column="updated_at" />
+    <result property="coIdx" column="co_idx" />
+    
+    <result property="accountName" column="account_name"/>
+    <result property="businessNumber" column="business_number"/>
+    <result property="residentNumber" column="resident_number"/>
+  </resultMap>
+
+  <!-- detail 전표 조회 -->
+  <select id="selectEntryDetailList" parameterType="map" resultMap="entryDetailResultMap">
+    SELECT 
+      d.line_number, 
+      d.entry_number AS d_entry_number, 
+      d.partner_code AS d_partner_code, 
+      d.partner_name, 
+      d.account_code,
+      d.resentmen_type, 
+      d.amount, 
+      d.description, 
+      d.created_at, 
+      d.updated_at,
+      a.account_name
+    FROM entry_detail d
+    LEFT JOIN account a ON d.account_code = a.account_code
+    WHERE d.entry_number = #{entryNumber}
+    AND d.co_idx = #{coIdx}
+    AND a.co_idx = #{coIdx}
+    ORDER BY d.line_number
   </select>
 </mapper>
