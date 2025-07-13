@@ -408,7 +408,6 @@
           // 상세 그리드 초기화
           if (detailGridApi) {
             detailGridApi.setGridOption('rowData', []);
-            currentDetailEntryNumber = null;
           }
           
           // 마스터 그리드에 빈 행이 없으면 추가
@@ -678,33 +677,21 @@
         purchaseSalesGridApi.applyTransaction({ add: [getEmptyRow()] });
       }
     }
-
-    // 현재 로드된 상세정보의 전표번호를 추적하는 변수
-    let currentDetailEntryNumber = null;
     
     // 상세정보 표시 함수: 선택한 master의 detail 가져오기
     function showDetailInfo(master) {
       const entryNo = master.entryNumber;
       if (!entryNo) {
-        // 빈 마스터 행인 경우 상세정보 그리드 초기화
+        // 빈 마스터 행인 경우 상세정보 그리드 초기화 및 소계 행 제거
         if (detailGridApi) {
           const current = [];
           detailGridApi.forEachNode(node => current.push(node.data));
           detailGridApi.applyTransaction({ remove: current });
           detailGridApi.setGridOption('rowData', []);
-          currentDetailEntryNumber = null;
+          safeSetPinnedBottomRow(detailGridApi, []);
         }
         return;
       }
-      
-      // 같은 전표번호의 상세정보가 이미 로드되어 있으면 중복 호출 방지
-      if (currentDetailEntryNumber === entryNo) {
-
-        return;
-      }
-      
-
-      currentDetailEntryNumber = entryNo;
       
       fetch(`/acc/enps/de/${entryNo}`)
         .then(res => {
@@ -764,8 +751,6 @@
           }
         })
         .catch(err => {
-
-          currentDetailEntryNumber = null; // 오류 시 초기화
           // 오류 발생 시에도 빈 행 추가
           if (detailGridApi) {
             const current = [];
@@ -1039,16 +1024,17 @@
         }, 100);
       },
       onRowClicked: (event) => {
-        selectedMaster = event.data;  // 클릭된 마스터 저장
-        // 등록된 마스터 행(전표번호가 있는 행)만 상세정보 표시
+        selectedMaster = event.data;
         if (event.data.entryNumber) {
           showDetailInfo(event.data);
         } else {
-          // 빈 행 클릭 시 상세정보 그리드 초기화
+          // 빈 행 클릭 시 상세정보 그리드 초기화 + 소계 행 제거
           if (detailGridApi) {
             const current = [];
             detailGridApi.forEachNode(node => current.push(node.data));
             detailGridApi.applyTransaction({ remove: current });
+            detailGridApi.setGridOption('rowData', []);
+            safeSetPinnedBottomRow(detailGridApi, []);
           }
         }
       },
@@ -1059,24 +1045,23 @@
         }
       },
       onCellFocused: (event) => {
-        // 셀에 포커스가 맞춰질 때도 상세정보 표시 (단, 클릭이 아닌 키보드 이동 등의 경우만)
         if (event.rowIndex !== null && event.rowIndex >= 0) {
           const rowNode = purchaseSalesGridApi.getDisplayedRowAtIndex(event.rowIndex);
           if (rowNode && rowNode.data) {
-            // 이미 같은 마스터가 선택되어 있으면 중복 호출 방지
             if (selectedMaster && selectedMaster.entryNumber === rowNode.data.entryNumber) {
               return;
             }
-            
             selectedMaster = rowNode.data;
             if (rowNode.data.entryNumber) {
               showDetailInfo(rowNode.data);
             } else {
-              // 빈 행 포커스 시 상세정보 그리드 초기화
+              // 빈 행 포커스 시 상세정보 그리드 초기화 + 소계 행 제거
               if (detailGridApi) {
                 const current = [];
                 detailGridApi.forEachNode(node => current.push(node.data));
                 detailGridApi.applyTransaction({ remove: current });
+                detailGridApi.setGridOption('rowData', []);
+                safeSetPinnedBottomRow(detailGridApi, []);
               }
             }
           }
@@ -1794,6 +1779,7 @@
         // 차변/대변 금액이 변경된 경우 소계 행 업데이트
         if (["debitAmount", "creditAmount"].includes(event.colDef.field) && selectedMaster && selectedMaster.entryNumber) {
           setPinnedBottomDetailSummary(selectedMaster.entryNumber);
+          if (detailGridApi) detailGridApi.refreshCells({ force: true });
         }
       }
     };
