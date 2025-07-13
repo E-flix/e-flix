@@ -18,4 +18,5 @@ public interface EntryAutoService {
     List<EntryAutoAllDTO> selectAutoEntryAll(EntryAutoAllDTO param);
     void createSalaryEntryMasters();
     int insertBatch(List<EntryDetailDTO> entryDetailList);
+    List<EntryDetailDTO> selectEntryDetailList(int entryNumber, String coIdx); // coIdx 추가
 }

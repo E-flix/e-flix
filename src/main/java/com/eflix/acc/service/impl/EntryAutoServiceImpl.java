@@ -3,7 +3,6 @@ package com.eflix.acc.service.impl;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.eflix.acc.dto.EntryAutoAllDTO;
 import com.eflix.acc.dto.EntryDetailDTO;
 import com.eflix.acc.dto.EntryMasterDTO;
@@ -110,5 +109,10 @@ public class EntryAutoServiceImpl implements EntryAutoService {
     master.setCoIdx(AuthUtil.getCoIdx());
     entryAutoMapper.updateEntryMaster(master);
     return successCount;
+  }
+
+  @Override
+  public List<EntryDetailDTO> selectEntryDetailList(int entryNumber, String coIdx) {
+    return entryAutoMapper.selectEntryDetailList(entryNumber, coIdx);
   }
 }

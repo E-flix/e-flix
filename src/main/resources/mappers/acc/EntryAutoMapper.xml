@@ -180,4 +180,45 @@
     WHERE s.co_idx = #{coIdx}
     AND s.salary_type = 'ST03'
   </select>
+
+  <!-- EntryDetailDTO 매핑 정의 -->
+  <resultMap id="entryDetailResultMap" type="com.eflix.acc.dto.EntryDetailDTO">
+    <id property="lineNumber" column="line_number" />
+    <result property="entryNumber" column="d_entry_number" />
+    <result property="partnerCode" column="d_partner_code" />
+    <result property="partnerName" column="partner_name" />
+    <result property="accountCode" column="account_code" />
+    <result property="resentmenType" column="resentmen_type" />
+    <result property="amount" column="amount" />
+    <result property="description" column="description" />
+    <result property="createdAt" column="created_at" />
+    <result property="updatedAt" column="updated_at" />
+    <result property="coIdx" column="co_idx" />
+    
+    <result property="accountName" column="account_name"/>
+    <result property="businessNumber" column="business_number"/>
+    <result property="residentNumber" column="resident_number"/>
+  </resultMap>
+
+  <!-- detail 전표 조회 -->
+  <select id="selectEntryDetailList" parameterType="map" resultMap="entryDetailResultMap">
+    SELECT 
+      d.line_number, 
+      d.entry_number AS d_entry_number, 
+      d.partner_code AS d_partner_code, 
+      d.partner_name, 
+      d.account_code,
+      d.resentmen_type, 
+      d.amount, 
+      d.description, 
+      d.created_at, 
+      d.updated_at,
+      a.account_name
+    FROM entry_detail d
+    LEFT JOIN account a ON d.account_code = a.account_code
+    WHERE d.entry_number = #{entryNumber}
+    AND d.co_idx = #{coIdx}
+    AND a.co_idx = #{coIdx}
+    ORDER BY d.line_number
+  </select>
 </mapper>

@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.eflix.acc.dto.EntryAutoAllDTO;
 import com.eflix.acc.dto.EntryDetailDTO;
 import com.eflix.acc.service.EntryAutoService;
 import com.eflix.common.code.service.CommonService;
+import com.eflix.common.security.auth.AuthUtil;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -65,5 +67,15 @@ public class AccEntryAutoController {
   @ResponseBody
   public int insertBatch(@RequestBody List<EntryDetailDTO> entryDetailList) {
     return entryAutoService.insertBatch(entryDetailList);
+  }
+
+  /**
+   * 전표상세 리스트 조회
+   */
+  @GetMapping("/ena/detailList")
+  @ResponseBody
+  public List<EntryDetailDTO> getEntryDetailList(@RequestParam int entryNumber) {
+    String coIdx = AuthUtil.getCoIdx();
+    return entryAutoService.selectEntryDetailList(entryNumber, coIdx);
   }
 }
