@@ -36,7 +36,7 @@
       <h3 class="mb-0">자동전표처리</h3>
       <!-- 오른쪽: 버튼 모음 -->
       <div>
-        <button class="btn btn-outline-secondary btn-sm">전표추가</button>
+        <button id="addDetail" class="btn btn-outline-secondary btn-sm">전표추가</button>
       </div>
     </div>
     <!-- 전표일자, 차변/대변 계정과목 합치기/개별 필터 UI 추가 -->
@@ -157,48 +157,44 @@
       }
     }
     // 전표 추가 버튼 클릭 시 동작
-    document.querySelector('.btn.btn-outline-secondary.btn-sm').addEventListener('click', () => {
-      // 전표 추가 로직
+    document.querySelector('#addDetail').addEventListener('click', () => {
       // 1. 현재 선택된 행 정보 가져오기
-      const selectedRows = defaultGridOptions.journalGridOptions.api.getSelectedRows();
-      if (selectedRows.length === 0) {
+      const selectedRows = journalGrid.api.getSelectedRows();
+      if (!selectedRows || selectedRows.length === 0) {
         alert('전표를 추가할 행을 선택해 주십시오.');
         return;
       }
-      const selectedData = selectedRows[0];
-      // 2. 새로운 전표 데이터 생성
-      const newEntry = {
-        entryNumber: '', // 전표번호는 자동 생성
-        resentmenType: selectedData.resentmenType,
-        accountCode: selectedData.accountCode,
-        accountName: selectedData.accountName,
+      const now = new Date();
+      // entryDetail 리스트 생성
+      const entryDetailList = selectedRows.map(selectedData => ({
+        entryNumber: selectedData.entryNumber,
         partnerCode: selectedData.partnerCode,
         partnerName: selectedData.partnerName,
-        debitAmount: 0,
-        creditAmount: 0,
-        entryDate: selectedData.entryDate
-      };
-      // 3. 전표 데이터 전송 (예: AJAX)
-      fetch('/api/addEntry', {
+        accountCode: selectedData.accountCode,
+        resentmenType: selectedData.resentmenType,
+        amount: selectedData.debitAmount || selectedData.creditAmount || 0,
+        description: selectedData.description || '',
+        createdAt: now.toISOString().slice(0, 19).replace('T', ' '),
+        updatedAt: now.toISOString().slice(0, 19).replace('T', ' '),
+      }));
+      // 리스트 전체를 서버로 전송
+      fetch('/acc/ena/addDetail', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newEntry)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entryDetailList)
       })
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
         if (data.success) {
-          alert('전표가 추가되었습니다.');
-          // 그리드 데이터 새로 고침
-          clearGrids();
+          alert(`상세 전표 일괄 추가 완료\n성공: ${data.successCount}, 실패: ${data.failCount}`);
+          // 필요시 그리드 새로고침
         } else {
-          alert('전표 추가에 실패하였습니다: ' + (data.message || '알 수 없는 오류'));
+          alert('상세 전표 일괄 추가 실패: ' + (data.message || '알 수 없는 오류'));
         }
       })
       .catch(error => {
-        console.error('전표 추가 중 오류 발생:', error);
-        alert('전표 추가 중 오류 발생: ' + error.message);
+        console.error('상세 전표 일괄 추가 중 오류:', error);
+        alert('상세 전표 일괄 추가 중 오류: ' + error.message);
       });
     });
     // ag-Grid 인스턴스 변수 선언

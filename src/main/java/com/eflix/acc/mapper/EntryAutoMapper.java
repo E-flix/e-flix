@@ -13,7 +13,7 @@ public interface EntryAutoMapper {
     Integer selectMaxPlusOneLineNumber(EntryAutoAllDTO param);
     EntryAutoAllDTO selectEntryMasterByRemarks(EntryAutoAllDTO param);
     void insertSalaryEntryMaster(EntryMasterDTO params);
-    void insertEntryDetail(EntryDetailDTO detail);
+    int insertEntryDetail(EntryDetailDTO detail);
     void updateEntryDetail(EntryDetailDTO detail);
     void updateEntryMaster(EntryMasterDTO master);
     List<EntryAutoAllDTO> selectAutoEntryAll(EntryAutoAllDTO param);

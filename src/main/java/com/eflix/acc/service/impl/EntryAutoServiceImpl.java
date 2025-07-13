@@ -3,6 +3,7 @@ package com.eflix.acc.service.impl;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.eflix.acc.dto.EntryAutoAllDTO;
 import com.eflix.acc.dto.EntryDetailDTO;
 import com.eflix.acc.dto.EntryMasterDTO;
@@ -89,5 +90,15 @@ public class EntryAutoServiceImpl implements EntryAutoService {
         entryAutoMapper.insertSalaryEntryMaster(master);
       }
     }
+  }
+
+  @Transactional
+  public int insertBatch(List<EntryDetailDTO> entryDetailList) {
+    int successCount = 0;
+    for (EntryDetailDTO dto : entryDetailList) {
+      entryAutoMapper.insertEntryDetail(dto);
+      successCount++;
+    }
+    return successCount;
   }
 }
