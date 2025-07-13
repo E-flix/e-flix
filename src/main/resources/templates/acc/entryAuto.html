@@ -27,6 +27,11 @@
       justify-content: center !important;
       text-align: center;
     }
+    /* 금액 컬럼 오른쪽 정렬 */
+    .ag-cell-right {
+      text-align: right !important;
+      justify-content: flex-end !important;
+    }
   </style>
 </head>
 <div layout:fragment="content">
@@ -61,7 +66,7 @@
       </label>
     </div>
     <div class="entry-auto-section entry-auto-row d-flex mb-2" style="gap:7px;">
-      <!-- 귀속월/지급일/전표일자 목록 ag-Grid -->
+      <!-- 귀속월/지급월/전표일자 목록 ag-Grid -->
       <div class="entry-auto-col d-flex flex-column flex-fill" style="height:48vh;">
         <div id="grid-periods" class="ag-theme-alpine" style="width:100%; height:100%"></div>
       </div>
@@ -102,7 +107,7 @@
       { headerName: '코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center',
         editable: params => params.data && params.data.ledgerCheck !== 'a1' },
       { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center', editable: false },
-      { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center', editable: false }
+      { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center', cellClass: 'ag-cell-right', editable: false }
     ];
     // credits: 공제항목(대변)
     const creditsColumnDefs = [
@@ -110,20 +115,31 @@
       { headerName: '코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center',
         editable: params => params.data && params.data.ledgerCheck !== 'a1' },
       { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center', editable: false },
-      { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center', editable: false }
+      { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center', cellClass: 'ag-cell-right', editable: false }
     ];
     // journal: 일반전표(차변/대변)
     const journalColumnDefs =  [
       { headerName: "일자", field: "entryDate", minWidth: 100, width: 100, editable: false },
-      { headerName: "전표번호", field: "entryNumber", minWidth: 110, maxWidth: 130, width: 120, editable: false },
-      { headerName: "구분", field: "resentmenType", minWidth: 70, maxWidth: 90, width: 80, editable: false },
-      { headerName: "코드", field: "accountCode", width: 65, minWidth: 60, editable: false },
+      { headerName: "전표번호", field: "entryNumber", minWidth: 110, maxWidth: 130, width: 120, editable: false,
+        valueFormatter: params => {
+          if (!params.value || isNaN(Number(params.value))) return '';
+          return String(params.value);
+        }
+      },
+      { headerName: "구분", field: "resentmenType", minWidth: 70, maxWidth: 90, width: 80, editable: false,
+        valueFormatter: params => {
+          if (params.value === 'g3') return '차변';
+          if (params.value === 'g4') return '대변';
+          return params.value || '';
+        }
+      },
+      { headerName: "코드", field: "accountCode", width: 65, minWidth: 60, editable: false, cellClass: 'ag-cell-center', valueFormatter: params => params.value != null ? String(params.value) : '' },
       { headerName: "계정과목명", field: "accountName", minWidth: 140, width: 120, editable: false },
       // 거래처코드, 거래처명, 적요: ledgerCheck가 'a1'이면 수정불가
       { headerName: "코드", field: "partnerCode", width: 65, minWidth: 60, editable: params => params.data && params.data.ledgerCheck !== 'a1' },
       { headerName: "거래처명", field: "partnerName", minWidth: 110, maxWidth: 140, width: 120, editable: params => params.data && params.data.ledgerCheck !== 'a1' },
-      { headerName: "차변", field: "debitAmount", minWidth: 90, maxWidth: 110, width: 100, editable: false },
-      { headerName: "대변", field: "creditAmount", minWidth: 90, maxWidth: 110, width: 100, editable: false },
+      { headerName: "차변", field: "debitAmount", minWidth: 90, maxWidth: 110, width: 100, editable: false, cellClass: 'ag-cell-right', valueFormatter: params => params.value != null ? Number(params.value).toLocaleString() : '' },
+      { headerName: "대변", field: "creditAmount", minWidth: 90, maxWidth: 110, width: 100, editable: false, cellClass: 'ag-cell-right', valueFormatter: params => params.value != null ? Number(params.value).toLocaleString() : '' },
       { headerName: "적요", field: "description", minWidth: 120, width: 120, editable: params => params.data && params.data.ledgerCheck !== 'a1' }
     ];
     // ag-Grid 기본 옵션
@@ -290,12 +306,12 @@
               entryDate: entryDateValue,
               entryNumber: item.entryNumber,
               resentmenType: item.resentmenType,
-              accountCode: item.accountCode,
+              accountCode: item.accountCode != null ? item.accountCode : '', // 그대로 사용, Number() 사용하지 않음
               accountName: item.accountName,
               partnerCode: item.partnerCode,
               partnerName: item.partnerName,
-              debitAmount: item.resentmenType === 'g3' ? item.amount : null,
-              creditAmount: item.resentmenType === 'g4' ? item.amount : null,
+              debitAmount: item.resentmenType === 'g3' ? (item.amount != null ? Number(item.amount) : null) : null,
+              creditAmount: item.resentmenType === 'g4' ? (item.amount != null ? Number(item.amount) : null) : null,
               description: item.description
             }));
           } catch (err) {
@@ -312,7 +328,7 @@
                 debitMap[item.accountCode] = {
                   ledgerCheck: ledgerCheck,
                   entryDate: entryDateValue,
-                  entryNumber: entryNumber,
+                  entryNumber: ledgerCheck === 'a2' ? '' : entryNumber,
                   resentmenType: 'g3',
                   accountCode: item.accountCode,
                   accountName: item.accountName,
@@ -330,7 +346,7 @@
             debitRows = filteredDebits.map(item => ({
               ledgerCheck: ledgerCheck,
               entryDate: entryDateValue,
-              entryNumber: entryNumber,
+              entryNumber: ledgerCheck === 'a2' ? '' : entryNumber,
               resentmenType: 'g3',
               accountCode: item.accountCode,
               accountName: item.accountName,
@@ -349,7 +365,7 @@
                 creditMap[item.accountCode] = {
                   ledgerCheck: ledgerCheck,
                   entryDate: entryDateValue,
-                  entryNumber: entryNumber,
+                  entryNumber: ledgerCheck === 'a2' ? '' : entryNumber,
                   resentmenType: 'g4',
                   accountCode: item.accountCode,
                   accountName: item.accountName,
@@ -367,7 +383,7 @@
             creditRows = filteredCredits.map(item => ({
               ledgerCheck: ledgerCheck,
               entryDate: entryDateValue,
-              entryNumber: entryNumber,
+              entryNumber: ledgerCheck === 'a2' ? '' : entryNumber,
               resentmenType: 'g4',
               accountCode: item.accountCode,
               accountName: item.accountName,
@@ -619,6 +635,28 @@
               journalGrid.api = params.api; // 반드시 추가!
               params.api.sizeColumnsToFit && params.api.sizeColumnsToFit();
               bindPartnerCodeF4Modal(journalGrid);
+              // 거래처코드 변경 시 거래처명 자동 매핑
+              journalGrid.api.addEventListener('cellValueChanged', function(event) {
+                if (event.colDef.field === 'partnerCode') {
+                  const code = event.newValue;
+                  if (!code) {
+                    event.node.setDataValue('partnerName', '');
+                    return;
+                  }
+                  fetch('/acc/pt/' + code)
+                    .then(res => res.ok ? res.json() : Promise.reject())
+                    .then(data => {
+                      if (data && data.partnerName) {
+                        event.node.setDataValue('partnerName', data.partnerName);
+                      } else {
+                        event.node.setDataValue('partnerName', '');
+                      }
+                    })
+                    .catch(() => {
+                      event.node.setDataValue('partnerName', '');
+                    });
+                }
+              });
             }
           });
         })
