@@ -77,16 +77,58 @@
     .detail-table th:nth-child(9) { width: 90px; }   /* 부가세 */
     .detail-table th:nth-child(10) { width: 150px; } /* 비고 */
 
-    /* 모달 테이블 스타일 */
+    /* 모달 테이블 스타일 - 통일된 스타일 적용 */
+    .modal-table {
+      width: 100%;
+      margin-bottom: 0;
+    }
+    
     .modal-table th {
       background-color: #e9ecef;
       font-weight: 600;
       text-align: center;
+      padding: 10px 8px;
+      border: 1px solid #dee2e6;
+      white-space: nowrap;
     }
     
     .modal-table td {
       text-align: center;
       vertical-align: middle;
+      padding: 8px;
+      border: 1px solid #dee2e6;
+    }
+    
+    /* 모달 헤더 통일 */
+    .modal-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-bottom: none;
+    }
+    
+    .modal-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .btn-close-white {
+      filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    
+    /* 모달 버튼 스타일 통일 */
+    .modal-select-btn {
+      padding: 4px 12px;
+      font-size: 0.875rem;
+      border-radius: 4px;
+      border: 1px solid #007bff;
+      background-color: #fff;
+      color: #007bff;
+      transition: all 0.2s;
+    }
+    
+    .modal-select-btn:hover {
+      background-color: #007bff;
+      color: white;
     }
   </style>
 </head>
@@ -240,63 +282,79 @@
     </div>
   </form>
 
-  <!-- 거래처 모달 -->
+  <!-- 거래처 모달 - 크기 통일 (modal-lg 추가) -->
   <div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">거래처 조회</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title">
+            <i class="fas fa-search me-2"></i>거래처 조회
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <div class="input-group mb-2">
+          <div class="input-group mb-3">
             <input id="customerSearch" type="text" class="form-control" placeholder="거래처명 검색">
-            <button id="btnCustomerSearch" class="btn btn-outline-secondary">검색</button>
+            <button id="btnCustomerSearch" class="btn btn-outline-primary">
+              <i class="fas fa-search"></i> 검색
+            </button>
           </div>
           <div class="table-responsive">
-            <table class="table table-bordered modal-table mb-0">
+            <table class="table table-bordered modal-table">
               <thead>
                 <tr>
-                  <th>선택</th>
-                  <th>코드</th>
-                  <th>이름</th>
-                  <th>대표명</th>
-                  <th>전화번호</th>
-                  <th>할인율(%)</th>
+                  <th width="80">선택</th>
+                  <th width="120">코드</th>
+                  <th width="180">이름</th>
+                  <th width="120">대표명</th>
+                  <th width="140">전화번호</th>
+                  <th width="100">할인율(%)</th>
                 </tr>
               </thead>
               <tbody></tbody>
             </table>
           </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> 취소
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 품목 모달 -->
+  <!-- 품목 모달 - 크기 유지 (modal-lg) -->
   <div class="modal fade" id="itemModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">품목 목록</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title">
+            <i class="fas fa-cube me-2"></i>품목 목록
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-0">
           <div class="table-responsive">
-            <table class="table table-bordered m-0 modal-table">
+            <table class="table table-bordered modal-table">
               <thead>
                 <tr>
-                  <th>선택</th>
-                  <th>코드</th>
-                  <th>이름</th>
-                  <th>규격</th>
-                  <th>단위</th>
-                  <th>단가</th>
+                  <th width="80">선택</th>
+                  <th width="120">코드</th>
+                  <th width="200">이름</th>
+                  <th width="150">규격</th>
+                  <th width="80">단위</th>
+                  <th width="120">단가</th>
                 </tr>
               </thead>
               <tbody></tbody>
             </table>
           </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> 취소
+          </button>
         </div>
       </div>
     </div>
@@ -415,7 +473,7 @@
           list.forEach(c => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-              <td><button class="btn btn-sm btn-outline-primary selCust">선택</button></td>
+              <td><button class="btn btn-sm btn-outline-primary modal-select-btn selCust">선택</button></td>
               <td>${c.customerCd}</td>
               <td>${c.customerNm}</td>
               <td>${c.representativeNm}</td>
@@ -458,7 +516,7 @@
             const tr = document.createElement('tr');
             tr.dataset.taxRate = it.taxRate;
             tr.innerHTML = `
-              <td><button class="btn btn-sm btn-outline-primary selItem">선택</button></td>
+              <td><button class="btn btn-sm btn-outline-primary modal-select-btn selItem">선택</button></td>
               <td>${it.itemCode}</td><td>${it.itemName}</td><td>${it.spec}</td>
               <td>${it.unit}</td><td>${it.salePrice}</td>`;
             body.appendChild(tr);

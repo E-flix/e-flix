@@ -88,13 +88,15 @@ WHERE STATUS = 'ARCHIVED'
 ORDER BY ARCHIVED_AT DESC
 </select>
 
-<!-- 6) 만료된 견적서 자동 아카이브 -->
+<!-- 6) 만료된 견적서 자동 아카이브 - CDATA 섹션 사용 -->
 <update id="archiveExpiredQuotations">
+<![CDATA[
 UPDATE QUOTATION 
 SET STATUS = 'ARCHIVED', 
     ARCHIVED_AT = SYSDATE
 WHERE STATUS = 'ACTIVE' 
   AND VALID_PERIOD < SYSDATE
+]]>
 </update>
 
 <!-- 7) 견적서 복원 -->
@@ -141,12 +143,14 @@ WHERE QUOTATION_NO = #{quotationNo}
     ORDER BY LINE_NO
 </select>
 
-<!-- 11) 만료 예정 견적서 개수 조회 -->
+<!-- 11) 만료 예정 견적서 개수 조회 - CDATA 섹션 사용 -->
 <select id="getExpiringSoonCount" resultType="int">
+<![CDATA[
 SELECT COUNT(*)
 FROM QUOTATION
 WHERE STATUS = 'ACTIVE'
   AND VALID_PERIOD BETWEEN SYSDATE AND SYSDATE + 7
+]]>
 </select>
 
 </mapper>
