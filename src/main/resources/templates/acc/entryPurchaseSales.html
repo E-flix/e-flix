@@ -454,16 +454,7 @@
                 const newEmptyRow = getEmptyDetailRow();
                 newEmptyRow.entryNumber = selectedMaster.entryNumber;
                 
-                // 소계 행이 있으면 그 위에 추가, 없으면 일반 추가
-                const summaryRowIndex = findSummaryRowIndex();
-                if (summaryRowIndex >= 0) {
-                  focusedGridApi.applyTransaction({ 
-                    add: [newEmptyRow], 
-                    addIndex: summaryRowIndex 
-                  });
-                } else {
-                  focusedGridApi.applyTransaction({ add: [newEmptyRow] });
-                }
+                focusedGridApi.applyTransaction({ add: [newEmptyRow] });
               }
             }, 100);
             return;
@@ -504,22 +495,7 @@
               const newEmptyRow = getEmptyDetailRow();
               newEmptyRow.entryNumber = selectedMaster.entryNumber;
               
-              // 소계 행이 있으면 그 위에 추가, 없으면 일반 추가
-              const summaryRowIndex = findSummaryRowIndex();
-              
-              if (summaryRowIndex >= 0) {
-                focusedGridApi.applyTransaction({ 
-                  add: [newEmptyRow], 
-                  addIndex: summaryRowIndex 
-                });
-              } else {
-                focusedGridApi.applyTransaction({ add: [newEmptyRow] });
-              }
-            }
-            
-            // 빈 행 추가 후 소계 재계산
-            if (selectedMaster && selectedMaster.entryNumber) {
-              addDetailSummaryRow(selectedMaster.entryNumber);
+              focusedGridApi.applyTransaction({ add: [newEmptyRow] });
             }
           }, 100);
           alert('선택한 상세항목이 삭제되었습니다.');
@@ -602,50 +578,6 @@
         _summaryEntryNumber: entryNumber,
         _subtotalDiff: difference
       };
-    }
-
-    // 상세 그리드에서 기존 소계 행 제거
-    function removeDetailSummaryRows() {
-      if (!detailGridApi) return;
-      
-      const summaryRowsToRemove = [];
-      detailGridApi.forEachNode(node => {
-        if (node.data && node.data.isSummary === true) {
-          summaryRowsToRemove.push(node.data);
-        }
-      });
-      
-      if (summaryRowsToRemove.length > 0) {
-        detailGridApi.applyTransaction({ remove: summaryRowsToRemove });
-      }
-    }
-
-    // 상세 그리드에 소계 행 추가 (항상 맨 마지막에 추가)
-    function addDetailSummaryRow(entryNumber) {
-      if (!detailGridApi || !entryNumber) return;
-      
-      // 기존 소계 행 제거
-      removeDetailSummaryRows();
-      
-      // 새 소계 행 생성
-      const summaryRow = generateDetailSummaryRow(entryNumber);
-      if (summaryRow) {
-        // 소계 행은 항상 맨 마지막에 추가
-        detailGridApi.applyTransaction({ add: [summaryRow] });
-      }
-    }
-
-    // 소계 행의 인덱스를 찾는 함수
-    function findSummaryRowIndex() {
-      if (!detailGridApi) return -1;
-      
-      for (let i = 0; i < detailGridApi.getDisplayedRowCount(); i++) {
-        const rowNode = detailGridApi.getDisplayedRowAtIndex(i);
-        if (rowNode && rowNode.data && rowNode.data.isSummary === true) {
-          return i;
-        }
-      }
-      return -1; // 소계 행이 없으면 -1 반환
     }
 
     // ag-Grid 로드 함수: master 리스트 가져오기
@@ -820,13 +752,8 @@
               if (!hasEmptyRow) {
                 const newEmptyRow = getEmptyDetailRow();
                 newEmptyRow.entryNumber = master.entryNumber;
-                // 소계 행이 있으면 그 위에 추가, 없으면 일반 추가
-                const summaryRowIndex = findSummaryRowIndex();
-                if (summaryRowIndex >= 0) {
-                  detailGridApi.applyTransaction({ add: [newEmptyRow], addIndex: summaryRowIndex });
-                } else {
-                  detailGridApi.applyTransaction({ add: [newEmptyRow] });
-                }
+                detailGridApi.applyTransaction({ add: [newEmptyRow] });
+
               }
               // 핀된 하단에 전표소계 행 추가
               setPinnedBottomDetailSummary(master.entryNumber);
@@ -847,17 +774,7 @@
             
             const newEmptyRow = getEmptyDetailRow();
             newEmptyRow.entryNumber = master.entryNumber;
-            
-            // 소계 행이 있으면 그 위에 추가, 없으면 일반 추가
-            const summaryRowIndex = findSummaryRowIndex();
-            if (summaryRowIndex >= 0) {
-              detailGridApi.applyTransaction({ 
-                add: [newEmptyRow], 
-                addIndex: summaryRowIndex 
-              });
-            } else {
-              detailGridApi.applyTransaction({ add: [newEmptyRow] });
-            }
+            detailGridApi.applyTransaction({ add: [newEmptyRow] });
           }
         });
     }
@@ -1696,17 +1613,7 @@
                 // 마지막 행을 넘어가면 새 빈 행 추가
                 const newEmptyRow = getEmptyDetailRow();
                 newEmptyRow.entryNumber = selectedMaster.entryNumber;
-                
-                // 소계 행이 있으면 그 위에 추가, 없으면 마지막에 추가
-                const summaryRowIndex = findSummaryRowIndex();
-                if (summaryRowIndex >= 0) {
-                  api.applyTransaction({ 
-                    add: [newEmptyRow], 
-                    addIndex: summaryRowIndex 
-                  });
-                } else {
-                  api.applyTransaction({ add: [newEmptyRow] });
-                }
+                api.applyTransaction({ add: [newEmptyRow] });
                 
                 setTimeout(() => {
                   // 새로 추가된 행에 포커스 (소계 행 위에 추가된 경우 해당 위치)
@@ -1732,16 +1639,7 @@
                 const newEmptyRow = getEmptyDetailRow();
                 newEmptyRow.entryNumber = selectedMaster.entryNumber;
                 
-                // 소계 행이 있으면 그 위에 추가, 없으면 마지막에 추가
-                const summaryRowIndex = findSummaryRowIndex();
-                if (summaryRowIndex >= 0) {
-                  api.applyTransaction({ 
-                    add: [newEmptyRow], 
-                    addIndex: summaryRowIndex 
-                  });
-                } else {
-                  api.applyTransaction({ add: [newEmptyRow] });
-                }
+                api.applyTransaction({ add: [newEmptyRow] });
                 
                 setTimeout(() => {
                   // 새로 추가된 행에 포커스 (소계 행 위에 추가된 경우 해당 위치)
@@ -1895,10 +1793,7 @@
         
         // 차변/대변 금액이 변경된 경우 소계 행 업데이트
         if (["debitAmount", "creditAmount"].includes(event.colDef.field) && selectedMaster && selectedMaster.entryNumber) {
-          setTimeout(() => {
-            addDetailSummaryRow(selectedMaster.entryNumber);
-            setPinnedBottomDetailSummary(selectedMaster.entryNumber);
-          }, 100);
+          setPinnedBottomDetailSummary(selectedMaster.entryNumber);
         }
       }
     };
@@ -2008,17 +1903,7 @@
                 if (!hasEmptyRow) {
                   const newEmptyRow = getEmptyDetailRow();
                   newEmptyRow.entryNumber = selectedMaster.entryNumber;
-                  
-                  // 소계 행이 있으면 그 위에 추가, 없으면 마지막에 추가
-                  const summaryRowIndex = findSummaryRowIndex();
-                  if (summaryRowIndex >= 0) {
-                    detailGridApi.applyTransaction({ 
-                      add: [newEmptyRow], 
-                      addIndex: summaryRowIndex 
-                    });
-                  } else {
-                    detailGridApi.applyTransaction({ add: [newEmptyRow] });
-                  }
+                  detailGridApi.applyTransaction({ add: [newEmptyRow] });
                 }
               }, 100);
             }
@@ -2110,25 +1995,24 @@
     }
 
     // 안전하게 핀된 하단 행 설정 함수
-function safeSetPinnedBottomRow(api, rows) {
-  if (!api) return;
-  if (typeof api.setPinnedBottomRowData === 'function') {
-    api.setPinnedBottomRowData(rows);
-  } else if (typeof api.setGridOption === 'function') {
-    api.setGridOption('pinnedBottomRowData', rows);
-  }
-}
+    function safeSetPinnedBottomRow(api, rows) {
+      if (!api) return;
+      if (typeof api.setPinnedBottomRowData === 'function') {
+        api.setPinnedBottomRowData(rows);
+      } else if (typeof api.setGridOption === 'function') {
+        api.setGridOption('pinnedBottomRowData', rows);
+      }
+    }
 
-// 전표 소계 핀 고정 함수
-function setPinnedBottomDetailSummary(entryNumber) {
-  if (!detailGridApi || !entryNumber) return;
-  // generate the summary row
-  const summaryRow = generateDetailSummaryRow(entryNumber);
-  if (summaryRow) {
-    safeSetPinnedBottomRow(detailGridApi, [summaryRow]);
-  } else {
-    safeSetPinnedBottomRow(detailGridApi, []);
-  }
-}
+    // 전표 소계 핀 고정 함수
+    function setPinnedBottomDetailSummary(entryNumber) {
+      if (!detailGridApi || !entryNumber) return; // detailGridApi가 없거나 entryNumber가 없으면 종료
+      const summaryRow = generateDetailSummaryRow(entryNumber); // 전표 소계 행 생성
+      if (summaryRow) { // 전표 소계 행이 생성되면 핀 고정
+        safeSetPinnedBottomRow(detailGridApi, [summaryRow]); // 핀된 하단 행 설정
+      } else {
+        safeSetPinnedBottomRow(detailGridApi, []); // 전표 소계 행이 없으면 핀된 하단 행 비우기
+      }
+    }
   </script>
 </div>
