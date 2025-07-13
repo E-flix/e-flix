@@ -27,23 +27,133 @@
       height: 30px;
       font-size: .9rem;
     }
+
+    /* 선택된 행 스타일 */
+    .ag-row-selected {
+      background-color: #e3f2fd !important;
+      border: 2px solid #2196f3 !important;
+    }
+
+    .ag-row-selected .ag-cell {
+      background-color: #e3f2fd !important;
+      color: #1565c0 !important;
+      font-weight: 600;
+    }
+
+    /* 만료된 견적서 스타일 */
+    .expired-quotation {
+      background-color: #ffebee !important;
+      color: #c62828 !important;
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    .expired-quotation .ag-cell {
+      background-color: #ffebee !important;
+      color: #c62828 !important;
+    }
+
+    /* 휴지통 아이콘 */
+    .trash-icon {
+      color: #f44336;
+      font-size: 16px;
+      margin-left: 5px;
+    }
+
+    /* 필터 토글 버튼 */
+    .filter-toggle-container {
+      margin-bottom: 10px;
+    }
+
+    .filter-toggle-btn {
+      padding: 5px 15px;
+      border: 1px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-right: 5px;
+      border-radius: 20px;
+      transition: all 0.3s;
+    }
+
+    .filter-toggle-btn.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+
+    .filter-toggle-btn:hover {
+      background: #f8f9fa;
+    }
+
+    .filter-toggle-btn.active:hover {
+      background: #0056b3;
+    }
+
+    /* 상태 배지 */
+    .status-badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .status-valid {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .status-expired {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .status-expiring-soon {
+      background-color: #ffc107;
+      color: #212529;
+    }
   </style>
 </head>
 
 <div layout:fragment="content" class="w-100">
-  <h3 class="mb-2">견적서 조회</h3>
+  <h3 class="mb-2">
+    견적서 조회
+    <button class="btn btn-outline-secondary btn-sm ms-3" id="btnTrash">
+      <i class="fas fa-trash"></i> 휴지통 <span id="trashCount" class="badge bg-danger ms-1">0</span>
+    </button>
+    <button class="btn btn-outline-warning btn-sm ms-2" id="btnAutoArchive">
+      <i class="fas fa-sync"></i> 만료된 견적서 정리
+    </button>
+  </h3>
+
+  <!-- ────────── 필터 토글 버튼 ────────── -->
+  <div class="filter-toggle-container">
+    <button class="filter-toggle-btn active" data-filter="all">
+      <i class="fas fa-list"></i> 전체 견적서
+    </button>
+    <button class="filter-toggle-btn" data-filter="valid">
+      <i class="fas fa-check-circle"></i> 유효한 견적서
+    </button>
+    <button class="filter-toggle-btn" data-filter="expired">
+      <i class="fas fa-trash"></i> 만료된 견적서
+    </button>
+    <button class="filter-toggle-btn" data-filter="expiring-soon">
+      <i class="fas fa-exclamation-triangle"></i> 만료 임박 (7일)
+    </button>
+  </div>
 
   <!-- ────────── 필터 영역 ────────── -->
   <form id="filterForm" class="filter-box">
     <div class="row g-4 justify-content-center">
 
-      <!-- ① 견적번호 / 견적일자 -->
+      <!-- ① 견적번호 / 납기예정일 -->
       <div class="col-12 col-sm-6 col-md-4">
         <label for="fQNo" class="form-label">견적서 번호</label>
         <input id="fQNo" type="text" class="form-control form-control-sm" placeholder="예: QT-20250627-001">
 
-        <label for="fQDate" class="form-label mt-3">견적일자</label>
-        <input id="fQDate" type="date" class="form-control form-control-sm">
+        <label for="fDeliveryDate" class="form-label mt-3">납기예정일</label>
+        <input id="fDeliveryDate" type="date" class="form-control form-control-sm">
       </div>
 
       <!-- ② 거래처 / 대표명 -->
@@ -84,32 +194,182 @@
     <div id="gridDetail" class="ag-theme-alpine w-100" style="height: 250px;"></div>
   </div>
 
+  <!-- 휴지통 모달 -->
+  <div class="modal fade" id="trashModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title">
+            <i class="fas fa-trash mr-2"></i>견적서 휴지통
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- 휴지통 통계 -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <div class="card bg-light">
+                <div class="card-body text-center">
+                  <h5 class="card-title text-muted">총 휴지통 건수</h5>
+                  <h3 class="text-primary" id="trashTotalCount">0</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card bg-light">
+                <div class="card-body text-center">
+                  <h5 class="card-title text-muted">이번달 추가</h5>
+                  <h3 class="text-warning" id="trashThisMonthCount">0</h3>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card bg-light">
+                <div class="card-body text-center">
+                  <h5 class="card-title text-muted">일괄 작업</h5>
+                  <button class="btn btn-outline-success btn-sm me-1" id="btnRestoreAll" disabled>
+                    <i class="fas fa-undo"></i> 전체 복원
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" id="btnDeleteAll" disabled>
+                    <i class="fas fa-times"></i> 전체 삭제
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 휴지통 그리드 -->
+          <div id="trashGrid" class="ag-theme-alpine w-100" style="height: 400px;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> 닫기
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ────────── 스크립트 ────────── -->
   <script th:inline="javascript">
     // ① 서버 데이터
     const masterData = /*[[${quotationList}]]*/ [];
 
     // ② API 레퍼런스
-    let gridApiMaster, gridApiDetail;
+    let gridApiMaster, gridApiDetail, gridApiTrash;
 
-    // ③ 마스터 그리드 옵션
+    // ③ 현재 필터 상태
+    let currentFilter = 'all';
+    let filteredData = [...masterData];
+
+    // ④ 휴지통 모달
+    let trashModal;
+
+    // ⑤ 날짜 유틸리티 함수
+    const isExpired = (validPeriodStr) => {
+      if (!validPeriodStr) return false;
+      const validDate = new Date(validPeriodStr);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return validDate < today;
+    };
+
+    const isExpiringSoon = (validPeriodStr) => {
+      if (!validPeriodStr) return false;
+      const validDate = new Date(validPeriodStr);
+      const today = new Date();
+      const sevenDaysLater = new Date();
+      sevenDaysLater.setDate(today.getDate() + 7);
+      return validDate >= today && validDate <= sevenDaysLater;
+    };
+
+    const getQuotationStatus = (validPeriodStr) => {
+      if (isExpired(validPeriodStr)) return 'expired';
+      if (isExpiringSoon(validPeriodStr)) return 'expiring-soon';
+      return 'valid';
+    };
+
+    // ⑥ 마스터 그리드 옵션
     const masterOptions = {
       rowData: masterData,
       columnDefs: [
-        { headerName:'견적서 번호', field:'quotationNo',    width:150 },
-        { headerName:'견적일자',    field:'quotationDt',     width:110 },
+        { 
+          headerName:'견적서 번호', 
+          field:'quotationNo',    
+          width:150,
+          cellStyle: { textAlign: 'center' },
+          headerClass: 'ag-header-center'
+        },
+        { 
+          headerName:'납기예정일', 
+          field:'expectedDeliveryDt',     
+          width:120,
+          valueFormatter: params => {
+            const dateValue = params.value || params.data?.quotationDt;
+            if (!dateValue) return '';
+            try {
+              return new Date(dateValue).toLocaleDateString('ko-KR');
+            } catch (e) {
+              return dateValue;
+            }
+          }
+        },
         { headerName:'거래처',      field:'customerName'        },
         { headerName:'대표명',      field:'representativeNm',  width:110 },
         { headerName:'연락처',      field:'phone',           width:130 },
-        { headerName:'유효기간',    field:'validPeriod',     width:110 }
+        { 
+          headerName:'유효기간',    
+          field:'validPeriod',     
+          width:140,
+          cellRenderer: params => {
+            if (!params.value) return '';
+            const status = getQuotationStatus(params.value);
+            const dateStr = new Date(params.value).toLocaleDateString('ko-KR');
+            
+            let badgeClass = 'status-valid';
+            let icon = '<i class="fas fa-check-circle"></i>';
+            
+            if (status === 'expired') {
+              badgeClass = 'status-expired';
+              icon = '<i class="fas fa-trash trash-icon"></i>';
+            } else if (status === 'expiring-soon') {
+              badgeClass = 'status-expiring-soon';
+              icon = '<i class="fas fa-exclamation-triangle"></i>';
+            }
+            
+            return `<span class="status-badge ${badgeClass}">${icon} ${dateStr}</span>`;
+          }
+        },
+        {
+          headerName: '작업',
+          width: 100,
+          cellRenderer: params => {
+            if (!params.data) return '';
+            const status = getQuotationStatus(params.data.validPeriod);
+            if (status === 'expired') {
+              return `<button class="btn btn-sm btn-outline-danger move-to-trash" data-quotation-no="${params.data.quotationNo}">
+                <i class="fas fa-trash"></i>
+              </button>`;
+            }
+            return '';
+          }
+        }
       ],
       defaultColDef: { flex:1, resizable:true },
       localeText: { noRowsToShow:'데이터가 없습니다.' },
-      onRowClicked: e => loadDetails(e.data.quotationNo),
-      // 마스터 그리드 준비 완료 콜백
+      rowSelection: 'single',
+      onRowClicked: e => {
+        if (e.data && e.data.quotationNo) {
+          loadDetails(e.data.quotationNo);
+        }
+      },
+      getRowClass: params => {
+        if (!params.data) return '';
+        const status = getQuotationStatus(params.data.validPeriod);
+        return status === 'expired' ? 'expired-quotation' : '';
+      },
       onGridReady: function(params) {
         gridApiMaster = params.api;
-        // 그리드가 준비된 후 컬럼 크기 조정
         setTimeout(() => {
           if (gridApiMaster && gridApiMaster.sizeColumnsToFit) {
             gridApiMaster.sizeColumnsToFit();
@@ -118,15 +378,75 @@
       }
     };
 
-    /* ④ 디테일 그리드 옵션 */
+    // ⑦ 휴지통 그리드 옵션
+    const trashGridOptions = {
+      rowData: [],
+      columnDefs: [
+        { 
+          headerName: '선택',
+          width: 60,
+          checkboxSelection: true,
+          headerCheckboxSelection: true
+        },
+        { 
+          headerName:'견적서 번호', 
+          field:'quotationNo',    
+          width:150,
+          cellStyle: { textAlign: 'center' }
+        },
+        { headerName:'거래처',      field:'customerName', width:150 },
+        { headerName:'대표명',      field:'representativeNm',  width:110 },
+        { 
+          headerName:'유효기간', 
+          field:'validPeriod',     
+          width:120,
+          valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('ko-KR') : ''
+        },
+        { 
+          headerName:'휴지통 이동일', 
+          field:'archivedAt',     
+          width:140,
+          valueFormatter: p => p.value ? new Date(p.value).toLocaleDateString('ko-KR') : ''
+        },
+        {
+          headerName: '작업',
+          width: 150,
+          cellRenderer: params => {
+            if (!params.data) return '';
+            return `
+              <button class="btn btn-sm btn-outline-success me-1 restore-quotation" data-quotation-no="${params.data.quotationNo}">
+                <i class="fas fa-undo"></i> 복원
+              </button>
+              <button class="btn btn-sm btn-outline-danger delete-permanent" data-quotation-no="${params.data.quotationNo}">
+                <i class="fas fa-times"></i> 삭제
+              </button>
+            `;
+          }
+        }
+      ],
+      defaultColDef: { flex:1, resizable:true },
+      localeText: { noRowsToShow:'휴지통이 비어있습니다.' },
+      rowSelection: 'multiple',
+      onGridReady: function(params) {
+        gridApiTrash = params.api;
+        setTimeout(() => {
+          if (gridApiTrash && gridApiTrash.sizeColumnsToFit) {
+            gridApiTrash.sizeColumnsToFit();
+          }
+        }, 100);
+      },
+      onSelectionChanged: function() {
+        const selectedRows = gridApiTrash.getSelectedRows();
+        document.getElementById('btnRestoreAll').disabled = selectedRows.length === 0;
+        document.getElementById('btnDeleteAll').disabled = selectedRows.length === 0;
+      }
+    };
+
+    /* ⑧ 디테일 그리드 옵션 */
     const detailOptions = {
       rowData: [],
       columnDefs: [
-        // ▶ 순번을 실제 lineNo 로 쓰고 싶다면:
         { headerName: '순번', field: 'lineNo', width: 80 },
-        //   혹은 그대로 auto-index 를 쓰려면:
-        // { headerName: '순번', valueGetter: 'node.rowIndex + 1', width: 80 },
-    
         { headerName: '품목코드', field: 'itemCode',  width: 130 },
         { headerName: '품목명',   field: 'itemName'               },
         { headerName: '규격',     field: 'spec'                   },
@@ -175,9 +495,14 @@
       }
     };
 
-
-    // ⑤ DOMContentLoaded → 그리드 생성
+    // ⑨ DOMContentLoaded → 그리드 생성
     document.addEventListener('DOMContentLoaded', () => {
+      // 유효기간 초기값 설정 (오늘 ~ 30일 후)
+      setDefaultValidPeriod();
+      
+      // 휴지통 모달 초기화
+      trashModal = new bootstrap.Modal(document.getElementById('trashModal'));
+
       // ▶ 마스터 그리드
       const masterEl = document.getElementById('gridMaster');
       if (agGrid.createGrid) {
@@ -193,53 +518,126 @@
       } else {
         new agGrid.Grid(detailEl, detailOptions);
       }
+
+      // ▶ 휴지통 그리드
+      const trashEl = document.getElementById('trashGrid');
+      if (agGrid.createGrid) {
+        agGrid.createGrid(trashEl, trashGridOptions);
+      } else {
+        new agGrid.Grid(trashEl, trashGridOptions);
+      }
+
+      // 필터 토글 버튼 이벤트
+      document.querySelectorAll('.filter-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-toggle-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilter = btn.dataset.filter;
+          applyStatusFilter();
+        });
+      });
+
+      // 휴지통 버튼 이벤트
+      document.getElementById('btnTrash').addEventListener('click', openTrashModal);
+      
+      // 자동 아카이브 버튼 이벤트
+      document.getElementById('btnAutoArchive').addEventListener('click', runAutoArchive);
+
+      // 그리드 내 버튼 이벤트 위임
+      document.getElementById('gridMaster').addEventListener('click', handleMasterGridClick);
+      document.getElementById('trashGrid').addEventListener('click', handleTrashGridClick);
+
+      // 휴지통 일괄 작업 버튼
+      document.getElementById('btnRestoreAll').addEventListener('click', restoreSelectedQuotations);
+      document.getElementById('btnDeleteAll').addEventListener('click', deleteSelectedQuotations);
+
+      // 페이지 로드 시 휴지통 개수 업데이트
+      updateTrashCount();
     });
 
-    // ⑥ 상세 AJAX 호출
+    // ⑩ 유틸리티 함수들
+    function setDefaultValidPeriod() {
+      const today = new Date();
+      const thirtyDaysLater = new Date();
+      thirtyDaysLater.setDate(today.getDate() + 30);
+      
+      document.getElementById('fValidFrom').value = today.toISOString().split('T')[0];
+      document.getElementById('fValidTo').value = thirtyDaysLater.toISOString().split('T')[0];
+    }
+
+    function applyStatusFilter() {
+      if (!gridApiMaster) return;
+
+      let dataToShow = [...masterData];
+
+      switch (currentFilter) {
+        case 'valid':
+          dataToShow = masterData.filter(item => {
+            const status = getQuotationStatus(item.validPeriod);
+            return status === 'valid';
+          });
+          break;
+        case 'expired':
+          dataToShow = masterData.filter(item => {
+            const status = getQuotationStatus(item.validPeriod);
+            return status === 'expired';
+          });
+          break;
+        case 'expiring-soon':
+          dataToShow = masterData.filter(item => {
+            const status = getQuotationStatus(item.validPeriod);
+            return status === 'expiring-soon';
+          });
+          break;
+        case 'all':
+        default:
+          dataToShow = [...masterData];
+          break;
+      }
+
+      filteredData = dataToShow;
+
+      if (typeof gridApiMaster.setRowData === 'function') {
+        gridApiMaster.setRowData(filteredData);
+      } else if (typeof gridApiMaster.setGridOption === 'function') {
+        gridApiMaster.setGridOption('rowData', filteredData);
+      }
+      
+      if (gridApiMaster.sizeColumnsToFit) {
+        gridApiMaster.sizeColumnsToFit();
+      }
+
+      clearDetailGrid();
+    }
+
     async function loadDetails(quotationNo) {
       if (!gridApiDetail) {
         console.error('Detail grid API not ready');
         return;
       }
       
-      // 선택된 견적서 번호 표시
       document.getElementById('selectedQuotationNo').textContent = `(${quotationNo})`;
       
       try {
-        const res = await fetch(
-          '/bsn/quotation/details?quotationNo='
-          + encodeURIComponent(quotationNo)
-        );
+        const res = await fetch('/bsn/quotation/details?quotationNo=' + encodeURIComponent(quotationNo));
         if (!res.ok) throw new Error(res.statusText);
         const items = await res.json();
         
-        // 데이터 로깅으로 확인
-        console.log('Received detail data:', items);
-        
-        // 데이터 전처리 (다양한 필드명 대응)
         const processedItems = items.map(item => {
-          console.log('Processing item:', item);
           return {
             ...item,
             qty: item.qty || item.QTY || 0,
             unitPrice: item.unitPrice || item.UNIT_PRICE || 0,
-            // 데이터베이스 컬럼명 기준으로 매핑
             supplyAmount: item.supplyAmount || item.SUPPLY_AMOUNT || item.supply_amount || 0,
             taxAmount: item.taxAmount || item.TAX_AMOUNT || item.tax_amount || 0,
             totalMoney: item.totalMoney || item.TOTAL_MONEY || item.total_money || item.totalAmount || item.TOTAL_AMOUNT || 0
           };
         });
         
-        console.log('Processed items:', processedItems);
-        
-        // AG-Grid 버전별 대응
         if (typeof gridApiDetail.setRowData === 'function') {
           gridApiDetail.setRowData(processedItems);
         } else if (typeof gridApiDetail.setGridOption === 'function') {
           gridApiDetail.setGridOption('rowData', processedItems);
-        } else {
-          console.error('setRowData and setGridOption methods not found');
-          return;
         }
         
         if (gridApiDetail.sizeColumnsToFit) {
@@ -249,7 +647,6 @@
       } catch (e) {
         console.error(e);
         Swal.fire('오류', '상세 데이터를 불러올 수 없습니다.', 'error');
-        // 오류 시에도 빈 데이터로 초기화
         if (typeof gridApiDetail.setRowData === 'function') {
           gridApiDetail.setRowData([]);
         } else if (typeof gridApiDetail.setGridOption === 'function') {
@@ -258,7 +655,255 @@
       }
     }
 
-    // ⑦ 필터 적용
+    function clearDetailGrid() {
+      if (gridApiDetail) {
+        if (typeof gridApiDetail.setRowData === 'function') {
+          gridApiDetail.setRowData([]);
+        } else if (typeof gridApiDetail.setGridOption === 'function') {
+          gridApiDetail.setGridOption('rowData', []);
+        }
+      }
+      document.getElementById('selectedQuotationNo').textContent = '';
+    }
+
+    // ⑪ 휴지통 관련 함수들
+    async function updateTrashCount() {
+      try {
+        const response = await fetch('/bsn/quotation/trash/statistics');
+        const stats = await response.json();
+        document.getElementById('trashCount').textContent = stats.totalCount || 0;
+      } catch (error) {
+        console.error('휴지통 개수 업데이트 실패:', error);
+      }
+    }
+
+    async function openTrashModal() {
+      try {
+        // 휴지통 통계 로드
+        const statsResponse = await fetch('/bsn/quotation/trash/statistics');
+        const stats = await statsResponse.json();
+        
+        document.getElementById('trashTotalCount').textContent = stats.totalCount || 0;
+        document.getElementById('trashThisMonthCount').textContent = stats.thisMonthCount || 0;
+
+        // 휴지통 데이터 로드
+        const trashResponse = await fetch('/bsn/quotation/trash');
+        const trashData = await trashResponse.json();
+
+        if (typeof gridApiTrash.setRowData === 'function') {
+          gridApiTrash.setRowData(trashData);
+        } else if (typeof gridApiTrash.setGridOption === 'function') {
+          gridApiTrash.setGridOption('rowData', trashData);
+        }
+
+        trashModal.show();
+      } catch (error) {
+        console.error('휴지통 데이터 로드 실패:', error);
+        Swal.fire('오류', '휴지통 데이터를 불러올 수 없습니다.', 'error');
+      }
+    }
+
+    async function runAutoArchive() {
+      const result = await Swal.fire({
+        title: '만료된 견적서 정리',
+        text: '유효기간이 지난 견적서를 모두 휴지통으로 이동하시겠습니까?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '정리하기',
+        cancelButtonText: '취소'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch('/bsn/quotation/archive-expired', { method: 'POST' });
+          const data = await response.json();
+
+          if (data.success) {
+            Swal.fire('완료!', data.message, 'success');
+            location.reload(); // 페이지 새로고침
+          } else {
+            Swal.fire('실패', data.message, 'error');
+          }
+        } catch (error) {
+          console.error('자동 정리 실패:', error);
+          Swal.fire('오류', '자동 정리 중 오류가 발생했습니다.', 'error');
+        }
+      }
+    }
+
+    function handleMasterGridClick(event) {
+      if (event.target.classList.contains('move-to-trash')) {
+        const quotationNo = event.target.dataset.quotationNo;
+        moveToTrash(quotationNo);
+      }
+    }
+
+    function handleTrashGridClick(event) {
+      if (event.target.classList.contains('restore-quotation')) {
+        const quotationNo = event.target.dataset.quotationNo;
+        restoreQuotation(quotationNo);
+      } else if (event.target.classList.contains('delete-permanent')) {
+        const quotationNo = event.target.dataset.quotationNo;
+        deleteQuotationPermanently(quotationNo);
+      }
+    }
+
+    async function moveToTrash(quotationNo) {
+      const result = await Swal.fire({
+        title: '휴지통으로 이동',
+        text: `견적서 ${quotationNo}을(를) 휴지통으로 이동하시겠습니까?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '이동',
+        cancelButtonText: '취소'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`/bsn/quotation/${quotationNo}/trash`, { method: 'POST' });
+          const data = await response.json();
+
+          if (data.success) {
+            Swal.fire('완료!', data.message, 'success');
+            location.reload();
+          } else {
+            Swal.fire('실패', data.message, 'error');
+          }
+        } catch (error) {
+          console.error('휴지통 이동 실패:', error);
+          Swal.fire('오류', '휴지통 이동 중 오류가 발생했습니다.', 'error');
+        }
+      }
+    }
+
+    async function restoreQuotation(quotationNo) {
+      try {
+        const response = await fetch(`/bsn/quotation/${quotationNo}/restore`, { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+          Swal.fire('복원 완료!', data.message, 'success');
+          openTrashModal(); // 휴지통 새로고침
+          updateTrashCount();
+        } else {
+          Swal.fire('실패', data.message, 'error');
+        }
+      } catch (error) {
+        console.error('복원 실패:', error);
+        Swal.fire('오류', '복원 중 오류가 발생했습니다.', 'error');
+      }
+    }
+
+    async function deleteQuotationPermanently(quotationNo) {
+      const result = await Swal.fire({
+        title: '완전 삭제',
+        html: `
+          <div class="text-center">
+            <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+            <p class="mt-3"><strong>견적서 ${quotationNo}을(를) 완전히 삭제하시겠습니까?</strong></p>
+            <p class="text-danger"><small>※ 이 작업은 되돌릴 수 없습니다!</small></p>
+          </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '완전 삭제',
+        cancelButtonText: '취소',
+        confirmButtonColor: '#dc3545'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`/bsn/quotation/${quotationNo}/permanent`, { method: 'DELETE' });
+          const data = await response.json();
+
+          if (data.success) {
+            Swal.fire('삭제 완료!', data.message, 'success');
+            openTrashModal(); // 휴지통 새로고침
+            updateTrashCount();
+          } else {
+            Swal.fire('실패', data.message, 'error');
+          }
+        } catch (error) {
+          console.error('완전 삭제 실패:', error);
+          Swal.fire('오류', '삭제 중 오류가 발생했습니다.', 'error');
+        }
+      }
+    }
+
+    async function restoreSelectedQuotations() {
+      const selectedRows = gridApiTrash.getSelectedRows();
+      if (selectedRows.length === 0) return;
+
+      const result = await Swal.fire({
+        title: '선택 항목 복원',
+        text: `선택한 ${selectedRows.length}건의 견적서를 복원하시겠습니까?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '복원',
+        cancelButtonText: '취소'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const promises = selectedRows.map(row => 
+            fetch(`/bsn/quotation/${row.quotationNo}/restore`, { method: 'POST' })
+              .then(res => res.json())
+          );
+          
+          const results = await Promise.all(promises);
+          const successCount = results.filter(r => r.success).length;
+          
+          Swal.fire('복원 완료!', `${successCount}건의 견적서가 복원되었습니다.`, 'success');
+          openTrashModal(); // 휴지통 새로고침
+          updateTrashCount();
+        } catch (error) {
+          console.error('일괄 복원 실패:', error);
+          Swal.fire('오류', '일괄 복원 중 오류가 발생했습니다.', 'error');
+        }
+      }
+    }
+
+    async function deleteSelectedQuotations() {
+      const selectedRows = gridApiTrash.getSelectedRows();
+      if (selectedRows.length === 0) return;
+
+      const result = await Swal.fire({
+        title: '선택 항목 완전 삭제',
+        html: `
+          <div class="text-center">
+            <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+            <p class="mt-3"><strong>선택한 ${selectedRows.length}건의 견적서를 완전히 삭제하시겠습니까?</strong></p>
+            <p class="text-danger"><small>※ 이 작업은 되돌릴 수 없습니다!</small></p>
+          </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '완전 삭제',
+        cancelButtonText: '취소',
+        confirmButtonColor: '#dc3545'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const promises = selectedRows.map(row => 
+            fetch(`/bsn/quotation/${row.quotationNo}/permanent`, { method: 'DELETE' })
+              .then(res => res.json())
+          );
+          
+          const results = await Promise.all(promises);
+          const successCount = results.filter(r => r.success).length;
+          
+          Swal.fire('삭제 완료!', `${successCount}건의 견적서가 완전히 삭제되었습니다.`, 'success');
+          openTrashModal(); // 휴지통 새로고침
+          updateTrashCount();
+        } catch (error) {
+          console.error('일괄 삭제 실패:', error);
+          Swal.fire('오류', '일괄 삭제 중 오류가 발생했습니다.', 'error');
+        }
+      }
+    }
+
+    // 기존 필터 함수들...
     function applyFilters() {
       if (!gridApiMaster) {
         console.error('Master grid API not ready');
@@ -267,7 +912,7 @@
 
       const f = {
         qNo:       document.getElementById('fQNo').value.trim(),
-        qDt:       document.getElementById('fQDate').value,
+        deliveryDt: document.getElementById('fDeliveryDate').value,
         cust:      document.getElementById('fCustomer').value.trim(),
         rep:       document.getElementById('fRep').value.trim(),
         phone:     document.getElementById('fPhone').value.trim(),
@@ -275,21 +920,28 @@
         validTo:   document.getElementById('fValidTo').value
       };
 
-      const filtered = masterData.filter(r => {
-        if (f.qNo     && !r.quotationNo.includes(f.qNo))          return false;
-        if (f.qDt     && r.quotationDt.substring(0,10) !== f.qDt)  return false;
-        if (f.cust    && !r.customerName.includes(f.cust))        return false;
-        if (f.rep     && !r.representativeNm.includes(f.rep))     return false;
-        if (f.phone   && !r.phone.includes(f.phone))              return false;
+      let dataToFilter = [...filteredData];
+
+      const filtered = dataToFilter.filter(r => {
+        if (f.qNo && !r.quotationNo.includes(f.qNo)) return false;
+        
+        if (f.deliveryDt && r.expectedDeliveryDt) {
+          const deliveryDate = new Date(r.expectedDeliveryDt).toISOString().split('T')[0];
+          if (deliveryDate !== f.deliveryDt) return false;
+        }
+        
+        if (f.cust && !r.customerName.includes(f.cust)) return false;
+        if (f.rep && !r.representativeNm.includes(f.rep)) return false;
+        if (f.phone && !r.phone.includes(f.phone)) return false;
+        
         if (f.validFrom || f.validTo) {
           const v = r.validPeriod.substring(0,10);
           if (f.validFrom && v < f.validFrom) return false;
-          if (f.validTo   && v > f.validTo)   return false;
+          if (f.validTo && v > f.validTo) return false;
         }
         return true;
       });
 
-      // AG-Grid 버전별 대응
       if (typeof gridApiMaster.setRowData === 'function') {
         gridApiMaster.setRowData(filtered);
       } else if (typeof gridApiMaster.setGridOption === 'function') {
@@ -300,19 +952,9 @@
         gridApiMaster.sizeColumnsToFit();
       }
 
-      // 디테일 초기화 (상세창은 항상 표시)
-      if (gridApiDetail) {
-        if (typeof gridApiDetail.setRowData === 'function') {
-          gridApiDetail.setRowData([]);
-        } else if (typeof gridApiDetail.setGridOption === 'function') {
-          gridApiDetail.setGridOption('rowData', []);
-        }
-      }
-      // 선택된 견적서 번호 초기화
-      document.getElementById('selectedQuotationNo').textContent = '';
+      clearDetailGrid();
     }
 
-    // ⑧ 필터 초기화
     function resetFilters() {
       if (!gridApiMaster) {
         console.error('Master grid API not ready');
@@ -320,8 +962,14 @@
       }
 
       document.getElementById('filterForm').reset();
+      setDefaultValidPeriod();
       
-      // AG-Grid 버전별 대응
+      currentFilter = 'all';
+      document.querySelectorAll('.filter-toggle-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.filter-toggle-btn[data-filter="all"]').classList.add('active');
+      
+      filteredData = [...masterData];
+      
       if (typeof gridApiMaster.setRowData === 'function') {
         gridApiMaster.setRowData(masterData);
       } else if (typeof gridApiMaster.setGridOption === 'function') {
@@ -332,18 +980,9 @@
         gridApiMaster.sizeColumnsToFit();
       }
       
-      if (gridApiDetail) {
-        if (typeof gridApiDetail.setRowData === 'function') {
-          gridApiDetail.setRowData([]);
-        } else if (typeof gridApiDetail.setGridOption === 'function') {
-          gridApiDetail.setGridOption('rowData', []);
-        }
-      }
-      // 선택된 견적서 번호 초기화
-      document.getElementById('selectedQuotationNo').textContent = '';
+      clearDetailGrid();
     }
 
-    // ⑨ SweetAlert 데모
     function showAlert() {
       Swal.fire('성공!', '작업이 성공적으로 완료되었습니다.', 'success');
     }

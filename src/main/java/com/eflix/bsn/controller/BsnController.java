@@ -186,6 +186,164 @@ public class BsnController {
         }
     }
 
+    /**
+     * 휴지통 견적서 목록 조회
+     */
+    @GetMapping("/quotation/trash")
+    @ResponseBody
+    public List<QuotationDTO> getTrashQuotations() {
+        String coIdx = AuthUtil.getCoIdx();
+        try {
+            log.info("휴지통 견적서 목록 조회 - 회사: {}", coIdx);
+            List<QuotationDTO> archivedList = quotationService.getArchivedQuotationList();
+            log.info("휴지통 견적서 조회 완료 - 회사: {}, 건수: {}", coIdx, archivedList.size());
+            return archivedList;
+        } catch (Exception e) {
+            log.error("휴지통 견적서 목록 조회 오류 - 회사: {}", coIdx, e);
+            return new ArrayList<>();
+        }
+    }
+    
+    /**
+     * 견적서 휴지통으로 이동
+     */
+    @PostMapping("/quotation/{quotationNo}/trash")
+    @ResponseBody
+    public Map<String, Object> moveQuotationToTrash(@PathVariable String quotationNo) {
+        Map<String, Object> response = new HashMap<>();
+        String coIdx = AuthUtil.getCoIdx();
+        
+        try {
+            log.info("견적서 휴지통 이동 요청 - 회사: {}, 견적서: {}", coIdx, quotationNo);
+            
+            boolean success = quotationService.moveToTrash(quotationNo);
+            
+            if (success) {
+                response.put("success", true);
+                response.put("message", "견적서가 휴지통으로 이동되었습니다.");
+                log.info("견적서 휴지통 이동 완료 - 회사: {}, 견적서: {}", coIdx, quotationNo);
+            } else {
+                response.put("success", false);
+                response.put("message", "견적서를 휴지통으로 이동할 수 없습니다.");
+            }
+        } catch (Exception e) {
+            log.error("견적서 휴지통 이동 실패 - 회사: {}, 견적서: {}", coIdx, quotationNo, e);
+            response.put("success", false);
+            response.put("message", "휴지통 이동 중 오류가 발생했습니다.");
+        }
+        
+        return response;
+    }
+    
+    /**
+     * 견적서 복원
+     */
+    @PostMapping("/quotation/{quotationNo}/restore")
+    @ResponseBody
+    public Map<String, Object> restoreQuotation(@PathVariable String quotationNo) {
+        Map<String, Object> response = new HashMap<>();
+        String coIdx = AuthUtil.getCoIdx();
+        
+        try {
+            log.info("견적서 복원 요청 - 회사: {}, 견적서: {}", coIdx, quotationNo);
+            
+            boolean success = quotationService.restoreQuotation(quotationNo);
+            
+            if (success) {
+                response.put("success", true);
+                response.put("message", "견적서가 복원되었습니다.");
+                log.info("견적서 복원 완료 - 회사: {}, 견적서: {}", coIdx, quotationNo);
+            } else {
+                response.put("success", false);
+                response.put("message", "견적서를 복원할 수 없습니다.");
+            }
+        } catch (Exception e) {
+            log.error("견적서 복원 실패 - 회사: {}, 견적서: {}", coIdx, quotationNo, e);
+            response.put("success", false);
+            response.put("message", "복원 중 오류가 발생했습니다.");
+        }
+        
+        return response;
+    }
+    
+    /**
+     * 견적서 완전 삭제
+     */
+    @DeleteMapping("/quotation/{quotationNo}/permanent")
+    @ResponseBody
+    public Map<String, Object> deleteQuotationPermanently(@PathVariable String quotationNo) {
+        Map<String, Object> response = new HashMap<>();
+        String coIdx = AuthUtil.getCoIdx();
+        
+        try {
+            log.info("견적서 완전 삭제 요청 - 회사: {}, 견적서: {}", coIdx, quotationNo);
+            
+            boolean success = quotationService.deleteQuotationPermanently(quotationNo);
+            
+            if (success) {
+                response.put("success", true);
+                response.put("message", "견적서가 완전히 삭제되었습니다.");
+                log.info("견적서 완전 삭제 완료 - 회사: {}, 견적서: {}", coIdx, quotationNo);
+            } else {
+                response.put("success", false);
+                response.put("message", "견적서를 삭제할 수 없습니다.");
+            }
+        } catch (Exception e) {
+            log.error("견적서 완전 삭제 실패 - 회사: {}, 견적서: {}", coIdx, quotationNo, e);
+            response.put("success", false);
+            response.put("message", "삭제 중 오류가 발생했습니다.");
+        }
+        
+        return response;
+    }
+    
+    /**
+     * 만료된 견적서 자동 아카이브 실행 (수동 실행용)
+     */
+    @PostMapping("/quotation/archive-expired")
+    @ResponseBody
+    public Map<String, Object> archiveExpiredQuotations() {
+        Map<String, Object> response = new HashMap<>();
+        String coIdx = AuthUtil.getCoIdx();
+        
+        try {
+            log.info("수동 자동 아카이브 실행 - 회사: {}", coIdx);
+            
+            int archivedCount = quotationService.archiveExpiredQuotations();
+            
+            response.put("success", true);
+            response.put("archivedCount", archivedCount);
+            response.put("message", archivedCount + "건의 견적서가 휴지통으로 이동되었습니다.");
+            
+            log.info("수동 자동 아카이브 완료 - 회사: {}, 처리 건수: {}", coIdx, archivedCount);
+        } catch (Exception e) {
+            log.error("수동 자동 아카이브 실패 - 회사: {}", coIdx, e);
+            response.put("success", false);
+            response.put("message", "자동 아카이브 실행 중 오류가 발생했습니다.");
+        }
+        
+        return response;
+    }
+    
+    /**
+     * 휴지통 통계 정보 조회
+     */
+    @GetMapping("/quotation/trash/statistics")
+    @ResponseBody
+    public Map<String, Object> getTrashStatistics() {
+        String coIdx = AuthUtil.getCoIdx();
+        try {
+            log.info("휴지통 통계 조회 - 회사: {}", coIdx);
+            return quotationService.getTrashStatistics();
+        } catch (Exception e) {
+            log.error("휴지통 통계 조회 실패 - 회사: {}", coIdx, e);
+            Map<String, Object> emptyStats = new HashMap<>();
+            emptyStats.put("totalCount", 0);
+            emptyStats.put("thisMonthCount", 0);
+            return emptyStats;
+        }
+    }
+
     /*──────────────────────────────
      * 3. 주문서 영역
      *──────────────────────────────*/
