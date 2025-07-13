@@ -95,7 +95,12 @@ public class EntryAutoServiceImpl implements EntryAutoService {
   @Transactional
   public int insertBatch(List<EntryDetailDTO> entryDetailList) {
     int successCount = 0;
+    EntryAutoAllDTO check = new EntryAutoAllDTO(); // detail 조회용
+    check.setCoIdx(AuthUtil.getCoIdx());
     for (EntryDetailDTO dto : entryDetailList) {
+      check.setEntryNumber(dto.getEntryNumber());
+      dto.setCoIdx(AuthUtil.getCoIdx());
+      dto.setLineNumber(entryAutoMapper.selectMaxPlusOneLineNumber(check)); // line number 자동생성
       entryAutoMapper.insertEntryDetail(dto);
       successCount++;
     }

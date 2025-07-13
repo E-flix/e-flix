@@ -158,15 +158,17 @@
     }
     // 전표 추가 버튼 클릭 시 동작
     document.querySelector('#addDetail').addEventListener('click', () => {
-      // 1. 현재 선택된 행 정보 가져오기
-      const selectedRows = journalGrid.api.getSelectedRows();
-      if (!selectedRows || selectedRows.length === 0) {
-        alert('전표를 추가할 행을 선택해 주십시오.');
+      // 모든 행을 대상으로 처리
+      const allRows = [];
+      journalGrid.api.forEachNode(node => {
+        if (node.data) allRows.push(node.data);
+      });
+      if (!allRows || allRows.length === 0) {
+        alert('전표 데이터가 없습니다.');
         return;
       }
       const now = new Date();
-      // entryDetail 리스트 생성
-      const entryDetailList = selectedRows.map(selectedData => ({
+      const entryDetailList = allRows.map(selectedData => ({
         entryNumber: selectedData.entryNumber,
         partnerCode: selectedData.partnerCode,
         partnerName: selectedData.partnerName,
@@ -174,27 +176,30 @@
         resentmenType: selectedData.resentmenType,
         amount: selectedData.debitAmount || selectedData.creditAmount || 0,
         description: selectedData.description || '',
-        createdAt: now.toISOString().slice(0, 19).replace('T', ' '),
-        updatedAt: now.toISOString().slice(0, 19).replace('T', ' '),
+        createdAt: now.toISOString(), 
+        updatedAt: now.toISOString(), 
       }));
-      // 리스트 전체를 서버로 전송
       fetch('/acc/ena/addDetail', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(entryDetailList)
       })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          return res.text().then(msg => { throw new Error(msg || '서버 오류'); });
+        }
+        return res.json();
+      })
       .then(data => {
-        if (data.success) {
-          alert(`상세 전표 일괄 추가 완료\n성공: ${data.successCount}, 실패: ${data.failCount}`);
-          // 필요시 그리드 새로고침
+        if (data.success || typeof data.successCount !== 'undefined') {
+          alert(`상세 전표 일괄 추가 완료\n성공: ${data.successCount ?? '-'}, 실패: ${data.failCount ?? '-'}`);
         } else {
           alert('상세 전표 일괄 추가 실패: ' + (data.message || '알 수 없는 오류'));
         }
       })
       .catch(error => {
         console.error('상세 전표 일괄 추가 중 오류:', error);
-        alert('상세 전표 일괄 추가 중 오류: ' + error.message);
+        alert('상세 전표 일괄 추가 중 오류: ' + (error.message || error));
       });
     });
     // ag-Grid 인스턴스 변수 선언
@@ -207,7 +212,6 @@
       const dateType = document.getElementById('journal-date-type')?.value || 'payMonth';
       const debitType = document.getElementById('journal-debit-type')?.value || 'merge';
       const creditType = document.getElementById('journal-credit-type')?.value || 'split';
-      console.log('[updateDetailGrids] selectedPeriod:', selectedPeriod);
       if (!selectedPeriod) {
         debitsGrid.api.applyTransaction({ remove: debitsGrid.api.getDisplayedRowAtIndex ? Array.from({length: debitsGrid.api.getDisplayedRowCount()}, (_, i) => debitsGrid.api.getDisplayedRowAtIndex(i).data) : [] });
         creditsGrid.api.applyTransaction({ remove: creditsGrid.api.getDisplayedRowAtIndex ? Array.from({length: creditsGrid.api.getDisplayedRowCount()}, (_, i) => creditsGrid.api.getDisplayedRowAtIndex(i).data) : [] });
@@ -241,7 +245,6 @@
 
       function generateJournalGridData() {
         const entryDateValue = getJournalEntryDate(selectedPeriod, dateType);
-        console.log('[generateJournalGridData] entryDateValue:', entryDateValue, 'debitType:', debitType, 'creditType:', creditType);
         // 차변
         let debitRows = [];
         if (debitType === 'merge') {
@@ -314,15 +317,12 @@
             description: null
           }));
         }
-        console.log('[generateJournalGridData] result:', [...debitRows, ...creditRows]);
         return [
           ...debitRows,
           ...creditRows
         ];
       }
       const generatedJournalRows = generateJournalGridData();
-      console.log('[updateDetailGrids] generatedJournalRows:', generatedJournalRows);
-
       // 기존 데이터 모두 제거 후 새 데이터 추가 (ag-Grid v33.x 안전 방식)
       // debitsGrid 안전 교체
       const allDebitsRows = [];
@@ -353,8 +353,7 @@
       journalGrid.api.applyTransaction({ add: generatedJournalRows });
       journalGrid.api.deselectAll();
       journalGrid.api.refreshCells({ force: true });
-      console.log('[journalGrid] after applyTransaction', journalGrid.api.getDisplayedRowCount());
-
+      
       // 합계 행 추가
       setPinnedBottomTotals(); 
     }
@@ -401,8 +400,6 @@
         .then(res => res.json())
         .then(data => {
           // 그리드 데이터 갱신 (기존 데이터 세팅 코드와 동일하게)
-          // 예시:
-          console.log(data);
           periodsGridData = data.map(item => ({ attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber }));
           debitsGridData = [];
           data.forEach(item => {
