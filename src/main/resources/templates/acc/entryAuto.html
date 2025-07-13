@@ -99,7 +99,7 @@
     // debits: 지급항목(차변)
     const debitsColumnDefs = [
       { headerName: '지급항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center'},
-      { headerName: '계정과목코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center',
+      { headerName: '코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center',
         editable: params => params.data.ledgerCheck !== 'a1' },// ledgerCheck이 'a1'이면 입력불가
       { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
       { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
@@ -107,7 +107,7 @@
     // credits: 공제항목(대변)
     const creditsColumnDefs = [
       { headerName: '공제항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
-      { headerName: '계정과목코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center',
+      { headerName: '코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center',
         editable: params => params.data.ledgerCheck !== 'a1' },// ledgerCheck이 'a1'이면 입력불가
       { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
       { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
@@ -117,7 +117,7 @@
       { headerName: "일자", field: "entryDate", minWidth: 100, width: 100},
       { headerName: "전표번호", field: "entryNumber", minWidth: 110, maxWidth: 130, width: 120 },
       { headerName: "구분", field: "resentmenType", minWidth: 70, maxWidth: 90, width: 80 },
-      { headerName: "계정과목코드", field: "accountCode", width: 65, minWidth: 60 },
+      { headerName: "코드", field: "accountCode", width: 65, minWidth: 60 },
       { headerName: "계정과목명", field: "accountName", minWidth: 140, width: 120 },
       { headerName: "코드", field: "partnerCode", width: 65, minWidth: 60 },
       { headerName: "거래처명", field: "partnerName", minWidth: 110, maxWidth: 140, width: 120 },
@@ -169,6 +169,7 @@
       }
       const now = new Date();
       const entryDetailList = allRows.map(selectedData => ({
+        entryDate: selectedData.entryDate,
         entryNumber: selectedData.entryNumber,
         partnerCode: selectedData.partnerCode,
         partnerName: selectedData.partnerName,
@@ -191,10 +192,10 @@
         return res.json();
       })
       .then(data => {
-        if (data.success || typeof data.successCount !== 'undefined') {
-          alert(`상세 전표 일괄 추가 완료\n성공: ${data.successCount ?? '-'}, 실패: ${data.failCount ?? '-'}`);
+        if (data > 0) {
+          alert(`전표추가 완료`);
         } else {
-          alert('상세 전표 일괄 추가 실패: ' + (data.message || '알 수 없는 오류'));
+          alert('전표추가 실패');
         }
       })
       .catch(error => {
@@ -222,7 +223,7 @@
         safeSetPinnedBottomRow(creditsGrid.api, []);
         return;
       }
-      const { attMonth, payMonth, entryDate, entryNumber } = selectedPeriod;
+      const { attMonth, payMonth, entryDate, entryNumber, ledgerCheck } = selectedPeriod;
 
       const filteredDebits = debitsGridData.filter(item =>
         item.attMonth === attMonth && item.payMonth === payMonth && item.entryDate === entryDate && item.entryNumber === entryNumber
@@ -399,50 +400,58 @@
         })
         .then(res => res.json())
         .then(data => {
+          console.log(data)
           // 그리드 데이터 갱신 (기존 데이터 세팅 코드와 동일하게)
-          periodsGridData = data.map(item => ({ attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber }));
+          periodsGridData = data.map(item => ({
+            attMonth: item.attMonth,
+            payMonth: item.payMonth,
+            entryDate: item.entryDate ? item.entryDate.slice(0, 10) : '', // yyyy-MM-dd 형식으로 변환
+            entryNumber: item.entryNumber,
+            ledgerCheck: item.ledgerCheck
+          }));
           debitsGridData = [];
           data.forEach(item => {
+            const entryDate = item.entryDate ? item.entryDate.slice(0, 10) : '';
             if (item.baseSalary && item.baseSalary !== 0) debitsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
               item: '기본급', accountCode: 802, accountName: '직원급여', amount: item.baseSalary
             });
             if (item.bonus && item.bonus !== 0) debitsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
               item: '상여금', accountCode: 803, accountName: '상여금', amount: item.bonus
             });
             if (item.overtimePay && item.overtimePay !== 0) debitsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
               item: '잔업근무수당', accountCode: 802, accountName: '직원급여', amount: item.overtimePay
             });
             if (item.nightWorkPay && item.nightWorkPay !== 0) debitsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
               item: '야간근무수당', accountCode: 802, accountName: '직원급여', amount: item.nightWorkPay
             });
           });
           creditsGridData = [];
           data.forEach(item => {
+            const entryDate = item.entryDate ? item.entryDate.slice(0, 10) : '';
             if (item.tax && item.tax !== 0) creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
               item: '원천세', accountCode: 254, accountName: '예수금', amount: item.tax
             });
             if (item.healthInsurance && item.healthInsurance !== 0) creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
               item: '건강보험', accountCode: 254, accountName: '예수금', amount: item.healthInsurance
             });
             if (item.nationalPension && item.nationalPension !== 0) creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
               item: '국민연금', accountCode: 254, accountName: '예수금', amount: item.nationalPension
             });
             if (item.employmentIns && item.employmentIns !== 0) creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
               item: '고용보험', accountCode: 254, accountName: '예수금', amount: item.employmentIns
             });
             if (item.otherDeductions && item.otherDeductions !== 0) creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
               item: '기타공제', accountCode: 254, accountName: '예수금', amount: item.otherDeductions
             });
-
             // 차인지급액 추가
             const payment =
               (Number(item.baseSalary || 0) +
@@ -454,9 +463,8 @@
                Number(item.nationalPension || 0) +
                Number(item.employmentIns || 0) +
                Number(item.otherDeductions || 0));
-
             creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate: item.entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
               item: '차인지급액', accountCode: 262, accountName: '미지급비용', amount: payment
             });
           });

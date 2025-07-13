@@ -39,4 +39,5 @@ public class EntryDetailDTO {
   private String accountNumber; // 계좌번호
   private String cardName; // 카드명
   private String cardNumber; // 카드번호
+  private Date entryDate;
 }

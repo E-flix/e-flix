@@ -86,7 +86,7 @@
     SET ledger_check = 'a1',
         entry_date = #{entryDate},
         updated_at = sysdate
-    WHERE remarks = #{remarks}
+    WHERE entry_number = #{entryNumber}
       AND ledger_check = 'a2'
       AND co_idx = #{coIdx}
   </update>

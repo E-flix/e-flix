@@ -104,6 +104,11 @@ public class EntryAutoServiceImpl implements EntryAutoService {
       entryAutoMapper.insertEntryDetail(dto);
       successCount++;
     }
+    EntryMasterDTO master = new EntryMasterDTO();
+    master.setEntryNumber(entryDetailList.get(0).getEntryNumber());
+    master.setEntryDate(entryDetailList.get(0).getEntryDate());
+    master.setCoIdx(AuthUtil.getCoIdx());
+    entryAutoMapper.updateEntryMaster(master);
     return successCount;
   }
 }
