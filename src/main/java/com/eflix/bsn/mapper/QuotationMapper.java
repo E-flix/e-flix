@@ -19,9 +19,27 @@ public interface QuotationMapper {
     /** 디테일 견적서 INSERT */
     void insertQuotationDetail(QuotationDetailDTO detail);
 
-    /** 견적서 목록 조회 */
+    /** 활성 견적서 목록 조회 */
     List<QuotationDTO> getQuotationList();
 
-    // 견적서 상세 조회
+    /** 휴지통 견적서 목록 조회 */
+    List<QuotationDTO> getArchivedQuotationList();
+
+    /** 견적서 상세 조회 */
     List<QuotationDetailDTO> selectQuotationDetails(@Param("quotationNo") String quotationNo);
+    
+    /** 만료된 견적서 자동 아카이브 */
+    int archiveExpiredQuotations();
+    
+    /** 견적서 복원 */
+    int restoreQuotation(@Param("quotationNo") String quotationNo);
+    
+    /** 견적서 완전 삭제 */
+    int deleteQuotationPermanently(@Param("quotationNo") String quotationNo);
+    
+    /** 견적서 휴지통으로 이동 */
+    int moveToTrash(@Param("quotationNo") String quotationNo);
+    
+    /** 만료 예정 견적서 개수 조회 */
+    int getExpiringSoonCount();
 }

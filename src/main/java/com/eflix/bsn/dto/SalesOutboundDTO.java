@@ -18,6 +18,7 @@ public class SalesOutboundDTO {
     private String representativeNm;
     private Date orderDt;
     private Date outboundDt;
+    private Date deliveryDueDate;
     private String money;
     private String remarks;
     private String coIdx;

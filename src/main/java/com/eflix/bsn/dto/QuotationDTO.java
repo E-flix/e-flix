@@ -34,8 +34,28 @@ public class QuotationDTO {
     private String sender;
     /** 할인율 (0~20, 추가) */
     private Integer discountRate;
+    
+    /** 견적서 상태 (ACTIVE, ARCHIVED, DELETED) */
+    private String status;
+    
+    /** 아카이브 일시 */
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+    private Date archivedAt;
 
     /** 견적서 상세 목록 */
-    private List<QuotationDetailDTO> details;       
+    private List<QuotationDetailDTO> details;
+    
+    // 유효성 상태 판단 메소드
+    public boolean isExpired() {
+        if (validPeriod == null) return false;
+        return validPeriod.before(new Date());
+    }
+    
+    public boolean isExpiringSoon() {
+        if (validPeriod == null) return false;
+        Date today = new Date();
+        Date sevenDaysLater = new Date(today.getTime() + (7 * 24 * 60 * 60 * 1000));
+        return validPeriod.after(today) && validPeriod.before(sevenDaysLater);
+    }
 }
-

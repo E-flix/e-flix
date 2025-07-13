@@ -43,12 +43,12 @@ public class SOutboundServiceImpl implements SOutboundService {
         String coIdx = AuthUtil.getCoIdx();
         dto.setCoIdx(coIdx);
 
-        // 1. 출하번호가 없으면 새로 채번합니다.
+        // 1. 출하번호가 없으면 새로 채번
         if (!StringUtils.hasText(dto.getOutboundNo())) {
             dto.setOutboundNo(generateNextOutboundNo());
         }
         
-        // 2. 작성일, 출고일 등 기본값을 설정합니다.
+        // 2. 작성일, 출고일 등 기본값을 설정
         if (!StringUtils.hasText(dto.getWriteDt())) {
             dto.setWriteDt(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         }
@@ -56,10 +56,10 @@ public class SOutboundServiceImpl implements SOutboundService {
             dto.setOutboundDt(java.sql.Date.valueOf(LocalDate.now()));
         }
 
-        // 3. 헤더 정보를 데이터베이스에 저장합니다.
+        // 3. 헤더 정보를 데이터베이스에 저장
         outboundMapper.insertOutbound(dto);
 
-        // 4. 상세 품목 정보가 있으면 함께 저장합니다.
+        // 4. 상세 품목 정보가 있으면 함께 저장
         if (dto.getDetails() != null && !dto.getDetails().isEmpty()) {
             prepareDetailData(dto.getDetails(), dto.getOutboundNo(), coIdx);
             outboundMapper.insertOutboundDetailBatch(dto.getDetails());
@@ -74,7 +74,7 @@ public class SOutboundServiceImpl implements SOutboundService {
         String coIdx = AuthUtil.getCoIdx();
         log.info("주문서 기반 출하 의뢰서 생성 시작 - 주문번호: {}", orderNo);
 
-        // 1. 주문서 정보를 조회하여 출하 의뢰서 데이터를 구성합니다.
+        // 1. 주문서 정보를 조회하여 출하 의뢰서 데이터를 구성
         SalesOutboundDTO outboundHeader = outboundMapper.selectOrderForOutbound(orderNo, coIdx);
         if (outboundHeader == null) {
             throw new IllegalArgumentException("주문서를 찾을 수 없습니다: " + orderNo);
@@ -86,7 +86,7 @@ public class SOutboundServiceImpl implements SOutboundService {
         }
         outboundHeader.setDetails(outboundDetails);
 
-        // 2. 공통 생성 로직을 호출하여 출하 의뢰서를 최종 생성합니다.
+        // 2. 공통 생성 로직을 호출하여 출하 의뢰서를 최종 생성
         String outboundNo = createOutbound(outboundHeader);
 
         log.info("주문서 기반 출하 의뢰서 생성 완료: {} -> {}", orderNo, outboundNo);
@@ -138,7 +138,7 @@ public class SOutboundServiceImpl implements SOutboundService {
     }
 
     /**
-     * 상세 품목 데이터를 일괄 저장하기 전에 필요한 값(출하번호, 순번 등)을 설정합니다.
+     * 상세 품목 데이터를 일괄 저장하기 전에 필요한 값(출하번호, 순번 등)을 설정
      */
     private void prepareDetailData(List<SoutboundDetailDTO> details, String outboundNo, String coIdx) {
         AtomicInteger lineNo = new AtomicInteger(1);
@@ -149,7 +149,6 @@ public class SOutboundServiceImpl implements SOutboundService {
             if (!StringUtils.hasText(detail.getOutboundStatus())) {
                 detail.setOutboundStatus("대기");
             }
-            // ★★★ 변경: 가격 관련 필드가 제거되었으므로, 금액 계산 로직을 삭제합니다. ★★★
         });
     }
 }

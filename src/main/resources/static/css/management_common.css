@@ -1,0 +1,104 @@
+/* ===================================================
+ * 영업 관리 페이지 공통 스타일
+ * - 적용 대상: 주문서, 견적서, 출고 관리 등
+ * - 작성일: 2025-07-14
+ * =================================================== */
+
+/* 1. 페이지 컨테이너 및 헤더 */
+.management-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* 섹션 간 간격 */
+}
+
+.page-header {
+    background-color: #fff;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    border: 1px solid #e3e6f0;
+}
+
+.page-header h4 {
+    font-weight: 700;
+    color: #4e73df;
+}
+
+.page-header .btn {
+    min-width: 80px; /* 버튼 최소 너비 */
+}
+
+/* 2. 섹션 박스 (카드 스타일) */
+.section-box {
+    padding: 0; /* 내부 패딩은 card-body에서 처리 */
+    border: 1px solid #e3e6f0;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    overflow: hidden; /* card-header의 radius 적용을 위해 */
+}
+
+.section-box .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    padding: 0.75rem 1.25rem;
+}
+
+.section-box .card-header h6 {
+    margin: 0;
+    font-weight: 700;
+    color: #4e73df;
+}
+
+.section-box .card-body {
+    padding: 1.25rem;
+}
+
+/* 3. 버튼 통일 */
+.btn-sm {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+}
+
+.btn .fas {
+    margin-right: 4px;
+}
+
+/* 4. 모달창 통일 */
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom: none;
+}
+
+.modal-header .modal-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.modal-header .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.modal-dialog.modal-lg {
+    max-width: 800px;
+}
+
+.modal-dialog.modal-xl {
+    max-width: 1140px;
+}
+
+/* 5. AG-Grid 높이 통일 */
+.header-grid, .detail-grid, .credit-grid {
+    height: 350px;
+    width: 100%;
+}
+
+/* 견적서 조회 페이지의 필터 박스 스타일 */
+#filterForm.section-box {
+    padding: 1.25rem;
+    background-color: #f8f9fc;
+}

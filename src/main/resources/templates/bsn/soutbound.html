@@ -476,7 +476,7 @@
         }
       });
       
-      // ★★★ 추가: 헤더 그리드 상태 실시간 모니터링 함수 ★★★
+      // 헤더 그리드 상태 실시간 모니터링 함수 
       window.monitorHeaderGrid = function() {
         console.log('=== 헤더 그리드 실시간 상태 ===');
         
@@ -512,7 +512,7 @@
         return allRows;
       };
       
-      // ★★★ 추가: 강제 헤더 업데이트 함수 ★★★
+      // 강제 헤더 업데이트 함수
       window.forceUpdateHeader = function(customerName, representativeNm) {
         console.log('🔧 강제 헤더 업데이트 시작');
         
@@ -555,45 +555,150 @@
       // 저장 버튼 - 출하 의뢰서 등록
       document.getElementById('btnSave').addEventListener('click', async () => {
         console.log('💾 출하 의뢰서 저장 시작');
-
+      
         if (!isNewMode) {
           Swal.fire('알림', '신규 모드에서만 저장할 수 있습니다.', 'info');
           return;
         }
-
-        // 헤더 데이터 검증
-        const headerNode = headerGridApi.getRowNode('신규 등록 중...');
-        if (!headerNode || !headerNode.data) {
-          Swal.fire('오류', '헤더 정보가 없습니다.', 'error');
+      
+        //수정된 헤더 데이터 확보 로직 
+        let headerData = null;
+      
+        // 방법 1: getRowNode로 찾기
+        try {
+          const headerNode = headerGridApi.getRowNode('신규 등록 중...');
+          if (headerNode && headerNode.data) {
+            headerData = headerNode.data;
+            console.log('✅ 방법 1 성공 - getRowNode:', headerData);
+          }
+        } catch (error) {
+          console.warn('⚠️ 방법 1 실패:', error);
+        }
+      
+        // 방법 2: forEachNode로 찾기
+        if (!headerData) {
+          try {
+            headerGridApi.forEachNode(node => {
+              if (node.data && node.data.outboundNo === '신규 등록 중...') {
+                headerData = node.data;
+                console.log('✅ 방법 2 성공 - forEachNode:', headerData);
+                return false; // 찾았으면 중단
+              }
+            });
+          } catch (error) {
+            console.warn('⚠️ 방법 2 실패:', error);
+          }
+        }
+      
+        // 방법 3: 전역 변수 사용
+        if (!headerData && newOutboundData) {
+          headerData = newOutboundData;
+          console.log('✅ 방법 3 성공 - 전역 변수:', headerData);
+        }
+      
+        // 방법 4: 첫 번째 행 직접 확인 (신규 모드에서는 첫 번째 행이 신규 행)
+        if (!headerData) {
+          try {
+            const firstRowNode = headerGridApi.getDisplayedRowAtIndex(0);
+            if (firstRowNode && firstRowNode.data && firstRowNode.data.isNew) {
+              headerData = firstRowNode.data;
+              console.log('✅ 방법 4 성공 - 첫 번째 행:', headerData);
+            }
+          } catch (error) {
+            console.warn('⚠️ 방법 4 실패:', error);
+          }
+        }
+      
+        // 최종 확인
+        if (!headerData) {
+          console.error('❌ 모든 방법 실패 - 헤더 데이터를 찾을 수 없음');
+          
+          // 디버깅 정보 출력
+          console.log('디버깅 정보:');
+          console.log('- isNewMode:', isNewMode);
+          console.log('- newOutboundData:', newOutboundData);
+          console.log('- headerGridApi:', !!headerGridApi);
+          
+          if (headerGridApi) {
+            const allRows = [];
+            headerGridApi.forEachNode(node => allRows.push(node.data));
+            console.log('- 현재 그리드 모든 행:', allRows);
+          }
+        
+          // 사용자에게 자세한 오류 정보 제공
+          Swal.fire({
+            title: '헤더 정보 오류',
+            html: `
+              <div class="text-start">
+                <p>헤더 정보를 찾을 수 없습니다.</p>
+                <hr>
+                <strong>해결 방법:</strong>
+                <ol>
+                  <li>신규 버튼을 다시 클릭</li>
+                  <li>주문서를 다시 선택</li>
+                  <li>페이지를 새로고침</li>
+                </ol>
+                <hr>
+                <small class="text-muted">
+                  신규모드: ${isNewMode ? '✅' : '❌'}<br>
+                  전역데이터: ${newOutboundData ? '✅' : '❌'}
+                </small>
+              </div>
+            `,
+            icon: 'error',
+            confirmButtonText: '확인',
+            footer: '<small>문제가 지속되면 관리자에게 문의하세요.</small>'
+          });
           return;
         }
-
-        const headerData = headerNode.data;
+      
+        console.log('📋 최종 헤더 데이터:', headerData);
+      
+        // ★★★ 필수 필드 검증 ★★★
         const validationErrors = [];
-
+      
         if (!headerData.customerCd || !headerData.customerCd.trim()) {
-          validationErrors.push('거래처를 선택해 주세요.');
+          validationErrors.push('• 거래처를 선택해 주세요.');
         }
         if (!headerData.customerName || !headerData.customerName.trim()) {
-          validationErrors.push('거래처명이 필요합니다.');
+          validationErrors.push('• 거래처명이 필요합니다.');
         }
         if (!headerData.outboundDt) {
-          validationErrors.push('출고일자를 입력해 주세요.');
+          validationErrors.push('• 출고일자를 입력해 주세요.');
         }
-
+      
         if (validationErrors.length > 0) {
-          Swal.fire('검증 오류', validationErrors.join('\n'), 'error');
+          console.error('❌ 헤더 검증 실패:', validationErrors);
+          Swal.fire({
+            title: '입력 정보 확인',
+            html: `
+              <div class="text-start">
+                <p><strong>다음 정보를 확인해 주세요:</strong></p>
+                ${validationErrors.join('<br>')}
+                <hr>
+                <p class="text-muted">주문서를 선택하면 자동으로 입력됩니다.</p>
+              </div>
+            `,
+            icon: 'warning',
+            confirmButtonText: '확인'
+          });
           return;
         }
-
-        // 상세 데이터 수집
+      
+        // ★★★ 상세 데이터 수집 및 검증 ★★★
         const details = [];
         const detailErrors = [];
-
+      
         detailGridApi.forEachNode((node, index) => {
           const data = node.data;
-          if (!data.itemCode && !data.itemName && !data.qty) return;
-
+          console.log(`📦 상세 ${index + 1}:`, data);
+        
+          // 빈 행 건너뛰기
+          if (!data.itemCode && !data.itemName && !data.qty) {
+            return;
+          }
+        
+          // 필수 필드 검증
           if (!data.itemCode || !data.itemCode.trim()) {
             detailErrors.push(`${index + 1}번째 행: 품목코드가 필요합니다.`);
             return;
@@ -606,7 +711,8 @@
             detailErrors.push(`${index + 1}번째 행: 수량은 1 이상이어야 합니다.`);
             return;
           }
-
+        
+          // 상세 항목 구성
           details.push({
             lineNo: details.length + 1,
             itemCode: data.itemCode.trim(),
@@ -618,27 +724,48 @@
             remarks: data.remarks || ''
           });
         });
-
+      
+        console.log('📦 수집된 상세 데이터:', details);
+        console.log('❌ 상세 검증 오류:', detailErrors);
+      
         if (detailErrors.length > 0) {
-          Swal.fire('검증 오류', detailErrors.join('\n'), 'error');
+          Swal.fire({
+            title: '상세 정보 확인',
+            html: `
+              <div class="text-start">
+                <p><strong>다음 상세 정보를 확인해 주세요:</strong></p>
+                ${detailErrors.map(err => `• ${err}`).join('<br>')}
+              </div>
+            `,
+            icon: 'warning',
+            confirmButtonText: '확인'
+          });
           return;
         }
+      
         if (details.length === 0) {
-          Swal.fire('안내', '출고할 품목을 한 개 이상 입력해 주세요.', 'warning');
+          Swal.fire({
+            title: '상품 정보 필요',
+            text: '출고할 품목을 한 개 이상 입력해 주세요.',
+            icon: 'warning',
+            confirmButtonText: '확인'
+          });
           return;
         }
-
-        // 저장 확인
+      
+        // ★★★ 저장 확인 대화상자 ★★★
         const confirmResult = await Swal.fire({
           title: '출하 의뢰서 등록',
           html: `
             <div class="text-start">
-              <p><strong>거래처:</strong> ${headerData.customerName}</p>
-              <p><strong>출고일자:</strong> ${formatDateForAPI(headerData.outboundDt)}</p>
-              <p><strong>품목 개수:</strong> ${details.length}개</p>
-              <p><strong>총 수량:</strong> ${details.reduce((sum, d) => sum + d.qty, 0)}개</p>
+              <p><strong>📋 등록 정보:</strong></p>
+              <p>• <strong>거래처:</strong> ${headerData.customerName}</p>
+              <p>• <strong>대표명:</strong> ${headerData.representativeNm || '-'}</p>
+              <p>• <strong>출고일자:</strong> ${formatDateForAPI(headerData.outboundDt)}</p>
+              <p>• <strong>품목 개수:</strong> ${details.length}개</p>
+              <p>• <strong>총 수량:</strong> ${details.reduce((sum, d) => sum + d.qty, 0)}개</p>
               <hr>
-              <p class="text-muted">출하 의뢰서를 등록하시겠습니까?</p>
+              <p class="text-center text-muted">출하 의뢰서를 등록하시겠습니까?</p>
             </div>
           `,
           icon: 'question',
@@ -647,15 +774,20 @@
           cancelButtonColor: '#6c757d',
           confirmButtonText: '<i class="fas fa-save"></i> 등록',
           cancelButtonText: '<i class="fas fa-times"></i> 취소',
-          reverseButtons: true
+          reverseButtons: true,
+          width: '500px'
         });
-
-        if (!confirmResult.isConfirmed) return;
-
-        // DTO 구성 및 전송
+      
+        if (!confirmResult.isConfirmed) {
+          console.log('사용자가 등록을 취소했습니다.');
+          return;
+        }
+      
+        // ★★★ DTO 구성 및 전송 ★★★
         const outboundDto = {
           writeDt: formatDateForAPI(new Date()),
           outboundDt: formatDateForAPI(headerData.outboundDt || new Date()),
+          deliveryDueDate: formatDateForAPI(headerData.deliveryDueDate || headerData.outboundDt || new Date()),
           customerCd: headerData.customerCd.trim(),
           customerName: headerData.customerName.trim(),
           representativeNm: headerData.representativeNm || '',
@@ -664,81 +796,128 @@
           remarks: headerData.remarks || '',
           details: details
         };
-
+      
+        console.log('=== 최종 전송 데이터 ===');
+        console.log('DTO:', outboundDto);
+      
+        // 저장 진행 표시
         Swal.fire({
           title: '등록 중...',
-          text: '출하 의뢰서를 저장하고 있습니다.',
+          html: `
+            <div class="text-center">
+              <div class="spinner-border text-primary mb-3"></div>
+              <p>출하 의뢰서를 저장하고 있습니다.</p>
+              <small class="text-muted">잠시만 기다려 주세요...</small>
+            </div>
+          `,
           allowOutsideClick: false,
-          showConfirmButton: false,
-          didOpen: () => Swal.showLoading()
+          showConfirmButton: false
         });
-
+      
         try {
+          console.log('🌐 서버 요청 시작');
+        
           const response = await fetch('/bsn/soutbounds', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json; charset=utf-8' },
             body: JSON.stringify(outboundDto)
           });
-
+        
+          console.log('📡 서버 응답 상태:', response.status, response.statusText);
+        
           if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${response.statusText}\n상세: ${errorText}`);
           }
-
+        
           const result = await response.json();
-
+          console.log('✅ 서버 응답 데이터:', result);
+        
           if (result.success) {
+            // 성공 처리
             await Swal.fire({
               title: '등록 완료! 🎉',
               html: `
                 <div class="text-center">
-                  <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
-                  <p class="mt-3"><strong>출하 의뢰서가 성공적으로 등록되었습니다.</strong></p>
-                  <p class="text-primary"><strong>출하번호: ${result.outboundNo}</strong></p>
+                  <i class="fas fa-check-circle text-success" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                  <h4 class="text-success mb-3">출하 의뢰서가 성공적으로 등록되었습니다!</h4>
+                  <div class="alert alert-info">
+                    <p class="mb-1"><strong>출하번호:</strong></p>
+                    <h5 class="text-primary">${result.outboundNo}</h5>
+                  </div>
                   <p class="text-muted">목록에서 확인하실 수 있습니다.</p>
                 </div>
               `,
               icon: 'success',
               confirmButtonText: '확인',
-              timer: 5000
+              timer: 6000,
+              width: '500px'
             });
-
+          
+            // 상태 초기화 및 목록 새로고침
             resetNewMode();
             loadOutboundList();
-
-            // 등록된 항목 선택
+          
+            // 등록된 항목 자동 선택
             setTimeout(() => {
               if (headerGridApi && result.outboundNo) {
                 headerGridApi.forEachNode(node => {
-                  if (node.data.outboundNo === result.outboundNo) {
+                  if (node.data && node.data.outboundNo === result.outboundNo) {
                     node.setSelected(true);
                     headerGridApi.ensureNodeVisible(node);
                     loadOutboundDetails(result.outboundNo);
+                    return false; // 찾았으면 중단
                   }
                 });
               }
             }, 1000);
+          
           } else {
+            // 서버에서 success: false 응답
+            console.error('❌ 서버 비즈니스 로직 오류:', result.message);
             Swal.fire({
               title: '등록 실패',
-              text: result.message || '서버에서 알 수 없는 오류가 발생했습니다.',
+              html: `
+                <div class="text-center">
+                  <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                  <p>${result.message || '서버에서 알 수 없는 오류가 발생했습니다.'}</p>
+                  <small class="text-muted">입력 정보를 다시 확인해 주세요.</small>
+                </div>
+              `,
               icon: 'error',
               confirmButtonText: '확인'
             });
           }
+        
         } catch (error) {
           console.error('❌ 등록 요청 실패:', error);
+        
           let errorMessage = '등록 중 오류가 발생했습니다.';
+          let errorDetail = error.message;
+        
           if (error.message.includes('HTTP 400')) {
-            errorMessage = '요청 데이터에 오류가 있습니다. 입력값을 다시 확인해주세요.';
+            errorMessage = '요청 데이터에 오류가 있습니다.';
           } else if (error.message.includes('HTTP 500')) {
-            errorMessage = '서버 내부 오류가 발생했습니다. 관리자에게 문의하세요.';
+            errorMessage = '서버 내부 오류가 발생했습니다.';
+          } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            errorMessage = '네트워크 연결에 문제가 있습니다.';
           }
+        
           Swal.fire({
             title: '등록 실패',
-            text: errorMessage,
+            html: `
+              <div class="text-center">
+                <i class="fas fa-times-circle text-danger" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                <p><strong>${errorMessage}</strong></p>
+                <details class="mt-3">
+                  <summary class="text-muted" style="cursor: pointer;">오류 상세 정보</summary>
+                  <small class="text-muted">${errorDetail}</small>
+                </details>
+              </div>
+            `,
             icon: 'error',
-            footer: `오류 상세: ${error.message}`,
-            confirmButtonText: '확인'
+            confirmButtonText: '확인',
+            width: '500px'
           });
         }
       });

@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "[http://mybatis.org/dtd/mybatis-3-mapper.dtd](http://mybatis.org/dtd/mybatis-3-mapper.dtd)">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.eflix.bsn.mapper.SOutboundMapper">
 
-  <!-- 출고 목록 조회 -->
+  <!-- ★★★ 수정된 출고 목록 조회 - 누락된 필드들 추가 ★★★ -->
   <select id="selectAllOutbound" resultType="com.eflix.bsn.dto.SalesOutboundDTO" parameterType="string">
     SELECT
         so.OUTBOUND_NO,
         so.WRITE_DT,
+        so.CUSTOMER_CD,
         so.CUSTOMER_NAME,
+        so.REPRESENTATIVE_NM,        
+        so.ORDER_DT,                 
         so.OUTBOUND_DT,
+        -- ★ 추가: 납기일자 (컬럼이 있으면 사용, 없으면 OUTBOUND_DT 사용)
+        COALESCE(so.DELIVERY_DUE_DATE, so.OUTBOUND_DT) AS deliveryDueDate,
+        so.MONEY,
         so.REMARKS,
         so.CO_IDX,
-        -- ★★★ 변경: 전체 상태 계산 로직을 '출고완료'와 '대기' 2가지로 단순화 ★★★
+        -- 전체 상태 계산 로직
         CASE
             -- 모든 품목이 출고완료 상태이면 '출고완료'
             WHEN status_summary.total_count = status_summary.completed_count THEN '출고완료'
@@ -37,7 +43,7 @@
         so.OUTBOUND_DT DESC, so.CREATED_AT DESC
   </select>
 
-  <!-- ★★★ 변경: 출고 상세 조회 쿼리에서 가격 관련 컬럼 제거 ★★★ -->
+  <!-- 출고 상세 조회 -->
   <select id="selectOutboundDetails" resultType="com.eflix.bsn.dto.SoutboundDetailDTO" parameterType="string">
     SELECT
       sd.OUTBOUND_NO        AS outboundNo,
@@ -68,10 +74,10 @@
   <insert id="insertOutbound" parameterType="com.eflix.bsn.dto.SalesOutboundDTO">
     INSERT INTO EFLIX.SALES_OUTBOUND (
       OUTBOUND_NO, WRITE_DT, CUSTOMER_CD, CUSTOMER_NAME, REPRESENTATIVE_NM,
-      ORDER_DT, OUTBOUND_DT, MONEY, REMARKS, CO_IDX
+      ORDER_DT, OUTBOUND_DT, DELIVERY_DUE_DATE, MONEY, REMARKS, CO_IDX
     ) VALUES (
       #{outboundNo}, #{writeDt}, #{customerCd}, #{customerName}, #{representativeNm},
-      #{orderDt}, #{outboundDt}, #{money, jdbcType=VARCHAR}, #{remarks, jdbcType=VARCHAR}, #{coIdx}
+      #{orderDt}, #{outboundDt}, #{deliveryDueDate}, #{money, jdbcType=VARCHAR}, #{remarks, jdbcType=VARCHAR}, #{coIdx}
     )
   </insert>
 
@@ -81,12 +87,10 @@
     <foreach collection="list" item="d">
       INTO EFLIX.SOUTBOUND_DETAIL (
         OUTBOUND_NO, LINE_NO, ITEM_CODE, ITEM_NAME, STANDARD,
-        QTY, UNIT, UNIT_PRICE, SUPPLY_AMOUNT, TAX_AMOUNT, TOTAL_AMOUNT,
-        OUTBOUND_STATUS, REMARKS, CO_IDX
+        QTY, UNIT, OUTBOUND_STATUS, REMARKS, CO_IDX
       ) VALUES (
         #{d.outboundNo}, #{d.lineNo}, #{d.itemCode}, #{d.itemName}, #{d.standard},
-        #{d.qty}, #{d.unit}, #{d.unitPrice}, #{d.supplyAmount}, #{d.taxAmount}, #{d.totalAmount},
-        #{d.outboundStatus}, #{d.remarks}, #{d.coIdx}
+        #{d.qty}, #{d.unit}, #{d.outboundStatus}, #{d.remarks}, #{d.coIdx}
       )
     </foreach>
     SELECT 1 FROM DUAL
@@ -101,6 +105,7 @@
         REPRESENTATIVE_NM = #{representativeNm},
         ORDER_DT = #{orderDt},
         OUTBOUND_DT = #{outboundDt},
+        DELIVERY_DUE_DATE = #{deliveryDueDate},
         MONEY = #{money},
         REMARKS = #{remarks}
     WHERE OUTBOUND_NO = #{outboundNo}
@@ -115,10 +120,6 @@
         STANDARD = #{standard},
         QTY = #{qty},
         UNIT = #{unit},
-        UNIT_PRICE = #{unitPrice},
-        SUPPLY_AMOUNT = #{supplyAmount},
-        TAX_AMOUNT = #{taxAmount},
-        TOTAL_AMOUNT = #{totalAmount},
         OUTBOUND_STATUS = #{outboundStatus},
         REMARKS = #{remarks}
     WHERE OUTBOUND_NO = #{outboundNo}
@@ -157,10 +158,6 @@
       od.SPEC               AS standard,
       od.QTY                AS qty,
       'EA'                  AS unit,
-      od.UNIT_PRICE         AS unitPrice,
-      od.SUPPLY_AMOUNT      AS supplyAmount,
-      od.TAX_AMOUNT         AS taxAmount,
-      od.TOTAL_AMOUNT       AS totalAmount,
       '대기'                AS outboundStatus,
       od.REMARKS            AS remarks,
       od.CO_IDX             AS coIdx
@@ -170,7 +167,7 @@
     ORDER BY od.LINE_NO
   </select>
 
-  <!-- ★★★ 변경: 출고 상태 통계 조회 쿼리에서 금액 합계(SUM) 제거 ★★★ -->
+  <!-- 출고 상태 통계 조회 -->
   <select id="selectOutboundStatusStats" resultType="java.util.HashMap" parameterType="string">
     SELECT 
       OUTBOUND_STATUS as status,
