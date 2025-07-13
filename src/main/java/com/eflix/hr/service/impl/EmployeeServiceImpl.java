@@ -124,4 +124,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public int mergeEmployee(EmployeeDTO employeeDTO) {
         return employeeMapper.mergeEmployee(employeeDTO);
     }
+
+    @Override
+    public EmployeeDTO findSummaryByEmpIdx(String empIdx) {
+        return employeeMapper.findSummaryByEmpIdx(empIdx);
+    }
 }

@@ -425,4 +425,16 @@
                 #{empRegdate}, #{deptIdx}, #{grdIdx}, #{roleId}, #{empType},
                 #{bankCode}, #{empAccount}, #{baseSalary}, #{empAddrZip}, #{empAddr}, #{empAddrDetail}, #{coIdx})
     </update>
+
+    <!-- 0713 -->
+    <!-- 사원 간단 정보 -->
+    <select id="findSummaryByEmpIdx" parameterType="String" resultType="EmployeeDTO">
+        SELECT e.emp_idx, e.emp_name,
+            d.dept_idx, d.dept_name,
+            g.grd_name
+        FROM employees e
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+            LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+        WHERE e.emp_idx = #{empIdx}
+    </select>
 </mapper>

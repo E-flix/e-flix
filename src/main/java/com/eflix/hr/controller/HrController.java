@@ -20,10 +20,12 @@ import com.eflix.common.code.service.CommonService;
 import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.GradeDTO;
 import com.eflix.hr.dto.HrWorkTypeDTO;
 import com.eflix.hr.dto.RoleDTO;
 import com.eflix.hr.service.DepartmentService;
 import com.eflix.hr.service.EmployeeService;
+import com.eflix.hr.service.GradeService;
 import com.eflix.hr.service.HrWorkTypeService;
 import com.eflix.hr.service.RoleService;
 import com.eflix.hr.service.SalaryService;
@@ -75,6 +77,9 @@ public class HrController {
 
     @Autowired
     private CompanyService companyService;
+
+    @Autowired
+    private GradeService gradeService;
 
     private String getEmpIdx() {
         return AuthUtil.getEmpIdx();
@@ -288,7 +293,13 @@ public class HrController {
     }
     
     @GetMapping("/salary/calc")
-    public String salaryCalc() {
+    public String salaryCalc(Model model) {
+        List<DepartmentDTO> departmentDTO = departmentService.findUpAllByCoIdx(getCoIdx());
+        List<GradeDTO> gradeDTO = gradeService.findAllByCoIdx(getCoIdx());
+
+        model.addAttribute("depts", departmentDTO);
+        model.addAttribute("grades", gradeDTO);
+
         return "hr/new/salary/calc";
     }
 

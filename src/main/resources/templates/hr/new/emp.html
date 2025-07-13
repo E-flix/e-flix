@@ -554,11 +554,7 @@
                     currentPageSize = parseInt(this.value, 10);
                     loadEmpList(1);
                 });
-                $("#paginationArea").on("click", ".page-link", function(e) {
-                    const page = parseInt($(this).data("page"), 10);
-                    loadEmpList(page);
-                });
-
+                
                 $("#paginationArea").on("click", ".page-link", function(e) {
                     const page = parseInt($(this).data("page"), 10);
                     loadEmpList(page);
