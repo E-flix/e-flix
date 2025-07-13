@@ -100,30 +100,31 @@
     const debitsColumnDefs = [
       { headerName: '지급항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center'},
       { headerName: '코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center',
-        editable: params => params.data.ledgerCheck !== 'a1' },// ledgerCheck이 'a1'이면 입력불가
-      { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
-      { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
+        editable: params => params.data && params.data.ledgerCheck !== 'a1' },
+      { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center', editable: false },
+      { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center', editable: false }
     ];
     // credits: 공제항목(대변)
     const creditsColumnDefs = [
       { headerName: '공제항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
       { headerName: '코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center',
-        editable: params => params.data.ledgerCheck !== 'a1' },// ledgerCheck이 'a1'이면 입력불가
-      { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
-      { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center' }
+        editable: params => params.data && params.data.ledgerCheck !== 'a1' },
+      { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center', editable: false },
+      { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center', editable: false }
     ];
     // journal: 일반전표(차변/대변)
     const journalColumnDefs =  [
-      { headerName: "일자", field: "entryDate", minWidth: 100, width: 100},
-      { headerName: "전표번호", field: "entryNumber", minWidth: 110, maxWidth: 130, width: 120 },
-      { headerName: "구분", field: "resentmenType", minWidth: 70, maxWidth: 90, width: 80 },
-      { headerName: "코드", field: "accountCode", width: 65, minWidth: 60 },
-      { headerName: "계정과목명", field: "accountName", minWidth: 140, width: 120 },
-      { headerName: "코드", field: "partnerCode", width: 65, minWidth: 60 },
-      { headerName: "거래처명", field: "partnerName", minWidth: 110, maxWidth: 140, width: 120 },
-      { headerName: "차변", field: "debitAmount", minWidth: 90, maxWidth: 110, width: 100 },
-      { headerName: "대변", field: "creditAmount", minWidth: 90, maxWidth: 110, width: 100 },
-      { headerName: "적요", field: "description", minWidth: 120, width: 120 }
+      { headerName: "일자", field: "entryDate", minWidth: 100, width: 100, editable: false },
+      { headerName: "전표번호", field: "entryNumber", minWidth: 110, maxWidth: 130, width: 120, editable: false },
+      { headerName: "구분", field: "resentmenType", minWidth: 70, maxWidth: 90, width: 80, editable: false },
+      { headerName: "코드", field: "accountCode", width: 65, minWidth: 60, editable: false },
+      { headerName: "계정과목명", field: "accountName", minWidth: 140, width: 120, editable: false },
+      // 거래처코드, 거래처명, 적요: ledgerCheck가 'a1'이면 수정불가
+      { headerName: "코드", field: "partnerCode", width: 65, minWidth: 60, editable: params => params.data && params.data.ledgerCheck !== 'a1' },
+      { headerName: "거래처명", field: "partnerName", minWidth: 110, maxWidth: 140, width: 120, editable: params => params.data && params.data.ledgerCheck !== 'a1' },
+      { headerName: "차변", field: "debitAmount", minWidth: 90, maxWidth: 110, width: 100, editable: false },
+      { headerName: "대변", field: "creditAmount", minWidth: 90, maxWidth: 110, width: 100, editable: false },
+      { headerName: "적요", field: "description", minWidth: 120, width: 120, editable: params => params.data && params.data.ledgerCheck !== 'a1' }
     ];
     // ag-Grid 기본 옵션
     const defaultGridOptions = {
@@ -194,6 +195,28 @@
       .then(data => {
         if (data > 0) {
           alert(`전표추가 완료`);
+          // 전표추가 후 periodsGridData 등 최신화
+          fetch('/acc/ena/all')
+            .then(res => res.json())
+            .then(newData => {
+              periodsGridData = newData.map(item => ({
+                attMonth: item.attMonth,
+                payMonth: item.payMonth,
+                entryDate: item.entryDate ? item.entryDate.slice(0, 10) : '',
+                entryNumber: item.entryNumber,
+                ledgerCheck: item.ledgerCheck
+              }));
+              // periodsGrid에 데이터 반영 (setRowData → applyTransaction 방식으로 변경)
+              if (periodsGrid && periodsGrid.api) {
+                const allRows = [];
+                for (let i = 0; i < periodsGrid.api.getDisplayedRowCount(); i++) {
+                  allRows.push(periodsGrid.api.getDisplayedRowAtIndex(i).data);
+                }
+                periodsGrid.api.applyTransaction({ remove: allRows });
+                periodsGrid.api.applyTransaction({ add: periodsGridData });
+                periodsGrid.api.refreshCells({ force: true });
+              }
+            });
         } else {
           alert('전표추가 실패');
         }
@@ -207,8 +230,19 @@
     let periodsGrid, debitsGrid, creditsGrid, journalGrid;
     let periodsGridData = [], debitsGridData = [], creditsGridData = [], journalGridData = [];
 
+    // 전표추가 버튼 활성/비활성 제어 함수
+    function updateAddDetailButtonState(selectedPeriod) {
+      const btn = document.getElementById('addDetail');
+      if (!btn) return;
+      if (selectedPeriod && selectedPeriod.ledgerCheck === 'a1') {
+        btn.disabled = true;
+      } else {
+        btn.disabled = false;
+      }
+    }
     // 선택된 periods row에 따라 하위 그리드 데이터 필터링 함수
     function updateDetailGrids(selectedPeriod) {
+      updateAddDetailButtonState(selectedPeriod); // 버튼 상태 동기화
       // 필터 값을 직접 읽어옴 (window 변수, setTimeout 불필요)
       const dateType = document.getElementById('journal-date-type')?.value || 'payMonth';
       const debitType = document.getElementById('journal-debit-type')?.value || 'merge';
@@ -253,6 +287,7 @@
           filteredDebits.forEach(item => {
             if (!debitMap[item.accountCode]) {
               debitMap[item.accountCode] = {
+                ledgerCheck: ledgerCheck,
                 entryDate: entryDateValue,
                 entryNumber: entryNumber,
                 resentmenType: 'g3',
@@ -270,6 +305,7 @@
           debitRows = Object.values(debitMap);
         } else {
           debitRows = filteredDebits.map(item => ({
+            ledgerCheck: ledgerCheck,
             entryDate: entryDateValue,
             entryNumber: entryNumber,
             resentmenType: 'g3',
@@ -289,6 +325,7 @@
           filteredCredits.forEach(item => {
             if (!creditMap[item.accountCode]) {
               creditMap[item.accountCode] = {
+                ledgerCheck: ledgerCheck,
                 entryDate: entryDateValue,
                 entryNumber: entryNumber,
                 resentmenType: 'g4',
@@ -306,6 +343,7 @@
           creditRows = Object.values(creditMap);
         } else {
           creditRows = filteredCredits.map(item => ({
+            ledgerCheck: ledgerCheck,
             entryDate: entryDateValue,
             entryNumber: entryNumber,
             resentmenType: 'g4',
@@ -413,19 +451,19 @@
           data.forEach(item => {
             const entryDate = item.entryDate ? item.entryDate.slice(0, 10) : '';
             if (item.baseSalary && item.baseSalary !== 0) debitsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,ledgerCheck: item.ledgerCheck,
               item: '기본급', accountCode: 802, accountName: '직원급여', amount: item.baseSalary
             });
             if (item.bonus && item.bonus !== 0) debitsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,ledgerCheck: item.ledgerCheck,
               item: '상여금', accountCode: 803, accountName: '상여금', amount: item.bonus
             });
             if (item.overtimePay && item.overtimePay !== 0) debitsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,ledgerCheck: item.ledgerCheck,
               item: '잔업근무수당', accountCode: 802, accountName: '직원급여', amount: item.overtimePay
             });
             if (item.nightWorkPay && item.nightWorkPay !== 0) debitsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,ledgerCheck: item.ledgerCheck,
               item: '야간근무수당', accountCode: 802, accountName: '직원급여', amount: item.nightWorkPay
             });
           });
@@ -433,23 +471,23 @@
           data.forEach(item => {
             const entryDate = item.entryDate ? item.entryDate.slice(0, 10) : '';
             if (item.tax && item.tax !== 0) creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber, ledgerCheck: item.ledgerCheck,
               item: '원천세', accountCode: 254, accountName: '예수금', amount: item.tax
             });
             if (item.healthInsurance && item.healthInsurance !== 0) creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber, ledgerCheck: item.ledgerCheck,
               item: '건강보험', accountCode: 254, accountName: '예수금', amount: item.healthInsurance
             });
             if (item.nationalPension && item.nationalPension !== 0) creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber, ledgerCheck: item.ledgerCheck,
               item: '국민연금', accountCode: 254, accountName: '예수금', amount: item.nationalPension
             });
             if (item.employmentIns && item.employmentIns !== 0) creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber, ledgerCheck: item.ledgerCheck,
               item: '고용보험', accountCode: 254, accountName: '예수금', amount: item.employmentIns
             });
             if (item.otherDeductions && item.otherDeductions !== 0) creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber, ledgerCheck: item.ledgerCheck,
               item: '기타공제', accountCode: 254, accountName: '예수금', amount: item.otherDeductions
             });
             // 차인지급액 추가
@@ -464,11 +502,12 @@
                Number(item.employmentIns || 0) +
                Number(item.otherDeductions || 0));
             creditsGridData.push({
-              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber,
+              attMonth: item.attMonth, payMonth: item.payMonth, entryDate, entryNumber: item.entryNumber, ledgerCheck: item.ledgerCheck,
               item: '차인지급액', accountCode: 262, accountName: '미지급비용', amount: payment
             });
           });
           journalGridData = data.map(item => ({
+            ledgerCheck: item.ledgerCheck,
             attMonth: item.attMonth,
             payMonth: item.payMonth,
             entryDate: item.entryDate,
@@ -554,6 +593,7 @@
             onGridReady: params => {
               journalGrid.api = params.api; // 반드시 추가!
               params.api.sizeColumnsToFit && params.api.sizeColumnsToFit();
+              bindPartnerCodeF4Modal(journalGrid);
             }
           });
         })
@@ -561,58 +601,22 @@
           alert('데이터를 불러오는 중 오류가 발생했습니다.\n' + error.message);
         });
     });
-    function showDebugPanel(title, data) {
-      $('#debug-panel').show();
-      $('#debug-panel-content').prepend(
-        `<div style='margin-bottom:10px;border-bottom:1px solid #444;padding-bottom:6px;'><b style='color:#ffd700;'>${title}</b>\n<code style='color:#b2f7ef;'>${JSON.stringify(data, null, 2)}</code></div>`
-      );
-    }
-    $('#debug-panel-toggle').on('click', function() {
-      $('#debug-panel').hide();
-      $('#debug-panel-content').empty();
-    });
-    // Thymeleaf 변수도 디버그 패널에 표시
-    showDebugPanel('Thymeleaf code0H', code0H);
-    showDebugPanel('Thymeleaf code0A', code0A);
-    showDebugPanel('Thymeleaf code0G', code0G);
-    // 계정과목/거래처 모달 오픈 함수
-    function windowOpenAccountModal() {
-      window.openAccountModal(null, function(code, name) {
-        $('#accountCode').val(code).trigger('change');
-        $('#accountName').val(name);
+    // journalGrid의 partnerCode 셀에서 F4 누르면 거래처 모달 오픈 (ledgerCheck !== 'a1'일 때만)
+    function bindPartnerCodeF4Modal(grid) {
+      grid.api.addEventListener('cellKeyDown', function(event) {
+        if (
+          event.colDef.field === 'partnerCode' &&
+          (event.event.key === 'F4' || event.event.keyCode === 115) &&
+          event.node.data.ledgerCheck !== 'a1'
+        ) {
+          event.event.preventDefault();
+          window.openPartnerModal(null, function(code, name) {
+            event.node.setDataValue('partnerCode', code);
+            event.node.setDataValue('partnerName', name);
+          });
+        }
       });
     }
-    function windowOpenPartnerModal() {
-      window.openPartnerModal(null, function(code, name) {
-        $('#partnerCode').val(code).trigger('change');
-        $('#partnerName').val(name);
-      });
-    }
-
-    // 계정과목 input에서 F4 누르면 계정과목 모달 오픈
-    $('#accountCode').on('keydown', function(e) {
-      if (e.key === 'F4' || e.keyCode === 115) {
-        e.preventDefault();
-        windowOpenAccountModal();
-      }
-    });
-    // 거래처 input에서 F4 누르면 거래처 모달 오픈
-    $('#partnerCode').on('keydown', function(e) {
-      if (e.key === 'F4' || e.keyCode === 115) {
-        e.preventDefault();
-        windowOpenPartnerModal();
-      }
-    });
-
-    // 모달이 닫힐 때 포커스를 원래 입력 필드로 되돌림
-    $(document).ready(function() {
-      $('#accountModal').on('hidden.bs.modal', function () {
-        $('#accountCode').focus();
-      });
-      $('#partnerModal').on('hidden.bs.modal', function () {
-        $('#partnerCode').focus();
-      });
-    });
 
     // 계정과목번호 입력 시 계정과목명 자동 조회 및 롤백 처리
     let lastValidAccountCode = '';
@@ -736,7 +740,7 @@
         }
       });
     }
-    // 필터 옵션 변경 시 자동 반영 (window/setTimeout 없이 간단하게)
+    // 필터 옵션 변경 시 자동 반영
     document.getElementById('journal-date-type').addEventListener('change', function() {
       const selected = periodsGrid && periodsGrid.api ? periodsGrid.api.getSelectedRows() : [];
       if (selected && selected.length > 0) updateDetailGrids(selected[0]);
