@@ -781,15 +781,11 @@
         .then(data => {
           if (detailGridApi && typeof detailGridApi.applyTransaction === 'function') {
             // 기존 데이터 제거 후 새 데이터 추가
-
-            
             // 금액 필드 처리: resentmenType과 amount 값에 따라 debitAmount 또는 creditAmount에 할당
             data.forEach(item => {
               // 기본값으로 차변/대변 모두 0으로 초기화
               item.debitAmount = 0;
               item.creditAmount = 0;
-              
-
               if (item.amount !== undefined && item.amount !== null && item.amount !== 0) {
                 // resentmenType에 따라 금액 배치
                 if (item.resentmenType === 'g3') {
@@ -808,11 +804,9 @@
                 }
               }
             });
-            
             const current = [];
             detailGridApi.forEachNode(node => current.push(node.data));
             detailGridApi.applyTransaction({ remove: current, add: data });
-            
             // 빈 행이 있는지 확인하고 없으면 추가
             setTimeout(() => {
               let hasEmptyRow = false;
@@ -825,26 +819,18 @@
               }
               if (!hasEmptyRow) {
                 const newEmptyRow = getEmptyDetailRow();
-                // 선택된 마스터의 전표번호를 빈 행에 설정
                 newEmptyRow.entryNumber = master.entryNumber;
-                
                 // 소계 행이 있으면 그 위에 추가, 없으면 일반 추가
                 const summaryRowIndex = findSummaryRowIndex();
                 if (summaryRowIndex >= 0) {
-                  detailGridApi.applyTransaction({ 
-                    add: [newEmptyRow], 
-                    addIndex: summaryRowIndex 
-                  });
+                  detailGridApi.applyTransaction({ add: [newEmptyRow], addIndex: summaryRowIndex });
                 } else {
                   detailGridApi.applyTransaction({ add: [newEmptyRow] });
                 }
               }
-              
-
-              // 소계 행 추가
-              addDetailSummaryRow(master.entryNumber);
+              // 핀된 하단에 전표소계 행 추가
+              setPinnedBottomDetailSummary(master.entryNumber);
             }, 100);
-            
             detailGridApi.refreshCells({ force: true });
           } else {
 
@@ -1708,27 +1694,25 @@
               nextRowIndex++;
               if (nextRowIndex >= api.getDisplayedRowCount()) {
                 // 마지막 행을 넘어가면 새 빈 행 추가
-                if (selectedMaster && selectedMaster.entryNumber) {
-                  const newEmptyRow = getEmptyDetailRow();
-                  newEmptyRow.entryNumber = selectedMaster.entryNumber;
-                  
-                  // 소계 행이 있으면 그 위에 추가, 없으면 마지막에 추가
-                  const summaryRowIndex = findSummaryRowIndex();
-                  if (summaryRowIndex >= 0) {
-                    api.applyTransaction({ 
-                      add: [newEmptyRow], 
-                      addIndex: summaryRowIndex 
-                    });
-                  } else {
-                    api.applyTransaction({ add: [newEmptyRow] });
-                  }
-                  
-                  setTimeout(() => {
-                    // 새로 추가된 행에 포커스 (소계 행 위에 추가된 경우 해당 위치)
-                    const focusRowIndex = summaryRowIndex >= 0 ? summaryRowIndex : api.getDisplayedRowCount() - 1;
-                    api.setFocusedCell(focusRowIndex, allColumns[0].field);
-                  }, 100);
+                const newEmptyRow = getEmptyDetailRow();
+                newEmptyRow.entryNumber = selectedMaster.entryNumber;
+                
+                // 소계 행이 있으면 그 위에 추가, 없으면 마지막에 추가
+                const summaryRowIndex = findSummaryRowIndex();
+                if (summaryRowIndex >= 0) {
+                  api.applyTransaction({ 
+                    add: [newEmptyRow], 
+                    addIndex: summaryRowIndex 
+                  });
+                } else {
+                  api.applyTransaction({ add: [newEmptyRow] });
                 }
+                
+                setTimeout(() => {
+                  // 새로 추가된 행에 포커스 (소계 행 위에 추가된 경우 해당 위치)
+                  const focusRowIndex = summaryRowIndex >= 0 ? summaryRowIndex : api.getDisplayedRowCount() - 1;
+                  api.setFocusedCell(focusRowIndex, allColumns[0].field);
+                }, 100);
                 return;
               }
             }
@@ -1745,27 +1729,25 @@
               nextColIndex = 0;
               if (nextRowIndex >= api.getDisplayedRowCount()) {
                 // 마지막 행을 넘어가면 새 빈 행 추가
-                if (selectedMaster && selectedMaster.entryNumber) {
-                  const newEmptyRow = getEmptyDetailRow();
-                  newEmptyRow.entryNumber = selectedMaster.entryNumber;
-                  
-                  // 소계 행이 있으면 그 위에 추가, 없으면 마지막에 추가
-                  const summaryRowIndex = findSummaryRowIndex();
-                  if (summaryRowIndex >= 0) {
-                    api.applyTransaction({ 
-                      add: [newEmptyRow], 
-                      addIndex: summaryRowIndex 
-                    });
-                  } else {
-                    api.applyTransaction({ add: [newEmptyRow] });
-                  }
-                  
-                  setTimeout(() => {
-                    // 새로 추가된 행에 포커스 (소계 행 위에 추가된 경우 해당 위치)
-                    const focusRowIndex = summaryRowIndex >= 0 ? summaryRowIndex : api.getDisplayedRowCount() - 1;
-                    api.setFocusedCell(focusRowIndex, allColumns[0].field);
-                  }, 100);
+                const newEmptyRow = getEmptyDetailRow();
+                newEmptyRow.entryNumber = selectedMaster.entryNumber;
+                
+                // 소계 행이 있으면 그 위에 추가, 없으면 마지막에 추가
+                const summaryRowIndex = findSummaryRowIndex();
+                if (summaryRowIndex >= 0) {
+                  api.applyTransaction({ 
+                    add: [newEmptyRow], 
+                    addIndex: summaryRowIndex 
+                  });
+                } else {
+                  api.applyTransaction({ add: [newEmptyRow] });
                 }
+                
+                setTimeout(() => {
+                  // 새로 추가된 행에 포커스 (소계 행 위에 추가된 경우 해당 위치)
+                  const focusRowIndex = summaryRowIndex >= 0 ? summaryRowIndex : api.getDisplayedRowCount() - 1;
+                  api.setFocusedCell(focusRowIndex, allColumns[0].field);
+                }, 100);
                 return;
               }
               continue;
@@ -1912,9 +1894,10 @@
         }
         
         // 차변/대변 금액이 변경된 경우 소계 행 업데이트
-        if (['debitAmount', 'creditAmount'].includes(event.colDef.field) && selectedMaster && selectedMaster.entryNumber) {
+        if (["debitAmount", "creditAmount"].includes(event.colDef.field) && selectedMaster && selectedMaster.entryNumber) {
           setTimeout(() => {
             addDetailSummaryRow(selectedMaster.entryNumber);
+            setPinnedBottomDetailSummary(selectedMaster.entryNumber);
           }, 100);
         }
       }
@@ -2007,11 +1990,7 @@
         
         if (savedDetails && savedDetails.length > 0) {
           const savedDetail = savedDetails[0];
-          
-          // 저장된 데이터로 그리드 업데이트
           Object.assign(rowData, savedDetail);
-          
-          // 그리드 새로 고침
           if (detailGridApi) {
             detailGridApi.refreshCells({ force: true });
             
@@ -2043,6 +2022,8 @@
                 }
               }, 100);
             }
+            // 핀된 하단에 전표소계 행 갱신
+            setPinnedBottomDetailSummary(selectedMaster.entryNumber);
           }
         }
       } catch (error) {
@@ -2124,197 +2105,30 @@
         }
       }
     }
-
-    // 요약 행 추가 함수
-    function addSummaryRows(data) {
-      if (!data.length) return [];
-      const result = [];
-      let grand = { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0 };
-
-      // 날짜 오름차순 정렬
-      data = [...data].sort((a, b) => new Date(a.entryDate) - new Date(b.entryDate));
-
-      // 그룹핑
-      const groupBy = (arr, keyFn) => arr.reduce((acc, row) => {
-        const key = keyFn(row);
-        acc[key] = acc[key] || [];
-        acc[key].push(row);
-        return acc;
-      }, {});
-
-      // 월/분기/반기 그룹핑
-      const getMonth = row => {
-        const d = new Date(row.entryDate);
-        return isNaN(d) ? (row.entryDate?.substr(5, 2) || '') : String(d.getMonth() + 1).padStart(2, '0');
-      };
-      const getQuarter = row => {
-        const d = new Date(row.entryDate);
-        const m = isNaN(d) ? parseInt(row.entryDate?.substr(5, 2)) : d.getMonth() + 1;
-        return m ? `${Math.floor((m - 1) / 3) + 1}` : '';
-      };
-      const getHalf = row => {
-        const d = new Date(row.entryDate);
-        const m = isNaN(d) ? parseInt(row.entryDate?.substr(5, 2)) : d.getMonth() + 1;
-        return m ? (m <= 6 ? '상' : '하') : '';
-      };
-
-      // 그룹핑된 키
-      const byMonth = groupBy(data, getMonth);
-      const byQuarter = groupBy(data, getQuarter);
-      const byHalf = groupBy(data, getHalf);
-
-      // 월/분기/반기/전체 합계 누적용
-      let monthSum = {}, quarterSum = {}, halfSum = {};
-
-      // 일자별 정렬
-      const days = [...new Set(data.map(row => {
-        const d = new Date(row.entryDate);
-        if (isNaN(d)) return row.entryDate?.substr(5, 5) || '';
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        return `${mm}-${dd}`;
-      }))].sort();
-
-      // 월/분기/반기/전체 마지막 일자인지 체크 함수
-      const isLastOfGroup = (idx, arr, groupFn) => {
-        if (idx === arr.length - 1) return true;
-        return groupFn(arr[idx]) !== groupFn(arr[idx + 1]);
-      };
-
-      // 일자별로 루프
-      for (let i = 0; i < data.length;) {
-        const curRow = data[i];
-        const curDate = curRow.entryDate;
-        const d = new Date(curDate);
-        const mm = isNaN(d) ? (curDate?.substr(5, 2) || '') : String(d.getMonth() + 1).padStart(2, '0');
-        const dd = isNaN(d) ? (curDate?.substr(8, 2) || '') : String(d.getDate()).padStart(2, '0');
-        const dayKey = `${mm}-${dd}`;
-
-        // 같은 일자 데이터 모으기
-        const dayRows = [];
-        while (
-          i < data.length &&
-          (() => {
-            const row = data[i];
-            const d2 = new Date(row.entryDate);
-            const mm2 = isNaN(d2) ? (row.entryDate?.substr(5, 2) || '') : String(d2.getMonth() + 1).padStart(2, '0');
-            const dd2 = isNaN(d2) ? (row.entryDate?.substr(8, 2) || '') : String(d2.getDate()).padStart(2, '0');
-            return `${mm2}-${dd2}` === dayKey;
-          })()
-        ) {
-          dayRows.push(data[i]);
-          i++;
-        }
-
-        // 일자 데이터 push
-        dayRows.forEach(row => {
-          result.push(row);
-
-          // 누적
-          grand.totalSupplyAmount += row.totalSupplyAmount || 0;
-          grand.totalTaxAmount += row.totalTaxAmount || 0;
-          grand.total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0);
-
-          // 월/분기/반기 누적
-          const month = getMonth(row);
-          const quarter = getQuarter(row);
-          const half = getHalf(row);
-
-          monthSum[month] = monthSum[month] || { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0, count: 0 };
-          monthSum[month].totalSupplyAmount += row.totalSupplyAmount || 0;
-          monthSum[month].totalTaxAmount += row.totalTaxAmount || 0;
-          monthSum[month].total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0);
-          monthSum[month].count++;
-
-          quarterSum[quarter] = quarterSum[quarter] || { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0, count: 0 };
-          quarterSum[quarter].totalSupplyAmount += row.totalSupplyAmount || 0;
-          quarterSum[quarter].totalTaxAmount += row.totalTaxAmount || 0;
-          quarterSum[quarter].total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0);
-          quarterSum[quarter].count++;
-
-          halfSum[half] = halfSum[half] || { totalSupplyAmount: 0, totalTaxAmount: 0, total: 0, count: 0 };
-          halfSum[half].totalSupplyAmount += row.totalSupplyAmount || 0;
-          halfSum[half].totalTaxAmount += row.totalTaxAmount || 0;
-          halfSum[half].total += (row.totalSupplyAmount || 0) + (row.totalTaxAmount || 0);
-          halfSum[half].count++;
-        });
-
-        // 일계
-        result.push({
-          entryDate: `${dayKey} 일계 [ ${dayRows.length} 건 ]`,
-          totalSupplyAmount: dayRows.reduce((a, b) => a + (b.totalSupplyAmount || 0), 0),
-          totalTaxAmount: dayRows.reduce((a, b) => a + (b.totalTaxAmount || 0), 0),
-          total: dayRows.reduce((a, b) => a + (b.totalSupplyAmount || 0) + (b.totalTaxAmount || 0), 0),
-          isSubtotal: true
-        });
-
-        // 월계
-        if (
-          i === data.length ||
-          getMonth(data[i - 1]) !== getMonth(data[i])
-        ) {
-          const month = getMonth(dayRows[0]);
-          const ms = monthSum[month];
-          result.push({
-            entryDate: `${month}월계 [ ${ms.count} 건 ]`,
-            totalSupplyAmount: ms.totalSupplyAmount,
-            totalTaxAmount: ms.totalTaxAmount,
-            total: ms.total,
-            isSubtotal: true
-          });
-          // 월 누적 초기화
-          monthSum[month] = undefined;
-        }
-
-        // 분기계
-        if (
-          i === data.length ||
-          getQuarter(data[i - 1]) !== getQuarter(data[i])
-        ) {
-          const quarter = getQuarter(dayRows[0]);
-          const qs = quarterSum[quarter];
-          result.push({
-            entryDate: `${quarter}분기계 [ ${qs.count} 건 ]`,
-            totalSupplyAmount: qs.totalSupplyAmount,
-            totalTaxAmount: qs.totalTaxAmount,
-            total: qs.total,
-            isSubtotal: true
-          });
-          quarterSum[quarter] = undefined;
-        }
-
-        // 반기계
-        if (
-          i === data.length ||
-          getHalf(data[i - 1]) !== getHalf(data[i])
-        ) {
-          const half = getHalf(dayRows[0]);
-          const hs = halfSum[half];
-          result.push({
-            entryDate: `${half}반기계 [ ${hs.count} 건 ]`,
-            totalSupplyAmount: hs.totalSupplyAmount,
-            totalTaxAmount: hs.totalTaxAmount,
-            total: hs.total,
-            isSubtotal: true
-          });
-          halfSum[half] = undefined;
-        }
-      }
-
-      // 소계
-      result.push({
-        entryDate: '소계',
-        totalSupplyAmount: grand.totalSupplyAmount,
-        totalTaxAmount: grand.totalTaxAmount,
-        total: grand.total,
-        isGrandTotal: true
-      });
-
-      return result;
-    }
-
     function 인쇄() {
       alert('인쇄 기능을 준비 중입니다.');
     }
+
+    // 안전하게 핀된 하단 행 설정 함수
+function safeSetPinnedBottomRow(api, rows) {
+  if (!api) return;
+  if (typeof api.setPinnedBottomRowData === 'function') {
+    api.setPinnedBottomRowData(rows);
+  } else if (typeof api.setGridOption === 'function') {
+    api.setGridOption('pinnedBottomRowData', rows);
+  }
+}
+
+// 전표 소계 핀 고정 함수
+function setPinnedBottomDetailSummary(entryNumber) {
+  if (!detailGridApi || !entryNumber) return;
+  // generate the summary row
+  const summaryRow = generateDetailSummaryRow(entryNumber);
+  if (summaryRow) {
+    safeSetPinnedBottomRow(detailGridApi, [summaryRow]);
+  } else {
+    safeSetPinnedBottomRow(detailGridApi, []);
+  }
+}
   </script>
 </div>
