@@ -39,6 +39,7 @@ import com.eflix.bsn.service.OrdersService;
 import com.eflix.bsn.service.QuotationService;
 import com.eflix.bsn.service.SOutboundService;
 import com.eflix.common.security.auth.AuthUtil;
+import com.eflix.common.security.dto.SecurityEmpDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -166,15 +167,26 @@ public class BsnController {
             QuotationDTO dto = new QuotationDTO();
             dto.setQuotationNo(nextNo);
             dto.setDetails(List.of(new QuotationDetailDTO()));
-            model.addAttribute("nextQuotationNo", nextNo);
-            model.addAttribute("quotation", dto);
+            
+            // 1. AuthUtil을 사용하여 로그인한 사원 정보 DTO를 가져옵니다.
+            SecurityEmpDTO loginEmployee = AuthUtil.getLoginEmployeeDTO();
+            
+            // 2. 사원 정보가 있을 경우, QuotationDTO의 sender 필드에 직접 이름을 설정합니다.
+            if (loginEmployee != null && loginEmployee.getEmpName() != null) {
+                dto.setSender(loginEmployee.getEmpName());
+            } else {
+                // 로그인하지 않았거나 사원 정보가 없는 경우 기본값을 설정합니다.
+                dto.setSender("담당자"); 
+            }
+
+            model.addAttribute("quotation", dto); // sender 필드가 채워진 DTO를 모델에 추가
+
             return "bsn/quotation";
         } catch (Exception e) {
             log.error("견적서 입력 화면 오류", e);
             return "redirect:/bsn";
         }
     }
-
     @PostMapping("/createQuotation")
     public String createQuotation(@ModelAttribute QuotationDTO quotation) {
         try {
