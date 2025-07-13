@@ -43,4 +43,8 @@ public class PartnerDetailDTO {
   private Date updatedAt;
   private String remarks;
   private String coIdx; // 회사번호 추가
+  private String institutionName;
+  private String fiPartnerCode;
+  private String cardName;
+  private String cardPartnerCode;
 }
