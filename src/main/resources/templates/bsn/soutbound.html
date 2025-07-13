@@ -476,7 +476,7 @@
         }
       });
       
-      // ★★★ 추가: 헤더 그리드 상태 실시간 모니터링 함수 ★★★
+      // 헤더 그리드 상태 실시간 모니터링 함수 
       window.monitorHeaderGrid = function() {
         console.log('=== 헤더 그리드 실시간 상태 ===');
         
@@ -512,7 +512,7 @@
         return allRows;
       };
       
-      // ★★★ 추가: 강제 헤더 업데이트 함수 ★★★
+      // 강제 헤더 업데이트 함수
       window.forceUpdateHeader = function(customerName, representativeNm) {
         console.log('🔧 강제 헤더 업데이트 시작');
         
@@ -553,7 +553,6 @@
       };
 
       // 저장 버튼 - 출하 의뢰서 등록
-      // ★★★ 수정된 저장 함수 - 헤더 정보 안정적 확보 ★★★
       document.getElementById('btnSave').addEventListener('click', async () => {
         console.log('💾 출하 의뢰서 저장 시작');
       
@@ -562,7 +561,7 @@
           return;
         }
       
-        // ★★★ 수정된 헤더 데이터 확보 로직 ★★★
+        //수정된 헤더 데이터 확보 로직 
         let headerData = null;
       
         // 방법 1: getRowNode로 찾기
@@ -788,6 +787,7 @@
         const outboundDto = {
           writeDt: formatDateForAPI(new Date()),
           outboundDt: formatDateForAPI(headerData.outboundDt || new Date()),
+          deliveryDueDate: formatDateForAPI(headerData.deliveryDueDate || headerData.outboundDt || new Date()),
           customerCd: headerData.customerCd.trim(),
           customerName: headerData.customerName.trim(),
           representativeNm: headerData.representativeNm || '',
