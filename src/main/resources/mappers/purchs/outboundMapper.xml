@@ -36,12 +36,7 @@ WHERE
 <!-- 출고 기능-->
 <select id="outboundProcedure" resultType="OutboundDTO" parameterType="OutboundDTO">
 CALL OUTBOUND_PROCEDURE(
-    #{memo},
-    #{manager},
-    #{outboundNo},
-    #{warehouseId},
-    #{prodId},
-    #{outboundQuantity}
+    #{outboundNo}
 )
 </select>
 </mapper>
