@@ -27,22 +27,22 @@ public class OutboundController {
 	public String outbound() {
 		return "purchs/outbound";
 	}
-
+    // 출고의뢰서 조회
     @GetMapping("/obr")
     @ResponseBody
     public List<OutboundDTO> selectOutboundRequest() {
         return outboundService.selectOutboundRequest();
     }
-    
+    // 출고의뢰서 상세 조회
     @GetMapping("/obrd")
     @ResponseBody
     public List<OutboundDTO> outboundRequestDetail(@RequestParam String outboundNo) {
         return outboundService.outboundRequestDetail(outboundNo);
     }
-    
+    // 출고 프로시저
     @PostMapping("/obp")
     @ResponseBody
-    public List<OutboundDTO> outboundProcedure(@RequestBody String outboundDTO) {
+    public List<OutboundDTO> outboundProcedure(@RequestBody OutboundDTO outboundDTO) {
         return outboundService.outboundProcedure(outboundDTO);
     }
     

@@ -6,49 +6,31 @@
 <!-- 출하 의뢰서 조회 -->
 <select id="selectOutboundRequest" resultType="OutboundDTO">
 SELECT
-    so.outbound_no,
-    so.write_dt,
-    so.customer_name,
-    so.representative_nm,
-    so.order_dt,
-    so.outbound_dt,
-    so.remarks,
-        -- ★★★ 변경: 전체 상태 계산 로직을 '출고완료'와 '대기' 2가지로 단순화 ★★★
-        CASE
-            -- 모든 품목이 출고완료 상태이면 '출고완료'
-            WHEN status_summary.total_count = status_summary.completed_count THEN '출고완료'
-            -- 그 외 (하나라도 대기 상태가 있으면) '대기'
-            ELSE '대기'
-        END AS overallStatus
-    FROM
-        EFLIX.SALES_OUTBOUND so
-    LEFT JOIN (
-        SELECT 
-            OUTBOUND_NO,
-            COUNT(*) AS total_count,
-            SUM(CASE WHEN OUTBOUND_STATUS = '출고완료' THEN 1 ELSE 0 END) AS completed_count
-        FROM EFLIX.SOUTBOUND_DETAIL
-        GROUP BY OUTBOUND_NO
-    ) status_summary ON so.OUTBOUND_NO = status_summary.OUTBOUND_NO
-    WHERE 
-        so.CO_IDX = 'co-101'
-    AND status_summary.completed_count =0
-    ORDER BY 
-        so.OUTBOUND_DT DESC, so.CREATED_AT DESC
+    so.outbound_no AS outbound_no,
+    so.customer_name AS customer_name,
+    so.representative_nm AS representative_nm,
+    so.order_dt AS order_dt,
+    so.outbound_dt AS outbound_dt
+FROM sales_outbound so
+WHERE so.outbound_no IN (
+    SELECT DISTINCT outbound_no
+    FROM soutbound_detail
+    WHERE outbound_status = '대기'
+)
 </select>
 <!-- 출하 의뢰서 조회 상세 -->
 <select id="outboundRequestDetail" resultType="OutboundDTO" parameterType="String">
 SELECT
-    sd.order_no AS outbound_no,
-    sd.item_name AS prod_name,
-    sd.standard AS standard,
-    sd.qty AS outbound_quantity,
-    sd.outbound_detail_status AS status,
-    sd.remarks AS remarks
-FROM 
-    soutbound_detail sd
-WHERE 
-    sd.order_no = #{outboundNo}
+    outbound_no,
+    item_name AS prod_name,
+    standard,
+    qty AS outbound_quantity,
+    outbound_status,
+    remarks AS memo
+FROM
+    soutbound_detail
+WHERE
+    outbound_no = #{outboundNo}
 </select>
 
 <!-- 출고 기능-->
@@ -59,7 +41,7 @@ CALL OUTBOUND_PROCEDURE(
     #{outboundNo},
     #{warehouseId},
     #{prodId},
-    #{outbound_quantity}
+    #{outboundQuantity}
 )
 </select>
 </mapper>
