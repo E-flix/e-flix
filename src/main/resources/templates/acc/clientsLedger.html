@@ -166,7 +166,7 @@
         { headerName: '차변', field: 'debit', valueFormatter: p => p.value?.toLocaleString() },
         { headerName: '대변', field: 'credit', valueFormatter: p => p.value?.toLocaleString() },
         { headerName: '잔액', field: 'balance', valueFormatter: p => p.value !== undefined && p.value !== null ? p.value.toLocaleString() : '' },
-        { headerName: '전표번호', field: 'entryNumber' },
+        { headerName: '전표번호', field: 'entryNumber', valueFormatter: p => (!p.value || isNaN(Number(p.value))) ? '' : String(p.value) },
       ],
       // 월 소계 행 스타일 적용 (getRowClass로 변경)
       getRowClass: params => {
@@ -367,7 +367,7 @@
       let balance = 0; // 잔액 => for문에서 누적시켜서 잔액 표시
       let totalDebit = 0, totalCredit = 0;
       // 전기이월 행 첫줄 세팅
-      let preValue = 50000; // 테스트용
+      let preValue = 0; // 테스트용
       // let preValue = data[0].detail[0].전기이월;
       let majorCategory = null;
       if (

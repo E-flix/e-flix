@@ -90,4 +90,29 @@ public class EntryAutoServiceImpl implements EntryAutoService {
       }
     }
   }
+
+  @Transactional
+  public int insertBatch(List<EntryDetailDTO> entryDetailList) {
+    int successCount = 0;
+    EntryAutoAllDTO check = new EntryAutoAllDTO(); // detail 조회용
+    check.setCoIdx(AuthUtil.getCoIdx());
+    for (EntryDetailDTO dto : entryDetailList) {
+      check.setEntryNumber(dto.getEntryNumber());
+      dto.setCoIdx(AuthUtil.getCoIdx());
+      dto.setLineNumber(entryAutoMapper.selectMaxPlusOneLineNumber(check)); // line number 자동생성
+      entryAutoMapper.insertEntryDetail(dto);
+      successCount++;
+    }
+    EntryMasterDTO master = new EntryMasterDTO();
+    master.setEntryNumber(entryDetailList.get(0).getEntryNumber());
+    master.setEntryDate(entryDetailList.get(0).getEntryDate());
+    master.setCoIdx(AuthUtil.getCoIdx());
+    entryAutoMapper.updateEntryMaster(master);
+    return successCount;
+  }
+
+  @Override
+  public List<EntryDetailDTO> selectEntryDetailList(int entryNumber, String coIdx) {
+    return entryAutoMapper.selectEntryDetailList(entryNumber, coIdx);
+  }
 }
