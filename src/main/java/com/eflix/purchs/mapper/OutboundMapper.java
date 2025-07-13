@@ -7,5 +7,5 @@ import com.eflix.purchs.dto.OutboundDTO;
 public interface OutboundMapper {
     public List<OutboundDTO> selectOutboundRequest();
     public List<OutboundDTO> outboundRequestDetail(String outboundNo);
-    public List<OutboundDTO> outboundProcedure(String OutboundDTO);
+    public List<OutboundDTO> outboundProcedure(OutboundDTO outboundDTO);
 }
