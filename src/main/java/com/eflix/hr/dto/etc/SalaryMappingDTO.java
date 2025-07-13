@@ -10,7 +10,7 @@ public class SalaryMappingDTO {
     private String alName;
     private String type;
     private String coIdx;
-    private double alAmount;
+    private String alAmount;
     private String useStatus;
     private String targetDept;
     private String mpMemo;

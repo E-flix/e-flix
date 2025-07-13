@@ -237,16 +237,16 @@
                                 <label class="form-label fw-semibold">계산방식 <span class="text-danger">*</span></label>
                                 <select class="form-select" name="calcMethod" id="modalCalcType">
                                     <option value="">선택</option>
-                                    <option value="CA1">고정금액</option>
-                                    <option value="CA2">비율</option>
-                                    <option value="CA3">수식</option>
+                                    <option value="CA01">고정금액</option>
+                                    <option value="CA02">비율</option>
+                                    <option value="CA03">수식</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">금액/비율 <span class="text-danger">*</span></label>
-                                <div class="input-group">
+                                <div class="input-group" id="modalInput">
                                     <input type="number" class="form-control" name="alAmount" id="modalAlAmount" value="200000" required>
-                                    <span class="input-group-text">원</span>
+                                    <span class="input-group-text" id="modalInputText">원</span>
                                 </div>
                             </div>
                         </div>
@@ -356,7 +356,6 @@
 
             $("#modalTargetUpDept").on("change", function() {
                 const $upDept = $(this).val();
-                console.log($upDept);
                 loadDownDept($upDept);
             });
 
@@ -417,6 +416,37 @@
                 } else {
                     insertItem(itemData);
                 }
+            });
+
+            $("#modalCalcType").on("change", function() {
+                const calcType = $(this).val();
+                const $modalInput = $("#modalInput");
+
+                if(calcType === "CA03") {
+                    const textInput = "<input type='text' class='form-control' name='alAmount' id='modalAlAmount' " +
+                        "placeholder='예: baseSalary * 0.03 + 20000' required>";
+
+                    $modalInput.find("input").replaceWith(textInput);
+                    $modalInput.find("#modalInputText").text("식");
+                } else if(calcType === "CA01") {
+                    const numberInput = "<input type='number' class='form-control' name='alAmount' id='modalAlAmount' " +
+                          "value='0' required>";
+                    $modalInput.find("input").replaceWith(numberInput);
+                    $modalInput.find("#modalInputText").text("원");
+
+                    $("#modalAlAmount").off("input");
+                } else if(calcType === "CA02") {
+                    const numberInput = "<input type='number' class='form-control' name='alAmount' id='modalAlAmount' " +
+                          "value='0' placeholder='' required>";
+                    $modalInput.find("input").replaceWith(numberInput);
+                    $modalInput.find("#modalInputText").text("=");
+
+                    $("#modalAlAmount").off("input");
+                }
+            });
+
+            $("#itemModal").on("shown.bs.modal", function () {
+                $("#modalCalcType").trigger("change");
             });
 
             function insertItem(data) {
@@ -502,6 +532,7 @@
                     const targetDept = item.targetDept !== "" ? item.targetDeptName : "전체";
                     const useStatus = item.useStatus === "Y" ? "사용중" : "미사용";
                     const useStatusBG = item.useStatus === "Y" ? "bg-success" : "bg-danger";
+                    const alAmount = item.calcType === "CA03" ? item.alAmount : Number(item.alAmount).toLocaleString() + "원";
 
                     html += `
                         <tr>
@@ -519,7 +550,7 @@
                                 <small class="text-muted">${calcType}</small>
                             </td>
                             <td class="text-center align-middle">
-                                <span class="fw-semibold">${Number(item.alAmount).toLocaleString()}원</span>
+                                <span class="fw-semibold">${alAmount}</span>
                             </td>
                             <td class="text-center align-middle">
                                 <small class="text-muted">${targetDept}</small>
