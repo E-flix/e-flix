@@ -2,9 +2,11 @@ package com.eflix.hr.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -248,12 +250,15 @@ public class HrController {
 
     @GetMapping("/attd/req")
     public String req(Model model) {
-        EmployeeDTO employeeDTO = employeeService.findByEmpIdx(getEmpIdx());
-        DepartmentDTO DepartmentDTO = departmentService.findByEmpIdx(getEmpIdx());
+        EmployeeDTO employeeDTO = Optional.ofNullable(employeeService.findByEmpIdx(getEmpIdx()))
+            .orElse(new EmployeeDTO());
+        DepartmentDTO departmentDTO = Optional.ofNullable(departmentService.findByEmpIdx(getEmpIdx()))
+            .orElse(new DepartmentDTO());
 
-        model.addAttribute("empName", employeeDTO.getEmpName());
-        model.addAttribute("empIdx", employeeDTO.getEmpIdx());
-        model.addAttribute("deptName", DepartmentDTO.getDeptName());
+        // model에 null-safe 값 전달
+        model.addAttribute("empName", Optional.ofNullable(employeeDTO.getEmpName()).orElse(""));
+        model.addAttribute("empIdx", Optional.ofNullable(employeeDTO.getEmpIdx()).orElse(""));
+        model.addAttribute("deptName", Optional.ofNullable(departmentDTO.getDeptName()).orElse(""));
         
         return "hr/new/attd/req";
     }
@@ -275,13 +280,16 @@ public class HrController {
 
     @GetMapping("/va/req")
     public String vaEmp(Model model) {
-        EmployeeDTO employeeDTO = employeeService.findByEmpIdx(getEmpIdx());
-        DepartmentDTO DepartmentDTO = departmentService.findByEmpIdx(getEmpIdx());
-        List<CommonDTO> AttdReqType = commonService.getCommon("AT");
+        EmployeeDTO employeeDTO = Optional.ofNullable(employeeService.findByEmpIdx(getEmpIdx()))
+        .orElse(new EmployeeDTO());
+        DepartmentDTO departmentDTO = Optional.ofNullable(departmentService.findByEmpIdx(getEmpIdx()))
+        .orElse(new DepartmentDTO());
+        List<CommonDTO> AttdReqType = Optional.ofNullable(commonService.getCommon("AT"))
+        .orElse(Collections.emptyList());
 
-        model.addAttribute("empName", employeeDTO.getEmpName());
-        model.addAttribute("empIdx", employeeDTO.getEmpIdx());
-        model.addAttribute("deptName", DepartmentDTO.getDeptName());
+        model.addAttribute("empName", Optional.ofNullable(employeeDTO.getEmpName()).orElse(""));
+        model.addAttribute("empIdx", Optional.ofNullable(employeeDTO.getEmpIdx()).orElse(""));
+        model.addAttribute("deptName", Optional.ofNullable(departmentDTO.getDeptName()).orElse(""));
         model.addAttribute("attdReqType", AttdReqType);
 
         return "hr/new/va/req";

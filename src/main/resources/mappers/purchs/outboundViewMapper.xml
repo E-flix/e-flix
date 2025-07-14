@@ -14,15 +14,15 @@ SELECT
 FROM
     outbound
 <where>
-    <if test= 'outboundId != null and outboundId != "" '> 
+    <if test= ' outboundId != null and outboundId != "" '> 
         outbound_id = #{outboundId} 
     </if>
-   <if test="startDate != null and startDate != ''">
+    <if test=" startDate != null and startDate != '' ">
     AND outbound_date &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
-</if>
-<if test="endDate != null and endDate != ''">
+    </if>
+    <if test=" endDate != null and endDate != '' ">
     AND outbound_date &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
-</if>
+    </if>
 </where>
 ORDER BY
     outbound_id
@@ -33,10 +33,11 @@ SELECT
     outbound_detail_id,
     outbound_id,
     warehouse_id,
-    prod_id,
+    obd.prod_id AS prod_id,
+    p.prod_name AS prod_name,
     outbound_quantity
 FROM
-    outbound_detail
+    outbound_detail obd JOIN prod p ON (obd.prod_id = p.prod_id)
 WHERE
     outbound_id = #{outboundId}
 </select>

@@ -24,6 +24,7 @@ public class OutboundViewDTO {
    private String outboundDetailId;
    private String warehouseId;
    private String prodId;
+   private String prodName;
    private int outboundQuantity;
 
 }

@@ -11,6 +11,7 @@ package com.eflix.hr.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.eflix.hr.dto.LeaveRequestDTO;
@@ -22,6 +23,8 @@ import com.eflix.hr.dto.etc.VaSummaryDTO;
 import com.eflix.hr.mapper.LeaveRequestMapper;
 import com.eflix.hr.service.LeaveRequestService;
 
+import jakarta.persistence.PersistenceException;
+
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
 
@@ -30,7 +33,13 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     @Override
     public int insert(VaDTO vaDTO) {
-        return leaveRequestMapper.insert(vaDTO);
+        try {
+            leaveRequestMapper.insert(vaDTO);
+
+            return 1;
+        } catch (DataAccessException | PersistenceException ex) {
+            return 0;
+        }
     }
 
     @Override

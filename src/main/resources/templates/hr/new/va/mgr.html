@@ -605,15 +605,24 @@
             }
 
             function detailModalFill(data) {
+                const start = new Date(data.leaveStartDate);
+                const end = new Date(data.leaveEndDate);
+
+                const diffTime = end - start;
+
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                const reqType = data.reqType === "AT01" ? "연차" : data.reqType === "03" ? "병가" : "개인사"
+
                 $("#modalEmpName").val(data.empName);
                 $("#modalDeptName").val(data.deptName);
                 $("#modalEmpIdx").val(data.empIdx);
-                $("#modalReqType").val(data.reqTypeName);
-                $("#modalReqestDate").val(data.requestDate);
+                $("#modalReqType").val(reqType);
+                $("#modalRequestDate").val(data.requestDate);
                 $("#modalLeaveStartDate").val(data.leaveStartDate);
                 $("#modalLeaveEndDate").val(data.leaveEndDate);
-                $("#modalTotalDate").val(data.leaveDays + "일");
-                $("#modalReason").val(data.reason);
+                $("#modalTotalDate").val(diffDays + "일");
+                $("#modalReason").val(data.abReason);
 
                 $("#modalLeaveReqIdx").val(data.leaveReqIdx);
             }
