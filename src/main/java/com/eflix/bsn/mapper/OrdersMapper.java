@@ -18,6 +18,9 @@ public interface OrdersMapper {
     /* ───── 채번 ───── */
     String selectNextOrderNo(String coIdx);
 
+    String findLatestOrderNoForToday(@Param("prefix") String prefix, @Param("coIdx") String coIdx);
+
+
     /* ───── 저장 / 수정 ───── */
     int insertOrder(OrdersDTO dto);
 

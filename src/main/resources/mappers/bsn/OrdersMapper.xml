@@ -75,6 +75,14 @@
     WHERE  co_idx = #{coIdx}
   </select>
 
+
+  <select id="findLatestOrderNoForToday" resultType="string">
+      SELECT MAX(ORDER_NO)
+      FROM ORDERS
+      WHERE ORDER_NO LIKE #{prefix} || '%'
+        AND CO_IDX = #{coIdx}
+    </select>
+
   <insert id="insertOrder" parameterType="com.eflix.bsn.dto.OrdersDTO">
     INSERT INTO ORDERS (
       ORDER_NO, ORDER_DT, PAYMENT_TERMS,
