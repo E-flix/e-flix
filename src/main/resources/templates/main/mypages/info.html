@@ -277,29 +277,29 @@
                                             <div class="col-6">
                                                 <div class="card bg-light text-center py-3" id="hrService">
                                                     <i class="bi bi-people fs-4 text-primary mb-2"></i>
-                                                    <div class="small fw-semibold">인사관리</div>
-                                                    <i class="bi bi-check-circle text-success mt-1"></i>
+                                                    <div class="small fw-semibold">인사</div>
+                                                    <i class="bi bi-x-circle text-danger mt-1"></i>
                                                 </div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="card bg-light text-center py-3" id="inventoryService">
-                                                    <i class="bi bi-boxes fs-4 text-success mb-2"></i>
-                                                    <div class="small fw-semibold">재고관리</div>
-                                                    <i class="bi bi-check-circle text-success mt-1"></i>
+                                                    <i class="bi bi-archive fs-4 text-success mb-2"></i>
+                                                    <div class="small fw-semibold">재고</div>
+                                                    <i class="bi bi-x-circle text-danger mt-1"></i>
                                                 </div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="card bg-light text-center py-3" id="accountingService">
                                                     <i class="bi bi-calculator fs-4 text-warning mb-2"></i>
-                                                    <div class="small fw-semibold">회계관리</div>
+                                                    <div class="small fw-semibold">회계</div>
                                                     <i class="bi bi-x-circle text-danger mt-1"></i>
                                                 </div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="card bg-light text-center py-3" id="salesService">
                                                     <i class="bi bi-graph-up fs-4 text-info mb-2"></i>
-                                                    <div class="small fw-semibold">영업관리</div>
-                                                    <i class="bi bi-check-circle text-success mt-1"></i>
+                                                    <div class="small fw-semibold">영업</div>
+                                                    <i class="bi bi-x-circle text-danger mt-1"></i>
                                                 </div>
                                             </div>
                                         </div>
@@ -514,20 +514,20 @@
 
                                         const activeModules = data.moduleDTOs;
 
+                                        const moduleMap = {
+                                            "mou-101": "#hrService",
+                                            "mou-102": "#accountingService",
+                                            "mou-103": "#inventoryService",
+                                            "mou-104": "#salesService"
+                                        };
+
                                         $.each(activeModules, function (index, item) {
-                                            if (item.moduleIdx === "mou-101") {
-                                                $("#hr").removeClass("bg-light").addClass("bg-success text-white");
-                                                $("#hr").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
-                                            } else if (item.moduleIdx === "mou-102") {
-                                                $("#acc").removeClass("bg-light").addClass("bg-success text-white");
-                                                $("#acc").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
-                                            } else if (item.moduleIdx === "mou-103") {
-                                                $("#purchs").removeClass("bg-light").addClass("bg-success text-white");
-                                                $("#purchs").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
-                                            } else if (item.moduleIdx === "mou-104") {
-                                                $("#bnz").removeClass("bg-light").addClass("bg-success text-white");
-                                                $("#bnz").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
-                                            }
+                                            const targetId = moduleMap[item.moduleIdx];
+                                            
+                                            if (!targetId) return;
+                                            $(targetId).find('i.bi-x-circle')
+                                                .removeClass('bi-x-circle text-danger')
+                                                .addClass('bi-check-circle text-success');
                                         });
                                     }
                                 },
@@ -568,11 +568,9 @@
                             } else if (type === "invoice") {
                                 url = `/subscription/report/${type}/${spiIdx}`;
                             }
-                            // 팝업 창 옵션
-                            const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
 
                             // 새 창 열기
-                            window.open(url, "_blank", popupOptions);
+                            window.open(url);
                         });
                     </script>
                 </div>

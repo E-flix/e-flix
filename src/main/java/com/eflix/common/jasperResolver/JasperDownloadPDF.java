@@ -42,7 +42,7 @@ public class JasperDownloadPDF extends AbstractView {
         JasperPrint jasperPrint =  JasperFillManager.fillReport(jasperReport, map, new JRBeanCollectionDataSource(dataList));
 
         response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", "attachment; filename=" + model.get("saveName"));
+        response.setHeader("Content-Disposition", "attachment; filename=" + model.get("saveName")+".pdf");
         JasperExportManager.exportReportToPdfStream(jasperPrint, response.getOutputStream());
     }
 
