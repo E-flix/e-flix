@@ -66,4 +66,6 @@ public interface SalaryMapper {
     public List<SalaryDetailDTO> salaryDetailBySalaryIdxWithCoIdx(String salaryIdx, String coIdx);
 
     public int updateSalary(SalaryDTO salaryDTO);
+
+    public String findSalaryIdxByEmpIdxAndDate(String empIdx, String date);
 }

@@ -22,7 +22,6 @@
             <meta charset="UTF-8">
             <title>급여 명세서</title>
             <style>
-
                 .payslip-container {
                     max-width: 800px;
                     margin: 0 auto;
@@ -43,7 +42,7 @@
                 <h4 class="text-center fw-bold mb-4">급여 명세서</h4>
                 <!--버튼구성 -->
                 <div class="d-flex justify-content-end mb-3">
-                    <button class="btn btn-danger me-2">PDF</button>
+                    <button class="btn btn-danger me-2" id="btn1">PDF</button>
                     <button class="btn btn-primary me-2" onclick="window.print()">인쇄</button>
                     <button class="btn btn-secondary" onclick="history.back()">닫기</button>
                 </div>
@@ -167,6 +166,17 @@
                     </tbody>
                 </table>
             </div>
+            <script>
+                $("#btn1").on("click", function() {
+                    let empIdx = 'emp-201'
+                    let date = '2025-05'
+                    url = `/hr/salary/report/preview/stub/${empIdx}/${date}`;
+
+                    const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+
+                    window.open(url, "_blank", popupOptions);
+                });
+            </script>
         </body>
 
         </html>

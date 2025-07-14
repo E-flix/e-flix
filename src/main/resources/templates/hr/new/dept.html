@@ -1,5 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{common/layouts/default}">
+    layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
@@ -12,188 +12,619 @@
 ============================================ -->
 
 <head>
-  <title>부서관리</title>
+    <title>부서관리</title>
 </head>
 <div layout:fragment="content">
-  <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4 class="fw-bold mb-0">부서 목록</h4>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deptModal">+ 부서등록</button>
-    </div>
-
-    <!-- 부서 목록 테이블 -->
-    <div class="table-responsive">
-      <table class="table table-bordered text-center align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>부서코드</th>
-            <th>부서명</th>
-            <th>상위부서</th>
-            <th>전화번호</th>
-            <th>사용여부</th>
-            <th>수정</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- 여기서 반복 -->
-          <tr th:each="dept : ${deptList}">
-            <td th:text="${dept.deptIdx}"></td>
-            <td th:text="${dept.deptName}"></td>
-            <td th:text="${dept.deptUpName}"></td>
-            <td th:text="${dept.deptTel}"></td>
-            <td>
-              <span th:classappend="${dept.deptStatus == 'Y'} ? 'badge bg-success' : 'badge bg-secondary'"
-                th:text="${dept.deptStatus}"></span>
-            </td>
-            <td>
-              <button type="button" class="btn btn-sm btn-primary editBtn" th:data-dept-idx="${dept.deptIdx}"
-                th:data-dept-name="${dept.deptName}" th:data-dept-up-idx="${dept.deptUpIdx}"
-                th:data-dept-status="${dept.deptStatus}" th:data-dept-tel="${dept.deptTel}"
-                th:data-dept-memo="${dept.deptMemo}">수정</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-
-    <!-- 등록/수정 모달 -->
-    <div class="modal fade" id="deptModal" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">[부서등록]</h5>
-            <button class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <form>
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label for="deptIdx" class="form-label">부서코드 *</label>
-                  <input type="text" id="deptIdx" name="deptIdx" class="form-control" placeholder="부서코드는 자동생성됩니다."
-                    readonly>
+    <div class="container-fluid">
+        <!-- 헤더 영역 -->
+        <div class="row bg-white shadow-sm mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center py-3">
+                    <div>
+                        <h3 class="mb-0 text-primary fw-bold">
+                            <i class="bi bi-building me-2"></i>부서관리
+                        </h3>
+                        <small class="text-muted">인사관리 > 부서관리</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-primary me-2" id="refreshBtn">
+                            <i class="bi bi-arrow-clockwise me-1"></i>새로고침
+                        </button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deptModal" id="addDeptModal">
+                            <i class="bi bi-plus-circle me-1"></i>부서등록
+                        </button>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                  <label for="deptName" class="form-label">부서명 *</label>
-                  <input type="text" id="deptName" name="deptName" class="form-control" placeholder="예: 인사팀">
-                </div>
-              </div>
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label class="form-label">상위 부서</label>
-                  <select id="deptUpIdx" name="option" class="form-select">
-                    <option>선택</option>
-                    <option th:each="dt : ${deptList.?[deptUpIdx == null]}" th:value="${dt.deptIdx}"
-                      th:text="${dt.deptName}">
-                    </option>
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">사용여부 *</label>
-                  <select class="form-select" id="deptStatusSelect">
-                    <option value="Y">Y</option>
-                    <option value="N">N</option>
-                  </select>
-                </div>
-              </div>
-              <!-- 전화번호 -->
-              <div class="row mb-3 align-items-center">
-                <label for="deptTel" class="col-md-2 col-form-label">전화번호</label>
-                <div class="col-md-4">
-                  <input id="deptTel" name="deptTel" type="text" class="form-control" placeholder="예: 02-123-4567">
-                </div>
-              </div>
-
-              <!-- 위치정보 / 비고 -->
-              <div class="row mb-3 align-items-center">
-                <label for="deptMemo" class="col-md-2 col-form-label">위치 / 비고</label>
-                <div class="col-md-8">
-                  <input id="deptMemo" name="deptMemo" type="text" class="form-control" placeholder="예: 본사 2층, 선택사항">
-                </div>
-              </div>
-
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary" id="deptAddBtn">저장</button>
-            <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-          </div>
+            </div>
         </div>
-      </div>
+
+        <div class="row">
+            <!-- 좌측 - 부서 트리 구조 -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-diagram-3 me-2"></i>부서구조
+                        </h6>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tree-structure">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                        <i class="bi bi-building-fill text-primary me-2"></i>
+                                        <strong>전체 부서</strong>
+                                        <span class="badge bg-secondary ms-auto" id="totalEmpCount">68명</span>
+                                    </div>
+                                    <ul class="list-unstyled ps-3 mt-2" id="deptTreeBody">
+                                        <!-- 경영본부 -->
+                                        <li class="mb-1">
+                                            <div class="d-flex align-items-center p-2 rounded hover-bg-light tree-parent"
+                                                data-target="management-sub">
+                                                <i class="bi bi-caret-right-fill me-2 tree-toggle"></i>
+                                                <i class="bi bi-building me-2 text-primary"></i>
+                                                <strong>경영본부</strong>
+                                                <span class="badge bg-warning ms-auto">18명</span>
+                                            </div>
+                                            <ul class="list-unstyled ps-4 mt-1 tree-children" id="management-sub"
+                                                style="display: none;">
+                                                <li class="mb-1">
+                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                                        <i class="bi bi-dot me-2"></i>
+                                                        <i class="bi bi-people me-2 text-info"></i>
+                                                        경영지원팀
+                                                        <span class="badge bg-info ms-auto">8명</span>
+                                                    </div>
+                                                </li>
+                                                <li class="mb-1">
+                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                                        <i class="bi bi-dot me-2"></i>
+                                                        <i class="bi bi-people me-2 text-info"></i>
+                                                        인사팀
+                                                        <span class="badge bg-info ms-auto">5명</span>
+                                                    </div>
+                                                </li>
+                                                <li class="mb-1">
+                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                                        <i class="bi bi-dot me-2"></i>
+                                                        <i class="bi bi-people me-2 text-info"></i>
+                                                        재무팀
+                                                        <span class="badge bg-info ms-auto">5명</span>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </li>
+
+                                        <!-- 개발본부 -->
+                                        <li class="mb-1">
+                                            <div class="d-flex align-items-center p-2 rounded hover-bg-light tree-parent"
+                                                data-target="dev-sub">
+                                                <i class="bi bi-caret-right-fill me-2 tree-toggle"></i>
+                                                <i class="bi bi-building me-2 text-success"></i>
+                                                <strong>개발본부</strong>
+                                                <span class="badge bg-warning ms-auto">25명</span>
+                                            </div>
+                                            <ul class="list-unstyled ps-4 mt-1 tree-children" id="dev-sub"
+                                                style="display: none;">
+                                                <li class="mb-1">
+                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                                        <i class="bi bi-dot me-2"></i>
+                                                        <i class="bi bi-code-slash me-2 text-success"></i>
+                                                        프론트엔드팀
+                                                        <span class="badge bg-info ms-auto">8명</span>
+                                                    </div>
+                                                </li>
+                                                <li class="mb-1">
+                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                                        <i class="bi bi-dot me-2"></i>
+                                                        <i class="bi bi-code-slash me-2 text-success"></i>
+                                                        백엔드팀
+                                                        <span class="badge bg-info ms-auto">10명</span>
+                                                    </div>
+                                                </li>
+                                                <li class="mb-1">
+                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                                        <i class="bi bi-dot me-2"></i>
+                                                        <i class="bi bi-code-slash me-2 text-success"></i>
+                                                        QA팀
+                                                        <span class="badge bg-info ms-auto">7명</span>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </li>
+
+                                        <!-- 영업본부 -->
+                                        <li class="mb-1">
+                                            <div class="d-flex align-items-center p-2 rounded hover-bg-light tree-parent"
+                                                data-target="sales-sub">
+                                                <i class="bi bi-caret-right-fill me-2 tree-toggle"></i>
+                                                <i class="bi bi-building me-2 text-warning"></i>
+                                                <strong>영업본부</strong>
+                                                <span class="badge bg-warning ms-auto">25명</span>
+                                            </div>
+                                            <ul class="list-unstyled ps-4 mt-1 tree-children" id="sales-sub"
+                                                style="display: none;">
+                                                <li class="mb-1">
+                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                                        <i class="bi bi-dot me-2"></i>
+                                                        <i class="bi bi-megaphone me-2 text-warning"></i>
+                                                        마케팅팀
+                                                        <span class="badge bg-info ms-auto">12명</span>
+                                                    </div>
+                                                </li>
+                                                <li class="mb-1">
+                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                                        <i class="bi bi-dot me-2"></i>
+                                                        <i class="bi bi-megaphone me-2 text-warning"></i>
+                                                        영업1팀
+                                                        <span class="badge bg-info ms-auto">8명</span>
+                                                    </div>
+                                                </li>
+                                                <li class="mb-1">
+                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                                        <i class="bi bi-dot me-2"></i>
+                                                        <i class="bi bi-megaphone me-2 text-warning"></i>
+                                                        영업2팀
+                                                        <span class="badge bg-info ms-auto">5명</span>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 우측 - 부서 목록 테이블 -->
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-table me-2"></i>부서 목록
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-end">
+                                    <div class="input-group" style="width: 300px;">
+                                        <input type="text" class="form-control form-control-sm" placeholder="부서명 검색..."
+                                            id="searchInput">
+                                        <button class="btn btn-outline-secondary btn-sm" type="button">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th width="10%" class="text-center">
+                                            <input type="checkbox" class="form-check-input position-static" id="checkAll">
+                                        </th>
+                                        <th width="12%" class="text-center">부서코드</th>
+                                        <th width="20%">부서명</th>
+                                        <th width="18%">상위부서</th>
+                                        <th width="12%" class="text-center">사원수</th>
+                                        <th width="13%">전화번호</th>
+                                        <th width="8%" class="text-center">상태</th>
+                                        <th width="7%" class="text-center">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deptListBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-sm btn-outline-danger me-2" id="deleteSelectedBtn">
+                                        <i class="bi bi-trash me-1"></i>선택삭제
+                                    </button>
+                                    <small class="text-muted">총 5개 부서 | 45명</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination pagination-sm justify-content-end mb-0">
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" tabindex="-1">이전</a>
+                                        </li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="#">다음</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-  <script>
-    // 부서등록
-    $("#deptAddBtn").on("click", function (e) {
-      data = {
-        deptIdx: $("#deptIdx").val(),
-        deptName: $("#deptName").val(),
-        deptUpIdx: $("#deptUpIdx").val(),
-        deptStatus: $("#deptStatusSelect").val(),
-        deptTel: $("#deptTel").val(),
-        deptMemo: $("#deptMemo").val(),
-      }
 
-      console.log(data);
-      $.ajax({
-        type: "POST",
-        url: "/hr/insertDept",
-        data: JSON.stringify(data),
-        contentType: "application/json",
-        success: function (res) {
-          if (res === "200") {
-            $("deptModal").hide();
-            $('.modal-backdrop').remove();
-            window.location.reload();
-          } else {
-            alert("부서 등록에 실패했습니다.")
-          }
-        },
-        error: function (xhr, status, err) {
-          console.error(err);
-        }
-      });
-    });
+    <!-- 부서 등록/수정 모달 -->
+    <div class="modal fade" id="deptModal" tabindex="-1" aria-labelledby="deptModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="deptModalLabel">
+                        <i class="bi bi-building me-2"></i>부서 등록
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="deptForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="deptIdx" class="form-label">
+                                    부서코드 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" id="deptIdx" name="deptIdx" class="form-control"
+                                    placeholder="자동생성됩니다" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="deptName" class="form-label">
+                                    부서명 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" id="deptName" name="deptName" class="form-control"
+                                    placeholder="예: 인사팀" required>
+                            </div>
+                        </div>
 
-    // 부서수정
-    $(document).ready(function () {
-      // 1) 테이블에 있는 .editBtn 클릭 잡기 (delegation)
-      $(document).on('click', '.editBtn', function () {
-        const d = $(this).data();
-        console.log(d);
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="deptUpIdx" class="form-label">상위부서</label>
+                                <select id="deptUpIdx" name="deptUpIdx" class="form-select">
+                                    <option value="">상위부서 선택</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="deptStatusSelect" class="form-label">
+                                    사용여부 <span class="text-danger">*</span>
+                                </label>
+                                <select id="deptStatusSelect" name="deptStatus" class="form-select">
+                                    <option value="Y">사용</option>
+                                    <option value="N">미사용</option>
+                                </select>
+                            </div>
+                        </div>
 
-        // 2) 폼 필드에 값 세팅 (id 와 일치해야 합니다)
-        $('#deptIdx').val(d.deptIdx);
-        $('#deptName').val(d.deptName);
-        $('#deptUpIdx').val(d.deptUpIdx || '');
-        $('#deptStatusSelect').val(d.deptStatus);
-        $('#deptTel').val(d.deptTel);
-        $('#deptMemo').val(d.deptMemo);
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="deptTel" class="form-label">전화번호</label>
+                                <input type="text" id="deptTel" name="deptTel" class="form-control"
+                                    placeholder="예: 02-123-4567">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="deptManager" class="form-label">부서장</label>
+                                <select id="deptManager" name="deptManager" class="form-select">
+                                    <option value="">부서장 선택</option>
+                                    <option value="EMP001">김철수</option>
+                                    <option value="EMP002">박영희</option>
+                                    <option value="EMP003">이민수</option>
+                                </select>
+                            </div>
+                        </div>
 
-        // 3) 모달 제목 교체
-        $('#deptModal .modal-title').text('[부서수정] ' + d.deptName);
+                        <div class="mb-3">
+                            <label for="deptMemo" class="form-label">위치 / 비고</label>
+                            <textarea id="deptMemo" name="deptMemo" class="form-control" rows="3"
+                                placeholder="예: 본사 2층 동쪽 (선택사항)"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>취소
+                    </button>
+                    <button type="button" class="btn btn-primary" id="deptAddBtn">
+                        <i class="bi bi-check-circle me-1"></i>저장
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            loadDepartment();
 
-        // 4) 모달 띄우기
-        new bootstrap.Modal(document.getElementById('deptModal')).show();
-        // $.ajax({
-        //   type: "GET",
-        //   url: "/hr/insertDept",
-        //   data: JSON.stringify(),
-        //   contentType: "application/json",
-        //   success: function (res) {
-        //     if (res === "200") {
-        //       $("deptModal").hide();
-        //       $('.modal-backdrop').remove();
-        //       window.location.reload();
-        //     } else {
-        //       alert("부서 수정에 실패했습니다.")
-        //     }
-        //   },
-        //   error: function (xhr, status, err) {
-        //     console.error(error);
-        //   }
-        // })
-      });
-    });
-  </script>
+            $("#checkAll").on("change", function () {
+                $(".row-checkbox").prop("checked", this.checked);
+            });
+
+            $(document).on("change", ".row-checkbox", function () {
+                const total = $(".row-checkbox").length;
+                const checked = $(".row-checkbox:checked").length;
+                $("#checkAll")
+                    .prop("checked", checked === total)
+                    .prop("indeterminate", checked > 0 && checked < total);
+            });
+
+            $(document).on("click", ".editBtn", function () {
+                const $btn = $(this);
+                $("#deptIdx").val($btn.data("dept-idx"));
+                $("#deptName").val($btn.data("dept-name"));
+                // $("#deptUpIdx").val($btn.data("dept-up-idx") || "");
+                loadDeptUpIdx($btn.data("dept-up-idx"));
+                $("#deptStatusSelect").val($btn.data("dept-status"));
+                $("#deptTel").val($btn.data("dept-tel") || "");
+                $("#deptMemo").val($btn.data("dept-memo") || "");
+
+                $("#deptModalLabel").html("<i class='bi bi-pencil me-2'></i>부서 수정");
+                $("#deptModal").modal("show");
+            });
+
+            $("#addDeptModal").on("click", function() {
+                loadDeptUpIdx();
+            });
+
+            $("#deptModal").on("hidden.bs.modal", function () {
+                $("#deptForm")[0].reset();
+                $("#deptModalLabel").html("<i class='bi bi-building me-2'></i>부서 등록");
+            });
+
+            $("#searchInput").on("keyup", function () {
+                const term = $(this).val().toLowerCase();
+                $("tbody tr").each(function () {
+                    const name = $(this).find("td:eq(2)").text().toLowerCase();
+                    $(this).toggle(name.includes(term));
+                });
+            });
+
+            $("#refreshBtn").on("click", function () {
+                location.reload();
+            });
+
+            $("#deptAddBtn").on("click", function () {
+                const deptData = {
+                    deptIdx: $('#deptIdx').val(),
+                    deptName: $('#deptName').val(),
+                    deptUpIdx: $('#deptUpIdx').val(),
+                    deptStatus: $('#deptStatusSelect').val(),
+                    deptTel: $('#deptTel').val(),
+                    deptMemo: $('#deptMemo').val()
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: "/hr/dept/insert",
+                    data: JSON.stringify(deptData),
+                    contentType: "application/json",
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            Swal.fire("성공", "부서가 성공적으로 등록되었습니다.", "success");
+                            loadDepartment();
+                            $("#deptModal").modal("hide");
+                        } else {
+                            Swal.fire("실패", res.head.res_result, "error");
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                })
+            });
+
+
+            $("#deleteSelectedBtn").on("click", function () {
+                const selectedIdxs = $(".row-checkbox:checked").map(function () {
+                    return $(this).closest("tr").find("td:eq(1)").text().trim();
+                }).get();
+
+                if (selectedIdxs.length === 0) {
+                    Swal.fire("알림", "삭제할 부서를 선택해주세요.", "info");
+                    return;
+                }
+
+                Swal.fire({
+                    title: `선택한 ${selectedIdxs.length}개 부서를 삭제하시겠습니까?`,
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonText: "승인",
+                    cancelButtonText: "취소"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "DELETE",
+                            url: "/hr/dept/delete",
+                            data: JSON.stringify(selectedIdxs),
+                            contentType: "application/json",
+                            success: function (res) {
+                                if (res.head.res_code === "200") {
+                                    Swal.fire("성공", "성공적으로 삭제가 이루어졌습니다.", "success");
+                                    loadDepartment();
+                                } else {
+                                    Swal.fire("실패", res.head.res_result, "error");
+                                }
+                            },
+                            error: function (xhr, status, err) {
+                                console.error(err);
+                                Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            $(document).on("click", ".tree-parent", function () {
+                const $icon = $(this).find(".tree-toggle");
+                const $target = $("#" + $(this).data("target"));
+
+                $target.slideToggle(200);
+                $icon.toggleClass("bi-caret-right-fill bi-caret-down-fill");
+            });
+
+            function loadDeptUpIdx(selectedDeptUpIdx) {
+                $.ajax({
+                    type: "GET",
+                    url: "/hr/dept/list/up",
+                    success: function (res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body;
+
+                            const $deptUpIdx = $("#deptUpIdx");
+                            $deptUpIdx.empty();
+                            $deptUpIdx.append(`<option value="">선택</option>`);
+
+                            $.each(data, function(i, item) {
+                                $deptUpIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
+                            });
+
+                            if(selectedDeptUpIdx) {
+                                $deptUpIdx.val(selectedDeptUpIdx);
+                            }
+                        } else {
+                            Swal.fire("실패", "상위 부서 목록을 불러오던 중 오류가 발생했습니다.", "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function loadDepartment() {
+                $.ajax({
+                    type: "GET",
+                    url: "/hr/dept/list",
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+
+                            const totalEmpCount = data
+                                .filter(dept => !dept.deptUpIdx || dept.deptUpIdx === '')
+                                .reduce((sum, dept) => sum + (Number(dept.empCount) || 0), 0);
+                            $("#totalEmpCount").text(`${totalEmpCount}명`);
+                            renderDeptTree(data);
+                            renderDeptList(data);
+                        } else {
+                            Swal.fire("실패", res.head.res_result, "error");
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                })
+            }
+
+            function buildDeptTreeMap(depts) {
+                const treeMap = {};
+                depts.forEach(dept => {
+                    const parent = dept.deptUpIdx || null;
+                    if (!treeMap[parent]) {
+                        treeMap[parent] = [];
+                    }
+                    treeMap[parent].push(dept);
+                });
+                return treeMap;
+            }
+
+            function renderDeptTree(depts) {
+                const $treeRoot = $("#deptTreeBody");
+                $treeRoot.empty();
+
+                const treeMap = buildDeptTreeMap(depts);
+
+                function renderTreeList(parentIdx, colorClass = "primary") {
+                    const children = treeMap[parentIdx] || [];
+                    let html = "";
+
+                    children.forEach(dept => {
+                        const childHtml = renderTreeList(dept.deptIdx, colorClass);
+                        const hasChild = childHtml !== "";
+
+                        html += `
+                            <li class="mb-1">
+                                <div class="d-flex align-items-center p-2 rounded hover-bg-light ${hasChild ? 'tree-parent' : ''}"
+                                    ${hasChild ? `data-target="tree-${dept.deptIdx}"` : ""}>
+                                    ${hasChild
+                                        ? `<i class="bi bi-caret-right-fill me-2 tree-toggle"></i>`
+                                        : `<i class="bi bi-dot me-2"></i>`}
+                                    <i class="bi bi-${hasChild ? 'building' : 'people'} me-2 text-${colorClass}"></i>
+                                    ${dept.deptName}
+                                    <span class="badge bg-${parentIdx === null ? 'warning' : 'info'} ms-auto">${dept.empCount}명</span>
+                                </div>
+                                ${hasChild
+                                    ? `<ul class="list-unstyled ps-4 mt-1 tree-children" id="tree-${dept.deptIdx}" style="display:none;">${childHtml}</ul>`
+                                    : ''}
+                            </li>
+                        `;
+                    });
+                    return html;
+                }
+                $treeRoot.html(renderTreeList(null));
+            }
+
+            function renderDeptList(depts) {
+                const $listBody = $("#deptListBody");
+                $listBody.empty();
+
+                const treeMap = buildDeptTreeMap(depts);
+                const deptNameMap = Object.fromEntries(depts.map(d => [d.deptIdx, d.deptName]));
+
+                function getRow(dept, level) {
+                    const indent = level > 0 ? `<span class="text-muted me-2">└─</span>` : "";
+                    const icon = level === 0 ? `<i class="bi bi-building text-primary me-2"></i>` : `<i class="bi bi-people text-info me-2"></i>`;
+                    const rowClass = level === 0 ? "table-secondary" : "";
+
+                    return `
+                    <tr class="${rowClass}">
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input row-checkbox">
+                        </td>
+                        <td class="text-center fw-bold">${dept.deptIdx}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                ${indent}${icon}${dept.deptName}
+                            </div>
+                        </td>
+                        <td>${deptNameMap[dept.deptUpIdx] || "-"}</td>
+                        <td class="text-center">
+                            <span class="badge bg-${level === 0 ? 'warning' : 'primary'}">${dept.empCount}명</span>
+                        </td>
+                        <td>${dept.deptTel || '-'}</td>
+                        <td class="text-center">
+                            <span class="badge bg-${dept.deptStatus === 'Y' ? 'success' : 'secondary'}">${dept.deptStatus === 'Y' ? '사용' : '미사용'}</span>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary editBtn"
+                                data-dept-idx="${dept.deptIdx}" data-dept-name="${dept.deptName}"
+                                data-dept-up-idx="${dept.deptUpIdx || ''}" data-dept-status="${dept.deptStatus}"
+                                data-dept-tel="${dept.deptTel || ''}" data-dept-memo="${dept.deptMemo || ''}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    `;
+                }
+
+                function renderTableRows(parentIdx, level = 0) {
+                    const children = treeMap[parentIdx] || [];
+                    children.forEach(dept => {
+                        $listBody.append(getRow(dept, level));
+                        renderTableRows(dept.deptIdx, level + 1);
+                    });
+                }
+
+                renderTableRows(null);
+            }
+        });
+    </script>
 </div>

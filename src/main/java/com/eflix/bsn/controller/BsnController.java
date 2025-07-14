@@ -855,4 +855,12 @@ public class BsnController {
             return "bsn/reports/today_popup";
         }
     }
+
+    /*──────────────────────────────
+     * 7. 거래처 관리 페이지 (신규)
+     *──────────────────────────────*/
+    @GetMapping("/customer_management")
+    public String customerManagementPage() {
+        return "bsn/customer_management";
+    }
 }

@@ -5,14 +5,14 @@
 }
 
 /* 섹션 박스 스타일 */
-.section-box {
+/* .section-box {
   padding: 15px;
   border: 1px solid #e3e6f0;
   border-radius: 8px;
   background-color: #ffffff;
   margin-bottom: 15px;
   box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-}
+} */
 
 .section-box h6 {
   margin-bottom: 12px;
@@ -228,13 +228,13 @@
 }
 
 /* 제목 헤더 스타일 */
-.page-header {
+/* .page-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-radius: 8px;
   padding: 12px 20px;
   margin-bottom: 20px;
-}
+} */
 
 /* 카드 스타일 */
 .card {

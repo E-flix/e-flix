@@ -59,4 +59,6 @@ public class CreditInfoDTO {
         }
         return null;
     }
+
+    private String coIdx;
 }

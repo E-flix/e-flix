@@ -3,7 +3,7 @@ package com.eflix.main.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.eflix.EflixApplication;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
@@ -11,6 +11,9 @@ import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.common.security.details.SecurityUserDetails;
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.service.CompanyService;
+import com.eflix.main.service.MasterService;
+
+import io.micrometer.core.ipc.http.HttpSender.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,8 +59,17 @@ import org.springframework.web.bind.annotation.RequestPart;
 @RequestMapping("/company")
 public class CompnayRestController {
 
+    private final EflixApplication eflixApplication;
+
     @Autowired
     private CompanyService companyService;
+
+    @Autowired
+    private MasterService masterService;
+
+    CompnayRestController(EflixApplication eflixApplication) {
+        this.eflixApplication = eflixApplication;
+    }
 
     @GetMapping("/find")
     public ResponseEntity<ResResult> findByUserId(@RequestParam("userIdx") String userIdx) {
@@ -148,4 +160,21 @@ public class CompnayRestController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    // 0714
+    @GetMapping("/master/exist")
+    public ResponseEntity<ResResult> existMstId(@RequestParam("mstId") String mstId) {
+        ResResult result = null;
+
+        int existMstId = masterService.existMstId(mstId);
+
+        if(existMstId > 0) {
+            result = ResUtil.makeResult(ResStatus.OK, null);
+        } else {
+            result = ResUtil.makeResult("400", "이미 존재하는 아이디 입니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    
 }

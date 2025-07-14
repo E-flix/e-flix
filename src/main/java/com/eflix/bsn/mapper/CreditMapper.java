@@ -35,4 +35,7 @@ public interface CreditMapper {
 
   //거래정지 예정 고객 목록 조회
   List<CreditInfoDTO> selectTradeResumeScheduled(@Param("targetDate") LocalDate targetDate);
+
+  int insertCreditInfo(CreditInfoDTO dto);
+  int updateCreditInfo(CreditInfoDTO dto);
 }

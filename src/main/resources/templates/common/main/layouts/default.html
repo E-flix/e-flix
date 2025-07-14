@@ -497,6 +497,8 @@
 							$('.modal-backdrop').remove(); 
                         } else {
                             Swal.fire("실패", res.head.res_result, "error");
+                            $('#userPw').val();
+                            $('#userPwCheck').val();
                         }
                     },
                     error: function(xhr, status, err) {

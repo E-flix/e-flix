@@ -6,15 +6,16 @@
 <mapper namespace="com.eflix.bsn.mapper.SalesDashboardMapper">
 
   <!-- ========================================
-       매출 현황 분석
-       ======================================== -->
+      매출 현황 분석
+  ======================================== -->
 
   <!-- 오늘 매출액 -->
   <select id="getTodaySales" parameterType="string" resultType="java.math.BigDecimal">
     <![CDATA[
     SELECT COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS todaySales
     FROM ORDERS_DETAIL od
-    JOIN ORDERS o ON o.ORDER_NO = od.ORDER_NO AND o.CO_IDX = od.CO_IDX
+    JOIN ORDERS o ON o.ORDER_NO = od.ORDER_NO
+    AND o.CO_IDX = od.CO_IDX
     WHERE od.CO_IDX = #{coIdx}
       AND TRUNC(o.ORDER_DT) = TRUNC(SYSDATE)
     ]]>
@@ -34,7 +35,7 @@
   <!-- 월별 매출 차트 데이터 (최근 N개월) -->
   <select id="getMonthlySalesChart" resultType="java.util.HashMap">
     <![CDATA[
-    SELECT 
+    SELECT
       TO_CHAR(o.ORDER_DT, 'YYYY-MM') AS month,
       COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS amount,
       COUNT(DISTINCT o.ORDER_NO) AS orderCount
@@ -50,7 +51,7 @@
   <!-- 일별 매출 트렌드 (최근 N일) -->
   <select id="getDailySalesTrend" resultType="java.util.HashMap">
     <![CDATA[
-    SELECT 
+    SELECT
       TO_CHAR(o.ORDER_DT, 'YYYY-MM-DD') AS date,
       COALESCE(SUM(od.TOTAL_AMOUNT), 0) AS amount,
       COUNT(DISTINCT o.ORDER_NO) AS orderCount

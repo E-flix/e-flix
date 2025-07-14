@@ -21,4 +21,11 @@
         INSERT INTO master(mst_idx, co_idx, mst_id, mst_pw, mst_name, mst_email)
         VALUES(#{mstIdx}, #{coIdx}, #{mstId}, #{mstPw}, #{mstName}, #{mstEmail})
     </insert>
+
+    <!-- 0715 -->
+    <select id="existMstId" parameterType="String" resultType="int">
+        SELECT COUNT(*)
+        FROM master
+        WHERE mst_id = #{mstId}
+    </select>
 </mapper>

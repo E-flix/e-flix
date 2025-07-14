@@ -55,4 +55,6 @@ public interface SalaryService {
     public List<SalaryDetailDTO> salaryDetailBySalaryIdxWithCoIdx(String salaryIdx, String coIdx);
 
     public int confirmSalary(List<String> salaryDTO);
+
+    public String findSalaryIdxByEmpIdxAndDate(String empIdx, String date);
 }

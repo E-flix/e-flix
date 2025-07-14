@@ -20,4 +20,7 @@ public interface UserMapper {
 
     public UserDTO findUserPwByUserIdx(String userIdx);
 
+    // 0714
+    public int existByUserId(String userId);
+
 }

@@ -18,4 +18,8 @@ public class MasterServiceImpl implements MasterService {
         return masterMapper.insertMaster(masterDTO);
     }
     
+    @Override
+    public int existMstId(String mstId) {
+        return masterMapper.existMstId(mstId);
+    }
 }

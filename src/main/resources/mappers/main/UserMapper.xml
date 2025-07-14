@@ -136,4 +136,10 @@
         FROM users
         WHERE user_idx = #{userIdx}
     </select>
+
+    <select id="existByUserId" parameterType="String" resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
 </mapper>

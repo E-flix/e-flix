@@ -73,6 +73,13 @@ public class LoginController {
         
         userDTO.setUserPw(passwordEncoder.encode(userDTO.getUserPw()));
 
+        int existUserId = userService.existByUserId(userDTO.getUserId());
+
+        if(existUserId > 0) {
+            result = ResUtil.makeResult("400", "이미 존재하는 아이디 입니다.", null);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+
         int affectedRow = userService.insertUser(userDTO);
 
         if(affectedRow > 0) {

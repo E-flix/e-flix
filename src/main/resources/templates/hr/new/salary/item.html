@@ -125,7 +125,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="text-center py-3 fw-semibold">
-                                            <input type="checkbox" class="form-check-input">
+                                            <input type="checkbox" class="form-check-input position-static">
                                         </th>
                                         <th class="text-center py-3 fw-semibold">구분</th>
                                         <th class="text-center py-3 fw-semibold">항목코드</th>
@@ -262,19 +262,12 @@
                                 <label class="form-label fw-semibold">상위 부서</label>
                                 <select class="form-select" name="targetUpDept" id="modalTargetUpDept">
                                     <option selected>전체</option>
-                                    <option>경영진</option>
-                                    <option>개발부</option>
-                                    <option>영업부</option>
-                                    <option>관리부</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">하위 부서</label>
                                 <select class="form-select" name="targetDownDept" id="modalTargetDownDept">
                                     <option selected>전체</option>
-                                    <option>팀장</option>
-                                    <option>선임</option>
-                                    <option>주임</option>
                                 </select>
                             </div>
                         </div>
@@ -538,7 +531,7 @@
                     html += `
                         <tr>
                             <td class="text-center align-middle">
-                                <input type="checkbox" class="form-check-input">
+                                <input type="checkbox" class="form-check-input position-static">
                             </td>
                             <td class="text-center align-middle">
                                 <span class="badge ${typeBG}">${type}</span>

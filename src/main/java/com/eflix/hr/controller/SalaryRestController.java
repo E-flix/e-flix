@@ -2,13 +2,14 @@ package com.eflix.hr.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
+import com.eflix.common.jasperResolver.JasperDownloadPDF;
+import com.eflix.common.jasperResolver.JasperPreviewPDF;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
 import com.eflix.common.security.auth.AuthUtil;
-import com.eflix.hr.dto.EmployeeDTO;
-import com.eflix.hr.dto.SalaryDTO;
 import com.eflix.hr.dto.etc.SalaryCalcDTO;
 import com.eflix.hr.dto.etc.SalaryDetailDTO;
 import com.eflix.hr.dto.etc.SalaryEmpDTO;
@@ -16,12 +17,10 @@ import com.eflix.hr.dto.etc.SalaryListDTO;
 import com.eflix.hr.dto.etc.SalaryMappingDTO;
 import com.eflix.hr.dto.etc.SalaryMappingSearchDTO;
 import com.eflix.hr.dto.etc.SalarySearchDTO;
-import com.eflix.hr.dto.etc.SalarySummaryDTO;
 import com.eflix.hr.service.EmployeeService;
 import com.eflix.hr.service.SalaryMappingService;
 import com.eflix.hr.service.SalaryService;
 
-import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -53,70 +51,21 @@ public class SalaryRestController {
     @Autowired
     private EmployeeService employeeService;
 
+    @Autowired
+    private JasperPreviewPDF jasperPreviewPDF;
+
+    @Autowired
+    private JasperDownloadPDF jasperDownloadPDF;
+
     public String getCoIdx() {
         return AuthUtil.getCoIdx();
     }
-    
-    // // 0707
-    // @GetMapping("/list")
-    // public List<SalarySummaryDTO> getList(
-    //         @RequestParam(required = false) String attMonth,
-    //         @RequestParam(required = false) String payMonth,
-    //         @RequestParam(required = false) String empName,
-    //         @RequestParam(required = false) String deptIdx) {
-    //     return salaryService.findSalaryList(getCoIdx(), attMonth, payMonth, empName, deptIdx);
-    // }
 
-    // @GetMapping("/detail")
-    // public List<SalaryDetailDTO> findSalaryDetail(@RequestParam String salaryIdx) {
-    //     return salaryService.findSalaryDetail(getCoIdx(), salaryIdx);
-    // }
+    public String getEmpIdx() {
+        return AuthUtil.getEmpIdx();
+    }
 
-    // @GetMapping("/detail-items")
-    // public List<SalaryDetailDTO> getSalaryDetailItems(
-    //         @RequestParam String salaryIdx) {
-    //     return salaryService.selectSalaryDetail(getCoIdx(), salaryIdx);
-    // }
-
-    // @PostMapping("/calc")
-    // public void postCal(@RequestParam List<String> salaryIdxList) {
-    //     System.out.println();
-    //     salaryService.calculateSalary(getCoIdx(), salaryIdxList);
-    // }
-
-    // @PostMapping("/confirm")
-    // public void postConfirm(
-    //         @RequestParam List<String> salaryIdxList) {
-    //             Map<String, Object> map = new HashMap<>();
-    //             map.put("coIdx", getCoIdx());
-    //             map.put("salaryIdxList", salaryIdxList);
-    //     salaryService.confirmSalary(map);
-    // }
-    // @GetMapping("/items")
-    // public List<SalaryMappingDTO> getItems() {
-    //     return salaryMappingService.findAllByCoIdx(getCoIdx());
-    // }
-
-    // @GetMapping("/item/{mpIdx}")
-    // public SalaryMappingDTO getItem(@PathVariable("mpIdx") String mpIdx) {
-    //     return salaryMappingService.findByMpIdx(getCoIdx(), mpIdx);
-    // }
-
-    // @PostMapping("/item")
-    // public void postItem(@ModelAttribute SalaryMappingDTO salaryMappingDTO) {
-    //     salaryMappingService.insert(salaryMappingDTO);
-    // }
-
-    // @PutMapping("/item/{mpIdx}")
-    // public void putItem(@PathVariable("mpIdx") String mpIdx, @ModelAttribute SalaryMappingDTO salaryMappingDTO) {
-    //     salaryMappingDTO.setMpIdx(mpIdx);
-    //     salaryMappingService.update(salaryMappingDTO);
-    // }
-
-    // @DeleteMapping("/item/{mpIdx}")
-    // public void deleteItem(@PathVariable("mpIdx") String mpIdx) {
-    //     salaryMappingService.delete(mpIdx);
-    // }
+    private final String STUB_REPORT_PATH = "/reports/stub_template.jasper";
 
     // 0712
     @GetMapping("/items")
@@ -295,4 +244,98 @@ public class SalaryRestController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @GetMapping("/report/preview/stub/{empIdx}/{date}")
+    public ModelAndView previewStub(@PathVariable("empIdx") String empIdx, @PathVariable("date") String date) {
+        ModelAndView mv = new ModelAndView();
+
+        String salaryIdx = salaryService.findSalaryIdxByEmpIdxAndDate(getEmpIdx(), date);
+
+        List<SalaryDetailDTO> detailList = salaryService.salaryDetailBySalaryIdxWithCoIdx(salaryIdx, getCoIdx());
+        SalaryEmpDTO salaryEmpDTO = salaryService.salaryEmpInfo(empIdx, salaryIdx);
+
+        if(detailList == null || salaryEmpDTO == null) {
+            throw new RuntimeException("급여 명세 데이터를 찾을 수 없습니다.");
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("employeeName", salaryEmpDTO.getEmpName());
+        params.put("employeeId",   salaryEmpDTO.getEmpIdx());
+        params.put("department",   salaryEmpDTO.getDeptName());
+        params.put("position",     salaryEmpDTO.getGrdName());
+        params.put("payDate",      salaryEmpDTO.getPayMonth());
+        params.put("companyName",  "E-FLIX");
+
+        mv.setView(jasperPreviewPDF);
+        mv.addObject("fileName", STUB_REPORT_PATH);
+        mv.addObject("dataList",   detailList);
+        mv.addObject("params", params);
+        mv.addObject("saveName", "stub" + salaryEmpDTO.getEmpName() + "_" + salaryEmpDTO.getPayMonth());
+
+        return mv;
+    }
+
+    
+    
+    // // 0707
+    // @GetMapping("/list")
+    // public List<SalarySummaryDTO> getList(
+    //         @RequestParam(required = false) String attMonth,
+    //         @RequestParam(required = false) String payMonth,
+    //         @RequestParam(required = false) String empName,
+    //         @RequestParam(required = false) String deptIdx) {
+    //     return salaryService.findSalaryList(getCoIdx(), attMonth, payMonth, empName, deptIdx);
+    // }
+
+    // @GetMapping("/detail")
+    // public List<SalaryDetailDTO> findSalaryDetail(@RequestParam String salaryIdx) {
+    //     return salaryService.findSalaryDetail(getCoIdx(), salaryIdx);
+    // }
+
+    // @GetMapping("/detail-items")
+    // public List<SalaryDetailDTO> getSalaryDetailItems(
+    //         @RequestParam String salaryIdx) {
+    //     return salaryService.selectSalaryDetail(getCoIdx(), salaryIdx);
+    // }
+
+    // @PostMapping("/calc")
+    // public void postCal(@RequestParam List<String> salaryIdxList) {
+    //     System.out.println();
+    //     salaryService.calculateSalary(getCoIdx(), salaryIdxList);
+    // }
+
+    // @PostMapping("/confirm")
+    // public void postConfirm(
+    //         @RequestParam List<String> salaryIdxList) {
+    //             Map<String, Object> map = new HashMap<>();
+    //             map.put("coIdx", getCoIdx());
+    //             map.put("salaryIdxList", salaryIdxList);
+    //     salaryService.confirmSalary(map);
+    // }
+    // @GetMapping("/items")
+    // public List<SalaryMappingDTO> getItems() {
+    //     return salaryMappingService.findAllByCoIdx(getCoIdx());
+    // }
+
+    // @GetMapping("/item/{mpIdx}")
+    // public SalaryMappingDTO getItem(@PathVariable("mpIdx") String mpIdx) {
+    //     return salaryMappingService.findByMpIdx(getCoIdx(), mpIdx);
+    // }
+
+    // @PostMapping("/item")
+    // public void postItem(@ModelAttribute SalaryMappingDTO salaryMappingDTO) {
+    //     salaryMappingService.insert(salaryMappingDTO);
+    // }
+
+    // @PutMapping("/item/{mpIdx}")
+    // public void putItem(@PathVariable("mpIdx") String mpIdx, @ModelAttribute SalaryMappingDTO salaryMappingDTO) {
+    //     salaryMappingDTO.setMpIdx(mpIdx);
+    //     salaryMappingService.update(salaryMappingDTO);
+    // }
+
+    // @DeleteMapping("/item/{mpIdx}")
+    // public void deleteItem(@PathVariable("mpIdx") String mpIdx) {
+    //     salaryMappingService.delete(mpIdx);
+    // }
+
 }
