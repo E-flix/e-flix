@@ -40,6 +40,18 @@
     .grandtotal-row {
       background: #f3f6fa !important;
     }
+    .ag-header-center .ag-header-cell-label {
+      justify-content: center !important;
+      text-align: center;
+    }
+    /* 금액 컬럼 오른쪽 정렬 */
+    .ag-cell-right {
+      text-align: right !important;
+      justify-content: flex-end !important;
+    }
+    .ag-cell-center {
+      text-align: center !important;
+    }
   </style>
 </head>
 <div layout:fragment="content">
@@ -63,11 +75,11 @@
       <div class="d-flex align-items-center me-2">
         <label class="form-label me-2 mb-0">일자</label>
         2025 년
-        <input type="number" value="1" min="1" max="12" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" id="startMonth" style="width:45px;"> 월
-        <input type="number" value="1" min="1" max="31" class="form-control form-control-sm d-inline-block mx-1" name="startDay" id="startDay" style="width:45px;"> 일 ~
+        <input type="number" value="1" min="1" max="12" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" id="startMonth" style="width:50px;"> 월
+        <input type="number" value="1" min="1" max="31" class="form-control form-control-sm d-inline-block mx-1" name="startDay" id="startDay" style="width:50px;"> 일 ~
         2025 년
-        <input type="number" value="12" min="1" max="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" id="endMonth" style="width:45px;"> 월
-        <input type="number" value="31" min="1" max="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" id="endDay" style="width:45px;"> 일
+        <input type="number" value="12" min="1" max="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" id="endMonth" style="width:50px;"> 월
+        <input type="number" value="31" min="1" max="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" id="endDay" style="width:50px;"> 일
       </div>
       <div class="d-flex align-items-center me-2">
         <label class="me-2 mb-0" style="white-space:nowrap;">과세유형</label>
@@ -101,7 +113,7 @@
       {
         headerName: "유형",
         field: "transactionType",
-        initialWidth: 100,
+        minWidth: 60, width: 80,
         cellRenderer: params => {
           if (params.data?.isSubtotal || params.data?.isGrandTotal) { // 소계/합계 row
             // 합계 row: 유형 컬럼에만 표시
@@ -117,9 +129,10 @@
           return code || '';
         },
         colSpan: params => (params.data?.isSubtotal || params.data?.isGrandTotal) ? 3 : 1, // 소계/합계 row는 유형 컬럼을 3개 합침
-        cellClass: params => (params.data?.isSubtotal || params.data?.isGrandTotal) ? 'ag-cell-center subtotal-cell' : '' // 소계/합계 row는 가운데 정렬
+        headerClass: 'ag-header-center',
+        cellClass: 'ag-cell-center'
       },
-      { headerName: '일자',  field: 'entryDate', width: 90,
+      { headerName: '일자',  field: 'entryDate', minWidth: 60, width: 80,
         valueFormatter: params => {
           if (!params.value) return '';
           const d = new Date(params.value); // 날짜 형식 변환
@@ -127,19 +140,21 @@
           const dd = String(d.getDate()).padStart(2, '0'); // 일
           return `${mm}-${dd}`; // 일자 형식
         },
+        headerClass: 'ag-header-center', cellClass: 'ag-cell-center',
         colSpan: params => (params.data?.isSubtotal || params.data?.isGrandTotal) ? 0 : 1 // 소계/합계 row는 일자 컬럼 숨김
       },
-      { headerName: '품목', field: 'itemName', width: 180,
+      { headerName: '품목', field: 'itemName', minWidth: 120, width: 320, headerClass: 'ag-header-center',
         colSpan: params => (params.data?.isSubtotal || params.data?.isGrandTotal) ? 0 : 1 // 소계/합계 row는 품목 컬럼 숨김
       },
-      { headerName: '공급가액', field: 'totalSupplyAmount', width: 120, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
-      { headerName: '세액', field: 'totalTaxAmount', width: 110, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString() },
-      { headerName: '합계', field: 'total', width: 130, type: 'numericColumn', valueGetter: params => (params.data?.totalSupplyAmount || 0) + (params.data?.totalTaxAmount || 0), valueFormatter: params => params.value?.toLocaleString() },
-      { headerName: '코드', field: 'partnerCode', width: 70 },
-      { headerName: '거래처명', field: 'partnerName', width: 170 },
-      { headerName: '계정코드', valueGetter: params => params.data?.details?.[0]?.accountCode || '', width: 110 },
-      { headerName: '계정과목명', valueGetter: params => params.data?.details?.[0]?.accountName || '', width: 150 },
-      { headerName: '전자', field: 'electronicType', width: 60,
+      { headerName: '공급가액', field: 'totalSupplyAmount', minWidth: 60, width: 150, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString(), headerClass: 'ag-header-center' },
+      { headerName: '세액', field: 'totalTaxAmount', minWidth: 60, width: 150, type: 'numericColumn', valueFormatter: params => params.value?.toLocaleString(), headerClass: 'ag-header-center' },
+      { headerName: '합계', field: 'total', minWidth: 60, width: 150, type: 'numericColumn', valueGetter: params => (params.data?.totalSupplyAmount || 0) + (params.data?.totalTaxAmount || 0), 
+        headerClass: 'ag-header-center', valueFormatter: params => params.value?.toLocaleString() },
+      { headerName: '코드', field: 'partnerCode', minWidth: 60, width: 70, headerClass: 'ag-header-center', cellClass: 'ag-cell-center' },
+      { headerName: '거래처명', field: 'partnerName', minWidth: 60, width: 230, headerClass: 'ag-header-center' },
+      { headerName: '코드', valueGetter: params => params.data?.details?.[0]?.accountCode || '', minWidth: 60, width: 70, headerClass: 'ag-header-center', cellClass: 'ag-cell-center' },
+      { headerName: '계정과목명', valueGetter: params => params.data?.details?.[0]?.accountName || '', minWidth: 60, width: 200, headerClass: 'ag-header-center' },
+      { headerName: '전자', field: 'electronicType', minWidth: 60, width: 60, headerClass: 'ag-header-center', cellClass: 'ag-cell-center', flex: 1,
         cellRenderer: params => {
           if (params.value === 'a1') return '○'; return '';
         }

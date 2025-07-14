@@ -39,6 +39,10 @@ public class AttendanceRecordDTO {
     private String attdStart;    // formatted attendance_records.attd_start
     private String attdEnd;      // formatted attendance_records.attd_end
     private String overtime;     // calculated overtime
+    private String memo;
+    private String abReason;
+    private String isHoliday;
+    private String attdPay;
     
     private Date hdDate;
     private String hdType;

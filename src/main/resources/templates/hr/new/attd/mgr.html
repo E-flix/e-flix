@@ -305,7 +305,7 @@
                         if(res.head.res_code === "200") {
                             renderEditModalTable(res.body);
                         } else {
-                            Swal.fire("실패", res.body, "error");
+                            Swal.fire("실패", res.head.res_result, "error");
                         }
                     },
                     error: function() {
@@ -353,7 +353,7 @@
                             renderEmpListBody(data.emps);
                             renderPagination(data.page, data.pageSize, data.total);
                         } else {
-                            Swal.fire("실패", res.body, "error");
+                            Swal.fire("실패", res.head.res_result, "error");
                         }
                     },
                     error: function () {
@@ -374,7 +374,7 @@
                         if (res.head.res_code === "200") {
                             renderEmpDetail(res.body);
                         } else {
-                            Swal.fire("실패", res.body, "error");
+                            Swal.fire("실패", res.head.res_result, "error");
                         }
                     },
                     error: function () {
@@ -506,7 +506,7 @@
                             renderUpDept(data.depts);
                             renderGrade(data.grades);
                         } else {
-                            Swal.fire("실패", res.body, "error");
+                            Swal.fire("실패", res.head.res_result, "error");
                         }
                     },
                     error: function (xhr, status, err) {
@@ -540,7 +540,7 @@
 
                                 renderDownDept(data);
                             } else {
-                                Swal.fire("실패", res.body, "error");
+                                Swal.fire("실패", res.head.res_result, "error");
                             }
                         },
                         error: function (xhr, status, err) {
@@ -577,7 +577,7 @@
                                 $searchAttdYear.append(`<option value="${item}">${item}</option>`)
                             });
                         } else {
-                            Swal.fire("실패", res.body, "error");
+                            Swal.fire("실패", res.head.res_result, "error");
                         }
                     },
                     error: function (xhr, status, err) {
@@ -600,7 +600,7 @@
                                 $searchAttdMonth.append(`<option value="${item > 10 ? item : '0' + item}">${item}</option>`)
                             });
                         } else {
-                            Swal.fire("실패", res.body, "error");
+                            Swal.fire("실패", res.head.res_result, "error");
                         }
                     },
                     error: function (xhr, status, err) {
