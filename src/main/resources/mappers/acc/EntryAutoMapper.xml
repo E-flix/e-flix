@@ -179,6 +179,7 @@
     AND s.pay_month = sum_salaries.pay_month
     WHERE s.co_idx = #{coIdx}
     AND s.salary_type = 'ST03'
+    order by s.att_month, s.pay_month
   </select>
 
   <!-- EntryDetailDTO 매핑 정의 -->

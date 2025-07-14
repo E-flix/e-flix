@@ -121,10 +121,10 @@
     const journalColumnDefs =  [
       { headerName: "일자", field: "entryDate", minWidth: 100, width: 100, editable: false },
       { headerName: "전표번호", field: "entryNumber", minWidth: 110, maxWidth: 130, width: 120, editable: false,
-        valueFormatter: params => {
-          if (!params.value || isNaN(Number(params.value))) return '';
+        valueGetter: params => params.data && params.data.ledgerCheck === 'a2' ? '' : params.data.entryNumber,
+        valueFormatter: params => { if (!params.value || isNaN(Number(params.value))) return '';
           return String(params.value);
-        }
+        } 
       },
       { headerName: "구분", field: "resentmenType", minWidth: 70, maxWidth: 90, width: 80, editable: false,
         valueFormatter: params => {
@@ -185,6 +185,7 @@
         return;
       }
       const now = new Date();
+      console.log('allRows:', allRows);
       const entryDetailList = allRows.map(selectedData => ({
         entryDate: selectedData.entryDate,
         entryNumber: selectedData.entryNumber,
@@ -328,7 +329,7 @@
                 debitMap[item.accountCode] = {
                   ledgerCheck: ledgerCheck,
                   entryDate: entryDateValue,
-                  entryNumber: ledgerCheck === 'a2' ? '' : entryNumber,
+                  entryNumber: item.entryNumber,
                   resentmenType: 'g3',
                   accountCode: item.accountCode,
                   accountName: item.accountName,
@@ -346,7 +347,7 @@
             debitRows = filteredDebits.map(item => ({
               ledgerCheck: ledgerCheck,
               entryDate: entryDateValue,
-              entryNumber: ledgerCheck === 'a2' ? '' : entryNumber,
+              entryNumber: item.entryNumber,
               resentmenType: 'g3',
               accountCode: item.accountCode,
               accountName: item.accountName,
@@ -365,7 +366,7 @@
                 creditMap[item.accountCode] = {
                   ledgerCheck: ledgerCheck,
                   entryDate: entryDateValue,
-                  entryNumber: ledgerCheck === 'a2' ? '' : entryNumber,
+                  entryNumber: item.entryNumber,
                   resentmenType: 'g4',
                   accountCode: item.accountCode,
                   accountName: item.accountName,
@@ -383,7 +384,7 @@
             creditRows = filteredCredits.map(item => ({
               ledgerCheck: ledgerCheck,
               entryDate: entryDateValue,
-              entryNumber: ledgerCheck === 'a2' ? '' : entryNumber,
+              entryNumber: item.entryNumber,
               resentmenType: 'g4',
               accountCode: item.accountCode,
               accountName: item.accountName,
