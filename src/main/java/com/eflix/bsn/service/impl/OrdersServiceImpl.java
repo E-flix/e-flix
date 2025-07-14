@@ -95,10 +95,7 @@ public class OrdersServiceImpl implements OrdersService {
             log.error("주문 데이터 검증 실패: {}", e.getMessage());
             throw e;
         }
-        
-        // ==========================================================
-        // ★★★★★★★★★★★★★★★★★★★★★ FIX START ★★★★★★★★★★★★★★★★★★★★★
-        // ==========================================================
+
         // 기존 로직은 신규 주문임에도 주문번호가 있다는 이유로 수정으로 판단하는 오류가 있었음.
         // 데이터베이스에 해당 주문번호가 실제로 존재하는지 확인하여 신규/수정 여부를 판단하도록 변경.
         OrdersDTO queryDto = new OrdersDTO();
@@ -106,10 +103,7 @@ public class OrdersServiceImpl implements OrdersService {
         queryDto.setCoIdx(coIdx);
         OrdersDTO existingOrder = ordersMapper.selectOrderHeader(queryDto);
         boolean isNew = (existingOrder == null);
-        // ==========================================================
-        // ★★★★★★★★★★★★★★★★★★★★★★ FIX END ★★★★★★★★★★★★★★★★★★★★★★
-        // ==========================================================
-        
+
         log.info("저장 모드: {}", isNew ? "신규" : "수정");
         
         try {
@@ -132,14 +126,24 @@ public class OrdersServiceImpl implements OrdersService {
             }
             /* ② 수정이라면 헤더 UPDATE + 기존 디테일 삭제 */
             else {
-                log.info("헤더 UPDATE 및 기존 디테일 삭제 시작");
+                // ==========================================================
+                // ★★★★★★★★★★★★★★★★★★★★★ FIX START ★★★★★★★★★★★★★★★★★★★★★
+                // ==========================================================
+                // When updating, do not delete all details.
+                // Just update the header information. Detail updates will be handled separately if needed.
+                log.info("헤더 UPDATE 시작 - 주문번호: {}", dto.getOrderNo());
                 ordersMapper.updateOrder(dto);
-                ordersMapper.deleteOrderDetailAll(dto.getOrderNo(), coIdx);
-                log.info("헤더 UPDATE 및 기존 디테일 삭제 완료");
+                
+                // The dangerous deleteOrderDetailAll is now removed from the standard update path.
+                // If a full replacement of details is needed, a separate method should be created.
+                log.info("헤더 UPDATE 완료. 상세 내역은 변경되지 않았습니다.");
+                // ==========================================================
+                // ★★★★★★★★★★★★★★★★★★★★★★ FIX END ★★★★★★★★★★★★★★★★★★★★★★
+                // ==========================================================
             }
 
-            /* ③ 디테일 라인번호 부여 후 일괄 INSERT */
-            if (dto.getDetails() != null && !dto.getDetails().isEmpty()) {
+            /* ③ 디테일 라인번호 부여 후 일괄 INSERT (신규 등록 시에만) */
+            if (isNew && dto.getDetails() != null && !dto.getDetails().isEmpty()) {
                 // ★ 디테일 데이터 검증 및 설정 (회사 정보 포함)
                 prepareDetailData(dto, coIdx);
                 
@@ -160,8 +164,8 @@ public class OrdersServiceImpl implements OrdersService {
                     throw new RuntimeException("주문 디테일 저장에 실패했습니다. (반환값: " + detailResult + ")");
                 }
                 log.info("디테일 INSERT 성공 - 영향받은 행: {}", detailResult);
-            } else {
-                log.warn("디테일 데이터가 없습니다.");
+            } else if (isNew) {
+                log.warn("신규 주문이지만 디테일 데이터가 없습니다.");
             }
 
             log.info("=== 주문서 저장 완료 ===");

@@ -87,6 +87,15 @@ $(function () {
   /*──────────────── 1. 헤더 그리드 ────────────────*/
   const headerGridOptions = {
     components: { datePicker: DatePicker },
+    // =================================================================
+    // ★★★★★★★★★★★★★★★★★★★★★ FIX START ★★★★★★★★★★★★★★★★★★★★★
+    // =================================================================
+    // Add getRowNodeId to use 'orderNo' as the unique ID for each row.
+    // This allows headerGridApi.getRowNode(orderNo) to work correctly.
+    getRowNodeId: (data) => data.orderNo,
+    // =================================================================
+    // ★★★★★★★★★★★★★★★★★★★★★★ FIX END ★★★★★★★★★★★★★★★★★★★★★★
+    // =================================================================
     columnDefs: [
       { headerName:'주문번호',   field:'orderNo',        pinned:'left', width:150,
         cellClass:'font-weight-bold text-primary', editable:false },
@@ -504,124 +513,45 @@ $(function () {
   }
 
 
-  /*──────────────── 주문서 헤더 업데이트 함수 ────────────────*/
+  /*──────────────── 주문서 헤더 업데이트 함수 (수정됨) ────────────────*/
   function updateOrderHeader(quotation) {
     console.log('📝 헤더 정보 업데이트 시작');
-    
+
     try {
-      // 매핑할 데이터 준비
-      const customerCd = quotation.customerCd || '';
-      const customerNm = quotation.customerName || quotation.customerNm || '';
-      const representativeNm = quotation.representativeNm || '';
-      const phoneNo = quotation.phone || '';
-      const salesEmpCd = quotation.salesEmpCd || 'emp-101';
-      const discountRate = quotation.discountRate || 0;
-      const paymentTerms = 'Net 30';
-      
-      // 담당자 설정 (우선순위: sender > salesEmpCd > 기본값)
-      let orderWriter = 'emp-101';
-      if (quotation.sender && quotation.sender.trim()) {
-        orderWriter = quotation.sender.trim();
-      } else if (quotation.salesEmpCd && quotation.salesEmpCd.trim()) {
-        orderWriter = quotation.salesEmpCd.trim();
-      }
-      
-      console.log('📝 설정할 헤더 값들:', {
-        customerCd, customerNm, representativeNm, phoneNo, 
-        salesEmpCd, discountRate, paymentTerms, orderWriter
-      });
-      
-      // 필수 필드 검증
-      if (!customerCd.trim()) {
-        throw new Error('견적서에 거래처 정보가 없습니다.');
-      }
-      
-      // ⭐ 전역 currentOrder 상태 업데이트 (우선)
-      currentOrder = {
-        ...currentOrder,
-        customerCd: customerCd,
-        customerNm: customerNm,
-        representativeNm: representativeNm,
-        phoneNo: phoneNo,
-        salesEmpCd: salesEmpCd,
-        discountRate: discountRate,
-        paymentTerms: paymentTerms,
-        orderWriter: orderWriter
-      };
-      
-      console.log('📝 업데이트된 currentOrder:', currentOrder);
-      
-      // ⭐ 방법 1: 전체 헤더 데이터 다시 로드
-      const allRowData = [];
-      headerGridApi.forEachNode(node => {
-        if (node.data.orderNo === currentOrder.orderNo) {
-          // 현재 주문서 행 업데이트
-          allRowData.push({
-            ...node.data,
-            customerCd: customerCd,
-            customerNm: customerNm,
-            representativeNm: representativeNm,
-            phoneNo: phoneNo,
-            salesEmpCd: salesEmpCd,
-            discountRate: discountRate,
-            paymentTerms: paymentTerms,
-            orderWriter: orderWriter
-          });
-        } else {
-          allRowData.push(node.data);
+        // Find the node for the new order row using the now-reliable getRowNodeId
+        const rowNode = headerGridApi.getRowNode(currentOrder.orderNo);
+        if (!rowNode) {
+            // This error should no longer occur with the getRowNodeId fix.
+            throw new Error("신규 주문서 행을 찾을 수 없습니다.");
         }
-      });
-      
-      // AG-Grid 데이터 재설정
-      safeSetRowData(headerGridApi, allRowData);
-      
-      // ⭐ 방법 2: 트랜잭션으로 업데이트 (백업)
-      try {
-        let targetNode = null;
-        headerGridApi.forEachNode(node => {
-          if (node.data.orderNo === currentOrder.orderNo) {
-            targetNode = node;
-            return false;
-          }
-        });
-        
-        if (targetNode) {
-          // 개별 필드 업데이트
-          targetNode.setDataValue('customerCd', customerCd);
-          targetNode.setDataValue('customerNm', customerNm);
-          targetNode.setDataValue('representativeNm', representativeNm);
-          targetNode.setDataValue('phoneNo', phoneNo);
-          targetNode.setDataValue('salesEmpCd', salesEmpCd);
-          targetNode.setDataValue('discountRate', discountRate);
-          targetNode.setDataValue('paymentTerms', paymentTerms);
-          targetNode.setDataValue('orderWriter', orderWriter);
-          
-          console.log('✅ setDataValue로 개별 필드 업데이트 완료');
-        }
-      } catch (setDataError) {
-        console.warn('⚠️ setDataValue 실패 (백업 방법):', setDataError);
-      }
-      
-      // ⭐ 그리드 강제 새로고침
-      setTimeout(() => {
-        if (headerGridApi && typeof headerGridApi.refreshCells === 'function') {
-          headerGridApi.refreshCells({ force: true });
-          console.log('🔄 헤더 그리드 강제 새로고침 완료');
-        }
-        
-        // 첫 번째 행으로 스크롤하여 변경사항 확인
-        if (headerGridApi && typeof headerGridApi.ensureIndexVisible === 'function') {
-          headerGridApi.ensureIndexVisible(0);
-        }
-      }, 100);
-      
-      console.log('✅ 헤더 정보 업데이트 완료');
-      
+
+        // Prepare the data to update
+        const updatedData = {
+            ...rowNode.data, // Keep existing data like orderNo
+            customerCd: quotation.customerCd || '',
+            customerNm: quotation.customerName || quotation.customerNm || '',
+            representativeNm: quotation.representativeNm || '',
+            phoneNo: quotation.phone || '',
+            salesEmpCd: quotation.salesEmpCd || 'emp-101',
+            discountRate: quotation.discountRate || 0,
+            paymentTerms: 'Net 30',
+            orderWriter: (quotation.sender || quotation.salesEmpCd || 'emp-101').trim()
+        };
+
+        // Update the global state variable
+        currentOrder = updatedData;
+
+        // Update the grid row data directly using the AG-Grid API
+        rowNode.setData(updatedData);
+
+        console.log('✅ 헤더 정보 업데이트 완료:', currentOrder);
+
     } catch (error) {
-      console.error('❌ 헤더 업데이트 실패:', error);
-      throw error;
+        console.error('❌ 헤더 업데이트 실패:', error);
+        throw error; // Propagate error to be caught by the caller
     }
   }
+
 
   /*──────────────── 주문서 상세 업데이트 함수 ────────────────*/
   function updateOrderDetails(details) {
@@ -1059,11 +989,23 @@ $(function () {
 
   /*──────────────── 11. 헤더 클릭 → 디테일+여신 ────────────────*/
   function handleHeaderRowClicked(e){
-    currentOrder = e.data;
-    // 신규 등록(editMode) 중에는 로드하지 않음
+    // =================================================================
+    // ★★★★★★★★★★★★★★★★★★★★★ FIX START ★★★★★★★★★★★★★★★★★★★★★
+    // =================================================================
+    // 신규 등록(editMode) 중에는 다른 행의 데이터를 불러오지 않도록 수정
+    // If in edit mode, do not process the click event to prevent `currentOrder` from being overwritten.
     if (editMode) {
+      // Optional: Provide feedback to the user that they are in edit mode.
+      if (e.data.orderNo !== currentOrder.orderNo) {
+          console.warn('신규 등록 모드입니다. 먼저 현재 주문서를 저장 또는 취소하세요.');
+      }
       return;
     }
+    // =================================================================
+    // ★★★★★★★★★★★★★★★★★★★★★★ FIX END ★★★★★★★★★★★★★★★★★★★★★★
+    // =================================================================
+
+    currentOrder = e.data;
     
     // 기존 데이터 조회 모드일 때는 견적서 조회 버튼 비활성화
     $('#btnQuotationSearch').prop('disabled', true);
