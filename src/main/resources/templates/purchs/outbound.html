@@ -156,37 +156,71 @@
 	// 출고 버튼 클릭 시 프로시저 호출
 	document.getElementById("outboundBtn").addEventListener("click", function () {
 		if (!selectedOutboundNo) {
-			alert("출고의뢰서를 먼저 선택해주세요.");
+			Swal.fire({
+				title: "주의",
+				icon: "warning",
+				text: "출고의뢰서를 먼저 선택해주세요.",
+				timer: 1500,
+				showConfirmButton: false
+			});
 			return;
 		}
 
-		if (!confirm("선택된 출고의뢰서를 출고 처리하시겠습니까?")) return;
+		Swal.fire({
+			title: "출고 처리 확인",
+			text: "선택된 출고의뢰서를 출고 처리하시겠습니까?",
+			icon: "question",
+			showCancelButton: true,
+			confirmButtonText: "예",
+			cancelButtonText: "아니오"
+		}).then((result) => {
+			if (!result.isConfirmed) return;
 
-		const payload = { outboundNo: selectedOutboundNo };
+			const payload = { outboundNo: selectedOutboundNo };
 
-		fetch("/purchs/obp", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(payload)
-		})
-			.then(res => {
-				if (!res.ok) throw new Error("출고 처리 실패");
-				return res.json();
+			fetch("/purchs/obp", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload)
 			})
-			.then(data => {
-				alert("출고 처리가 완료되었습니다.");
+				.then(async res => {
+					if (!res.ok) {
+						const errorText = (await res.text()).replace(/\s+/g, ' ').trim();
 
-				// 다시 상세 조회해서 상태 갱신
-				return fetch(`/purchs/obrd?outboundNo=${selectedOutboundNo}`);
-			})
-			.then(res => res.json())
-			.then(data => {
-				outboundListDetailGrid.setGridOption("rowData", data);
-			})
-			.catch(err => {
-				console.error("출고 실패:", err);
-				alert("출고 중 오류가 발생했습니다.");
-			});
+						await Swal.fire({
+							title: "출고 실패",
+							text: errorText || "출고 처리 중 오류가 발생했습니다.",
+							icon: "error"
+						})
+						throw new Error("출고실패");
+					}
+					return res.json();
+				})
+				.then(data => {
+					Swal.fire({
+						title: "출고 완료",
+						text: "출고 처리가 완료되었습니다.",
+						icon: "success",
+						timer: 1500,
+						showConfirmButton: false
+					});
+
+					// 상태 갱신
+					return fetch(`/purchs/obrd?outboundNo=${selectedOutboundNo}`);
+				})
+				.then(res => res.json())
+				.then(data => {
+					outboundListDetailGrid.setGridOption("rowData", data);
+				})
+				.catch(err => {
+					console.error("출고 실패:", err);
+					Swal.fire({
+						title: "출고 실패",
+						text: err.message || "출고 중 오류가 발생했습니다.",
+						icon: "error"
+					});
+				});
+		});
 	});
 </script>
 
