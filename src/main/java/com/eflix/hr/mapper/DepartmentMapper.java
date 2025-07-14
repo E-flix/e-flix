@@ -35,4 +35,6 @@ public interface DepartmentMapper {
     List<DepartmentDTO> findUpAllByCoIdx(String coIdx);
     List<DepartmentDTO> findDownAllByCoIdx(String coIdx, String deptUpIdx);
 
+    DepartmentDTO findByEmpIdx(String empIdx);
+
 }

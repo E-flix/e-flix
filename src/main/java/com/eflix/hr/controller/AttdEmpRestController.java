@@ -2,17 +2,19 @@ package com.eflix.hr.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
 import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.etc.AttdDetailDTO;
-import com.eflix.hr.dto.etc.AttdRecordDTO;
-import com.eflix.hr.dto.etc.AttdRecordSummaryDTO;
 import com.eflix.hr.dto.etc.AttdSummaryDTO;
 import com.eflix.hr.service.AttendanceRecordService;
+import com.eflix.hr.service.AttendanceRequestService;
 import com.eflix.hr.service.EmployeeService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -21,10 +23,14 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @RestController
 @RequestMapping("/hr/attd/emp")
@@ -36,6 +42,12 @@ public class AttdEmpRestController {
     @Autowired
     private AttendanceRecordService attendanceRecordService;
 
+    @Autowired
+    private AttendanceRequestService attdReqService;
+
+    @Value("${upload.path}")
+    private String path;
+
     private String getCoIdx() {
         return AuthUtil.getCoIdx();
     }
@@ -43,6 +55,30 @@ public class AttdEmpRestController {
     private String getEmpIdx() {
         return AuthUtil.getEmpIdx();
     }
+
+    public String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
+    }
+
+    @PostMapping("/in")
+    public ResponseEntity<ResResult> postMethodName(@RequestBody String entity) {
+        ResResult result = null;
+
+
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    
 
     @GetMapping("/year")
     public ResponseEntity<ResResult> getYear() {
@@ -100,9 +136,6 @@ public class AttdEmpRestController {
     public ResponseEntity<ResResult> getSummary(@RequestParam String date) {
         ResResult result = null;
 
-        System.out.println(date);
-
-        // AttdRecordSummaryDTO attdRecordSummaryDTO = attendanceRecordService.selectAttdRecordSummaryByEmpIdx(getEmpIdx(), date);
         AttdSummaryDTO attdSummaryDTO = attendanceRecordService.findAttdSummaryByEmpIdxWithDate(getEmpIdx(), date);
 
         if(attdSummaryDTO != null) {
@@ -118,7 +151,6 @@ public class AttdEmpRestController {
     public ResponseEntity<ResResult> getList(@RequestParam String date) {
         ResResult result = null;
 
-        // List<AttdRecordDTO> attd = attendanceRecordService.findAllByEmpIdxWithDate(getEmpIdx(), date);
         List<AttdDetailDTO> attdDetailDTOs = attendanceRecordService.findAttdDetailListByEmpIdxWithDate(getEmpIdx(), date);
 
         if(attdDetailDTOs != null) {

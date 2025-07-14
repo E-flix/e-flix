@@ -216,4 +216,10 @@
             )
             WHERE ROWNUM = 1
     </select>
+
+    <select id="findCoRegdateByCoIdx" parameterType="String" resultType="Date">
+        SELECT co_regdate
+        FROM companies
+        WHERE co_idx = #{coIdx}
+    </select>
 </mapper>

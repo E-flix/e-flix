@@ -14,447 +14,618 @@
     <title>근태관리</title>
 </head>
 <div layout:fragment="content">
-    <div id="attdManager">
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <!-- 헤더 -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold text-dark mb-0">근태 관리</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="#" class="text-decoration-none">관리</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">근태 관리</li>
+                        </ol>
+                    </nav>
+                </div>
 
-        <!-- 필터 영역 -->
-        <form class="row g-3 align-items-end mb-4 p-4 border bg-light rounded">
-            <div class="col-md-6 col-lg-3">
-                <label class="form-label fw-semibold">사원명</label>
-                <input type="text" class="form-control" placeholder="검색어 입력" name="SearchEmpName">
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <label class="form-label fw-semibold">근무상태</label>
-                <select class="form-select" id="searchEmpType">
-                    <option value="">전체</option>
-                    <option value="정상">정상근무</option>
-                    <option value="지각">지각</option>
-                    <option value="조퇴">조퇴</option>
-                    <option value="결근">결근</option>
-                </select>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <label class="form-label fw-semibold">부서</label>
-                <select name="deptUpIdx" class="form-select" id="searchDeptUpIdx">
-                    <option value="">전체</option>
-                    <option value="본사">본사</option>
-                </select>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <label class="form-label fw-semibold">상세 부서</label>
-                <select name="deptIdx" class="form-select" id="searchDeptDownIdx">
-                    <option value="">전체</option>
-                    <option value="인사부">인사부</option>
-                    <option value="영업부">영업부</option>
-                </select>
-            </div>
-            <div class="col-md-6 col-lg-2">
-                <label class="form-label fw-semibold">년도</label>
-                <select class="form-select" id="searchAttdYear">
-                    <option value="">선택</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                </select>
-            </div>
-            <div class="col-md-6 col-lg-2">
-                <label class="form-label fw-semibold">월</label>
-                <select class="form-select" id="searchAttdMonth">
-                    <option value="">선택</option>
-                </select>
-            </div>
-            <div class="col-md-6 col-lg-2">
-                <label class="form-label fw-semibold">직책</label>
-                <select class="form-select" id="searchGradeIdx">
-                    <option value="">전체</option>
-                </select>
-            </div>
-            <div class="col-md-6 col-lg-4 d-flex align-items-end gap-2">
-                <button type="button" class="btn btn-primary flex-fill" id="searchBtn">
-                    <i class="bi bi-search"></i> 조회
-                </button>
-                <button type="reset" class="btn btn-outline-secondary flex-fill">
-                    <i class="bi bi-arrow-clockwise"></i> 초기화
-                </button>
-            </div>
-        </form>
-
-        <!-- 상단 근태 리스트 -->
-        <div class="table-responsive mb-5">
-            <table class="table table-bordered table-hover align-middle text-center">
-                <thead class="table-light">
-                    <tr>
-                        <th>사번</th>
-                        <th>사원명</th>
-                        <th>부서</th>
-                        <th>직책</th>
-                        <th>총근무일수</th>
-                        <th>정상근무</th>
-                        <th>초과근무</th>
-                        <th>지각</th>
-                        <th>조퇴</th>
-                        <th>결근</th>
-                        <th>휴가</th>
-                        <th>수정일자</th>
-                    </tr>
-                </thead>
-                <tbody id="empListBody">
-                    <tr data-bs-toggle="collapse" data-bs-target="#detailRow1" aria-expanded="false"
-                        style="cursor:pointer;">
-                        <td>1</td>
-                        <td>홍길동</td>
-                        <td>인사부</td>
-                        <td>과장</td>
-                        <td>20일</td>
-                        <td>19일</td>
-                        <td>2시간</td>
-                        <td>1회</td>
-                        <td>0회</td>
-                        <td>0회</td>
-                        <td>1일</td>
-                        <td>2025-06-15</td>
-                    </tr>
-                    <tr class="collapse bg-light" id="detailRow1">
-                        <td colspan="12">
-                            <!-- 상세 영역 (아래에서 별도 작성) -->
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="card h-100">
-                                        <div class="card-body">
-                                            <h6 class="card-title fw-bold mb-3">📋 사원 정보</h6>
-                                            <ul class="list-group list-group-flush">
-                                                <li class="list-group-item"><strong>사원명:</strong> 홍길동</li>
-                                                <li class="list-group-item"><strong>년월:</strong> 2024년 06월</li>
-                                                <li class="list-group-item"><strong>부서명:</strong> A01 본사 → 인사부</li>
-                                                <li class="list-group-item"><strong>정규 근무일수:</strong> 20일</li>
-                                                <li class="list-group-item"><strong>직책:</strong> 과장</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="d-flex justify-content-end mb-2">
-                                        <button class="btn btn-success btn-sm me-2" data-bs-toggle="modal"
-                                            data-bs-target="#editModal">수정</button>
-                                    </div>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-bordered text-center mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>날짜</th>
-                                                    <th>근무상태</th>
-                                                    <th>출근시간</th>
-                                                    <th>퇴근시간</th>
-                                                    <th>총 근무시간</th>
-                                                    <th>특이사항</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>06-01</td>
-                                                    <td>정상근무</td>
-                                                    <td>9:00</td>
-                                                    <td>18:00</td>
-                                                    <td>9시간</td>
-                                                    <td>-</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>06-02</td>
-                                                    <td>지각</td>
-                                                    <td>9:45</td>
-                                                    <td>18:00</td>
-                                                    <td>8시간 15분</td>
-                                                    <td>지각 1회</td>
-                                                </tr>
-                                                <!-- ... -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="d-flex justify-content-end mt-2">
-                                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse"
-                                            data-bs-target="#detailRow1">닫기</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    <!-- 두 번째 사원 -->
-                    <tr>
-                        <td>2</td>
-                        <td>홍윤희</td>
-                        <td>영업부</td>
-                        <td>대리</td>
-                        <td>20일</td>
-                        <td>20일</td>
-                        <td>1시간</td>
-                        <td>0회</td>
-                        <td>0회</td>
-                        <td>0회</td>
-                        <td>0일</td>
-                        <td>-</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- 수정 모달 -->
-        <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">근태 상세 수정</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                <!-- 필터 영역 -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="card-title mb-0"><i class="bi bi-funnel me-2"></i>검색 조건</h5>
                     </div>
-                    <div class="modal-body">
+                    <div class="card-body">
+                        <form class="row g-3">
+                            <div class="col-md-6 col-lg-3">
+                                <label class="form-label fw-semibold">사원명</label>
+                                <input type="text" class="form-control" placeholder="검색어 입력" name="SearchEmpName">
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <label class="form-label fw-semibold">근무상태</label>
+                                <select class="form-select" id="searchEmpStatus">
+                                    <option value="">전체</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <label class="form-label fw-semibold">부서</label>
+                                <select name="deptUpIdx" class="form-select" id="searchDeptUpIdx">
+                                    <option value="">전체</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <label class="form-label fw-semibold">상세 부서</label>
+                                <select name="deptIdx" class="form-select" id="searchDeptDownIdx">
+                                    <option value="">전체</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-lg-2">
+                                <label class="form-label fw-semibold">년도</label>
+                                <select class="form-select" id="searchAttdYear">
+                                    <option value="">전체</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-lg-2">
+                                <label class="form-label fw-semibold">월</label>
+                                <select class="form-select" id="searchAttdMonth">
+                                    <option value="">전체</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-lg-2">
+                                <label class="form-label fw-semibold">직책</label>
+                                <select class="form-select" id="searchGradeIdx">
+                                    <option value="">전체</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-lg-4 d-flex align-items-end gap-2">
+                                <button type="button" class="btn btn-primary flex-fill" id="searchBtn">
+                                    <i class="bi bi-search"></i> 조회
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary flex-fill">
+                                    <i class="bi bi-arrow-clockwise"></i> 초기화
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 결과 요약 -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-2">
+                                <h6 class="text-muted mb-1">총 직원</h6>
+                                <h4 class="mb-0 fw-bold">2명</h4>
+                            </div>
+                            <div class="col-md-2">
+                                <h6 class="text-muted mb-1">정상근무</h6>
+                                <h4 class="mb-0 fw-bold text-success">39일</h4>
+                            </div>
+                            <div class="col-md-2">
+                                <h6 class="text-muted mb-1">지각</h6>
+                                <h4 class="mb-0 fw-bold text-warning">1회</h4>
+                            </div>
+                            <div class="col-md-2">
+                                <h6 class="text-muted mb-1">조퇴</h6>
+                                <h4 class="mb-0 fw-bold text-info">0회</h4>
+                            </div>
+                            <div class="col-md-2">
+                                <h6 class="text-muted mb-1">결근</h6>
+                                <h4 class="mb-0 fw-bold text-danger">0회</h4>
+                            </div>
+                            <div class="col-md-2">
+                                <h6 class="text-muted mb-1">휴가</h6>
+                                <h4 class="mb-0 fw-bold text-primary">1일</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 근태 리스트 -->
+                <div class="card">
+                    <div class="card-header bg-white border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0"><i class="bi bi-table me-2"></i>근태 현황</h5>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-success btn-sm">
+                                    <i class="bi bi-file-earmark-excel"></i> Excel
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-printer"></i> 인쇄
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-sm align-middle text-center" id="editTable">
+                            <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>날짜</th>
-                                        <th>근무상태</th>
-                                        <th>출근시간</th>
-                                        <th>퇴근시간</th>
-                                        <th>총 근무시간</th>
-                                        <th>특이사항</th>
+                                        <th class="text-center">사번</th>
+                                        <th class="text-center">사원명</th>
+                                        <th class="text-center">부서</th>
+                                        <th class="text-center">직책</th>
+                                        <th class="text-center">총근무일수</th>
+                                        <th class="text-center">정상근무</th>
+                                        <th class="text-center">초과근무</th>
+                                        <th class="text-center">지각</th>
+                                        <th class="text-center">조퇴</th>
+                                        <th class="text-center">결근</th>
+                                        <th class="text-center">휴가</th>
+                                        <th class="text-center">수정일자</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>06-01</td>
-                                        <td ondblclick="editCell(this)">정상근무</td>
-                                        <td ondblclick="editCell(this)">9:00</td>
-                                        <td ondblclick="editCell(this)">18:00</td>
-                                        <td ondblclick="editCell(this)">9시간</td>
-                                        <td ondblclick="editCell(this)">-</td>
-                                    </tr>
-                                    <!-- ... -->
+                                <tbody id="empListBody">
+
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary">저장</button>
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-                    </div>
+                </div>
+
+                <!-- 페이징 -->
+                <div class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination" id="paginationArea">
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
-        <script>
-            $(function () {
-                let currentPage = 1;
-                loadEmpList(1);
+    </div>
 
+    <!-- 수정 모달 -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-square me-2"></i>근태 상세 수정
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle me-2"></i>
+                        셀을 더블클릭하여 수정할 수 있습니다.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm align-middle text-center" id="editTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>날짜</th>
+                                    <th>근무상태</th>
+                                    <th>출근시간</th>
+                                    <th>퇴근시간</th>
+                                    <th>총 근무시간</th>
+                                    <th>특이사항</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>06-01</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">정상근무</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">9:00</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">18:00</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">9시간</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">-</td>
+                                </tr>
+                                <tr>
+                                    <td>06-02</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">지각</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">9:45</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">18:00</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">8시간 15분</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">지각 1회</td>
+                                </tr>
+                                <tr>
+                                    <td>06-03</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">정상근무</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">8:55</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">18:00</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">9시간 5분</td>
+                                    <td ondblclick="editCell(this)" class="cursor-pointer">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary">
+                        <i class="bi bi-check-lg me-2"></i>저장
+                    </button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-2"></i>닫기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            let currentPage = 1;
+            let currentDetailEmpIdx = null;
 
-                $("#searchBtn").on("click", function () {
-                    loadEmpList();
-                });
-
-                function loadEmpList(page = 1) {
-                    currentPage = page;
-
-                    const searchData = {
-                        empName: $("#searchEmpName").val(),
-                        empType: $("#searchEmpType").val(),
-                        deptUpIdx: $("#searchDeptUpIdx").val(),
-                        deptDownIdx: $("#searchDeptDownIdx").val(),
-                        gradeIdx: $("#searchGradeIdx").val(),
-                        attdYear: $("#searchAttdYear").val(),
-                        attdMonth: $("#searchAttdMonth").val(),
-                    }
-
-                    const queryString = $.param(searchData);
-
-                    $.ajax({
-                        type: "GET",
-                        url: `/hr/attd/mgr/list?${queryString}&page=${page}`,
-                        success: function (res) {
-                            if (res.head.res_code === "200") {
-                                const data = res.body;
-
-                                renderEmpListBody(data.emps);
-                                renderPagination(data.page, data.pageSize, data.total);
-                            } else {
-                                Swal.fire("실패", res.body, "error");
-                            }
-                        },
-                        error: function (xhr, status, err) {
-                            console.error(err);
-                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
-                        }
-                    });
-                }
-
-                function renderEmpListBody(emps) {
-                    const $empListBody = $("#empListBody");
-                    $empListBody.empty();
-                    let html = "";
-                    $.each(emps, function (i, item) {
-                        html += `
-                         <tr data-bs-toggle="collapse" data-bs-target="#detailRow1" aria-expanded="false" style="cursor:pointer;">
-                            <td>${i}</td>
-                            <td>${item.empName}</td>
-                            <td>${item.deptName}</td>
-                            <td>${item.grdName}</td>
-                            <td>${item.totalDay}</td>
-                            <td>${item.workDay}</td>
-                            <td>${item.nightHours}</td>
-                            <td>${item.lateCount}</td>
-                            <td>${item.leaveEarlyCount}</td>
-                            <td>${item.abCount}</td>
-                            <td>${item.usedLeaveDay}</td>
-                            <td>${item.lastModDate}</td>
-                        </tr>
-                    `;
-                    });
-                    $empListBody.html(html);
-                }
-
-                function renderPagination(page, pageSize, total) {
-                    const $totalPages = Math.ceil(total / pageSize);
-                    const $pagination = $("#paginationArea");
-
-                    $pagination.empty();
-                    $pagination.append(`
-                    <li class="page-item ${page === 1 ? 'disabled' : ''}">
-                        <span class="page-link" data-page="${page - 1}">이전</span>
-                    </li>
-                `);
-
-                    for (let i = 0; i <= totalPages; i++) {
-                        $pagination.append(`
-                        <li class="page-item ${i === page ? 'active' : ''}">
-                            <span class="page-link" data-page="${i}">${i}</span>
-                        </li>
-                    `);
-                    }
-
-                    $pagination.append(`
-                    <li class="page-item ${page === totalPages ? 'disabled' : ''}">
-                        <a class="page-link" data-page="${page + 1}">다음</a>
-                    </li>
-                `);
-                }
-
-                function loadUpDept() {
-                    $.ajax({
-                        type: "",
-                        url: "",
-                        success: function (res) {
-                            if (res.head.res_code === "200") {
-                                const data = res.body;
-
-                            } else {
-                                Swal.fire("실패", res.body, "error");
-                            }
-                        },
-                        error: function (xhr, status, err) {
-                            console.error(err);
-                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
-                        }
-                    });
-                }
-
-                function loadYears() {
-                    $.ajax({
-                        type: "",
-                        url: "",
-                        success: function (res) {
-                            if (res.head.res_code === "200") {
-                                const data = res.body;
-
-                            } else {
-                                Swal.fire("실패", res.body, "error");
-                            }
-                        },
-                        error: function (xhr, status, err) {
-                            console.error(err);
-                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
-                        }
-                    });
-                }
-
-                function loadMonth() {
-                    $.ajax({
-                        type: "",
-                        url: "",
-                        success: function (res) {
-                            if (res.head.res_code === "200") {
-                                const data = res.body;
-
-                            } else {
-                                Swal.fire("실패", res.body, "error");
-                            }
-                        },
-                        error: function (xhr, status, err) {
-                            console.error(err);
-                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
-                        }
-                    });
-                }
-            });
-        </script>
-        <!-- 스크립트 -->
-        <script>
-            const coIdx = "co-201"
-            function showDetail(name) {
-                document.getElementById('detailSection').style.display = 'block';
-                // 추가적으로 선택한 사원 데이터로 갱신할 수 있음
-            }
-
-            function hideDetail() {
-                document.getElementById('detailSection').style.display = 'none';
-            }
-
-            function editCell(cell) {
-                const originalText = cell.innerText;
-                const input = document.createElement("input");
-                input.type = "text";
-                input.value = originalText;
-                input.classList.add("form-control");
-                input.onblur = function () {
-                    cell.innerText = input.value || originalText;
-                };
-                cell.innerText = "";
-                cell.appendChild(input);
-                input.focus();
-            }
+            // 1) 최초 로딩, 검색은 항상 1페이지부터
+            loadEmpList(1);
+            loadYear();
+            loadSearchSelect();
 
             $("#searchBtn").on("click", function () {
-                const query = {
-                    empName: $("#empName").val(),
+                loadEmpList(1);
+            });
+
+            // 2) 페이징 클릭 처리
+            $("#paginationArea").on("click", ".page-link", function () {
+                const p = parseInt($(this).data("page"), 10);
+                if (p >= 1 && p !== currentPage) {
+                    loadEmpList(p);
                 }
+            });
+
+            // 3) 리스트 클릭 → 상세 토글 + 로드
+            $("#empListBody").on("click", "tr.tr-item", function () {
+                const target = $(this).attr("data-bs-target");
+                currentDetailEmpIdx = $(this).data("emp-idx");
+
+                // 1. 다른 row 닫기 (DOM상에 있는 것만)
+                $("#empListBody .collapse").not(target).collapse("hide");
+
+                // 2. 만약 이미 상세 row가 DOM에 있다면 토글(즉, 숨김/보임 전환)
+                if ($(target).length) {
+                    $(target).collapse('toggle');
+                } else {
+                    // 3. 상세 정보 요청 및 렌더링 (AJAX)
+                    loadEmpDetail(currentDetailEmpIdx);
+                    // 상세 데이터 렌더링 후, 직접 show 처리 (아래 renderEmpDetail 참고)
+                }
+            });
+
+            $("#searchDeptUpIdx").on("change", function() {
+                const deptUpIdx = $(this).val();
+                loadDownDept(deptUpIdx);
+            });
+
+            $("#searchAttdYear").on("change", function() {
+                const year = $(this).val();
+                loadMonth(year);
+            });
+
+            $('#editModal').on('show.bs.modal', function(event) {
+                const btn = $(event.relatedTarget); // 클릭한 버튼
+                const empIdx = btn.data('emp-idx');
+
+                // 선택 연월 처리 (검색 조건에서 가져오거나 디폴트)
+                const year = $("#searchAttdYear").val() || new Date().getFullYear();
+                const month = $("#searchAttdMonth").val().padStart(2, "0") || String(new Date().getMonth() + 1).padStart(2, "0");
+
+                // AJAX로 상세 데이터 요청
                 $.ajax({
-                    url: "/hr/am/search",
+                    type: 'GET',
+                    url: `/hr/attd/mgr/detail?empIdx=${empIdx}&year=${year}&month=${month}`,
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            renderEditModalTable(res.body);
+                        } else {
+                            Swal.fire("실패", res.body, "error");
+                        }
+                    },
+                    error: function() {
+                        Swal.fire("오류", "데이터 로딩 오류", "error");
+                    }
+                });
+            });
+
+            function renderEditModalTable(attds) {
+                const $tbody = $("#editTable tbody").empty();
+                attds.forEach(row => {
+                    $tbody.append(`
+                        <tr>
+                            <td>${row.attdDate || '-'}</td>
+                            <td ondblclick="editCell(this)" class="cursor-pointer">${row.attdStatus || '-'}</td>
+                            <td ondblclick="editCell(this)" class="cursor-pointer">${row.startTime || '-'}</td>
+                            <td ondblclick="editCell(this)" class="cursor-pointer">${row.endTime || '-'}</td>
+                            <td ondblclick="editCell(this)" class="cursor-pointer">${row.totalTime || '-'}</td>
+                        </tr>
+                    `);
+                });
+            }
+
+            function loadEmpList(page = 1) {
+                currentPage = page;
+
+                const searchData = {
+                    empName: $('input[name="SearchEmpName"]').val(),  // id 대신 name으로 가져오도록
+                    empStatus: $("#searchEmpStatus").val(),
+                    deptUpIdx: $("#searchDeptUpIdx").val(),
+                    deptDownIdx: $("#searchDeptDownIdx").val(),
+                    gradeIdx: $("#searchGradeIdx").val(),
+                    dateYear: $("#searchAttdYear").val(),
+                    dateMonth: $("#searchAttdMonth").val(),
+                };
+
+                const queryString = $.param(searchData);
+
+                $.ajax({
                     type: "GET",
-                    data: query,
-                    dataType: 'json',
-                    success: function (code) {
-                        if (code === '200') {
-                            alert('성공')
+                    url: `/hr/attd/mgr/list?${queryString}&page=${page}`,
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+                            renderEmpListBody(data.emps);
+                            renderPagination(data.page, data.pageSize, data.total);
+                        } else {
+                            Swal.fire("실패", res.body, "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function loadEmpDetail(empIdx) {
+                // 선택된 년·월을 실제 선택값으로
+                const year = $("#searchAttdYear").val() || new Date().getFullYear();
+                const month = $("#searchAttdMonth").val().padStart(2, "0") || String(new Date().getMonth() + 1).padStart(2, "0");
+
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/attd/mgr/detail?empIdx=${empIdx}&year=${year}&month=${month}`,
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            renderEmpDetail(res.body);
+                        } else {
+                            Swal.fire("실패", res.body, "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function renderEmpDetail(attds) {
+                // collapse row id를 empIdx 기반으로 고유하게
+                const rowId = `detailRow-${currentDetailEmpIdx}`;
+                // 기존에 있으면 제거
+                $(`#${rowId}`).remove();
+
+                let html = `
+        <tr class="collapse bg-light" id="${rowId}">
+        <td colspan="12" class="p-0">
+            <div class="border-top bg-light p-4">
+            <div class="row g-4">
+                <div class="col-md">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0"><i class="bi bi-calendar-check me-2"></i>상세 근태 현황</h6>
+                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editModal" data-attd-indx="${currentDetailEmpIdx}">
+                        <i class="bi bi-pencil"></i> 수정
+                    </button>
+                    </div>
+                    <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0 text-center">
+                        <thead class="table-light">
+                            <tr>
+                            <th>날짜</th><th>근무상태</th><th>출근시간</th><th>퇴근시간</th>
+                            <th>총 근무시간</th><th>특이사항</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                let detailRow = "";
+                attds.forEach(item => {
+                    detailRow += `
+            <tr>
+            <td>${item.attdDate || '-'}</td>
+            <td>${item.attdStatus || '-'}</td>
+            <td>${item.startTime || '-'}</td>
+            <td>${item.endTime || '-'}</td>
+            <td>${item.totalTime || '-'}</td>
+            <td>${item.abReason || '-'}</td>
+            </tr>`;
+                });
+                html += detailRow;
+                html += `
+                        </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#${rowId}">
+                        <i class="bi bi-chevron-up"></i> 닫기
+                        </button>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            </div>
+        </td>
+        </tr>`;
+                $(`tr.tr-item[data-emp-idx="${currentDetailEmpIdx}"]`).after(html);
+
+                // 바로 show (Bootstrap collapse 애니메이션 적용)
+                $(`#detailRow-${currentDetailEmpIdx}`).collapse('show');
+            }
+
+            function renderEmpListBody(emps) {
+                const $body = $("#empListBody").empty();
+                emps.forEach((item, i) => {
+                    $body.append(`
+                    <tr class="tr-item" data-bs-toggle="collapse" data-bs-target="#detailRow-${item.empIdx}"
+                        style="cursor:pointer;" data-emp-idx="${item.empIdx}">
+                    <td>${i + 1}</td>
+                    <td>${item.empName}</td>
+                    <td>${item.deptName}</td>
+                    <td>${item.grdName}</td>
+                    <td>${item.totalDay}</td>
+                    <td>${item.workDay}</td>
+                    <td>${item.nightHours}</td>
+                    <td>${item.lateCount}</td>
+                    <td>${item.leaveEarlyCount}</td>
+                    <td>${item.abCount}</td>
+                    <td>${item.usedLeaveDay}</td>
+                    <td>${item.lastModDate || '-'}</td>
+                    </tr>`);
+                });
+            }
+
+            function renderPagination(page, pageSize, total) {
+                const totalPages = Math.ceil(total / pageSize);
+                const $pg = $("#paginationArea").empty();
+
+                // 이전
+                $pg.append(`
+          <li class="page-item ${page === 1 ? "disabled" : ""}">
+            <span class="page-link" data-page="${page - 1}">이전</span>
+          </li>`);
+
+                // 1 ~ totalPages
+                for (let i = 1; i <= totalPages; i++) {
+                    $pg.append(`
+              <li class="page-item ${i === page ? "active" : ""}">
+                <span class="page-link" data-page="${i}">${i}</span>
+              </li>`);
+                }
+
+                // 다음
+                $pg.append(`
+          <li class="page-item ${page === totalPages ? "disabled" : ""}">
+            <span class="page-link" data-page="${page + 1}">다음</span>
+          </li>`);
+            }
+
+            function loadSearchSelect(selectedUpValue, selectedDownValue) {
+                $.ajax({
+                    type: "GET",
+                    url: "/hr/attd/mgr/searchOptions",
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+                            renderStatus(data.status);
+                            renderUpDept(data.depts);
+                            renderGrade(data.grades);
+                        } else {
+                            Swal.fire("실패", res.body, "error");
                         }
                     },
                     error: function (xhr, status, err) {
                         console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
                     }
-                })
-            });
-            function loadDept() {
+                });
+            }
+
+            function renderStatus(status) {
+                const $searchEmpStatus = $("#searchEmpStatus");
+                $.each(status, function (i, item) {
+                    $searchEmpStatus.append(`<option value="${item.commonCode}">${item.commonCodeName}</option>`);
+                });
+            }
+
+            function renderGrade(grades) {
+                const $searchGradeIdx = $("#searchGradeIdx");
+                $.each(grades, function(i, item) {
+                    $searchGradeIdx.append(`<option value="${item.grdIdx}">${item.grdName}</option>`);
+                });
+            }
+
+            function loadDownDept(deptUpIdx) {
                 $.ajax({
-                    url: "/hr/dept/list/all?coIdx=" + coIdx,
+                        type: "GET",
+                        url: `/hr/dept/list/down?deptUpIdx=${deptUpIdx}`,
+                        success: function (res) {
+                            if (res.head.res_code === "200") {
+                                const data = res.body;
+
+                                renderDownDept(data);
+                            } else {
+                                Swal.fire("실패", res.body, "error");
+                            }
+                        },
+                        error: function (xhr, status, err) {
+                            console.error(err);
+                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                        }
+                    });
+            }
+
+            function renderUpDept(upDept) {
+                const $searchDeptUpIdx = $("#searchDeptUpIdx");
+                $.each(upDept, function (i, item) {
+                    $searchDeptUpIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
+                });
+            }
+
+            function renderDownDept(downDept) {
+                const $searchDeptDownIdx = $("#searchDeptDownIdx");
+                $.each(downDept, function (i, item) {
+                    $searchDeptDownIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`)
+                });
+            }
+
+            function loadYear() {
+                $.ajax({
                     type: "GET",
+                    url: "/hr/attd/mgr/year",
                     success: function (res) {
-                        $("#deptSelect").empty();
-                        $.each(res, function (i, item) {
-                            let option = `<option value="${item.deptIdx}">${item.deptName}</option>`;
-                            $("#deptSelect").append(option);
-                        });
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+
+                            const $searchAttdYear = $("#searchAttdYear");
+                            $.each(data, function(i, item) {
+                                $searchAttdYear.append(`<option value="${item}">${item}</option>`)
+                            });
+                        } else {
+                            Swal.fire("실패", res.body, "error");
+                        }
                     },
                     error: function (xhr, status, err) {
                         console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
                     }
-                })
+                });
             }
-            $(document).ready(function () {
-                loadDept();
-            });
-        </script>
-    </div>
+
+            function loadMonth(year) {
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/attd/mgr/month?year=${year}`,
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+
+                            const $searchAttdMonth = $("#searchAttdMonth");
+                            $.each(data, function(i, item) {
+                                $searchAttdMonth.append(`<option value="${item > 10 ? item : '0' + item}">${item}</option>`)
+                            });
+                        } else {
+                            Swal.fire("실패", res.body, "error");
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+            //6. 셀 더블클릭 수정 함수
+            window.editCell = function (td) {
+                const $td = $(td);
+                if ($td.find('input').length) return; // 이미 편집 모드면 무시
+                const old = $td.text().trim();
+                const $input = $('<input type="text" class="form-control form-control-sm">').val(old);
+                $td.empty().append($input);
+                $input.focus();
+
+                // blur 또는 Enter 시 저장
+                $input.on('blur keydown', function (e) {
+                    if (e.type === 'blur' || (e.type === 'keydown' && e.key === 'Enter')) {
+                        const val = $input.val().trim() || old;
+                        $td.empty().text(val);
+                    }
+                });
+            };
+        });
+    </script>
 </div>

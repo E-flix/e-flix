@@ -21,4 +21,7 @@ public interface SecurityMapper {
     public SecurityUserDTO findByUserId(String username);
 
     public List<String> findCompanyRolesByCoIdx(String coIdx);
+
+    // 0712
+    public String findRoleIdxByEmpIdx(String empIdx, String coIdx);
 }

@@ -1,0 +1,599 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-18
+  - 설명     : 근태 관리화면 (관리자)
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-18 (김어진): title 및 내용 추가
+  - 2025-06-19 (김어진): layout 구성
+============================================ -->
+
+<head>
+    <title>급여계산</title>
+</head>
+
+<div layout:fragment="content">
+    <div class="container-fluid p-4">
+        <div class="row">
+            <div class="col-12">
+                <!-- 페이지 헤더 -->
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                    <div>
+                        <h2 class="text-primary mb-1">
+                            <i class="fas fa-calculator me-2"></i>급여계산
+                        </h2>
+                        <small class="text-muted">직원 급여 계산 및 관리</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-info fs-6">2025년 5월 급여</span>
+                    </div>
+                </div>
+
+                <!-- 기능 버튼 그룹 -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body py-3">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-check-square me-1"></i>전체선택
+                                    </button>
+                                    <button class="btn btn-warning btn-sm" id="calcBtn">
+                                        <i class="fas fa-calculator me-1"></i>급여계산
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" id="confirmBtn">
+                                        <i class="fas fa-check-circle me-1"></i>급여확정
+                                    </button>
+                                    <div class="vr"></div>
+                                    <button class="btn btn-success btn-sm">
+                                        <i class="fas fa-file-excel me-1"></i>EXCEL
+                                    </button>
+                                    <button class="btn btn-danger btn-sm">
+                                        <i class="fas fa-file-pdf me-1"></i>PDF생성
+                                    </button>
+                                    <button class="btn btn-info btn-sm">
+                                        <i class="fas fa-paper-plane me-1"></i>명세서일괄발송
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 검색 조건 -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-search me-2"></i>검색조건
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">귀속년월</label>
+                                        <select id="attMonth" class="form-select">
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">지급년월</label>
+                                        <select id="payMonth" class="form-select">
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">사원명</label>
+                                        <input type="text" class="form-control" placeholder="사원명 입력" id="searchEmpName">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">상위 부서</label>
+                                        <select class="form-select" id="searchDeptUpIdx">
+                                            <option value="">전체</option>
+                                            <option th:each="dept : ${depts}" th:value="${dept.deptIdx}" th:text="${dept.deptName}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <label class="form-label fw-semibold">하위 부서</label>
+                                        <select class="form-select" id="searchDeptDownIdx">
+                                            <option value="">전체</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <label class="form-label fw-semibold">직급</label>
+                                        <select class="form-select" id="serachGrade">
+                                            <option value="">전체</option>
+                                            <option th:each="grd : ${grades}" th:value="${grd.grdIdx}" th:text="${grd.grdName}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end gap-2">
+                                        <button class="btn btn-primary" id="btnSearch">
+                                            <i class="fas fa-search me-1"></i>조회
+                                        </button>
+                                        <button class="btn btn-outline-secondary">
+                                            <i class="fas fa-redo me-1"></i>초기화
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 급여 리스트 -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div
+                                class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>급여 리스트
+                                </h6>
+                                <span class="badge bg-light text-primary">총 5건</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-center" width="50">
+                                                    <input type="checkbox" class="form-check-input">
+                                                </th>
+                                                <th class="text-center">사번</th>
+                                                <th class="text-center">이름</th>
+                                                <th class="text-center">부서</th>
+                                                <th class="text-center">직급</th>
+                                                <th class="text-center">귀속년월</th>
+                                                <th class="text-center">지급년월</th>
+                                                <th class="text-center">기본급</th>
+                                                <th class="text-center">수당합계</th>
+                                                <th class="text-center">공제합계</th>
+                                                <th class="text-center">실수령액</th>
+                                                <th class="text-center">계산상태</th>
+                                                <th class="text-center">관리</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="salaryTableBody">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted">
+                                        <small>총 급여액: <span class="fw-bold text-primary">13,520,000원</span></small>
+                                    </div>
+                                    <nav>
+                                        <ul class="pagination pagination-sm mb-0" id="paginationArea">
+
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 급여 상세조회 모달 -->
+    <div class="modal fade" id="salaryDetailModal" tabindex="-1" aria-labelledby="salaryDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="salaryDetailModalLabel">
+                        <i class="fas fa-user-circle me-2"></i>급여 상세조회 - 김철수 (EMP001)
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-0 pb-0">
+                    <div class="row g-0">
+                        <div class="col-md-4 bg-light p-3" id="detailInfo">
+
+                        </div>
+                        <div class="col-md-8">
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th>항목</th>
+                                            <th class="text-end">금액</th>
+                                            <th class="text-center">비고</th>
+                                            <th class="text-center">과세구분</th>
+                                            <th class="text-center">구분</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="detailTableBody">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">
+                        <i class="fas fa-print me-1"></i>명세서 인쇄
+                    </button>
+                    <button type="button" class="btn btn-danger">
+                        <i class="fas fa-file-pdf me-1"></i>PDF 다운로드
+                    </button>
+                    <button type="button" class="btn btn-success">
+                        <i class="fas fa-paper-plane me-1"></i>명세서 발송
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>닫기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 지급월 자동 설정 -->
+    <script>
+        $(function () {
+            let currentPage = 1;
+            // 초기 로딩
+            loadSalaryList(1);
+
+            // 1) 조회 클릭 → 목록 로딩
+            $('#btnSearch').on('click', function () {
+                loadSalaryList(1);
+            });
+
+            $("#paginationArea").on("click", ".page-link", function (e) {
+                const page = parseInt($(this).data("page"), 10);
+                loadSalaryList(page);
+            });
+
+            $("#salaryTableBody").on("click", ".detail-modal", function (e) {
+                const salaryIdx = $(this).data("salary-idx");
+                const empIdx = $(this).data("emp-idx");
+                loadDetail(salaryIdx, empIdx);
+            });
+
+            $("#searchDeptUpIdx").on("change", function () {
+                const deptUpIdx = $(this).val();
+                loadDeptDown(deptUpIdx);
+            });
+
+
+            $("#calcBtn").on("click", function () {
+                const checkedRows = $("#salaryTableBody input[type='checkBox']:checked")
+                    .map((number, cb) => $(cb).closest("tr").data("empIdx")).get();
+
+                if (checkedRows.lenght === 0) {
+                    Swal.fire("알림", "계산할 직원을 선택하세요.", "info");
+                    return;
+                }
+
+                const calcData = {
+                    empIdxList: checkedRows,
+                    date: $("#attMonth").val(),
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/hr/salary/calc",
+                    contentType: "application/json",
+                    data: JSON.stringify(calcData),
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            Swal.fire("성공", "급여 계산이 정상적으로 이루어졌습니다.", "success");
+                            loadSalaryList(1);
+                        } else {
+                            Swal.fire("실패", res.body, "error");
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            });
+
+            $("#confirmBtn").on("click", function () {
+                const checkedRows = $("#salaryTableBody input[type='checkBox']:checked")
+                    .map((number, cb) => $(cb).closest("tr").data("salaryIdx")).get();
+
+                if (checkedRows.lenght === 0) {
+                    Swal.fire("알림", "계산할 직원을 선택하세요.", "info");
+                    return;
+                }
+
+                const confirmData = checkedRows;
+
+                $.ajax({
+                    type: "PUT",
+                    url: `/hr/salary/confirm`,
+                    data: JSON.stringify(confirmData),
+                    contentType: "application/json",
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            Swal.fire("성공", "급여확정이 성공적으로 이루어졌습니다.", "success");
+                            loadSalaryList(1);
+                        } else {
+                            Swal.fire("실패", res.body, "error");
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            });
+
+            function loadDeptDown(deptUpIdx) {
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/dept/list/down?deptUpIdx=${deptUpIdx}`,
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+                            renderDeptDown(data);
+                        } else {
+
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                })
+            }
+
+            function renderDeptDown(data) {
+                const $searchDeptDownIdx = $("#searchDeptDownIdx");
+                $searchDeptDownIdx.append(`<option value="">전체</option>`);
+
+                $.each(data, function (i, item) {
+                    $searchDeptDownIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
+                });
+            }
+
+            // 3) 급여 목록 AJAX 호출
+            function loadSalaryList(page = 1) {
+                currentPage = page;
+
+                const upIdx = $("#searchDeptUpIdx").val();
+                const downIdx = $("#searchDeptDownIdx").val();
+                const calcData = {
+                    attMonth: $("#attMonth").val() || toYmd(new Date()),
+                    empName: $("#searchEmpName").val(),
+                    deptIdx: downIdx && downIdx !== "" ? downIdx : upIdx,
+                    gradeIdx: $("#searchGradeIdx").val(),
+                }
+
+                const queryString = $.param(calcData);
+
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/salary/list?${queryString}&page=${page}`,
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+                            renderSalaryTable(data.salaries);
+                            renderPagination(data.page, data.pageSize, data.total);
+                        } else {
+                            Swal.fire("실패", "데이터가 존재하지 않습니다.", "error");
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function renderSalaryTable(salaries) {
+                const $salaryTableBody = $("#salaryTableBody");
+                $salaryTableBody.empty();
+                let html = "";
+                $.each(salaries, function (i, item) {
+                    const salaryTypeBG = item.calcStatus === "ST02" ? "bg-info" : item.calcStatus === "ST03" ? "bg-success" : "bg-warning";
+                    const salaryType = item.calcStatus === "ST02" ? "계산완료" : item.calcStatus === "ST03" ? "급여확정" : "미계산";
+                    const salaryCheck = item.calcStatus === "ST03" ? "" : `<input type="checkbox" class="form-check-input">`;
+                    html += `
+                    <tr data-salary-idx="${item.salaryIdx}" data-emp-idx="${item.empIdx}">
+                        <td class="text-center">
+                            ${salaryCheck}
+                        </td>
+                        <td class="text-center">${item.empIdx}</td>
+                        <td class="text-center fw-semibold">${item.empName}</td>
+                        <td class="text-center">${item.deptName}</td>
+                        <td class="text-center">${item.grdName}</td>
+                        <td class="text-center">${item.attMonth}</td>
+                        <td class="text-center">${item.payMonth}</td>
+                        <td class="text-end">${item.baseSalary.toLocaleString()} 원</td>
+                        <td class="text-end">${item.allowanceTotal.toLocaleString()} 원</td>
+                        <td class="text-end">- ${item.deductionTotal.toLocaleString()} 원</td>
+                        <td class="text-end fw-bold text-primary">${item.netSalary.toLocaleString()} 원</td>
+                        <td class="text-center">
+                            <span class="badge ${salaryTypeBG}">${salaryType}</span>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary me-1 detail-modal"
+                                data-bs-toggle="modal" data-bs-target="#salaryDetailModal"
+                                data-salary-idx="${item.salaryIdx}" data-emp-idx="${item.empIdx}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `
+                });
+
+                $salaryTableBody.html(html);
+            }
+
+            function renderPagination(page, pageSize, total) {
+                const totalPages = Math.ceil(total / pageSize);
+                const $pagination = $("#paginationArea");
+                $pagination.empty();
+
+                $pagination.append(`
+                        <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                            <a class="page-link" data-page="${page - 1}">이전</a>
+                        </li>
+                    `);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    $pagination.append(`
+                            <li class="page-item ${i === page ? 'active' : ''}">
+                                <a class="page-link" data-page="${i}">${i}</a>
+                            </li>
+                        `);
+                }
+
+                $pagination.append(`
+                        <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                            <a class="page-link" data-page="${page + 1}">다음</a>
+                        </li>
+                    `);
+            }
+
+            function loadDetail(salaryIdx, empIdx) {
+                const detailData = {
+                    salaryIdx: salaryIdx,
+                    empIdx: empIdx,
+                }
+
+                const queryString = $.param(detailData);
+
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/salary/detail?${queryString}`,
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            const data = res.body;
+                            renderDetail(data.items, data.emp);
+                        } else {
+                            Swal.fire("실패", "데이터가 존재하지 않습니다.", "error");
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function renderDetail(items, emp) {
+                const $detailTableBody = $("#detailTableBody");
+                const $detailInfo = $("#detailInfo");
+                const $salaryDetailModalLabel = $("#salaryDetailModalLabel");
+
+
+                $detailTableBody.empty();
+                $detailInfo.empty();
+
+                $salaryDetailModalLabel.html(`
+                    <i class="fas fa-user-circle me-2"></i>급여 상세조회 - ${emp.empName} (${emp.empIdx})
+                `);
+
+                const salaryType = emp.salaryType === "ST02" ? "계산완료" : emp.salaryType === "ST03" ? "급여확정" : "미계산";
+                let infoHtml = `
+                    <div class="text-center mb-3">
+                        <div class="bg-primary rounded-circle mx-auto mb-2"
+                            style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user text-white fa-2x"></i>
+                        </div>
+                        <h6 class="mb-1">${emp.empName}</h6>
+                        <small class="text-muted">${emp.deptName} ${emp.grdName}</small>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">귀속년월</small>
+                        <strong>${emp.attMonth}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">지급년월</small>
+                        <strong>${emp.payMonth}</strong>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <small>${salaryType} 상태입니다</small>
+                    </div>
+                `;
+                $detailInfo.html(infoHtml);
+
+                let itemHtml = ""
+                $.each(items, function (i, item) {
+                    const taxTypeBG = item.taxType === "TM01" ? "bg-warning" : item.taxType === "TM02" ? "bg-info" : "bg-success";
+                    const taxTypeName = item.taxType === "TM01" ? "과세" : item.taxType === "TM02" ? "비과세" : "면세";
+
+                    const payTypeBG = item.payType === "SM01" ? "bg-primary" : "bg-danger";
+                    const payTypeName = item.payType === "SM01" ? "지급" : "공제";
+                    itemHtml += `
+                        <tr>
+                            <td class="fw-semibold">${item.itemName}</td>
+                            <td class="text-end">${item.amount}</td>
+                            <td class="text-center">${item.remark}</td>
+                            <td class="text-center">
+                                <span class="badge ${taxTypeBG}">${taxTypeName}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge ${payTypeBG}">${payTypeName}</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                $detailTableBody.html(itemHtml);
+            }
+
+            // YYYY-MM → "YYYY년 MM월"
+            function fmtText(ym) {
+                var parts = ym.split("-");
+                return parts[0] + "년 " + parts[1].padStart(2, "0") + "월";
+            }
+
+            // YYYY-MM → Date(year,month-1)
+            function toDate(ym) {
+                var p = ym.split("-");
+                return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, 1);
+            }
+
+            // Date → YYYY-MM
+            function toYmd(date) {
+                var y = date.getFullYear();
+                var m = String(date.getMonth() + 1).padStart(2, "0");
+                return y + "-" + m;
+            }
+
+            var $att = $("#attMonth"),
+                $pay = $("#payMonth");
+
+            // 3개월: 0:현재, -1, -2
+            var now = new Date();
+            for (var i = 0; i < 6; i++) {
+                var dAtt = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                var ymAtt = toYmd(dAtt);
+                // att 옵션
+                $att.append(
+                    $("<option>").val(ymAtt).text(fmtText(ymAtt))
+                );
+                // pay 옵션 → dAtt +1월
+                var dPay = new Date(dAtt.getFullYear(), dAtt.getMonth() + 1, 1);
+                var ymPay = toYmd(dPay);
+                $pay.append(
+                    $("<option>").val(ymPay).text(fmtText(ymPay))
+                );
+            }
+
+            // 기본 선택: 인덱스 0 = 현재월
+            $att.prop("selectedIndex", 0);
+            $pay.prop("selectedIndex", 0);
+
+            // att 변경 시 pay도 맞춰서 인덱스 동기화
+            $att.on("change", function () {
+                $pay.prop("selectedIndex", this.selectedIndex);
+            });
+        });
+    </script>
+</div>
+
+</html>

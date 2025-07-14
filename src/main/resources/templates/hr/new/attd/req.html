@@ -1,5 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{common/layouts/default}">
+    layout:decorate="~{common/layouts/default}">
 <!-- ============================================
   - 작성자   : 김어진
   - 최초작성 : 2025-06-18
@@ -11,120 +11,323 @@
 ============================================ -->
 
 <head>
-  <title>근태신청</title>
+    <title>근태 신청</title>
 </head>
 <div layout:fragment="content">
-  <div id="empAdd">
-    <h2>근태신청</h2>
-    <div class="mt-4">
-
-        <!-- 버튼 -->
-        <div class="d-flex justify-content-end mb-3">
-          <button type="submit" class="btn btn-primary" id="addBtn">신청하기</button>
+    <!-- 페이지 제목 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-dark">
+            <i class="bi bi-calendar-plus"></i> 근태 신청
+        </h2>
+        <div class="text-muted">
+            <i class="bi bi-calendar3"></i> 2025-07-10 (목)
         </div>
-        <div class="p-4 border rounded bg-light">
+    </div>
 
-          <h5 class="text-center fw-bold mb-4"> &lt; 근태 신청 &gt; </h5>
 
-          <!-- 사원 정보 -->
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <label class="form-label">사원명</label>
-              <input type="text" class="form-control" value="홍길동" readonly>
+    <!-- 버튼 섹션 -->
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            불러오기
+        </button>
+        <button type="button" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> 취소
+        </button>
+        <button type="button" class="btn btn-outline-primary">
+            <i class="bi bi-save"></i> 임시저장
+        </button>
+        <button type="submit" class="btn btn-primary" id="reqBtn">
+            <i class="bi bi-check-circle"></i> 신청하기
+        </button>
+    </div>
+    <!-- 신청 폼 -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-file-earmark-plus"></i> 근태 신청서
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- 사원 정보 섹션 -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h6 class="border-bottom pb-2 mb-3 text-muted">
+                        <i class="bi bi-person-badge"></i> 신청자 정보
+                    </h6>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">사원명</label>
+                    <input type="text" class="form-control bg-light" th:value="${empName}" readonly>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">부서</label>
+                    <input type="text" class="form-control bg-light" th:value="${deptName}" readonly>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">사번</label>
+                    <input type="text" class="form-control bg-light" th:value="${empIdx}" readonly>
+                </div>
             </div>
-            <div class="col-md-4">
-              <label class="form-label">부서</label>
-              <input type="text" class="form-control" value="인사부" readonly>
+
+            <!-- 신청 정보 섹션 -->
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">신청일자</label>
+                    <input type="text" class="form-control bg-light" id="reqDate" readonly>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">근태 번호</label>
+                    <input type="text" class="form-control bg-light" id="reqAttd" readonly>
+                </div>
             </div>
-            <div class="col-md-4">
-              <label class="form-label">사번</label>
-              <input type="text" class="form-control" value="1001" readonly>
+
+            <!-- 기간 설정 섹션 -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h6 class="border-bottom pb-2 mb-3 text-muted">
+                        <i class="bi bi-calendar-range"></i> 신청 기간
+                    </h6>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label fw-bold">시작일 <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="reqOldValue" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label fw-bold">종료일 <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="reqNewValue" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label fw-bold">총 일수</label>
+                    <input type="text" class="form-control bg-light" id="reqTotalDay" value="1일" readonly>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label fw-bold">근태 유형 <span class="text-danger">*</span></label>
+                    <select class="form-select" id="reqEditType" required>
+                        <option value="">선택</option>
+                        <th:block th:each="type : ${attdReqType}">
+                            <option th:value="${type.commonCode}" th:text="${type.commonCodeName}">
+                            </option>
+                        </th:block>
+                    </select>
+                </div>
             </div>
-          </div>
 
-          <!-- 신청일자 -->
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <label class="form-label">신청일자</label>
-              <input type="text" class="form-control" id="regDate" readonly>
+            <!-- 사유 섹션 -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">신청 사유 <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="reqReason" rows="3"
+                    placeholder="신청 사유를 상세히 입력해주세요. (예: 가족 행사 참여, 개인 사정 등)" required></textarea>
             </div>
-          </div>
 
-          <!-- 근태 유형 -->
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <label class="form-label">근태 유형</label>
-              <select class="form-select" id="editType">
-                <option value="AT01">연차</option>
-                <option>반차</option>
-                <option>병가</option>
-                <option>외근</option>
-              </select>
+            <!-- 안내사항 -->
+            <div class="alert alert-info border-start border-4 border-info">
+                <div class="d-flex">
+                    <i class="bi bi-info-circle-fill text-info me-2"></i>
+                    <div>
+                        <strong>신청 안내사항</strong>
+                        <ul class="mt-2 mb-0">
+                            <li>병가나 외근 신청 시, 관련 증빙서류를 반드시 첨부해주세요.</li>
+                            <li>연차 신청은 최소 1일 전에 신청해주세요.</li>
+                            <li>승인 후 변경사항이 있을 경우 즉시 담당자에게 연락바랍니다.</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <!-- 날짜 및 시간 -->
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <label class="form-label">시작일</label>
-              <input type="date" class="form-control" id="oldValue" value="2025-06-20">
+            <!-- 첨부파일 섹션 -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">첨부파일</label>
+                <input type="file" class="form-control" multiple>
+                <div class="form-text">병가, 외근 등 증빙서류가 필요한 경우 첨부해주세요.</div>
             </div>
-            <div class="col-md-4">
-              <label class="form-label">종료일</label>
-              <input type="date" class="form-control" id="newValue" value="2025-06-20">
+
+            <!-- 승인 상태 (숨김 필드) -->
+            <input type="hidden" value="미승인">
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">근태 선택</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+
+                        </div>
+                        <div class="col-3">
+                            <label for="yearSelect" class="form-label">연도</label>
+                            <select id="yearSelect" class="form-select"></select>
+                        </div>
+                        <div class="col-3">
+                            <label for="monthSelect" class="form-label">월</label>
+                            <select id="monthSelect" class="form-select"></select>
+                        </div>
+                    </div>
+                    
+                    <!-- 목록 -->
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>날짜</th>
+                                    <th>상태</th>
+                                    <th>출근</th>
+                                    <th>퇴근</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attdListBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 4. 페이징 -->
+                    <nav aria-label="Page navigation" class="mt-2">
+                        <ul class="pagination justify-content-center" id="paginationArea">
+                        </ul>
+                    </nav>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="button" class="btn btn-primary">저장</button>
+                </div>
             </div>
-          </div>
-
-          <!-- 사유 -->
-          <div class="mb-3">
-            <label class="form-label">사유</label>
-            <input type="text" class="form-control" id="reason" placeholder="예: 가족 행사 참여">
-          </div>
-
-          <!-- 승인 상태 (숨김 또는 read-only용) -->
-          <input type="hidden" value="미승인">
-
-          <!-- 안내문 -->
-          <div class="alert alert-info">
-            📌 병가나 외근 신청 시, 관련 증빙서류를 반드시 첨부해주세요.
-          </div>
-
-
         </div>
     </div>
     <script>
-      $(document).ready(function() {
-        const today = new Date();
-        // $("#regDate").val(today.getFullYear() + "-" + today.getMonth() + "-" + today.getDay());
-      });
-      $("#addBtn").on("click", function() {
-        const data = {
-          empIdx: "emp-107",
-          editType: $("#editType").val(),
-          oldValue: $("#oldValue").val(),
-          newValue: $("#newValue").val(),
-          reason: $("#reason").val()
-        }
+        $(function () {
+            let currentPage = 1;
 
-        $.ajax({
-          type:"POST",
-          url: "/hr/insertAttd",
-          data: JSON.stringify(data),
-          contentType: "application/json",
-          success: function(res) {
-            if(res) {
-              Swal.fire("성공", "성공적으로 반영되었습니다.", "success");
-            } else {
-              Swal.fire("실패", "데이터를 반영하던 중 오류가 발생했습니다.", "error");
+            loadTime();
+
+            $("#file_input").change(function () {
+                addFile(this.files);
+            });
+
+            $("#reqBtn").on("click", function () {
+                const reqData = {
+                    editType: $("#reqEditType").val(),
+                    oldValue: $("#reqOldValue").val(),
+                    newValue: $("#reqNewValue").val(),
+                    reason: $("#reqReason").val()
+                }
+
+                var formData = new FormData();
+                formData.append("reqData", new Blob([JSON.stringify(reqData)], { type: "application/json" }));
+                const fileInput = $("#empPhoto")[0];
+                const file = fileInput && fileInput.files && fileInput.files[0];
+
+                if (file) {
+                    formData.append("reqFile", file);
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/hr/attd/emp/req",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    enctype: "multipart/form-data",
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
+                            Swal.fire("성공", "성공적으로 반영되었습니다.", "success");
+                        } else {
+                            Swal.fire("실패", "데이터를 반영하던 중 오류가 발생했습니다.", "error");
+                        }
+                    },
+                    error: function (xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            });
+
+            
+            $("#reqOldValue, #reqNewValue").on("change", function () {
+                const start = $("#reqOldValue").val();
+                const end = $("#reqNewValue").val();
+                if (start && end) {
+                    // Date객체로 변환 (yyyy-mm-dd)
+                    const startDate = new Date(start);
+                    const endDate = new Date(end);
+                    // 일수 계산: (종료 - 시작) + 1
+                    const diff = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1;
+                    if (!isNaN(diff) && diff >= 1) {
+                        $("#reqTotalDay").val(diff + "일");
+                    } else {
+                        $("#reqTotalDay").val("-");
+                    }
+                } else {
+                    $("#reqTotalDay").val("-");
+                }
+            });
+            function loadTime() {
+                let date = new Date()
+                let offset = date.getTimezoneOffset() * 60000;
+                let dateOffset = new Date(date.getTime() - offset).toISOString().substring(0, 10);
+                $("#reqDate").val(dateOffset);
+                $("#reqOldValue").val(dateOffset);
+                $("#reqNewValue").val(dateOffset);
             }
-          },
-          error: function(xhr, status, err) {
-            console.error(err);
-            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
-          }
-        });
-      });
-    </script>
 
-  </div>
+            function loadAttdList(page = 1) {
+                currentPage = page;
+
+                $.ajax({
+                    type: "GET",
+                    url: "/hr/attd/emp/list",
+                    success: function(res) {
+
+                    },
+                    error: function(err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                })
+            }
+
+            function renderAttdList(attds) {
+                const $attdListBody = $("#attdListBody");
+
+                $attdListBody.empty();
+                let html = "";
+                $.each(attds, function(i, item) {
+                    html += `
+                        <tr>
+                            <td>${i}</td>
+                            <td>${item.attdDate}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    `;
+                });
+            }
+
+            function renderPagination(page, paseSize, total) {
+                const totalPages = Math.cel(total / pageSize);
+                const $pg = $("#paginationArea").empty();
+
+                $pg.append(`
+                    <li class="page-item ${page === 1 ? "disabled" : ""}">
+                        <span class="page-link" data-page="${page - 1}">이전</span>
+                    </li>`);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    $pg.append(`
+                        <li class="page-item ${i === page ? "active" : ""}">
+                            <span class="page-link" data-page="${i}">${i}</span>
+                        </li>`);
+                }
+
+                $pg.append(`
+                    <li class="page-item ${page === totalPages ? "disabled" : ""}">
+                        <span class="page-link" data-page="${page + 1}">다음</span>
+                    </li>`);
+            }
+        });
+    </script>
 </div>

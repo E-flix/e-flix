@@ -42,16 +42,10 @@ import net.sf.jasperreports.engine.util.JRSaver;
 public class ReportServiceImpl implements ReportService {
 
     @Autowired
-    private UserMapper userMapper;
-
-    @Autowired
     private CompanyMapper companyMapper;
     
     @Autowired
     private SubscriptionMapper subscriptionMapper;
-
-    @Value("${file.path}")
-    private String path;
 
     private final String STATEMENT_REPORT_PATH = "static/reports/statement_template.jasper";
     private final String INVOICE_REPORT_PATH = "static/reports/invoice_template.jasper";

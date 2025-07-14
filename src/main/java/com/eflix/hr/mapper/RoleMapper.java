@@ -24,4 +24,6 @@ public interface RoleMapper {
     List<String> findRoleIdsByEmpIdx(String empIdx);
 
     List<RoleDTO> roleList();
+
+    List<RoleDTO> findAllByCoIdx(String coIdx);
 }

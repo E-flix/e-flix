@@ -58,4 +58,7 @@ public interface AttendanceRecordMapper {
 
     List<AttdRemarkDTO> findAttdRemarkListByEmpIdxWithDate(String empIdx, String date);
 
+    // 0710
+    List<AttendanceRecordDTO> findAllByEmpIdx(String empIdx);
+
 }

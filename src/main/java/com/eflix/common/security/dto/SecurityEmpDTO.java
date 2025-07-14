@@ -15,5 +15,6 @@ public class SecurityEmpDTO implements Serializable {
     private String empPw;
     private String empName;
     private String empEmail;
+    private String roleId;
     private List<String> roleCodes; // ROLE_HR, ROLE_ACC 등
 }

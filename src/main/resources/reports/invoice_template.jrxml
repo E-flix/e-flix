@@ -7,7 +7,7 @@
 	<field name="coNameEn" class="java.lang.String"/>
 	<field name="coAddr" class="java.lang.String"/>
 	<field name="coAddrDetail" class="java.lang.String"/>
-	<field name="coZip" class="java.lang.Integer"/>
+	<field name="coZip" class="java.lang.String"/>
 	<field name="bizrNo" class="java.lang.String"/>
 	<field name="ceoName" class="java.lang.String"/>
 	<field name="ceoTel" class="java.lang.String"/>
@@ -22,13 +22,18 @@
 	<field name="spiPay" class="java.lang.String"/>
 	<field name="moduleNames" class="java.lang.String"/>
 	<variable name="totalAmount" class="java.math.BigDecimal">
-		<variableExpression><![CDATA[new java.math.BigDecimal(String.valueOf($F{spkPrice}))]]></variableExpression>
-	</variable>
-	<variable name="taxAmount" class="java.math.BigDecimal">
-		<variableExpression><![CDATA[$V{totalAmount}.divide(new java.math.BigDecimal("11"), java.math.RoundingMode.HALF_UP)]]></variableExpression>
+		<variableExpression><![CDATA[$F{spkPrice} != null
+        ? new java.math.BigDecimal($F{spkPrice}.toString())
+        : java.math.BigDecimal.ZERO]]></variableExpression>
 	</variable>
 	<variable name="supplyAmount" class="java.math.BigDecimal">
-		<variableExpression><![CDATA[$V{totalAmount}.subtract($V{taxAmount})]]></variableExpression>
+		<variableExpression><![CDATA[$V{totalAmount}
+            .divide(new java.math.BigDecimal("1.1"), 0, java.math.RoundingMode.DOWN)
+            .divide(new java.math.BigDecimal("1000"), 0, java.math.RoundingMode.DOWN)
+            .multiply(new java.math.BigDecimal("1000"))]]></variableExpression>
+	</variable>
+	<variable name="taxAmount" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$V{totalAmount}.subtract($V{supplyAmount})]]></variableExpression>
 	</variable>
 	<title>
 		<band height="100">
@@ -372,7 +377,7 @@
 				<textFieldExpression><![CDATA[$F{spiPay}.equals("SP01") ? "무통장입금" : 
 $F{spiPay}.equals("SP02") ? "신용카드" : 
 $F{spiPay}.equals("SP03") ? "계좌이체" : 
-$F{spiPay}.equals("SP04") ? "카카오페이" : 
+$F{spiPay}.equals("kakaopay") ? "카카오페이" : 
 $F{spiPay}.equals("SP05") ? "네이버페이" : "기타"]]></textFieldExpression>
 			</textField>
 			<staticText>

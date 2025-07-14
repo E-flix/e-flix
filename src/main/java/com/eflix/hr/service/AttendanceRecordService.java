@@ -63,4 +63,6 @@ public interface AttendanceRecordService {
 
     public List<AttdMgrListDTO> findAttdMgrListByCoIdxWithDate(AttdSearchDTO attdSearchDTO);
     public List<AttdRemarkDTO> findAttdRemarkListByEmpIdxWithDate(String empIdx, String date);
+
+    public List<AttendanceRecordDTO> findAllByEmpIdx(String empIdx);
 }

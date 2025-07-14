@@ -1,0 +1,652 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-18
+  - 설명     : 근태 관리화면 (관리자)
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-18 (김어진): title 및 내용 추가
+  - 2025-06-19 (김어진): layout 구성
+============================================ -->
+
+<head>
+    <title>급여항목</title>
+</head>
+
+<div layout:fragment="content">
+    <!-- 메인 콘텐츠 -->
+    <div class="container-fluid px-4 py-3">
+        <!-- 페이지 헤더 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                    <div>
+                        <h4 class="mb-1 fw-bold text-dark">
+                            <i class="fas fa-coins text-primary me-2"></i>급여항목 관리
+                        </h4>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0 small">
+                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">인사관리</a></li>
+                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">급여관리</a></li>
+                                <li class="breadcrumb-item active">급여항목</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div>
+                        <button class="btn btn-success btn-sm me-2" data-bs-toggle="modal" data-bs-target="#itemModal" id="addModal">
+                            <i class="fas fa-plus me-1"></i>항목 추가
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-download me-1"></i>엑셀 다운로드
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 검색 필터 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light border-0 py-3">
+                        <h6 class="mb-0 fw-semibold">
+                            <i class="fas fa-search text-secondary me-2"></i>검색 조건
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <form class="row g-4">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">항목명/코드</label>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                    <select name="option" class="form-select form-select-sm" id="searchType">
+                                        <option value="">전체</option>
+                                        <option value="alName">항목명</option>
+                                        <option value="alNumber">코드</option>
+                                    </select>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input type="text" name="keyword" class="form-control form-control-sm" id="searchKeyword"
+                                            placeholder="검색어 입력 후 [enter]">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">구분</label>
+                                <select class="form-select form-select-sm" id="searchType">
+                                    <option value="">전체</option>
+                                    <option value="SM01">지급</option>
+                                    <option value="SM02">공제</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">사용여부</label>
+                                <select class="form-select form-select-sm" id="searchUseStatus">
+                                    <option value="">선택</option>
+                                    <option value="Y">사용</option>
+                                    <option value="N">미사용</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="button" class="btn btn-primary btn-sm w-100">
+                                    <i class="fas fa-search me-1"></i>조회
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 급여항목 테이블 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-semibold">
+                                <i class="fas fa-list text-secondary me-2"></i>급여항목 목록
+                                <span class="badge bg-primary ms-2">총 5건</span>
+                            </h6>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted me-3">페이지당 표시:</small>
+                                <select class="form-select form-select-sm" style="width: 80px;">
+                                    <option>10</option>
+                                    <option>20</option>
+                                    <option>50</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="salaryItemTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center py-3 fw-semibold">
+                                            <input type="checkbox" class="form-check-input">
+                                        </th>
+                                        <th class="text-center py-3 fw-semibold">구분</th>
+                                        <th class="text-center py-3 fw-semibold">항목코드</th>
+                                        <th class="text-center py-3 fw-semibold">항목명</th>
+                                        <th class="text-center py-3 fw-semibold">계산방식</th>
+                                        <th class="text-center py-3 fw-semibold">금액/비율</th>
+                                        <th class="text-center py-3 fw-semibold">적용대상</th>
+                                        <th class="text-center py-3 fw-semibold">사용여부</th>
+                                        <th class="text-center py-3 fw-semibold">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemListBody">
+                                   
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">1-5 of 5 records</small>
+                            </div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0" id="paginationArea">
+
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 급여항목 추가/수정 모달 -->
+    <div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="itemModalLabel">
+                        <i class="fas fa-plus-circle me-2"></i>급여항목 추가
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="itemForm">
+                        <input type="hidden" name="mpIdx">
+                        
+                        <!-- 기본 정보 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>기본 정보
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">항목명 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="alName" value="" id="modalAlName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">항목코드 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="alNumber" value="" id="modalAlNumber" required>
+                            </div>
+                        </div>
+
+                        <!-- 구분 및 설정 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-cogs me-2"></i>구분 및 설정
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">구분 <span class="text-danger">*</span></label>
+                                <div class="mt-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="modalType" value="SM01" id="pay" checked>
+                                        <label class="form-check-label" for="pay">
+                                            <span class="badge bg-success-subtle text-success">지급</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="modalType" value="SM02" id="deduct">
+                                        <label class="form-check-label" for="deduct">
+                                            <span class="badge bg-danger-subtle text-danger">공제</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">과세구분</label>
+                                <select class="form-select" name="taxType" id="modalTaxType">
+                                    <option value="">선택</option>
+                                    <option value="TM01">과세</option>
+                                    <option value="TM02">비과세</option>
+                                    <option value="TM03">면세</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 계산 방식 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-calculator me-2"></i>계산 방식
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">계산방식 <span class="text-danger">*</span></label>
+                                <select class="form-select" name="calcMethod" id="modalCalcType">
+                                    <option value="">선택</option>
+                                    <option value="CA01">고정금액</option>
+                                    <option value="CA02">비율</option>
+                                    <option value="CA03">수식</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">금액/비율 <span class="text-danger">*</span></label>
+                                <div class="input-group" id="modalInput">
+                                    <input type="number" class="form-control" name="alAmount" id="modalAlAmount" value="200000" required>
+                                    <span class="input-group-text" id="modalInputText">원</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 적용 대상 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-users me-2"></i>적용 대상
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">상위 부서</label>
+                                <select class="form-select" name="targetUpDept" id="modalTargetUpDept">
+                                    <option selected>전체</option>
+                                    <option>경영진</option>
+                                    <option>개발부</option>
+                                    <option>영업부</option>
+                                    <option>관리부</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">하위 부서</label>
+                                <select class="form-select" name="targetDownDept" id="modalTargetDownDept">
+                                    <option selected>전체</option>
+                                    <option>팀장</option>
+                                    <option>선임</option>
+                                    <option>주임</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 사용 설정 -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="fw-semibold text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-toggle-on me-2"></i>사용 설정
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">사용 여부</label>
+                                <div class="mt-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="modalUseStatus" id="useY" value="Y" checked>
+                                        <label class="form-check-label" for="useY">
+                                            <span class="badge bg-success">사용</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="modalUseStatus" id="useN" value="N">
+                                        <label class="form-check-label" for="useN">
+                                            <span class="badge bg-secondary">미사용</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 비고 -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">비고</label>
+                                <textarea class="form-control" name="mpMemo" id="modalMpMemo" rows="3" placeholder="급여항목에 대한 추가 설명을 입력하세요"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-success" id="saveItemBtn">
+                        <i class="fas fa-save me-2"></i>등록
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>취소
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            let currentPage = 1;
+            let editMode = false;
+            let selectedItemIdx = null;
+
+            loadItemList(1);
+
+            $("#searchBtn").on("click", function() {
+                loadItemList(1);
+            });
+
+            $("#paginationArea").on("click", ".page-link", function(e) {
+                const page = parseInt($(this).data("page"), 10);
+                loadItemList(page);
+            });
+
+            $("#addModal").on("click", function() {
+                loadUpDept();
+                editMode = false;
+                selectedItemIdx = null;
+
+                $("#itemModalLabel").html("<i class='fas fa-plus-circle me-2'></i>급여항목 추가");
+                $("#saveItemBtn").text("등록").removeClass("btn-warning").addClass("btn-success");
+
+                $("input[id^='search']").val("");
+                $("#modalTargetDownDept").empty().append("<option value=''>선택</option>")
+            })
+
+            $("#modalTargetUpDept").on("change", function() {
+                const $upDept = $(this).val();
+                loadDownDept($upDept);
+            });
+
+            $("#salaryItemTable").on("click", ".update-btn", function() {
+                editMode = true;
+                selectedItemIdx = $(this).data("mp-idx");
+                loadUpDept();
+
+                $("#itemModalLabel").html("<i class='fas fa-plus-circle me-2'></i>급여항목 수정");
+                $("#saveItemBtn").text("수정").removeClass("btn-success").addClass("btn-warning");
+
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/salary/item/${selectedItemIdx}`,
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body
+                            $("#modalAlName").val(data.alName);
+                            $("#modalAlNumber").val(data.alNumber);
+                            $(`#modalType[value="${data.type}"]`).prop('checked', true);
+                            $(`#modalCalcType[value="${data.calcType}"]`).val(data.calcType);
+                            $("#modalAlAmount").val(data.alAmount);
+                            $("#modalTaxType").val(data.taxType);
+                            $(`input[name="modalUseStatus"][value="${data.useStatus}"]`).prop('checked', true);
+                            $("#modalMpMemo").val(data.mpMemo)
+                        } else {
+
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.log(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                })
+            })
+
+            $("#saveItemBtn").on("click", function() {
+                const upDept   = $("#modalTargetUpDept").val();
+                const downDept = $("#modalTargetDownDept").val();
+
+                const targetDept = (upDept && downDept !== "") ? downDept : upDept;
+
+
+                const itemData = {
+                    alName: $("#modalAlName").val(),
+                    alNumber: $("#modalAlNumber").val(),
+                    type: $("input[name='modalType']:checked").val(),
+                    taxType: $("#modalTaxType").val(),
+                    calcType: $("#modalCalcType").val(),
+                    alAmount: $("#modalAlAmount").val(),
+                    targetDept: targetDept,
+                    useStatus: $("input[name='modalUseStatus']:checked").val(),
+                    mpMemo: $("#modalMpMemo").val(),
+                }
+
+                if(editMode) {
+                    updateItem(itemData);
+                } else {
+                    insertItem(itemData);
+                }
+            });
+
+            $("#modalCalcType").on("change", function() {
+                const calcType = $(this).val();
+                const $modalInput = $("#modalInput");
+
+                if(calcType === "CA03") {
+                    const textInput = "<input type='text' class='form-control' name='alAmount' id='modalAlAmount' " +
+                        "placeholder='예: baseSalary * 0.03 + 20000' required>";
+
+                    $modalInput.find("input").replaceWith(textInput);
+                    $modalInput.find("#modalInputText").text("식");
+                } else if(calcType === "CA01") {
+                    const numberInput = "<input type='number' class='form-control' name='alAmount' id='modalAlAmount' " +
+                          "value='0' required>";
+                    $modalInput.find("input").replaceWith(numberInput);
+                    $modalInput.find("#modalInputText").text("원");
+
+                    $("#modalAlAmount").off("input");
+                } else if(calcType === "CA02") {
+                    const numberInput = "<input type='number' class='form-control' name='alAmount' id='modalAlAmount' " +
+                          "value='0' placeholder='' required>";
+                    $modalInput.find("input").replaceWith(numberInput);
+                    $modalInput.find("#modalInputText").text("=");
+
+                    $("#modalAlAmount").off("input");
+                }
+            });
+
+            $("#itemModal").on("shown.bs.modal", function () {
+                $("#modalCalcType").trigger("change");
+            });
+            
+            function insertItem(data) {
+                $.ajax({
+                    type: "POST",
+                    url: "/hr/salary/item",
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    success: function(res) {
+                        if(res.head.res_code === "200"){
+                            Swal.fire("성공", "정상적으로 등록되었습니다.", "success");
+                        } else {
+                            Swal.fire("실패", "등록에 실패했습니다.", "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function updateItem(data) {
+                $.ajax({
+                    type: "PUT",
+                    url: `/hr/salary/item/${selectedItemIdx}`,
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    success: function(res) {
+                        if(res.head.res_code === "200"){
+                            Swal.fire("성공", "정상적으로 수정되었습니다.", "success");
+                            loadItemList(page = 1);
+                        } else {
+                            Swal.fire("실패", "수정에 실패했습니다.", "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function loadItemList(page = 1) {
+                currentPage = page;
+
+                const searchData = {
+                    option: $("#searchType").val(),
+                    keyword: $("#keyword").val(),
+                    type: $("#searchType").val(),
+                    useStatus: $("#searchUseStatus").val(),
+                }
+
+                const queryString = $.param(searchData);
+
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/salary/items?${queryString}&page=${page}`,
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body;
+
+                            renderItemList(data.items);
+                            renderPagination(data.page, data.pageSize, data.total);
+                        } else {
+                            Swal.fire("실패", "데이터가 존재하지 않습니다.", "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                })
+            };
+
+            function renderItemList(items) {
+                const $itemListBody = $("#itemListBody");
+                let html = "";
+
+                $.each(items, function(i, item) {
+                    const typeBG = item.type === "SM01" ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger";
+                    const type = item.type === "SM01" ? "지급" : "공제";
+                    const calcType = item.calcType === "CA1" ? "고정금액" : item.calcType === "CA2"? "비율" : "수식";
+                    const targetDept = item.targetDept !== "" ? item.targetDeptName : "전체";
+                    const useStatus = item.useStatus === "Y" ? "사용중" : "미사용";
+                    const useStatusBG = item.useStatus === "Y" ? "bg-success" : "bg-danger";
+                    const alAmount = item.calcType === "CA03" ? item.alAmount : Number(item.alAmount).toLocaleString() + "원";
+
+                    html += `
+                        <tr>
+                            <td class="text-center align-middle">
+                                <input type="checkbox" class="form-check-input">
+                            </td>
+                            <td class="text-center align-middle">
+                                <span class="badge ${typeBG}">${type}</span>
+                            </td>
+                            <td class="text-center align-middle">
+                                <code class="text-dark">${item.alNumber}</code>
+                            </td>
+                            <td class="text-center align-middle fw-semibold">${item.alName}</td>
+                            <td class="text-center align-middle">
+                                <small class="text-muted">${calcType}</small>
+                            </td>
+                            <td class="text-center align-middle">
+                                <span class="fw-semibold">${alAmount}</span>
+                            </td>
+                            <td class="text-center align-middle">
+                                <small class="text-muted">${targetDept}</small>
+                            </td>
+                            <td class="text-center align-middle">
+                                <span class="badge ${useStatusBG}">${useStatus}</span>
+                            </td>
+                            <td class="text-center align-middle">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary btn-sm update-btn" data-bs-toggle="modal" data-bs-target="#itemModal" data-mp-idx=${item.mpIdx}>
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm delete-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                $itemListBody.html(html);
+            };
+
+            function renderPagination(page, pageSize, total) {
+                const totalPages = Math.ceil(total / pageSize);
+                const $pagination = $("#paginationArea");
+                $pagination.empty();
+
+                $pagination.append(`
+                    <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                        <a class="page-link" data-page="${page - 1}">이전</a>
+                    </li>
+                `);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    $pagination.append(`
+                        <li class="page-item ${i === page ? 'active' : ''}">
+                            <a class="page-link" data-page="${i}">${i}</a>
+                        </li>
+                    `);
+                }
+
+                $pagination.append(`
+                    <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" data-page="${page + 1}">다음</a>
+                    </li>
+                `);
+            };
+
+            function loadUpDept() {
+                $.ajax({
+                    type: "GET",
+                    url: "/hr/dept/list/up",
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body;
+                            const $modalTargetUpDept = $("#modalTargetUpDept");
+                            $modalTargetUpDept.empty();
+                            $modalTargetUpDept.append(`<option value="">선택</option>`);
+                            $.each(data, function(i, item) {
+                                $modalTargetUpDept.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
+                            });
+                        } else {
+                            
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function loadDownDept(deptUpIdx) {
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/dept/list/down?deptUpIdx=${deptUpIdx}`,
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body;
+                            const $modalTargetDownDept = $("#modalTargetDownDept");
+                            $modalTargetDownDept.empty();
+                            $modalTargetDownDept.append(`<option value="">선택</option>`);
+                            $.each(data, function(i, item) {
+                                $modalTargetDownDept.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
+                            });
+                        } else {
+                            
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+        });
+    </script>
+</div>
+</html>

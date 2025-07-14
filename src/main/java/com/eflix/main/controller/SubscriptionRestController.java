@@ -48,7 +48,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/subscription")
 public class SubscriptionRestController {
     
-    @Value("${file.path}")
+    @Value("${upload.path}")
     private String path;
 
     @Autowired
@@ -144,6 +144,8 @@ public class SubscriptionRestController {
 
         StatementDTO statementDTO = subscriptionService.findSubscriptionBySpiIdx(spiIdx);
         List<StatementDTO> dataList = List.of(statementDTO);
+        log.info("dataList = {}", statementDTO);
+        log.info("dataList = {}", statementDTO.getSpiStatus());
 
         Map<String, Object> params = new HashMap<>();
         params.put("title", "구독 명세서");
