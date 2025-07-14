@@ -32,9 +32,7 @@
         <button type="button" class="btn btn-quotation btn-sm me-1" id="btnQuotationSearch" disabled>
           <i class="fas fa-file-alt"></i> 견적서 조회
         </button>
-        <button type="button" class="btn btn-secondary btn-sm me-1" id="btnDebug" style="background-color: #6c757d;">
-          <i class="fas fa-bug"></i> 디버그
-        </button>
+        <!-- [수정] 디버그 버튼 삭제 -->
         <button type="button" class="btn btn-create btn-sm me-1" id="btnNew">
           <i class="fas fa-plus"></i> 신규
         </button>
@@ -43,6 +41,9 @@
         </button>
         <button type="button" class="btn btn-delete btn-sm me-1" id="btnDelete">
           <i class="fas fa-trash"></i> 삭제
+        </button>
+        <button type="button" class="btn btn-warning btn-sm me-1" id="btnCancel" style="display: none;">
+          <i class="fas fa-times"></i> 취소
         </button>
         <button type="button" class="btn btn-save btn-sm" id="btnSave">
           <i class="fas fa-save"></i> 등록
@@ -58,9 +59,9 @@
           <h6 class="m-0 font-weight-bold text-primary">
             <i class="fas fa-list mr-2"></i>주문서 헤더 목록
           </h6>
-          <button type="button" class="btn btn-save btn-sm" id="btnSaveHeader">
-            <i class="fas fa-save"></i>헤더 저장
-          </button>
+          <div class="text-sm text-muted">
+            💡 편집 모드에서 담당자, 할인율, 결제조건 등을 직접 수정할 수 있습니다. | 신규 작성 중에는 취소 버튼으로 작업을 중단할 수 있습니다.
+          </div>
         </div>
         <div class="card-body">
           <div id="headerGrid" class="ag-theme-alpine header-grid"></div>
@@ -99,9 +100,6 @@
           </button>
           <button type="button" class="btn btn-warning btn-sm" id="btnDeleteRow">
             <i class="fas fa-minus"></i> 행 삭제
-          </button>
-          <button type="button" class="btn btn-save btn-sm" id="btnSaveDetail">
-            <i class="fas fa-save"></i>저장
           </button>
         </div>
       </div>
@@ -221,7 +219,13 @@
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body p-0">
+        <div class="modal-body">
+          <div class="input-group mb-3">
+            <input id="itemSearchInput" type="text" class="form-control" placeholder="품목명 검색">
+            <button id="btnItemSearch" class="btn btn-outline-primary">
+              <i class="fas fa-search"></i> 검색
+            </button>
+          </div>
           <div class="table-responsive">
             <table class="table table-bordered m-0">
               <thead class="table-light">
@@ -236,6 +240,30 @@
       </div>
     </div>
   </div>
+
+  <!-- CSS 스타일 추가 -->
+  <style>
+    /* 신규 주문서 행 스타일링 */
+    .ag-theme-alpine .new-order-row {
+        background-color: #fff3cd !important;
+        border-left: 4px solid #ffc107 !important;
+    }
+    
+    .ag-theme-alpine .new-order-row:hover {
+        background-color: #ffeaa7 !important;
+    }
+
+    /* 취소 버튼 스타일 */
+    #btnCancel {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+    }
+  </style>
 
   <!-- 외부 JavaScript 파일 연결 -->
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
