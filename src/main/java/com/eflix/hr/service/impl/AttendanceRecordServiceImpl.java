@@ -122,4 +122,19 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
     public List<AttdRemarkDTO> findAttdRemarkListByEmpIdxWithDate(String empIdx, String date) {
         return attendanceRecordMapper.findAttdRemarkListByEmpIdxWithDate(empIdx, date);
     }
+
+    @Override
+    public List<AttendanceRecordDTO> findAllByEmpIdx(String empIdx) {
+        return attendanceRecordMapper.findAllByEmpIdx(empIdx);
+    }
+
+    @Override
+    public int insert(AttendanceRecordDTO attendanceRecordDTO) {
+        return attendanceRecordMapper.insert(attendanceRecordDTO);
+    }
+
+    @Override
+    public int update(AttendanceRecordDTO attendanceRecordDTO) {
+        return attendanceRecordMapper.update(attendanceRecordDTO);
+    }
 }

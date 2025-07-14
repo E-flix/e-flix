@@ -218,7 +218,7 @@
     </select>
 
     <select id="findAllAttdCount" parameterType="AttdSearchDTO" resultType="int">
-      SELECT COUNT(*)
+        SELECT COUNT(*)
         FROM employees e
             LEFT JOIN departments d ON e.dept_idx = d.dept_idx
             LEFT JOIN grade g ON e.grd_idx = g.grd_idx
@@ -232,39 +232,71 @@
                     COUNT(CASE WHEN ar.attd_status = 'AR06' THEN 1 END) AS abCount,
                     MAX(ar.attd_moddate) AS lastModDate
                 FROM attendance_records ar
-                WHERE TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                    <when test="date != null and date != ''">
+                        TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                    </when>
+                    <otherwise>
+                        TO_CHAR(ar.attd_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                    </otherwise>
+                </choose>
+                </where>
                 GROUP BY ar.emp_idx
-            ) attd ON e.emp_idx = attd.emp_idx
+                ) attd ON e.emp_idx = attd.emp_idx
             LEFT JOIN (
                 SELECT
                     nr.emp_idx,
                     SUM(nr.nt_hours) AS nightHours
                 FROM night_records nr
-                WHERE TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                        <when test="date != null and date != ''">
+                            TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                        </when>
+                        <otherwise>
+                            TO_CHAR(nr.nt_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                        </otherwise>
+                    </choose>
+                </where>
                 GROUP BY nr.emp_idx
-            ) night ON e.emp_idx = night.emp_idx
+                ) night ON e.emp_idx = night.emp_idx
             LEFT JOIN (
                 SELECT
                     lr.emp_idx,
                     SUM(lr.leave_end_date - lr.leave_start_date + 1) AS usedLeaveDay
                 FROM leave_requests lr
-                WHERE TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                        <when test="date != null and date != ''">
+                            TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                        </when>
+                        <otherwise>
+                            TO_CHAR(lr.leave_start_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                        </otherwise>
+                    </choose>
+                </where>
                 AND lr.approval_status = 'AS02'
                 GROUP BY lr.emp_idx
             ) lv ON e.emp_idx = lv.emp_idx
         WHERE e.co_idx = #{coIdx}
-          <if test="empName != null and empName != ''">
-            AND e.emp_name LIKE '%' || #{empName} || '%'
-          </if>
-          <if test="attdStatus != null and attdStatus != ''">
-            AND ar.attd_status = #{attdStatus}
-          </if>
-          <if test="deptIdx != null and deptIdx != ''">
-            AND e.dept_idx = #{deptIdx}
-          </if>
-          <if test="grdIdx != null and grdIdx != ''">
-            AND e.grd_idx = #{grdIdx}
-          </if>
+            <if test="empName != null and empName != ''">
+                AND e.emp_name LIKE '%' || #{empName} || '%'
+            </if>
+            <if test="attdStatus != null and attdStatus != ''">
+                AND ar.attd_status = #{attdStatus}
+            </if>
+            <if test="deptUpIdx != null and deptUpIdx != ''">
+                    <if test="deptDownIdx != null and deptDownIdx != ''">
+                        AND e.dept_idx = #{deptDownIdx}
+                    </if>
+                    <if test="deptDownIdx == null or deptDownIdx == ''">
+                        AND e.dept_idx = #{deptUpIdx}
+                    </if>
+                </if>
+            <if test="grdIdx != null and grdIdx != ''">
+                AND e.grd_idx = #{grdIdx}
+            </if>
         ORDER BY e.emp_idx
     </select>
 
@@ -295,23 +327,50 @@
                     COUNT(CASE WHEN ar.attd_status = 'AR06' THEN 1 END) AS abCount,
                     MAX(ar.attd_moddate) AS lastModDate
                 FROM attendance_records ar
-                WHERE TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                    <when test="date != null and date != ''">
+                        TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
+                    </when>
+                    <otherwise>
+                        TO_CHAR(ar.attd_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                    </otherwise>
+                </choose>
+                </where>
                 GROUP BY ar.emp_idx
-            ) attd ON e.emp_idx = attd.emp_idx
+                ) attd ON e.emp_idx = attd.emp_idx
             LEFT JOIN (
                 SELECT
                     nr.emp_idx,
                     SUM(nr.nt_hours) AS nightHours
                 FROM night_records nr
-                WHERE TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                        <when test="date != null and date != ''">
+                            TO_CHAR(nr.nt_date, 'YYYY-MM') = #{date}
+                        </when>
+                        <otherwise>
+                            TO_CHAR(nr.nt_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                        </otherwise>
+                    </choose>
+                </where>
                 GROUP BY nr.emp_idx
-            ) night ON e.emp_idx = night.emp_idx
+                ) night ON e.emp_idx = night.emp_idx
             LEFT JOIN (
                 SELECT
                     lr.emp_idx,
                     SUM(lr.leave_end_date - lr.leave_start_date + 1) AS usedLeaveDay
                 FROM leave_requests lr
-                WHERE TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                <where>
+                    <choose>
+                        <when test="date != null and date != ''">
+                            TO_CHAR(lr.leave_start_date, 'YYYY-MM') = #{date}
+                        </when>
+                        <otherwise>
+                            TO_CHAR(lr.leave_start_date, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+                        </otherwise>
+                    </choose>
+                </where>
                 AND lr.approval_status = 'AS02'
                 GROUP BY lr.emp_idx
             ) lv ON e.emp_idx = lv.emp_idx
@@ -322,9 +381,14 @@
             <if test="attdStatus != null and attdStatus != ''">
                 AND ar.attd_status = #{attdStatus}
             </if>
-            <if test="deptIdx != null and deptIdx != ''">
-                AND e.dept_idx = #{deptIdx}
-            </if>
+            <if test="deptUpIdx != null and deptUpIdx != ''">
+                    <if test="deptDownIdx != null and deptDownIdx != ''">
+                        AND e.dept_idx = #{deptDownIdx}
+                    </if>
+                    <if test="deptDownIdx == null or deptDownIdx == ''">
+                        AND e.dept_idx = #{deptUpIdx}
+                    </if>
+                </if>
             <if test="grdIdx != null and grdIdx != ''">
                 AND e.grd_idx = #{grdIdx}
             </if>
@@ -335,6 +399,8 @@
         SELECT
             ar.attd_idx      AS attdIdx,
             ar.emp_idx       AS empIdx,
+            TO_CHAR(ar.attd_start, 'HH24:MI') AS startTime,
+            TO_CHAR(ar.attd_end, 'HH24:MI') AS endTime,
             TO_CHAR(ar.attd_date, 'YYYY-MM-DD') AS attdDate,
             cc.common_code_name AS attdStatus,
             CASE
@@ -355,4 +421,123 @@
             AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
         ORDER BY ar.attd_date ASC
     </select>
+
+    <select id="findAllByEmpIdx" parameterType="String" resultType="AttendanceRecordDTO">
+        SELECT attd_idx, emp_idx, attd_date, attd_time, attd_start, attd_end, attd_status, ab_reason, memo, co_idx, attd_pay, is_holiday, attd_moddate
+        FROM attendance_records
+        WHERE emp_idx = #{empIdx}
+    </select>
+
+    <update id="insert" parameterType="AttendanceRecordDTO">
+        <selectKey resultType="String" keyProperty="attdIdx" order="BEFORE">
+            SELECT 'attd-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(attd_idx, 6))), 100) + 1) FROM attendance_records
+        </selectKey>
+        MERGE INTO attendance_records ar
+        USING (
+            SELECT
+                #{attdIdx} AS attd_idx,
+                #{empIdx}    AS emp_idx,
+                #{coIdx}     AS co_idx,
+                #{attdDate}  AS attd_date
+            FROM dual
+        ) src
+        ON (ar.attd_idx = src.attd_idx)
+        WHEN MATCHED THEN
+            UPDATE SET
+                ar.attd_time    = #{attdTime},
+                ar.attd_start   = #{attdStart},
+                ar.attd_end     = #{attdEnd},
+                ar.attd_status = CASE
+                        WHEN #{attdTime} IS NOT NULL AND TO_DATE(#{attdTime}, 'HH24:MI') &lt;= TO_DATE('09:00', 'HH24:MI') THEN 'AR02'
+                        WHEN #{attdTime} IS NOT NULL AND TO_DATE(#{attdTime}, 'HH24:MI') &gt; TO_DATE('09:00', 'HH24:MI') THEN 'AR03'
+                        ELSE #{attdStatus}
+                    END,
+                ar.ab_reason    = #{abReason},
+                ar.memo         = #{memo},
+                ar.is_holiday   = #{isHoliday},
+                ar.attd_pay     = #{attdPay},
+                ar.attd_moddate = SYSDATE
+        WHEN NOT MATCHED THEN
+            INSERT (
+                attd_idx, emp_idx, co_idx, attd_date,
+                attd_time, attd_start, attd_end,
+                attd_status, ab_reason, memo,
+                is_holiday, attd_pay, attd_moddate
+            )
+            VALUES (
+                #{attdIdx}, #{empIdx}, #{coIdx}, #{attdDate},
+                #{attdTime}, #{attdStart}, #{attdEnd},
+                CASE
+                    WHEN #{attdTime} IS NOT NULL AND TO_DATE(#{attdTime}, 'HH24:MI') &lt;= TO_DATE('09:00', 'HH24:MI') THEN 'AR02'
+                    WHEN #{attdTime} IS NOT NULL AND TO_DATE(#{attdTime}, 'HH24:MI') &gt; TO_DATE('09:00', 'HH24:MI') THEN 'AR03'
+                    ELSE #{attdStatus}
+                END,
+                #{abReason}, #{memo},
+                #{isHoliday}, #{attdPay}, SYSDATE
+            )
+    </update>
+
+    <update id="update" parameterType="AttendanceRecordDTO">
+        MERGE INTO attendance_records ar
+        USING (
+            SELECT
+                #{attdIdx} AS attd_idx,
+                #{empIdx}    AS emp_idx,
+                #{coIdx}     AS co_idx,
+                #{attdDate}  AS attd_date
+            FROM dual
+        ) src
+        ON (ar.attd_idx = src.attd_idx)
+        WHEN MATCHED THEN
+            UPDATE
+            SET
+                <if test="attdTime != null">
+                    ar.attd_time = #{attdTime},
+                </if>
+                <if test="attdStart != null">
+                    ar.attd_start = #{attdStart},
+                </if>
+                <if test="attdEnd != null">
+                    ar.attd_end = #{attdEnd},
+                </if>
+                <if test="memo != null">
+                    ar.memo = #{memo},
+                </if>
+                <if test="abReason != null">
+                    ar.ab_reason = #{abReason},
+                </if>
+                <if test="isHoliday != null">
+                    ar.is_holiday = #{isHoliday},
+                </if>
+                <if test="attdPay != null">
+                    ar.attd_pay = #{attdPay},
+                </if>
+                <if test="attdEnd != null">
+                    ar.attd_status = 
+                    CASE
+                        WHEN TO_DATE(#{attdEnd}, 'HH24:MI') &lt; TO_DATE('18:00', 'HH24:MI') THEN 'AR04'
+                        WHEN TO_DATE(#{attdEnd}, 'HH24:MI') &gt;= TO_DATE('18:00', 'HH24:MI') THEN 'AR05'
+                        ELSE #{attdStatus}
+                    END,
+                </if>
+                ar.attd_moddate = SYSDATE
+        WHEN NOT MATCHED THEN
+            INSERT (
+                attd_idx, emp_idx, co_idx, attd_date,
+                attd_time, attd_start, attd_end,
+                attd_status, ab_reason, memo,
+                is_holiday, attd_pay, attd_moddate
+            )
+            VALUES (
+                #{attdIdx}, #{empIdx}, #{coIdx}, #{attdDate},
+                #{attdTime}, #{attdStart}, #{attdEnd},
+                CASE
+                    WHEN src.attd_end IS NOT NULL AND TO_DATE(#{attdEnd}, 'HH24:MI') &lt; TO_DATE('18:00', 'HH24:MI') THEN 'AR04'
+                    WHEN src.attd_end IS NOT NULL AND TO_DATE(#{attdEnd}, 'HH24:MI') &gt;= TO_DATE('18:00', 'HH24:MI') THEN 'AR05'
+                    ELSE #{attdStatus}
+                END,
+                #{abReason}, #{memo},
+                #{isHoliday}, #{attdPay}, SYSDATE
+            )
+    </update>
 </mapper>

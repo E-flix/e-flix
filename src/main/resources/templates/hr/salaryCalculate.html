@@ -207,7 +207,7 @@
                 }
                 list.forEach(item => {
                     $tbody.append(`
-            <tr data-salary-idx="${item.salaryIdx}" class="${item.status === 'st-02' ? 'table-success' : ''}" style="cursor:pointer;">
+            <tr data-salary-idx="${item.salaryIdx}" class="${item.status === 'st-02' ? 'table-primary' : item.status === 'st-03' ? 'table-success' : 'table-error'}" style="cursor:pointer;">
               <td><input type="checkbox" name="salaryCheckbox"></td>
               <td>${item.empIdx}</td>
               <td>${item.empName}</td>
@@ -219,7 +219,7 @@
               <td>${item.allowanceSum.toLocaleString()}</td>
               <td>${item.deductionSum.toLocaleString()}</td>
               <td>${item.netSalary.toLocaleString()}</td>
-              <td><span class="badge bg-${item.status === 'st-02' ? 'success' : 'secondary'}">${item.status === 'st-02' ? '계산완료' : '미계산'}</span></td>
+              <td><span class="badge bg-${item.status === 'st-02' ? 'primary' : item.status === 'st-03' ? 'success' : 'error'}">${item.status === 'st-02' ? '계산완료' : item.status === 'st-03' ? '급여확정' : 'ERROR'}</span></td>
               <td></td>
             </tr>
           `);

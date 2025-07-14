@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.eflix.acc.dto.EntryMasterDTO;
 import com.eflix.acc.mapper.PurchaseSalesReportMapper;
 import com.eflix.acc.service.PurchaseSalesReportService;
-import com.eflix.common.security.auth.AuthContext;
+import com.eflix.common.security.auth.AuthUtil;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -16,11 +16,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PurchaseSalesReportServiceImpl implements PurchaseSalesReportService {
     private final PurchaseSalesReportMapper purchaseSalesReportMapper;
-    private final AuthContext authContext;
 
     @Override
     public List<EntryMasterDTO> getReportList(Map<String, Object> params) {
-        params.put("coIdx", authContext.getCoIdx());
+        params.put("coIdx", AuthUtil.getCoIdx());
         return purchaseSalesReportMapper.getReportList(params);
     }
 }

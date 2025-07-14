@@ -15,213 +15,184 @@
 <div layout:fragment="content">
     <!-- main -->
     <div class="masthead" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh;">
+        <!-- ERP 마이페이지 통합 레이아웃 -->
         <div class="container">
-            <!-- Header -->
+            <!-- 페이지 헤더 -->
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="card shadow-lg border-0 gradient-card">
-                        <div class="card-body text-center pb-4">
-                            <i class="fas fa-crown fa-3x mb-3"></i>
-                            <div>
-                                <a href="/mypage/service" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-user"></i>구독 관리
-                                </a>
-                            </div>
-                            <h1 class="display-6 fw-bold mt-2 mb-2">프로필 관리</h1>
-                            <p class="lead mb-0">개인 정보와 회사 정보를 한 곳에서 관리하세요</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1 fw-bold">마이페이지</h2>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item"><a href="#" class="text-decoration-none">홈</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">마이페이지</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary" id="profileTabBtn">
+                                <i class="bi bi-person-circle me-2"></i>프로필 관리
+                            </button>
+                            <button class="btn btn-primary" id="subscriptionTabBtn">
+                                <i class="bi bi-credit-card me-2"></i>구독 관리
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row justify-content-center g-4">
-                <!-- 가입 정보 카드 -->
-                <div class="col-lg-6 col-md-12">
-                    <div class="card info-card h-100">
-                        <div class="card-header">
-                            <h4 class="mb-0">
-                                <i class="bi bi-person-circle"></i>
-                                가입 정보
-                            </h4>
-                        </div>
-                        <div class="card-body p-4">
-                            <p class="section-subtitle">서비스 사용을 위한 기본 정보를 입력해주세요.</p>
 
-                            <div class="form-floating mb-3">
-                                <input class="form-control" id="userId" type="text" placeholder="아이디..." required />
-                                <label for="userId">아이디</label>
-                                <div class="invalid-feedback">아이디를 입력해주세요.</div>
+            <!-- 탭 컨텐츠 -->
+            <div class="row">
+                <div class="col-12">
+                    <!-- 프로필 관리 탭 -->
+                    <div id="profileTab" class="tab-content">
+                        <div class="row g-4">
+                            <!-- 개인정보 카드 -->
+                            <div class="col-lg-6">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header bg-light border-0">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-circle fs-5 text-primary me-2"></i>
+                                            <h5 class="mb-0 fw-semibold">개인정보</h5>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="userForm">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <label for="userId" class="form-label text-muted small">아이디</label>
+                                                    <input type="text" class="form-control" id="userId"
+                                                        placeholder="아이디를 입력하세요">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="userPw" class="form-label text-muted small">비밀번호</label>
+                                                    <input type="password" class="form-control" id="userPw"
+                                                        placeholder="비밀번호">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="userPwCheck" class="form-label text-muted small">비밀번호
+                                                        확인</label>
+                                                    <input type="password" class="form-control" id="userPwCheck"
+                                                        placeholder="비밀번호 확인">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="userTel" class="form-label text-muted small">연락처</label>
+                                                    <input type="tel" class="form-control" id="userTel"
+                                                        placeholder="연락처">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="userEmail"
+                                                        class="form-label text-muted small">이메일</label>
+                                                    <input type="email" class="form-control" id="userEmail"
+                                                        placeholder="이메일">
+                                                </div>
+                                            </div>
+                                            <div class="d-grid mt-4">
+                                                <button type="button" class="btn btn-primary" id="userBtn">
+                                                    <i class="bi bi-check-circle me-2"></i>개인정보 저장
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="row g-3 mb-3">
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input class="form-control" id="userPw" type="password" placeholder="****"
-                                            required />
-                                        <label for="userPw">비밀번호</label>
-                                        <div class="invalid-feedback">비밀번호를 입력해주세요.</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input class="form-control" id="userPwCheck" type="password" placeholder="****"
-                                            required />
-                                        <label for="userPwCheck">비밀번호 확인</label>
-                                        <div class="invalid-feedback">비밀번호가 서로 일치하지 않습니다.</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input class="form-control" id="userTel" type="tel" placeholder="연락처..." required />
-                                <label for="userTel">연락처</label>
-                                <div class="invalid-feedback">연락처를 입력해주세요.</div>
-                            </div>
-
-                            <div class="form-floating mb-4">
-                                <input class="form-control" id="userEmail" type="email" placeholder="이메일..." required />
-                                <label for="userEmail">이메일</label>
-                                <div class="invalid-feedback">이메일을 입력해주세요.</div>
-                            </div>
-
-                            <div class="d-grid">
-                                <button class="btn btn-primary btn-lg" id="userBtn">
-                                    <i class="bi bi-check-circle me-2"></i>개인정보 저장
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 회사 정보 카드 -->
-                <div class="col-lg-6 col-md-12">
-                    <div class="card info-card h-100">
-                        <div class="card-header">
-                            <h4 class="mb-0">
-                                <i class="bi bi-building"></i>
-                                회사 정보
-                            </h4>
-                        </div>
-                        <div class="card-body p-4">
-                            <p class="section-subtitle">사업자 정보를 정확하게 입력해주세요.</p>
-
-                            <form id="companyForm">
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="coName" type="text" placeholder="회사명"
-                                                required />
-                                            <label for="coName">회사명</label>
-                                            <div class="invalid-feedback">회사명을 입력해주세요.</div>
+                            <!-- 회사정보 카드 -->
+                            <div class="col-lg-6">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header bg-light border-0">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-building fs-5 text-success me-2"></i>
+                                            <h5 class="mb-0 fw-semibold">회사정보</h5>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="coNameEn" type="text"
-                                                placeholder="회사 영문명" />
-                                            <label for="coNameEn">회사 영문명 (선택)</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-8">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="coZip" type="text" placeholder="우편번호"
-                                                required readonly />
-                                            <label for="coZip">우편번호</label>
-                                            <div class="invalid-feedback">우편번호를 입력하세요.</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 d-grid">
-                                        <button type="button" class="btn btn-outline-primary h-100"
-                                            onclick="sample6_execDaumPostcode()">
-                                            <i class="bi bi-search me-1"></i>주소 찾기
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="form-floating mb-3">
-                                    <input class="form-control" id="coAddr" type="text" placeholder="주소" required
-                                        readonly />
-                                    <label for="coAddr">주소</label>
-                                    <div class="invalid-feedback">주소를 입력하세요.</div>
-                                </div>
-
-                                <div class="form-floating mb-3">
-                                    <input class="form-control" id="coAddrDetail" type="text" placeholder="상세 주소" />
-                                    <label for="coAddrDetail">상세주소</label>
-                                </div>
-
-                                <div class="form-floating mb-3">
-                                    <input class="form-control" id="bizrNo" type="text" placeholder="000-00-00000"
-                                        required />
-                                    <label for="bizrNo">사업자등록번호</label>
-                                    <div class="invalid-feedback">사업자등록번호를 입력하세요.</div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="bizrCert" class="form-label">
-                                        <i class="bi bi-file-earmark-arrow-up me-2"></i>사업자등록증
-                                    </label>
-                                    <input class="form-control file-input" id="bizrCert" type="file" required />
-                                    <div class="invalid-feedback">파일을 등록해주세요.</div>
-                                </div>
-
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="ceoName" type="text" placeholder="대표자명"
-                                                required />
-                                            <label for="ceoName">대표자명</label>
-                                            <div class="invalid-feedback">대표자명을 입력하세요.</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="ceoTel" type="tel" placeholder="대표자 연락처" />
-                                            <label for="ceoTel">대표자 연락처</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="pschName" type="text" placeholder="담당자명"
-                                                required />
-                                            <label for="pschName">담당자명</label>
-                                            <div class="invalid-feedback">담당자명을 입력하세요.</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="pschTel" type="tel" placeholder="담당자 연락처"
-                                                required />
-                                            <label for="pschTel">담당자 연락처</label>
-                                            <div class="invalid-feedback">담당자 연락처를 입력하세요.</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-floating mb-4">
-                                    <input class="form-control" id="pschEmail" type="email"
-                                        placeholder="abc@example.com" required />
-                                    <label for="pschEmail">담당자 이메일</label>
-                                    <div class="invalid-feedback">유효한 이메일 주소를 입력하세요.</div>
-                                </div>
-
-                                <div class="d-grid">
-                                    <button class="btn btn-primary btn-lg" id="companyBtn">
-                                        <i class="bi bi-check-circle me-2"></i>회사정보 저장
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                                    <div class="card-body">
+                                        <form id="companyForm">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label for="coName" class="form-label text-muted small">회사명</label>
+                                                    <input type="text" class="form-control" id="coName"
+                                                        placeholder="회사명">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="coNameEn" class="form-label text-muted small">회사
+                                                        영문명</label>
+                                                    <input type="text" class="form-control" id="coNameEn"
+                                                        placeholder="회사 영문명 (선택)">
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <label for="coZip" class="form-label text-muted small">우편번호</label>
+                                                    <input type="text" class="form-control" id="coZip"
+                                                        placeholder="우편번호" readonly>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label text-muted small">&nbsp;</label>
+                                                    <button type="button" class="btn btn-outline-secondary w-100"
+                                                        onclick="sample6_execDaumPostcode()">
+                                                        <i class="bi bi-search me-1"></i>주소찾기
+                                                    </button>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label for="coAddr" class="form-label text-muted small">주소</label>
+                                                    <input type="text" class="form-control" id="coAddr" placeholder="주소"
+                                                        readonly>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label for="coAddrDetail"
+                                                        class="form-label text-muted small">상세주소</label>
+                                                    <input type="text" class="form-control" id="coAddrDetail"
+                                                        placeholder="상세주소">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="bizrNo"
+                                                        class="form-label text-muted small">사업자등록번호</label>
+                                                    <input type="text" class="form-control" id="bizrNo"
+                                                        placeholder="000-00-00000">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="bizrCert"
+                                                        class="form-label text-muted small">사업자등록증</label>
+                                                    <input type="file" class="form-control" id="bizrCert">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="ceoName"
+                                                        class="form-label text-muted small">대표자명</label>
+                                                    <input type="text" class="form-control" id="ceoName"
+                                                        placeholder="대표자명">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="ceoTel" class="form-label text-muted small">대표자
+                                                        연락처</label>
+                                                    <input type="tel" class="form-control" id="ceoTel"
+                                                        placeholder="대표자 연락처">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="pschName"
+                                                        class="form-label text-muted small">담당자명</label>
+                                                    <input type="text" class="form-control" id="pschName"
+                                                        placeholder="담당자명">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="pschTel" class="form-label text-muted small">담당자
+                                                        연락처</label>
+                                                    <input type="tel" class="form-control" id="pschTel"
+                                                        placeholder="담당자 연락처">
+                                                </div>
+                                                <div class="col-12">
+                                                    <label for="pschEmail" class="form-label text-muted small">담당자
+                                                        이메일</label>
+                                                    <input type="email" class="form-control" id="pschEmail"
+                                                        placeholder="담당자 이메일">
+                                                </div>
+                                            </div>
+                                            <div class="d-grid mt-4">
+                                                <button type="button" class="btn btn-success" id="companyBtn">
+                                                    <i class="bi bi-check-circle me-2"></i>회사정보 저장
+                                                </button>
+                                            </div>
+                                        </form>
+                                        
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script>
         function sample6_execDaumPostcode() {
@@ -272,6 +243,365 @@
             }).open();
         }
     </script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 구독 관리 탭 -->
+                    <div id="subscriptionTab" class="tab-content" style="display: none;">
+                        <div class="row g-4">
+                            <!-- 구독 패키지 정보 -->
+                            <div class="col-lg-4">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header bg-light border-0">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-box-seam fs-5 text-primary me-2"></i>
+                                                <h5 class="mb-0 fw-semibold">구독 패키지</h5>
+                                            </div>
+                                            <span class="badge bg-success">활성</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted small">패키지명</label>
+                                            <input type="text" class="form-control" id="spkName" readonly>
+                                            <input type="hidden" id="spiIdx">
+                                        </div>
+
+                                        <h6 class="mb-3">포함 서비스</h6>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <div class="card bg-light text-center py-3" id="hrService">
+                                                    <i class="bi bi-people fs-4 text-primary mb-2"></i>
+                                                    <div class="small fw-semibold">인사관리</div>
+                                                    <i class="bi bi-check-circle text-success mt-1"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="card bg-light text-center py-3" id="inventoryService">
+                                                    <i class="bi bi-boxes fs-4 text-success mb-2"></i>
+                                                    <div class="small fw-semibold">재고관리</div>
+                                                    <i class="bi bi-check-circle text-success mt-1"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="card bg-light text-center py-3" id="accountingService">
+                                                    <i class="bi bi-calculator fs-4 text-warning mb-2"></i>
+                                                    <div class="small fw-semibold">회계관리</div>
+                                                    <i class="bi bi-x-circle text-danger mt-1"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="card bg-light text-center py-3" id="salesService">
+                                                    <i class="bi bi-graph-up fs-4 text-info mb-2"></i>
+                                                    <div class="small fw-semibold">영업관리</div>
+                                                    <i class="bi bi-check-circle text-success mt-1"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 계약 및 결제 정보 -->
+                            <div class="col-lg-5">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header bg-light border-0">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-calendar-check fs-5 text-info me-2"></i>
+                                            <h5 class="mb-0 fw-semibold">계약 및 결제정보</h5>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted small">계약 기간</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="spiPeriod" readonly>
+                                                    <span class="input-group-text">개월</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted small">최근 결제일</label>
+                                                <input type="date" class="form-control" id="recentPayDate" readonly>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted small">서비스 시작일</label>
+                                                <input type="date" class="form-control" id="spiStart" readonly>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted small">서비스 종료일</label>
+                                                <input type="date" class="form-control" id="spiEnd" readonly>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label text-muted small">다음 결제 예정일</label>
+                                                <input type="date" class="form-control" id="spiNext" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 문서 관리 및 다운로드 -->
+                            <div class="col-lg-3">
+                                <div class="row g-3">
+                                    <!-- 관련 문서 -->
+                                    <div class="col-12">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-header bg-light border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-file-earmark-text fs-5 text-secondary me-2"></i>
+                                                    <h6 class="mb-0 fw-semibold">관련 문서</h6>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="d-grid gap-2">
+                                                    <div
+                                                        class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="bi bi-file-earmark-contract me-2 text-muted"></i>
+                                                            <span class="small">계약서</span>
+                                                        </div>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button"
+                                                                class="btn btn-outline-secondary btn-sm preview-btn"
+                                                                data-type="contract">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-outline-secondary btn-sm download-btn"
+                                                                data-type="contract">
+                                                                <i class="bi bi-download"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="bi bi-receipt me-2 text-muted"></i>
+                                                            <span class="small">거래명세서</span>
+                                                        </div>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button"
+                                                                class="btn btn-outline-secondary btn-sm preview-btn"
+                                                                data-type="statement">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-outline-secondary btn-sm download-btn"
+                                                                data-type="statement">
+                                                                <i class="bi bi-download"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="bi bi-file-earmark-ruled me-2 text-muted"></i>
+                                                            <span class="small">세금계산서</span>
+                                                        </div>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button"
+                                                                class="btn btn-outline-secondary btn-sm preview-btn"
+                                                                data-type="invoice">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button type="button"
+                                                                class="btn btn-outline-secondary btn-sm download-btn"
+                                                                data-type="invoice">
+                                                                <i class="bi bi-download"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 데이터 다운로드 -->
+                                    <div class="col-12">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-header bg-light border-0">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-download fs-5 text-warning me-2"></i>
+                                                    <h6 class="mb-0 fw-semibold">데이터 다운로드</h6>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-2">
+                                                    <div class="col-12">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="department" id="hrData" value="hr">
+                                                            <label class="form-check-label small" for="hrData">
+                                                                <i class="bi bi-people me-1 text-primary"></i>인사 데이터
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="department" id="inventoryData" value="inventory">
+                                                            <label class="form-check-label small" for="inventoryData">
+                                                                <i class="bi bi-boxes me-1 text-success"></i>재고 데이터
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="department" id="accountingData" value="accounting"
+                                                                checked>
+                                                            <label class="form-check-label small" for="accountingData">
+                                                                <i class="bi bi-calculator me-1 text-warning"></i>회계 데이터
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="department" id="salesData" value="sales">
+                                                            <label class="form-check-label small" for="salesData">
+                                                                <i class="bi bi-graph-up me-1 text-info"></i>영업 데이터
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-warning btn-sm w-100 mt-3" id="dataDownloadBtn">
+                                                    <i class="bi bi-download me-2"></i>다운로드
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 구독 해지 섹션 -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm border-danger">
+                                    <div class="card-body text-center py-4">
+                                        <h6 class="text-muted mb-3">구독 서비스 해지</h6>
+                                        <p class="text-muted small mb-3">서비스 해지 시 모든 데이터가 삭제되며 복구가 불가능합니다.</p>
+                                        <button class="btn btn-outline-danger" id="cancelSubscriptionBtn">
+                                            <i class="bi bi-x-circle me-2"></i>구독 해지
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        function loadSubscription() {
+                            $.ajax({
+                                type: "GET",
+                                url: "/user/api/service",
+                                success: function (res) {
+                                    const data = res.body;
+                                    if (res.head.res_code === "200") {
+                                        $('#spkName').val(data.subscriptionPackageDTO.spkName);
+                                        $('#spiIdx').val(data.subscriptionDTO.spiIdx);
+                                        $('#spiPeriod').val(data.subscriptionDTO.spiPeriod);
+                                        $('#spiStart').val(data.subscriptionDTO.spiStart.substring(0, 10));
+                                        $('#spiEnd').val(data.subscriptionDTO.spiEnd.substring(0, 10));
+                                        $('#spiNext').val(data.subscriptionDTO.spiNext.substring(0, 10));
+                                        $('#recentPayDate').val(data.subscriptionDTO.spiNext.substring(0, 10));
+
+                                        const activeModules = data.moduleDTOs;
+
+                                        $.each(activeModules, function (index, item) {
+                                            if (item.moduleIdx === "mou-101") {
+                                                $("#hr").removeClass("bg-light").addClass("bg-success text-white");
+                                                $("#hr").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
+                                            } else if (item.moduleIdx === "mou-102") {
+                                                $("#acc").removeClass("bg-light").addClass("bg-success text-white");
+                                                $("#acc").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
+                                            } else if (item.moduleIdx === "mou-103") {
+                                                $("#purchs").removeClass("bg-light").addClass("bg-success text-white");
+                                                $("#purchs").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
+                                            } else if (item.moduleIdx === "mou-104") {
+                                                $("#bnz").removeClass("bg-light").addClass("bg-success text-white");
+                                                $("#bnz").find('i.fa-times-circle').removeClass('fa-times-circle text-danger').addClass('fa-check-circle text-white');
+                                            }
+                                        });
+                                    }
+                                },
+                                error: function (xhr, status, err) {
+                                    console.error(err);
+                                    Swal.fire("오류", "서버와 통신 중 문제가 발생했습니다.", "error");
+                                }
+                            });
+                        }
+
+                        $(".preview-btn").on("click", function (e) {
+                            let spiIdx = $("#spiIdx").val();
+                            let type = $(this).data("type");
+                            let url = "";
+
+                            if (type === "contract") {
+
+                            } else if (type === "statement") {
+                                url = `/subscription/report/preview/${type}/${spiIdx}`;
+                            } else if (type === "invoice") {
+                                url = `/subscription/report/preview/${type}/${spiIdx}`;
+                            }
+                            // 팝업 창 옵션
+                            const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+
+                            // 새 창 열기
+                            window.open(url, "_blank", popupOptions);
+                        });
+
+                        $(".download-btn").on("click", function (e) {
+                            let spiIdx = $("#spiIdx").val();
+                            let type = $(this).data("type");
+                            let url = "";
+
+                            if (type === "contract") {
+                            } else if (type === "statement") {
+                                url = `/subscription/report/${type}/${spiIdx}`;
+                            } else if (type === "invoice") {
+                                url = `/subscription/report/${type}/${spiIdx}`;
+                            }
+                            // 팝업 창 옵션
+                            const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+
+                            // 새 창 열기
+                            window.open(url, "_blank", popupOptions);
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+        <script>
+            // 탭 전환 기능
+            document.getElementById('profileTabBtn').addEventListener('click', function () {
+                document.getElementById('profileTab').style.display = 'block';
+                document.getElementById('subscriptionTab').style.display = 'none';
+                this.classList.add('btn-primary');
+                this.classList.remove('btn-outline-primary');
+                document.getElementById('subscriptionTabBtn').classList.add('btn-outline-primary');
+                document.getElementById('subscriptionTabBtn').classList.remove('btn-primary');
+                loadUserData();
+                loadCompanyData();
+                
+            });
+
+            document.getElementById('subscriptionTabBtn').addEventListener('click', function () {
+                document.getElementById('subscriptionTab').style.display = 'block';
+                document.getElementById('profileTab').style.display = 'none';
+                this.classList.add('btn-primary');
+                this.classList.remove('btn-outline-primary');
+                document.getElementById('profileTabBtn').classList.add('btn-outline-primary');
+                document.getElementById('profileTabBtn').classList.remove('btn-primary');
+                loadSubscription();
+            });
+        </script>
+    </div>
     <script th:inline="javascript">
         function loadUserData() {
             $.ajax({
@@ -323,7 +653,6 @@
         $(document).ready(function () {
             loadUserData();
             loadCompanyData();
-
             const userIdx = /*[[${session.userIdx}]]*/ "";
             $('#userBtn').on('click', function () {
                 if ($("#userPw").val() !== $("#userPwCheck").val()) {

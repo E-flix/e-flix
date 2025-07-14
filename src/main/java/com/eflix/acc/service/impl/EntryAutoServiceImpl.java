@@ -1,5 +1,5 @@
 package com.eflix.acc.service.impl;
-
+import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,20 +93,30 @@ public class EntryAutoServiceImpl implements EntryAutoService {
 
   @Transactional
   public int insertBatch(List<EntryDetailDTO> entryDetailList) {
+    int entryNumber = entryDetailList.get(0).getEntryNumber();
+    Date entryDate = entryDetailList.get(0).getEntryDate();
+    String coIdx = AuthUtil.getCoIdx();
+    EntryAutoAllDTO check = new EntryAutoAllDTO();
+    check.setCoIdx(coIdx);
+    check.setEntryNumber(entryNumber);
+
     int successCount = 0;
-    EntryAutoAllDTO check = new EntryAutoAllDTO(); // detail 조회용
-    check.setCoIdx(AuthUtil.getCoIdx());
+    // 최초 1회만 max line number 조회
+    int lineNumber = entryAutoMapper.selectMaxPlusOneLineNumber(check);
+
+    System.out.println("insertBatch - entryDetailList: " + entryDetailList);
     for (EntryDetailDTO dto : entryDetailList) {
-      check.setEntryNumber(dto.getEntryNumber());
-      dto.setCoIdx(AuthUtil.getCoIdx());
-      dto.setLineNumber(entryAutoMapper.selectMaxPlusOneLineNumber(check)); // line number 자동생성
-      entryAutoMapper.insertEntryDetail(dto);
-      successCount++;
+        dto.setEntryNumber(entryNumber);
+        dto.setCoIdx(coIdx);
+        dto.setLineNumber(lineNumber++); // 1씩 증가
+        System.out.println("insertBatch - dto: " + dto);
+        entryAutoMapper.insertEntryDetail(dto);
+        successCount++;
     }
     EntryMasterDTO master = new EntryMasterDTO();
-    master.setEntryNumber(entryDetailList.get(0).getEntryNumber());
-    master.setEntryDate(entryDetailList.get(0).getEntryDate());
-    master.setCoIdx(AuthUtil.getCoIdx());
+    master.setEntryNumber(entryNumber);
+    master.setEntryDate(entryDate);
+    master.setCoIdx(coIdx);
     entryAutoMapper.updateEntryMaster(master);
     return successCount;
   }

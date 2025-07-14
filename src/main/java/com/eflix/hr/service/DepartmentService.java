@@ -30,4 +30,7 @@ public interface DepartmentService {
     // 0707
     public List<DepartmentDTO> findUpAllByCoIdx(String coIdx);
     public List<DepartmentDTO> findDownAllByCoIdx(String coIdx, String deptUpIdx);
+
+    // 0710
+    public DepartmentDTO findByEmpIdx(String empIdx);
 }

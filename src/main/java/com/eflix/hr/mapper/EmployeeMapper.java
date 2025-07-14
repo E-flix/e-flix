@@ -53,4 +53,7 @@ public interface EmployeeMapper {
     public int update(EmployeeDTO employeeDTO);
     public int mergeEmployee(EmployeeDTO employeeDTO);
 
+    // 0713
+    public EmployeeDTO findSummaryByEmpIdx(String empIdx);
+
 }

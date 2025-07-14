@@ -1,0 +1,174 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+<!-- ============================================
+  - 작성자   : 김어진
+  - 최초작성 : 2025-06-19
+  - 설명     : 부서 등록화면 (사원)
+  -----------------------------------------------
+  [ 변경 이력 ]
+  - 2025-06-19 (김어진): title 및 내용 추가 및 layout 구성
+============================================ -->
+
+<head>
+    <title>급여명세서</title>
+</head>
+<div layout:fragment="content">
+    <div id="">
+        <h2>급여명세서</h2>
+        <!DOCTYPE html>
+        <html lang="ko">
+
+        <head>
+            <meta charset="UTF-8">
+            <title>급여 명세서</title>
+            <style>
+
+                .payslip-container {
+                    max-width: 800px;
+                    margin: 0 auto;
+                    border: 1px solid #ccc;
+                    padding: 30px;
+                    background: white;
+                }
+
+                .table-bordered td,
+                .table-bordered th {
+                    vertical-align: middle;
+                }
+            </style>
+        </head>
+
+        <body class="bg-light">
+            <div class="payslip-container">
+                <h4 class="text-center fw-bold mb-4">급여 명세서</h4>
+                <!--버튼구성 -->
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-danger me-2">PDF</button>
+                    <button class="btn btn-primary me-2" onclick="window.print()">인쇄</button>
+                    <button class="btn btn-secondary" onclick="history.back()">닫기</button>
+                </div>
+                <!-- 인적사항 -->
+                <table class="table table-bordered">
+                    <tr>
+                        <th>성명</th>
+                        <td class="text-primary">홍 길 동</td>
+                        <th>사번</th>
+                        <td class="text-primary">073542</td>
+                    </tr>
+                    <tr>
+                        <th>부서</th>
+                        <td class="text-primary">개발지원팀</td>
+                        <th>직급</th>
+                        <td class="text-primary">팀장</td>
+                    </tr>
+                </table>
+
+                <!-- 세부내역 -->
+                <h6 class="fw-bold mt-4">세부 내역</h6>
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>지급 항목</th>
+                            <th>지급 금액(원)</th>
+                            <th>공제 항목</th>
+                            <th>공제 금액(원)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>기본급</td>
+                            <td>3,200,000</td>
+                            <td>소득세</td>
+                            <td>115,530</td>
+                        </tr>
+                        <tr>
+                            <td>연장근로수당</td>
+                            <td>379,728</td>
+                            <td>국민연금</td>
+                            <td>177,570</td>
+                        </tr>
+                        <tr>
+                            <td>야간근로수당</td>
+                            <td>15,822</td>
+                            <td>고용보험</td>
+                            <td>31,570</td>
+                        </tr>
+                        <tr>
+                            <td>휴일근로수당</td>
+                            <td>94,932</td>
+                            <td>건강보험</td>
+                            <td>135,350</td>
+                        </tr>
+                        <tr>
+                            <td>가족수당</td>
+                            <td>150,000</td>
+                            <td>장기 요양 보험</td>
+                            <td>15,590</td>
+                        </tr>
+                        <tr>
+                            <td>식대</td>
+                            <td>100,000</td>
+                            <td>노조회비</td>
+                            <td>15,000</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td>지급액 계</td>
+                            <td>3,940,482</td>
+                            <td>공제액 계</td>
+                            <td>490,610</td>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td colspan="2">실 수령액</td>
+                            <td colspan="2" class="text-end">3,472,161 원</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <div>
+                        <strong>지급일자:</strong> 2025-06-10
+                    </div>
+                    <div><strong>지급자:</strong> 급여관리자</div>
+                </div>
+
+                <!-- 계산방법 -->
+                <h6 class="fw-bold">계산 방법</h6>
+                <table class="table table-bordered small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>구분</th>
+                            <th>산식 또는 산출항목</th>
+                            <th>지급액(원)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>연장근로수당</td>
+                            <td>연장근로시간 수 (16시간) x 15,822원 x 1.5</td>
+                            <td>379,728</td>
+                        </tr>
+                        <tr>
+                            <td>야간근로수당</td>
+                            <td>야간근로시간 수 (2시간) x 15,822원 x 0.5</td>
+                            <td>15,822</td>
+                        </tr>
+                        <tr>
+                            <td>휴일근로수당</td>
+                            <td>휴일근로시간 수 (4시간) x 15,822원 x 1.5</td>
+                            <td>94,932</td>
+                        </tr>
+                        <tr>
+                            <td>가족수당</td>
+                            <td>100,000 x 1명(배우자) + 50,000 x 1명(자녀)</td>
+                            <td>150,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </body>
+
+        </html>
+    </div>
+</div>

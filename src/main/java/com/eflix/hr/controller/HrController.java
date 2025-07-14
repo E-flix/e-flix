@@ -20,13 +20,16 @@ import com.eflix.common.code.service.CommonService;
 import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.dto.EmployeeDTO;
+import com.eflix.hr.dto.GradeDTO;
 import com.eflix.hr.dto.HrWorkTypeDTO;
 import com.eflix.hr.dto.RoleDTO;
 import com.eflix.hr.service.DepartmentService;
 import com.eflix.hr.service.EmployeeService;
+import com.eflix.hr.service.GradeService;
 import com.eflix.hr.service.HrWorkTypeService;
 import com.eflix.hr.service.RoleService;
 import com.eflix.hr.service.SalaryService;
+import com.eflix.main.service.CompanyService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,6 +74,20 @@ public class HrController {
 
     @Autowired
     private CommonService commonService;
+
+    @Autowired
+    private CompanyService companyService;
+
+    @Autowired
+    private GradeService gradeService;
+
+    private String getEmpIdx() {
+        return AuthUtil.getEmpIdx();
+    }
+
+    private String getCoIdx() {
+        return AuthUtil.getCoIdx();
+    }
 
     // 인사 메인 화면
     @GetMapping("")
@@ -199,17 +216,17 @@ public class HrController {
         return "hr/attdApproval";
     }
 
-    // 급여 계산 화면
-    @GetMapping("/sc")
-    public String salaryCalculate() {
-        return "hr/salaryCalculate";
-    }
+    // // 급여 계산 화면
+    // @GetMapping("/sc")
+    // public String salaryCalculate() {
+    //     return "hr/salaryCalculate";
+    // }
 
-    // 급여 항목 화면
-    @GetMapping("/si")
-    public String salaryItem() {
-        return "hr/salaryItem";
-    }
+    // // 급여 항목 화면
+    // @GetMapping("/si")
+    // public String salaryItem() {
+    //     return "hr/salaryItem";
+    // }
 
     // 급여 명세서 화면
     @GetMapping("/sp")
@@ -230,7 +247,14 @@ public class HrController {
     }
 
     @GetMapping("/attd/req")
-    public String req() {
+    public String req(Model model) {
+        EmployeeDTO employeeDTO = employeeService.findByEmpIdx(getEmpIdx());
+        DepartmentDTO DepartmentDTO = departmentService.findByEmpIdx(getEmpIdx());
+
+        model.addAttribute("empName", employeeDTO.getEmpName());
+        model.addAttribute("empIdx", employeeDTO.getEmpIdx());
+        model.addAttribute("deptName", DepartmentDTO.getDeptName());
+        
         return "hr/new/attd/req";
     }
     
@@ -248,6 +272,45 @@ public class HrController {
     public String dept() {
         return "hr/new/dept";
     }
+
+    @GetMapping("/va/req")
+    public String vaEmp(Model model) {
+        EmployeeDTO employeeDTO = employeeService.findByEmpIdx(getEmpIdx());
+        DepartmentDTO DepartmentDTO = departmentService.findByEmpIdx(getEmpIdx());
+        List<CommonDTO> AttdReqType = commonService.getCommon("AT");
+
+        model.addAttribute("empName", employeeDTO.getEmpName());
+        model.addAttribute("empIdx", employeeDTO.getEmpIdx());
+        model.addAttribute("deptName", DepartmentDTO.getDeptName());
+        model.addAttribute("attdReqType", AttdReqType);
+
+        return "hr/new/va/req";
+    }
     
+    @GetMapping("/va/mgr")
+    public String vaMgr() {
+        return "hr/new/va/mgr";
+    }
+    
+    @GetMapping("/salary/calc")
+    public String salaryCalc(Model model) {
+        List<DepartmentDTO> departmentDTO = departmentService.findUpAllByCoIdx(getCoIdx());
+        List<GradeDTO> gradeDTO = gradeService.findAllByCoIdx(getCoIdx());
+
+        model.addAttribute("depts", departmentDTO);
+        model.addAttribute("grades", gradeDTO);
+
+        return "hr/new/salary/calc";
+    }
+
+    @GetMapping("/salary/item")
+    public String salaryItem() {
+        return "hr/new/salary/item";
+    }
+
+    @GetMapping("/salary/stub")
+    public String salaryPay() {
+        return "hr/new/salary/stub";
+    }
     
 }

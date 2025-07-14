@@ -46,4 +46,7 @@ public interface EmployeeService {
     public int update(EmployeeDTO employeeDTO);
 
     public int mergeEmployee(EmployeeDTO employeeDTO);
+
+    // 0714
+    public EmployeeDTO findSummaryByEmpIdx(String empIdx);
 }

@@ -81,5 +81,8 @@ public class DepartmentServiceImpl implements DepartmentService{
     return departmentMapper.findDownAllByCoIdx(coIdx, deptUpIdx);
   }
 
-
+  @Override
+  public DepartmentDTO findByEmpIdx(String empIdx) {
+    return departmentMapper.findByEmpIdx(empIdx);
+  }
 }

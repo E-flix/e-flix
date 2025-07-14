@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.eflix.common.code.service.CommonService;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
@@ -14,10 +13,12 @@ import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.DepartmentDTO;
 import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.dto.GradeDTO;
+import com.eflix.hr.dto.RoleDTO;
 import com.eflix.hr.dto.etc.EmpSearchDTO;
 import com.eflix.hr.service.DepartmentService;
 import com.eflix.hr.service.EmployeeService;
 import com.eflix.hr.service.GradeService;
+import com.eflix.hr.service.RoleService;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +48,9 @@ public class EmpRestController {
     @Autowired
     private GradeService gradeService;
 
+    @Autowired
+    private RoleService roleService;
+
     @Value("${upload.path}")
     private String path;
 
@@ -73,6 +77,7 @@ public class EmpRestController {
             searchResult.put("total", empCount);
             searchResult.put("page", empSearchDTO.getPage());
             searchResult.put("startPage", empSearchDTO.getStartPage());
+            searchResult.put("pageSize", empSearchDTO.getPageUnit());
             searchResult.put("endPage", empSearchDTO.getEndPage());
             searchResult.put("lastPage", empSearchDTO.getLastPage());
             result = ResUtil.makeResult(ResStatus.OK, searchResult);
@@ -90,10 +95,12 @@ public class EmpRestController {
 
         List<DepartmentDTO> depts = departmentService.findUpAllByCoIdx(getCoIdx());
         List<GradeDTO> grades = gradeService.findAllByCoIdx(getCoIdx());
+        List<RoleDTO> roles = roleService.findAllByCoIdx(getCoIdx());
         if ((depts != null) || (grades != null)) {
             Map<String, Object> options = new HashMap<>();
             options.put("depts", depts);
             options.put("grades", grades);
+            options.put("roles", roles);
 
             result = ResUtil.makeResult(ResStatus.OK, options);
         } else {

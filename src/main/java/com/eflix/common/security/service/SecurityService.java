@@ -17,4 +17,6 @@ public interface SecurityService {
 
     // 회사가 구매한 모듈 ERP 권한 목록
     public List<String> findCompanyRolesByCoIdx(String coIdx);
+
+    public String findRoleIdByEmpIdx(String empIdx, String coIdx);
 }

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================
+- 작성자   : 김어진
+- 최초작성 : 2025-06-20
+- 설명     : LeaveRequestsMapper query xml
+[ 변경 이력 ]
+- 2025-06-19 (김어진): 계정과목 전체조회 작성
+=============================================== -->
+<mapper namespace="com.eflix.hr.mapper.LeaveRequestMapper">
+
+    <insert id="insert" parameterType="VaDTO">
+        <selectKey resultType="String" keyProperty="leaveReqIdx" order="BEFORE">
+            SELECT 'req-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(leave_req_idx, 5))), 100) + 1) FROM leave_requests
+        </selectKey>
+        INSERT INTO leave_requests (leave_req_idx, emp_idx, leave_start_date, leave_end_date, reason, request_date, approval_status, att_file, co_idx, req_type)
+        VALUES (#{leaveReqIdx}, #{empIdx}, #{leaveStartDate}, #{leaveEndDate}, #{reason}, SYSDATE, 'AS01', #{attFile}, #{coIdx}, #{reqType})
+    </insert>
+
+    <select id="findSummaryByEmpIdxWithCoIdx" parameterType="String" resultType="VaSummaryDTO">
+        SELECT
+        g.grd_annual AS total,
+
+        NVL(SUM(
+            CASE WHEN lr.approval_status = 'AS02'
+            THEN (lr.leave_end_date - lr.leave_start_date + 1)
+            ELSE 0
+            END
+        ), 0)
+        AS used,
+
+        (g.grd_annual
+        - NVL(SUM(
+            CASE WHEN lr.approval_status = 'AS02'
+                THEN (lr.leave_end_date - lr.leave_start_date + 1)
+                ELSE 0
+            END
+            ), 0)
+        ) AS remaining,
+
+        NVL(SUM(CASE WHEN lr.approval_status = 'AS01' THEN 1 ELSE 0 END), 0)
+            AS pending,
+        NVL(SUM(CASE WHEN lr.approval_status = 'AS02' THEN 1 ELSE 0 END), 0)
+            AS approved,
+        NVL(SUM(CASE WHEN lr.approval_status = 'AS03' THEN 1 ELSE 0 END), 0)
+            AS rejected
+        FROM employees e
+        JOIN grade g ON e.grd_idx = g.grd_idx
+            AND e.co_idx  = g.co_idx
+        LEFT JOIN leave_requests lr ON lr.emp_idx = e.emp_idx
+            AND lr.co_idx  = e.co_idx
+            AND lr.leave_start_date >= e.emp_regdate
+        WHERE e.emp_idx = #{empIdx} AND e.co_idx  = #{coIdx}
+        GROUP BY g.grd_annual
+    </select>
+
+    <select id="findAllByEmpIdxWithCoIdx" parameterType="VaDTO">
+        SELECT leave_start_date, leave_end_date, approval_status, req_type
+        FROM leave_requests
+        WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
+        ORDER BY request_date DESC
+    </select>
+
+    <select id="findReqSummaryBySearch" parameterType="vaSearchDTO" resultType="VaReqSummaryDTO">
+        SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN lr.approval_status = 'AS01' THEN 1 ELSE 0 END) AS pending,
+            SUM(CASE WHEN lr.approval_status = 'AS02' THEN 1 ELSE 0 END) AS approved,
+            SUM(CASE WHEN lr.approval_status = 'AS03' THEN 1 ELSE 0 END) AS rejected
+        FROM leave_requests lr
+        LEFT JOIN employees e ON lr.emp_idx = e.emp_idx
+        <where>
+            1=1
+            <if test="approvalStatus != null and approvalStatus !=''">
+                lr.approval_status = #{approvalStatus}
+            </if>
+            <if test="reqType != null and reqType != ''">
+                lr.req_type = #{reqType}
+            </if>
+            <choose>
+                <when test ="reqStart != null and reqEnd != null and reqStart != '' and reqEnd != ''">
+                    AND lr.request_date BETWEEN TO_DATE(#{reqStart}, 'YYYY-MM-DD') AND TO_DATE(#{reqEnd}, 'YYYY-MM-DD')
+                </when>
+                <when test="reqStart != null and reqStart != '' and (reqEnd == null or reqEnd == '')">
+                    AND lr.request_date BETWEEN TO_DATE(#{reqStart}, 'YYYY-MM-DD') AND TRUNC(SYSDATE)
+                </when>
+                <otherwise />
+            </choose>
+            AND e.co_idx = #{coIdx}
+        </where>
+    </select>
+
+    <select id="findCountBySearch" parameterType="VaSearchDTO" resultType="int">
+        SELECT COUNT(*)
+        FROM leave_requests lr
+            LEFT JOIN employees e ON lr.emp_idx = e.emp_idx
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+        <where>
+            <if test="approvalStatus != null and approvalStatus !=''">
+                lr.approval_status = #{approvalStatus}
+            </if>
+            <if test="reqType != null and reqType != ''">
+                lr.req_type = #{reqType}
+            </if>
+            <choose>
+                <when test ="reqStart != null and reqEnd != null and reqStart != '' and reqEnd != ''">
+                    AND lr.request_date BETWEEN TO_DATE(#{reqStart}, 'YYYY-MM-DD') AND TO_DATE(#{reqEnd}, 'YYYY-MM-DD')
+                </when>
+                <when test="reqStart != null and reqStart != '' and (reqEnd == null or reqEnd == '')">
+                    AND lr.request_date BETWEEN TO_DATE(#{reqStart}, 'YYYY-MM-DD') AND TRUNC(SYSDATE)
+                </when>
+                <otherwise />
+            </choose>
+            AND e.co_idx = #{coIdx}
+        </where>
+    </select>
+
+    <select id="findAllBySearch" parameterType="VaSearchDTO" resultType="VaDTO">
+        SELECT *
+        FROM (
+            SELECT a.*, ROWNUM AS rn
+            FROM (
+                SELECT lr.leave_req_idx, lr.emp_idx, lr.approver_idx, lr.leave_Start_date, lr.leave_end_date,
+                    lr.reason, lr.request_date, lr.approval_status, lr.approved_date, lr.att_file, lr.co_idx, lr.req_type,
+                    e.emp_img, e.emp_name,
+                    d.dept_name
+                FROM leave_requests lr
+                    LEFT JOIN employees e ON lr.emp_idx = e.emp_idx
+                    LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+                <where>
+                    <if test="approvalStatus != null and approvalStatus !=''">
+                        lr.approval_status = #{approvalStatus}
+                    </if>
+                    <if test="reqType != null and reqType != ''">
+                        lr.req_type = #{reqType}
+                    </if>
+                    <choose>
+                        <when test ="reqStart != null and reqEnd != null and reqStart != '' and reqEnd != ''">
+                            AND lr.request_date BETWEEN TO_DATE(#{reqStart}, 'YYYY-MM-DD') AND TO_DATE(#{reqEnd}, 'YYYY-MM-DD')
+                        </when>
+                        <when test="reqStart != null and reqStart != '' and (reqEnd == null or reqEnd == '')">
+                            AND lr.request_date BETWEEN TO_DATE(#{reqStart}, 'YYYY-MM-DD') AND TRUNC(SYSDATE)
+                        </when>
+                        <otherwise />
+                    </choose>
+                    AND e.co_idx = #{coIdx}
+                </where>
+                ORDER BY lr.request_date DESC, e.emp_idx DESC
+            ) a
+            WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rn &gt; #{offset}
+    </select>
+
+    <select id="findByLeaveReqIdx" parameterType="String" resultType="VaDTO">
+        SELECT lr.leave_req_idx, lr.emp_idx, lr.approver_idx, lr.leave_Start_date, lr.leave_end_date,
+            lr.reason, lr.request_date, lr.approval_status, lr.approved_date, lr.att_file, lr.co_idx, lr.req_type, lr.ab_reason,
+            e.emp_name,
+            d.dept_name
+        FROM leave_requests lr
+            LEFT JOIN employees e ON lr.emp_idx = e.emp_idx
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+        WHERE lr.leave_req_idx = #{leaveReqIdx}
+    </select>
+
+    <update id="insertReqApprover" parameterType="LeaveRequestAppDTO">
+        CALL APPROVE_LEAVE(#{leaveReqIdx},#{approverIdx}, #{status}, #{abReason})
+    </update>
+</mapper>

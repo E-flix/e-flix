@@ -30,14 +30,14 @@
     LEFT JOIN departments d ON e.dept_idx = d.dept_idx
     LEFT JOIN (
         SELECT co_idx,
-              SUM(CASE WHEN type = 'sm-01' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS allowance_sum
+              SUM(CASE WHEN type = 'SM01' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS allowance_sum
         FROM salary_mapping
         WHERE use_status = 'Y'
         GROUP BY co_idx
     ) aw ON s.co_idx = aw.co_idx
     LEFT JOIN (
         SELECT co_idx,
-              SUM(CASE WHEN type = 'sm-02' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS deduction_sum
+              SUM(CASE WHEN type = 'SM02' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS deduction_sum
         FROM salary_mapping
         WHERE use_status = 'Y'
         GROUP BY co_idx
@@ -103,14 +103,14 @@
     LEFT JOIN departments d ON e.dept_idx = d.dept_idx
     LEFT JOIN (
         SELECT co_idx,
-              SUM(CASE WHEN type = 'sm-01' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS allowance_sum
+              SUM(CASE WHEN type = 'SM01' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS allowance_sum
         FROM salary_mapping
         WHERE use_status = 'Y'
         GROUP BY co_idx
     ) aw ON s.co_idx = aw.co_idx
     LEFT JOIN (
         SELECT co_idx,
-              SUM(CASE WHEN type = 'sm-02' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS deduction_sum
+              SUM(CASE WHEN type = 'SM02' AND use_status = 'Y' THEN NVL(al_amount, 0) ELSE 0 END) AS deduction_sum
         FROM salary_mapping
         WHERE use_status = 'Y'
         GROUP BY co_idx
@@ -134,35 +134,35 @@
   <!-- 급여 상세항목 (salary + salary_mapping) -->
   <select id="selectSalaryDetail" parameterType="String" resultType="SalaryDetailDTO">
     SELECT
-      '기본급'              AS itemName,
-      s.base_salary         AS amount,
-      '-'                   AS remark,
-      '과세'                AS taxType,
-      '지급'                AS payType
+        '기본급'              AS itemName,
+        s.base_salary         AS amount,
+        '-'                   AS remark,
+        'TM01'                AS taxType,
+        'SM01'                AS payType
     FROM salary s
     WHERE s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
     
     UNION ALL
     
     SELECT
-      sm.al_name            AS itemName,
-      CASE sm.type WHEN 'sm-02' THEN -sm.al_amount ELSE sm.al_amount END AS amount,
-      '-'                   AS remark,
-      DECODE(sm.type, 'sm-01', '과세', '비과세') AS taxType,
-      DECODE(sm.type, 'sm-01', '지급', '공제') AS payType
+        sm.al_name            AS itemName,
+        CASE sm.type WHEN 'SM02' THEN -sm.al_amount ELSE sm.al_amount END AS amount,
+        '-'                   AS remark,
+        DECODE(sm.type, 'SM01', 'TM01', 'TM02') AS taxType,
+        DECODE(sm.type, 'SM01', 'SM01', 'SM02') AS payType
     FROM salary_mapping sm
     JOIN salary s ON sm.co_idx = s.co_idx
     WHERE sm.use_status = 'Y'
-      AND s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
-    
+        AND s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
+
     UNION ALL
 
     SELECT
-      '세금' AS itemName,
-      -s.tax AS amount,
-      '-' AS remark,
-      '과세'                AS taxType,
-      '공제'                AS payType
+        '세금' AS itemName,
+        -s.tax AS amount,
+        '-' AS remark,
+        'TM01'                AS taxType,
+        'SM02'                AS payType
     FROM salary s
     WHERE s.salary_idx = #{salaryIdx} AND s.co_idx = #{coIdx}
   </select>
@@ -259,5 +259,283 @@
         FROM salary_mapping
         WHERE al_number LIKE 'al-%'
     </select>
+
+    <!-- 0713 -->
+    <select id="findAllCountBySearch" parameterType="SalarySearchDTO" resultType="int">
+        SELECT COUNT(*)
+        FROM employees e
+            LEFT JOIN salary s ON s.emp_idx = e.emp_idx
+                AND s.co_idx = #{coIdx}
+                AND SUBSTR(s.att_month,1,7) = #{attMonth}
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+            LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+        <where>
+            e.co_idx = #{coIdx}
+
+            <if test="empName != null and empName.trim() != ''">
+                AND e.emp_name LIKE '%' || #{empName} || '%'
+            </if>
+
+            <if test="deptIdx != null and deptIdx != ''">
+                AND d.dept_Idx = #{deptIdx}
+            </if>
+            
+            <if test="grdIdx != null and grdIdx != ''">
+                AND g.grd_idx = #{grdIdx}
+            </if>
+        </where>
+        ORDER BY e.emp_idx
+    </select>
+
+    <select id="findAllBySearch" parameterType="SalarySearchDTO" resultType="SalaryListDTO">
+        SELECT *
+        FROM (
+            SELECT a.*, ROWNUM AS rn
+            FROM (
+                SELECT
+                    s.salary_idx,
+                    e.emp_idx,
+                    e.emp_name,
+                    d.dept_name,
+                    g.grd_name,
+                    TO_CHAR(TO_DATE(s.att_month,'YYYY-MM-DD'),'YYYY.MM') AS att_month,
+                    TO_CHAR(TO_DATE(s.pay_month,'YYYY-MM-DD'),'YYYY.MM') AS pay_month,
+                    s.base_salary,
+                    (
+                        NVL(s.night_work_pay,0)
+                        + NVL((
+                            SELECT SUM(
+                            CASE WHEN m.type='SM01'
+                                    AND REGEXP_LIKE(m.al_amount,'^[0-9]+(\.[0-9]+)?$')
+                                THEN TO_NUMBER(m.al_amount)
+                                ELSE 0
+                            END)
+                            FROM salary_mapping m
+                            WHERE m.co_idx     = s.co_idx
+                            AND m.use_status = 'Y'
+                            AND m.mp_idx IN (
+                                s.sal1,s.sal2,s.sal3,s.sal4,s.sal5,
+                                s.sal6,s.sal7,s.sal8,s.sal9,s.sal10
+                            )
+                        ),0)
+                    )                                                     AS allowance_total,
+
+                    (
+                        NVL(s.tax,0)
+                        + NVL(s.national_pension,0)
+                        + NVL(s.health_insurance,0)
+                        + NVL(s.employment_ins,0)
+                        + NVL(s.industrial_ins,0)
+                        + NVL(s.other_deductions,0)
+                        + NVL((
+                            SELECT SUM(
+                            CASE WHEN m.type='SM02'
+                                    AND REGEXP_LIKE(m.al_amount,'^[0-9]+(\.[0-9]+)?$')
+                                THEN TO_NUMBER(m.al_amount)
+                                ELSE 0
+                            END)
+                            FROM salary_mapping m
+                            WHERE m.co_idx     = s.co_idx
+                            AND m.use_status = 'Y'
+                            AND m.mp_idx IN (
+                                s.sal1,s.sal2,s.sal3,s.sal4,s.sal5,
+                                s.sal6,s.sal7,s.sal8,s.sal9,s.sal10
+                            )
+                        ),0)
+                    )                                                     AS deduction_total,
+
+                    s.total_salary                                       AS net_salary,
+
+                    s.salary_type  AS calc_status
+
+                FROM employees e
+                    LEFT JOIN salary s ON s.emp_idx = e.emp_idx
+                        AND s.co_idx = #{coIdx}
+                        AND SUBSTR(s.att_month,1,7) = #{attMonth}
+                    LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+                    LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+                <where>
+                    e.co_idx = #{coIdx}
+
+                    <if test="empName != null and empName != ''">
+                        AND e.emp_name LIKE '%' || #{empName} || '%'
+                    </if>
+
+                    <if test="deptIdx != null and deptIdx != ''">
+                        AND d.dept_Idx = #{deptIdx}
+                    </if>
+                    
+                    <if test="grdIdx != null and grdIdx != ''">
+                        AND g.grd_idx = #{grdIdx}
+                    </if>
+                </where>
+                ORDER BY e.emp_idx
+            ) a
+            WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rn &gt; #{offset}
+    </select>
+
+    <select id="calcSalary" parameterType="SalaryCalcDTO">
+        CALL calc_salary(#{date}, #{coIdx})
+    </select>
+
+    <select id="calcSalaryByEmpIdx" parameterType="SalaryCalcDTO">
+        CALL calc_salary_v2(#{empIdx}, #{date}, #{coIdx})
+    </select>
+
+    <select id="salaryEmpInfo" parameterType="String" resultType="SalaryEmpDTO">
+        SELECT e.emp_img, e.emp_idx, e.emp_name,
+            d.dept_idx, d.dept_name,
+            g.grd_idx, g.grd_name,
+            s.att_month, s.pay_month, s.salary_type
+        FROM employees e
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+            LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+            LEFT JOIN salary s ON e.emp_idx = s.emp_idx
+                AND s.salary_idx = #{salaryIdx}
+        WHERE e.emp_idx = #{empIdx}
+    </select>
+
+    <select id="salaryDetailBySalaryIdxWithCoIdx" parameterType="String" resultType="SalaryDetailDTO">
+        SELECT t.item_name, t.amount, t.remark, t.tax_type, t.pay_type
+        FROM (
+            SELECT
+                '기본급' AS item_name,
+                '+ '||TO_CHAR(s.base_salary, 'FM9G999G999') AS amount,
+                '-' AS remark,
+                'TM01' AS tax_type,
+                'SM01' AS pay_type,
+                1 AS grp_order,
+                0 AS row_order
+            FROM salary s
+            WHERE s.salary_idx = #{salaryIdx}
+                AND s.co_idx = #{coIdx}
+
+            UNION ALL
+
+            SELECT
+                sm.al_name AS item_name,
+                CASE sm.calc_type
+                    WHEN 'CA1' THEN
+                        (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
+                        || TO_CHAR(TO_NUMBER(sm.al_amount), 'FM9G999G999')
+                    WHEN 'CA2' THEN
+                        (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
+                        || TO_CHAR(TO_NUMBER(sm.al_amount), 'FM9G999G999') || '%'
+                    ELSE
+                        (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
+                        || sm.al_amount
+                END AS amount,
+                CASE sm.calc_type
+                    WHEN 'CA01' THEN '정액'
+                    WHEN 'CA02' THEN '비율'
+                    ELSE '수식'
+                END                                                                         AS remark,
+                sm.tax_type AS tax_type,
+                CASE sm.type
+                    WHEN 'SM01' THEN 'SM01'
+                    ELSE 'SM02'
+                END                                                                         AS pay_type,
+                2                                                                           AS grp_order,
+                CASE sm.type WHEN 'SM01' THEN 0 ELSE 1 END                                   AS row_order
+            FROM salary_mapping sm
+            WHERE sm.co_idx = #{coIdx}
+                AND sm.use_status = 'Y'
+
+            UNION ALL
+
+            SELECT
+                '야간수당' AS item_name,
+                '+ '||TO_CHAR(s.night_work_pay, 'FM9G999G999') AS amount,
+                '정액' AS remark,
+                'TM01' AS tax_type,
+                'SM01' AS pay_type,
+                2 AS grp_order,
+                2 AS row_order
+            FROM salary s
+            WHERE s.salary_idx = #{salaryIdx}
+                AND s.co_idx = #{coIdx}
+
+            UNION ALL
+
+            SELECT
+                '국민연금' AS item_name,
+                '- '||TO_CHAR(s.national_pension, 'FM9G999G999') AS amount,
+                '4.5%' AS remark,
+                'TM02' AS tax_type,
+                'SM02' AS pay_type,
+                3 AS grp_order,
+                0 AS row_order
+            FROM salary s
+            WHERE s.salary_idx = #{salaryIdx}
+                AND s.co_idx = #{coIdx}
+
+            UNION ALL
+            SELECT
+                '건강보험' AS item_name,
+                '- '||TO_CHAR(s.health_insurance, 'FM9G999G999')  AS amount,
+                '3.495%' AS remark,
+                'TM02' AS tax_type,
+                'SM02' AS pay_type,
+                3 AS grp_order,
+                1 AS row_order
+            FROM salary s
+            WHERE s.salary_idx = #{salaryIdx}
+                AND s.co_idx = #{coIdx}
+
+            UNION ALL
+            SELECT
+                '고용보험' AS item_name,
+                '- '||TO_CHAR(s.employment_ins, 'FM9G999G999') AS amount,
+                '1.0%' AS remark,
+                'TM02' AS tax_type,
+                'SM02' AS pay_type,
+                3 AS grp_order,
+                2 AS row_order
+            FROM salary s
+            WHERE s.salary_idx = #{salaryIdx}
+                AND s.co_idx = #{coIdx}
+
+            UNION ALL
+            SELECT
+                '소득세' AS item_name,
+                '- '||TO_CHAR(s.tax, 'FM9G999G999') AS amount,
+                '자동계산' AS remark,
+                'TM02' AS tax_type,
+                'SM02' AS pay_type,
+                3 AS grp_order,
+                3 AS row_order
+
+            FROM salary s
+            WHERE s.salary_idx = #{salaryIdx}
+                AND s.co_idx = #{coIdx}
+
+            UNION ALL
+
+            SELECT
+                '실수령액' AS item_name,
+                '+ '||TO_CHAR(s.total_salary, 'FM9G999G999') AS amount,
+                '자동계산' AS remark,
+                '-' AS tax_type,
+                '-' AS pay_type,
+                4 AS grp_order,
+                0  AS row_order
+            FROM salary s
+            WHERE s.salary_idx = #{salaryIdx}
+                AND s.co_idx = #{coIdx}
+            ) t
+        ORDER BY t.grp_order, t.row_order
+    </select>
+
+    <update id="updateSalary" parameterType="SalaryDTO">
+        UPDATE salary
+        <set>
+            <if test="salaryType != null and salaryType != ''">
+                salary_type = #{salaryType}
+            </if>
+        </set>
+        WHERE salary_idx = #{salaryIdx}
+    </update>
 </mapper>
 
