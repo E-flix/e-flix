@@ -432,49 +432,13 @@
         <selectKey resultType="String" keyProperty="attdIdx" order="BEFORE">
             SELECT 'attd-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(attd_idx, 6))), 100) + 1) FROM attendance_records
         </selectKey>
-        MERGE INTO attendance_records ar
-        USING (
-            SELECT
-                #{attdIdx} AS attd_idx,
-                #{empIdx}    AS emp_idx,
-                #{coIdx}     AS co_idx,
-                #{attdDate}  AS attd_date
-            FROM dual
-        ) src
-        ON (ar.attd_idx = src.attd_idx)
-        WHEN MATCHED THEN
-            UPDATE SET
-                ar.attd_time    = #{attdTime},
-                ar.attd_start   = #{attdStart},
-                ar.attd_end     = #{attdEnd},
-                ar.attd_status = CASE
-                        WHEN #{attdTime} IS NOT NULL AND TO_DATE(#{attdTime}, 'HH24:MI') &lt;= TO_DATE('09:00', 'HH24:MI') THEN 'AR02'
-                        WHEN #{attdTime} IS NOT NULL AND TO_DATE(#{attdTime}, 'HH24:MI') &gt; TO_DATE('09:00', 'HH24:MI') THEN 'AR03'
-                        ELSE #{attdStatus}
-                    END,
-                ar.ab_reason    = #{abReason},
-                ar.memo         = #{memo},
-                ar.is_holiday   = #{isHoliday},
-                ar.attd_pay     = #{attdPay},
-                ar.attd_moddate = SYSDATE
-        WHEN NOT MATCHED THEN
-            INSERT (
-                attd_idx, emp_idx, co_idx, attd_date,
-                attd_time, attd_start, attd_end,
-                attd_status, ab_reason, memo,
-                is_holiday, attd_pay, attd_moddate
-            )
-            VALUES (
-                #{attdIdx}, #{empIdx}, #{coIdx}, #{attdDate},
-                #{attdTime}, #{attdStart}, #{attdEnd},
+            INSERT INTO attendance_records (attd_idx, emp_idx, co_idx, attd_date, attd_time, attd_start, attd_status)
+            VALUES (#{attdIdx}, #{empIdx}, #{coIdx}, SYSDATE, #{attdTime}, #{attdStart},
                 CASE
                     WHEN #{attdTime} IS NOT NULL AND TO_DATE(#{attdTime}, 'HH24:MI') &lt;= TO_DATE('09:00', 'HH24:MI') THEN 'AR02'
                     WHEN #{attdTime} IS NOT NULL AND TO_DATE(#{attdTime}, 'HH24:MI') &gt; TO_DATE('09:00', 'HH24:MI') THEN 'AR03'
                     ELSE #{attdStatus}
-                END,
-                #{abReason}, #{memo},
-                #{isHoliday}, #{attdPay}, SYSDATE
-            )
+                END)
     </update>
 
     <update id="update" parameterType="AttendanceRecordDTO">

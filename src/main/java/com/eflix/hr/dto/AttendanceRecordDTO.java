@@ -32,7 +32,7 @@ public class AttendanceRecordDTO {
     private String coIdx;        // co_idx
 
     // Attendance Detail Fields
-    private Date   attdDate;     // attendance_records.attd_date
+    private String attdDate;     // attendance_records.attd_date
     private String hdIdx;        // attendance_records.hd_idx
     private String attdStatus;   // attendance_records.attd_status
     private String attdTime;     // formatted attendance_records.attd_time
