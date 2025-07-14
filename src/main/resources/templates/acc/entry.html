@@ -73,10 +73,10 @@
       <h3 class="mb-0">일반전표</h3>
       <!-- 오른쪽: 버튼 모음 -->
       <div>
-        <button class="btn btn-outline-secondary btn-sm" onclick="다운로드()">엑셀 서식 내려받기</button>
-        <button class="btn btn-outline-secondary btn-sm" onclick="업로드()">엑셀 업로드하기</button>
+        <!-- <button class="btn btn-outline-secondary btn-sm" onclick="다운로드()">엑셀 서식 내려받기</button> -->
+        <!-- <button class="btn btn-outline-secondary btn-sm" onclick="업로드()">엑셀 업로드하기</button> -->
         <button class="btn btn-outline-secondary btn-sm" onclick="deleteSelectedRow()">삭제</button>
-        <button class="btn btn-outline-secondary btn-sm" onclick="인쇄()">인쇄</button>
+        <!-- <button class="btn btn-outline-secondary btn-sm" onclick="인쇄()">인쇄</button> -->
       </div>
     </div>
     <!-- 엑셀 업로드 모달 -->
@@ -101,11 +101,11 @@
       <div class="col-auto">
         <label class="form-label mb-0">일자</label>
         2025 년
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:45px;"> 월
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startDay" style="width:45px;"> 일 ~
+        <input type="number" value="1" min="1" max="12" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:50px;"> 월
+        <input type="number" value="1" min="1" max="31" class="form-control form-control-sm d-inline-block" name="startDay" style="width:50px;"> 일 ~
         2025 년
-        <input type="number" value="12" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:45px;"> 월
-        <input type="number" value="31" class="form-control form-control-sm d-inline-block" name="endDay" style="width:45px;"> 일
+        <input type="number" value="12" min="1" max="12" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:50px;"> 월
+        <input type="number" value="31" min="1" max="31" class="form-control form-control-sm d-inline-block" name="endDay" style="width:50px;"> 일
       </div>
       <div class="col-auto">
         <button type="button" id="diffFilterBtn" class="btn btn btn-outline-secondary btn-sm btn-sm">
@@ -395,7 +395,7 @@
           }
         },
         { headerName: "코드", field: "accountCode", editable: params => !params.data?.isSummary, minWidth: 70, maxWidth: 70, cellClass: 'ag-center-aligned-cell' },
-        { headerName: "계정과목", field: "accountName", editable: () => false, minWidth: 100, maxWidth: 100, cellClass: 'ag-left-aligned-cell' },
+        { headerName: "계정과목", field: "accountName", editable: () => false, minWidth: 100, cellClass: 'ag-left-aligned-cell' },
         { headerName: "코드", field: "partnerCode", editable: params => !params.data?.isSummary, minWidth: 80, maxWidth: 80, cellClass: 'ag-center-aligned-cell' },
         { headerName: "거래처", field: "partnerName", editable: params => !params.data?.isSummary, initialWidth: 250, cellClass: 'ag-left-aligned-cell' },
         {
@@ -424,7 +424,7 @@
             }
           }
         },
-        { headerName: "적요", field: "description", editable: params => !params.data?.isSummary, minWidth: 400 },
+        { headerName: "적요", field: "description", editable: params => !params.data?.isSummary, minWidth: 400, flex: 1 },
       ],
       onRowClicked: (event) => {
         if (event.data?.isSummary) {
@@ -796,10 +796,9 @@
                 params.node.setDataValue('partnerName', '');
                 alert("거래처 조회 중 오류가 발생했습니다.");
               }
-            } catch (e) {
-              console.error(e);
-              params.node.setDataValue('partnerName', '');
-              alert("서버와 통신 중 오류가 발생했습니다.");
+            } catch (event) {
+              params.node.setDataValue('partnerCode', params.oldValue);
+              alert("해당 거래처를 찾을 수 없습니다.");
             }
           } else {
             params.node.setDataValue('partnerName', '');
@@ -829,9 +828,8 @@
                 alert("계정과목 조회 중 오류가 발생했습니다.");
               }
             } catch (e) {
-              console.error(e);
-              params.node.setDataValue('accountName', '');
-              alert("서버와 통신 중 오류가 발생했습니다.");
+              params.node.setDataValue('accountCode', params.oldValue);
+              alert("해당 계정과목을 찾을 수 없습니다.");
             }
           } else {
             params.node.setDataValue('accountName', '');
