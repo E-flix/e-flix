@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.eflix.hr.dto.AttendanceRecordDTO;
-import com.eflix.hr.dto.EmployeeDTO;
 import com.eflix.hr.dto.etc.AttdDetailDTO;
 import com.eflix.hr.dto.etc.AttdMgrListDTO;
 import com.eflix.hr.dto.etc.AttdRecordDTO;
@@ -65,4 +64,8 @@ public interface AttendanceRecordService {
     public List<AttdRemarkDTO> findAttdRemarkListByEmpIdxWithDate(String empIdx, String date);
 
     public List<AttendanceRecordDTO> findAllByEmpIdx(String empIdx);
+
+    // 0714
+    public int insert(AttendanceRecordDTO attendanceRecordDTO);
+    public int update(AttendanceRecordDTO attendanceRecordDTO);
 }

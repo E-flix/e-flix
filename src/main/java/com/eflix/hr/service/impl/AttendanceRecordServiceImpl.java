@@ -127,4 +127,14 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
     public List<AttendanceRecordDTO> findAllByEmpIdx(String empIdx) {
         return attendanceRecordMapper.findAllByEmpIdx(empIdx);
     }
+
+    @Override
+    public int insert(AttendanceRecordDTO attendanceRecordDTO) {
+        return attendanceRecordMapper.insert(attendanceRecordDTO);
+    }
+
+    @Override
+    public int update(AttendanceRecordDTO attendanceRecordDTO) {
+        return attendanceRecordMapper.update(attendanceRecordDTO);
+    }
 }

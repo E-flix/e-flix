@@ -8,6 +8,7 @@ import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
 import com.eflix.common.security.auth.AuthUtil;
+import com.eflix.hr.dto.AttendanceRecordDTO;
 import com.eflix.hr.dto.etc.AttdDetailDTO;
 import com.eflix.hr.dto.etc.AttdSummaryDTO;
 import com.eflix.hr.service.AttendanceRecordService;
@@ -58,6 +59,9 @@ public class AttdEmpRestController {
 
     public String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
+        System.out.println(request.getRemoteAddr());
+
+        System.out.println(ip);
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
@@ -70,11 +74,61 @@ public class AttdEmpRestController {
         return ip;
     }
 
+    private boolean isCompanyIp(String ip) {
+        return ip.startsWith("58.238.119.9") || ip.startsWith("10.");
+    }
+
     @PostMapping("/in")
-    public ResponseEntity<ResResult> postMethodName(@RequestBody String entity) {
+    public ResponseEntity<ResResult> in(HttpServletRequest request) {
         ResResult result = null;
 
+        String empIdx = getEmpIdx();
+        String ip = getClientIp(request);
+        System.out.println(ip);
+        AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
 
+        if(!isCompanyIp(ip)) {
+            result = ResUtil.makeResult(ResStatus.OK, "사내 IP내에서만 출근이 가능합니다.");
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+
+        attendanceRecordDTO.setEmpIdx(empIdx);
+        attendanceRecordDTO.setAttdStatus("AR02");
+
+        int affectRows = attendanceRecordService.insert(attendanceRecordDTO);
+
+        if(affectRows > 0) {
+            result = ResUtil.makeResult(ResStatus.OK, "");
+        } else {
+            result = ResUtil.makeResult("400", "출근 등록 중 오류가 발생했습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/out")
+    public ResponseEntity<ResResult> out(HttpServletRequest request) {
+        ResResult result = null;
+
+        String empIdx = getEmpIdx();
+        String ip = getClientIp(request);
+        AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
+
+        if(!isCompanyIp(ip)) {
+            result = ResUtil.makeResult(ResStatus.OK, "사내 IP내에서만 퇴근이 가능합니다.");
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+
+        attendanceRecordDTO.setEmpIdx(empIdx);
+        attendanceRecordDTO.setAttdStatus("AR03");
+
+        int affectRows = attendanceRecordService.insert(attendanceRecordDTO);
+
+        if(affectRows > 0) {
+            result = ResUtil.makeResult(ResStatus.OK, "");
+        } else {
+            result = ResUtil.makeResult("400", "출근 등록 중 오류가 발생했습니다.", null);
+        }
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
