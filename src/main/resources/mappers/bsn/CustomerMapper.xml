@@ -160,7 +160,60 @@
   </select>
 
 
+<!-- [수정] 전체 거래처 목록 조회 시 할인율(DISCOUNT_RATE) 추가 -->
+<select id="selectAllWithCreditSummary" resultType="java.util.Map">
+  SELECT
+      c.CUSTOMER_CD       AS "customerCd",
+      c.CUSTOMER_NM       AS "customerNm",
+      c.REPRESENTATIVE_NM AS "representativeNm",
+      c.PHONE_NO          AS "phoneNo",
+      c.DISCOUNT_RATE     AS "discountRate",
+      cr.CREDIT_STATUS    AS "creditStatus",
+      cr.TRADE_STOP_FLG   AS "tradeStopFlg",
+      cr.CREDIT_HOLD_FLG  AS "creditHoldFlg"
+  FROM CUSTOMERS c
+  LEFT JOIN CREDIT_MANAGEMENT cr ON c.CUSTOMER_CD = cr.CUSTOMER_CD AND c.CO_IDX = cr.CO_IDX
+  WHERE c.CO_IDX = #{coIdx} AND c.USE_YN = 'Y'
+  ORDER BY c.CUSTOMER_NM
+</select>
 
+<select id="findMaxCustomerSequence" resultType="int">
+  SELECT NVL(MAX(TO_NUMBER(SUBSTR(CUSTOMER_CD, 4))), 0)
+  FROM CUSTOMERS
+  WHERE CUSTOMER_CD LIKE #{prefix} || '%'
+    AND REGEXP_LIKE(SUBSTR(CUSTOMER_CD, 4), '^[0-9]+$')
+</select>
 
+<!-- [수정] 신규 거래처 저장 시 할인율(DISCOUNT_RATE) 추가 -->
+<insert id="insertCustomer" parameterType="com.eflix.bsn.dto.CustomerDTO">
+  INSERT INTO CUSTOMERS (
+      CUSTOMER_CD, CUSTOMER_NM, REPRESENTATIVE_NM, BUSINESS_REG_NO, ADDRESS,
+      PHONE_NO, EMAIL, SALES_EMP_CD, CREDIT_GRADE, USE_YN, 
+      REG_DT, UPD_DT, CO_IDX, DISCOUNT_RATE
+  ) VALUES (
+      #{customerCd}, #{customerNm}, #{representativeNm}, #{businessRegNo}, #{address},
+      #{phoneNo}, #{email}, #{salesEmpCd}, #{creditGrade}, 'Y', 
+      SYSDATE, SYSDATE, #{coIdx}, #{discountRate, jdbcType=NUMERIC}
+  )
+</insert>
+
+<!-- [수정] 거래처 정보 수정 시 할인율(DISCOUNT_RATE) 추가 -->
+<update id="updateCustomer" parameterType="com.eflix.bsn.dto.CustomerDTO">
+  UPDATE CUSTOMERS
+  <set>
+      <if test="customerNm != null and customerNm != ''">CUSTOMER_NM = #{customerNm},</if>
+      <if test="representativeNm != null and representativeNm != ''">REPRESENTATIVE_NM = #{representativeNm},</if>
+      <if test="businessRegNo != null and businessRegNo != ''">BUSINESS_REG_NO = #{businessRegNo},</if>
+      <if test="address != null and address != ''">ADDRESS = #{address},</if>
+      <if test="phoneNo != null and phoneNo != ''">PHONE_NO = #{phoneNo},</if>
+      <if test="email != null and email != ''">EMAIL = #{email},</if>
+      <if test="salesEmpCd != null and salesEmpCd != ''">SALES_EMP_CD = #{salesEmpCd},</if>
+      <if test="creditGrade != null and creditGrade != ''">CREDIT_GRADE = #{creditGrade},</if>
+      <if test="useYn != null and useYn != ''">USE_YN = #{useYn},</if>
+      <if test="discountRate != null">DISCOUNT_RATE = #{discountRate},</if>
+      UPD_DT = SYSDATE
+  </set>
+  WHERE CUSTOMER_CD = #{customerCd} AND CO_IDX = #{coIdx}
+</update>
 
 </mapper>

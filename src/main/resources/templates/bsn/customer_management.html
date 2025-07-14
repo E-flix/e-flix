@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{common/layouts/default}">
+<head>
+    <title>거래처 관리</title>
+    <link rel="stylesheet" th:href="@{/css/management_common.css}" />
+    <style>
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+        .form-section h6 {
+            font-weight: 700;
+            color: #4e73df;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f0f2f5;
+            margin-bottom: 1rem;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #5a5c69;
+        }
+        .status-badge {
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            border-radius: 10rem;
+            color: white;
+        }
+        .status-normal { background-color: #1cc88a; }
+        .status-hold { background-color: #f6c23e; color: #5a5c69; }
+        .status-stop { background-color: #e74a3b; }
+    </style>
+</head>
+<div layout:fragment="content" class="management-container">
+
+    <!-- 페이지 헤더 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-0 text-dark font-weight-bold"><i class="fas fa-users-cog mr-2"></i>거래처 관리</h4>
+            <small class="text-muted">거래처 및 여신 정보 등록, 수정, 조회</small>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary btn-sm" id="btnNew"><i class="fas fa-plus"></i> 신규</button>
+            <button type="button" class="btn btn-success btn-sm" id="btnSave"><i class="fas fa-save"></i> 저장</button>
+            <button type="button" class="btn btn-danger btn-sm" id="btnDelete" disabled><i class="fas fa-trash"></i> 삭제</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 좌측: 거래처 목록 -->
+        <div class="col-lg-5">
+            <div class="section-box">
+                <div class="card-header">
+                    <h6><i class="fas fa-list-ul mr-2"></i>거래처 목록</h6>
+                </div>
+                <div class="card-body">
+                    <div id="customerGrid" class="ag-theme-alpine" style="height: 600px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측: 입력 폼 -->
+        <div class="col-lg-7">
+            <form id="customerForm">
+                <input type="hidden" id="customerCd">
+                
+                <!-- 거래처 기본 정보 -->
+                <div class="section-box form-section">
+                    <div class="card-header"><h6><i class="fas fa-user-tie mr-2"></i>거래처 기본 정보</h6></div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div>
+                                <label for="customerNm">거래처명</label>
+                                <input type="text" id="customerNm" class="form-control form-control-sm" required>
+                            </div>
+                            <div>
+                                <label for="representativeNm">대표자명</label>
+                                <input type="text" id="representativeNm" class="form-control form-control-sm">
+                            </div>
+                            <div>
+                                <label for="businessRegNo">사업자등록번호</label>
+                                <input type="text" id="businessRegNo" class="form-control form-control-sm">
+                            </div>
+                            <div>
+                                <label for="phoneNo">연락처</label>
+                                <input type="text" id="phoneNo" class="form-control form-control-sm">
+                            </div>
+                            <div class="full-width">
+                                <label for="address">주소</label>
+                                <input type="text" id="address" class="form-control form-control-sm">
+                            </div>
+                            <div>
+                                <label for="email">이메일</label>
+                                <input type="email" id="email" class="form-control form-control-sm">
+                            </div>
+                            <div>
+                                <label for="salesEmpCd">영업담당자</label>
+                                <input type="text" id="salesEmpCd" class="form-control form-control-sm">
+                            </div>
+                            <div>
+                                <label for="discountRate">할인율 (%)</label>
+                                <input type="number" id="discountRate" class="form-control form-control-sm" value="0" min="0" max="100" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 거래처 여신 정보 -->
+                <div class="section-box form-section">
+                    <div class="card-header"><h6><i class="fas fa-credit-card mr-2"></i>거래처 여신 정보</h6></div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div>
+                                <label for="creditLimit">여신한도</label>
+                                <input type="number" id="creditLimit" class="form-control form-control-sm" value="0">
+                            </div>
+                            <div>
+                                <label for="paymentTerms">결제조건</label>
+                                <input type="text" id="paymentTerms" class="form-control form-control-sm" value="Net 30">
+                            </div>
+                            <div>
+                                <label for="creditStatus">여신상태</label>
+                                <select id="creditStatus" class="form-select form-select-sm">
+                                    <option value="정상">정상</option>
+                                    <option value="주의">주의</option>
+                                    <option value="위험">위험</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="creditGrade">신용등급</label>
+                                <select id="creditGrade" class="form-select form-select-sm">
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="tradeStopFlg">거래정지 여부</label>
+                                <select id="tradeStopFlg" class="form-select form-select-sm">
+                                    <option value="N">N (아니오)</option>
+                                    <option value="Y">Y (예)</option>
+                                </select>
+                            </div>
+                             <div>
+                                <label for="creditHoldFlg">여신보류 여부</label>
+                                <select id="creditHoldFlg" class="form-select form-select-sm">
+                                    <option value="N">N (아니오)</option>
+                                    <option value="Y">Y (예)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 외부 JS 파일 연결 -->
+    <script th:src="@{/js/customer_management.js}"></script>
+</div>
+</html>

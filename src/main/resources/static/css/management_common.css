@@ -11,17 +11,21 @@
     gap: 1.5rem; /* 섹션 간 간격 */
 }
 
+/* [수정] 헤더에 적용되던 배경, 그림자, 테두리 등 모든 시각적 스타일을 제거합니다. */
 .page-header {
-    background-color: #fff;
+    /* 아래 스타일들을 제거하여 일반 텍스트처럼 보이도록 합니다. */
+    /* background-color: #fff;
     padding: 1rem 1.5rem;
     border-radius: 0.5rem;
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-    border: 1px solid #e3e6f0;
+    border: 1px solid #e3e6f0; 
+    */
 }
 
+/* [수정] 헤더 제목의 색상을 기본 텍스트 색상으로 변경합니다. */
 .page-header h4 {
     font-weight: 700;
-    color: #4e73df;
+    color: #3a3b45; /* 기존 #4e73df (파란색) 에서 어두운 색으로 변경 */
 }
 
 .page-header .btn {
