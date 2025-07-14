@@ -96,4 +96,83 @@
             JOIN employees e ON e.dept_idx = d.dept_idx
         WHERE e.emp_idx = #{empIdx}
     </select>
+
+    <!-- 0714 -->
+    <!-- 전체 부서 목록 + 사원 수 포함 -->
+    <select id="findAllDepartmentWithEmpCountByCoIdx" parameterType="String" resultType="DepartmentDTO">
+        WITH dept_hierarchy AS ( 
+            SELECT d.dept_idx, d.dept_up_idx, d.dept_name
+            FROM departments d
+            START WITH d.dept_up_idx IS NULL
+            CONNECT BY PRIOR d.dept_idx = d.dept_up_idx
+        ),
+        emp_counts AS (
+            SELECT e.dept_idx, COUNT(*) AS emp_count
+            FROM employees e
+            GROUP BY e.dept_idx
+        ),
+        dept_with_emp AS (
+            SELECT dh.dept_idx,
+                dh.dept_up_idx,
+                dh.dept_name,
+                (
+                    SELECT SUM(ec.emp_count)
+                    FROM emp_counts ec
+                        JOIN departments d2 ON ec.dept_idx = d2.dept_idx
+                    WHERE d2.dept_idx IN (
+                        SELECT d3.dept_idx
+                        FROM departments d3
+                        START WITH d3.dept_idx = dh.dept_idx
+                        CONNECT BY PRIOR d3.dept_idx = d3.dept_up_idx
+                    )
+                ) AS total_emp_count
+            FROM dept_hierarchy dh
+        )
+        SELECT 
+            d.dept_idx,
+            d.dept_up_idx,
+            d.dept_name,
+            d.dept_status,
+            d.dept_tel,
+            d.dept_memo,
+            d.co_idx,
+            NVL(dw.total_emp_count, 0) AS empCount
+        FROM departments d
+            LEFT JOIN dept_with_emp dw ON d.dept_idx = dw.dept_idx
+        WHERE d.co_idx = #{coIdx}
+        ORDER BY d.dept_up_idx NULLS FIRST, d.dept_idx
+    </select>
+
+    <!-- 부서 등록 -->
+    <insert id="insert" parameterType="DepartmentDTO">
+        <selectKey resultType="String" keyProperty="deptIdx" order="BEFORE">
+            SELECT 'dept-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(dept_idx, 6))), 100) + 1) FROM departments
+        </selectKey>
+        INSERT INTO departments (
+            dept_idx, dept_up_idx, dept_name, dept_status,
+            dept_memo, dept_tel, co_idx, dept_regdate
+        ) VALUES (
+            #{deptIdx}, #{deptUpIdx}, #{deptName}, #{deptStatus},
+            #{deptMemo}, #{deptTel}, #{coIdx}, SYSDATE
+        )
+    </insert>
+
+    <!-- 부서 수정 -->
+    <update id="update" parameterType="DepartmentDTO">
+        UPDATE departments
+        SET dept_name = #{deptName},
+            dept_up_idx = #{deptUpIdx},
+            dept_status = #{deptStatus},
+            dept_tel = #{deptTel},
+            dept_memo = #{deptMemo},
+            dept_moddate = SYSDATE
+        WHERE dept_idx = #{deptIdx}
+    </update>
+
+    <!-- 부서 삭제 -->
+    <delete id="deleteDepartments" parameterType="java.util.List">
+        <foreach collection="list" item="deptIdx" separator=";">
+            DELETE FROM departments WHERE dept_idx = #{deptIdx}
+        </foreach>
+    </delete>
 </mapper>

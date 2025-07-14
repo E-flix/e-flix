@@ -63,10 +63,8 @@
 
 		<!-- 출근/퇴근 버튼 -->
 		<li class="nav-item dropdown mx-1">
-			<a class="nav-link dropdown-toggle" href="#" id="attendanceDropdown" 
-				role="button" data-bs-toggle="dropdown" aria-expanded="false">
+			<a class="nav-link dropdown-toggle" href="#" id="attendanceDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				<i class="fas fa-clock fa-fw"></i>
-				<!-- <span class="badge bg-primary position-absolute top-50 start-100 translate-middle rounded-pill">근무</span> -->
 			</a>
 			<div class="dropdown-list dropdown-menu dropdown-menu-end shadow" aria-labelledby="attendanceDropdown">
 				<h6 class="dropdown-header">근무 관리</h6>
@@ -97,9 +95,9 @@
 		</li>
 
 		<!-- Nav Item - Alerts -->
-		<li class="nav-item dropdown no-arrow mx-1"><a class="nav-link dropdown-toggle" href="#" id="alertsDropdown"
-				role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i
-					class="fas fa-bell fa-fw"></i> <!-- Counter - Alerts -->
+		<li class="nav-item dropdown no-arrow mx-1">
+			<a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<i class="fas fa-bell fa-fw"></i> <!-- Counter - Alerts -->
 				<span class="badge badge-danger badge-counter">3+</span>
 			</a> <!-- Dropdown - Alerts -->
 			<div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -244,8 +242,6 @@
 				}
 			});
 		});
-
-		$("")
 
 		$("#checkinBtn").on("click", function () {
 			$.ajax({
