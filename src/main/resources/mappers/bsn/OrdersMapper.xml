@@ -48,28 +48,27 @@
   </select>
 
   <select id="selectOrderDetails" resultType="com.eflix.bsn.dto.OrdersDetailDTO" parameterType="OrdersDetailDTO">
-    SELECT
-      od.ORDER_NO        AS orderNo,
-      od.LINE_NO         AS lineNo,
-      od.ITEM_CODE       AS itemCode,
-      od.ITEM_NAME       AS itemName,
-      od.SPEC            AS spec,
-      od.QTY             AS qty,
-      od.UNIT_PRICE      AS unitPrice,
-      od.SUPPLY_AMOUNT   AS supplyAmount,
-      od.TAX_AMOUNT      AS taxAmount,
-      od.TOTAL_AMOUNT    AS totalAmount,
-      od.REMARKS         AS remarks,
-      od.CO_IDX          AS coIdx,
-      od.OUTBOUND_DT     AS outboundDt,
-      od.CATCH_DT        AS catchDt,
-      od.OUT_STATE       AS outState
-    FROM ORDERS_DETAIL od
-    JOIN ORDERS o ON od.ORDER_NO = o.ORDER_NO
-    WHERE od.ORDER_NO = #{orderNo}
-      AND o.CO_IDX = #{coIdx}
-    ORDER BY od.LINE_NO
-  </select>
+  SELECT
+    od.ORDER_NO        AS orderNo,
+    od.LINE_NO         AS lineNo,
+    od.ITEM_CODE       AS itemCode,
+    od.ITEM_NAME       AS itemName,
+    od.SPEC            AS spec,
+    od.QTY             AS qty,
+    od.UNIT_PRICE      AS unitPrice,
+    od.SUPPLY_AMOUNT   AS supplyAmount,
+    od.TAX_AMOUNT      AS taxAmount,
+    od.TOTAL_AMOUNT    AS totalAmount,
+    od.REMARKS         AS remarks,
+    od.CO_IDX          AS coIdx,
+    od.OUTBOUND_DT     AS outboundDt,
+    od.CATCH_DT        AS catchDt,
+    od.OUT_STATE       AS outState
+  FROM ORDERS_DETAIL od
+  WHERE od.ORDER_NO = #{orderNo}
+    AND od.CO_IDX = #{coIdx}
+  ORDER BY od.LINE_NO
+</select>
 
   <select id="selectNextOrderNo" resultType="string" parameterType = "String">
     SELECT FN_NEXT_ORDER_NO FROM DUAL

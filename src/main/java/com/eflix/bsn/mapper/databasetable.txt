@@ -1,171 +1,66 @@
-/* ─── CREDIT_MANAGEMENT (여신 관리) ───────────────── */
-CREATE TABLE EFLIX.CREDIT_MANAGEMENT (
-    CUSTOMER_CD          VARCHAR2(20)   NOT NULL,                      -- PK · FK
-    CREDIT_LIMIT         NUMBER(15,2)   NOT NULL,                      -- 한도
-    CREDIT_USED          NUMBER(15,2)   DEFAULT 0        NOT NULL,     -- 사용액
-    PAYMENT_TERMS        VARCHAR2(30)   DEFAULT 'Net 30' NOT NULL,     -- 결제조건
-    OVERDUE_AMOUNT       NUMBER(15,2)   DEFAULT 0        NOT NULL,     -- 연체금액
-    CREDIT_STATUS        VARCHAR2(20)   DEFAULT 'NORMAL' NOT NULL,     -- 상태
-    CREDIT_HOLD_FLG      CHAR(1)        DEFAULT 'N'      NOT NULL,     -- 보류(Y/N)
-    CREDIT_HOLD_REASON   VARCHAR2(200),
-    CREDIT_HOLD_UNTIL    DATE,
-    CREDIT_RATING        VARCHAR2(10),
-    GUARANTEE_AMOUNT     NUMBER(15,2)   DEFAULT 0        NOT NULL,     -- 담보
-    LOCK_ORDER_THRESHOLD NUMBER(15,2)   DEFAULT 0        NOT NULL,     -- 차단기준
-    EFFECTIVE_FROM       DATE           NOT NULL,
-    EFFECTIVE_TO         DATE           NOT NULL,
-    GRACE_PERIOD         NUMBER         DEFAULT 0        NOT NULL,     -- 연체허용일
-    LAST_SETTLE_DT       DATE,
-    CREATED_AT           TIMESTAMP(6)   DEFAULT SYSTIMESTAMP NOT NULL,
-    UPDATED_AT           TIMESTAMP(6)   DEFAULT SYSTIMESTAMP NOT NULL,
-    CO_IDX               VARCHAR2(30),
-    TRADE_STOP_FLG       CHAR(1)        DEFAULT 'N'      NOT NULL,     -- 거래정지 Y/N
-    TRADE_STOP_REASON    VARCHAR2(200),
-    TRADE_STOP_DT        DATE,
-    TRADE_RESUME_DT      DATE,
-
-    CONSTRAINT PK_CREDIT_MANAGEMENT
-        PRIMARY KEY (CUSTOMER_CD),
-
-    CONSTRAINT FK_CUST_TO_CREDIT_MAN
-        FOREIGN KEY (CUSTOMER_CD)
-        REFERENCES EFLIX.CUSTOMERS (CUSTOMER_CD),
-
-    CONSTRAINT CHK_TRADE_STOP_FLG
-        CHECK (TRADE_STOP_FLG IN ('Y', 'N'))
-);
-
-/* ─── 컬럼 주석 유지 ───────────────────────────── */
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CUSTOMER_CD          IS '거래처 코드';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_LIMIT         IS '신용 한도 금액';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_USED          IS '사용된 신용 금액';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.PAYMENT_TERMS        IS '결제 조건 (예: Net 30)';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.OVERDUE_AMOUNT       IS '연체 금액';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_STATUS        IS '여신 상태 (NORMAL, HOLD, OVERDUE 등)';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_HOLD_FLG      IS '여신 보류 여부 (Y/N)';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_HOLD_REASON   IS '여신 보류 사유';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_HOLD_UNTIL    IS '여신 보류 해제 예정일';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_RATING        IS '여신 등급 (예: A, B, C)';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.GUARANTEE_AMOUNT     IS '담보 또는 보증금 금액';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.LOCK_ORDER_THRESHOLD IS '한도 초과 시 자동 차단 기준 금액';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.EFFECTIVE_FROM       IS '적용 시작일';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.EFFECTIVE_TO         IS '적용 종료일';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.GRACE_PERIOD         IS '최대 연체 허용 일수';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.LAST_SETTLE_DT       IS '최종 결제 완료 일자';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREATED_AT           IS '레코드 생성 일시';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.UPDATED_AT           IS '레코드 수정 일시';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.TRADE_STOP_FLG       IS '거래정지 여부 (Y/N)';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.TRADE_STOP_REASON    IS '거래정지 사유';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.TRADE_STOP_DT        IS '거래정지 시작일';
-COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.TRADE_RESUME_DT      IS '거래재개 예정일';
-
-/* ───────────────── CUSTOMERS ───────────────── */
-CREATE TABLE EFLIX.CUSTOMERS (
-    CUSTOMER_CD       VARCHAR2(20 BYTE)  NOT NULL,      -- PK
-    CUSTOMER_NM       VARCHAR2(100 BYTE) NOT NULL,
-    REPRESENTATIVE_NM VARCHAR2(50 BYTE)  NOT NULL,
-    BUSINESS_REG_NO   VARCHAR2(20 BYTE)  NOT NULL,
-    ADDRESS           VARCHAR2(200 BYTE) NOT NULL,
-    PHONE_NO          VARCHAR2(20 BYTE)  NOT NULL,
-    EMAIL             VARCHAR2(100 BYTE) NOT NULL,
-    SALES_EMP_CD      VARCHAR2(20 BYTE)  NOT NULL,
-    CREDIT_GRADE      VARCHAR2(10 BYTE)  NOT NULL,
-    USE_YN            CHAR(1 BYTE)       NOT NULL,
-    REG_DT            DATE               NOT NULL,
-    UPD_DT            DATE               NOT NULL,
-    DISCOUNT_RATE     NUMBER(5,2) DEFAULT 0 NOT NULL,
-    CO_IDX            VARCHAR2(30 BYTE),
-
-    CONSTRAINT PK_CUSTOMERS
-        PRIMARY KEY (CUSTOMER_CD)
-);
-
-
-/* ───────────────── ORDERS ───────────────────── */
+/*───────────────────────────────────
+  주문서(ORDERS) 테이블 및 인덱스
+───────────────────────────────────*/
 CREATE TABLE EFLIX.ORDERS (
-    ORDER_NO        VARCHAR2(50 BYTE)   NOT NULL,      -- PK
-    ORDER_DT        DATE                NOT NULL,
-    PAYMENT_TERMS   VARCHAR2(100 BYTE)  NOT NULL,
-    CUSTOMER_CD     VARCHAR2(100 BYTE)  NOT NULL,      -- FK → CUSTOMERS
-    CO_IDX          VARCHAR2(30 BYTE),
-    ORDER_WRITER    VARCHAR2(50 BYTE),
-    REMARKS         VARCHAR2(100 BYTE),
+    ORDER_NO        VARCHAR2(50 BYTE)   NOT NULL,        -- 주문서 번호
+    ORDER_DT        DATE                NOT NULL,        -- 주문서 작성일자
+    PAYMENT_TERMS   VARCHAR2(100 BYTE)  NOT NULL,        -- 결제조건
+    CUSTOMER_CD     VARCHAR2(100 BYTE)  NOT NULL,        -- 거래처 코드
+    CO_IDX          VARCHAR2(30 BYTE),                   -- 회사 식별자
+    ORDER_WRITER    VARCHAR2(50 BYTE),                   -- 작성자
+    REMARKS         VARCHAR2(100 BYTE),                  -- 비고
 
     CONSTRAINT PK_ORDERS
-        PRIMARY KEY (ORDER_NO),
-
-    CONSTRAINT FK_ORDERS_CUSTOMER
-        FOREIGN KEY (CUSTOMER_CD)
-        REFERENCES EFLIX.CUSTOMERS (CUSTOMER_CD)
+        PRIMARY KEY (ORDER_NO) USING INDEX                -- PK 인덱스
 );
 
-/* ─── BSN_ITEM (영업 품목 마스터) ───────────────── */
-CREATE TABLE EFLIX.BSN_ITEM (
-    ITEM_CODE   VARCHAR2(50)   NOT NULL,                -- PK
-    ITEM_NAME   VARCHAR2(100)  NOT NULL,                -- 품목명
-    SPEC        VARCHAR2(100),                          -- 규격
-    UNIT        VARCHAR2(50),                           -- 단위
-    SALE_PRICE  NUMBER(15,2)   NOT NULL,                -- 판매단가
-    TAX_RATE    NUMBER(5,2)    DEFAULT 0,               -- 부가세율(%)
-    REMARK      VARCHAR2(200),                          -- 비고
-    CREATED_AT  TIMESTAMP(6)   DEFAULT SYSTIMESTAMP NOT NULL,
-    UPDATED_AT  TIMESTAMP(6)   DEFAULT SYSTIMESTAMP NOT NULL,
-    CO_IDX      VARCHAR2(30),                           -- 회사 식별자(FK 필요 시 추가)
+/* 보조(일반) 인덱스 ─ 필요한 경우만 유지 */
+CREATE INDEX IDX_ORDERS_CUSTOMER_CD ON EFLIX.ORDERS (CUSTOMER_CD);
+CREATE INDEX IDX_ORDERS_ORDER_DT    ON EFLIX.ORDERS (ORDER_DT);
 
-    CONSTRAINT PK_BSN_ITEM
-        PRIMARY KEY (ITEM_CODE)
-);
+/* 컬럼 주석 */
+COMMENT ON COLUMN EFLIX.ORDERS.ORDER_NO      IS '주문서 번호';
+COMMENT ON COLUMN EFLIX.ORDERS.ORDER_DT      IS '주문서 작성일자';
+COMMENT ON COLUMN EFLIX.ORDERS.PAYMENT_TERMS IS '결제조건';
+COMMENT ON COLUMN EFLIX.ORDERS.CUSTOMER_CD   IS '거래처 코드';
+COMMENT ON COLUMN EFLIX.ORDERS.ORDER_WRITER  IS '작성자';
+COMMENT ON COLUMN EFLIX.ORDERS.REMARKS       IS '비고';
 
-/* ─── 컬럼·테이블 주석 ───────────────────────────── */
-COMMENT ON COLUMN EFLIX.BSN_ITEM.ITEM_CODE   IS '품목 코드 (PK)';
-COMMENT ON COLUMN EFLIX.BSN_ITEM.ITEM_NAME   IS '품목 명';
-COMMENT ON COLUMN EFLIX.BSN_ITEM.SPEC        IS '규격';
-COMMENT ON COLUMN EFLIX.BSN_ITEM.UNIT        IS '단위';
-COMMENT ON COLUMN EFLIX.BSN_ITEM.SALE_PRICE  IS '판매 단가';
-COMMENT ON COLUMN EFLIX.BSN_ITEM.TAX_RATE    IS '부가세율(%)';
-COMMENT ON COLUMN EFLIX.BSN_ITEM.REMARK      IS '비고';
-COMMENT ON COLUMN EFLIX.BSN_ITEM.CREATED_AT  IS '등록일시';
-COMMENT ON COLUMN EFLIX.BSN_ITEM.UPDATED_AT  IS '수정일시';
-COMMENT ON TABLE  EFLIX.BSN_ITEM             IS '영업파트 품목 정보 테이블';
 
-/* ─── UPDATED_AT 자동 갱신 트리거 ──────────────── */
-CREATE OR REPLACE TRIGGER EFLIX.TRG_BSN_ITEM_UPD
-BEFORE UPDATE ON EFLIX.BSN_ITEM
-FOR EACH ROW
-BEGIN
-    :NEW.UPDATED_AT := SYSTIMESTAMP;
-END;
-/
-
-ALTER TRIGGER EFLIX.TRG_BSN_ITEM_UPD ENABLE;
-
-/* ─── ORDERS_DETAIL (주문 상세) ────────────────── */
+/*───────────────────────────────────
+  주문서 상세(ORDERS_DETAIL) 테이블
+───────────────────────────────────*/
 CREATE TABLE EFLIX.ORDERS_DETAIL (
-    ORDER_NO      VARCHAR2(30)   NOT NULL,   -- PK · FK → ORDERS
-    LINE_NO       NUMBER         NOT NULL,   -- PK
-    ITEM_CODE     VARCHAR2(50)   NOT NULL,   -- 품목코드
-    ITEM_NAME     VARCHAR2(50)   NOT NULL,   -- 품목명
-    SPEC          VARCHAR2(100),             -- 규격
-    QTY           NUMBER(10,2)   NOT NULL,   -- 수량
-    UNIT_PRICE    NUMBER(15,2)   NOT NULL,   -- 단가
-    SUPPLY_AMOUNT NUMBER(15,2),              -- 공급가액
-    TAX_AMOUNT    NUMBER(15,2),              -- 부가세
-    TOTAL_AMOUNT  NUMBER(15,2),              -- 합계금액
-    REMARKS       VARCHAR2(200),             -- 비고
-    CO_IDX        VARCHAR2(30),              -- 회사 식별자(FK 필요 시)
-    OUTBOUND_DT   DATE          NOT NULL,    -- 출고일
-    CATCH_DT      DATE          NOT NULL,    -- 납기일
-    OUT_STATE     VARCHAR2(20),              -- 출고상태
+    ORDER_NO        VARCHAR2(30 BYTE)   NOT NULL,          -- 주문서 번호
+    LINE_NO         NUMBER              NOT NULL,          -- 순번
+    ITEM_CODE       VARCHAR2(50 BYTE)   NOT NULL,          -- 품목코드
+    ITEM_NAME       VARCHAR2(50 BYTE)   NOT NULL,          -- 품목명
+    SPEC            VARCHAR2(100 BYTE),                    -- 규격
+    QTY             NUMBER(10,2)        NOT NULL,          -- 수량
+    UNIT_PRICE      NUMBER(15,2)        NOT NULL,          -- 단가
+    SUPPLY_AMOUNT   NUMBER(15,2),                           -- 공급가액
+    TAX_AMOUNT      NUMBER(15,2),                           -- 부가세
+    TOTAL_AMOUNT    NUMBER(15,2),                           -- 합계금액
+    REMARKS         VARCHAR2(200 BYTE),                    -- 비고
+    CO_IDX          VARCHAR2(30 BYTE),                     -- 회사 식별자
+    OUTBOUND_DT     DATE               NOT NULL,           -- 출고일
+    CATCH_DT        DATE               NOT NULL,           -- 납기일
+    OUT_STATE       VARCHAR2(20 BYTE),                     -- 출고상태
 
+    /*── 제약 조건 ──*/
     CONSTRAINT PK_ORDERS_DETAIL
-        PRIMARY KEY (ORDER_NO, LINE_NO),
+        PRIMARY KEY (ORDER_NO, LINE_NO) USING INDEX,
 
     CONSTRAINT FK_ORDERS_TO_ORDERS_DETAIL
         FOREIGN KEY (ORDER_NO)
         REFERENCES EFLIX.ORDERS (ORDER_NO)
 );
 
-/* ─── 컬럼 주석 ──────────────────────────────── */
+/* 보조 인덱스 ─ 조회 패턴에 따라 조정 */
+CREATE INDEX IDX_ORDERS_DETAIL_ITEM_CODE ON EFLIX.ORDERS_DETAIL (ITEM_CODE);
+CREATE INDEX IDX_ORDERS_DETAIL_OUTBOUND_DT ON EFLIX.ORDERS_DETAIL (OUTBOUND_DT);
+
+/* 컬럼 주석 */
 COMMENT ON COLUMN EFLIX.ORDERS_DETAIL.ORDER_NO      IS '주문서 번호';
 COMMENT ON COLUMN EFLIX.ORDERS_DETAIL.LINE_NO       IS '순번';
 COMMENT ON COLUMN EFLIX.ORDERS_DETAIL.ITEM_CODE     IS '품목코드';
@@ -182,67 +77,291 @@ COMMENT ON COLUMN EFLIX.ORDERS_DETAIL.CATCH_DT      IS '납기일';
 COMMENT ON COLUMN EFLIX.ORDERS_DETAIL.OUT_STATE     IS '출고상태';
 
 
-/* ─── SALES_OUTBOUND (매출 출고 헤더) ─────────────── */
-CREATE TABLE EFLIX.SALES_OUTBOUND (
-    OUTBOUND_NO  VARCHAR2(30)  NOT NULL,   -- PK (출고 번호)
-    WRITE_DT     VARCHAR2(30)  NOT NULL,   -- 작성일(문자열)
-    CUSTOMER_CD  VARCHAR2(20)  NOT NULL,   -- 거래처 코드 FK
-    CUSTOMER_NAME VARCHAR2(100),           -- ★ 추가: 거래처명 (조인 최적화)
-    REPRESENTATIVE_NM VARCHAR2(50),        -- ★ 추가: 대표명
-    ORDER_DT     DATE          NOT NULL,   -- 주문일
-    OUTBOUND_DT  DATE          NOT NULL,   -- 실제 출고일
-    MONEY        VARCHAR2(4)   DEFAULT 'KRW' NOT NULL,   -- 통화
-    REMARKS      VARCHAR2(200),            -- ★ 확장: 비고 길이 증가
-    CO_IDX       VARCHAR2(30),             -- 회사 식별자
-    CREATED_AT   TIMESTAMP(6)  DEFAULT SYSTIMESTAMP NOT NULL,  -- ★ 추가: 생성일시
-    UPDATED_AT   TIMESTAMP(6)  DEFAULT SYSTIMESTAMP NOT NULL,  -- ★ 추가: 수정일시
+/*───────────────────────────────────────────────
+  영업 품목(BSN_ITEM) 테이블
+───────────────────────────────────────────────*/
+CREATE TABLE EFLIX.BSN_ITEM (
+    ITEM_CODE    VARCHAR2(50 BYTE)   NOT NULL,               -- 품목 코드
+    ITEM_NAME    VARCHAR2(100 BYTE)  NOT NULL,               -- 품목 명
+    SPEC         VARCHAR2(100 BYTE),                         -- 규격
+    UNIT         VARCHAR2(50 BYTE),                          -- 단위
+    SALE_PRICE   NUMBER(15,2)        NOT NULL,               -- 판매 단가
+    TAX_RATE     NUMBER(5,2)         DEFAULT 0,              -- 부가세율(%)
+    REMARK       VARCHAR2(200 BYTE),                         -- 비고
+    CREATED_AT   TIMESTAMP(6)        DEFAULT SYSTIMESTAMP    NOT NULL, -- 등록일시
+    UPDATED_AT   TIMESTAMP(6)        DEFAULT SYSTIMESTAMP    NOT NULL, -- 수정일시
+    CO_IDX       VARCHAR2(30 BYTE),                          -- 회사 식별자
 
-    CONSTRAINT PK_SALES_OUTBOUND
-        PRIMARY KEY (OUTBOUND_NO),
+    CONSTRAINT PK_BSN_ITEM
+        PRIMARY KEY (ITEM_CODE) USING INDEX                  -- PK 인덱스
+);
 
-    CONSTRAINT FK_SO_CUSTOMER
+/* 보조 인덱스 ─ 필요 시 추가‧삭제 */
+CREATE INDEX IDX_BSN_ITEM_NAME ON EFLIX.BSN_ITEM (ITEM_NAME);
+
+/* 컬럼 주석 & 테이블 주석 */
+COMMENT ON COLUMN EFLIX.BSN_ITEM.ITEM_CODE   IS '품목 코드 (PK)';
+COMMENT ON COLUMN EFLIX.BSN_ITEM.ITEM_NAME   IS '품목 명';
+COMMENT ON COLUMN EFLIX.BSN_ITEM.SPEC        IS '규격';
+COMMENT ON COLUMN EFLIX.BSN_ITEM.UNIT        IS '단위';
+COMMENT ON COLUMN EFLIX.BSN_ITEM.SALE_PRICE  IS '판매 단가';
+COMMENT ON COLUMN EFLIX.BSN_ITEM.TAX_RATE    IS '부가세율(%)';
+COMMENT ON COLUMN EFLIX.BSN_ITEM.REMARK      IS '비고';
+COMMENT ON COLUMN EFLIX.BSN_ITEM.CREATED_AT  IS '등록일시';
+COMMENT ON COLUMN EFLIX.BSN_ITEM.UPDATED_AT  IS '수정일시';
+COMMENT ON TABLE  EFLIX.BSN_ITEM             IS '영업파트 품목 정보 테이블';
+
+/* 수정일시 자동 갱신 트리거 */
+CREATE OR REPLACE TRIGGER EFLIX.TRG_BSN_ITEM_UPD
+BEFORE UPDATE ON EFLIX.BSN_ITEM
+FOR EACH ROW
+BEGIN
+    :NEW.UPDATED_AT := SYSTIMESTAMP;
+END;
+/
+
+ALTER TRIGGER EFLIX.TRG_BSN_ITEM_UPD ENABLE;
+
+
+/*───────────────────────────────────
+  여신 관리(CREDIT_MANAGEMENT) 테이블
+───────────────────────────────────*/
+CREATE TABLE EFLIX.CREDIT_MANAGEMENT (
+    CUSTOMER_CD          VARCHAR2(20 BYTE)  PRIMARY KEY,                    -- 거래처 코드(PK)
+    CREDIT_LIMIT         NUMBER(15,2)       NOT NULL,                       -- 신용 한도
+    CREDIT_USED          NUMBER(15,2)       DEFAULT 0        NOT NULL,      -- 사용 신용
+    PAYMENT_TERMS        VARCHAR2(30 BYTE)  DEFAULT 'Net 30' NOT NULL,      -- 결제 조건
+    OVERDUE_AMOUNT       NUMBER(15,2)       DEFAULT 0        NOT NULL,      -- 연체 금액
+    CREDIT_STATUS        VARCHAR2(20 BYTE)  DEFAULT 'NORMAL' NOT NULL,      -- 여신 상태
+    CREDIT_HOLD_FLG      CHAR(1 BYTE)       DEFAULT 'N'      NOT NULL,      -- 여신 보류(Y/N)
+    CREDIT_HOLD_REASON   VARCHAR2(200 BYTE),                                -- 보류 사유
+    CREDIT_HOLD_UNTIL    DATE,                                              -- 보류 해제 예정일
+    CREDIT_RATING        VARCHAR2(10 BYTE),                                 -- 여신 등급
+    GUARANTEE_AMOUNT     NUMBER(15,2)       DEFAULT 0        NOT NULL,      -- 담보/보증금
+    LOCK_ORDER_THRESHOLD NUMBER(15,2)       DEFAULT 0        NOT NULL,      -- 자동 차단 기준
+    EFFECTIVE_FROM       DATE               NOT NULL,                       -- 적용 시작일
+    EFFECTIVE_TO         DATE               NOT NULL,                       -- 적용 종료일
+    GRACE_PERIOD         NUMBER             DEFAULT 0        NOT NULL,      -- 최대 연체 허용 일수
+    LAST_SETTLE_DT       DATE,                                              -- 최종 결제 일자
+    CREATED_AT           TIMESTAMP(6)       DEFAULT SYSTIMESTAMP NOT NULL,  -- 생성 일시
+    UPDATED_AT           TIMESTAMP(6)       DEFAULT SYSTIMESTAMP NOT NULL,  -- 수정 일시
+    CO_IDX               VARCHAR2(30 BYTE),                                 -- 회사 식별자
+    TRADE_STOP_FLG       CHAR(1 BYTE)       DEFAULT 'N'      NOT NULL,      -- 거래정지(Y/N)
+    TRADE_STOP_REASON    VARCHAR2(200 BYTE),                                -- 정지 사유
+    TRADE_STOP_DT        DATE,                                              -- 정지 시작일
+    TRADE_RESUME_DT      DATE,                                              -- 재개 예정일
+
+    /*── 추가 제약 ──*/
+    CONSTRAINT CHK_TRADE_STOP_FLG
+        CHECK (TRADE_STOP_FLG IN ('Y','N')),
+
+    CONSTRAINT FK_CUST_TO_CREDIT_MAN
         FOREIGN KEY (CUSTOMER_CD)
         REFERENCES EFLIX.CUSTOMERS (CUSTOMER_CD)
 );
 
-/* ─── SOUTBOUND_DETAIL (매출 출고 상세) ───────────── */
-CREATE TABLE EFLIX.SOUTBOUND_DETAIL (
-    OUTBOUND_NO  VARCHAR2(30)  NOT NULL,   -- FK → SALES_OUTBOUND.OUTBOUND_NO
-    LINE_NO      NUMBER        NOT NULL,   -- ★ 추가: 라인 번호 (순번)
-    ITEM_CODE    VARCHAR2(50),             -- ★ 추가: 품목 코드
-    ITEM_NAME    VARCHAR2(100) NOT NULL,   -- 품목명
-    STANDARD     VARCHAR2(100),            -- ★ 확장: 규격 (SPEC → STANDARD)
-    QTY          NUMBER(10,2)  NOT NULL,   -- ★ 수정: 소수점 지원
-    UNIT         VARCHAR2(20),             -- ★ 확장: 단위
-    UNIT_PRICE   NUMBER(15,2),             -- ★ 추가: 단가
-    SUPPLY_AMOUNT NUMBER(15,2),            -- ★ 추가: 공급가액
-    TAX_AMOUNT   NUMBER(15,2),             -- ★ 추가: 부가세
-    TOTAL_AMOUNT NUMBER(15,2),             -- ★ 추가: 합계금액
-    REMARKS      VARCHAR2(200),            -- 비고
-    CO_IDX       VARCHAR2(30),             -- 회사 식별자
+-- 보조 인덱스(예시): 거래처별 + 거래정지 여부
+CREATE INDEX IDX_CREDIT_TRADE_STOP
+    ON EFLIX.CREDIT_MANAGEMENT (CUSTOMER_CD, TRADE_STOP_FLG);
 
-    CONSTRAINT PK_SOUTBOUND_DETAIL
-        PRIMARY KEY (OUTBOUND_NO, LINE_NO),  -- ★ 수정: 복합키로 변경
+-- 주요 컬럼 주석
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CUSTOMER_CD        IS '거래처 코드';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_LIMIT       IS '신용 한도 금액';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_USED        IS '사용된 신용 금액';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.PAYMENT_TERMS      IS '결제 조건 (예: Net 30)';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.OVERDUE_AMOUNT     IS '연체 금액';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_STATUS      IS '여신 상태';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_HOLD_FLG    IS '여신 보류 여부 (Y/N)';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_HOLD_REASON IS '여신 보류 사유';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_HOLD_UNTIL  IS '여신 보류 해제 예정일';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREDIT_RATING      IS '여신 등급';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.GUARANTEE_AMOUNT   IS '담보/보증금';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.LOCK_ORDER_THRESHOLD IS '한도 초과 시 차단 기준';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.EFFECTIVE_FROM     IS '적용 시작일';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.EFFECTIVE_TO       IS '적용 종료일';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.GRACE_PERIOD       IS '최대 연체 허용 일수';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.LAST_SETTLE_DT     IS '최종 결제 완료 일자';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.CREATED_AT         IS '레코드 생성 일시';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.UPDATED_AT         IS '레코드 수정 일시';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.TRADE_STOP_FLG     IS '거래정지 여부 (Y/N)';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.TRADE_STOP_REASON  IS '거래정지 사유';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.TRADE_STOP_DT      IS '거래정지 시작일';
+COMMENT ON COLUMN EFLIX.CREDIT_MANAGEMENT.TRADE_RESUME_DT    IS '거래재개 예정일';
 
-    CONSTRAINT FK_SALES_OUT_TO_SOUT_DET
-        FOREIGN KEY (OUTBOUND_NO)
-        REFERENCES EFLIX.SALES_OUTBOUND (OUTBOUND_NO)
-        ON DELETE CASCADE  -- ★ 추가: 헤더 삭제 시 디테일 자동 삭제
+
+/*───────────────────────────────────
+  거래처(CUSTOMERS) 테이블
+───────────────────────────────────*/
+CREATE TABLE EFLIX.CUSTOMERS (
+    CUSTOMER_CD        VARCHAR2(20 BYTE)  PRIMARY KEY,                 -- 거래처 코드(PK)
+    CUSTOMER_NM        VARCHAR2(100 BYTE) NOT NULL,                    -- 거래처명
+    REPRESENTATIVE_NM  VARCHAR2(50 BYTE)  NOT NULL,                    -- 대표명
+    BUSINESS_REG_NO    VARCHAR2(20 BYTE)  NOT NULL,                    -- 사업자등록번호
+    ADDRESS            VARCHAR2(200 BYTE) NOT NULL,                    -- 주소
+    PHONE_NO           VARCHAR2(20 BYTE)  NOT NULL,                    -- 연락처
+    EMAIL              VARCHAR2(100 BYTE) NOT NULL,                    -- 이메일
+    SALES_EMP_CD       VARCHAR2(20 BYTE)  NOT NULL,                    -- 영업담당자 코드
+    CREDIT_GRADE       VARCHAR2(10 BYTE)  NOT NULL,                    -- 신용등급
+    USE_YN             CHAR(1 BYTE)       NOT NULL,                    -- 사용 여부(Y/N)
+    REG_DT             DATE               NOT NULL,                    -- 등록일
+    UPD_DT             DATE               NOT NULL,                    -- 수정일
+    DISCOUNT_RATE      NUMBER(5,2)        DEFAULT 0 NOT NULL,          -- 할인율
+    CO_IDX             VARCHAR2(30 BYTE)                                  -- 회사 식별자
 );
 
-/* ─── 인덱스 생성 (성능 최적화) ─────────────────── */
-CREATE INDEX IDX_SALES_OUTBOUND_CO_DT 
-ON EFLIX.SALES_OUTBOUND (CO_IDX, OUTBOUND_DT);
+/* 실무에서 많이 조회될 수 있는 컬럼에 보조 인덱스(예시) */
+CREATE INDEX IDX_CUSTOMERS_BUSI_REG_NO ON EFLIX.CUSTOMERS (BUSINESS_REG_NO);
+CREATE INDEX IDX_CUSTOMERS_PHONE_NO    ON EFLIX.CUSTOMERS (PHONE_NO);
 
-CREATE INDEX IDX_SOUTBOUND_DETAIL_ITEM 
-ON EFLIX.SOUTBOUND_DETAIL (ITEM_CODE);
+/* 컬럼 주석 */
+COMMENT ON COLUMN EFLIX.CUSTOMERS.CUSTOMER_CD        IS '거래처코드';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.CUSTOMER_NM        IS '거래처명';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.REPRESENTATIVE_NM  IS '대표명';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.BUSINESS_REG_NO    IS '사업자등록번호';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.ADDRESS            IS '주소';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.PHONE_NO           IS '연락처';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.EMAIL              IS '이메일';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.SALES_EMP_CD       IS '영업담당자';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.CREDIT_GRADE       IS '신용등급';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.USE_YN             IS '거래여부';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.REG_DT             IS '거래처 등록일';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.UPD_DT             IS '마지막 수정일';
+COMMENT ON COLUMN EFLIX.CUSTOMERS.DISCOUNT_RATE      IS '할인율';
 
-/* ─── 컬럼 주석 추가 ─────────────────────────────── */
-COMMENT ON COLUMN EFLIX.SALES_OUTBOUND.OUTBOUND_NO    IS '출고 번호 (PK)';
-COMMENT ON COLUMN EFLIX.SALES_OUTBOUND.CUSTOMER_NAME  IS '거래처명 (조인 최적화용)';
-COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.LINE_NO      IS '라인 번호 (복수 품목 지원)';
-COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.ITEM_CODE    IS '품목 코드 (BSN_ITEM FK)';
-COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.UNIT_PRICE   IS '단가';
-COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.SUPPLY_AMOUNT IS '공급가액';
-COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.TAX_AMOUNT   IS '부가세';
-COMMENT ON COLUMN EFLIX.SOUTBOUND_DETAIL.TOTAL_AMOUNT IS '합계금액';
+
+/*───────────────────────────────────
+  견적서(QUOTATION) 테이블
+───────────────────────────────────*/
+CREATE TABLE EFLIX.QUOTATION (
+    QUOTATION_NO          VARCHAR2(30 BYTE)  PRIMARY KEY,              -- 견적서 번호(PK)
+    CUSTOMER_CD           VARCHAR2(50 BYTE)  NOT NULL,                 -- 거래처 코드
+    CUSTOMER_NAME         VARCHAR2(50 BYTE)  NOT NULL,                 -- 거래처명
+    QUOTATION_DT          DATE               NOT NULL,                 -- 견적일
+    VALID_PERIOD          DATE               NOT NULL,                 -- 유효기간
+    PHONE                 VARCHAR2(50 BYTE)  NOT NULL,                 -- 연락처
+    EXPECTED_DELIVERY_DT  DATE               NOT NULL,                 -- 예상 납기일
+    ATTACHMENT_PATH       VARCHAR2(200 BYTE),                          -- 첨부파일 경로
+    REPRESENTATIVE_NM     VARCHAR2(50 BYTE),                           -- 대표자명
+    SENDER                VARCHAR2(50 BYTE),                           -- 발신자
+    DISCOUNT_RATE         NUMBER(3,0)       DEFAULT 0      NOT NULL,   -- 할인율
+    CO_IDX                VARCHAR2(30 BYTE),                           -- 회사 식별자
+    STATUS                VARCHAR2(20 BYTE) DEFAULT 'ACTIVE' NOT NULL, -- 상태
+    ARCHIVED_AT           TIMESTAMP(6),                                -- 보관 일시
+
+    /*── 상태 값 체크 ──*/
+    CONSTRAINT CHK_QUOTATION_STATUS
+        CHECK (STATUS IN ('ACTIVE','ARCHIVED','DELETED'))
+);
+
+/* 보조 인덱스 ─ 조회/필터에 자주 사용되는 컬럼 중심 */
+CREATE INDEX IDX_QUOTATION_ARCHIVED_AT  ON EFLIX.QUOTATION (ARCHIVED_AT);
+CREATE INDEX IDX_QUOTATION_STATUS       ON EFLIX.QUOTATION (STATUS);
+CREATE INDEX IDX_QUOTATION_VALID_PERIOD ON EFLIX.QUOTATION (VALID_PERIOD);
+
+/* 필요하다면 CUSTOMER_CD 등 다른 컬럼에도 인덱스를 추가하세요 */
+
+
+/*───────────────────────────────────
+  견적서 상세(QUOTATION_DETAIL) 테이블
+───────────────────────────────────*/
+CREATE TABLE EFLIX.QUOTATION_DETAIL (
+    QUOTATION_NO   VARCHAR2(30 BYTE)  NOT NULL,                     -- 견적서 번호
+    LINE_NO        NUMBER             NOT NULL,                     -- 순번
+    ITEM_CODE      VARCHAR2(50 BYTE),                               -- 품목 코드
+    ITEM_NAME      VARCHAR2(50 BYTE)  NOT NULL,                     -- 품목명
+    SPEC           VARCHAR2(100 BYTE),                              -- 규격
+    QTY            NUMBER(15,2)       NOT NULL,                     -- 수량
+    UNIT_PRICE     NUMBER(15,2)       NOT NULL,                     -- 단가
+    SUPPLY_AMOUNT  NUMBER(15,2)       DEFAULT 0 NOT NULL,           -- 공급가액
+    TAX_AMOUNT     NUMBER(15,2)       DEFAULT 0 NOT NULL,           -- 부가세
+    TOTAL_MONEY    NUMBER(15,2)       NOT NULL,                     -- 총 합계
+    REMARKS        VARCHAR2(100 BYTE),                              -- 비고
+    CO_IDX         VARCHAR2(30 BYTE),                               -- 회사 식별자
+
+    /*── 제약 조건 ──*/
+    CONSTRAINT PK_QUOTATION_DETAIL
+        PRIMARY KEY (QUOTATION_NO, LINE_NO) USING INDEX,
+
+    CONSTRAINT FK_QUOT_TO_QUOT_D
+        FOREIGN KEY (QUOTATION_NO)
+        REFERENCES EFLIX.QUOTATION (QUOTATION_NO)
+);
+
+/* 보조 인덱스(예시): 품목 코드 검색 가속 */
+CREATE INDEX IDX_QUOT_DETAIL_ITEM_CODE
+    ON EFLIX.QUOTATION_DETAIL (ITEM_CODE);
+
+/* 컬럼 주석 */
+COMMENT ON COLUMN EFLIX.QUOTATION_DETAIL.TOTAL_MONEY   IS '총 합계(공급가액+부가세)';
+COMMENT ON COLUMN EFLIX.QUOTATION_DETAIL.TAX_AMOUNT    IS '부가세 금액';
+COMMENT ON COLUMN EFLIX.QUOTATION_DETAIL.SUPPLY_AMOUNT IS '공급가액';
+
+
+/*───────────────────────────────────
+  출고서(SALES_OUTBOUND) 테이블
+───────────────────────────────────*/
+CREATE TABLE EFLIX.SALES_OUTBOUND (
+    OUTBOUND_NO        VARCHAR2(30 BYTE)  PRIMARY KEY,            -- 출고서 번호
+    WRITE_DT           VARCHAR2(30 BYTE)  NOT NULL,               -- 작성일(문자형)
+    CUSTOMER_CD        VARCHAR2(20 BYTE)  NOT NULL,               -- 거래처 코드
+    CUSTOMER_NAME      VARCHAR2(100 BYTE),                        -- 거래처명
+    REPRESENTATIVE_NM  VARCHAR2(50 BYTE),                         -- 대표자명
+    ORDER_DT           DATE,                                      -- 주문일
+    OUTBOUND_DT        DATE               NOT NULL,               -- 실제 출고일
+    DELIVERY_DUE_DATE  DATE,                                      -- 납기 예정일
+    MONEY              VARCHAR2(4 BYTE)   DEFAULT 'KRW' NOT NULL, -- 통화
+    REMARKS            VARCHAR2(200 BYTE),                        -- 비고
+    CO_IDX             VARCHAR2(30 BYTE),                         -- 회사 식별자
+    CREATED_AT         TIMESTAMP(6)      DEFAULT SYSTIMESTAMP NOT NULL,
+    UPDATED_AT         TIMESTAMP(6)      DEFAULT SYSTIMESTAMP NOT NULL
+);
+
+/* 보조 인덱스 ─ 조회 패턴에 맞춰 필요 시 조정 */
+CREATE INDEX IDX_SALES_OUTBOUND_CUST ON EFLIX.SALES_OUTBOUND (CUSTOMER_CD);
+CREATE INDEX IDX_SALES_OUTBOUND_DT   ON EFLIX.SALES_OUTBOUND (OUTBOUND_DT);
+
+/* UPDATED_AT 자동 갱신 트리거 */
+CREATE OR REPLACE TRIGGER EFLIX.TRG_SALES_OUTBOUND_UPD
+BEFORE UPDATE ON EFLIX.SALES_OUTBOUND
+FOR EACH ROW
+BEGIN
+    :NEW.UPDATED_AT := SYSTIMESTAMP;
+END;
+/
+
+ALTER TRIGGER EFLIX.TRG_SALES_OUTBOUND_UPD ENABLE;
+
+
+/*───────────────────────────────────
+  출고 상세(SOUTBOUND_DETAIL) 테이블
+───────────────────────────────────*/
+CREATE TABLE EFLIX.SOUTBOUND_DETAIL (
+    OUTBOUND_NO      VARCHAR2(30 BYTE)  NOT NULL,                       -- 출고서 번호
+    LINE_NO          NUMBER             NOT NULL,                       -- 순번
+    ITEM_CODE        VARCHAR2(50 BYTE),                                 -- 품목 코드
+    ITEM_NAME        VARCHAR2(100 BYTE) NOT NULL,                       -- 품목명
+    STANDARD         VARCHAR2(100 BYTE),                                -- 규격
+    QTY              NUMBER(10,2)      NOT NULL,                        -- 수량
+    UNIT             VARCHAR2(20 BYTE),                                 -- 단위
+    OUTBOUND_STATUS  VARCHAR2(20 BYTE) DEFAULT '대기' NOT NULL,         -- 출고 상태
+    REMARKS          VARCHAR2(200 BYTE),                                -- 비고
+    CO_IDX           VARCHAR2(30 BYTE),                                 -- 회사 식별자
+
+    /*── 제약 조건 ──*/
+    CONSTRAINT PK_SOUTBOUND_DETAIL
+        PRIMARY KEY (OUTBOUND_NO, LINE_NO) USING INDEX,
+
+    CONSTRAINT FK_SO_DETAIL_TO_HEADER
+        FOREIGN KEY (OUTBOUND_NO)
+        REFERENCES EFLIX.SALES_OUTBOUND (OUTBOUND_NO)
+        ON DELETE CASCADE,
+
+    CONSTRAINT CHK_OUTBOUND_STATUS_SIMPLE
+        CHECK (OUTBOUND_STATUS IN ('대기', '출고완료'))
+);
+
+/* 보조 인덱스(예시): 품목 코드·출고 상태 검색 가속 */
+CREATE INDEX IDX_SOUTBOUND_DETAIL_ITEM_CODE   ON EFLIX.SOUTBOUND_DETAIL (ITEM_CODE);
+CREATE INDEX IDX_SOUTBOUND_DETAIL_STATUS      ON EFLIX.SOUTBOUND_DETAIL (OUTBOUND_STATUS);
+
+
