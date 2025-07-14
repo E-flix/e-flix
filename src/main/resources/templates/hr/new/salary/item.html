@@ -478,6 +478,7 @@
                     success: function(res) {
                         if(res.head.res_code === "200"){
                             Swal.fire("성공", "정상적으로 수정되었습니다.", "success");
+                            loadItemList(page = 1);
                         } else {
                             Swal.fire("실패", "수정에 실패했습니다.", "error");
                         }

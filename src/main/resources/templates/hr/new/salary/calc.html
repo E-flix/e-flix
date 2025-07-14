@@ -409,10 +409,10 @@
                         <td class="text-center">${item.grdName}</td>
                         <td class="text-center">${item.attMonth}</td>
                         <td class="text-center">${item.payMonth}</td>
-                        <td class="text-end">${item.baseSalary}</td>
-                        <td class="text-end">${item.allowanceTotal}</td>
-                        <td class="text-end">${item.deductionTotal}</td>
-                        <td class="text-end fw-bold text-primary">${item.netSalary}</td>
+                        <td class="text-end">${item.baseSalary.toLocaleString()} 원</td>
+                        <td class="text-end">${item.allowanceTotal.toLocaleString()} 원</td>
+                        <td class="text-end">- ${item.deductionTotal.toLocaleString()} 원</td>
+                        <td class="text-end fw-bold text-primary">${item.netSalary.toLocaleString()} 원</td>
                         <td class="text-center">
                             <span class="badge ${salaryTypeBG}">${salaryType}</span>
                         </td>

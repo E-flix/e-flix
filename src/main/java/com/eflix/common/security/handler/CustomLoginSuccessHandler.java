@@ -60,6 +60,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             request.getSession().setAttribute("empName", securityEmpDTO.getEmpName());
             request.getSession().setAttribute("coIdx", securityEmpDTO.getCoIdx());
             request.getSession().setAttribute("authorities", userDetails.getAuthorities());
+            request.getSession().setAttribute("roleId", securityEmpDTO.getRoleId());
 
             log.info("ERP 사원 로그인 성공: {}", securityEmpDTO.getEmpEmail());
 
