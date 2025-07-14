@@ -87,7 +87,7 @@
       <h3 class="mb-0">매입매출전표</h3>
       <div>
         <button class="btn btn-outline-secondary btn-sm" onclick="deleteSelectedRows()">삭제</button>
-        <button class="btn btn-outline-secondary btn-sm" onclick="인쇄()">인쇄</button>
+        <!-- <button class="btn btn-outline-secondary btn-sm" onclick="인쇄()">인쇄</button> -->
       </div>
     </div>
 
@@ -97,11 +97,11 @@
       <div class="col-auto">
         <label class="form-label mb-0">일자</label>
         2025 년
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:45px;"> 월
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block" name="startDay" style="width:45px;"> 일 ~
+        <input type="number" value="1" min="1" max="12" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:50px;"> 월
+        <input type="number" value="1" min="1" max="31" class="form-control form-control-sm d-inline-block" name="startDay" style="width:50px;"> 일 ~
         2025 년
-        <input type="number" value="12" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:45px;"> 월
-        <input type="number" value="31" class="form-control form-control-sm d-inline-block" name="endDay" style="width:45px;"> 일
+        <input type="number" value="12" min="1" max="12" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:50px;"> 월
+        <input type="number" value="31" min="1" max="31" class="form-control form-control-sm d-inline-block" name="endDay" style="width:50px;"> 일
       </div>
       <div class="col-auto">
         <label class="form-label mb-0">구분</label>
@@ -861,7 +861,7 @@
             }
             return code || '';
           } },
-        { headerName: "품명", field: "itemName", minWidth: 200, editable: true },
+        { headerName: "품명", field: "itemName", minWidth: 220, editable: true },
         { headerName: "수량", field: "quantity", initialWidth: 100, cellClass: 'ag-right-aligned-cell', 
           valueFormatter: params => {
             const value = params.value;
@@ -952,10 +952,10 @@
             return false;
           }
         },
-        { headerName: "코드", field: "partnerCode", minWidth: 90, editable: true },
-        { headerName: "공급처명", field: "partnerName", minWidth: 120, editable: true },
+        { headerName: "코드", field: "partnerCode", initialWidth: 100, editable: true },
+        { headerName: "공급처명", field: "partnerName", minWidth:250, editable: true },
         { headerName: "등록번호", field: "businessNumber", minWidth: 150, editable: true },
-        { headerName: "전자", field: "electronicType", minWidth: 50, editable: true, flex: 1,
+        { headerName: "전자", field: "electronicType", maxWidth: 90, editable: true,
             cellRenderer: params => { 
               const code = params.value;
               if (code === 'a1') { return '○'; } 
@@ -1331,7 +1331,7 @@
             const mm = String(d.getMonth() + 1).padStart(2, '0');
             const dd = String(d.getDate()).padStart(2, '0');
             return `${mm}-${dd}`;
-          }, minWidth: 80, cellClass: 'ag-cell-center',
+          }, maxWidth: 80, cellClass: 'ag-cell-center',
           colSpan: params => {
             // 소계 행인 경우 5개 셀 합치기 (일자~계정과목)
             if (params.data && params.data.isSummary === true) {
@@ -1352,13 +1352,13 @@
             return null;
           }
         },
-        { headerName: "전표번호", field: "entryNumber", minWidth: 100, editable: false,
+        { headerName: "전표번호", field: "entryNumber", maxWidth: 100, editable: false,
           cellRenderer: params => {
             // 소계 행인 경우는 colSpan으로 인해 렌더링되지 않음
             return params.value || '';
           }
         },
-        { headerName: "구분", field: "resentmenType", minWidth: 80, 
+        { headerName: "구분", field: "resentmenType", maxWidth: 80, 
           editable: params => {
             // 소계 행은 편집 불가
             return !(params.data && params.data.isSummary === true);
@@ -1387,7 +1387,7 @@
             }
           }
         },
-        { headerName: "코드", field: "accountCode", minWidth: 80, 
+        { headerName: "코드", field: "accountCode", maxWidth: 80, 
           editable: params => {
             // 소계 행은 편집 불가
             return !(params.data && params.data.isSummary === true);
@@ -1404,7 +1404,7 @@
             return params.value || '';
           }
         },
-        { headerName: "코드", field: "partnerCode", minWidth: 80, 
+        { headerName: "코드", field: "partnerCode", maxWidth: 80, 
           editable: params => {
             // 소계 행은 편집 불가
             return !(params.data && params.data.isSummary === true);
@@ -1417,7 +1417,7 @@
             return params.value || '';
           }
         },
-        { headerName: "거래처명", field: "partnerName", minWidth: 120, 
+        { headerName: "거래처명", field: "partnerName", minWidth: 250, maxWidth: 250, 
           editable: params => {
             // 소계 행은 편집 불가
             return !(params.data && params.data.isSummary === true);
@@ -1488,7 +1488,7 @@
             return false;
           }
         },
-        { headerName: "적요", field: "description", minWidth: 150, 
+        { headerName: "적요", field: "description", minWidth: 350, 
           editable: params => {
             // 소계 행은 편집 불가
             return !(params.data && params.data.isSummary === true);

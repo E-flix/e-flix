@@ -35,6 +35,18 @@
       background: #f3f6fa !important;
       font-weight: bold !important;
     }
+    .ag-header-center .ag-header-cell-label {
+      justify-content: center !important;
+      text-align: center;
+    }
+    /* 금액 컬럼 오른쪽 정렬 */
+    .ag-cell-right {
+      text-align: right !important;
+      justify-content: flex-end !important;
+    }
+    .ag-cell-center {
+      text-align: center !important;
+    }
   </style>
 </head>
 <div layout:fragment="content">
@@ -58,12 +70,12 @@
     <div class="d-flex mb-2 align-items-end flex-nowrap" style="flex-wrap:nowrap;">
       <div class="d-flex align-items-center me-2">
         <label class="form-label me-2 mb-0">일자</label>
-        2025 년
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startMonth" style="width:45px;"> 월
-        <input type="number" value="1" class="form-control form-control-sm d-inline-block mx-1" name="startDay" style="width:45px;"> 일 ~
-        2025 년
-        <input type="number" value="12" class="form-control form-control-sm d-inline-block mx-1" name="endMonth" style="width:45px;"> 월
-        <input type="number" value="31" class="form-control form-control-sm d-inline-block mx-1" name="endDay" style="width:45px;"> 일
+        2025 년 
+        <input type="number" value="1" min="1" max="12" class="form-control form-control-sm d-inline-block" name="startMonth" style="width:50px;"> 월
+        <input type="number" value="1" min="1" max="31" class="form-control form-control-sm d-inline-block" name="startDay" style="width:50px;"> 일 ~
+        2025 년 
+        <input type="number" value="12" min="1" max="12" class="form-control form-control-sm d-inline-block" name="endMonth" style="width:50px;"> 월
+        <input type="number" value="31" min="1" max="31" class="form-control form-control-sm d-inline-block" name="endDay" style="width:50px;"> 일
       </div>
       <div class="d-flex align-items-center me-2">
         <label class="me-2 mb-0" style="white-space:nowrap;">계정과목</label>
@@ -116,14 +128,14 @@
       localeText: { noRowsToShow: '조회할 [계정과목]을 선택해주세요.' },
       // 헤더 설정
       columnDefs: [
-        { headerName: '코드', field: 'partnerCode' },
-        { headerName: '거래처명', field: 'partnerName' },
-        { headerName: '전기이월', field: 'openingBalance', valueFormatter: p => p.value?.toLocaleString() },
-        { headerName: '차변', field: 'debit', valueFormatter: p => p.value?.toLocaleString() },
-        { headerName: '대변', field: 'credit', valueFormatter: p => p.value?.toLocaleString() },
-        { headerName: '잔액', field: 'balance', valueFormatter: p => p.value?.toLocaleString() },
-        { headerName: '등록번호', field: 'businessNumber' },
-        { headerName: '대표자명', field: 'representativeName' }
+        { headerName: '코드', field: 'partnerCode', headerClass: 'ag-header-center', cellClass: 'ag-cell-center', minWidth: 60, width: 80 },
+        { headerName: '거래처명', field: 'partnerName', headerClass: 'ag-header-center', minWidth: 170, width:270 },
+        { headerName: '전기이월', field: 'openingBalance', valueFormatter: p => p.value?.toLocaleString(), headerClass: 'ag-header-center', cellClass: 'ag-cell-right', minWidth: 100, width: 180 },
+        { headerName: '차변', field: 'debit', valueFormatter: p => p.value?.toLocaleString(), headerClass: 'ag-header-center', cellClass: 'ag-cell-right', minWidth: 100, width: 180 },
+        { headerName: '대변', field: 'credit', valueFormatter: p => p.value?.toLocaleString(), headerClass: 'ag-header-center', cellClass: 'ag-cell-right', minWidth: 100, width: 180 },
+        { headerName: '잔액', field: 'balance', valueFormatter: p => p.value?.toLocaleString(), headerClass: 'ag-header-center', cellClass: 'ag-cell-right', minWidth: 100, width: 180 },
+        { headerName: '등록번호', field: 'businessNumber', headerClass: 'ag-header-center' },
+        { headerName: '대표자명', field: 'representativeName', headerClass: 'ag-header-center', flex: 1, minWidth: 100 }
       ],
       // 합계행 스타일 적용 (getRowClass)
       getRowClass: params => {
@@ -161,12 +173,12 @@
       localeText: { noRowsToShow: '조회할 [계정과목]과 [거래처]를 선택해주세요.' },
       // 헤더 설정
       columnDefs: [
-        { headerName: '날짜', field: 'entryDate' },
-        { headerName: '적요', field: 'description' },
-        { headerName: '차변', field: 'debit', valueFormatter: p => p.value?.toLocaleString() },
-        { headerName: '대변', field: 'credit', valueFormatter: p => p.value?.toLocaleString() },
-        { headerName: '잔액', field: 'balance', valueFormatter: p => p.value !== undefined && p.value !== null ? p.value.toLocaleString() : '' },
-        { headerName: '전표번호', field: 'entryNumber', valueFormatter: p => (!p.value || isNaN(Number(p.value))) ? '' : String(p.value) },
+        { headerName: '날짜', field: 'entryDate' , headerClass: 'ag-header-center', cellClass: 'ag-cell-center', minWidth: 100, width: 150 },
+        { headerName: '적요', field: 'description', headerClass: 'ag-header-center', minWidth: 100, width: 450 },
+        { headerName: '차변', field: 'debit', valueFormatter: p => p.value?.toLocaleString(), headerClass: 'ag-header-center', cellClass: 'ag-cell-right', minWidth: 100, width: 200 },
+        { headerName: '대변', field: 'credit', valueFormatter: p => p.value?.toLocaleString(), headerClass: 'ag-header-center', cellClass: 'ag-cell-right', minWidth: 100, width: 200 },
+        { headerName: '잔액', field: 'balance', valueFormatter: p => p.value !== undefined && p.value !== null ? p.value.toLocaleString() : '', headerClass: 'ag-header-center', cellClass: 'ag-cell-right', minWidth: 100, width: 200 },
+        { headerName: '전표번호', field: 'entryNumber', valueFormatter: p => (!p.value || isNaN(Number(p.value))) ? '' : String(p.value), headerClass: 'ag-header-center', cellClass: 'ag-cell-center', maxWidth: 100 },
       ],
       // 월 소계 행 스타일 적용 (getRowClass로 변경)
       getRowClass: params => {
