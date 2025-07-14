@@ -30,7 +30,7 @@ public interface AttendanceRecordMapper {
 
     // 근태 상세조회
     List<AttendanceRecordDTO> getRecordsByEmpId(AttendanceRecordDTO dto);
-    
+
     // 로그인 사원 근태현황 년월 드롭다운
     List<LocalDate> getJoinDate(String empIdx, String coIdx);
 
@@ -41,7 +41,8 @@ public interface AttendanceRecordMapper {
     List<AttendanceRecordDTO> managerSearch(AttendanceRecordDTO dto);
 
     // 0708
-	  public AttdRecordSummaryDTO selectAttdRecordSummaryByEmpIdx(String empIdx, String date);
+    public AttdRecordSummaryDTO selectAttdRecordSummaryByEmpIdx(String empIdx, String date);
+
     public List<AttdRecordDTO> findAllByEmpIdxWithDate(String empIdx, String date);
 
     public void addAttd();
@@ -61,4 +62,8 @@ public interface AttendanceRecordMapper {
     // 0710
     List<AttendanceRecordDTO> findAllByEmpIdx(String empIdx);
 
+    // 0714
+    public int insert(AttendanceRecordDTO attendanceRecordDTO);
+
+    public int update(AttendanceRecordDTO attendanceRecordDTO);
 }
