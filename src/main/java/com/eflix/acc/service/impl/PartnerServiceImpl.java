@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import com.eflix.acc.dto.PartnerDetailDTO;
 import com.eflix.acc.mapper.PartnerMapper;
 import com.eflix.acc.service.PartnerService;
-import com.eflix.common.security.auth.AuthContext;
+import com.eflix.common.security.auth.AuthUtil;
 import lombok.RequiredArgsConstructor;
 
 /* ============================================
@@ -21,12 +21,11 @@ import lombok.RequiredArgsConstructor;
 public class PartnerServiceImpl implements PartnerService {
 
   private final PartnerMapper partnerMapper;
-    private final AuthContext authContext;
 
   // 일반거래처 전체조회
   @Override
   public List<PartnerDetailDTO> getList() {
-    String coIdx = authContext.getCoIdx();
+    String coIdx = AuthUtil.getCoIdx();
     return partnerMapper.getList(coIdx);
   }
 
@@ -35,7 +34,7 @@ public class PartnerServiceImpl implements PartnerService {
   public PartnerDetailDTO getListByCode(int partnerCode) {
     PartnerDetailDTO DetailDTO = new PartnerDetailDTO();
     DetailDTO.setPartnerCode(partnerCode);
-    DetailDTO.setCoIdx(authContext.getCoIdx());
+    DetailDTO.setCoIdx(AuthUtil.getCoIdx());
     return partnerMapper.getListByCode(DetailDTO);
   }
 
@@ -43,7 +42,7 @@ public class PartnerServiceImpl implements PartnerService {
   @Override
   public List<PartnerDetailDTO> getListByName(String partnerName) {
     PartnerDetailDTO DetailDTO = new PartnerDetailDTO();
-    DetailDTO.setCoIdx(authContext.getCoIdx());
+    DetailDTO.setCoIdx(AuthUtil.getCoIdx());
     DetailDTO.setPartnerName(partnerName);
     return partnerMapper.getListByName(DetailDTO);
   }

@@ -94,6 +94,8 @@
     LEFT JOIN account a ON d.account_code = a.account_code
     WHERE m.co_idx = #{coIdx}
     AND a.co_idx = #{coIdx}
+    AND d.co_idx = #{coIdx}
+    AND m.ledger_check = 'a1'
     ORDER BY m.entry_number
   </select>
 
