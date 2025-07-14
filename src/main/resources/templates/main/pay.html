@@ -438,7 +438,7 @@
                                         </button>
                                     </div>
                                     <div class="col-md-4">
-                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period active" data-value="12">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period" data-value="12">
                                             <i class="bi bi-calendar2-fill d-block fs-4 mb-2"></i>1년
                                             <span class="badge bg-success small">추천</span>
                                         </button>
@@ -452,7 +452,7 @@
                             <div class="mb-4">
                                 <label class="form-label fw-bold">얼마나 자주 청구하시겠습니까?</label>
                                 <select class="form-select" id="billing-cycle">
-                                    <option value="annual">년</option>
+                                    <option value="annual" selected>년</option>
                                     <option value="monthly">월</option>
                                 </select>
                             </div>
@@ -510,47 +510,47 @@
                             <!-- 가입 정보 -->
                             <fieldset class="border rounded-3 p-4 mb-4">
                                 <legend class="float-none w-auto px-3 fs-6 fw-bold">
-                                    <i class="bi bi-building me-2"></i>가입 정보
+                                    <i class="bi bi-building me-2"></i>회사 정보
                                 </legend>
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" id="sameAsSubscriber">
                                     <label class="form-check-label fw-semibold" for="sameAsSubscriber">
-                                        <i class="bi bi-check2-circle me-2"></i>가입자와 동일
+                                        <i class="bi bi-check2-circle me-2"></i>불러오기
                                     </label>
                                 </div>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="pschName" placeholder="신청자">
+                                        <input type="text" class="form-control" id="pschName" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="pschTel" placeholder="연락처">
+                                        <input type="text" class="form-control" id="pschTel" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="coName" placeholder="회사명">
+                                        <input type="text" class="form-control" id="coName" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="coNameEn" placeholder="회사 영문명" readonly>
+                                        <input type="text" class="form-control" id="coNameEn" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="ceoName" placeholder="대표자명" readonly>
+                                        <input type="text" class="form-control" id="ceoName" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="ceoTel" placeholder="연락처" readonly>
+                                        <input type="text" class="form-control" id="ceoTel" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="coAddr" placeholder="주소" readonly>
+                                        <input type="text" class="form-control" id="coAddr" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="bizr_no" placeholder="사업자 번호" readonly>
+                                        <input type="text" class="form-control" id="bizr_no" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="coAddrDetail" placeholder="나머지 주소" readonly>
+                                        <input type="text" class="form-control" id="coAddrDetail" readonly>
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="coZip" placeholder="우편번호" readonly>
+                                        <input type="text" class="form-control" id="coZip" readonly>
                                     </div>
                                     <div class="col-md-10">
-                                        <input type="text" class="form-control" id="bizr_cert" placeholder="사업자 등록증" readonly>
+                                        <input type="text" class="form-control" id="bizr_cert" readonly>
                                     </div>
                                 </div>
                             </fieldset>
@@ -1114,10 +1114,7 @@
         // 단계 이동 버튼 이벤트 설정 함수
         function setupStepNavigation() {
             $('#next-to-step-2').click(handleStep2Transition);
-            $('#next-to-step-3').click(() => {
-                generateContractHTML();
-                showStep(3);
-            });
+            $('#next-to-step-3').click(handleStep3Transition);
             $('#next-to-step-4').click(() => {
                 updateFinalSummary();
                 showStep(4);
@@ -1129,6 +1126,20 @@
 
         // 모듈 설명 리스트를 2단계에서 출력
         function handleStep2Transition() {
+            const $selected = $(".toggle-module.active");
+
+            if($selected.length <= 1) {
+                Swal.fire("알림", "2개 이상의 모듈을 선택해주세요.", "info");
+                return;
+            }
+
+            const $selectedPeriod = $(".toggle-period.active");
+
+            if($selectedPeriod.length <= 0) {
+                Swal.fire("알림", "구독 기간을 선택해주세요.", "info");
+                return;
+            }
+
             const checkedServices = $('.toggle-module.active').map(function () {
                 return $(this).data('value');
             }).get();
@@ -1138,6 +1149,50 @@
 
             $('#highlight-list').html(highlightHtml);
             showStep(2);
+        }
+
+        function handleStep3Transition() {
+            const fields = [
+                { sel: '#mstId', msg: '마스터 ID' },
+                { sel: '#mstName', msg: '이름' },
+                { sel: '#mstPw', msg: '비밀번호' },
+                { sel: '#mstPwCheck', msg: '비밀번호 확인' },
+                { sel: '#coTel', msg: '회사 전화번호' },
+                { sel: '#mstTel', msg: '연락처' },
+                { sel: '#mstEmail', msg: '이메일' }
+            ];
+
+            for (let f of fields) {
+                if (!$(f.sel).val().trim()) {
+                    Swal.fire("알림", `${f.msg}을(를) 입력해주세요.`, "info");
+                    $(f.sel).focus();
+                    return;
+                }
+            }
+            if ($('#mstPw').val() !== $('#mstPwCheck').val()) {
+                Swal.fire("알림", "비밀번호가 일치하지 않습니다.", "info");
+                $('#mstPwCheck').focus();
+                return;
+            }
+            const mstId = $("#mstId").val();
+            $.ajax({
+                type: "GET",
+                url: `/compnay/master/exist?mstId=${mstId}`,
+                success: function(res) {
+                    if(res.head.res_code === 200) {
+                        generateContractHTML();
+                        showStep(3);
+                    } else {
+                        Swal.fire("알림", "이미 사용중인 아이디입니다.", "info");
+                        $("#mstId").focus();
+                        return;
+                    }
+                },
+                error: function(xhr, status, err) {
+                    console.error(err);
+                    Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                }
+            })
         }
 
         // 최종 결제 금액 및 요약 출력 (4단계)

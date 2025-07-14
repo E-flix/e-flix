@@ -318,9 +318,9 @@
                                 s.sal6,s.sal7,s.sal8,s.sal9,s.sal10
                             )
                         ),0)
-                    )                                                     AS allowance_total,
+                    ) AS allowance_total,
 
-                    (
+                    TRUNC(
                         NVL(s.tax,0)
                         + NVL(s.national_pension,0)
                         + NVL(s.health_insurance,0)
@@ -342,9 +342,9 @@
                                 s.sal6,s.sal7,s.sal8,s.sal9,s.sal10
                             )
                         ),0)
-                    )                                                     AS deduction_total,
+                    ) AS deduction_total,
 
-                    s.total_salary                                       AS net_salary,
+                    TRUNC(s.total_salary) AS net_salary,
 
                     s.salary_type  AS calc_status
 
@@ -419,10 +419,10 @@
                 CASE sm.calc_type
                     WHEN 'CA1' THEN
                         (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
-                        || TO_CHAR(TO_NUMBER(sm.al_amount), 'FM9G999G999')
+                        || TO_CHAR(TRUNC(TO_NUMBER(sm.al_amount)), 'FM9G999G999')
                     WHEN 'CA2' THEN
                         (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
-                        || TO_CHAR(TO_NUMBER(sm.al_amount), 'FM9G999G999') || '%'
+                        || TO_CHAR(TRUNC(TO_NUMBER(sm.al_amount)), 'FM9G999G999') || '%'
                     ELSE
                         (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
                         || sm.al_amount
@@ -537,5 +537,11 @@
         </set>
         WHERE salary_idx = #{salaryIdx}
     </update>
+
+    <select id="findSalaryIdxByEmpIdxAndDate" parameterType="String" resultType="String">
+        SELECT salary_idx
+        FROM salary
+        WHERE emp_idx = #{empIdx} AND att_month = #{date} || '-10'
+    </select>
 </mapper>
 

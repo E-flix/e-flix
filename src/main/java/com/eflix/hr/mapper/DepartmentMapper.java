@@ -22,19 +22,28 @@ public interface DepartmentMapper {
 
     // 부서등록
     public int insertDept(DepartmentDTO dept);
-    
+
     DepartmentDTO selectById(@Param("deptIdx") String deptIdx);
-    int insert(DepartmentDTO dto);
-    int update(DepartmentDTO dto);
+
+    // int insert(DepartmentDTO dto);
+
+    // int update(DepartmentDTO dto);
+
     int deleteById(@Param("deptIdx") String deptIdx);
 
     List<DepartmentDTO> findAllDepts(String coIdx);
+
     List<DepartmentDTO> findAllDeptsUp(String coIdx, String deptIdx);
 
-    
     List<DepartmentDTO> findUpAllByCoIdx(String coIdx);
+
     List<DepartmentDTO> findDownAllByCoIdx(String coIdx, String deptUpIdx);
 
     DepartmentDTO findByEmpIdx(String empIdx);
 
+    // 0714
+    public List<DepartmentDTO> findAllDepartmentWithEmpCountByCoIdx(String coIdx);
+    public int insert(DepartmentDTO departmentDTO);
+    public int update(DepartmentDTO departmentDTO);
+    public int deleteDepartments(List<String> deptIdxList); 
 }

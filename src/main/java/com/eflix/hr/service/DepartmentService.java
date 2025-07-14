@@ -16,21 +16,33 @@ import com.eflix.hr.dto.DepartmentDTO;
 
 public interface DepartmentService {
     public List<DepartmentDTO> selectAll(DepartmentDTO departmentDTO);
+
     public DepartmentDTO getDepartmentById(String deptIdx);
+
     int createDepartment(DepartmentDTO dto);
-    int updateDepartment(DepartmentDTO dto);
+
+    // int updateDepartment(DepartmentDTO dto);
+
     int deleteDepartment(String deptIdx);
 
     public List<DepartmentDTO> findAllDepts(String coIdx);
+
     public List<DepartmentDTO> findAllDeptsUP(String deptIdx);
-    
+
     // 부서등록
     public int insertDept(DepartmentDTO dept);
 
     // 0707
     public List<DepartmentDTO> findUpAllByCoIdx(String coIdx);
+
     public List<DepartmentDTO> findDownAllByCoIdx(String coIdx, String deptUpIdx);
 
     // 0710
     public DepartmentDTO findByEmpIdx(String empIdx);
+
+    // 0714
+    public List<DepartmentDTO> findAllDepartmentWithEmpCountByCoIdx(String coIdx);
+    public int insert(DepartmentDTO dto);
+    public int update(DepartmentDTO dto);
+    public int deleteDepartments(List<String> deptIdxList); 
 }

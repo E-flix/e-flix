@@ -103,7 +103,6 @@ public class SubscriptionRestController {
     @PostMapping("/insert")
     public ResponseEntity<ResResult> postMethodName(@RequestBody SubscriptionProcedureDTO dto) {
         ResResult result = null;
-        System.out.println(dto.toString());
         try {
             subscriptionService.insertSubscriptionByProcedure(dto);
             // subscriptionService.insertSubscriptionInfo(subMasterDTO.getSubscriptionDTO(), subMasterDTO.getMasterDTO());

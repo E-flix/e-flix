@@ -28,6 +28,7 @@ public class DepartmentDTO {
     private Date deptModdate;   // dept_moddate
 
     private String deptUpName;  // 상위 부서 이름
+    private String empCount;
 
     private String coIdx;
 
