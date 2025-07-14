@@ -739,7 +739,7 @@
                                 $("#totalCount").text(data.total);
                                 $("#itemSizeSelect").val(data.pageSize);
                             } else {
-                                Swal.fire("실패", res.body, "error");
+                                Swal.fire("실패", res.head.res_result, "error");
                             }
                         },
                         error: function (xhr, status, err) {
@@ -764,7 +764,7 @@
                                 }
 
                             } else {
-                                Swal.fire("실패", res.body, "error");
+                                Swal.fire("실패", res.head.res_result, "error");
                             }
                         },
                         error: function (xhr, status, err) {
@@ -861,7 +861,7 @@
                                 }
                                 renderRole(mode, data.roles);
                             } else {
-                                Swal.fire("실패", res.body, "error");
+                                Swal.fire("실패", res.head.res_result, "error");
                             }
                         },
                         error: function (xhr, status, err) {
@@ -881,7 +881,7 @@
 
                                 renderDownDept(mode, data);
                             } else {
-                                Swal.fire("실패", res.body, "error");
+                                Swal.fire("실패", res.head.res_result, "error");
                             }
                         },
                         error: function (xhr, status, err) {

@@ -1667,7 +1667,7 @@
                 contentType: "application/json",
                 success: function (res) {
                     if (res.head.res_code !== "200") {
-                        Swal.fire("실패", res.body || "계약서 저장 실패", "error");
+                        Swal.fire("실패", res.head.res_result || "계약서 저장 실패", "error");
                     }
                 },
                 error: function (xhr, status, err) {
@@ -1721,7 +1721,7 @@
                     if (res.head.res_code === "200") {
                         Swal.fire("성공", "구독이 성공적으로 이루어졌습니다.", "success");
                     } else {
-                        Swal.fire("실패", res.body || "구독 등록 실패", "error");
+                        Swal.fire("실패", res.head.res_result || "구독 등록 실패", "error");
                     }
                 },
                 error: function (xhr, status, err) {

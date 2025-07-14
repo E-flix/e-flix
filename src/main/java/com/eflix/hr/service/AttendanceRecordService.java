@@ -66,6 +66,8 @@ public interface AttendanceRecordService {
     public List<AttendanceRecordDTO> findAllByEmpIdx(String empIdx);
 
     // 0714
+    public int isAlreadyCheckedIn(String empIdx);
     public int insert(AttendanceRecordDTO attendanceRecordDTO);
+    public int isAlreadyCheckedOut(String empIdx);
     public int update(AttendanceRecordDTO attendanceRecordDTO);
 }

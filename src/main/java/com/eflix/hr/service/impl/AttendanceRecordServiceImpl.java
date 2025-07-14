@@ -129,8 +129,18 @@ public class AttendanceRecordServiceImpl implements AttendanceRecordService {
     }
 
     @Override
+    public int isAlreadyCheckedIn(String empIdx) {
+        return attendanceRecordMapper.isAlreadyCheckedIn(empIdx);
+    }
+
+    @Override
     public int insert(AttendanceRecordDTO attendanceRecordDTO) {
         return attendanceRecordMapper.insert(attendanceRecordDTO);
+    }
+
+    @Override
+    public int isAlreadyCheckedOut(String empIdx) {
+        return attendanceRecordMapper.isAlreadyCheckedOut(empIdx);
     }
 
     @Override
