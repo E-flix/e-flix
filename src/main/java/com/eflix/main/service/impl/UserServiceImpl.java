@@ -54,4 +54,9 @@ public class UserServiceImpl implements UserService {
             return false;
         }
     }
+
+    @Override
+    public int existByUserId(String userId) {
+        return userMapper.existByUserId(userId);
+    }
 }

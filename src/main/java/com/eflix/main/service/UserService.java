@@ -51,4 +51,7 @@ public interface UserService {
     // 0704
     public boolean verifyPassword(String userIdx, String userPw);
 
+    // 0715
+    public int existByUserId(String userId);
+
 }

@@ -146,4 +146,9 @@ public class SalaryServiceImpl implements SalaryService {
 
         return successCount;
     }
+
+    @Override
+    public String findSalaryIdxByEmpIdxAndDate(String empIdx, String date) {
+        return salaryMapper.findSalaryIdxByEmpIdxAndDate(empIdx, date);
+    }
 }
