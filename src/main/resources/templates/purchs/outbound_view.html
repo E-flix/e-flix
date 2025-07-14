@@ -10,10 +10,11 @@
 	<div class="d-flex justify-content-between align-items-center mb-0">
 		<h2>출고조회</h2>
 	</div>
+
 	<div class="card border-0">
 		<div class="card-body ps-0 	pt-0">
-			<!-- <h5 class="text-center mb-4">출고 요청</h5> -->
 			<div class="row mb-3 align-items-end">
+
 				<div class="col-md-2">
 					<label class="form-label mb-0">출고ID</label>
 					<select class="form-control form-control-sm" id="outboundList">
@@ -22,6 +23,7 @@
 						</option>
 					</select>
 				</div>
+
 				<div class="col-md-4">
 					<label for="startDate" class="form-label mb-1">출고일</label>
 					<div class="d-flex align-items-center">
@@ -30,15 +32,18 @@
 						<input type="date" id="endDate" class="form-control form-control-sm" />
 					</div>
 				</div>
+
 				<div class="col-md-1">
-					<label class="form-label mb-0">검색</label> <!-- 공간 확보용 -->
-					<button class="btn btn-primary btn-sm w-100" id="searchBtn">검색</button>
+					<button class="btn btn-outline-secondary btn-sm mt-2" id="searchBtn">검색</button>
 				</div>
+
 			</div>
+
 			<!-- AG Grid: 창고조회 -->
 			<div class="grid-container mb-4" style="height: 40vh; width: 100%;">
 				<div id="outboundViewList" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 			</div>
+
 		</div>
 	</div>
 	<!-- 모달: 창고 상세 정보 -->
@@ -58,6 +63,7 @@
 								<th>출고ID</th>
 								<th>창고ID</th>
 								<th>제품ID</th>
+								<th>제품명</th>
 								<th>수량</th>
 							</tr>
 						</thead>
@@ -93,7 +99,7 @@
 			{ headerName: "출고담당자", field: "outboundManager", editable: false }
 		],
 		onRowClicked: (event) => {
-			const outboundId = event.data.outboundNumber;
+			const outboundId = event.data.outboundId;
 
 			fetch(`/purchs/obdViewDetail?outboundId=${outboundId}`)
 				.then(res => res.json())
@@ -109,6 +115,7 @@
             <td>${item.outboundId}</td>
             <td>${item.warehouseId}</td>
             <td>${item.prodId}</td>
+            <td>${item.prodName}</td>
             <td>${item.outboundQuantity}</td>
           </tr>
         `).join("");

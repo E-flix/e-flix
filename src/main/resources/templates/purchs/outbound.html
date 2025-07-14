@@ -61,6 +61,8 @@
 	let outboundRequestGrid;
 	// 출고의뢰서 상세 조회
 	let outboundListDetailGrid;
+	// 출고번호 전역변수
+	let selectedOutboundNo = null;
 
 	// 메인 페이지 상세 AG Grid 정의
 	const outboundListDetailGridOptions = {
@@ -71,12 +73,12 @@
 			{ headerName: "제품명", field: "prodName", editable: false },
 			{ headerName: "규격", field: "standard", editable: false },
 			{ headerName: "출고 수량", field: "outboundQuantity", editable: false },
-			{ 
-				headerName: "출고 상태", 
+			{
+				headerName: "출고 상태",
 				field: "outboundStatus",
 				editable: false,
 				cellRenderer: (params) => {
-					if(params.value === "대기") {
+					if (params.value === "대기") {
 						return `<span class="badge bg-warning">대기</span>`;
 					} else {
 						return `<span class="badge bg-success">출고완료</span>`;
@@ -113,6 +115,7 @@
 		defaultColDef: { resizable: true, sortable: true },
 		onRowClicked: (event) => {
 			const outboundNo = event.data.outboundNo;
+			selectedOutboundNo = outboundNo;
 
 			fetch(`/purchs/obrd?outboundNo=${outboundNo}`)
 				.then(res => res.json())
@@ -149,24 +152,17 @@
 	});
 
 	// 출고버튼 (출고기능)
-	document.getElementById("outboundBtn").addEventListener("click", function () {
-		// 현재 선택된 출고의뢰 번호 가져오기 (전역 변수 또는 hidden input으로 관리 추천)
-		const outboundNo = selectedOutboundNo;  // 예: "OUT-20250713-0003"
-		const manager = "홍길동"; // 로그인 유저 또는 입력값
-		const memo = "출고 메모 내용"; // 필요시 input에서 가져오기
 
-		if (!outboundNo) {
-			alert("출고의뢰서를 선택해주세요.");
+	// 출고 버튼 클릭 시 프로시저 호출
+	document.getElementById("outboundBtn").addEventListener("click", function () {
+		if (!selectedOutboundNo) {
+			alert("출고의뢰서를 먼저 선택해주세요.");
 			return;
 		}
 
-		if (!confirm("출고를 진행하시겠습니까?")) return;
+		if (!confirm("선택된 출고의뢰서를 출고 처리하시겠습니까?")) return;
 
-		const payload = {
-			outboundNo: outboundNo,
-			manager: manager,
-			memo: memo
-		};
+		const payload = { outboundNo: selectedOutboundNo };
 
 		fetch("/purchs/obp", {
 			method: "POST",
@@ -174,14 +170,18 @@
 			body: JSON.stringify(payload)
 		})
 			.then(res => {
-				if (!res.ok) throw new Error("출고 요청 실패");
+				if (!res.ok) throw new Error("출고 처리 실패");
 				return res.json();
 			})
 			.then(data => {
-				alert("출고가 완료되었습니다.");
-				// AG Grid 리로드 또는 상태 갱신
-				reloadOutboundList();
-				clearOutboundDetail();
+				alert("출고 처리가 완료되었습니다.");
+
+				// 다시 상세 조회해서 상태 갱신
+				return fetch(`/purchs/obrd?outboundNo=${selectedOutboundNo}`);
+			})
+			.then(res => res.json())
+			.then(data => {
+				outboundListDetailGrid.setGridOption("rowData", data);
 			})
 			.catch(err => {
 				console.error("출고 실패:", err);
@@ -199,3 +199,4 @@
 	});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

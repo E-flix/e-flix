@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eflix.purchs.mapper.MovementViewMapper">
+    <select id="warehouseMovementList" resultType="MovementViewDTO" parameterType="MovementViewDTO">
+        SELECT
+            transfer_id,
+            wt.prod_id AS prod_id,
+            p.prod_name AS prod_name,
+            from_warehouse_id,
+            to_warehouse_id,
+            quantity,
+            transfer_date,
+            manager
+        FROM
+            warehouse_transfer wt JOIN prod p ON (wt.prod_id = p.prod_id) 
+        <where>
+            <if test= " prodName != null and prodName != '' ">
+                prod_name = #{prodName}
+            </if>
+            <if test= " startDate != null and startDate != '' ">
+                AND transfer_date &gt; TO_DATE(#{startDate}, 'YYYY-MM-DD')
+            </if>
+            <if test= " endDate != null and endDate != '' ">
+                AND transfer_date &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+            </if>
+        </where>
+        ORDER BY
+            transfer_id
+    </select>
+
+    <select id="searchProdName" resultType="MovementViewDTO">
+        SELECT
+            p.prod_name
+        FROM
+            warehouse_transfer wt JOIN prod p ON (wt.prod_id = p.prod_id)
+        ORDER BY
+            p.prod_id
+    </select>
+</mapper>

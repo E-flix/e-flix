@@ -22,13 +22,7 @@ public class PurchsController {
 	public String category() {
 		return "purchs/category";
 	}
-
-	// 입고조회
-	@GetMapping("/ibdv")
-	public String inbound_view() {
-		return "purchs/inbound_view";
-	}
-
+	
 	// 재고조회
 	@GetMapping("/ivyv")
 	public String inventory_view() {
