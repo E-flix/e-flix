@@ -1076,14 +1076,14 @@
                         } else {
                             // 회사 정보가 없을 경우 사용자에게 등록 여부 묻기
                             Swal.fire({
-                                title: "등록된 회사가 없습니다. </br> 해당 정보로 등록하시겠나요?",
+                                title: "등록된 회사가 없습니다. </br> 등록 페이지로 이동하시겠나요?",
                                 showDenyButton: true,
                                 confirmButtonText: "등록",
                                 denyButtonText: "취소",
                                 icon: 'question'
                             }).then(result => {
                                 if (result.isConfirmed) {
-                                    Swal.fire("저장되었습니다", "", "success");
+                                    window.location.href="/mypage";
                                 }
                             });
                         }
@@ -1720,6 +1720,7 @@
                 success: function (res) {
                     if (res.head.res_code === "200") {
                         Swal.fire("성공", "구독이 성공적으로 이루어졌습니다.", "success");
+                        window.location.href = "/";
                     } else {
                         Swal.fire("실패", res.head.res_result || "구독 등록 실패", "error");
                     }

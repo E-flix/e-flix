@@ -105,6 +105,7 @@
                                         <div class="d-flex align-items-center">
                                             <i class="bi bi-building fs-5 text-success me-2"></i>
                                             <h5 class="mb-0 fw-semibold">회사정보</h5>
+                                            <h5 class="mb-0 fw-semibold" id="coIdx"></h2>
                                         </div>
                                     </div>
                                     <div class="card-body">
@@ -630,18 +631,19 @@
                 success: function (res) {
                     const data = res.body;
                     if (res.head.res_code === "200") {
-                        $('#coName').val(data.coName)
+                        $("#coIdx").text(`(${data.coIdx})`),
+                        $('#coName').val(data.coName),
                         $('#coNameEn').val(data.coNameEn),
-                            $('#coZip').val(data.coZip),
-                            $('#coAddr').val(data.coAddr),
-                            $('#coAddrDetail').val(data.coAddrDetail),
-                            $('#ceoName').val(data.ceoName),
-                            $('#ceoTel').val(data.ceoTel),
-                            $('#bizrNo').val(data.bizrNo),
-                            // $('#bizrCert').val(data.bizrCert),
-                            $('#pschName').val(data.pschName),
-                            $('#pschTel').val(data.pschTel),
-                            $('#pschEmail').val(data.pschEmail)
+                        $('#coZip').val(data.coZip),
+                        $('#coAddr').val(data.coAddr),
+                        $('#coAddrDetail').val(data.coAddrDetail),
+                        $('#ceoName').val(data.ceoName),
+                        $('#ceoTel').val(data.ceoTel),
+                        $('#bizrNo').val(data.bizrNo),
+                        // $('#bizrCert').val(data.bizrCert),
+                        $('#pschName').val(data.pschName),
+                        $('#pschTel').val(data.pschTel),
+                        $('#pschEmail').val(data.pschEmail)
                     }
                 },
                 error: function (xhr, status, err) {
