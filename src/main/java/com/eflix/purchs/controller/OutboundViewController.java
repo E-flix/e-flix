@@ -41,11 +41,11 @@ public class OutboundViewController {
     
 
     //출고번호 검색
-    @GetMapping("/searchObdId")
-    @ResponseBody
-    public List<OutboundViewDTO> searchOutboundId(OutboundViewDTO dto ) {
-        return service.searchOutboundId();
-    }
+    // @GetMapping("/searchObdId")
+    // @ResponseBody
+    // public List<OutboundViewDTO> searchOutboundId(OutboundViewDTO dto ) {
+    //     return service.searchOutboundId();
+    // }
     
     
 }

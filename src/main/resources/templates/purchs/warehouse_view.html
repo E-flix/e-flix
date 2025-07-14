@@ -19,37 +19,43 @@
 		<h2>창고조회</h2>
 	</div>
 	<div class="card border-0">
-		<div class="card-body ps-0 	pt-0">
-			<!-- <h5 class="text-center mb-4">출고 요청</h5> -->
+		<div class="card-body ps-0 pt-0">
 			<div class="row mb-3 align-items-end">
+
 				<div class="col-md-2">
-					<label class="form-label mb-0">창고ID</label>
+					<label class="form-label mb-1">창고ID</label>
 					<input type="text" class="form-control form-control-sm" id="warehouseIdInput" placeholder="창고ID" />
 				</div>
+
 				<div class="col-md-2">
-					<label class="form-label mb-0">창고위치</label>
+					<label class="form-label mb-1">창고위치</label>
 					<select class="form-control form-control-sm" id="warehouseLocationInput">
 						<option value=''>선택</option>
 						<option th:each="wh : ${whlocationList}" th:value="${wh.warehouseLocation}"
 							th:text="${wh.warehouseLocation}"></option>
 					</select>
 				</div>
+
 				<div class="col-md-2">
-					<label class="form-label mb-0">창고상태</label>
+					<label class="form-label mb-1">창고상태</label>
 					<select class="form-control form-control-sm" id="warehouseStatusSelect">
 						<option value='' selected>선택</option>
 						<option value="재고존재">재고존재</option>
 						<option value="비었음">비었음</option>
 					</select>
 				</div>
+
 				<div class="col-md-2">
-					<button class="btn btn-primary btn-sm mt-2" id="searchBtn">검색</button>
+					<button class="btn btn-outline-secondary btn-sm mt-2" id="searchBtn">검색</button>
 				</div>
+
 			</div>
+
 			<!-- AG Grid: 창고조회 -->
 			<div class="grid-container mb-4" style="height: 40vh; width: 100%;">
 				<div id="warehouseViewList" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
 			</div>
+
 		</div>
 	</div>
 	<!-- 모달: 창고 상세 정보 -->

@@ -1,0 +1,107 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{common/layouts/default}">
+
+<head>
+	<title>창고이동추적</title>
+</head>
+
+<div layout:fragment="content" class="container-fluid">
+
+	<div class="d-flex justify-content-between align-items-center mb-0">
+		<h2>창고이동추적</h2>
+	</div>
+
+	<div class="card border-0">
+		<div class="card-body ps-0 pt-0">
+			<div class="row mb-3 align-items-end">
+
+				<div class="col-md-2">
+					<label class="form-label mb-0">제품명</label>
+					<select class="form-control form-control-sm" id="prodNameList_">
+						<option value=''>선택</option>
+						<option th:each="wh : ${prodNameList}" th:value="${wh.prodName}" th:text="${wh.prodName}">
+						</option>
+					</select>
+				</div>
+
+				<div class="col-md-4">
+					<label for="startDate" class="form-label mb-1">이동일</label>
+					<div class="d-flex align-items-center">
+						<input type="date" id="startDate" class="form-control form-control-sm me-1" />
+						<span class="me-1">~</span>
+						<input type="date" id="endDate" class="form-control form-control-sm" />
+					</div>
+				</div>
+
+				<div class="col-md-1">
+					<button class="btn btn-outline-secondary btn-sm mt-2" id="searchBtn">검색</button>
+				</div>
+			</div>
+
+			<!-- AG Grid: 창고조회 -->
+			<div class="grid-container mb-4" style="height: 40vh; width: 100%;">
+				<div id="movementViewList" class="ag-theme-alpine" style="width: 100%; height: 100%;"></div>
+			</div>
+
+		</div>
+	</div>
+</div>
+</html>
+<script th:inline="javascript">
+	let movementViewList = /*[[${warehouseViewList}]]*/[];
+	let prodNameList = /*[[${prodNameList}]]*/[];
+	let movementViewGrid;
+
+	const gridOptions = {
+		headerHeight: 35,
+		rowHeight: 35,
+		rowData: movementViewList,
+		columnDefs: [
+			{ headerName: "이동번호", field: "transferId", editable: false },
+			{ headerName: "제품ID", field: "prodId", editable: false },
+			{ headerName: "제품명", field: "prodName", editable: false },
+			{ headerName: "이동전 창고", field: "fromWarehouseId", editable: false },
+			{ headerName: "이동후 창고", field: "toWarehouseId", editable: false },
+			{ headerName: "이동수량 창고", field: "quantity", editable: false },
+			{ headerName: "이동날짜", field: "transferDate", editable: false },
+			{ headerName: "담당자", field: "manager", editable: false },
+		],
+		onGridReady: (params) => {
+			gridOptions.api = params.api;
+			params.api.sizeColumnsToFit();
+		}
+	};
+
+	window.addEventListener('resize', () => {
+		if (gridOptions.api) {
+			gridOptions.api.sizeColumnsToFit();
+		}
+	});
+
+	// 그리드 초기화
+	document.addEventListener('DOMContentLoaded', () => {
+		movementViewGrid = agGrid.createGrid(document.querySelector("#movementViewList"), gridOptions);
+	});
+
+	// 검색버튼 이벤트
+	document.querySelector('#searchBtn').addEventListener('click', function () {
+
+		let prodName = document.querySelector('#prodNameList_').value;
+		let startDate = document.querySelector('#startDate').value;
+		let endDate = document.querySelector('#endDate').value;
+		let param = `prodName=${prodName}&startDate=${startDate}&endDate=${endDate}`
+		fetch(`/purchs/mvData?${param}`)
+			.then(res => res.json())
+			.then(data => {
+				movementViewGrid.setGridOption("rowData", data);
+			})
+	});
+
+	// 엔터 키로 검색 실행
+	document.getElementById('prodNameList_').addEventListener('keydown', function (e) {
+		if (e.key === 'Enter') {
+			e.preventDefault(); // 선택창 닫히는 기본 동작 방지 (옵션)
+			document.getElementById('searchBtn').click(); // 검색 버튼 클릭
+		}
+	});
+</script>
