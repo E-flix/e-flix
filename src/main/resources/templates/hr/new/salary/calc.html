@@ -36,7 +36,7 @@
                     <div class="col-12">
                         <div class="card border-0 shadow-sm">
                             <div class="card-body py-3">
-                                <div class="d-flex flex-wrap gap-2">
+                                <div class="d-flex flex-wrap gap-2 justify-content-end">
                                     <button class="btn btn-outline-secondary btn-sm">
                                         <i class="fas fa-check-square me-1"></i>전체선택
                                     </button>
@@ -73,47 +73,49 @@
                             </div>
                             <div class="card-body">
                                 <div class="row g-3">
-                                    <div class="col-md-2">
+                                    <div class="col-lg-2 col-md-3 col-sm-6">
                                         <label class="form-label fw-semibold">귀속년월</label>
-                                        <select id="attMonth" class="form-select">
+                                        <select id="attMonth" class="form-select form-select-sm">
                                         </select>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-lg-2 col-md-3 col-sm-6">
                                         <label class="form-label fw-semibold">지급년월</label>
-                                        <select id="payMonth" class="form-select">
+                                        <select id="payMonth" class="form-select form-select-sm">
                                         </select>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-lg-2 col-md-3 col-sm-6">
                                         <label class="form-label fw-semibold">사원명</label>
-                                        <input type="text" class="form-control" placeholder="사원명 입력" id="searchEmpName">
+                                        <input type="text" class="form-control form-control-sm" placeholder="사원명 입력" id="searchEmpName">
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-lg-2 col-md-3 col-sm-6">
                                         <label class="form-label fw-semibold">상위 부서</label>
-                                        <select class="form-select" id="searchDeptUpIdx">
+                                        <select class="form-select form-select-sm" id="searchDeptUpIdx">
                                             <option value="">전체</option>
                                             <option th:each="dept : ${depts}" th:value="${dept.deptIdx}" th:text="${dept.deptName}"></option>
                                         </select>
                                     </div>
-                                    <div class="col-md-1">
+                                    <div class="col-lg-2 col-md-3 col-sm-6">
                                         <label class="form-label fw-semibold">하위 부서</label>
-                                        <select class="form-select" id="searchDeptDownIdx">
+                                        <select class="form-select form-select-sm" id="searchDeptDownIdx">
                                             <option value="">전체</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-1">
+                                    <div class="col-lg-2 col-md-3 col-sm-6">
                                         <label class="form-label fw-semibold">직급</label>
-                                        <select class="form-select" id="serachGrade">
+                                        <select class="form-select form-select-sm" id="serachGrade">
                                             <option value="">전체</option>
                                             <option th:each="grd : ${grades}" th:value="${grd.grdIdx}" th:text="${grd.grdName}"></option>
                                         </select>
                                     </div>
-                                    <div class="col-md-2 d-flex align-items-end gap-2">
-                                        <button class="btn btn-primary" id="btnSearch">
-                                            <i class="fas fa-search me-1"></i>조회
-                                        </button>
-                                        <button class="btn btn-outline-secondary">
-                                            <i class="fas fa-redo me-1"></i>초기화
-                                        </button>
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-end gap-2 mt-3">
+                                            <button class="btn btn-sm btn-primary" id="btnSearch">
+                                                <i class="fas fa-search me-1"></i>조회
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-redo me-1"></i>초기화
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
