@@ -27,7 +27,7 @@ public class JasperDownloadPDF extends AbstractView {
 
     @Override
     protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+        HttpServletResponse response) throws Exception {
 
         String reportFile = (String)model.get("fileName");
 

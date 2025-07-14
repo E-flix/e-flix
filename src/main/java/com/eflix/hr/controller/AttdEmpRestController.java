@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -75,25 +76,31 @@ public class AttdEmpRestController {
     }
 
     private boolean isCompanyIp(String ip) {
-        return ip.startsWith("58.238.119.9") || ip.startsWith("10.");
+        return ip.startsWith("0:0:0:0:0:0:0:1") || ip.startsWith("10.");
     }
 
     @PostMapping("/in")
     public ResponseEntity<ResResult> in(HttpServletRequest request) {
         ResResult result = null;
 
-        String empIdx = getEmpIdx();
         String ip = getClientIp(request);
-        System.out.println(ip);
         AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
-
         if(!isCompanyIp(ip)) {
             result = ResUtil.makeResult(ResStatus.OK, "사내 IP내에서만 출근이 가능합니다.");
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
 
-        attendanceRecordDTO.setEmpIdx(empIdx);
+        int isAlreadyCheckedIn = attendanceRecordService.isAlreadyCheckedIn(getEmpIdx());
+
+        if(isAlreadyCheckedIn > 0) {
+            result = ResUtil.makeResult("400", "이미 출근 처리가 되어 있습니다.", null);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+
+        attendanceRecordDTO.setEmpIdx(getEmpIdx());
+        attendanceRecordDTO.setCoIdx(getCoIdx());
         attendanceRecordDTO.setAttdStatus("AR02");
+        attendanceRecordDTO.setAttdTime("9");
 
         int affectRows = attendanceRecordService.insert(attendanceRecordDTO);
 
@@ -106,7 +113,7 @@ public class AttdEmpRestController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PostMapping("/out")
+    @PutMapping("/out")
     public ResponseEntity<ResResult> out(HttpServletRequest request) {
         ResResult result = null;
 
@@ -119,15 +126,22 @@ public class AttdEmpRestController {
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
 
+        int isAlreadyCheckedOut = attendanceRecordService.isAlreadyCheckedOut(getEmpIdx());
+
+        if(isAlreadyCheckedOut > 0) {
+            result = ResUtil.makeResult("400", "이미 퇴근 처리가 되어 있습니다.", null);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+
         attendanceRecordDTO.setEmpIdx(empIdx);
         attendanceRecordDTO.setAttdStatus("AR03");
 
-        int affectRows = attendanceRecordService.insert(attendanceRecordDTO);
+        int affectRows = attendanceRecordService.update(attendanceRecordDTO);
 
         if(affectRows > 0) {
             result = ResUtil.makeResult(ResStatus.OK, "");
         } else {
-            result = ResUtil.makeResult("400", "출근 등록 중 오류가 발생했습니다.", null);
+            result = ResUtil.makeResult("400", "퇴근 등록 중 오류가 발생했습니다.", null);
         }
 
         return new ResponseEntity<>(result, HttpStatus.OK);

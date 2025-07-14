@@ -138,7 +138,7 @@
 			<staticText>
 				<reportElement x="10" y="107" width="80" height="20" uuid="da14ba6c-56bf-4514-b4d9-8fd0c48b614e"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="맑은 고딕" size="13" isBold="true"/>
+					<font fontName="Malgun Gothic" size="13" isBold="true"/>
 				</textElement>
 				<text><![CDATA[현재 상태:]]></text>
 			</staticText>
