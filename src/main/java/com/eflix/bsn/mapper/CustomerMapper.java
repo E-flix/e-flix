@@ -22,4 +22,10 @@ public interface CustomerMapper {
     List<CustomerDTO> searchCustomers(String keyword);
 
     List<CustomerDTO> searchByName(@Param("name") String name);
+
+    List<Map<String, Object>> selectAllWithCreditSummary(@Param("coIdx") String coIdx);
+    String findLatestCustomerCd(@Param("prefix") String prefix, @Param("coIdx") String coIdx);
+    int insertCustomer(CustomerDTO dto);
+    int updateCustomer(CustomerDTO dto);
+    Integer findMaxCustomerSequence(@Param("prefix") String prefix);
 }
