@@ -12,11 +12,16 @@
 ============================================ -->
 
 <head>
-    <title>부서관리</title>
+    <title>부서 관리</title>
 </head>
 <div layout:fragment="content">
-    <div class="container-fluid">
-        <!-- 헤더 영역 -->
+    <div class="w-100">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>부서 관리</h3>
+        </div>
+    </div>
+        <div class="row">
+            <!-- 헤더 영역 -->
         <div class="row bg-white shadow-sm mb-4">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center py-3">
@@ -37,8 +42,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="row">
             <!-- 좌측 - 부서 트리 구조 -->
             <div class="col-md-3">
                 <div class="card">
@@ -253,8 +256,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
     <!-- 부서 등록/수정 모달 -->
     <div class="modal fade" id="deptModal" tabindex="-1" aria-labelledby="deptModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">

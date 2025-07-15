@@ -15,7 +15,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.eflix.common.payment.Entity.PaymentEntity;
@@ -23,8 +22,6 @@ import com.eflix.common.payment.dto.SubscriptionPaymentDTO;
 import com.eflix.common.payment.mapper.PaymentMapper;
 import com.eflix.common.payment.service.BillingService;
 import com.eflix.common.payment.service.PaymentService;
-import com.eflix.main.dto.SubscriptionDTO;
-import com.eflix.main.dto.SubscriptionPackageDetailDTO;
 import com.eflix.main.mapper.SubscriptionMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
