@@ -8,14 +8,15 @@
 <div layout:fragment="content" class="container-fluid">
 
 	<div class="d-flex justify-content-between align-items-center mb-0">
-		<h2>출고조회</h2>
+		<h3>출고조회</h3>
 	</div>
 
 	<div class="card border-0">
-		<div class="card-body ps-0 	pt-0">
-			<div class="row mb-3 align-items-end">
+		<div class="card-body ps-0 pt-0 pe-0">
+			<div class="w-100 mb-3 p-3 rounded border d-flex flex-wrap align-items-end gap-3"
+				style="border-color: #dfe6eb; background-color: #f8f9fa;">
 
-				<div class="col-md-2">
+				<div style="flex: 1 1 250px; min-width: 200px;">
 					<label class="form-label mb-0">출고ID</label>
 					<select class="form-control form-control-sm" id="outboundList">
 						<option value=''>선택</option>
@@ -24,7 +25,7 @@
 					</select>
 				</div>
 
-				<div class="col-md-4">
+				<div style="flex: 1 1 250px; min-width: 200px;">
 					<label for="startDate" class="form-label mb-1">출고일</label>
 					<div class="d-flex align-items-center">
 						<input type="date" id="startDate" class="form-control form-control-sm me-1" />
@@ -33,8 +34,11 @@
 					</div>
 				</div>
 
-				<div class="col-md-1">
-					<button class="btn btn-outline-secondary btn-sm mt-2" id="searchBtn">검색</button>
+				<div style="flex: 0 0 100px;">
+					<label class="form-label mb-1 invisible">검색</label>
+					<button class="btn btn-outline-primary btn-sm w-100" id="searchBtn">
+						<i class="bi bi-search"></i> 검색
+					</button>
 				</div>
 
 			</div>

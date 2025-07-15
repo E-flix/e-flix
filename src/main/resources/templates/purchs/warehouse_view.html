@@ -16,37 +16,42 @@
 <div layout:fragment="content" class="container-fluid">
 
 	<div class="d-flex justify-content-between align-items-center mb-0">
-		<h2>창고조회</h2>
+		<h3>창고조회</h3>
 	</div>
 	<div class="card border-0">
-		<div class="card-body ps-0 pt-0">
-			<div class="row mb-3 align-items-end">
+		<div class="card-body ps-0 pt-0 pe-0">
 
-				<div class="col-md-2">
-					<label class="form-label mb-1">창고ID</label>
+			<div class="w-100 mb-3 p-3 rounded border d-flex flex-wrap align-items-end gap-3"
+				style="border-color: #dfe6eb; background-color: #f8f9fa;">
+
+				<div style="flex: 1 1 250px; min-width: 200px;">
+					<label for="warehouseIdInput" class="form-label mb-1">창고ID</label>
 					<input type="text" class="form-control form-control-sm" id="warehouseIdInput" placeholder="창고ID" />
 				</div>
 
-				<div class="col-md-2">
-					<label class="form-label mb-1">창고위치</label>
-					<select class="form-control form-control-sm" id="warehouseLocationInput">
-						<option value=''>선택</option>
+				<div style="flex: 1 1 250px; min-width: 200px;">
+					<label for="warehouseLocationInput" class="form-label mb-1">창고위치</label>
+					<select class="form-select form-select-sm" id="warehouseLocationInput">
+						<option value="">선택</option>
 						<option th:each="wh : ${whlocationList}" th:value="${wh.warehouseLocation}"
 							th:text="${wh.warehouseLocation}"></option>
 					</select>
 				</div>
 
-				<div class="col-md-2">
-					<label class="form-label mb-1">창고상태</label>
-					<select class="form-control form-control-sm" id="warehouseStatusSelect">
-						<option value='' selected>선택</option>
+				<div style="flex: 1 1 250px; min-width: 200px;">
+					<label for="warehouseStatusSelect" class="form-label mb-1">창고상태</label>
+					<select class="form-select form-select-sm" id="warehouseStatusSelect">
+						<option value="">선택</option>
 						<option value="재고존재">재고존재</option>
 						<option value="비었음">비었음</option>
 					</select>
 				</div>
 
-				<div class="col-md-2">
-					<button class="btn btn-outline-secondary btn-sm mt-2" id="searchBtn">검색</button>
+				<div style="flex: 0 0 100px;">
+					<label class="form-label mb-1 invisible">검색</label>
+					<button class="btn btn-outline-primary btn-sm w-100" id="searchBtn">
+						<i class="bi bi-search"></i> 검색
+					</button>
 				</div>
 
 			</div>
@@ -104,8 +109,8 @@
 		columnDefs: [
 			{ headerName: "창고ID", field: "warehouseId", editable: false },
 			{ headerName: "창고위치", field: "warehouseLocation", editable: false },
-			{ headerName: "창고크기", field: "warehouseScale", editable: false, cellStyle: {textAlign: 'right'} },
-			{ headerName: "입고된제품량", field: "warehouseCurrent", editable: false, cellStyle: {textAlign: 'right'} },
+			{ headerName: "창고크기", field: "warehouseScale", editable: false, cellStyle: { textAlign: 'right' } },
+			{ headerName: "입고된제품량", field: "warehouseCurrent", editable: false, cellStyle: { textAlign: 'right' } },
 			{ headerName: "창고담당자", field: "warehouseManager", editable: false },
 			{
 				headerName: "창고상태",
@@ -158,7 +163,7 @@
 			gridOptions.api.sizeColumnsToFit();
 		}
 	});
-	
+
 	// 그리드 초기화
 	document.addEventListener('DOMContentLoaded', () => {
 		warehouseViewGrid = agGrid.createGrid(document.querySelector("#warehouseViewList"), gridOptions);
