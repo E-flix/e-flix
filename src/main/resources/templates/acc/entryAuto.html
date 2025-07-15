@@ -117,7 +117,7 @@
       { headerName: '공제항목', field: 'item', flex: 1, minWidth: 80, headerClass: 'ag-header-center' },
       { headerName: '코드', field: 'accountCode', width: 65, minWidth: 60, headerClass: 'ag-header-center', cellClass: 'ag-cell-center',
         editable: params => params.data && params.data.ledgerCheck !== 'a1' },
-      { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, maxWidth: 90, headerClass: 'ag-header-center', editable: false },
+      { headerName: '계정과목명', field: 'accountName', flex: 1, minWidth: 80, headerClass: 'ag-header-center', editable: false },
       { headerName: '금액', field: 'amount', valueFormatter: params => params.value?.toLocaleString(), flex: 1, minWidth: 100, headerClass: 'ag-header-center', cellClass: 'ag-cell-right', editable: false }
     ];
     // journal: 일반전표(차변/대변)
