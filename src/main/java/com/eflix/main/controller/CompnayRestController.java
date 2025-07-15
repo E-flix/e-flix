@@ -160,21 +160,4 @@ public class CompnayRestController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-
-    // 0714
-    @GetMapping("/master/exist")
-    public ResponseEntity<ResResult> existMstId(@RequestParam("mstId") String mstId) {
-        ResResult result = null;
-
-        int existMstId = masterService.existMstId(mstId);
-
-        if(existMstId > 0) {
-            result = ResUtil.makeResult(ResStatus.OK, null);
-        } else {
-            result = ResUtil.makeResult("400", "이미 존재하는 아이디 입니다.", null);
-        }
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-    
 }

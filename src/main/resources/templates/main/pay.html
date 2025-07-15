@@ -1193,7 +1193,7 @@
             const mstId = $("#mstId").val();
             $.ajax({
                 type: "GET",
-                url: `/compnay/master/exist?mstId=${mstId}`,
+                url: `/master/exist?mstId=${mstId}`,
                 success: function (res) {
                     if (res.head.res_code === 200) {
                         generateContractHTML();
