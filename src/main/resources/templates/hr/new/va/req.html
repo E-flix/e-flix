@@ -1,40 +1,20 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{common/layouts/default}">
 <head>
-    <title>연차 신청</title>
+    <title>휴가 신청</title>
 </head>
 <div layout:fragment="content">
-    <div class="container-fluid py-4">
-        <!-- 헤더 섹션 -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h2 class="text-dark mb-1">
-                            <i class="bi bi-calendar-plus text-primary"></i> 휴가 신청
-                        </h2>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">홈</a></li>
-                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">인사관리</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">휴가 신청</li>
-                            </ol>
-                        </nav>
-                    </div>
-                    <div class="text-end">
-                        <div class="text-muted small">오늘 날짜</div>
-                        <div class="fw-bold">2025-07-10 (목)</div>
-                    </div>
-                </div>
-            </div>
+    <div class="w-100">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>휴가 관리</h3>
         </div>
-
+    </div>
         <!-- 메인 콘텐츠 -->
         <div class="row">
             <div class="col-xl-8 col-lg-12">
                 <!-- 신청 폼 카드 -->
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header ">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="card-title mb-0">
                                 <i class="bi bi-file-earmark-plus"></i> 휴가 신청서
@@ -208,7 +188,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <script>
         $(function () {

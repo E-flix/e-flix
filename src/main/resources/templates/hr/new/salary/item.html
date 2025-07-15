@@ -11,40 +11,15 @@
 ============================================ -->
 
 <head>
-    <title>급여항목</title>
+    <title>급여 항목</title>
 </head>
 
 <div layout:fragment="content">
-    <!-- 메인 콘텐츠 -->
-    <div class="container-fluid px-4 py-3">
-        <!-- 페이지 헤더 -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
-                    <div>
-                        <h4 class="mb-1 fw-bold text-dark">
-                            <i class="fas fa-coins text-primary me-2"></i>급여항목 관리
-                        </h4>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-0 small">
-                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">인사관리</a></li>
-                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">급여관리</a></li>
-                                <li class="breadcrumb-item active">급여항목</li>
-                            </ol>
-                        </nav>
-                    </div>
-                    <div>
-                        <button class="btn btn-success btn-sm me-2" data-bs-toggle="modal" data-bs-target="#itemModal" id="addModal">
-                            <i class="fas fa-plus me-1"></i>항목 추가
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-download me-1"></i>엑셀 다운로드
-                        </button>
-                    </div>
-                </div>
-            </div>
+    <div class="w-100" id="empList">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>급여 항목</h3>
         </div>
-
+    </div>
         <!-- 검색 필터 -->
         <div class="row mb-4">
             <div class="col-12">
@@ -158,7 +133,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- 급여항목 추가/수정 모달 -->
     <div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">

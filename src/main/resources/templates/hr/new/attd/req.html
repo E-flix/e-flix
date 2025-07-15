@@ -15,34 +15,30 @@
 </head>
 <div layout:fragment="content">
     <!-- 페이지 제목 -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-dark">
-            <i class="bi bi-calendar-plus"></i> 근태 신청
-        </h2>
-        <div class="text-muted">
-            <i class="bi bi-calendar3"></i> 2025-07-10 (목)
+    <div class="w-100">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>근태 신청</h3>
         </div>
     </div>
 
-
     <!-- 버튼 섹션 -->
-    <div class="d-flex justify-content-end gap-2 mt-4">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <div class="d-flex justify-content-end gap-2 mb-2">
+        <!-- <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
             불러오기
-        </button>
-        <button type="button" class="btn btn-outline-secondary">
+        </button> -->
+        <!-- <button type="button" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> 취소
-        </button>
-        <button type="button" class="btn btn-outline-primary">
+        </button> -->
+        <!-- <button type="button" class="btn btn-sm btn-outline-primary">
             <i class="bi bi-save"></i> 임시저장
-        </button>
-        <button type="submit" class="btn btn-primary" id="reqBtn">
+        </button> -->
+        <button type="submit" class="btn btn-sm btn-primary" id="reqBtn">
             <i class="bi bi-check-circle"></i> 신청하기
         </button>
     </div>
     <!-- 신청 폼 -->
     <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header">
             <h5 class="card-title mb-0">
                 <i class="bi bi-file-earmark-plus"></i> 근태 신청서
             </h5>
@@ -57,15 +53,15 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">사원명</label>
-                    <input type="text" class="form-control bg-light" th:value="${empName}" readonly>
+                    <input type="text" class="form-control form-control-sm bg-light" th:value="${empName}" readonly>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">부서</label>
-                    <input type="text" class="form-control bg-light" th:value="${deptName}" readonly>
+                    <input type="text" class="form-control form-control-sm bg-light" th:value="${deptName}" readonly>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">사번</label>
-                    <input type="text" class="form-control bg-light" th:value="${empIdx}" readonly>
+                    <input type="text" class="form-control form-control-sm bg-light" th:value="${empIdx}" readonly>
                 </div>
             </div>
 
@@ -73,11 +69,11 @@
             <div class="row mb-4">
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">신청일자</label>
-                    <input type="text" class="form-control bg-light" id="reqDate" readonly>
+                    <input type="text" class="form-control form-control-sm bg-light" id="reqDate" readonly>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label fw-bold">근태 번호</label>
-                    <input type="text" class="form-control bg-light" id="reqAttd" readonly>
+                    <input type="text" class="form-control form-control-sm bg-light" id="reqAttd" readonly>
                 </div>
             </div>
 
@@ -90,19 +86,19 @@
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label fw-bold">시작일 <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="reqOldValue" required>
+                    <input type="date" class="form-control form-control-sm" id="reqOldValue" required>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label fw-bold">종료일 <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="reqNewValue" required>
+                    <input type="date" class="form-control form-control-sm" id="reqNewValue" required>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label fw-bold">총 일수</label>
-                    <input type="text" class="form-control bg-light" id="reqTotalDay" value="1일" readonly>
+                    <input type="text" class="form-control form-control-sm bg-light" id="reqTotalDay" value="1일" readonly>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label fw-bold">근태 유형 <span class="text-danger">*</span></label>
-                    <select class="form-select" id="reqEditType" required>
+                    <select class="form-select form-select-sm" id="reqEditType" required>
                         <option value="">선택</option>
                         <th:block th:each="type : ${attdReqType}">
                             <option th:value="${type.commonCode}" th:text="${type.commonCodeName}">
@@ -115,29 +111,14 @@
             <!-- 사유 섹션 -->
             <div class="mb-4">
                 <label class="form-label fw-bold">신청 사유 <span class="text-danger">*</span></label>
-                <textarea class="form-control" id="reqReason" rows="3"
+                <textarea class="form-control form-control-sm" id="reqReason" rows="3"
                     placeholder="신청 사유를 상세히 입력해주세요. (예: 가족 행사 참여, 개인 사정 등)" required></textarea>
-            </div>
-
-            <!-- 안내사항 -->
-            <div class="alert alert-info border-start border-4 border-info">
-                <div class="d-flex">
-                    <i class="bi bi-info-circle-fill text-info me-2"></i>
-                    <div>
-                        <strong>신청 안내사항</strong>
-                        <ul class="mt-2 mb-0">
-                            <li>병가나 외근 신청 시, 관련 증빙서류를 반드시 첨부해주세요.</li>
-                            <li>연차 신청은 최소 1일 전에 신청해주세요.</li>
-                            <li>승인 후 변경사항이 있을 경우 즉시 담당자에게 연락바랍니다.</li>
-                        </ul>
-                    </div>
-                </div>
             </div>
 
             <!-- 첨부파일 섹션 -->
             <div class="mb-4">
                 <label class="form-label fw-bold">첨부파일</label>
-                <input type="file" class="form-control" multiple>
+                <input type="file" class="form-control form-control-sm" multiple>
                 <div class="form-text">병가, 외근 등 증빙서류가 필요한 경우 첨부해주세요.</div>
             </div>
 
@@ -160,11 +141,11 @@
                         </div>
                         <div class="col-3">
                             <label for="yearSelect" class="form-label">연도</label>
-                            <select id="yearSelect" class="form-select"></select>
+                            <select id="yearSelect" class="form-select form-select-sm"></select>
                         </div>
                         <div class="col-3">
                             <label for="monthSelect" class="form-label">월</label>
-                            <select id="monthSelect" class="form-select"></select>
+                            <select id="monthSelect" class="form-select form-select-sm"></select>
                         </div>
                     </div>
                     
