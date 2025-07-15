@@ -29,6 +29,7 @@ public class SchedulerConfig {
     // 정기 결제 처리
     @Scheduled(cron = "0 0 9 * * *")
     public void processSubscriptionPayment() {
+        paymentService.processSubscription();
         log.info("09:00 구독 결제 처리 중...");
     }
 

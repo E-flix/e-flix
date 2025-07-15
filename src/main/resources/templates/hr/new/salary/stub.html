@@ -13,172 +13,247 @@
     <title>급여명세서</title>
 </head>
 <div layout:fragment="content">
-    <div id="">
-        <h2>급여명세서</h2>
-        <!DOCTYPE html>
-        <html lang="ko">
-
-        <head>
-            <meta charset="UTF-8">
-            <title>급여 명세서</title>
-            <style>
-                .payslip-container {
-                    max-width: 800px;
-                    margin: 0 auto;
-                    border: 1px solid #ccc;
-                    padding: 30px;
-                    background: white;
-                }
-
-                .table-bordered td,
-                .table-bordered th {
-                    vertical-align: middle;
-                }
-            </style>
-        </head>
-
-        <body class="bg-light">
-            <div class="payslip-container">
-                <h4 class="text-center fw-bold mb-4">급여 명세서</h4>
-                <!--버튼구성 -->
-                <div class="d-flex justify-content-end mb-3">
-                    <button class="btn btn-danger me-2" id="btn1">PDF</button>
-                    <button class="btn btn-primary me-2" onclick="window.print()">인쇄</button>
-                    <button class="btn btn-secondary" onclick="history.back()">닫기</button>
+    <div class="w-100">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>급여 명세서</h3>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>
+                        급여 명세서 관리
+                    </h4>
                 </div>
-                <!-- 인적사항 -->
-                <table class="table table-bordered">
-                    <tr>
-                        <th>성명</th>
-                        <td class="text-primary">홍 길 동</td>
-                        <th>사번</th>
-                        <td class="text-primary">073542</td>
-                    </tr>
-                    <tr>
-                        <th>부서</th>
-                        <td class="text-primary">개발지원팀</td>
-                        <th>직급</th>
-                        <td class="text-primary">팀장</td>
-                    </tr>
-                </table>
-
-                <!-- 세부내역 -->
-                <h6 class="fw-bold mt-4">세부 내역</h6>
-                <table class="table table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th>지급 항목</th>
-                            <th>지급 금액(원)</th>
-                            <th>공제 항목</th>
-                            <th>공제 금액(원)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>기본급</td>
-                            <td>3,200,000</td>
-                            <td>소득세</td>
-                            <td>115,530</td>
-                        </tr>
-                        <tr>
-                            <td>연장근로수당</td>
-                            <td>379,728</td>
-                            <td>국민연금</td>
-                            <td>177,570</td>
-                        </tr>
-                        <tr>
-                            <td>야간근로수당</td>
-                            <td>15,822</td>
-                            <td>고용보험</td>
-                            <td>31,570</td>
-                        </tr>
-                        <tr>
-                            <td>휴일근로수당</td>
-                            <td>94,932</td>
-                            <td>건강보험</td>
-                            <td>135,350</td>
-                        </tr>
-                        <tr>
-                            <td>가족수당</td>
-                            <td>150,000</td>
-                            <td>장기 요양 보험</td>
-                            <td>15,590</td>
-                        </tr>
-                        <tr>
-                            <td>식대</td>
-                            <td>100,000</td>
-                            <td>노조회비</td>
-                            <td>15,000</td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                        <tr class="fw-bold">
-                            <td>지급액 계</td>
-                            <td>3,940,482</td>
-                            <td>공제액 계</td>
-                            <td>490,610</td>
-                        </tr>
-                        <tr class="fw-bold">
-                            <td colspan="2">실 수령액</td>
-                            <td colspan="2" class="text-end">3,472,161 원</td>
-                        </tr>
-                    </tfoot>
-                </table>
-
-                <div class="d-flex justify-content-between mb-3">
-                    <div>
-                        <strong>지급일자:</strong> 2025-06-10
-                    </div>
-                    <div><strong>지급자:</strong> 급여관리자</div>
-                </div>
-
-                <!-- 계산방법 -->
-                <h6 class="fw-bold">계산 방법</h6>
-                <table class="table table-bordered small">
-                    <thead class="table-light">
-                        <tr>
-                            <th>구분</th>
-                            <th>산식 또는 산출항목</th>
-                            <th>지급액(원)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>연장근로수당</td>
-                            <td>연장근로시간 수 (16시간) x 15,822원 x 1.5</td>
-                            <td>379,728</td>
-                        </tr>
-                        <tr>
-                            <td>야간근로수당</td>
-                            <td>야간근로시간 수 (2시간) x 15,822원 x 0.5</td>
-                            <td>15,822</td>
-                        </tr>
-                        <tr>
-                            <td>휴일근로수당</td>
-                            <td>휴일근로시간 수 (4시간) x 15,822원 x 1.5</td>
-                            <td>94,932</td>
-                        </tr>
-                        <tr>
-                            <td>가족수당</td>
-                            <td>100,000 x 1명(배우자) + 50,000 x 1명(자녀)</td>
-                            <td>150,000</td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
-            <script>
-                $("#btn1").on("click", function() {
-                    let empIdx = 'emp-201'
-                    let date = '2025-05'
-                    url = `/hr/salary/report/preview/stub/${empIdx}/${date}`;
+            <div class="card-body">
+                <!-- 검색 및 필터 영역 -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label">사원번호</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="사원번호 입력" value="emp-201">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">기준월</label>
+                        <input type="month" class="form-control form-control-sm" value="2025-05">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">부서</label>
+                        <select class="form-select">
+                            <option>전체</option>
+                            <option>개발팀</option>
+                            <option>영업팀</option>
+                            <option>인사팀</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-outline-primary me-2">
+                            <i class="fas fa-search"></i> 검색
+                        </button>
+                        <button class="btn btn-outline-secondary">
+                            <i class="fas fa-redo"></i> 초기화
+                        </button>
+                    </div>
+                </div>
 
-                    const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+                <!-- 급여 명세서 목록 -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="">
+                            <tr>
+                                <th scope="col">
+                                    <input type="checkbox" class="form-check-input position-static">
+                                </th>
+                                <th scope="col">사번</th>
+                                <th scope="col">성명</th>
+                                <th scope="col">부서</th>
+                                <th scope="col">직급</th>
+                                <th scope="col">기준월</th>
+                                <th scope="col">기본급</th>
+                                <th scope="col">실수령액</th>
+                                <th scope="col">상태</th>
+                                <th scope="col">작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox" class="form-check-input"></td>
+                                <td><span class="badge bg-secondary">emp-201</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div
+                                            class="avatar-sm bg-info rounded-circle d-flex align-items-center justify-content-center me-2">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                        <strong>김철수</strong>
+                                    </div>
+                                </td>
+                                <td>개발팀</td>
+                                <td>선임</td>
+                                <td>2025-05</td>
+                                <td class="text-end">3,500,000원</td>
+                                <td class="text-end"><strong class="text-success">2,890,000원</strong></td>
+                                <td><span class="badge bg-success">발급완료</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" id="previewBtn"
+                                            data-emp="emp-201" data-date="2025-05">
+                                            <i class="fas fa-eye"></i> 미리보기
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" id="downloadBtn"
+                                            data-emp="emp-201" data-date="2025-05">
+                                            <i class="fas fa-download"></i> 다운로드
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="form-check-input"></td>
+                                <td><span class="badge bg-secondary">emp-202</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div
+                                            class="avatar-sm bg-warning rounded-circle d-flex align-items-center justify-content-center me-2">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                        <strong>이영희</strong>
+                                    </div>
+                                </td>
+                                <td>영업팀</td>
+                                <td>주임</td>
+                                <td>2025-05</td>
+                                <td class="text-end">3,200,000원</td>
+                                <td class="text-end"><strong class="text-success">2,720,000원</strong></td>
+                                <td><span class="badge bg-success">발급완료</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" id="previewBtn2"
+                                            data-emp="emp-202" data-date="2025-05">
+                                            <i class="fas fa-eye"></i> 미리보기
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" id="downloadBtn2"
+                                            data-emp="emp-202" data-date="2025-05">
+                                            <i class="fas fa-download"></i> 다운로드
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="form-check-input"></td>
+                                <td><span class="badge bg-secondary">emp-203</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div
+                                            class="avatar-sm bg-danger rounded-circle d-flex align-items-center justify-content-center me-2">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                        <strong>박민수</strong>
+                                    </div>
+                                </td>
+                                <td>인사팀</td>
+                                <td>대리</td>
+                                <td>2025-05</td>
+                                <td class="text-end">3,800,000원</td>
+                                <td class="text-end"><strong class="text-success">3,120,000원</strong></td>
+                                <td><span class="badge bg-warning">처리중</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" data-emp="emp-203"
+                                            data-date="2025-05">
+                                            <i class="fas fa-eye"></i> 미리보기
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" data-emp="emp-203"
+                                            data-date="2025-05">
+                                            <i class="fas fa-download"></i> 다운로드
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox" class="form-check-input"></td>
+                                <td><span class="badge bg-secondary">emp-204</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div
+                                            class="avatar-sm bg-success rounded-circle d-flex align-items-center justify-content-center me-2">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                        <strong>최지은</strong>
+                                    </div>
+                                </td>
+                                <td>개발팀</td>
+                                <td>과장</td>
+                                <td>2025-05</td>
+                                <td class="text-end">4,200,000원</td>
+                                <td class="text-end"><strong class="text-success">3,450,000원</strong></td>
+                                <td><span class="badge bg-success">발급완료</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" data-emp="emp-204"
+                                            data-date="2025-05">
+                                            <i class="fas fa-eye"></i> 미리보기
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" data-emp="emp-204"
+                                            data-date="2025-05">
+                                            <i class="fas fa-download"></i> 다운로드
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                    window.open(url, "_blank", popupOptions);
-                });
-            </script>
-        </body>
-
-        </html>
+                <!-- 페이징 및 통계 정보 -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <small class="text-muted">총 4명 중 1-4명 표시</small>
+                            <div class="ms-3">
+                                <button class="btn btn-outline-primary btn-sm me-2">
+                                    <i class="fas fa-file-excel"></i> 엑셀 다운로드
+                                </button>
+                                <button class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-print"></i> 일괄 출력
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <nav>
+                            <ul class="pagination justify-content-end mb-0">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1">이전</a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">1</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">3</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">다음</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    <button id="btn1">ㅇㅇㅇ</button>
+    <script>
+        $("#btn1").on("click", function () {
+            let empIdx = 'emp-201'
+            let date = '2025-05'
+            url = `/hr/salary/report/preview/stub/${empIdx}/${date}`;
+
+            const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+
+            window.open(url, "_blank", popupOptions);
+        });
+    </script>
 </div>
