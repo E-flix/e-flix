@@ -44,6 +44,7 @@
             <result property="empRole" column="emp_role"/>
             <result property="empAccount" column="emp_account"/>
             <result property="empAddr" column="emp_addr"/>
+            <result property="empStatus" column="emp_status"/>
         </association>
     </resultMap>
 
