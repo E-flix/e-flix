@@ -47,9 +47,10 @@
         </association>
     </resultMap>
 
-    <select id="findAllUser" resultMap="userMgrResultMap">
+    <select id="findAllUserByCoIdx" parameterType="String" resultMap="userMgrResultMap">
         SELECT *
         FROM employees
+        WHERE co_idx = #{coIdx}
     </select>
 
     <select id="findAllEmployeeRole" resultType="EmployeeRoleDTO">

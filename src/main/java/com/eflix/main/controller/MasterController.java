@@ -27,7 +27,7 @@ public class MasterController {
 
         int existMstId = masterService.existMstId(mstId);
 
-        if(existMstId > 0) {
+        if(existMstId == 0) {
             result = ResUtil.makeResult(ResStatus.OK, null);
         } else {
             result = ResUtil.makeResult("400", "이미 존재하는 아이디 입니다.", null);

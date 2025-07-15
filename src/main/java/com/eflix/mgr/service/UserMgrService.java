@@ -9,7 +9,7 @@ public interface UserMgrService {
 
     public int insertUser(UserMgrDTO mgrUserDTO);
 
-    public List<UserMgrDTO> findAllUser();
+    public List<UserMgrDTO> findAllUserByCoIdx(String coIdx);
 
     public List<EmployeeRoleDTO> findAllEmployeeRoleDTO();
 
