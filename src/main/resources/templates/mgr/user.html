@@ -86,9 +86,9 @@
                                     <button type="button" class="btn btn-outline-warning px-4" onclick="editUser()">
                                         <i class="bi bi-pencil-square me-2"></i>수정
                                     </button>
-                                    <button type="button" class="btn btn-outline-danger px-4" onclick="deleteUser()">
+                                    <!-- <button type="button" class="btn btn-outline-danger px-4" onclick="deleteUser()">
                                         <i class="bi bi-trash me-2"></i>삭제
-                                    </button>
+                                    </button> -->
                                 </div>
                             </div>
                         </div>
@@ -411,94 +411,55 @@
 
         // AG-grid
         const userGridOptions = {
-            rowData: userDataList,
-            rowHeight: 45,
-            headerHeight: 40,
-            rowSelection: 'multiple',
-            defaultColDef: {
-                resizable: true,
-                sortable: true,
-                filter: true,
-            },
-            columnDefs: [
-                {
-                    headerName: '',
-                    checkboxSelection: true,
-                    headerCheckboxSelection: true,
-                    width: 50,
-                    pinned: 'left'
-                },
-                { headerName: "사원번호", field: "empIdx", width: 110 },
-                {
-                    headerName: "이름",
-                    field: "empName",
-                    width: 150,
-                    cellRenderer: (params) => {
-                    return `
-                        <div class="d-flex align-items-center">
-                        <img src="${params.data.empImg}" class="rounded-circle me-2" width="32" height="32" />
-                        ${params.value}
-                        </div>
-                    `;
-                    }
-                },
-                { headerName: "이메일", field: "empEmail", flex: 1, cellStyle: { color: 'orange' } },
-                { headerName: "부서", field: "empDept", width: 130 },
-                { headerName: "직급", field: "empGrade", width: 90 },
-                {
-                    headerName: "권한",
-                    field: "empRole",
-                    width: 160,
-                    cellRenderer: (params) => {
-                    const role = params.value;
-                    let className = "badge bg-secondary";
-                    // if (role.includes("회계")) className = "badge bg-primary";
-                    // else if (role.includes("인사")) className = "badge bg-info";
-                    // else if (role.includes("영업")) className = "badge bg-warning";
-                    // else if (role.includes("없음")) className = "badge bg-light text-muted";
-                    // return `<span class="${className}">${role}</span>`;
-                    }
-                },
-                {
-                    headerName: "상태",
-                    field: "empStatus",
-                    width: 100,
-                    cellRenderer: (params) => {
-                    const status = params.value;
-                    const badgeClass = status === '재직중' ? 'bg-success' : 'bg-danger';
-                    return `<span class="badge ${badgeClass}">${status}</span>`;
-                    }
-                },
-                { headerName: "입사일", field: "empDate", width: 110 },
-                {
-                    headerName: "관리",
-                    field: "empIdx",
-                    width: 100,
-                    pinned: 'right',
-                    cellRenderer: () => {
-                    return `
-                        <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                        </div>
-                    `;
-                    }
-                }
-            ],
-            onGridReady: (params) => {
-                userGridOptions.api = params.api;
-                params.api.setGridOption("rowData", userDataList);
-                params.api.sizeColumnsToFit();
-            },
-            onSelectionChanged: (event) => {
-                const selectedRows = event.api.getSelectedRows();
-                console.log('선택된 행:', selectedRows);
-            }
-        };
+  rowData: userDataList,  // 서버에서 받은 데이터 (empIdx, empName, empDate, empStatus)
+  rowHeight: 45,
+  headerHeight: 40,
+  rowSelection: 'multiple',
+  defaultColDef: {
+    resizable: true,
+    sortable: true,
+    filter: true,
+  },
+  columnDefs: [
+    {
+      headerName: '',
+      checkboxSelection: true,
+      headerCheckboxSelection: true,
+      width: 50,
+      pinned: 'left'
+    },
+    { headerName: "사원번호", field: "empIdx", width: 110 },
+    { headerName: "이름", field: "empName", width: 150 },
+    {
+      headerName: "입사일",
+      field: "empDate",
+      width: 130,
+      valueFormatter: (params) => {
+        // 입사일이 문자열인 경우에도 YYYY-MM-DD 형식 유지
+        return params.value ? params.value.substring(0, 10) : '';
+      }
+    },
+    {
+      headerName: "상태",
+      field: "empStatus",
+      width: 100,
+      cellRenderer: (params) => {
+        const status = params.value;
+        const badgeClass = status === 'ES01' ? 'bg-success' : 'bg-danger';
+        return `<span class="badge ${badgeClass}">${status}</span>`;
+      }
+    }
+  ],
+  onGridReady: (params) => {
+    userGridOptions.api = params.api;
+    params.api.setGridOption("rowData", userDataList);
+    params.api.sizeColumnsToFit();
+  },
+  onSelectionChanged: (event) => {
+    const selectedRows = event.api.getSelectedRows();
+    console.log('선택된 행:', selectedRows);
+  }
+};
 
         $(document).ready(function () {
             init();
@@ -576,11 +537,11 @@
         function editUser() {
             const selectedRows = userGridOptions.api.getSelectedRows();
             if(selectedRows.length === 0) {
-                alert("수정할 사용자를 선택해주세요.");
+                Swal.fire("알림", "수정할 사원을 선택하세요.", "info");
                 return;
             }
             if(selectedRows.length > 1) {
-                alert("수정할 사용자를 하나만 선택해주세요.");
+                Swal.fire("알림", "수정할 사원을 한 명만 선택하세요.", "info");
                 return;
             }
             console.log("사용자 수정:", selectedRows[0]);

@@ -782,7 +782,7 @@
 
                                     <div class="row g-2 mb-3">
                                         <div class="col-12">
-                                            <small class="text-muted">선택된 모듈:</small>
+                                            <small class="text-muted">선택된 모듈:<div id="finalModule"></div></small>
                                             <div id="selectedModules" class="fw-semibold"></div>
                                         </div>
                                     </div>
@@ -809,9 +809,7 @@
                                             <i class="bi bi-shield-check me-2"></i>안전한 결제
                                         </h6>
                                         <ul class="mb-0 small">
-                                            <li>SSL 암호화로 안전하게 보호됩니다</li>
                                             <li>카드 정보는 저장되지 않습니다</li>
-                                            <li>PCI DSS 보안 표준을 준수합니다</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -824,7 +822,6 @@
                                         <ul class="mb-0 small">
                                             <li>즉시 서비스 이용 가능</li>
                                             <li>계정 정보 이메일 발송</li>
-                                            <li>온보딩 가이드 제공</li>
                                             <li>24시간 고객 지원</li>
                                         </ul>
                                     </div>
@@ -858,7 +855,7 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-pill fw-semibold" id="upload-tab" data-bs-toggle="tab"
+                            <button class="nav-link rounded-pill border fw-semibold" id="upload-tab" data-bs-toggle="tab"
                                 data-bs-target="#upload-pane" type="button" role="tab">
                                 <i class="fas fa-cloud-upload-alt me-2"></i>파일 업로드
                             </button>
@@ -937,11 +934,11 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-0 p-4">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>취소
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>취소
                     </button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold" id="saveSignature">
-                        <i class="fas fa-save me-2"></i>저장하기
+                    <button type="button" class="btn btn-primary px-4 fw-semibold" id="saveSignature">
+                        <i class="fas fa-save"></i>저장하기
                     </button>
                 </div>
             </div>
@@ -1195,7 +1192,7 @@
                 type: "GET",
                 url: `/master/exist?mstId=${mstId}`,
                 success: function (res) {
-                    if (res.head.res_code === 200) {
+                    if (res.head.res_code === "200") {
                         generateContractHTML();
                         showStep(3);
                     } else {
@@ -1214,22 +1211,21 @@
         // 최종 결제 금액 및 요약 출력 (4단계)
         function updateFinalSummary() {
             const period = $('#selectedPeriod').val();
-            const selectedModules = $('.toggle-module.active');
-            const moduleCount = selectedModules.length;
-            const selectedLabels = selectedModules.map(function () {
-                return $(this).text().trim();
-            }).get();
+            const selectedModules = $('#selectedModules').val();
+            console.log(period);
+            console.log(selectedModules);
 
-            const pricePerModulePerMonth = spkPrice; // 기본 요금: 부가세 포함
+            const pricePerModulePerMonth = spkPrice * 12; // 기본 요금: 부가세 포함
             const totalPrice = pricePerModulePerMonth // 부가세 포함 금액
             const vat = Math.round(totalPrice / 10); // 실제 부가세 금액만 따로 보여주기
             const basePrice = totalPrice - vat; // 순수 공급가 계산
 
             const formatCurrency = amount => '₩' + amount.toLocaleString('ko-KR') + '.00';
             const periodTextMap = { "1": "1개월 구독", "3": "6개월 구독", "12": "1년 구독" };
+            console.log(`${periodTextMap[period]}, ${formatCurrency(totalPrice)} / ${period === "12" ? "년" : "개월"} 지불`);
 
             $('#final-subscription-summary').text(`${periodTextMap[period]}, ${formatCurrency(totalPrice)} / ${period === "12" ? "년" : "개월"} 지불`);
-            $('#selectedModules').html(selectedLabels.join(', '));
+            $('#finalModule').html($('#selectedModules').text());
             $('#basePrice').text(formatCurrency(basePrice)); // 공급가
             $('#vatAmount').text(formatCurrency(vat)); // 부가세
             $('#totalAmount').text(formatCurrency(totalPrice)); // 총액
@@ -1664,7 +1660,7 @@
                 signatureFile.value = '';
                 currentSignature = null;
 
-                alert('서명이 저장되었습니다.');
+                Swal.fire("성공", "서명이 정상적으로 등록되었습니다.", "success");
             }
         });
 
@@ -1800,7 +1796,21 @@
                 success: function (res) {
                     if (res.head.res_code === "200") {
                         Swal.fire("성공", "구독이 성공적으로 이루어졌습니다.", "success");
-                        window.location.href = "/";
+                        Swal.fire({
+                            title: '구독 완료',
+                            html: `
+                                <div class="text-start">
+                                    <p><strong>회사코드:</strong> ${coIdx}</p>
+                                    <p><strong>마스터 아이디:</strong> ${mstId}</p>
+                                </div>
+                            `,
+                            icon: 'success',
+                            confirmButtonText: '확인'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = "/";
+                            }
+                        });
                     } else {
                         Swal.fire("실패", res.head.res_result || "구독 등록 실패", "error");
                     }
