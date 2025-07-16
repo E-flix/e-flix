@@ -216,4 +216,11 @@
   WHERE CUSTOMER_CD = #{customerCd} AND CO_IDX = #{coIdx}
 </update>
 
+  <update id="softDeleteCustomer">
+        UPDATE CUSTOMERS
+        SET USE_YN = 'N',
+            UPD_DT = SYSDATE
+        WHERE CUSTOMER_CD = #{customerCd} AND CO_IDX = #{coIdx}
+  </update>
+
 </mapper>

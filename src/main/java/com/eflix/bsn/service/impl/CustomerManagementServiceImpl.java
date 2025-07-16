@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,8 +95,22 @@ public class CustomerManagementServiceImpl implements CustomerManagementService 
         return result;
     }
 
+
+    @Override
+    @Transactional
+    public void deleteCustomer(String customerCd) {
+        String coIdx = AuthUtil.getCoIdx();
+        log.info("거래처 비활성화 요청: coIdx={}, customerCd={}", coIdx, customerCd);
+
+        int updatedRows = customerMapper.softDeleteCustomer(customerCd, coIdx);
+        if (updatedRows == 0) {
+            throw new RuntimeException("삭제할 거래처를 찾을 수 없거나 권한이 없습니다.");
+        }
+        log.info("거래처 비활성화 완료: {}", customerCd);
+    }
+
     private synchronized String generateNextCustomerCd() {
-        String prefix = "cus";
+        String prefix = "CUS";
         // 데이터베이스에서 'cus'로 시작하는 코드 중 가장 큰 숫자 부분을 조회합니다.
         Integer maxSequence = customerMapper.findMaxCustomerSequence(prefix);
         
@@ -107,4 +120,7 @@ public class CustomerManagementServiceImpl implements CustomerManagementService 
         // 'cus' + 4자리 숫자 형식으로 포맷팅하여 반환합니다.
         return prefix + String.format("%04d", nextSequence);
     }
+
+
+
 }
