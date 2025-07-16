@@ -353,7 +353,7 @@
             <div class="feature-icon d-inline-block">
                 <i class="bi bi-microsoft"></i>
             </div>
-            <h2 class="d-inline-block align-middle fw-bold ms-3">E-FELIX - Business <span
+            <h2 class="d-inline-block align-middle fw-bold ms-3" id="spkTitle">E-FELIX - Business <span
                     class="text-primary">Standard</span></h2>
         </div>
 
@@ -428,23 +428,26 @@
                                 <label class="form-label fw-bold mb-3">구독 기간 선택</label>
                                 <div class="row g-2">
                                     <div class="col-md-4">
-                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period" data-value="1">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period"
+                                            data-value="1">
                                             <i class="bi bi-calendar-month d-block fs-4 mb-2"></i>1개월
                                         </button>
                                     </div>
                                     <div class="col-md-4">
-                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period" data-value="3">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period"
+                                            data-value="3">
                                             <i class="bi bi-calendar3 d-block fs-4 mb-2"></i>3개월
                                         </button>
                                     </div>
                                     <div class="col-md-4">
-                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period" data-value="12">
+                                        <button type="button" class="btn btn-outline-primary w-100 py-3 toggle-period"
+                                            data-value="12">
                                             <i class="bi bi-calendar2-fill d-block fs-4 mb-2"></i>1년
                                             <span class="badge bg-success small">추천</span>
                                         </button>
                                     </div>
                                 </div>
-                                
+
                                 <!-- 선택된 구독 기간 hidden input (폼 제출용) -->
                                 <input type="hidden" name="selectedPeriod" id="selectedPeriod" value="12">
                             </div>
@@ -458,8 +461,8 @@
                             </div>
 
                             <div class="checkout-summary">
-                                <div class="fw-bold mb-2 fs-5">E-FELIX - Business Standard</div>
-                                <div class="text-muted mb-3" id="subscription-summary">1년 구독, ₩202,800 / 년 지불</div>
+                                <div class="fw-bold mb-2 fs-5 spk-title">E-FELIX - Business Standard</div>
+                                <div class="text-muted mb-3" id="subscription-summary">1년 구독, ₩0 / 년 지불</div>
 
                                 <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                                     <div>
@@ -467,7 +470,7 @@
                                         <br>
                                         <small class="text-muted">(세금이 포함되지 않음)</small>
                                     </div>
-                                    <span class="price-box" id="resultPrice">₩202,800.00</span>
+                                    <span class="price-box" id="resultPrice">₩0</span>
                                 </div>
                             </div>
 
@@ -480,7 +483,7 @@
 
                         <!-- Right -->
                         <div class="col-md-5">
-                            <h5 class="fw-bold">E-FELIX - Business Standard</h5>
+                            <h5 class="fw-bold spk-title">E-FELIX - Business Standard</h5>
                             <p class="mb-3">제품 하이라이트</p>
                             <ul>
                                 <li><strong>[인사]</strong> 인사 문서, 근태표, 인사평가 및 급여 명세를 효율적으로 관리하세요.</li>
@@ -604,7 +607,7 @@
                                 </h6>
 
                                 <div class="bg-white p-3 rounded border">
-                                    <div class="fw-bold mb-1">E-FELIX - Business Standard</div>
+                                    <div class="fw-bold mb-1 spk-title">E-FELIX - Business Standard</div>
                                     <div class="text-muted mb-2" id="subscription-summary-2">1년 구독, ₩202,800 / 년 지불
                                     </div>
 
@@ -614,7 +617,7 @@
                                             <br>
                                             <small class="text-muted">(세금이 포함되지 않음)</small>
                                         </div>
-                                        <div class="fw-bold text-end price-box" id="price-display">₩202,800.00</div>
+                                        <div class="fw-bold text-end price-box" id="price-display">₩0</div>
                                     </div>
                                 </div>
 
@@ -736,22 +739,24 @@
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <!-- 간편결제 수단 선택 -->
                             <div id="easyPayOptions" class="d-none mt-3">
                                 <label class="form-label fw-semibold mb-2">간편결제 수단 선택</label>
                                 <div class="d-flex gap-3">
-                                    <button type="button" class="btn btn-outline-warning flex-fill easy-pay-btn" data-method="kakaopay">
+                                    <button type="button" class="btn btn-outline-warning flex-fill easy-pay-btn"
+                                        data-method="kakaopay">
                                         <i class="bi bi-chat-dots-fill me-2"></i>카카오페이
                                     </button>
-                                    <button type="button" class="btn btn-outline-success flex-fill easy-pay-btn" data-method="naverpay">
+                                    <button type="button" class="btn btn-outline-success flex-fill easy-pay-btn"
+                                        data-method="naverpay">
                                         <i class="bi bi-shop-window me-2"></i>네이버페이
                                     </button>
                                 </div>
                                 <!-- 선택된 결제 수단 hidden input -->
                                 <input type="hidden" id="selectedEasyPayMethod" name="easyPayMethod" value="">
                             </div>
-                           
+
                             <div class="d-flex justify-content-between mt-4">
                                 <button class="btn btn-outline-secondary" id="back-to-step-3">
                                     <i class="bi bi-arrow-left me-2"></i>이전
@@ -771,13 +776,13 @@
                                 </h6>
 
                                 <div class="bg-white p-3 rounded border">
-                                    <div class="fw-bold mb-2">E-FELIX - Business Standard</div>
-                                    <div class="text-muted mb-2" id="final-subscription-summary">1년 구독, ₩202,800 / 년 지불
+                                    <div class="fw-bold mb-2 spk-title">E-FELIX - Business Standard</div>
+                                    <div class="text-muted mb-2" id="final-subscription-summary">1년 구독, ₩0 / 년 지불
                                     </div>
 
                                     <div class="row g-2 mb-3">
                                         <div class="col-12">
-                                            <small class="text-muted">선택된 모듈:</small>
+                                            <small class="text-muted">선택된 모듈:<div id="finalModule"></div></small>
                                             <div id="selectedModules" class="fw-semibold"></div>
                                         </div>
                                     </div>
@@ -785,7 +790,7 @@
                                     <div class="border-top pt-3">
                                         <div class="d-flex justify-content-between mb-2">
                                             <span>기본 요금</span>
-                                            <span id="basePrice">₩202,800.00</span>
+                                            <span id="basePrice">₩0</span>
                                         </div>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span>부가세 (10%)</span>
@@ -804,9 +809,7 @@
                                             <i class="bi bi-shield-check me-2"></i>안전한 결제
                                         </h6>
                                         <ul class="mb-0 small">
-                                            <li>SSL 암호화로 안전하게 보호됩니다</li>
                                             <li>카드 정보는 저장되지 않습니다</li>
-                                            <li>PCI DSS 보안 표준을 준수합니다</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -819,7 +822,6 @@
                                         <ul class="mb-0 small">
                                             <li>즉시 서비스 이용 가능</li>
                                             <li>계정 정보 이메일 발송</li>
-                                            <li>온보딩 가이드 제공</li>
                                             <li>24시간 고객 지원</li>
                                         </ul>
                                     </div>
@@ -853,7 +855,7 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-pill fw-semibold" id="upload-tab" data-bs-toggle="tab"
+                            <button class="nav-link rounded-pill border fw-semibold" id="upload-tab" data-bs-toggle="tab"
                                 data-bs-target="#upload-pane" type="button" role="tab">
                                 <i class="fas fa-cloud-upload-alt me-2"></i>파일 업로드
                             </button>
@@ -932,11 +934,11 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-0 p-4">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>취소
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>취소
                     </button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold" id="saveSignature">
-                        <i class="fas fa-save me-2"></i>저장하기
+                    <button type="button" class="btn btn-primary px-4 fw-semibold" id="saveSignature">
+                        <i class="fas fa-save"></i>저장하기
                     </button>
                 </div>
             </div>
@@ -1020,7 +1022,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script th:inline="javascript">
-         // 간편결제 버튼 누르면 결제 수단 버튼 표시
+        // 간편결제 버튼 누르면 결제 수단 버튼 표시
         $('#btnEasyPay').on('click', function () {
             $('#easyPayOptions').removeClass('d-none').hide().slideDown();
         });
@@ -1039,6 +1041,10 @@
 
         // 페이지 로딩 시 초기 설정
         $(document).ready(function () {
+            const spkName = /*[[${subscriptionPackage.spkName}]]*/ "";
+            $("#spkTitle").html(`E-FELIX - <span
+                    class="text-primary">${spkName}</span>`);
+            $(".spk-title").html(`E-FELIX - ${spkName}`);
             // 가입자 정보 자동 입력 체크박스 이벤트 등록
             $('#sameAsSubscriber').change(handleSubscriberInfoCheckbox);
 
@@ -1083,7 +1089,9 @@
                                 icon: 'question'
                             }).then(result => {
                                 if (result.isConfirmed) {
-                                    window.location.href="/mypage";
+                                    window.location.href = "/mypage";
+                                } else {
+                                    $("#sameAsSubscriber").prop('checked', false);
                                 }
                             });
                         }
@@ -1128,14 +1136,14 @@
         function handleStep2Transition() {
             const $selected = $(".toggle-module.active");
 
-            if($selected.length <= 1) {
+            if ($selected.length <= 1) {
                 Swal.fire("알림", "2개 이상의 모듈을 선택해주세요.", "info");
                 return;
             }
 
             const $selectedPeriod = $(".toggle-period.active");
 
-            if($selectedPeriod.length <= 0) {
+            if ($selectedPeriod.length <= 0) {
                 Swal.fire("알림", "구독 기간을 선택해주세요.", "info");
                 return;
             }
@@ -1148,10 +1156,15 @@
             const highlightHtml = checkedServices.map(service => highlightMap[service] || '').join('');
 
             $('#highlight-list').html(highlightHtml);
+            updateSummary();
             showStep(2);
         }
 
         function handleStep3Transition() {
+            if (!($("#sameAsSubscriber").is(':checked'))) {
+                Swal.fire("알림", `회사 정보를 불러와주세요.`, "info");
+                return;
+            }
             const fields = [
                 { sel: '#mstId', msg: '마스터 ID' },
                 { sel: '#mstName', msg: '이름' },
@@ -1177,9 +1190,9 @@
             const mstId = $("#mstId").val();
             $.ajax({
                 type: "GET",
-                url: `/compnay/master/exist?mstId=${mstId}`,
-                success: function(res) {
-                    if(res.head.res_code === 200) {
+                url: `/master/exist?mstId=${mstId}`,
+                success: function (res) {
+                    if (res.head.res_code === "200") {
                         generateContractHTML();
                         showStep(3);
                     } else {
@@ -1188,7 +1201,7 @@
                         return;
                     }
                 },
-                error: function(xhr, status, err) {
+                error: function (xhr, status, err) {
                     console.error(err);
                     Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
                 }
@@ -1198,22 +1211,21 @@
         // 최종 결제 금액 및 요약 출력 (4단계)
         function updateFinalSummary() {
             const period = $('#selectedPeriod').val();
-            const selectedModules = $('.toggle-module.active');
-            const moduleCount = selectedModules.length;
-            const selectedLabels = selectedModules.map(function () {
-                return $(this).text().trim();
-            }).get();
+            const selectedModules = $('#selectedModules').val();
+            console.log(period);
+            console.log(selectedModules);
 
-            const pricePerModulePerMonth = spkPrice; // 기본 요금: 부가세 포함
+            const pricePerModulePerMonth = spkPrice * 12; // 기본 요금: 부가세 포함
             const totalPrice = pricePerModulePerMonth // 부가세 포함 금액
             const vat = Math.round(totalPrice / 10); // 실제 부가세 금액만 따로 보여주기
             const basePrice = totalPrice - vat; // 순수 공급가 계산
 
             const formatCurrency = amount => '₩' + amount.toLocaleString('ko-KR') + '.00';
             const periodTextMap = { "1": "1개월 구독", "3": "6개월 구독", "12": "1년 구독" };
+            console.log(`${periodTextMap[period]}, ${formatCurrency(totalPrice)} / ${period === "12" ? "년" : "개월"} 지불`);
 
             $('#final-subscription-summary').text(`${periodTextMap[period]}, ${formatCurrency(totalPrice)} / ${period === "12" ? "년" : "개월"} 지불`);
-            $('#selectedModules').html(selectedLabels.join(', '));
+            $('#finalModule').html($('#selectedModules').text());
             $('#basePrice').text(formatCurrency(basePrice)); // 공급가
             $('#vatAmount').text(formatCurrency(vat)); // 부가세
             $('#totalAmount').text(formatCurrency(totalPrice)); // 총액
@@ -1229,6 +1241,15 @@
 
         // 모듈 버튼 선택 처리 및 상호 비활성화 설정
         function setupModuleSelection() {
+            if (spkIdx === "spk-103") {
+                $('.toggle-module').each(function () {
+                    const $btn = $(this);
+                    $btn.addClass('active');
+                    $btn.prop('disabled', false);
+                    selected.add($btn.data('value'));
+                });
+                $('#selectedModules').val(Array.from(selected).join(','));
+            }
             $('.toggle-module').on('click', function () {
                 const $this = $(this);
                 const value = $this.data('value');
@@ -1248,14 +1269,13 @@
                 } else if (groupB.includes(value)) {
                     $this.hasClass('active') ? disableModules(groupA) : resetDisabledIfNoneSelected(groupB, groupA);
                 }
-
                 updateSummary();
             });
         }
 
         // 구독기간 버튼 선택 처리 및 상호 비활성화 설정
         function setupPeriodSelection() {
-            $('.toggle-period').on('click', function() {
+            $('.toggle-period').on('click', function () {
                 $('.toggle-period').removeClass('active');
 
                 $(this).addClass('active');
@@ -1339,6 +1359,7 @@
             const displayPeriod = periodValue === "12" ? "1년" : periodValue + "개월";
 
             $('#subscription-summary').text(`${displayPeriod} 구독, ₩${price.toLocaleString()} / ${billingText} 지불`);
+            $('#subscription-summary-2').text(`${displayPeriod} 구독, ₩${price.toLocaleString()} / ${billingText} 지불`);
             $('#price-display').text(`₩${price.toLocaleString()}`);
             $('#resultPrice').text(`₩${price.toLocaleString()}`);
         }
@@ -1639,7 +1660,7 @@
                 signatureFile.value = '';
                 currentSignature = null;
 
-                alert('서명이 저장되었습니다.');
+                Swal.fire("성공", "서명이 정상적으로 등록되었습니다.", "success");
             }
         });
 
@@ -1775,7 +1796,21 @@
                 success: function (res) {
                     if (res.head.res_code === "200") {
                         Swal.fire("성공", "구독이 성공적으로 이루어졌습니다.", "success");
-                        window.location.href = "/";
+                        Swal.fire({
+                            title: '구독 완료',
+                            html: `
+                                <div class="text-start">
+                                    <p><strong>회사코드:</strong> ${coIdx}</p>
+                                    <p><strong>마스터 아이디:</strong> ${mstId}</p>
+                                </div>
+                            `,
+                            icon: 'success',
+                            confirmButtonText: '확인'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = "/";
+                            }
+                        });
                     } else {
                         Swal.fire("실패", res.head.res_result || "구독 등록 실패", "error");
                     }
@@ -1790,6 +1825,8 @@
 
         const spkPrice = /*[[${subscriptionPackage.spkPrice}]]*/ ""
         const spkIdx = /*[[${subscriptionPackage.spkIdx}]]*/ ""
+
+
 
         // V2 결제
         // function Checkout() {

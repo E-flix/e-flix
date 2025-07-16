@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
+        }),
+        delete: (customerCd) => fetchData(`/bsn/customer-management/${customerCd}`, {
+            method: 'DELETE'
         })
     };
 
@@ -115,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(customerGridApi) customerGridApi.deselectAll();
     };
 
-    // ===== 저장 로직 =====
+    // ===== 저장 및 삭제 로직 =====
     const saveCustomer = async () => {
         const customerNm = document.getElementById('customerNm').value;
         if (!customerNm || customerNm.trim() === '') {
@@ -165,13 +168,45 @@ document.addEventListener('DOMContentLoaded', () => {
             // fetchData에서 오류 처리
         }
     };
+    
+    const deleteCustomer = async () => {
+        const customerCd = document.getElementById('customerCd').value;
+        const customerNm = document.getElementById('customerNm').value;
+
+        if (!customerCd) {
+            Swal.fire('알림', '삭제할 거래처를 선택해주세요.', 'warning');
+            return;
+        }
+
+        const result = await Swal.fire({
+            title: '거래처 비활성화',
+            html: `<strong>${customerNm} (${customerCd})</strong> 거래처와의 거래를 중단하시겠습니까?<br><small class="text-danger mt-2">이 작업은 거래처를 목록에서 숨기며, 되돌릴 수 있습니다.</small>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74a3b',
+            confirmButtonText: '예, 비활성화합니다',
+            cancelButtonText: '취소'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await API.delete(customerCd);
+                if (response.success) {
+                    Swal.fire('처리 완료', response.message, 'success');
+                    // [수정] 삭제 성공 후 폼을 비우고, 그리드를 새로고침합니다.
+                    clearForm();
+                    await loadCustomerList();
+                }
+            } catch (error) {
+                // fetchData에서 오류를 이미 처리하므로 별도 처리가 필요 없습니다.
+            }
+        }
+    };
 
     // ===== 이벤트 리스너 바인딩 =====
     document.getElementById('btnNew').addEventListener('click', clearForm);
     document.getElementById('btnSave').addEventListener('click', saveCustomer);
-    document.getElementById('btnDelete').addEventListener('click', () => {
-        Swal.fire('뭘봐', '구현할거임 ㅅㄱ', 'info');
-    });
+    document.getElementById('btnDelete').addEventListener('click', deleteCustomer);
 
     // ===== 초기화 실행 =====
     initCustomerGrid();

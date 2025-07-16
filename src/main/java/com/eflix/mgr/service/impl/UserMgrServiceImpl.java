@@ -22,9 +22,6 @@ public class UserMgrServiceImpl implements UserMgrService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private AuthContext authContext;
-
     @Override
     public int insertUser(UserMgrDTO mgrUserDTO) {
         mgrUserDTO.getEmployeeDTO().setCoIdx(AuthUtil.getCoIdx());
@@ -33,8 +30,8 @@ public class UserMgrServiceImpl implements UserMgrService {
     }
 
     @Override
-    public List<UserMgrDTO> findAllUser() {
-        return userMgrMapper.findAllUser();
+    public List<UserMgrDTO> findAllUserByCoIdx(String coIdx) {
+        return userMgrMapper.findAllUserByCoIdx(coIdx);
     }
 
     @Override

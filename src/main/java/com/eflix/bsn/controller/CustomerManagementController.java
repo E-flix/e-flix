@@ -49,4 +49,18 @@ public class CustomerManagementController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
+
+    /**
+     * 특정 거래처를 논리적으로 삭제(비활성화)
+     */
+    @DeleteMapping("/{customerCd}")
+    public ResponseEntity<Map<String, Object>> deleteCustomer(@PathVariable String customerCd) {
+        try {
+            customerManagementService.deleteCustomer(customerCd);
+            return ResponseEntity.ok(Map.of("success", true, "message", "거래처가 비활성화 처리되었습니다."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 }

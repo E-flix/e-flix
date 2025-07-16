@@ -11,40 +11,15 @@
 ============================================ -->
 
 <head>
-    <title>급여항목</title>
+    <title>급여 항목</title>
 </head>
 
 <div layout:fragment="content">
-    <!-- 메인 콘텐츠 -->
-    <div class="container-fluid px-4 py-3">
-        <!-- 페이지 헤더 -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
-                    <div>
-                        <h4 class="mb-1 fw-bold text-dark">
-                            <i class="fas fa-coins text-primary me-2"></i>급여항목 관리
-                        </h4>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb mb-0 small">
-                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">인사관리</a></li>
-                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">급여관리</a></li>
-                                <li class="breadcrumb-item active">급여항목</li>
-                            </ol>
-                        </nav>
-                    </div>
-                    <div>
-                        <button class="btn btn-success btn-sm me-2" data-bs-toggle="modal" data-bs-target="#itemModal" id="addModal">
-                            <i class="fas fa-plus me-1"></i>항목 추가
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-download me-1"></i>엑셀 다운로드
-                        </button>
-                    </div>
-                </div>
-            </div>
+    <div class="w-100" id="empList">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>급여 항목</h3>
         </div>
-
+    </div>
         <!-- 검색 필터 -->
         <div class="row mb-4">
             <div class="col-12">
@@ -110,12 +85,15 @@
                                 <span class="badge bg-primary ms-2">총 5건</span>
                             </h6>
                             <div class="d-flex align-items-center">
-                                <small class="text-muted me-3">페이지당 표시:</small>
+                                <small class="text-muted me-2">페이지당 표시:</small>
                                 <select class="form-select form-select-sm" style="width: 80px;">
                                     <option>10</option>
                                     <option>20</option>
                                     <option>50</option>
                                 </select>
+                                 <button class="btn btn-success btn-sm me-2 ml-2" data-bs-toggle="modal" data-bs-target="#itemModal" id="addModal">
+                                    <i class="fas fa-plus me-1"></i>항목 추가
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -158,7 +136,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- 급여항목 추가/수정 모달 -->
     <div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
@@ -451,6 +428,7 @@
                     success: function(res) {
                         if(res.head.res_code === "200"){
                             Swal.fire("성공", "정상적으로 등록되었습니다.", "success");
+                            window.location.reload();
                         } else {
                             Swal.fire("실패", "등록에 실패했습니다.", "error");
                         }
@@ -522,7 +500,7 @@
                 $.each(items, function(i, item) {
                     const typeBG = item.type === "SM01" ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger";
                     const type = item.type === "SM01" ? "지급" : "공제";
-                    const calcType = item.calcType === "CA1" ? "고정금액" : item.calcType === "CA2"? "비율" : "수식";
+                    const calcType = item.calcType === "CA01" ? "고정금액" : item.calcType === "CA02"? "비율" : "수식";
                     const targetDept = item.targetDept !== "" ? item.targetDeptName : "전체";
                     const useStatus = item.useStatus === "Y" ? "사용중" : "미사용";
                     const useStatusBG = item.useStatus === "Y" ? "bg-success" : "bg-danger";

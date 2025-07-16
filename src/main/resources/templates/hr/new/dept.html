@@ -12,249 +12,126 @@
 ============================================ -->
 
 <head>
-    <title>부서관리</title>
+    <title>부서 관리</title>
 </head>
 <div layout:fragment="content">
-    <div class="container-fluid">
-        <!-- 헤더 영역 -->
-        <div class="row bg-white shadow-sm mb-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center py-3">
-                    <div>
-                        <h3 class="mb-0 text-primary fw-bold">
-                            <i class="bi bi-building me-2"></i>부서관리
-                        </h3>
-                        <small class="text-muted">인사관리 > 부서관리</small>
-                    </div>
-                    <div>
-                        <button class="btn btn-outline-primary me-2" id="refreshBtn">
-                            <i class="bi bi-arrow-clockwise me-1"></i>새로고침
-                        </button>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deptModal" id="addDeptModal">
-                            <i class="bi bi-plus-circle me-1"></i>부서등록
-                        </button>
+    <div class="w-100">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>부서 관리</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="d-flex justify-content-end mb-2 gap-2">
+            <button class="btn btn-sm btn-outline-primary me-2" id="refreshBtn">
+                <i class="bi bi-arrow-clockwise me-1"></i>새로고침
+            </button>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#deptModal" id="addDeptModal">
+                <i class="bi bi-plus-circle me-1"></i>부서등록
+            </button>
+        </div>
+        <!-- 좌측 - 부서 트리 구조 -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="bi bi-diagram-3 me-2"></i>부서구조
+                    </h6>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tree-structure">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <div class="d-flex align-items-center p-2 rounded hover-bg-light">
+                                    <i class="bi bi-building-fill text-primary me-2"></i>
+                                    <strong>전체 부서</strong>
+                                    <span class="badge bg-secondary ms-auto" id="totalEmpCount">68명</span>
+                                </div>
+                                <ul class="list-unstyled ps-3 mt-2" id="deptTreeBody">
+
+                                </ul>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <!-- 좌측 - 부서 트리 구조 -->
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h6 class="mb-0">
-                            <i class="bi bi-diagram-3 me-2"></i>부서구조
-                        </h6>
-                    </div>
-                    <div class="card-body p-2">
-                        <div class="tree-structure">
-                            <ul class="list-unstyled">
-                                <li class="mb-2">
-                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
-                                        <i class="bi bi-building-fill text-primary me-2"></i>
-                                        <strong>전체 부서</strong>
-                                        <span class="badge bg-secondary ms-auto" id="totalEmpCount">68명</span>
-                                    </div>
-                                    <ul class="list-unstyled ps-3 mt-2" id="deptTreeBody">
-                                        <!-- 경영본부 -->
-                                        <li class="mb-1">
-                                            <div class="d-flex align-items-center p-2 rounded hover-bg-light tree-parent"
-                                                data-target="management-sub">
-                                                <i class="bi bi-caret-right-fill me-2 tree-toggle"></i>
-                                                <i class="bi bi-building me-2 text-primary"></i>
-                                                <strong>경영본부</strong>
-                                                <span class="badge bg-warning ms-auto">18명</span>
-                                            </div>
-                                            <ul class="list-unstyled ps-4 mt-1 tree-children" id="management-sub"
-                                                style="display: none;">
-                                                <li class="mb-1">
-                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
-                                                        <i class="bi bi-dot me-2"></i>
-                                                        <i class="bi bi-people me-2 text-info"></i>
-                                                        경영지원팀
-                                                        <span class="badge bg-info ms-auto">8명</span>
-                                                    </div>
-                                                </li>
-                                                <li class="mb-1">
-                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
-                                                        <i class="bi bi-dot me-2"></i>
-                                                        <i class="bi bi-people me-2 text-info"></i>
-                                                        인사팀
-                                                        <span class="badge bg-info ms-auto">5명</span>
-                                                    </div>
-                                                </li>
-                                                <li class="mb-1">
-                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
-                                                        <i class="bi bi-dot me-2"></i>
-                                                        <i class="bi bi-people me-2 text-info"></i>
-                                                        재무팀
-                                                        <span class="badge bg-info ms-auto">5명</span>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </li>
-
-                                        <!-- 개발본부 -->
-                                        <li class="mb-1">
-                                            <div class="d-flex align-items-center p-2 rounded hover-bg-light tree-parent"
-                                                data-target="dev-sub">
-                                                <i class="bi bi-caret-right-fill me-2 tree-toggle"></i>
-                                                <i class="bi bi-building me-2 text-success"></i>
-                                                <strong>개발본부</strong>
-                                                <span class="badge bg-warning ms-auto">25명</span>
-                                            </div>
-                                            <ul class="list-unstyled ps-4 mt-1 tree-children" id="dev-sub"
-                                                style="display: none;">
-                                                <li class="mb-1">
-                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
-                                                        <i class="bi bi-dot me-2"></i>
-                                                        <i class="bi bi-code-slash me-2 text-success"></i>
-                                                        프론트엔드팀
-                                                        <span class="badge bg-info ms-auto">8명</span>
-                                                    </div>
-                                                </li>
-                                                <li class="mb-1">
-                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
-                                                        <i class="bi bi-dot me-2"></i>
-                                                        <i class="bi bi-code-slash me-2 text-success"></i>
-                                                        백엔드팀
-                                                        <span class="badge bg-info ms-auto">10명</span>
-                                                    </div>
-                                                </li>
-                                                <li class="mb-1">
-                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
-                                                        <i class="bi bi-dot me-2"></i>
-                                                        <i class="bi bi-code-slash me-2 text-success"></i>
-                                                        QA팀
-                                                        <span class="badge bg-info ms-auto">7명</span>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </li>
-
-                                        <!-- 영업본부 -->
-                                        <li class="mb-1">
-                                            <div class="d-flex align-items-center p-2 rounded hover-bg-light tree-parent"
-                                                data-target="sales-sub">
-                                                <i class="bi bi-caret-right-fill me-2 tree-toggle"></i>
-                                                <i class="bi bi-building me-2 text-warning"></i>
-                                                <strong>영업본부</strong>
-                                                <span class="badge bg-warning ms-auto">25명</span>
-                                            </div>
-                                            <ul class="list-unstyled ps-4 mt-1 tree-children" id="sales-sub"
-                                                style="display: none;">
-                                                <li class="mb-1">
-                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
-                                                        <i class="bi bi-dot me-2"></i>
-                                                        <i class="bi bi-megaphone me-2 text-warning"></i>
-                                                        마케팅팀
-                                                        <span class="badge bg-info ms-auto">12명</span>
-                                                    </div>
-                                                </li>
-                                                <li class="mb-1">
-                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
-                                                        <i class="bi bi-dot me-2"></i>
-                                                        <i class="bi bi-megaphone me-2 text-warning"></i>
-                                                        영업1팀
-                                                        <span class="badge bg-info ms-auto">8명</span>
-                                                    </div>
-                                                </li>
-                                                <li class="mb-1">
-                                                    <div class="d-flex align-items-center p-2 rounded hover-bg-light">
-                                                        <i class="bi bi-dot me-2"></i>
-                                                        <i class="bi bi-megaphone me-2 text-warning"></i>
-                                                        영업2팀
-                                                        <span class="badge bg-info ms-auto">5명</span>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
+        <!-- 우측 - 부서 목록 테이블 -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6 class="mb-0">
+                                <i class="bi bi-table me-2"></i>부서 목록
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-end">
+                                <div class="input-group" style="width: 300px;">
+                                    <input type="text" class="form-control form-control-sm" placeholder="부서명 검색..."
+                                        id="searchDeptName">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" id="searchDept">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-0">
+                            <thead class="">
+                                <tr>
+                                    <th width="10%" class="text-center">
+                                        <input type="checkbox" class="form-check-input position-static" id="checkAll">
+                                    </th>
+                                    <th width="12%" class="text-center">부서코드</th>
+                                    <th width="20%">부서명</th>
+                                    <th width="18%">상위부서</th>
+                                    <th width="12%" class="text-center">사원수</th>
+                                    <th width="13%">전화번호</th>
+                                    <th width="8%" class="text-center">상태</th>
+                                    <th width="7%" class="text-center">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deptListBody">
 
-            <!-- 우측 - 부서 목록 테이블 -->
-            <div class="col-md-9">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
-                                <h6 class="mb-0">
-                                    <i class="bi bi-table me-2"></i>부서 목록
-                                </h6>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex justify-content-end">
-                                    <div class="input-group" style="width: 300px;">
-                                        <input type="text" class="form-control form-control-sm" placeholder="부서명 검색..."
-                                            id="searchInput">
-                                        <button class="btn btn-outline-secondary btn-sm" type="button">
-                                            <i class="bi bi-search"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <button class="btn btn-sm btn-outline-danger me-2" id="deleteSelectedBtn">
+                                    <i class="bi bi-trash me-1"></i>선택삭제
+                                </button>
+                                <small class="text-muted">총 5개 부서 | 45명</small>
                             </div>
                         </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-bordered mb-0">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th width="10%" class="text-center">
-                                            <input type="checkbox" class="form-check-input position-static" id="checkAll">
-                                        </th>
-                                        <th width="12%" class="text-center">부서코드</th>
-                                        <th width="20%">부서명</th>
-                                        <th width="18%">상위부서</th>
-                                        <th width="12%" class="text-center">사원수</th>
-                                        <th width="13%">전화번호</th>
-                                        <th width="8%" class="text-center">상태</th>
-                                        <th width="7%" class="text-center">관리</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="deptListBody">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-light">
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center">
-                                    <button class="btn btn-sm btn-outline-danger me-2" id="deleteSelectedBtn">
-                                        <i class="bi bi-trash me-1"></i>선택삭제
-                                    </button>
-                                    <small class="text-muted">총 5개 부서 | 45명</small>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <nav aria-label="Page navigation">
-                                    <ul class="pagination pagination-sm justify-content-end mb-0">
-                                        <li class="page-item disabled">
-                                            <a class="page-link" href="#" tabindex="-1">이전</a>
-                                        </li>
-                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="#">다음</a>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            </div>
+                        <div class="col-md-6">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination pagination-sm justify-content-end mb-0" id="paginationArea">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" tabindex="-1">이전</a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">다음</a>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- 부서 등록/수정 모달 -->
     <div class="modal fade" id="deptModal" tabindex="-1" aria-labelledby="deptModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -312,10 +189,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="deptManager" class="form-label">부서장</label>
                                 <select id="deptManager" name="deptManager" class="form-select">
-                                    <option value="">부서장 선택</option>
-                                    <option value="EMP001">김철수</option>
-                                    <option value="EMP002">박영희</option>
-                                    <option value="EMP003">이민수</option>
+                                    <option value="">선택</option>
                                 </select>
                             </div>
                         </div>
@@ -340,10 +214,16 @@
     </div>
     <script>
         $(function () {
-            loadDepartment();
+            let currentPage = "1";
+            loadDepartment(1);
 
             $("#checkAll").on("change", function () {
                 $(".row-checkbox").prop("checked", this.checked);
+            });
+
+            $("#paginationArea").on("click", ".page-link", function(e) {
+                const page = parseInt($(this).data("page"), 10);
+                loadEmpList(page);
             });
 
             $(document).on("change", ".row-checkbox", function () {
@@ -368,7 +248,7 @@
                 $("#deptModal").modal("show");
             });
 
-            $("#addDeptModal").on("click", function() {
+            $("#addDeptModal").on("click", function () {
                 loadDeptUpIdx();
             });
 
@@ -391,12 +271,13 @@
 
             $("#deptAddBtn").on("click", function () {
                 const deptData = {
-                    deptIdx: $('#deptIdx').val(),
-                    deptName: $('#deptName').val(),
-                    deptUpIdx: $('#deptUpIdx').val(),
-                    deptStatus: $('#deptStatusSelect').val(),
-                    deptTel: $('#deptTel').val(),
-                    deptMemo: $('#deptMemo').val()
+                    deptIdx: $("#deptIdx").val(),
+                    deptName: $("#deptName").val(),
+                    deptUpIdx: $("#deptUpIdx").val(),
+                    deptStatus: $("#deptStatusSelect").val(),
+                    deptTel: $("#deptTel").val(),
+                    deptMemo: $("#deptMemo").val(),
+                    mgrIdx: $("#deptManager").val()
                 };
 
                 $.ajax({
@@ -474,45 +355,54 @@
                     type: "GET",
                     url: "/hr/dept/list/up",
                     success: function (res) {
-                        if(res.head.res_code === "200") {
+                        if (res.head.res_code === "200") {
                             const data = res.body;
 
                             const $deptUpIdx = $("#deptUpIdx");
                             $deptUpIdx.empty();
                             $deptUpIdx.append(`<option value="">선택</option>`);
 
-                            $.each(data, function(i, item) {
+                            $.each(data, function (i, item) {
                                 $deptUpIdx.append(`<option value="${item.deptIdx}">${item.deptName}</option>`);
                             });
 
-                            if(selectedDeptUpIdx) {
+                            if (selectedDeptUpIdx) {
                                 $deptUpIdx.val(selectedDeptUpIdx);
                             }
                         } else {
                             Swal.fire("실패", "상위 부서 목록을 불러오던 중 오류가 발생했습니다.", "error");
                         }
                     },
-                    error: function(xhr, status, err) {
+                    error: function (xhr, status, err) {
                         console.error(err);
                         Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
                     }
                 });
             }
 
-            function loadDepartment() {
+            function loadDepartment(page = 1) {
+                currentPage = page;
+
+                const searchData = {
+                    deptName: $("#searchDeptName").val(),
+                }
+
+                const queryString = $.param(searchData);
+
                 $.ajax({
                     type: "GET",
-                    url: "/hr/dept/list",
+                    url: `/hr/dept/list?${queryString}&page=${page}`,
                     success: function (res) {
                         if (res.head.res_code === "200") {
                             const data = res.body;
 
-                            const totalEmpCount = data
-                                .filter(dept => !dept.deptUpIdx || dept.deptUpIdx === '')
+                            const totalEmpCount = data.depts
+                                .filter(dept => !dept.deptUpIdx || dept.deptUpIdx === "")
                                 .reduce((sum, dept) => sum + (Number(dept.empCount) || 0), 0);
                             $("#totalEmpCount").text(`${totalEmpCount}명`);
-                            renderDeptTree(data);
-                            renderDeptList(data);
+                            renderDeptTree(data.depts);
+                            renderDeptList(data.depts);
+                            renderPagination(data.page, data.pageSize, data.total);
                         } else {
                             Swal.fire("실패", res.head.res_result, "error");
                         }
@@ -522,6 +412,32 @@
                         Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
                     }
                 })
+            }
+
+            function renderPagination(page, pageSize, total) {
+                const totalPages = Math.ceil(total / pageSize);
+                const $pagination = $("#paginationArea");
+                $pagination.empty();
+
+                $pagination.append(`
+                    <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                        <a class="page-link" data-page="${page - 1}">이전</a>
+                    </li>
+                `);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    $pagination.append(`
+                        <li class="page-item ${i === page ? 'active' : ''}">
+                            <a class="page-link" data-page="${i}">${i}</a>
+                        </li>
+                    `);
+                }
+
+                $pagination.append(`
+                    <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" data-page="${page + 1}">다음</a>
+                    </li>
+                `);
             }
 
             function buildDeptTreeMap(depts) {
@@ -555,15 +471,15 @@
                                 <div class="d-flex align-items-center p-2 rounded hover-bg-light ${hasChild ? 'tree-parent' : ''}"
                                     ${hasChild ? `data-target="tree-${dept.deptIdx}"` : ""}>
                                     ${hasChild
-                                        ? `<i class="bi bi-caret-right-fill me-2 tree-toggle"></i>`
-                                        : `<i class="bi bi-dot me-2"></i>`}
+                                ? `<i class="bi bi-caret-right-fill me-2 tree-toggle"></i>`
+                                : `<i class="bi bi-dot me-2"></i>`}
                                     <i class="bi bi-${hasChild ? 'building' : 'people'} me-2 text-${colorClass}"></i>
                                     ${dept.deptName}
                                     <span class="badge bg-${parentIdx === null ? 'warning' : 'info'} ms-auto">${dept.empCount}명</span>
                                 </div>
                                 ${hasChild
-                                    ? `<ul class="list-unstyled ps-4 mt-1 tree-children" id="tree-${dept.deptIdx}" style="display:none;">${childHtml}</ul>`
-                                    : ''}
+                                ? `<ul class="list-unstyled ps-4 mt-1 tree-children" id="tree-${dept.deptIdx}" style="display:none;">${childHtml}</ul>`
+                                : ''}
                             </li>
                         `;
                     });

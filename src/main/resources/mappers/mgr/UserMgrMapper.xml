@@ -44,12 +44,15 @@
             <result property="empRole" column="emp_role"/>
             <result property="empAccount" column="emp_account"/>
             <result property="empAddr" column="emp_addr"/>
+            <result property="empStatus" column="emp_status"/>
+            <result property="roleId" column="role_id"/>
         </association>
     </resultMap>
 
-    <select id="findAllUser" resultMap="userMgrResultMap">
+    <select id="findAllUserByCoIdx" parameterType="String" resultMap="userMgrResultMap">
         SELECT *
         FROM employees
+        WHERE co_idx = #{coIdx}
     </select>
 
     <select id="findAllEmployeeRole" resultType="EmployeeRoleDTO">

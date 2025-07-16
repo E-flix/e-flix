@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.eflix.common.res.ResUtil;
 import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
+import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.mgr.dto.UserMgrDTO;
 import com.eflix.mgr.service.UserMgrService;
 
@@ -22,8 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
-
 @Slf4j
 @RestController
 @RequestMapping("/mgr")
@@ -31,12 +30,17 @@ public class UserMgrRestController {
 
     @Autowired
     private UserMgrService userMgrService;
+
+    @Autowired
+    private String getCoIdx() {
+        return AuthUtil.getCoIdx();
+    }
     
     @GetMapping("/api/users")
     public ResponseEntity<ResResult> getUser(@RequestParam("type") String type) {
         ResResult result = null;
 
-        List<UserMgrDTO> userMgrDTOs = userMgrService.findAllUser();
+        List<UserMgrDTO> userMgrDTOs = userMgrService.findAllUserByCoIdx(getCoIdx());
 
         if(userMgrDTOs != null) {
             result = ResUtil.makeResult(ResStatus.OK, userMgrDTOs);

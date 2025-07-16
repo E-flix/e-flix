@@ -2,195 +2,166 @@
     layout:decorate="~{common/layouts/default}">
 
 <head>
-    <title>연차 신청</title>
+    <title>휴가 신청</title>
 </head>
 <div layout:fragment="content">
-    <div class="container-fluid py-4">
-        <!-- 헤더 섹션 -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h2 class="text-dark mb-1">
-                            <i class="bi bi-clipboard-check text-primary"></i> 휴가 승인 관리
-                        </h2>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">홈</a></li>
-                                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">인사관리</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">휴가 승인 관리</li>
-                            </ol>
-                        </nav>
-                    </div>
-                    <div class="text-end">
-                        <div class="text-muted small">오늘 날짜</div>
-                        <div class="fw-bold">2025-07-10 (목)</div>
+    <div class="w-100">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>휴가 관리</h3>
+        </div>
+    </div>
+
+    <!-- 검색 및 필터 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-search"></i> 검색 및 필터
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">승인 상태</label>
+                            <select class="form-select form-select-sm" id="searchStatus">
+                                <option value="">전체</option>
+                                <option value="AS01">대기</option>
+                                <option value="AS02">승인</option>
+                                <option value="AS03">반려</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">휴가 유형</label>
+                            <select class="form-select form-select-sm" id="searchReqType">
+                                <option value="">전체</option>
+                                <option value="AT01">연차</option>
+                                <option value="AT03">병가</option>
+                                <option value="AT05">개인사</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">신청일 범위</label>
+                            <input type="date" class="form-control form-control-sm" id="searchReqStart">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">～</label>
+                            <input type="date" class="form-control form-control-sm" id="searchReqEnd">
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-arrow-clockwise"></i> 초기화
+                                </button>
+                                <button type="submit" class="btn btn-sm btn-primary" id="searchBtn">
+                                    <i class="bi bi-search"></i> 검색
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- 검색 및 필터 -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
+    <!-- 승인 대기 현황 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-warning">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock-history text-warning fs-1"></i>
+                    <h4 class="mt-2 mb-1" id="pendingCount">5</h4>
+                    <p class="text-muted mb-0">승인 대기</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-success">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle text-success fs-1"></i>
+                    <h4 class="mt-2 mb-1" id="approvedCount">23</h4>
+                    <p class="text-muted mb-0">승인 완료</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-danger">
+                <div class="card-body text-center">
+                    <i class="bi bi-x-circle text-danger fs-1"></i>
+                    <h4 class="mt-2 mb-1" id="rejectedCount">2</h4>
+                    <p class="text-muted mb-0">반려</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-info">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-event text-info fs-1"></i>
+                    <h4 class="mt-2 mb-1" id="totalCount">30</h4>
+                    <p class="text-muted mb-0">총 신청</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 휴가 신청 목록 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
                         <h6 class="card-title mb-0">
-                            <i class="bi bi-search"></i> 검색 및 필터
+                            <i class="bi bi-list-check"></i> 휴가 신청 목록
                         </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">승인 상태</label>
-                                <select class="form-select" id="searchStatus">
-                                    <option value="">전체</option>
-                                    <option value="AS01">대기</option>
-                                    <option value="AS02">승인</option>
-                                    <option value="AS03">반려</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">휴가 유형</label>
-                                <select class="form-select" id="searchReqType">
-                                    <option value="">전체</option>
-                                    <option value="AT01">연차</option>
-                                    <option value="AT03">병가</option>
-                                    <option value="AT05">개인사</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">신청일 범위</label>
-                                <input type="date" class="form-control" id="searchReqStart">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">～</label>
-                                <input type="date" class="form-control" id="searchReqEnd">
-                            </div>
+                        <!-- 일괄 처리 버튼 -->
+                        <div class="row">
                             <div class="col-12">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button type="button" class="btn btn-outline-secondary">
-                                        <i class="bi bi-arrow-clockwise"></i> 초기화
+                                <div class="d-flex justify-content-start gap-2">
+                                    <button type="button" class="btn btn-sm btn-success" id="acceptBulkBtn">
+                                        <i class="bi bi-check-all"></i> 선택 항목 승인
                                     </button>
-                                    <button type="submit" class="btn btn-primary" id="searchBtn">
-                                        <i class="bi bi-search"></i> 검색
+                                    <button type="button" class="btn btn-sm btn-danger" id="rejectBulkBtn">
+                                        <i class="bi bi-x-circle"></i> 선택 항목 반려
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="text-center">
+                                        <input type="checkbox" class="form-check-input position-static" id="checkAll">
+                                    </th>
+                                    <th scope="col">신청자</th>
+                                    <th scope="col">부서</th>
+                                    <th scope="col">휴가 유형</th>
+                                    <th scope="col">휴가 기간</th>
+                                    <th scope="col">일수</th>
+                                    <th scope="col">신청일</th>
+                                    <th scope="col">상태</th>
+                                    <th scope="col" class="text-center">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaveRequestTable">
 
-        <!-- 승인 대기 현황 -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card shadow-sm border-warning">
-                    <div class="card-body text-center">
-                        <i class="bi bi-clock-history text-warning fs-1"></i>
-                        <h4 class="mt-2 mb-1" id="pendingCount">5</h4>
-                        <p class="text-muted mb-0">승인 대기</p>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-success">
-                    <div class="card-body text-center">
-                        <i class="bi bi-check-circle text-success fs-1"></i>
-                        <h4 class="mt-2 mb-1" id="approvedCount">23</h4>
-                        <p class="text-muted mb-0">승인 완료</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-danger">
-                    <div class="card-body text-center">
-                        <i class="bi bi-x-circle text-danger fs-1"></i>
-                        <h4 class="mt-2 mb-1" id="rejectedCount">2</h4>
-                        <p class="text-muted mb-0">반려</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card shadow-sm border-info">
-                    <div class="card-body text-center">
-                        <i class="bi bi-calendar-event text-info fs-1"></i>
-                        <h4 class="mt-2 mb-1" id="totalCount">30</h4>
-                        <p class="text-muted mb-0">총 신청</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 휴가 신청 목록 -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-success text-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">
-                                <i class="bi bi-list-check"></i> 휴가 신청 목록
-                            </h5>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-outline-light btn-sm">
-                                    <i class="bi bi-download"></i> 엑셀 다운로드
-                                </button>
-                                <button type="button" class="btn btn-outline-light btn-sm">
-                                    <i class="bi bi-printer"></i> 인쇄
-                                </button>
-                            </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted">총 30건 중 1-4건 표시</span>
                         </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination pagination-sm mb-0" id="paginationArea">
+                            </ul>
+                        </nav>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th scope="col" class="text-center">
-                                            <input type="checkbox" class="form-check-input position-static" id="checkAll">
-                                        </th>
-                                        <th scope="col">신청자</th>
-                                        <th scope="col">부서</th>
-                                        <th scope="col">휴가 유형</th>
-                                        <th scope="col">휴가 기간</th>
-                                        <th scope="col">일수</th>
-                                        <th scope="col">신청일</th>
-                                        <th scope="col">상태</th>
-                                        <th scope="col" class="text-center">관리</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="leaveRequestTable">
-
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="text-muted">총 30건 중 1-4건 표시</span>
-                            </div>
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination pagination-sm mb-0" id="paginationArea">
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 일괄 처리 버튼 -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-start gap-2">
-                    <button type="button" class="btn btn-success" id="acceptBulkBtn">
-                        <i class="bi bi-check-all"></i> 선택 항목 승인
-                    </button>
-                    <button type="button" class="btn btn-danger" id="rejectBulkBtn">
-                        <i class="bi bi-x-circle"></i> 선택 항목 반려
-                    </button>
                 </div>
             </div>
         </div>
@@ -216,15 +187,15 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">사원명</label>
-                            <input type="text" class="form-control bg-light" id="modalEmpName" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalEmpName" readonly>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">부서</label>
-                            <input type="text" class="form-control bg-light" id="modalDeptName" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalDeptName" readonly>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">사번</label>
-                            <input type="text" class="form-control bg-light" id="modalEmpIdx" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalEmpIdx" readonly>
                         </div>
                     </div>
 
@@ -237,27 +208,27 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">휴가 유형</label>
-                            <input type="text" class="form-control bg-light" id="modalReqType" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalReqType" readonly>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">신청일자</label>
-                            <input type="text" class="form-control bg-light" id="modalRequestDate" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalRequestDate" readonly>
                         </div>
                         <div class="col-md-4 mt-3">
                             <label class="form-label fw-semibold">시작일</label>
-                            <input type="text" class="form-control bg-light" id="modalLeaveStartDate" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalLeaveStartDate" readonly>
                         </div>
                         <div class="col-md-4 mt-3">
                             <label class="form-label fw-semibold">종료일</label>
-                            <input type="text" class="form-control bg-light" id="modalLeaveEndDate" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalLeaveEndDate" readonly>
                         </div>
                         <div class="col-md-4 mt-3">
                             <label class="form-label fw-semibold">총 일수</label>
-                            <input type="text" class="form-control bg-light" id="modalTotalDate" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalTotalDate" readonly>
                         </div>
                         <div class="col-12 mt-3">
                             <label class="form-label fw-semibold">신청 사유</label>
-                            <textarea class="form-control bg-light" rows="3" id="modalReason" readonly></textarea>
+                            <textarea class="form-control form-control-sm bg-light" rows="3" id="modalReason" readonly></textarea>
                         </div>
                     </div>
 
@@ -270,19 +241,20 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold">승인 의견</label>
-                            <textarea class="form-control" rows="3" placeholder="승인 또는 반려 사유를 입력하세요" id="reqReason"></textarea>
+                            <textarea class="form-control form-control-sm" rows="3" placeholder="승인 또는 반려 사유를 입력하세요"
+                                id="reqReason"></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <input type="hidden" id="modalLeaveReqIdx">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x"></i> 닫기
                     </button>
-                    <button type="button" class="btn btn-danger" id="rejectBtn">
+                    <button type="button" class="btn btn-sm btn-danger" id="rejectBtn">
                         <i class="bi bi-x-circle"></i> 반려
                     </button>
-                    <button type="button" class="btn btn-success" id="acceptBtn">
+                    <button type="button" class="btn btn-sm btn-success" id="acceptBtn">
                         <i class="bi bi-check-circle"></i> 승인
                     </button>
                 </div>
@@ -326,7 +298,7 @@
                 loadVaList(1);
             });
 
-            $("#paginationArea").on("click", ".page-link", function(e) {
+            $("#paginationArea").on("click", ".page-link", function (e) {
                 const page = parseInt($(this).data("page"), 10);
                 loadVaList(page);
             });
@@ -354,11 +326,11 @@
                 $(this).find("input, textarea").val("");
             });
 
-            $("#acceptBtn").on("click", function() {
+            $("#acceptBtn").on("click", function () {
                 reqApp("AS02");
             });
 
-            $("#rejectBtn").on("click", function() {
+            $("#rejectBtn").on("click", function () {
                 console.log("test");
                 reqApp("AS03");
             });
@@ -387,7 +359,7 @@
                 });
             });
 
-            $("#rejectBulkBtn").on("click", function() {
+            $("#rejectBulkBtn").on("click", function () {
                 const selected = getSelectedLeaveReqIdxs();
                 if (selected.length === 0) {
                     Swal.fire("알림", "선택된 항목이 없습니다.", "warning");
@@ -435,7 +407,7 @@
             }
 
             function getSelectedLeaveReqIdxs() {
-                return $("tbody input[type='checkbox']:checked").map(function() {
+                return $("tbody input[type='checkbox']:checked").map(function () {
                     return $(this).data("leave-idx");
                 }).get();
             }
@@ -453,14 +425,14 @@
                     url: `/hr/va/mgr/approval/${leaveReqIdx}`,
                     data: JSON.stringify(appData),
                     contentType: "application/json",
-                    success: function(res) {
-                        if(res.head.res_code ==="200") {
+                    success: function (res) {
+                        if (res.head.res_code === "200") {
                             Swal.fire("성공", "정상적으로 승인되었습니다.", "success");
                         } else {
                             Swal.fire("실패", res.head.res_result, "error");
                         }
                     },
-                    error: function(xhr, status, err) {
+                    error: function (xhr, status, err) {
                         console.error(err);
                         Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", 'error');
                     }
@@ -524,15 +496,14 @@
                     html += `
                     <tr data-leave-id="${item.leaveReqIdx}">
                         <td class="text-center">
-                            ${
-                                item.approvalStatus === "AS01"
-                                    ? `<input type="checkbox" class="form-check-input leave-req-check" data-leave-idx="${item.leaveReqIdx}">`
-                                    : ''
-                            }
+                            ${item.approvalStatus === "AS01"
+                            ? `<input type="checkbox" class="form-check-input leave-req-check" data-leave-idx="${item.leaveReqIdx}">`
+                            : ''
+                        }
                         </td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <img src="${item.empImg}" class="rounded-circle me-2" width="32" height="32">
+                                <img src="/images/hr/emp/${item.empImg}" class="rounded-circle me-2" width="32" height="32">
                                 <div>
                                     <div class="fw-semibold">${item.empName}</div>
                                     <small class="text-muted">${item.empIdx}</small>
@@ -550,9 +521,8 @@
                                 <button type="button" class="btn btn-outline-primary btn-sm view-detail-btn" data-leave-id="${item.leaveReqIdx}" data-bs-toggle="modal" data-bs-target="#approvalModal">
                                     <i class="bi bi-eye"></i>
                                 </button>
-                                ${
-                                    item.approvalStatus === "AS01"
-                                    ? `
+                                ${item.approvalStatus === "AS01"
+                            ? `
                                         <button type="button" class="btn btn-outline-success btn-sm">
                                             <i class="bi bi-check"></i>
                                         </button>
@@ -560,8 +530,8 @@
                                             <i class="bi bi-x"></i>
                                         </button>
                                     `
-                                    : ''
-                                }
+                            : ''
+                        }
                             </div>
                         </td>
                     </tr>

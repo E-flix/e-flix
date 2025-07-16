@@ -15,48 +15,18 @@
 </head>
 
 <div layout:fragment="content">
-    <div class="container-fluid p-4">
+    <div class="w-100">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>급여 계산</h3>
+        </div>
+    </div>
         <div class="row">
             <div class="col-12">
-                <!-- 페이지 헤더 -->
-                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-                    <div>
-                        <h2 class="text-primary mb-1">
-                            <i class="fas fa-calculator me-2"></i>급여계산
-                        </h2>
-                        <small class="text-muted">직원 급여 계산 및 관리</small>
-                    </div>
-                    <div class="text-end">
-                        <span class="badge bg-info fs-6">2025년 5월 급여</span>
-                    </div>
-                </div>
-
                 <!-- 기능 버튼 그룹 -->
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card border-0 shadow-sm">
                             <div class="card-body py-3">
-                                <div class="d-flex flex-wrap gap-2 justify-content-end">
-                                    <button class="btn btn-outline-secondary btn-sm">
-                                        <i class="fas fa-check-square me-1"></i>전체선택
-                                    </button>
-                                    <button class="btn btn-warning btn-sm" id="calcBtn">
-                                        <i class="fas fa-calculator me-1"></i>급여계산
-                                    </button>
-                                    <button class="btn btn-primary btn-sm" id="confirmBtn">
-                                        <i class="fas fa-check-circle me-1"></i>급여확정
-                                    </button>
-                                    <div class="vr"></div>
-                                    <button class="btn btn-success btn-sm">
-                                        <i class="fas fa-file-excel me-1"></i>EXCEL
-                                    </button>
-                                    <button class="btn btn-danger btn-sm">
-                                        <i class="fas fa-file-pdf me-1"></i>PDF생성
-                                    </button>
-                                    <button class="btn btn-info btn-sm">
-                                        <i class="fas fa-paper-plane me-1"></i>명세서일괄발송
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -128,11 +98,33 @@
                     <div class="col-12">
                         <div class="card border-0 shadow-sm">
                             <div
-                                class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                class="card-header d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0">
                                     <i class="fas fa-list me-2"></i>급여 리스트
                                 </h6>
-                                <span class="badge bg-light text-primary">총 5건</span>
+                                
+                                <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                    <!-- <span class="badge bg-light text-primary">총 5건</span> -->
+                                    <!-- <button class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-check-square me-1"></i>전체선택
+                                    </button> -->
+                                    <button class="btn btn-warning btn-sm" id="calcBtn">
+                                        <i class="fas fa-calculator me-1"></i>급여계산
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" id="confirmBtn">
+                                        <i class="fas fa-check-circle me-1"></i>급여확정
+                                    </button>
+                                    <!-- <div class="vr"></div>
+                                    <button class="btn btn-success btn-sm">
+                                        <i class="fas fa-file-excel me-1"></i>EXCEL
+                                    </button>
+                                    <button class="btn btn-danger btn-sm">
+                                        <i class="fas fa-file-pdf me-1"></i>PDF생성
+                                    </button>
+                                    <button class="btn btn-info btn-sm">
+                                        <i class="fas fa-paper-plane me-1"></i>명세서일괄발송
+                                    </button> -->
+                                </div>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
@@ -179,7 +171,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- 급여 상세조회 모달 -->
     <div class="modal fade" id="salaryDetailModal" tabindex="-1" aria-labelledby="salaryDetailModalLabel"
@@ -407,10 +398,10 @@
                         </td>
                         <td class="text-center">${item.empIdx}</td>
                         <td class="text-center fw-semibold">${item.empName}</td>
-                        <td class="text-center">${item.deptName}</td>
-                        <td class="text-center">${item.grdName}</td>
-                        <td class="text-center">${item.attMonth}</td>
-                        <td class="text-center">${item.payMonth}</td>
+                        <td class="text-center">${item.deptName || "-"}</td>
+                        <td class="text-center">${item.grdName || "-"}</td>
+                        <td class="text-center">${item.attMonth || "-"}</td>
+                        <td class="text-center">${item.payMonth || "-"}</td>
                         <td class="text-end">${item.baseSalary.toLocaleString()} 원</td>
                         <td class="text-end">${item.allowanceTotal.toLocaleString()} 원</td>
                         <td class="text-end">- ${item.deductionTotal.toLocaleString()} 원</td>
@@ -571,7 +562,7 @@
 
             // 3개월: 0:현재, -1, -2
             var now = new Date();
-            for (var i = 0; i < 6; i++) {
+            for (var i = 0; i < 12; i++) {
                 var dAtt = new Date(now.getFullYear(), now.getMonth() - i, 1);
                 var ymAtt = toYmd(dAtt);
                 // att 옵션
