@@ -151,4 +151,14 @@ public class SalaryServiceImpl implements SalaryService {
     public String findSalaryIdxByEmpIdxAndDate(String empIdx, String date) {
         return salaryMapper.findSalaryIdxByEmpIdxAndDate(empIdx, date);
     }
+
+    @Override
+    public int findCountByEmpIdx(SalarySearchDTO salarySearchDTO) {
+        return salaryMapper.findCountByEmpIdx(salarySearchDTO);
+    }
+
+    @Override
+    public List<SalaryListDTO> findByEmpIdx(SalarySearchDTO salarySearchDTO) {
+        return salaryMapper.findByEmpIdx(salarySearchDTO);
+    }
 }

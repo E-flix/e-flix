@@ -518,11 +518,11 @@
 
                 let itemHtml = ""
                 $.each(items, function (i, item) {
-                    const taxTypeBG = item.taxType === "TM01" ? "bg-warning" : item.taxType === "TM02" ? "bg-info" : "bg-success";
-                    const taxTypeName = item.taxType === "TM01" ? "과세" : item.taxType === "TM02" ? "비과세" : "면세";
+                    const taxTypeBG = item.taxType === "TM01" ? "bg-warning" : item.taxType === "TM02" ? "bg-info" :  item.taxType === "TM03" ? "bg-success" : "";
+                    const taxTypeName = item.taxType === "TM01" ? "과세" : item.taxType === "TM02" ? "비과세" : item.taxType === "TM03" ? "면세" : "-";
 
-                    const payTypeBG = item.payType === "SM01" ? "bg-primary" : "bg-danger";
-                    const payTypeName = item.payType === "SM01" ? "지급" : "공제";
+                    const payTypeBG = item.payType === "SM01" ? "bg-primary" : item.payType === "SM02" ? "bg-danger" : "";
+                    const payTypeName = item.payType === "SM01" ? "지급" : item.payType === "SM02" ? "공제" : "-";
                     itemHtml += `
                         <tr>
                             <td class="fw-semibold">${item.itemName}</td>
