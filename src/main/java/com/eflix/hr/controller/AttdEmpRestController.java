@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
 @RestController
 @RequestMapping("/hr/attd/emp")
 public class AttdEmpRestController {
@@ -74,7 +73,7 @@ public class AttdEmpRestController {
     }
 
     private boolean isCompanyIp(String ip) {
-        return ip.startsWith("0:0:0:0:0:0:0:1") || ip.startsWith("10.");
+        return ip.startsWith("13.125.43.*") || ip.startsWith("10.");
     }
 
     @PostMapping("/in")
@@ -83,14 +82,14 @@ public class AttdEmpRestController {
 
         String ip = getClientIp(request);
         AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
-        if(!isCompanyIp(ip)) {
+        if (!isCompanyIp(ip)) {
             result = ResUtil.makeResult(ResStatus.OK, "사내 IP내에서만 출근이 가능합니다.");
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
 
         int isAlreadyCheckedIn = attendanceRecordService.isAlreadyCheckedIn(getEmpIdx());
 
-        if(isAlreadyCheckedIn > 0) {
+        if (isAlreadyCheckedIn > 0) {
             result = ResUtil.makeResult("400", "이미 출근 처리가 되어 있습니다.", null);
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
@@ -102,7 +101,7 @@ public class AttdEmpRestController {
 
         int affectRows = attendanceRecordService.insert(attendanceRecordDTO);
 
-        if(affectRows > 0) {
+        if (affectRows > 0) {
             result = ResUtil.makeResult(ResStatus.OK, "");
         } else {
             result = ResUtil.makeResult("400", "출근 등록 중 오류가 발생했습니다.", null);
@@ -119,14 +118,14 @@ public class AttdEmpRestController {
         String ip = getClientIp(request);
         AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
 
-        if(!isCompanyIp(ip)) {
+        if (!isCompanyIp(ip)) {
             result = ResUtil.makeResult(ResStatus.OK, "사내 IP내에서만 퇴근이 가능합니다.");
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
 
         int isAlreadyCheckedOut = attendanceRecordService.isAlreadyCheckedOut(getEmpIdx());
 
-        if(isAlreadyCheckedOut > 0) {
+        if (isAlreadyCheckedOut > 0) {
             result = ResUtil.makeResult("400", "이미 퇴근 처리가 되어 있습니다.", null);
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
@@ -136,7 +135,7 @@ public class AttdEmpRestController {
 
         int affectRows = attendanceRecordService.update(attendanceRecordDTO);
 
-        if(affectRows > 0) {
+        if (affectRows > 0) {
             result = ResUtil.makeResult(ResStatus.OK, "");
         } else {
             result = ResUtil.makeResult("400", "퇴근 등록 중 오류가 발생했습니다.", null);
@@ -144,7 +143,6 @@ public class AttdEmpRestController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
-    
 
     @GetMapping("/year")
     public ResponseEntity<ResResult> getYear() {
@@ -178,17 +176,16 @@ public class AttdEmpRestController {
         int nowYear = LocalDate.now().getYear();
 
         List<String> monthList = new ArrayList<>();
-        if(Integer.parseInt(year) == nowYear) {
-            for(int i = 1; i <= LocalDate.now().getMonthValue(); i++) {
+        if (Integer.parseInt(year) == nowYear) {
+            for (int i = 1; i <= LocalDate.now().getMonthValue(); i++) {
                 monthList.add(String.valueOf(i));
-            } 
-        }
-        else if (regYear == nowYear) {
-            for (int i = regYear; i <= 12 ; i++) {
+            }
+        } else if (regYear == nowYear) {
+            for (int i = regYear; i <= 12; i++) {
                 monthList.add(String.valueOf(i));
             }
         } else {
-            for (int i = 1;  i <= 12; i++) {
+            for (int i = 1; i <= 12; i++) {
                 monthList.add(String.valueOf(i));
             }
         }
@@ -204,7 +201,7 @@ public class AttdEmpRestController {
 
         AttdSummaryDTO attdSummaryDTO = attendanceRecordService.findAttdSummaryByEmpIdxWithDate(getEmpIdx(), date);
 
-        if(attdSummaryDTO != null) {
+        if (attdSummaryDTO != null) {
             result = ResUtil.makeResult(ResStatus.OK, attdSummaryDTO);
         } else {
             result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
@@ -217,9 +214,10 @@ public class AttdEmpRestController {
     public ResponseEntity<ResResult> getList(@RequestParam String date) {
         ResResult result = null;
 
-        List<AttdDetailDTO> attdDetailDTOs = attendanceRecordService.findAttdDetailListByEmpIdxWithDate(getEmpIdx(), date);
+        List<AttdDetailDTO> attdDetailDTOs = attendanceRecordService.findAttdDetailListByEmpIdxWithDate(getEmpIdx(),
+                date);
 
-        if(attdDetailDTOs != null) {
+        if (attdDetailDTOs != null) {
             result = ResUtil.makeResult(ResStatus.OK, attdDetailDTOs);
         } else {
             result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
