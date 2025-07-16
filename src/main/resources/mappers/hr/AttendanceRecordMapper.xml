@@ -187,15 +187,18 @@
         GROUP BY ar.emp_idx, e.emp_idx, g.grd_idx
     </select>
 
+    <!-- 근태 리스트 -->
     <select id="findAttdDetailListByEmpIdxWithDate" parameterType="String" resultType="AttdDetailDTO">
         SELECT
             TO_CHAR(ar.attd_date, 'YYYY-MM-DD') AS attdDate,
-            (SELECT hd_name FROM holiday h WHERE h.hd_date = ar.attd_date AND h.co_idx = ar.co_idx) AS holidayType,
-            cc.common_code_name AS attdStatus,
-            TO_CHAR(ar.attd_time, 'HH24:MI') AS scheduleTime,
+            (
+                SELECT hd_name FROM holiday h WHERE h.hd_date = ar.attd_date AND h.co_idx = ar.co_idx
+            ) AS holidayType,
+            ar.attd_status AS attdStatus,
+            ar.attd_time AS scheduleTime,
             TO_CHAR(ar.attd_start, 'HH24:MI') AS startTime,
             TO_CHAR(ar.attd_end, 'HH24:MI') AS endTime,
-            (
+            NVL((
                 SELECT
                     CASE WHEN n.nt_idx IS NOT NULL
                         THEN TO_CHAR(n.nt_hours, '99.99')
@@ -206,12 +209,12 @@
                 AND n.nt_date = ar.attd_date
                 AND n.co_idx = ar.co_idx
                 AND ROWNUM = 1
-            ) AS nightTime
+            ), 0) AS nightTime
         FROM attendance_records ar
             LEFT JOIN COMMON_CODE cc
                 ON ar.attd_status = cc.COMMON_CODE
-                AND cc.GROUP_CODE = 'AR'
-                AND cc.CO_IDX = ar.co_idx
+                    AND cc.GROUP_CODE = 'AR'
+                    AND cc.CO_IDX = ar.co_idx
         WHERE ar.emp_idx = #{empIdx}
             AND TO_CHAR(ar.attd_date, 'YYYY-MM') = #{date}
         ORDER BY attd_date ASC

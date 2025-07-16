@@ -272,6 +272,10 @@
         <where>
             e.co_idx = #{coIdx}
 
+            <if test="empIdx != null and empIdx != ''">
+                AND e.emp_idx = #{empIdx}
+            </if>
+
             <if test="empName != null and empName.trim() != ''">
                 AND e.emp_name LIKE '%' || #{empName} || '%'
             </if>
@@ -356,6 +360,10 @@
                     LEFT JOIN grade g ON e.grd_idx = g.grd_idx
                 <where>
                     e.co_idx = #{coIdx}
+
+                    <if test="empIdx != null and empIdx != ''">
+                        AND e.emp_idx = #{empIdx}
+                    </if>
 
                     <if test="empName != null and empName != ''">
                         AND e.emp_name LIKE '%' || #{empName} || '%'
@@ -542,6 +550,97 @@
         SELECT salary_idx
         FROM salary
         WHERE emp_idx = #{empIdx} AND att_month = #{date} || '-10'
+    </select>
+
+    <select id="findCountByEmpIdx" parameterType="SalarySearchDTO" resultType="int">
+        SELECT COUNT(*)
+        FROM employees e
+            LEFT JOIN salary s ON s.emp_idx = e.emp_idx
+                AND s.co_idx = #{coIdx}
+                AND SUBSTR(s.att_month,1,7) = #{attMonth}
+            LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+            LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+        WHERE e.co_idx = #{coIdx}
+            AND e.emp_idx = #{empIdx}
+            AND s.salary_type = 'ST03'
+        ORDER BY e.emp_idx
+    </select>
+
+    <select id="findByEmpIdx" parameterType="SalarySearchDTO" resultType="SalaryListDTO">
+        SELECT *
+        FROM (
+            SELECT a.*, ROWNUM AS rn
+            FROM (
+                SELECT
+                    s.salary_idx,
+                    e.emp_idx,
+                    e.emp_name,
+                    d.dept_name,
+                    g.grd_name,
+                    TO_CHAR(TO_DATE(s.att_month,'YYYY-MM-DD'),'YYYY.MM') AS att_month,
+                    TO_CHAR(TO_DATE(s.pay_month,'YYYY-MM-DD'),'YYYY.MM') AS pay_month,
+                    s.base_salary,
+                    (
+                        NVL(s.night_work_pay,0)
+                        + NVL((
+                            SELECT SUM(
+                            CASE WHEN m.type='SM01'
+                                    AND REGEXP_LIKE(m.al_amount,'^[0-9]+(\.[0-9]+)?$')
+                                THEN TO_NUMBER(m.al_amount)
+                                ELSE 0
+                            END)
+                            FROM salary_mapping m
+                            WHERE m.co_idx     = s.co_idx
+                            AND m.use_status = 'Y'
+                            AND m.mp_idx IN (
+                                s.sal1,s.sal2,s.sal3,s.sal4,s.sal5,
+                                s.sal6,s.sal7,s.sal8,s.sal9,s.sal10
+                            )
+                        ),0)
+                    ) AS allowance_total,
+
+                    TRUNC(
+                        NVL(s.tax,0)
+                        + NVL(s.national_pension,0)
+                        + NVL(s.health_insurance,0)
+                        + NVL(s.employment_ins,0)
+                        + NVL(s.industrial_ins,0)
+                        + NVL(s.other_deductions,0)
+                        + NVL((
+                            SELECT SUM(
+                            CASE WHEN m.type='SM02'
+                                    AND REGEXP_LIKE(m.al_amount,'^[0-9]+(\.[0-9]+)?$')
+                                THEN TO_NUMBER(m.al_amount)
+                                ELSE 0
+                            END)
+                            FROM salary_mapping m
+                            WHERE m.co_idx     = s.co_idx
+                            AND m.use_status = 'Y'
+                            AND m.mp_idx IN (
+                                s.sal1,s.sal2,s.sal3,s.sal4,s.sal5,
+                                s.sal6,s.sal7,s.sal8,s.sal9,s.sal10
+                            )
+                        ),0)
+                    ) AS deduction_total,
+
+                    TRUNC(s.total_salary) AS net_salary,
+
+                    s.salary_type  AS calc_status
+
+                FROM employees e
+                    LEFT JOIN salary s ON s.emp_idx = e.emp_idx
+                        AND s.co_idx = #{coIdx}
+                        AND SUBSTR(s.att_month,1,7) = #{attMonth}
+                    LEFT JOIN departments d ON e.dept_idx = d.dept_idx
+                    LEFT JOIN grade g ON e.grd_idx = g.grd_idx
+                WHERE e.co_idx = #{coIdx}
+                    AND e.emp_idx = #{empIdx}
+                    AND s.salary_type = 'ST03'
+                ORDER BY e.emp_idx
+            ) a
+            WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rn &gt; #{offset}
     </select>
 </mapper>
 

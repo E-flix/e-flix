@@ -30,27 +30,14 @@
                 <!-- 검색 및 필터 영역 -->
                 <div class="row mb-4">
                     <div class="col-md-3">
-                        <label class="form-label">사원번호</label>
-                        <input type="text" class="form-control form-control-sm" placeholder="사원번호 입력" value="emp-201">
-                    </div>
-                    <div class="col-md-3">
                         <label class="form-label">기준월</label>
-                        <input type="month" class="form-control form-control-sm" value="2025-05">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">부서</label>
-                        <select class="form-select">
-                            <option>전체</option>
-                            <option>개발팀</option>
-                            <option>영업팀</option>
-                            <option>인사팀</option>
-                        </select>
+                        <input type="month" class="form-control form-control-sm" value="2025-07" id="searchDate">
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
-                        <button class="btn btn-outline-primary me-2">
+                        <button class="btn btn-sm btn-outline-primary me-2">
                             <i class="fas fa-search"></i> 검색
                         </button>
-                        <button class="btn btn-outline-secondary">
+                        <button class="btn btn-sm btn-outline-secondary">
                             <i class="fas fa-redo"></i> 초기화
                         </button>
                     </div>
@@ -61,145 +48,22 @@
                     <table class="table table-hover">
                         <thead class="">
                             <tr>
-                                <th scope="col">
+                                <th class="text-center pl-3" scope="col">
                                     <input type="checkbox" class="form-check-input position-static">
                                 </th>
-                                <th scope="col">사번</th>
-                                <th scope="col">성명</th>
-                                <th scope="col">부서</th>
-                                <th scope="col">직급</th>
-                                <th scope="col">기준월</th>
-                                <th scope="col">기본급</th>
-                                <th scope="col">실수령액</th>
-                                <th scope="col">상태</th>
-                                <th scope="col">작업</th>
+                                <th scope="col" class="text-center">사번</th>
+                                <th scope="col" class="text-center">성명</th>
+                                <th scope="col" class="text-center">부서</th>
+                                <th scope="col" class="text-center">직급</th>
+                                <th scope="col" class="text-center">기준월</th>
+                                <th scope="col" class="text-center">기본급</th>
+                                <th scope="col" class="text-center">실수령액</th>
+                                <th scope="col" class="text-center">상태</th>
+                                <th scope="col" class="text-center">급여 명세서</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td><input type="checkbox" class="form-check-input"></td>
-                                <td><span class="badge bg-secondary">emp-201</span></td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div
-                                            class="avatar-sm bg-info rounded-circle d-flex align-items-center justify-content-center me-2">
-                                            <i class="fas fa-user text-white"></i>
-                                        </div>
-                                        <strong>김철수</strong>
-                                    </div>
-                                </td>
-                                <td>개발팀</td>
-                                <td>선임</td>
-                                <td>2025-05</td>
-                                <td class="text-end">3,500,000원</td>
-                                <td class="text-end"><strong class="text-success">2,890,000원</strong></td>
-                                <td><span class="badge bg-success">발급완료</span></td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-sm btn-outline-primary" id="previewBtn"
-                                            data-emp="emp-201" data-date="2025-05">
-                                            <i class="fas fa-eye"></i> 미리보기
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-success" id="downloadBtn"
-                                            data-emp="emp-201" data-date="2025-05">
-                                            <i class="fas fa-download"></i> 다운로드
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><input type="checkbox" class="form-check-input"></td>
-                                <td><span class="badge bg-secondary">emp-202</span></td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div
-                                            class="avatar-sm bg-warning rounded-circle d-flex align-items-center justify-content-center me-2">
-                                            <i class="fas fa-user text-white"></i>
-                                        </div>
-                                        <strong>이영희</strong>
-                                    </div>
-                                </td>
-                                <td>영업팀</td>
-                                <td>주임</td>
-                                <td>2025-05</td>
-                                <td class="text-end">3,200,000원</td>
-                                <td class="text-end"><strong class="text-success">2,720,000원</strong></td>
-                                <td><span class="badge bg-success">발급완료</span></td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-sm btn-outline-primary" id="previewBtn2"
-                                            data-emp="emp-202" data-date="2025-05">
-                                            <i class="fas fa-eye"></i> 미리보기
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-success" id="downloadBtn2"
-                                            data-emp="emp-202" data-date="2025-05">
-                                            <i class="fas fa-download"></i> 다운로드
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><input type="checkbox" class="form-check-input"></td>
-                                <td><span class="badge bg-secondary">emp-203</span></td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div
-                                            class="avatar-sm bg-danger rounded-circle d-flex align-items-center justify-content-center me-2">
-                                            <i class="fas fa-user text-white"></i>
-                                        </div>
-                                        <strong>박민수</strong>
-                                    </div>
-                                </td>
-                                <td>인사팀</td>
-                                <td>대리</td>
-                                <td>2025-05</td>
-                                <td class="text-end">3,800,000원</td>
-                                <td class="text-end"><strong class="text-success">3,120,000원</strong></td>
-                                <td><span class="badge bg-warning">처리중</span></td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-sm btn-outline-primary" data-emp="emp-203"
-                                            data-date="2025-05">
-                                            <i class="fas fa-eye"></i> 미리보기
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-success" data-emp="emp-203"
-                                            data-date="2025-05">
-                                            <i class="fas fa-download"></i> 다운로드
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><input type="checkbox" class="form-check-input"></td>
-                                <td><span class="badge bg-secondary">emp-204</span></td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div
-                                            class="avatar-sm bg-success rounded-circle d-flex align-items-center justify-content-center me-2">
-                                            <i class="fas fa-user text-white"></i>
-                                        </div>
-                                        <strong>최지은</strong>
-                                    </div>
-                                </td>
-                                <td>개발팀</td>
-                                <td>과장</td>
-                                <td>2025-05</td>
-                                <td class="text-end">4,200,000원</td>
-                                <td class="text-end"><strong class="text-success">3,450,000원</strong></td>
-                                <td><span class="badge bg-success">발급완료</span></td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-sm btn-outline-primary" data-emp="emp-204"
-                                            data-date="2025-05">
-                                            <i class="fas fa-eye"></i> 미리보기
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-success" data-emp="emp-204"
-                                            data-date="2025-05">
-                                            <i class="fas fa-download"></i> 다운로드
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                        <tbody id="stubListBody">
+
                         </tbody>
                     </table>
                 </div>
@@ -210,33 +74,19 @@
                         <div class="d-flex align-items-center">
                             <small class="text-muted">총 4명 중 1-4명 표시</small>
                             <div class="ms-3">
-                                <button class="btn btn-outline-primary btn-sm me-2">
+                                <!-- <button class="btn btn-outline-primary btn-sm me-2">
                                     <i class="fas fa-file-excel"></i> 엑셀 다운로드
                                 </button>
                                 <button class="btn btn-outline-info btn-sm">
                                     <i class="fas fa-print"></i> 일괄 출력
-                                </button>
+                                </button> -->
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <nav>
-                            <ul class="pagination justify-content-end mb-0">
-                                <li class="page-item disabled">
-                                    <a class="page-link" href="#" tabindex="-1">이전</a>
-                                </li>
-                                <li class="page-item active">
-                                    <a class="page-link" href="#">1</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">2</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">3</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">다음</a>
-                                </li>
+                            <ul class="pagination justify-content-end mb-0" id="paginationArea">
+
                             </ul>
                         </nav>
                     </div>
@@ -244,16 +94,125 @@
             </div>
         </div>
     </div>
-    <button id="btn1">ㅇㅇㅇ</button>
     <script>
-        $("#btn1").on("click", function () {
-            let empIdx = 'emp-201'
-            let date = '2025-05'
-            url = `/hr/salary/report/preview/stub/${empIdx}/${date}`;
+        $(function () {
+            let currentPage = 1;
+            loadStubList(1);
 
-            const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+            $("#stubListBody").on("click", ".stub-preview-btn", function() {
+                const salaryIdx = $(this).data("salary-idx");
+                previewStub(salaryIdx);
+            })
 
-            window.open(url, "_blank", popupOptions);
+            $("#stubListBody").on("click", ".stub-download-btn", function() {
+                const salaryIdx = $(this).data("salary-idx");
+                donwloadStub(salaryIdx);
+            })
+
+            function loadStubList(page = 1) {
+                currentPage = page;
+
+                const searchData = {
+                    attMonth: $("#searchDate").val(),
+                }
+
+                const queryString = $.param(searchData);
+
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/salary/stub/list?${queryString}&page=${page}`,
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body;
+
+                            renderStubList(data.stubs);
+                            renderPagination(data.page, data.pageSize, data.total);
+
+                        } else {
+                            Swal.fire("실패", "데이터가 존재하지 않습니다.", "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                })
+            }
+
+            function renderStubList(stubs) {
+                const $stubListBody = $("#stubListBody");
+                let html = "";
+                $.each(stubs, function(i, item) {
+                    html += `
+                        <tr>
+                            <td class="text-center"><input type="checkbox" class="form-check-input"></td>
+                            <td class="text-center"><span class="badge bg-secondary">${item.empIdx}</span></td>
+                            <td class="text-center">
+                                <div class="d-flex align-items-center">
+                                    <strong>${item.empName}</strong>
+                                </div>
+                            </td>
+                            <td class="text-center">${item.deptName}</td>
+                            <td class="text-center">${item.grdName}</td>
+                            <td class="text-center">${item.attMonth}</td>
+                            <td class="text-end">${item.baseSalary.toLocaleString()} 원</td>
+                            <td class="text-end"><strong class="text-success">${item.netSalary.toLocaleString()} 원</strong></td>
+                            <td class="text-center"><span class="badge bg-success">${item.calcStatus ? "확정" : " - "}</span></td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-outline-primary stub-preview-btn" data-salary-idx="${item.salaryIdx}">
+                                        <i class="fas fa-eye"></i> 미리보기
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success stub-download-btn" data-salary-idx="${item.salaryIdx}">
+                                        <i class="fas fa-download"></i> 다운로드
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                $stubListBody.html(html);
+            }
+
+            function renderPagination(page, pageSize, total) {
+                const totalPages = Math.ceil(total / pageSize);
+                const $pagination = $("#paginationArea");
+                $pagination.empty();
+
+                $pagination.append(`
+                    <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                        <a class="page-link" data-page="${page - 1}">이전</a>
+                    </li>
+                `);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    $pagination.append(`
+                        <li class="page-item ${i === page ? 'active' : ''}">
+                            <a class="page-link" data-page="${i}">${i}</a>
+                        </li>
+                    `);
+                }
+
+                $pagination.append(`
+                    <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" data-page="${page + 1}">다음</a>
+                    </li>
+                `);
+            }
+
+            function previewStub(salaryIdx) {
+                let url = `/hr/salary/report/preview/stub/${salaryIdx}`;
+
+                const popupOptions = "width=800,height=1000,scrollbars=yes,resizable=yes";
+
+                window.open(url, "_blank", popupOptions);
+            }
+
+            function donwloadStub(salaryIdx) {
+                let url = `/hr/salary/report/download/stub/${salaryIdx}`;
+
+                window.open(url);
+            }
         });
     </script>
 </div>

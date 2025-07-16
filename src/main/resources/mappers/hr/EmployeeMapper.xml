@@ -429,7 +429,7 @@
     <!-- 0713 -->
     <!-- 사원 간단 정보 -->
     <select id="findSummaryByEmpIdx" parameterType="String" resultType="EmployeeDTO">
-        SELECT e.emp_idx, e.emp_name,
+        SELECT e.emp_idx, e.emp_name, e.emp_img
             d.dept_idx, d.dept_name,
             g.grd_name
         FROM employees e

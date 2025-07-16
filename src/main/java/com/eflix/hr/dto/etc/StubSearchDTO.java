@@ -1,17 +1,15 @@
 package com.eflix.hr.dto.etc;
 
+import java.util.Date;
+
 import com.eflix.common.paging.PagingDTO;
 
 import lombok.Data;
 
 @Data
-public class SalarySearchDTO extends PagingDTO {
-    private String coIdx;
-    private String attMonth;
+public class StubSearchDTO extends PagingDTO{
     private String empIdx;
-    private String empName;
-    private String deptIdx;
-    private String grdIdx;
+    private Date date;
 
     public int getOffset() {
         return (getPage() - 1) * getPageUnit();

@@ -10,6 +10,7 @@ import lombok.Data;
 public class SalaryEmpDTO {
     private String empIdx;
     private String empName;
+    private String empImg;
 
     private String dpetIdx;
     private String deptName;

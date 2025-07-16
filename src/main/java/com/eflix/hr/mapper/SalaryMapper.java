@@ -68,4 +68,8 @@ public interface SalaryMapper {
     public int updateSalary(SalaryDTO salaryDTO);
 
     public String findSalaryIdxByEmpIdxAndDate(String empIdx, String date);
+
+    int findCountByEmpIdx(SalarySearchDTO salarySearchDTO);
+
+    List<SalaryListDTO> findByEmpIdx(SalarySearchDTO salarySearchDTO);
 }

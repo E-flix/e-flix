@@ -19,11 +19,14 @@
 	</variable>
 	<variable name="totalDeductions" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[($F{payType} != null && $F{payType}.equals("SM02"))
-            ? Double.parseDouble($F{amount}.replaceAll("[^0-9.-]", ""))
+            ? Math.abs(Double.parseDouble($F{amount}.replaceAll("[^0-9.-]", "")))
             : 0.0]]></variableExpression>
 	</variable>
-	<variable name="netPay" class="java.lang.Double">
-		<variableExpression><![CDATA[$V{totalEarnings} - $V{totalDeductions}]]></variableExpression>
+	<variable name="realTakeHome" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{itemName}.equals("실수령액")
+        ? Double.parseDouble($F{amount}.replaceAll("[^0-9.-]", ""))
+        : 0.0]]></variableExpression>
+		<initialValueExpression><![CDATA[0.0]]></initialValueExpression>
 	</variable>
 	<title>
 		<band height="80" splitType="Stretch">
@@ -203,6 +206,7 @@
 	</columnHeader>
 	<detail>
 		<band height="30" splitType="Stretch">
+			<printWhenExpression><![CDATA[!$F{itemName}.equals("실수령액")]]></printWhenExpression>
 			<rectangle>
 				<reportElement x="0" y="0" width="555" height="30" uuid="6e7f8a9b-0c1d-2e3f-4a5b-abcdef012345"/>
 				<graphicElement>
@@ -357,7 +361,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Malgun Gothic" size="12" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{netPay}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{realTakeHome}]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>
