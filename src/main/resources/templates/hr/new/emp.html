@@ -190,7 +190,7 @@
                                     <div class="text-center">
                                         <div class="position-relative">
                                             <img id="empPhotoPreview"
-                                                src="https://via.placeholder.com/120x150/e9ecef/6c757d?text=사진"
+                                                th:src="@{/emp.png}"
                                                 class="img-thumbnail rounded"
                                                 style="width: 120px; height: 150px; object-fit: cover;" alt="사원 사진">
                                             <!-- 사진 업로드 버튼 -->
@@ -258,10 +258,10 @@
                                             <i class="bi bi-card-text text-muted me-1"></i>주민번호 <span
                                                 class="text-danger">*</span>
                                         </label>
-                                        <div class="input-group input-group">
+                                        <div class="input-group input-group-sm">
                                             <input type="text" name="rrnPfx" class="form-control form-control-sm" placeholder="앞 6자리"
                                                 maxlength="6" id="modalRrnPfx">
-                                            <span class="input-group-text bg-light fw-bold">-</span>
+                                            <span class="input-group-text bg-light fw-bold" id="inputGroup-sizing-sm">-</span>
                                             <input type="password" name="rrnSfx" class="form-control form-control-sm"
                                                 placeholder="뒤 7자리" maxlength="7" id="modalRrnSfx">
                                         </div>
@@ -362,6 +362,8 @@
                                 </label>
                                 <select name="roleName" class="form-select form-select-sm form-select form-select-sm" id="modalRoleId">
                                     <option value="">선택</option>
+                                    <option value="RO01">매니저</option>
+                                    <option value="RO02">직원</option>
                                 </select>
                             </div>
                         </div>
@@ -433,7 +435,7 @@
                                     <i class="bi bi-house text-muted me-1"></i>주소
                                 </label>
                                 <div class="input-group input-group mb-3">
-                                    <button class="btn btn-outline-primary" type="button"
+                                    <button class="btn btn-sm btn-outline-primary" type="button"
                                         onclick="sample6_execDaumPostcode()">
                                         <i class="bi bi-search me-1"></i>우편번호 검색
                                     </button>
@@ -576,7 +578,7 @@
                     $("#modalDeptUpIdx").val("");
                     $("#modalDeptDownIdx").val("");
                     $("#modalGrade").val("");
-                    $("#modalRoleId").val("");
+                    // $("#modalRoleId").val("");
                     $("#modalEmpType").val("");
                     $("#modalBank").val("");
                     $("#modalEmpAccount").val("");
@@ -585,7 +587,7 @@
                     $("#addEmpAddr").val("");
                     $("#addEmpAddrDetail").val("");
                     $("#modalEmpMemo").val("");
-                    $("#empPhotoPreview").attr("src", "https://via.placeholder.com/120x150/e9ecef/6c757d?text=사진");
+                    $("#empPhotoPreview").attr("src", "/emp.png");
                     $("#employeeModal").modal("show");
                     loadSearchSelect("modal");
                     loadBankList();
@@ -647,6 +649,7 @@
                 });
 
                 $("#modalBtn").on("click", function (e) {
+                    const deptIdx = $("#modalDeptUpIdx").val() ? $("#modalDeptUpIdx").val() : $("#modalDeptUpIdx").val();
                     const empData = {
                         empIdx: $("#modalEmpIdx").val(),
                         empName: $("#modalEmpName").val(),
@@ -657,7 +660,7 @@
                         empPw: $("#modalEmpPw").val(),
                         empRegdate: $("#modalEmpRegdate").val(),
                         deptUpIdx: $("#modalDeptUpIdx").val(),
-                        deptIdx: $("#modalDeptDownIdx").val(),
+                        deptIdx: deptIdx,
                         grdIdx: $("#modalGrade").val(),
                         roleId: $("#modalRoleId").val(),
                         empType: $("#modalEmpType").val(),
@@ -785,6 +788,8 @@
                     const $empListBody = $("#empListBody").empty();
                     let empList = "";
                     $.each(data, function (i, item) {
+                        const empStatusBG = item.empStatus === "ES01" ? "bg-success" : "bg-danger";
+                        const empStatus = item.empStatus === "ES01" ? "재직" : "퇴사";
                         empList += `
                             <tr>
                                 <td class="text-center">
@@ -792,12 +797,12 @@
                                 </td>
                                 <td class="fw-semibold">${item.empIdx}</td>
                                 <td>${item.empName}</td>
-                                <td>${item.deptName}</td>
-                                <td><span class="badge bg-info">${item.grdName}</span></td>
-                                <td>${item.empPhone}</td>
+                                <td>${item.deptName || "-"}</td>
+                                <td><span class="badge bg-info">${item.grdName || "-"}</span></td>
+                                <td>${item.empPhone || "-"}</td>
                                 <td>${item.empEmail}</td>
                                 <td>${item.empRegdate}</td>
-                                <td><span class="badge bg-success">${item.empStatus}</span></td>
+                                <td><span class="badge ${empStatusBG}">${empStatus}</span></td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
                                         <button class="btn btn-sm btn-outline-primary" title="상세보기">
@@ -806,14 +811,14 @@
                                         <button class="btn btn-sm btn-outline-warning update-emp" data-emp-idx="${item.empIdx}" title="수정">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger" title="삭제">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
                                     </div>
                                 </td>
                             </tr>
                         `;
                     });
+                                        // <button class="btn btn-sm btn-outline-danger" title="삭제">
+                                        //     <i class="bi bi-trash"></i>
+                                        // </button>
                     $empListBody.html(empList);
                 }
 
@@ -858,7 +863,7 @@
                                 if (selectedDownValue) {
                                     $("#modalDeptDownIdx").val(selectedDownValue);
                                 }
-                                renderRole(mode, data.roles);
+                                // renderRole(mode, data.roles);
                             } else {
                                 Swal.fire("실패", res.head.res_result, "error");
                             }

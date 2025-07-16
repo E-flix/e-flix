@@ -15,6 +15,7 @@ import java.util.List;
 import org.springframework.data.repository.query.Param;
 
 import com.eflix.hr.dto.DepartmentDTO;
+import com.eflix.hr.dto.etc.DeptSearchDTO;
 
 public interface DepartmentMapper {
     // 부서조회
@@ -45,5 +46,9 @@ public interface DepartmentMapper {
     public List<DepartmentDTO> findAllDepartmentWithEmpCountByCoIdx(String coIdx);
     public int insert(DepartmentDTO departmentDTO);
     public int update(DepartmentDTO departmentDTO);
-    public int deleteDepartments(List<String> deptIdxList); 
+    public int deleteDepartments(List<String> deptIdxList);
+
+    // 0715
+    public int findAllDeptCountBySearch(DeptSearchDTO deptSearchDTO);
+    public List<DepartmentDTO> findAllBySearch(DeptSearchDTO deptSearchDTO);
 }

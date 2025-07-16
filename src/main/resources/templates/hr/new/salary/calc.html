@@ -27,27 +27,6 @@
                     <div class="col-12">
                         <div class="card border-0 shadow-sm">
                             <div class="card-body py-3">
-                                <div class="d-flex flex-wrap gap-2 justify-content-end">
-                                    <button class="btn btn-outline-secondary btn-sm">
-                                        <i class="fas fa-check-square me-1"></i>전체선택
-                                    </button>
-                                    <button class="btn btn-warning btn-sm" id="calcBtn">
-                                        <i class="fas fa-calculator me-1"></i>급여계산
-                                    </button>
-                                    <button class="btn btn-primary btn-sm" id="confirmBtn">
-                                        <i class="fas fa-check-circle me-1"></i>급여확정
-                                    </button>
-                                    <div class="vr"></div>
-                                    <button class="btn btn-success btn-sm">
-                                        <i class="fas fa-file-excel me-1"></i>EXCEL
-                                    </button>
-                                    <button class="btn btn-danger btn-sm">
-                                        <i class="fas fa-file-pdf me-1"></i>PDF생성
-                                    </button>
-                                    <button class="btn btn-info btn-sm">
-                                        <i class="fas fa-paper-plane me-1"></i>명세서일괄발송
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -123,7 +102,29 @@
                                 <h6 class="mb-0">
                                     <i class="fas fa-list me-2"></i>급여 리스트
                                 </h6>
-                                <span class="badge bg-light text-primary">총 5건</span>
+                                
+                                <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                    <!-- <span class="badge bg-light text-primary">총 5건</span> -->
+                                    <!-- <button class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-check-square me-1"></i>전체선택
+                                    </button> -->
+                                    <button class="btn btn-warning btn-sm" id="calcBtn">
+                                        <i class="fas fa-calculator me-1"></i>급여계산
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" id="confirmBtn">
+                                        <i class="fas fa-check-circle me-1"></i>급여확정
+                                    </button>
+                                    <!-- <div class="vr"></div>
+                                    <button class="btn btn-success btn-sm">
+                                        <i class="fas fa-file-excel me-1"></i>EXCEL
+                                    </button>
+                                    <button class="btn btn-danger btn-sm">
+                                        <i class="fas fa-file-pdf me-1"></i>PDF생성
+                                    </button>
+                                    <button class="btn btn-info btn-sm">
+                                        <i class="fas fa-paper-plane me-1"></i>명세서일괄발송
+                                    </button> -->
+                                </div>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
@@ -397,10 +398,10 @@
                         </td>
                         <td class="text-center">${item.empIdx}</td>
                         <td class="text-center fw-semibold">${item.empName}</td>
-                        <td class="text-center">${item.deptName}</td>
-                        <td class="text-center">${item.grdName}</td>
-                        <td class="text-center">${item.attMonth}</td>
-                        <td class="text-center">${item.payMonth}</td>
+                        <td class="text-center">${item.deptName || "-"}</td>
+                        <td class="text-center">${item.grdName || "-"}</td>
+                        <td class="text-center">${item.attMonth || "-"}</td>
+                        <td class="text-center">${item.payMonth || "-"}</td>
                         <td class="text-end">${item.baseSalary.toLocaleString()} 원</td>
                         <td class="text-end">${item.allowanceTotal.toLocaleString()} 원</td>
                         <td class="text-end">- ${item.deductionTotal.toLocaleString()} 원</td>

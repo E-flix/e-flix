@@ -85,12 +85,15 @@
                                 <span class="badge bg-primary ms-2">총 5건</span>
                             </h6>
                             <div class="d-flex align-items-center">
-                                <small class="text-muted me-3">페이지당 표시:</small>
+                                <small class="text-muted me-2">페이지당 표시:</small>
                                 <select class="form-select form-select-sm" style="width: 80px;">
                                     <option>10</option>
                                     <option>20</option>
                                     <option>50</option>
                                 </select>
+                                 <button class="btn btn-success btn-sm me-2 ml-2" data-bs-toggle="modal" data-bs-target="#itemModal" id="addModal">
+                                    <i class="fas fa-plus me-1"></i>항목 추가
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -425,6 +428,7 @@
                     success: function(res) {
                         if(res.head.res_code === "200"){
                             Swal.fire("성공", "정상적으로 등록되었습니다.", "success");
+                            window.location.reload();
                         } else {
                             Swal.fire("실패", "등록에 실패했습니다.", "error");
                         }
@@ -496,7 +500,7 @@
                 $.each(items, function(i, item) {
                     const typeBG = item.type === "SM01" ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger";
                     const type = item.type === "SM01" ? "지급" : "공제";
-                    const calcType = item.calcType === "CA1" ? "고정금액" : item.calcType === "CA2"? "비율" : "수식";
+                    const calcType = item.calcType === "CA01" ? "고정금액" : item.calcType === "CA02"? "비율" : "수식";
                     const targetDept = item.targetDept !== "" ? item.targetDeptName : "전체";
                     const useStatus = item.useStatus === "Y" ? "사용중" : "미사용";
                     const useStatusBG = item.useStatus === "Y" ? "bg-success" : "bg-danger";

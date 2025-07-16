@@ -21,7 +21,7 @@
                     </div>
                     <div>
                         <h3 class="mb-1 fw-bold text-dark">사용자 관리</h3>
-                        <p class="mb-0 text-muted small">직원 정보를 관리하고 권한을 설정할 수 있습니다</p>
+                        <p class="mb-0 text-muted small">사용자 정보를 관리하고 권한을 설정할 수 있습니다</p>
                     </div>
                 </div>
             </div>
@@ -131,28 +131,40 @@
                             <label for="empIdx" class="col-form-label fw-semibold text-dark">
                                 <i class="bi bi-hash text-muted me-1"></i>사원번호
                             </label>
-                            <input type="text" id="empIdx" name="empIdx" class="form-control form-control bg-light"
+                            <input type="text" id="empIdx" name="empIdx" class="form-control form-control-sm form-control bg-light"
                                 placeholder="사원번호는 자동생성 됩니다." readonly>
                         </div>
                         <div class="col-md-6">
                             <label for="empName" class="col-form-label fw-semibold text-dark">
                                 <i class="bi bi-person text-muted me-1"></i>사원명 <span class="text-danger">*</span>
                             </label>
-                            <input type="text" id="empName" name="empName" class="form-control form-control" placeholder="사원명을 입력하세요">
+                            <input type="text" id="empName" name="empName" class="form-control form-control-sm" placeholder="사원명을 입력하세요">
                         </div>
                     </div>
                 
-                    <!-- 주민번호 -->
                     <div class="row mb-2">
+                        <!-- 주민번호 -->
                         <div class="col-md-6">
                             <label class="col-form-label fw-semibold text-dark">
                                 <i class="bi bi-card-text text-muted me-1"></i>주민번호 <span class="text-danger">*</span>
                             </label>
-                            <div class="input-group input-group">
-                                <input type="text" name="rrnPfx" id="rrnPfx" class="form-control" placeholder="앞 6자리" maxlength="6">
+                            <div class="input-group input-group-sm">
+                                <input type="text" name="rrnPfx" id="rrnPfx" class="form-control form-control-sm" placeholder="앞 6자리" maxlength="6">
                                 <span class="input-group-text bg-light fw-bold">-</span>
-                                <input type="password" name="rrnSfx" id="rrnSfx" class="form-control" placeholder="뒤 7자리" maxlength="7">
+                                <input type="password" name="rrnSfx" id="rrnSfx" class="form-control form-control-sm" placeholder="뒤 7자리" maxlength="7">
                             </div>
+                        </div>
+                        
+                        <!-- 권한 -->
+                        <div class="col-md-6">
+                            <label for="authority" class="col-form-label fw-semibold text-dark">
+                                <i class="bi bi-shield-check text-muted me-1"></i>권한 <span class="text-danger">*</span>
+                            </label>
+                            <select name="roleName" class="form-select form-select-sm form-select form-select-sm" id="modalRoleId">
+                                <option value="">선택</option>
+                                <option value="RO01">매니저</option>
+                                <option value="RO02">직원</option>
+                            </select>
                         </div>
                     </div>
                 
@@ -171,14 +183,14 @@
                             <label for="empEmail" class="col-form-label fw-semibold text-dark">
                                 <i class="bi bi-envelope text-muted me-1"></i>이메일(ID) <span class="text-danger">*</span>
                             </label>
-                            <input type="email" id="empEmail" name="empEmail" class="form-control form-control"
+                            <input type="email" id="empEmail" name="empEmail" class="form-control form-control-sm"
                                 placeholder="이메일을 입력하세요">
                         </div>
                         <div class="col-md-6">
                             <label for="empPhone" class="col-form-label fw-semibold text-dark">
                                 <i class="bi bi-phone text-muted me-1"></i>연락처 <span class="text-danger">*</span>
                             </label>
-                            <input type="text" id="empPhone" name="empPhone" class="form-control form-control"
+                            <input type="text" id="empPhone" name="empPhone" class="form-control form-control-sm"
                                 placeholder="'-' 없이 숫자만 입력">
                         </div>
                     </div>
@@ -189,13 +201,13 @@
                             <label for="empPw" class="col-form-label fw-semibold text-dark">
                                 <i class="bi bi-key text-muted me-1"></i>비밀번호 <span class="text-danger">*</span>
                             </label>
-                            <input type="password" id="empPw" name="empPw" class="form-control form-control">
+                            <input type="password" id="empPw" name="empPw" class="form-control form-control-sm">
                         </div>
                         <div class="col-md-6">
                             <label for="empRegdate" class="col-form-label fw-semibold text-dark">
                                 <i class="bi bi-calendar text-muted me-1"></i>입사일 <span class="text-danger">*</span>
                             </label>
-                            <input type="date" id="empRegdate" name="empRegdate" class="form-control form-control">
+                            <input type="date" id="empRegdate" name="empRegdate" class="form-control form-control-sm">
                         </div>
                     </div>
                 </div>
@@ -203,10 +215,10 @@
                 <!-- 푸터 -->
                 <div class="modal-footer bg-light border-0 p-4">
                     <div class="d-flex gap-2 ms-auto">
-                        <button type="button" id="employeeModalCloseBtn" class="btn btn-outline-secondary btn-lg px-4" data-bs-dismiss="modal">
+                        <button type="button" id="employeeModalCloseBtn" class="btn btn-sm btn-outline-secondary btn-sm px-4" data-bs-dismiss="modal">
                             <i class="bi bi-x-circle me-1"></i>취소
                         </button>
-                        <button type="submit" form="employeeForm" class="btn btn-primary btn-lg px-4" id="modalBtn">
+                        <button type="submit" form="employeeForm" class="btn btn-sm btn-primary px-4" id="modalBtn">
                             <i class="bi bi-check-circle me-1"></i>저장
                         </button>
                     </div>
@@ -215,42 +227,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Daum 우편번호 API -->
-    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    <script>
-        function sample6_execDaumPostcode() {
-            new daum.Postcode({
-                oncomplete: function (data) {
-                    var addr = '';
-                    var extraAddr = '';
-
-                    if (data.userSelectedType === 'R') {
-                        addr = data.roadAddress;
-                    } else {
-                        addr = data.jibunAddress;
-                    }
-
-                    if (data.userSelectedType === 'R') {
-                        if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
-                            extraAddr += data.bname;
-                        }
-                        if (data.buildingName !== '' && data.apartment === 'Y') {
-                            extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-                        }
-                        if (extraAddr !== '') {
-                            extraAddr = ' (' + extraAddr + ')';
-                        }
-                    }
-
-                    document.getElementById('empAddrZip').value = data.zonecode;
-                    document.getElementById("empAddr").value = addr;
-                    document.getElementById("empAddrDetail").focus();
-                }
-            }).open();
-        }
-    </script>
-
     <script th:inline="javascript">
         let userDataList;
         let originalUserDataList; // 검색 기능을 위한 원본 데이터 보관
@@ -285,7 +261,17 @@
                 valueFormatter: (params) => {
                     // 입사일이 문자열인 경우에도 YYYY-MM-DD 형식 유지
                     return params.value ? params.value.substring(0, 10) : '';
-            }
+                }
+            },
+            {
+                headerName: "권한",
+                field: "roleId",
+                filter: false,
+                cellRenderer: (params) => {
+                    const status = params.value;
+                    const badgeClass = status === 'RO01' ? 'bg-success' : status === 'RO02' ? 'bg-info' : 'bg-danger';
+                    return `<span class="badge ${badgeClass}">${status === "RO01" ? "매니저" : status === 'RO02' ? '직원' : '-'}</span>`;
+                }
             },
             {
                 headerName: "상태",
@@ -295,7 +281,7 @@
                     const status = params.value;
                     const badgeClass = status === 'ES01' ? 'bg-success' : 'bg-danger';
                     return `<span class="badge ${badgeClass}">${status === "ES01" ? "재직" : "퇴사"}</span>`;
-            }
+                }
             }
         ],
         onGridReady: (params) => {
@@ -334,7 +320,6 @@
         }
 
         $("#modalBtn").on("click", function() {
-
             const userData = {
                 employeeDTO: {
                     empIdx: $("#empIdx").val(),
@@ -348,11 +333,6 @@
                     deptIdx: $("#deptIdx").val(),
                     empGrade: $("#empGrade").val(),
                     empRole: $("#empRole").val(),
-                    empType: $("#empType").val(),
-                    empAccount: $("#empAccount").val(),
-                    empAddr: $("#empAddr").val(),
-                    empAddrDetail: $("#empAddrDetail").val(),
-                    empAddrZip: $("#empAddrZip").val()
                 }
             }
 

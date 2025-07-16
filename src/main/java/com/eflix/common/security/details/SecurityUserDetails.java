@@ -1,5 +1,6 @@
 package com.eflix.common.security.details;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,12 +49,18 @@ public class SecurityUserDetails implements UserDetails {
 	}
 
 	// ERP 마스터 로그인
-	public SecurityUserDetails(SecurityMasterDTO master) {
+	public SecurityUserDetails(SecurityMasterDTO master, List<String> roleCodes) {
 		this.securityUserDTO = null;
 		this.securityEmpDTO = null;
 		this.securityMasterDTO = master;
-		this.authorities = List.of(new SimpleGrantedAuthority("ROLE_MASTER"));
-
+		// this.authorities = List.of(new SimpleGrantedAuthority("ROLE_MASTER"));
+		List<GrantedAuthority> authList = new ArrayList<>();
+        authList.add(new SimpleGrantedAuthority("ROLE_MASTER"));
+        roleCodes.stream()
+                 .map(SimpleGrantedAuthority::new)
+                 .forEach(authList::add);
+		
+		this.authorities = authList;
 		log.info("마스터 계정 - {}", this.securityMasterDTO);
 	}
 
