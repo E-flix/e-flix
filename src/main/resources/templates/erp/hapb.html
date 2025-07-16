@@ -186,8 +186,8 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="text-xs fw-bold text-dark text-uppercase mb-1">근무 중 인원</div>
-                                <div class="h4 mb-0 fw-bold text-dark">47명</div>
-                                <small class="text-danger">
+                                <div class="h4 mb-0 fw-bold text-dark" id="onDutyCount">47명</div>
+                                <small class="text-danger" id="tardyCount">
                                     <i class="fas fa-user-clock me-1"></i>지각 3명
                                 </small>
                             </div>
@@ -225,8 +225,8 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="text-xs fw-bold text-danger text-uppercase mb-1">재고 현황</div>
-                                <div class="h4 mb-0 fw-bold text-dark">1,247개</div>
-                                <small class="text-danger">
+                                <div class="h4 mb-0 fw-bold text-dark" id="inventoryCount">1,247개</div>
+                                <small class="text-danger" id="stockShortageCount">
                                     <i class="fas fa-exclamation-triangle me-1"></i>부족 8품목
                                 </small>
                             </div>
@@ -244,8 +244,8 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="text-xs fw-bold text-info text-uppercase mb-1">금일 총 처리</div>
-                                <div class="h4 mb-0 fw-bold text-dark">376건</div>
-                                <small class="text-muted">수주 156 + 출고 142 + 입고 78</small>
+                                <div class="h4 mb-0 fw-bold text-dark" id="todayProcessCount">376건</div>
+                                <!-- <small class="text-muted">수주 156 + 출고 142 + 입고 78</small> -->
                             </div>
                             <div class="text-info" style="font-size: 2.5rem;">
                                 <i class="fas fa-tasks"></i>
@@ -268,14 +268,14 @@
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="text-center">
                                     <div class="small-chart">
                                         <canvas id="attendanceChart"></canvas>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <!-- <div class="col-6">
                                 <h6 class="fw-bold mb-3">계약 만료 예정자</h6>
                                 <div class="list-group list-group-flush">
                                     <div class="list-group-item px-0 py-2">
@@ -306,7 +306,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -322,14 +322,14 @@
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="text-center">
                                     <div class="small-chart">
                                         <canvas id="salaryChart"></canvas>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <!-- <div class="col-6">
                                 <h6 class="fw-bold mb-3">미정산 급여</h6>
                                 <div class="list-group list-group-flush">
                                     <div class="list-group-item px-0 py-2">
@@ -360,7 +360,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -378,14 +378,14 @@
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="text-center">
                                     <div class="small-chart">
                                         <canvas id="inventoryChart"></canvas>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <!-- <div class="col-6">
                                 <h6 class="fw-bold mb-3">재고 부족 품목</h6>
                                 <div class="list-group list-group-flush">
                                     <div class="list-group-item px-0 py-2">
@@ -416,7 +416,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -475,7 +475,7 @@
         </div>
 
         <!-- 통합 알림 패널 -->
-        <div class="row">
+        <!-- <div class="row">
             <div class="col-12">
                 <div class="card shadow-sm">
                     <div class="card-header py-3">
@@ -552,11 +552,163 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
+    <script>
+        $(function() {
+            loadSummary();
+            loadHr();
+            loadAcc();
+            loadPurchs();
+            loadBsn();
+            function loadSummary() {
+                $.ajax({
+                    type: "GET",
+                    url: "/erp/dashboard/summary",
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body;
+                            $('#onDutyCount').text(data.onDutyCount + '명');
+                            $('#tardyCount').text('지각 ' + data.tardyCount + '명');
+                            $('#inventoryCount').text(data.inventoryCount + '개');
+                            $('#stockShortageCount').text('부족 ' + data.stockShortageCount + '품목');
+                            $('#todayProcessCount').text(data.todayProcessCount + '건');
+                        } else {
+
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                })
+            };
+
+            function loadHr() {
+                $.ajax({
+                    type: "GET",
+                    url: "/erp/dashboard/hr",
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const list = res.body.attendanceChart;
+                            let labels = [], values = [];
+                            $.each(list, function(i, item) {
+                                labels.push(item.STATUS);
+                                values.push(item.COUNT);
+                            });
+                            attendanceChart.data.labels = labels;
+                            attendanceChart.data.datasets[0].data = values;
+                            attendanceChart.update();
+                        } else {
+
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            };
+
+            function loadAcc() {
+                $.ajax({
+                    type: "GET",
+                    url: "/erp/dashboard/acc",
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const trend = res.body.salaryTrend;
+                            let months = [], amounts = [];
+                            $.each(trend, function(i, e) {
+                                months.push(e.MONTH + '월');
+                                amounts.push(e.AMOUNT);
+                            });
+                            salaryChart.data.labels = months;
+                            salaryChart.data.datasets[0].data = amounts;
+                            salaryChart.update();
+                        } else {
+
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function loadPurchs() {
+                $.ajax({
+                    type: "GET",
+                    url: "/erp/dashboard/purchs",
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const flow = res.body.inventoryFlow;
+                            let days = [], inCnt = [], outCnt = [];
+                            $.each(flow, function(i, e) {
+                                days.push(e.DAY);
+                                inCnt.push(e.INBOUND);
+                                outCnt.push(e.OUTBOUND);
+                            });
+                            inventoryChart.data.labels = days;
+                            inventoryChart.data.datasets[0].data = inCnt;
+                            inventoryChart.data.datasets[1].data = outCnt;
+                            inventoryChart.update();
+                        } else {
+
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function loadBsn() {
+                $.ajax({
+                    type: "GET",
+                    url: "/erp/dashboard/bsn",
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            // 매출 추이
+                            const sales = res.body.salesTrend;
+                            let months = [], amounts = [];
+                            $.each(sales, function(i, e) {
+                                months.push(e.MONTH + '월');
+                                amounts.push(e.AMOUNT);
+                            });
+                            salesChart.data.labels = months;
+                            salesChart.data.datasets[0].data = amounts;
+                            salesChart.update();
+
+                            // 주간 통계
+                            const stats = res.body.weeklyOrderStats;
+                            let container = $('.module-sales .row.text-center');
+                            container.empty();
+                            $.each(stats, function(i, s) {
+                                container.append(
+                                    '<div class="col-12 mb-3">' +
+                                    '<div class="card bg-light"><div class="card-body py-2">' +
+                                        '<div class="text-muted small">' + s.LABEL + '</div>' +
+                                        '<div class="h5 fw-bold mb-0">' + s.COUNT + (s.LABEL==='출고율'? '%':'건') + '</div>' +
+                                    '</div></div>' +
+                                    '</div>'
+                                );
+                            });
+                        } else {
+
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+        });
+    </script>
     <!-- Chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    
     <script>
         // 근태 현황 차트
         const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');

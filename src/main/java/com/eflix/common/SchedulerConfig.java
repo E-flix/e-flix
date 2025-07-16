@@ -26,14 +26,14 @@ public class SchedulerConfig {
     // 정기 결제 처리
     @Scheduled(cron = "0 0 9 * * *")
     public void processSubscriptionPayment() {
-        // paymentService.processSubscription();
+        paymentService.processSubscription();
         log.info("09:00 구독 결제 처리 중...");
     }
 
     // 사원 근태 등록
     @Scheduled(cron = "0 0 9 * * *")
     public void insertAttd() {
-        attendanceRecordService.addAttd();
+        // attendanceRecordService.addAttd();
         log.info("09:00 사원 근태 정보 등록 중...");
     }
 }
