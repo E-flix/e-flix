@@ -6,7 +6,9 @@ import lombok.Data;
 public class GradeDTO {
     private String grdIdx;
     private String grdName;
-    private String grdOrder;
-
+    private Integer grdOrder;
+    private Double grdAnnual;
     private String coIdx;
+
+    private Integer empCount;
 }

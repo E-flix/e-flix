@@ -112,6 +112,9 @@
 			{ headerName: "주문일", field: "orderDt" },
 			{ headerName: "출고의뢰일", field: "outboundDt" }
 		],
+		localeText: {
+				noRowsToShow: '⚠️요청된 출고의뢰서 가 없습니다.'
+			},
 		defaultColDef: { resizable: true, sortable: true },
 		onRowClicked: (event) => {
 			const outboundNo = event.data.outboundNo;
