@@ -28,4 +28,6 @@ public interface CustomerMapper {
     int insertCustomer(CustomerDTO dto);
     int updateCustomer(CustomerDTO dto);
     Integer findMaxCustomerSequence(@Param("prefix") String prefix);
+
+    int softDeleteCustomer(@Param("customerCd") String customerCd, @Param("coIdx") String coIdx);
 }

@@ -21,4 +21,6 @@ public interface CustomerManagementService {
      * @return 저장된 거래처 정보와 성공 여부를 담은 Map
      */
     Map<String, Object> saveCustomerWithCredit(CustomerWithCreditDTO dto);
+
+    void deleteCustomer(String customerCd);
 }

@@ -17,9 +17,13 @@ import com.eflix.hr.dto.etc.SalaryListDTO;
 import com.eflix.hr.dto.etc.SalaryMappingDTO;
 import com.eflix.hr.dto.etc.SalaryMappingSearchDTO;
 import com.eflix.hr.dto.etc.SalarySearchDTO;
+import com.eflix.hr.dto.etc.StubSearchDTO;
 import com.eflix.hr.service.EmployeeService;
 import com.eflix.hr.service.SalaryMappingService;
 import com.eflix.hr.service.SalaryService;
+import com.eflix.main.dto.etc.InvoiceDTO;
+
+import io.micrometer.core.ipc.http.HttpSender.Response;
 
 import java.util.HashMap;
 import java.util.List;
@@ -165,8 +169,6 @@ public class SalaryRestController {
 
         salarySearchDTO.setCoIdx(getCoIdx());
 
-        System.out.println(salarySearchDTO.toString());
-
         int salaryCount = salaryService.findAllCountBySearch(salarySearchDTO);
 
         salarySearchDTO.setTotalRecord(salaryCount);
@@ -244,6 +246,92 @@ public class SalaryRestController {
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @GetMapping("/stub/list")
+    public ResponseEntity<ResResult> stubList(SalarySearchDTO salarySearchDTO) {
+        ResResult result = null;
+
+        salarySearchDTO.setEmpIdx(getEmpIdx());
+        salarySearchDTO.setCoIdx(getCoIdx());
+        int stubCount = salaryService.findCountByEmpIdx(salarySearchDTO);
+
+        salarySearchDTO.setTotalRecord(stubCount);
+
+        List<SalaryListDTO> stubs = salaryService.findByEmpIdx(salarySearchDTO);
+
+        if(stubs != null) {
+            Map<String, Object> searchResult = new HashMap<>();
+            searchResult.put("stubs", stubs);
+            searchResult.put("total", stubCount);
+            searchResult.put("page", salarySearchDTO.getPage());
+            searchResult.put("startPage", salarySearchDTO.getStartPage());
+            searchResult.put("pageSize", salarySearchDTO.getPageUnit());
+            searchResult.put("endPage", salarySearchDTO.getEndPage());
+            searchResult.put("lastPage", salarySearchDTO.getLastPage());
+            result = ResUtil.makeResult(ResStatus.OK, searchResult);
+        } else {
+            result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", null);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    
+    @GetMapping("/report/preview/stub/{salaryIdx}")
+    public ModelAndView previewStub(@PathVariable("salaryIdx") String salaryIdx) {
+        ModelAndView mv = new ModelAndView();
+
+        List<SalaryDetailDTO> detailList = salaryService.salaryDetailBySalaryIdxWithCoIdx(salaryIdx, getCoIdx());
+        SalaryEmpDTO salaryEmpDTO = salaryService.salaryEmpInfo(getEmpIdx(), salaryIdx);
+
+        if(detailList == null || salaryEmpDTO == null) {
+            throw new RuntimeException("급여 명세 데이터를 찾을 수 없습니다.");
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("employeeName", salaryEmpDTO.getEmpName());
+        params.put("employeeId",   salaryEmpDTO.getEmpIdx());
+        params.put("department",   salaryEmpDTO.getDeptName());
+        params.put("position",     salaryEmpDTO.getGrdName());
+        params.put("payDate",      salaryEmpDTO.getPayMonth());
+        params.put("companyName",  "E-FLIX");
+
+        mv.setView(jasperPreviewPDF);
+        mv.addObject("fileName", STUB_REPORT_PATH);
+        mv.addObject("dataList",   detailList);
+        mv.addObject("params", params);
+        mv.addObject("saveName", "stub" + salaryEmpDTO.getEmpName() + "_" + salaryEmpDTO.getPayMonth());
+
+        return mv;
+    }
+
+    @GetMapping("/report/download/stub/{salaryIdx}")
+    public ModelAndView generateInvoice(@PathVariable("salaryIdx") String salaryIdx) {
+        ModelAndView mv = new ModelAndView();
+
+        List<SalaryDetailDTO> detailList = salaryService.salaryDetailBySalaryIdxWithCoIdx(salaryIdx, getCoIdx());
+        SalaryEmpDTO salaryEmpDTO = salaryService.salaryEmpInfo(getEmpIdx(), salaryIdx);
+
+        if(detailList == null || salaryEmpDTO == null) {
+            throw new RuntimeException("급여 명세 데이터를 찾을 수 없습니다.");
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("employeeName", salaryEmpDTO.getEmpName());
+        params.put("employeeId",   salaryEmpDTO.getEmpIdx());
+        params.put("department",   salaryEmpDTO.getDeptName());
+        params.put("position",     salaryEmpDTO.getGrdName());
+        params.put("payDate",      salaryEmpDTO.getPayMonth());
+        params.put("companyName",  "E-FLIX");
+
+        mv.setView(jasperDownloadPDF);
+        mv.addObject("fileName", STUB_REPORT_PATH);
+        mv.addObject("dataList", detailList);
+        mv.addObject("params", params);
+        mv.addObject("saveName", "stub" + salaryEmpDTO.getEmpName() + "_" + salaryEmpDTO.getPayMonth());
+
+        return mv;
+    }
+
 
     @GetMapping("/report/preview/stub/{empIdx}/{date}")
     public ModelAndView previewStub(@PathVariable("empIdx") String empIdx, @PathVariable("date") String date) {

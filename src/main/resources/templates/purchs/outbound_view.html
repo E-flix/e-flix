@@ -8,14 +8,15 @@
 <div layout:fragment="content" class="container-fluid">
 
 	<div class="d-flex justify-content-between align-items-center mb-0">
-		<h2>출고조회</h2>
+		<h3>출고조회</h3>
 	</div>
 
 	<div class="card border-0">
-		<div class="card-body ps-0 	pt-0">
-			<div class="row mb-3 align-items-end">
+		<div class="card-body ps-0 pt-0 pe-0">
+			<div class="w-100 mb-3 p-3 rounded border d-flex flex-wrap align-items-end gap-3"
+				style="border-color: #dfe6eb; background-color: #f8f9fa;">
 
-				<div class="col-md-2">
+				<div style="flex: 1 1 250px; min-width: 200px;">
 					<label class="form-label mb-0">출고ID</label>
 					<select class="form-control form-control-sm" id="outboundList">
 						<option value=''>선택</option>
@@ -24,7 +25,7 @@
 					</select>
 				</div>
 
-				<div class="col-md-4">
+				<div style="flex: 1 1 250px; min-width: 200px;">
 					<label for="startDate" class="form-label mb-1">출고일</label>
 					<div class="d-flex align-items-center">
 						<input type="date" id="startDate" class="form-control form-control-sm me-1" />
@@ -33,8 +34,11 @@
 					</div>
 				</div>
 
-				<div class="col-md-1">
-					<button class="btn btn-outline-secondary btn-sm mt-2" id="searchBtn">검색</button>
+				<div style="flex: 0 0 100px;">
+					<label class="form-label mb-1 invisible">검색</label>
+					<button class="btn btn-outline-primary btn-sm w-100" id="searchBtn">
+						<i class="bi bi-search"></i> 검색
+					</button>
 				</div>
 
 			</div>
@@ -46,57 +50,42 @@
 
 		</div>
 	</div>
-	<!-- 모달: 창고 상세 정보 -->
+
 	<div class="modal fade" id="outboundDetailModal" tabindex="-1">
 		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"
-			style="width: 600px; max-width: 90%; height: 400px;">
+			style="width: 800px; max-width: 90%; height: 500px;">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">출고 상세 정보</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
-				<div class="modal-body">
-					<table class="table table-sm table-bordered" id="outboundDetailTable">
-						<thead>
-							<tr>
-								<th>출고디테일ID</th>
-								<th>출고ID</th>
-								<th>창고ID</th>
-								<th>제품ID</th>
-								<th>제품명</th>
-								<th>수량</th>
-							</tr>
-						</thead>
-						<tbody id="outboundDetailTableBody">
-							<!-- JS로 제품 정보 삽입 -->
-						</tbody>
-					</table>
-				</div>
-				<div class="modal-footer">
-					<!-- 오른쪽 하단에 PDF 버튼 -->
-					<button id="downloadPdfBtn" type="button" class="btn btn-primary">PDF 다운로드</button>
+				<div class="modal-body p-2">
+					<div id="outboundDetailGrid" class="ag-theme-alpine" style="width: 100%; height: 300px;"></div>
 				</div>
 			</div>
 		</div>
 	</div>
+
 </div>
 
 </html>
+
 <script th:inline="javascript">
 	let outboundViewList = /*[[${obdView}]]*/[];
 	let searchId = /*[[${searchId}]]*/[];
 	let outboundViewGrid;
+	let outboundDetailGrid;
 
 	const gridOptions = {
 		headerHeight: 35,
 		rowHeight: 35,
 		rowData: outboundViewList,
 		columnDefs: [
-			{ headerName: "출고ID", field: "outboundId", editable: false },
-			{ headerName: "출고로트", field: "outboundLot", editable: false },
-			{ headerName: "출고의뢰번호", field: "outboundNumber", editable: false },
-			{ headerName: "출고일", field: "outboundDate", editable: false },
-			{ headerName: "출고담당자", field: "outboundManager", editable: false }
+			{ headerName: "출고ID", field: "outboundId" },
+			{ headerName: "출고로트", field: "outboundLot" },
+			{ headerName: "출고의뢰번호", field: "outboundNumber" },
+			{ headerName: "출고일", field: "outboundDate" },
+			{ headerName: "출고담당자", field: "outboundManager" }
 		],
 		onRowClicked: (event) => {
 			const outboundId = event.data.outboundId;
@@ -104,25 +93,38 @@
 			fetch(`/purchs/obdViewDetail?outboundId=${outboundId}`)
 				.then(res => res.json())
 				.then(data => {
-					const tbody = document.getElementById("outboundDetailTableBody");
-
-					if (data.length === 0) {
-						tbody.innerHTML = `<tr><td colspan="3" class="text-center">제품 정보 없음</td></tr>`;
-					} else {
-						tbody.innerHTML = data.map(item => `
-          <tr>
-            <td>${item.outboundDetailId}</td>
-            <td>${item.outboundId}</td>
-            <td>${item.warehouseId}</td>
-            <td>${item.prodId}</td>
-            <td>${item.prodName}</td>
-            <td>${item.outboundQuantity}</td>
-          </tr>
-        `).join("");
-					}
-
 					const modal = new bootstrap.Modal(document.getElementById("outboundDetailModal"));
 					modal.show();
+
+					// ✅ AG Grid 생성 또는 갱신
+					if (!outboundDetailGrid) {
+						const detailOptions = {
+							headerHeight: 35,
+							rowHeight: 35,
+							columnDefs: [
+								{ headerName: "출고디테일ID", field: "outboundDetailId" },
+								{ headerName: "출고ID", field: "outboundId" },
+								{ headerName: "창고ID", field: "warehouseId" },
+								{ headerName: "제품ID", field: "prodId" },
+								{ headerName: "제품명", field: "prodName" },
+								{ headerName: "수량", field: "outboundQuantity" }
+							],
+							defaultColDef: {
+								resizable: true,
+								sortable: true
+							},
+							onGridReady: (params) => {
+								params.api.sizeColumnsToFit();
+							}
+						};
+
+						outboundDetailGrid = agGrid.createGrid(
+							document.querySelector("#outboundDetailGrid"),
+							detailOptions
+						);
+					}
+
+					outboundDetailGrid.setGridOption("rowData", data);
 				})
 				.catch(err => {
 					console.error("모달 로딩 실패", err);
@@ -138,31 +140,34 @@
 		if (gridOptions.api) {
 			gridOptions.api.sizeColumnsToFit();
 		}
+		if (outboundDetailGrid) {
+			outboundDetailGrid.api.sizeColumnsToFit();
+		}
 	});
 
-	// 그리드 초기화
+	// 메인 그리드 초기화
 	document.addEventListener('DOMContentLoaded', () => {
 		outboundViewGrid = agGrid.createGrid(document.querySelector("#outboundViewList"), gridOptions);
 	});
-	// 검색버튼 이벤트
-	document.querySelector('#searchBtn').addEventListener('click', function () {
 
+	// 검색 버튼 이벤트
+	document.querySelector('#searchBtn').addEventListener('click', function () {
 		let outboundId = document.querySelector('#outboundList').value;
 		let startDate = document.querySelector('#startDate').value;
 		let endDate = document.querySelector('#endDate').value;
-		let param = `outboundId=${outboundId}&startDate=${startDate}&endDate=${endDate}`
+		let param = `outboundId=${outboundId}&startDate=${startDate}&endDate=${endDate}`;
 		fetch(`/purchs/obData?${param}`)
 			.then(res => res.json())
 			.then(data => {
 				outboundViewGrid.setGridOption("rowData", data);
-			})
+			});
 	});
 
 	// 엔터 키로 검색 실행
 	document.getElementById('outboundList').addEventListener('keydown', function (e) {
 		if (e.key === 'Enter') {
-			e.preventDefault(); // 선택창 닫히는 기본 동작 방지 (옵션)
-			document.getElementById('searchBtn').click(); // 검색 버튼 클릭
+			e.preventDefault();
+			document.getElementById('searchBtn').click();
 		}
 	});
 </script>
