@@ -441,7 +441,7 @@ $(document).ready(function() {
                 if (remainingCredit < currentOrderAmount) {
                     const confirmResult = await Utils.showAlert.confirm(
                         '여신 한도 초과',
-                        `여신 한도를 초과합니다. (잔여: ${Utils.formatCurrency(remainingCredit)} / 주문: ${Utils.formatCurrency(currentOrderAmount)})<br><br>그래도 주문을 등록하시겠습니까?`
+                        `여신 한도를 초과합니다. (잔여: ${Utils.formatCurrency(remainingCredit)} / 주문: ${Utils.formatCurrency(currentOrderAmount)})`
                     );
                     if (!confirmResult.isConfirmed) {
                         return; // 사용자가 취소하면 저장 중단
