@@ -150,22 +150,40 @@
         </selectKey>
         INSERT INTO departments (
             dept_idx, dept_up_idx, dept_name, dept_status,
-            dept_memo, dept_tel, co_idx, dept_regdate
+            dept_memo, dept_tel, co_idx, dept_regdate, mgr_idx
         ) VALUES (
             #{deptIdx}, #{deptUpIdx}, #{deptName}, #{deptStatus},
-            #{deptMemo}, #{deptTel}, #{coIdx}, SYSDATE
+            #{deptMemo}, #{deptTel}, #{coIdx}, SYSDATE, #{mgrIdx}
         )
     </insert>
 
     <!-- 부서 수정 -->
     <update id="update" parameterType="DepartmentDTO">
         UPDATE departments
-        SET dept_name = #{deptName},
-            dept_up_idx = #{deptUpIdx},
-            dept_status = #{deptStatus},
-            dept_tel = #{deptTel},
-            dept_memo = #{deptMemo},
+        <set>
+            <if test="deptName != null and deptName !=''">
+                dept_name = #{deptName},
+            </if>
+            <if test="deptUpIdx != null and deptUpIdx !=''">
+                dept_up_idx = #{deptUpIdx},
+            </if>
+            <if test="deptStatus != null and deptStatus !=''">
+                dept_status = #{deptStatus},
+            </if>
+            <if test="deptTel != null and deptTel !=''">
+                dept_tel = #{deptTel},
+            </if>
+            <if test="deptMemo != null and deptMemo !=''">
+                dept_memo = #{deptMemo},
+            </if>
+            <if test="mgrIdx != null and mgrIdx !=''">
+                mgr_idx = #{mgrIdx},
+            </if>
+            <if test="deptName != null and deptName !=''">
+                dept_name = #{deptName},
+            </if>
             dept_moddate = SYSDATE
+        </set>
         WHERE dept_idx = #{deptIdx}
     </update>
 
@@ -175,4 +193,74 @@
             DELETE FROM departments WHERE dept_idx = #{deptIdx}
         </foreach>
     </delete>
+
+    <!-- 0715 -->
+    <select id="findAllDeptCountBySearch" parameterType="DeptSearchDTO" resultType="int">
+        SELECT COUNT(*)
+        FROM departments d
+        <where>
+            <if test="deptName != null and deptName !=''">
+                AND d.dept_name LIKE '%' || #{deptName} || '%'
+            </if>
+            AND co_idx = #{coIdx}
+        </where>
+    </select>
+
+    <select id="findAllBySearch" parameterType="DeptSearchDTO" resultType="DepartmentDTO">
+         WITH dept_hierarchy AS (
+            SELECT d.dept_idx, d.dept_up_idx, d.dept_name
+            FROM departments d
+            START WITH d.dept_up_idx IS NULL
+            CONNECT BY PRIOR d.dept_idx = d.dept_up_idx
+        ),
+        emp_counts AS (
+            SELECT e.dept_idx, COUNT(*) AS emp_count
+            FROM employees e
+            GROUP BY e.dept_idx
+        ),
+        dept_with_emp AS (
+            SELECT dh.dept_idx,
+                dh.dept_up_idx,
+                dh.dept_name,
+                (
+                    SELECT SUM(ec.emp_count)
+                    FROM emp_counts ec
+                    JOIN departments d2 ON ec.dept_idx = d2.dept_idx
+                    WHERE d2.dept_idx IN (
+                    SELECT d3.dept_idx
+                    FROM departments d3
+                    START WITH d3.dept_idx = dh.dept_idx
+                    CONNECT BY PRIOR d3.dept_idx = d3.dept_up_idx
+                    )
+                ) AS total_emp_count
+            FROM dept_hierarchy dh
+        ),
+        dept_query AS (
+                SELECT
+                d.dept_idx,
+                d.dept_up_idx,
+                d.dept_name,
+                d.dept_status,
+                d.dept_tel,
+                d.dept_memo,
+                d.co_idx,
+                NVL(dw.total_emp_count, 0) AS empCount
+            FROM departments d
+                LEFT JOIN dept_with_emp dw ON d.dept_idx = dw.dept_idx
+            <where>
+                <if test="deptName != null and deptName != ''">
+                    AND d.dept_name LIKE '%' || #{deptName} || '%'
+                </if>
+            AND d.co_idx = #{coIdx}
+            </where>
+            ORDER BY d.dept_up_idx NULLS FIRST, d.dept_idx
+        )
+        SELECT *
+        FROM (
+            SELECT dq.*, ROWNUM AS rnum
+            FROM dept_query dq
+            WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rnum &gt; #{offset}
+    </select>
 </mapper>

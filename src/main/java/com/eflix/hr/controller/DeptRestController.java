@@ -1,6 +1,8 @@
 package com.eflix.hr.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +14,7 @@ import com.eflix.common.res.result.ResResult;
 import com.eflix.common.res.result.ResStatus;
 import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.DepartmentDTO;
+import com.eflix.hr.dto.etc.DeptSearchDTO;
 import com.eflix.hr.service.DepartmentService;
 import com.eflix.purchs.controller.OutboundController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,13 +92,28 @@ public class DeptRestController {
     
     // 0714
     @GetMapping("/list")
-    public ResponseEntity<ResResult> list() {
+    public ResponseEntity<ResResult> list(DeptSearchDTO deptSearchDTO) {
         ResResult result = null;
 
-        List<DepartmentDTO> list = departmentService.findAllDepartmentWithEmpCountByCoIdx(getCoIdx());
+        deptSearchDTO.setCoIdx(getCoIdx());
+
+        int deptCount = departmentService.findAllDeptCountBySearch(deptSearchDTO);
+
+        deptSearchDTO.setTotalRecord(deptCount);
+
+        // List<DepartmentDTO> list = departmentService.findAllDepartmentWithEmpCountByCoIdx(getCoIdx());
+        List<DepartmentDTO> list = departmentService.findAllBySearch(deptSearchDTO);
 
         if(list != null) {
-            result = ResUtil.makeResult(ResStatus.OK, list);
+            Map<String, Object> searchResult = new HashMap<>();
+            searchResult.put("depts", list);
+            searchResult.put("total", deptCount);
+            searchResult.put("page", deptSearchDTO.getPage());
+            searchResult.put("startPage", deptSearchDTO.getStartPage());
+            searchResult.put("pageSize", deptSearchDTO.getPageUnit());
+            searchResult.put("endPage", deptSearchDTO.getEndPage());
+            searchResult.put("lastPage", deptSearchDTO.getLastPage());
+            result = ResUtil.makeResult(ResStatus.OK, searchResult);
         } else {
             result = ResUtil.makeResult("404", "데이터가 존재하지 않습니다.", "null");
         }

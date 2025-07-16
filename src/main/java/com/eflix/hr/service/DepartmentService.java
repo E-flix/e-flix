@@ -13,6 +13,7 @@ package com.eflix.hr.service;
 import java.util.List;
 
 import com.eflix.hr.dto.DepartmentDTO;
+import com.eflix.hr.dto.etc.DeptSearchDTO;
 
 public interface DepartmentService {
     public List<DepartmentDTO> selectAll(DepartmentDTO departmentDTO);
@@ -44,5 +45,9 @@ public interface DepartmentService {
     public List<DepartmentDTO> findAllDepartmentWithEmpCountByCoIdx(String coIdx);
     public int insert(DepartmentDTO dto);
     public int update(DepartmentDTO dto);
-    public int deleteDepartments(List<String> deptIdxList); 
+    public int deleteDepartments(List<String> deptIdxList);
+
+    // 0715
+    public int findAllDeptCountBySearch(DeptSearchDTO deptSearchDTO);
+    public List<DepartmentDTO> findAllBySearch(DeptSearchDTO deptSearchDTO);
 }
