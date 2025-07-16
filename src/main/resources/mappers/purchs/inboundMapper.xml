@@ -15,7 +15,7 @@
         prod
       WHERE 
         prod_inbound_status = 'pis02'
-      order by prod_id
+      order by prod_id DESC
   </select>
 	<!--생산입력-->
 	<insert id="insertProd" parameterType="InboundDTO">

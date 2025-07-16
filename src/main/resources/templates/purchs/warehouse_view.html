@@ -17,37 +17,42 @@
 <div layout:fragment="content" class="container-fluid">
 
 	<div class="d-flex justify-content-between align-items-center mb-0">
-		<h2>창고조회</h2>
+		<h3>창고조회</h3>
 	</div>
 	<div class="card border-0">
-		<div class="card-body ps-0 pt-0">
-			<div class="row mb-3 align-items-end">
+		<div class="card-body ps-0 pt-0 pe-0">
 
-				<div class="col-md-2">
-					<label class="form-label mb-1">창고ID</label>
+			<div class="w-100 mb-3 p-3 rounded border d-flex flex-wrap align-items-end gap-3"
+				style="border-color: #dfe6eb; background-color: #f8f9fa;">
+
+				<div style="flex: 1 1 250px; min-width: 200px;">
+					<label for="warehouseIdInput" class="form-label mb-1">창고ID</label>
 					<input type="text" class="form-control form-control-sm" id="warehouseIdInput" placeholder="창고ID" />
 				</div>
 
-				<div class="col-md-2">
-					<label class="form-label mb-1">창고위치</label>
-					<select class="form-control form-control-sm" id="warehouseLocationInput">
-						<option value=''>선택</option>
+				<div style="flex: 1 1 250px; min-width: 200px;">
+					<label for="warehouseLocationInput" class="form-label mb-1">창고위치</label>
+					<select class="form-select form-select-sm" id="warehouseLocationInput">
+						<option value="">선택</option>
 						<option th:each="wh : ${whlocationList}" th:value="${wh.warehouseLocation}"
 							th:text="${wh.warehouseLocation}"></option>
 					</select>
 				</div>
 
-				<div class="col-md-2">
-					<label class="form-label mb-1">창고상태</label>
-					<select class="form-control form-control-sm" id="warehouseStatusSelect">
-						<option value='' selected>선택</option>
+				<div style="flex: 1 1 250px; min-width: 200px;">
+					<label for="warehouseStatusSelect" class="form-label mb-1">창고상태</label>
+					<select class="form-select form-select-sm" id="warehouseStatusSelect">
+						<option value="">선택</option>
 						<option value="재고존재">재고존재</option>
 						<option value="비었음">비었음</option>
 					</select>
 				</div>
 
-				<div class="col-md-2">
-					<button class="btn btn-outline-secondary btn-sm mt-2" id="searchBtn">검색</button>
+				<div style="flex: 0 0 100px;">
+					<label class="form-label mb-1 invisible">검색</label>
+					<button class="btn btn-outline-primary btn-sm w-100" id="searchBtn">
+						<i class="bi bi-search"></i> 검색
+					</button>
 				</div>
 
 			</div>
@@ -59,36 +64,22 @@
 
 		</div>
 	</div>
-	<!-- 모달: 창고 상세 정보 -->
+
 	<div class="modal fade" id="warehouseDetailModal" tabindex="-1">
 		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"
-			style="width: 600px; max-width: 90%; height: 400px;">
+			style="width: 800px; max-width: 90%; height: 500px;">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title">창고 상세 정보</h5>
+					<h5 class="modal-title">입고 상세 정보</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
-				<div class="modal-body">
-					<table class="table table-sm table-bordered" id="warehouseDetailTable">
-						<thead>
-							<tr>
-								<th>제품ID</th>
-								<th>제품명</th>
-								<th>수량</th>
-							</tr>
-						</thead>
-						<tbody id="warehouseDetailTableBody">
-							<!-- JS로 제품 정보 삽입 -->
-						</tbody>
-					</table>
-				</div>
-				<div class="modal-footer">
-					<!-- 오른쪽 하단에 PDF 버튼 -->
-					<button id="downloadPdfBtn" type="button" class="btn btn-primary">PDF 다운로드</button>
+				<div class="modal-body p-2">
+					<div id="warehouseDetailGrid" class="ag-theme-alpine" style="width: 100%; height: 300px;"></div>
 				</div>
 			</div>
 		</div>
 	</div>
+
 </div>
 
 </html>
@@ -97,6 +88,7 @@
 	let warehouseViewList = /*[[${warehouseViewList}]]*/[];
 	let whlocationList = /*[[${whlocationList}]]*/[];
 	let warehouseViewGrid;
+	let warehouseDetailGrid;
 
 	const gridOptions = {
 		headerHeight: 35,
@@ -105,8 +97,8 @@
 		columnDefs: [
 			{ headerName: "창고ID", field: "warehouseId", editable: false },
 			{ headerName: "창고위치", field: "warehouseLocation", editable: false },
-			{ headerName: "창고크기", field: "warehouseScale", editable: false, cellStyle: {textAlign: 'right'} },
-			{ headerName: "입고된제품량", field: "warehouseCurrent", editable: false, cellStyle: {textAlign: 'right'} },
+			{ headerName: "창고크기", field: "warehouseScale", editable: false, cellStyle: { textAlign: 'right' } },
+			{ headerName: "입고된제품량", field: "warehouseCurrent", editable: false, cellStyle: { textAlign: 'right' } },
 			{ headerName: "창고담당자", field: "warehouseManager", editable: false },
 			{
 				headerName: "창고상태",
@@ -127,22 +119,35 @@
 			fetch(`/purchs/whvld?warehouseId=${warehouseId}`)
 				.then(res => res.json())
 				.then(data => {
-					const tbody = document.getElementById("warehouseDetailTableBody");
-
-					if (data.length === 0) {
-						tbody.innerHTML = `<tr><td colspan="3" class="text-center">제품 정보 없음</td></tr>`;
-					} else {
-						tbody.innerHTML = data.map(item => `
-          <tr>
-            <td>${item.prodId}</td>
-            <td>${item.prodName}</td>
-            <td>${item.currentQuantity}</td>
-          </tr>
-        `).join("");
-					}
-
 					const modal = new bootstrap.Modal(document.getElementById("warehouseDetailModal"));
 					modal.show();
+
+					if (!warehouseDetailGrid) {
+						const detailOptions = {
+							headerHeight: 35,
+							rowHeight: 35,
+							columnDefs: [
+								{ headerName: "제품ID", field: "prodId" },
+								{ headerName: "제품명", field: "prodName" },
+								{ headerName: "수량", field: "currentQuantity" }
+							],
+							defaultColDef: {
+								resizable: true,
+								sortable: true
+							},
+							onGridReady: (params) => {
+								params.api.sizeColumnsToFit();
+							}
+						};
+
+						warehouseDetailGrid = agGrid.createGrid(
+							document.querySelector("#warehouseDetailGrid"),
+							detailOptions
+						);
+					} 
+
+					warehouseDetailGrid.setGridOption("rowData", data);
+
 				})
 				.catch(err => {
 					console.error("모달 로딩 실패", err);
@@ -158,8 +163,11 @@
 		if (gridOptions.api) {
 			gridOptions.api.sizeColumnsToFit();
 		}
+		if (warehouseDetailGrid) {
+			warehouseDetailGrid.api.sizeColumnsToFit();
+		}
 	});
-	
+
 	// 그리드 초기화
 	document.addEventListener('DOMContentLoaded', () => {
 		warehouseViewGrid = agGrid.createGrid(document.querySelector("#warehouseViewList"), gridOptions);
