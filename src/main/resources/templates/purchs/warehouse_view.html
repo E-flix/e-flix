@@ -64,36 +64,22 @@
 
 		</div>
 	</div>
-	<!-- 모달: 창고 상세 정보 -->
+
 	<div class="modal fade" id="warehouseDetailModal" tabindex="-1">
 		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered"
-			style="width: 600px; max-width: 90%; height: 400px;">
+			style="width: 800px; max-width: 90%; height: 500px;">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title">창고 상세 정보</h5>
+					<h5 class="modal-title">입고 상세 정보</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
-				<div class="modal-body">
-					<table class="table table-sm table-bordered" id="warehouseDetailTable">
-						<thead>
-							<tr>
-								<th>제품ID</th>
-								<th>제품명</th>
-								<th>수량</th>
-							</tr>
-						</thead>
-						<tbody id="warehouseDetailTableBody">
-							<!-- JS로 제품 정보 삽입 -->
-						</tbody>
-					</table>
-				</div>
-				<div class="modal-footer">
-					<!-- 오른쪽 하단에 PDF 버튼 -->
-					<button id="downloadPdfBtn" type="button" class="btn btn-primary">PDF 다운로드</button>
+				<div class="modal-body p-2">
+					<div id="warehouseDetailGrid" class="ag-theme-alpine" style="width: 100%; height: 300px;"></div>
 				</div>
 			</div>
 		</div>
 	</div>
+
 </div>
 
 </html>
@@ -102,6 +88,7 @@
 	let warehouseViewList = /*[[${warehouseViewList}]]*/[];
 	let whlocationList = /*[[${whlocationList}]]*/[];
 	let warehouseViewGrid;
+	let warehouseDetailGrid;
 
 	const gridOptions = {
 		headerHeight: 35,
@@ -132,22 +119,35 @@
 			fetch(`/purchs/whvld?warehouseId=${warehouseId}`)
 				.then(res => res.json())
 				.then(data => {
-					const tbody = document.getElementById("warehouseDetailTableBody");
-
-					if (data.length === 0) {
-						tbody.innerHTML = `<tr><td colspan="3" class="text-center">제품 정보 없음</td></tr>`;
-					} else {
-						tbody.innerHTML = data.map(item => `
-          <tr>
-            <td>${item.prodId}</td>
-            <td>${item.prodName}</td>
-            <td>${item.currentQuantity}</td>
-          </tr>
-        `).join("");
-					}
-
 					const modal = new bootstrap.Modal(document.getElementById("warehouseDetailModal"));
 					modal.show();
+
+					if (!warehouseDetailGrid) {
+						const detailOptions = {
+							headerHeight: 35,
+							rowHeight: 35,
+							columnDefs: [
+								{ headerName: "제품ID", field: "prodId" },
+								{ headerName: "제품명", field: "prodName" },
+								{ headerName: "수량", field: "currentQuantity" }
+							],
+							defaultColDef: {
+								resizable: true,
+								sortable: true
+							},
+							onGridReady: (params) => {
+								params.api.sizeColumnsToFit();
+							}
+						};
+
+						warehouseDetailGrid = agGrid.createGrid(
+							document.querySelector("#warehouseDetailGrid"),
+							detailOptions
+						);
+					} 
+
+					warehouseDetailGrid.setGridOption("rowData", data);
+
 				})
 				.catch(err => {
 					console.error("모달 로딩 실패", err);
@@ -162,6 +162,9 @@
 	window.addEventListener('resize', () => {
 		if (gridOptions.api) {
 			gridOptions.api.sizeColumnsToFit();
+		}
+		if (warehouseDetailGrid) {
+			warehouseDetailGrid.api.sizeColumnsToFit();
 		}
 	});
 

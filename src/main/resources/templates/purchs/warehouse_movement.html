@@ -175,7 +175,9 @@
 					width: 100
 				}
 			],
-			rowSelection: 'multiple',
+			rowSelection: {
+			mode: "multiRow"
+		},
 
 			onGridReady: (params) => {
 				whmGridOptions.api = params.api;
