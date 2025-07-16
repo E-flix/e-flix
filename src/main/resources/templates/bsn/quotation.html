@@ -6,95 +6,44 @@
   <meta charset="UTF-8" />
   <title>견적서 입력</title>
   
-  <!-- 공통 관리 페이지 스타일 -->
   <link rel="stylesheet" th:href="@{/css/management_common.css}" />
-
-  <!-- 페이지 전용 스타일 -->
   <style>
-    /* ================== 기타 스타일 ================== */
-    .bg-cell {
-      background-color: #f8f9fc !important;
-      font-weight: 600;
-      text-align: center;
-      vertical-align: middle;
-      white-space: nowrap;
-      min-width: 100px;
-    }
-    
-    .detail-table th {
-      background-color: #f8f9fc;
-      text-align: center;
-      vertical-align: middle;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    
-    .detail-table td {
-      vertical-align: middle;
-    }
-    
-    .form-control-sm {
-      font-size: 0.875rem;
-    }
-    
-    .table td, .table th {
-      padding: 0.5rem;
-      border: 1px solid #e3e6f0;
-    }
+    .bg-cell { background-color: #f8f9fc !important; font-weight: 600; text-align: center; vertical-align: middle; white-space: nowrap; min-width: 100px; }
+    .detail-table th { background-color: #f8f9fc; text-align: center; vertical-align: middle; font-weight: 600; white-space: nowrap; }
+    .detail-table td { vertical-align: middle; }
+    .form-control-sm { font-size: 0.875rem; }
+    .table td, .table th { padding: 0.5rem; border: 1px solid #e3e6f0; }
   </style>
 </head>
 
 <div layout:fragment="content" class="management-container">
-  <form th:action="@{/bsn/createQuotation}"
-        th:object="${quotation}"
-        method="post"
-        enctype="multipart/form-data">
+  <form id="quotationForm" th:action="@{/bsn/createQuotation}" th:object="${quotation}" method="post" enctype="multipart/form-data">
 
-    <!-- 페이지 헤더 (수정됨) -->
-    <!-- <div class="page-header">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <h4 class="mb-0"><i class="fas fa-file-alt mr-2"></i>견적서 입력</h4>
-          <small class="opacity-75">신규 견적서를 작성하고 등록합니다.</small>
-        </div>
-        <div>
-          <button type="submit" class="btn btn-sm"><i class="fas fa-save"></i> 등록</button>
-          <button type="button" class="btn btn-sm btn-reset ms-2"><i class="fas fa-undo"></i> 초기화</button>
-          <button type="button" class="btn btn-sm btn-list ms-2"><i class="fas fa-list"></i> 목록</button>
-        </div>
-      </div>
-    </div> -->
+    <!-- 페이지 헤더 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <h4 class="mb-0 text-dark font-weight-bold"><i class="fas fa-file-alt mr-2"></i>견적서 입력</h4>
         <small class="text-muted">신규 견적서를 작성하고 등록합니다.</small>
       </div>
       <div>
-        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save"></i> 등록</button>
+        <button type="button" id="btn-save-quotation" class="btn btn-primary btn-sm"><i class="fas fa-save"></i> 등록</button>
         <button type="button" class="btn btn-secondary btn-sm btn-reset ms-2"><i class="fas fa-undo"></i> 초기화</button>
         <button type="button" class="btn btn-outline-secondary btn-sm btn-list ms-2"><i class="fas fa-list"></i> 목록</button>
       </div>
     </div>
 
-    <!-- 견적서 기본 정보 (mb-4 클래스 추가로 간격 조정) -->
+    <!-- 견적서 기본 정보 -->
     <div class="section-box mb-4">
       <div class="card-header">
         <h6><i class="fas fa-info-circle mr-2"></i>견적서 기본 정보</h6>
       </div>
       <div class="card-body">
         <table class="table table-bordered align-middle mb-0">
-          <colgroup>
-            <col style="width:15%">
-            <col style="width:35%">
-            <col style="width:15%">
-            <col style="width:35%">
-          </colgroup>
           <tbody>
             <tr>
               <th class="bg-cell">견적서 번호</th>
               <td><input type="text" th:field="*{quotationNo}" class="form-control form-control-sm" readonly></td>
               <th class="bg-cell">견적일자</th>
-              <!-- id 추가 -->
               <td><input type="date" th:field="*{quotationDt}" id="quotationDate" class="form-control form-control-sm"></td>
             </tr>
             <tr>
@@ -112,7 +61,6 @@
             </tr>
             <tr>
               <th class="bg-cell">발신담당자</th>
-              <!-- th:value와 readonly 속성 추가 -->
               <td><input type="text" th:field="*{sender}" id="sender" class="form-control form-control-sm" th:value="${loggedInUserName}" readonly></td>
               <th class="bg-cell">전화번호</th>
               <td><input type="text" th:field="*{phone}" id="phone" class="form-control form-control-sm" readonly></td>
@@ -257,10 +205,6 @@
         const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
         const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
 
-        // =================================================================
-        // ★★★★★★★★★★★★★★★★★ 추가된 부분 ★★★★★★★★★★★★★★★★★
-        // =================================================================
-        // 오늘 날짜를 YYYY-MM-DD 형식으로 반환하는 함수
         const getTodayString = () => {
             const today = new Date();
             const year = today.getFullYear();
@@ -269,9 +213,7 @@
             return `${year}-${month}-${day}`;
         };
 
-        // 페이지 로드 시 견적일자에 오늘 날짜 설정
         document.getElementById('quotationDate').value = getTodayString();
-        // =================================================================
 
         function recalcRow(row) {
             const price = +row.querySelector('.item-price').value || 0;
@@ -411,11 +353,34 @@
 
         document.querySelector('.btn-reset').addEventListener('click', () => {
             document.querySelector('form').reset();
-            document.getElementById('quotationDate').value = getTodayString(); // 초기화 시 날짜 재설정
+            document.getElementById('quotationDate').value = getTodayString();
             updateTotals();
         });
         document.querySelector('.btn-list').addEventListener('click', () => window.location.href = '/bsn/qot_list');
-        document.querySelector('form').addEventListener('submit', renumberRows);
+        
+        document.getElementById('btn-save-quotation').addEventListener('click', () => {
+            const form = document.getElementById('quotationForm');
+            const customerCd = document.getElementById('customerCd').value;
+            if (!customerCd) {
+                Swal.fire('입력 오류', '거래처를 선택해주세요.', 'warning');
+                return;
+            }
+            renumberRows(); // 폼 제출 직전에 행 번호 재정렬
+            Swal.fire({ 
+                title: '견적서 등록',
+                text: "이 견적서를 등록하시겠습니까?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '예, 등록합니다',
+                cancelButtonText: '취소'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
         
         renumberRows();
         updateTotals();
