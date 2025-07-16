@@ -42,11 +42,11 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-semibold">신청일 범위</label>
-                            <input type="date" class="form-control" id="searchReqStart">
+                            <input type="date" class="form-control form-control-sm" id="searchReqStart">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-semibold">～</label>
-                            <input type="date" class="form-control" id="searchReqEnd">
+                            <input type="date" class="form-control form-control-sm" id="searchReqEnd">
                         </div>
                         <div class="col-12">
                             <div class="d-flex justify-content-end gap-2">
@@ -113,13 +113,18 @@
                         <h6 class="card-title mb-0">
                             <i class="bi bi-list-check"></i> 휴가 신청 목록
                         </h6>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-light btn-sm">
-                                <i class="bi bi-download"></i> 엑셀 다운로드
-                            </button>
-                            <button type="button" class="btn btn-outline-light btn-sm">
-                                <i class="bi bi-printer"></i> 인쇄
-                            </button>
+                        <!-- 일괄 처리 버튼 -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-start gap-2">
+                                    <button type="button" class="btn btn-sm btn-success" id="acceptBulkBtn">
+                                        <i class="bi bi-check-all"></i> 선택 항목 승인
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" id="rejectBulkBtn">
+                                        <i class="bi bi-x-circle"></i> 선택 항목 반려
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -162,20 +167,6 @@
         </div>
     </div>
 
-    <!-- 일괄 처리 버튼 -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-start gap-2">
-                <button type="button" class="btn btn-success" id="acceptBulkBtn">
-                    <i class="bi bi-check-all"></i> 선택 항목 승인
-                </button>
-                <button type="button" class="btn btn-danger" id="rejectBulkBtn">
-                    <i class="bi bi-x-circle"></i> 선택 항목 반려
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- 승인/반려 모달 -->
     <div class="modal fade" id="approvalModal" tabindex="-1" aria-labelledby="approvalModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -196,15 +187,15 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">사원명</label>
-                            <input type="text" class="form-control bg-light" id="modalEmpName" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalEmpName" readonly>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">부서</label>
-                            <input type="text" class="form-control bg-light" id="modalDeptName" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalDeptName" readonly>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">사번</label>
-                            <input type="text" class="form-control bg-light" id="modalEmpIdx" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalEmpIdx" readonly>
                         </div>
                     </div>
 
@@ -217,27 +208,27 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">휴가 유형</label>
-                            <input type="text" class="form-control bg-light" id="modalReqType" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalReqType" readonly>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">신청일자</label>
-                            <input type="text" class="form-control bg-light" id="modalRequestDate" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalRequestDate" readonly>
                         </div>
                         <div class="col-md-4 mt-3">
                             <label class="form-label fw-semibold">시작일</label>
-                            <input type="text" class="form-control bg-light" id="modalLeaveStartDate" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalLeaveStartDate" readonly>
                         </div>
                         <div class="col-md-4 mt-3">
                             <label class="form-label fw-semibold">종료일</label>
-                            <input type="text" class="form-control bg-light" id="modalLeaveEndDate" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalLeaveEndDate" readonly>
                         </div>
                         <div class="col-md-4 mt-3">
                             <label class="form-label fw-semibold">총 일수</label>
-                            <input type="text" class="form-control bg-light" id="modalTotalDate" readonly>
+                            <input type="text" class="form-control form-control-sm bg-light" id="modalTotalDate" readonly>
                         </div>
                         <div class="col-12 mt-3">
                             <label class="form-label fw-semibold">신청 사유</label>
-                            <textarea class="form-control bg-light" rows="3" id="modalReason" readonly></textarea>
+                            <textarea class="form-control form-control-sm bg-light" rows="3" id="modalReason" readonly></textarea>
                         </div>
                     </div>
 
@@ -250,20 +241,20 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold">승인 의견</label>
-                            <textarea class="form-control" rows="3" placeholder="승인 또는 반려 사유를 입력하세요"
+                            <textarea class="form-control form-control-sm" rows="3" placeholder="승인 또는 반려 사유를 입력하세요"
                                 id="reqReason"></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <input type="hidden" id="modalLeaveReqIdx">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x"></i> 닫기
                     </button>
-                    <button type="button" class="btn btn-danger" id="rejectBtn">
+                    <button type="button" class="btn btn-sm btn-danger" id="rejectBtn">
                         <i class="bi bi-x-circle"></i> 반려
                     </button>
-                    <button type="button" class="btn btn-success" id="acceptBtn">
+                    <button type="button" class="btn btn-sm btn-success" id="acceptBtn">
                         <i class="bi bi-check-circle"></i> 승인
                     </button>
                 </div>
@@ -512,7 +503,7 @@
                         </td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <img src="${item.empImg}" class="rounded-circle me-2" width="32" height="32">
+                                <img src="/images/hr/emp/${item.empImg}" class="rounded-circle me-2" width="32" height="32">
                                 <div>
                                     <div class="fw-semibold">${item.empName}</div>
                                     <small class="text-muted">${item.empIdx}</small>

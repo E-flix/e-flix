@@ -1,12 +1,8 @@
 package com.eflix.common.security.details;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -59,7 +55,9 @@ public class SecurityUserDetailService implements UserDetailsService {
 				SecurityMasterDTO securityMasterDTO = securityMapper.findMasterForLogin(coIdx, username); // username = mst_id
 
 				if (securityMasterDTO == null) throw new UsernameNotFoundException("마스터 계정 없음");
-				return new SecurityUserDetails(securityMasterDTO);
+
+				List<String> coRoles = securityMapper.findCompanyRolesByCoIdx(coIdx);
+				return new SecurityUserDetails(securityMasterDTO, coRoles);
 			}
 		}
 

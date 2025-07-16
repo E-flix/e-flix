@@ -1,14 +1,11 @@
 package com.eflix.common;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.eflix.common.payment.service.PaymentService;
 import com.eflix.hr.service.AttendanceRecordService;
-import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.service.SubscriptionService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +26,7 @@ public class SchedulerConfig {
     // 정기 결제 처리
     @Scheduled(cron = "0 0 9 * * *")
     public void processSubscriptionPayment() {
-        paymentService.processSubscription();
+        // paymentService.processSubscription();
         log.info("09:00 구독 결제 처리 중...");
     }
 

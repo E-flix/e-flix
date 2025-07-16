@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.eflix.common.security.auth.AuthContext;
 import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.DepartmentDTO;
+import com.eflix.hr.dto.etc.DeptSearchDTO;
 import com.eflix.hr.mapper.DepartmentMapper;
 import com.eflix.hr.service.DepartmentService;
 
@@ -105,5 +106,15 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public int deleteDepartments(List<String> deptIdxList) {
         return departmentMapper.deleteDepartments(deptIdxList);
+    }
+
+    @Override
+    public int findAllDeptCountBySearch(DeptSearchDTO deptSearchDTO) {
+        return departmentMapper.findAllDeptCountBySearch(deptSearchDTO);
+    }
+
+    @Override
+    public List<DepartmentDTO> findAllBySearch(DeptSearchDTO deptSearchDTO) {
+        return departmentMapper.findAllBySearch(deptSearchDTO);
     }
 }
