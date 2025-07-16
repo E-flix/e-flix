@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.eflix.mgr.mapper.SummaryMapper">
+
+    <!-- 요약카드 -->
+    <select id="getOnDutyCount" resultType="int">
+        SELECT COUNT(*)
+        FROM attendance_records
+        WHERE TRUNC(attd_date) = TRUNC(SYSDATE)
+        AND attd_status IN ('AR02','AR05')
+    </select>
+    <select id="getTardyCount" resultType="int">
+        SELECT COUNT(*)
+        FROM attendance_records
+        WHERE TRUNC(attd_date) = TRUNC(SYSDATE)
+        AND attd_status = 'AR03'
+    </select>
+
+    <select id="getThisMonthSales" resultType="java.math.BigDecimal">
+        SELECT NVL(SUM(TO_NUMBER(money)), 0)
+        FROM sales_outbound
+        WHERE TO_CHAR(outbound_dt, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
+    </select>
+
+    <select id="getInventoryCount" resultType="int">
+        SELECT NVL(SUM(iv_current_quantity), 0)
+        FROM inventory
+    </select>
+
+    <select id="getStockShortageCount" resultType="int">
+        SELECT COUNT(*)
+        FROM inventory inv
+        JOIN prod p ON inv.prod_id = p.prod_id
+        WHERE inv.iv_current_quantity &lt; p.safety_stock_amount
+    </select>
+
+    <select id="getTodayProcessCount" resultType="int">
+        SELECT (
+                (SELECT COUNT(*) FROM orders WHERE TRUNC(order_dt) = TRUNC(SYSDATE))
+            + (SELECT COUNT(*) FROM outbound WHERE TRUNC(outbound_date) = TRUNC(SYSDATE))
+            + (SELECT COUNT(*) FROM inbound WHERE TRUNC(inbound_date) = TRUNC(SYSDATE))
+            ) AS totalCount
+        FROM DUAL
+    </select>
+
+    <!-- 인사 모듈 -->
+    <select id="getAttendanceChartData" resultType="map">
+        SELECT statusLabel AS status,
+            count(*)           AS count
+        FROM (
+            SELECT CASE WHEN attd_status = 'AR02' THEN '출근'
+                        WHEN attd_status = 'AR03' THEN '지각'
+                        WHEN attd_status = 'AR06' THEN '결근'
+                        ELSE '기타' END AS statusLabel
+            FROM attendance_records
+            WHERE TRUNC(attd_date) = TRUNC(SYSDATE)
+        )
+        GROUP BY statusLabel
+    </select>
+
+    <!-- 회계모듈 -->
+    <select id="getSalaryTrend" resultType="map">
+        SELECT TO_CHAR(TO_DATE(pay_month, 'YYYY-MM-DD'), 'MM') AS month,
+            TRUNC(SUM(
+                NVL(base_salary, 0) + NVL(bonus, 0) + NVL(overtime_pay, 0) + NVL(night_work_pay, 0)
+                - NVL(tax, 0) - NVL(health_insurance, 0) - NVL(national_pension, 0)
+                - NVL(employment_ins, 0) - NVL(other_deductions, 0)
+            )) AS amount
+        FROM salary
+        WHERE TO_CHAR(TO_DATE(pay_month, 'YYYY-MM-DD'), 'YYYY') = TO_CHAR(SYSDATE, 'YYYY')
+        GROUP BY TO_CHAR(TO_DATE(pay_month, 'YYYY-MM-DD'), 'MM')
+        ORDER BY TO_CHAR(TO_DATE(pay_month, 'YYYY-MM-DD'), 'MM')
+    </select>
+
+    <select id="getPendingPayouts" resultType="map">
+        SELECT sal.salary_idx AS title,
+            emp.dept_idx            AS dept,
+            (sal.bonus + sal.overtime_pay + sal.night_work_pay) AS amount
+        FROM salary sal
+        JOIN employees emp ON sal.emp_idx = emp.emp_idx
+        WHERE sal.salary_type = 'ST01'
+    </select>
+
+    <!-- 재고 모듈 -->
+    <select id="getInventoryFlow" resultType="map">
+        SELECT dayOfWeek AS day,
+            SUM(inCnt)   AS inbound,
+            SUM(outCnt)  AS outbound
+        FROM (
+            SELECT TO_CHAR(inbound_date, 'DY') AS dayOfWeek,
+                COUNT(*)                   AS inCnt,
+                0                          AS outCnt
+            FROM inbound
+            WHERE TRUNC(inbound_date) BETWEEN TRUNC(SYSDATE, 'IW') AND TRUNC(SYSDATE, 'IW') + 6
+            GROUP BY TO_CHAR(inbound_date, 'DY')
+            UNION ALL
+            SELECT TO_CHAR(outbound_date, 'DY') AS dayOfWeek,
+                0                          AS inCnt,
+                COUNT(*)                   AS outCnt
+            FROM outbound
+            WHERE TRUNC(outbound_date) BETWEEN TRUNC(SYSDATE, 'IW') AND TRUNC(SYSDATE, 'IW') + 6
+            GROUP BY TO_CHAR(outbound_date, 'DY')
+        )
+        GROUP BY dayOfWeek
+        ORDER BY MIN(DECODE(dayOfWeek,'MON',1,'TUE',2,'WED',3,'THU',4,'FRI',5,'SAT',6,'SUN',7))
+    </select>
+
+    <select id="getLowStockItems" resultType="map">
+        SELECT p.prod_name            AS name,
+            inv.iv_current_quantity AS currentQty,
+            p.safety_stock_amount   AS safetyQty
+        FROM inventory inv
+        JOIN prod p ON inv.prod_id = p.prod_id
+        WHERE inv.iv_current_quantity &lt; p.safety_stock_amount
+    </select>
+
+    <!-- 영업 모듈 -->
+    <select id="getSalesTrend" resultType="map">
+        SELECT TO_CHAR(order_dt, 'MM') AS month,
+            SUM(money)             AS amount
+        FROM sales_outbound
+        WHERE TO_CHAR(order_dt, 'YYYY') = TO_CHAR(SYSDATE, 'YYYY')
+        GROUP BY TO_CHAR(order_dt, 'MM')
+        ORDER BY TO_CHAR(order_dt, 'MM')
+    </select>
+
+    <select id="getWeeklyOrderStats" resultType="map">
+        SELECT statLabel AS label,
+            cnt       AS count
+        FROM (
+            SELECT '이번 주 수주' AS statLabel,
+                COUNT(*)       AS cnt
+            FROM orders
+            WHERE TRUNC(order_dt) BETWEEN TRUNC(SYSDATE, 'IW') AND TRUNC(SYSDATE, 'IW') + 6
+
+            UNION ALL
+
+            SELECT '출고 완료' AS statLabel,
+                COUNT(*)     AS cnt
+            FROM sales_outbound
+            WHERE TRUNC(outbound_dt) BETWEEN TRUNC(SYSDATE, 'IW') AND TRUNC(SYSDATE, 'IW') + 6
+
+            UNION ALL
+
+            SELECT '출고율' AS statLabel,
+                ROUND(
+                    (SELECT COUNT(*) FROM sales_outbound 
+                        WHERE TRUNC(outbound_dt) BETWEEN TRUNC(SYSDATE, 'IW') AND TRUNC(SYSDATE, 'IW') + 6
+                    ) * 100 /
+                    NVL((
+                        SELECT COUNT(*) FROM orders 
+                        WHERE TRUNC(order_dt) BETWEEN TRUNC(SYSDATE, 'IW') AND TRUNC(SYSDATE, 'IW') + 6
+                    ), 1),
+                    2
+                ) AS cnt
+            FROM DUAL
+        )
+    </select>
+</mapper>

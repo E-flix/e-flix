@@ -1371,6 +1371,21 @@
             const signCoName = $('#coName').val();
             const signPschName = $('#pschName').val();
             const signCoAddr = $('#coAddr').val();
+
+            const contractModules = $("#selectedModules").val();
+            const contractPeriod = $("#selectedPeriod").val();
+            const contractCycle = $("#billing-cycle").val();
+
+            const periodText = contractCycle === 'annual'
+                ? `${contractPeriod}년`
+                : `${contractPeriod}개월`;
+
+            const cycleUnit = contractCycle === 'annual' ? '연' : '월';
+
+            const feeText = contractCycle === 'annual'
+                ? spkPrice * contractPeriod    // ex. spkPrice * 12
+                : spkPrice;
+
             const contractHTML =
                 `
                     <div class="container bg-white p-5 shadow rounded" id="contract-group">
@@ -1416,14 +1431,14 @@
 
                         <div class="contract-section">
                         <h5>제4조 (계약 기간)</h5>
-                        <p>본 계약의 유효기간은 계약 체결일로부터 <strong>[1년]</strong>이며, 별도 해지 통보가 없을 경우 자동 연장된다.</p>
+                        <p>본 계약의 유효기간은 계약 체결일로부터 <strong>${periodText}</strong>이며, 별도 해지 통보가 없을 경우 자동 연장된다.</p>
                         </div>
 
                         <div class="contract-section">
                         <h5>제5조 (이용 요금 및 결제)</h5>
                         <ol>
-                            <li>을은 시스템 이용 요금으로 월 <strong>[금액]</strong>원을 갑에게 지불한다.</li>
-                            <li>결제일은 매월 <strong>[지정일]</strong>일이며, 지정된 계좌로 송금한다.</li>
+                            <li>을은 시스템 이용 요금으로 ${cycleUnit} <strong>${feeText}</strong>원을 갑에게 지불한다.</li>
+                            <li>결제일은 매<strong>$${cycleUnit}</strong>일이며, 지정된 계좌로 송금한다.</li>
                         </ol>
                         </div>
 

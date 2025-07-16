@@ -61,6 +61,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             request.getSession().setAttribute("coIdx", securityEmpDTO.getCoIdx());
             request.getSession().setAttribute("authorities", userDetails.getAuthorities());
             request.getSession().setAttribute("roleId", securityEmpDTO.getRoleId());
+            request.getSession().setAttribute("userType", "ERP_EMP");
 
             log.info("ERP 사원 로그인 성공: {}", securityEmpDTO.getEmpEmail());
 
@@ -76,6 +77,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             request.getSession().setAttribute("mstName", masterDTO.getMstName());
             request.getSession().setAttribute("coIdx", masterDTO.getCoIdx());
             request.getSession().setAttribute("role", "ROLE_MASTER");
+            request.getSession().setAttribute("userType", "ERP_MASTER");
 
             log.info("ERP 마스터 로그인 성공: {}", masterDTO.getMstId());
 
@@ -91,6 +93,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             request.getSession().setAttribute("userId", securityUserDTO.getUserId());
             request.getSession().setAttribute("userName", securityUserDTO.getUserName());
             request.getSession().setAttribute("coIdx", securityUserDTO.getCoIdx());
+            request.getSession().setAttribute("userType", "ERP_MAIN");
 
             log.info("메인 사용자 로그인 성공: {}", securityUserDTO.getUserId());
             
