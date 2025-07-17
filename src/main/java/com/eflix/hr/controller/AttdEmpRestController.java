@@ -73,7 +73,7 @@ public class AttdEmpRestController {
     }
 
     private boolean isCompanyIp(String ip) {
-        return ip.startsWith("13.125.43.*") || ip.startsWith("10.");
+        return ip.startsWith("0:0:0:0:0:0:0:1") || ip.startsWith("10.");
     }
 
     @PostMapping("/in")
@@ -83,7 +83,7 @@ public class AttdEmpRestController {
         String ip = getClientIp(request);
         AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
         if (!isCompanyIp(ip)) {
-            result = ResUtil.makeResult(ResStatus.OK, "사내 IP내에서만 출근이 가능합니다.");
+            result = ResUtil.makeResult("400", "사내 IP내에서만 출근이 가능합니다.", null);
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
 
@@ -119,7 +119,7 @@ public class AttdEmpRestController {
         AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
 
         if (!isCompanyIp(ip)) {
-            result = ResUtil.makeResult(ResStatus.OK, "사내 IP내에서만 퇴근이 가능합니다.");
+            result = ResUtil.makeResult("400", "사내 IP내에서만 퇴근이 가능합니다.", null);
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
 
