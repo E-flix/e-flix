@@ -440,4 +440,19 @@
             LEFT JOIN grade g ON e.grd_idx = g.grd_idx
         WHERE e.emp_idx = #{empIdx}
     </select>
+
+    <select id="findByEmpIdxV2" parameterType="String" resultType="EmployeeDTO">
+        SELECT
+            e.emp_idx, e.emp_img, e.emp_name, e.rrn_pfx, e.rrn_sfx, e.emp_email, e.emp_phone,e.emp_pw, e.emp_regdate,
+            e.dept_idx,
+            d1.dept_up_idx AS dept_up_idx,
+            d2.dept_name   AS dept_up_name,
+            e.grd_idx, e.role_id, e.emp_type, e.bank_code, e.emp_account, e.base_salary, e.emp_addr_zip, e.emp_addr, e.emp_addr_detail, e.emp_memo, e.co_idx
+        FROM
+            employees e
+        LEFT JOIN departments d1 ON e.dept_idx = d1.dept_idx
+        LEFT JOIN departments d2 ON d1.dept_up_idx = d2.dept_idx
+        WHERE
+            e.emp_idx = #{empIdx}
+    </select>
 </mapper>

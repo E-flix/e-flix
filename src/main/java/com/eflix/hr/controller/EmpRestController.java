@@ -145,7 +145,7 @@ public class EmpRestController {
     public ResponseEntity<ResResult> getEmp(@RequestParam("empIdx") String empIdx) {
         ResResult result = null;
 
-        EmployeeDTO employeeDTO = employeeService.findByEmpIdx(empIdx);
+        EmployeeDTO employeeDTO = employeeService.findByEmpIdxV2(empIdx);
 
         if (employeeDTO != null) {
             result = ResUtil.makeResult(ResStatus.OK, employeeDTO);
