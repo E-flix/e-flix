@@ -33,23 +33,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/hr/dept")
 public class DeptRestController {
 
-    private final OutboundController outboundController;
-
-    private final AccAccountController accAccountController;
-
-    private final OrdersController ordersController;
-
-    private final OrdersServiceImpl ordersServiceImpl;
-
     @Autowired
     private DepartmentService departmentService;
-
-    DeptRestController(OrdersServiceImpl ordersServiceImpl, OrdersController ordersController, AccAccountController accAccountController, OutboundController outboundController) {
-        this.ordersServiceImpl = ordersServiceImpl;
-        this.ordersController = ordersController;
-        this.accAccountController = accAccountController;
-        this.outboundController = outboundController;
-    }
 
     public String getCoIdx() {
         return AuthUtil.getCoIdx();
@@ -95,6 +80,7 @@ public class DeptRestController {
     public ResponseEntity<ResResult> list(DeptSearchDTO deptSearchDTO) {
         ResResult result = null;
 
+        deptSearchDTO.setPageUnit(20);
         deptSearchDTO.setCoIdx(getCoIdx());
 
         int deptCount = departmentService.findAllDeptCountBySearch(deptSearchDTO);
