@@ -312,7 +312,7 @@
                             CASE WHEN m.type='SM01'
                                     AND REGEXP_LIKE(m.al_amount,'^[0-9]+(\.[0-9]+)?$')
                                 THEN TO_NUMBER(m.al_amount)
-                                ELSE 0
+                                ELSE eval_salary_expr(m.al_amount, s.base_salary)
                             END)
                             FROM salary_mapping m
                             WHERE m.co_idx     = s.co_idx
@@ -336,7 +336,7 @@
                             CASE WHEN m.type='SM02'
                                     AND REGEXP_LIKE(m.al_amount,'^[0-9]+(\.[0-9]+)?$')
                                 THEN TO_NUMBER(m.al_amount)
-                                ELSE 0
+                                ELSE eval_salary_expr(m.al_amount, s.base_salary)
                             END)
                             FROM salary_mapping m
                             WHERE m.co_idx     = s.co_idx
@@ -407,133 +407,138 @@
 
     <select id="salaryDetailBySalaryIdxWithCoIdx" parameterType="String" resultType="SalaryDetailDTO">
         SELECT t.item_name, t.amount, t.remark, t.tax_type, t.pay_type
-        FROM (
-            SELECT
-                '기본급' AS item_name,
-                '+ '||TO_CHAR(s.base_salary, 'FM9G999G999') AS amount,
-                '-' AS remark,
-                'TM01' AS tax_type,
-                'SM01' AS pay_type,
-                1 AS grp_order,
-                0 AS row_order
-            FROM salary s
-            WHERE s.salary_idx = #{salaryIdx}
+            FROM (
+                SELECT
+                    '기본급' AS item_name,
+                    '+ ' || TO_CHAR(s.base_salary, 'FM9G999G999') AS amount,
+                    '-' AS remark,
+                    'TM01' AS tax_type,
+                    'SM01' AS pay_type,
+                    1 AS grp_order,
+                    0 AS row_order
+                FROM salary s
+                WHERE s.salary_idx = #{salaryIdx}
                 AND s.co_idx = #{coIdx}
 
-            UNION ALL
+                UNION ALL
 
-            SELECT
-                sm.al_name AS item_name,
-                CASE sm.calc_type
-                    WHEN 'CA1' THEN
-                        (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
-                        || TO_CHAR(TRUNC(TO_NUMBER(sm.al_amount)), 'FM9G999G999')
-                    WHEN 'CA2' THEN
-                        (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
-                        || TO_CHAR(TRUNC(TO_NUMBER(sm.al_amount)), 'FM9G999G999') || '%'
-                    ELSE
-                        (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
-                        || sm.al_amount
-                END AS amount,
-                CASE sm.calc_type
-                    WHEN 'CA01' THEN '정액'
-                    WHEN 'CA02' THEN '비율'
-                    ELSE '수식'
-                END                                                                         AS remark,
-                sm.tax_type AS tax_type,
-                CASE sm.type
-                    WHEN 'SM01' THEN 'SM01'
-                    ELSE 'SM02'
-                END                                                                         AS pay_type,
-                2                                                                           AS grp_order,
-                CASE sm.type WHEN 'SM01' THEN 0 ELSE 1 END                                   AS row_order
-            FROM salary_mapping sm
-            WHERE sm.co_idx = #{coIdx}
+                SELECT
+                    sm.al_name AS item_name,
+                    CASE sm.calc_type
+                        WHEN 'CA1' THEN
+                            (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
+                            || TO_CHAR(TRUNC(TO_NUMBER(sm.al_amount)), 'FM9G999G999')
+                        WHEN 'CA2' THEN
+                            (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
+                            || TO_CHAR(TRUNC(TO_NUMBER(sm.al_amount)), 'FM9G999G999') || '%'
+                        ELSE
+                            (CASE sm.type WHEN 'SM01' THEN '+ ' ELSE '- ' END)
+                            || TO_CHAR(eval_salary_expr_by_salary_idx(sm.al_amount, #{salaryIdx}), 'FM9G999G999')
+                    END AS amount,
+                    CASE sm.calc_type
+                        WHEN 'CA01' THEN '정액'
+                        WHEN 'CA02' THEN '비율'
+                        ELSE '수식'
+                    END AS remark,
+                    sm.tax_type AS tax_type,
+                    sm.type AS pay_type,
+                    CASE sm.type
+                        WHEN 'SM01' THEN 2
+                        ELSE 3
+                    END AS grp_order,
+                    CASE sm.type
+                        WHEN 'SM01' THEN 0
+                        ELSE 100
+                    END AS row_order
+                FROM salary_mapping sm
+                WHERE sm.co_idx = #{coIdx}
                 AND sm.use_status = 'Y'
 
-            UNION ALL
+                UNION ALL
 
-            SELECT
-                '야간수당' AS item_name,
-                '+ '||TO_CHAR(s.night_work_pay, 'FM9G999G999') AS amount,
-                '정액' AS remark,
-                'TM01' AS tax_type,
-                'SM01' AS pay_type,
-                2 AS grp_order,
-                2 AS row_order
-            FROM salary s
-            WHERE s.salary_idx = #{salaryIdx}
+                SELECT
+                    '야간수당' AS item_name,
+                    '+ ' || TO_CHAR(s.night_work_pay, 'FM9G999G999') AS amount,
+                    '정액' AS remark,
+                    'TM01' AS tax_type,
+                    'SM01' AS pay_type,
+                    2 AS grp_order,
+                    1 AS row_order
+                FROM salary s
+                WHERE s.salary_idx = #{salaryIdx}
                 AND s.co_idx = #{coIdx}
 
-            UNION ALL
+                UNION ALL
 
-            SELECT
-                '국민연금' AS item_name,
-                '- '||TO_CHAR(s.national_pension, 'FM9G999G999') AS amount,
-                '4.5%' AS remark,
-                'TM02' AS tax_type,
-                'SM02' AS pay_type,
-                3 AS grp_order,
-                0 AS row_order
-            FROM salary s
-            WHERE s.salary_idx = #{salaryIdx}
+                SELECT
+                    '국민연금' AS item_name,
+                    '- ' || TO_CHAR(s.national_pension, 'FM9G999G999') AS amount,
+                    '4.5%' AS remark,
+                    'TM02' AS tax_type,
+                    'SM02' AS pay_type,
+                    3 AS grp_order,
+                    0 AS row_order
+                FROM salary s
+                WHERE s.salary_idx = #{salaryIdx}
                 AND s.co_idx = #{coIdx}
 
-            UNION ALL
-            SELECT
-                '건강보험' AS item_name,
-                '- '||TO_CHAR(s.health_insurance, 'FM9G999G999')  AS amount,
-                '3.495%' AS remark,
-                'TM02' AS tax_type,
-                'SM02' AS pay_type,
-                3 AS grp_order,
-                1 AS row_order
-            FROM salary s
-            WHERE s.salary_idx = #{salaryIdx}
+                UNION ALL
+
+                SELECT
+                    '건강보험' AS item_name,
+                    '- ' || TO_CHAR(s.health_insurance, 'FM9G999G999') AS amount,
+                    '3.495%' AS remark,
+                    'TM02' AS tax_type,
+                    'SM02' AS pay_type,
+                    3 AS grp_order,
+                    1 AS row_order
+                FROM salary s
+                WHERE s.salary_idx = #{salaryIdx}
                 AND s.co_idx = #{coIdx}
 
-            UNION ALL
-            SELECT
-                '고용보험' AS item_name,
-                '- '||TO_CHAR(s.employment_ins, 'FM9G999G999') AS amount,
-                '1.0%' AS remark,
-                'TM02' AS tax_type,
-                'SM02' AS pay_type,
-                3 AS grp_order,
-                2 AS row_order
-            FROM salary s
-            WHERE s.salary_idx = #{salaryIdx}
+                UNION ALL
+
+                SELECT
+                    '고용보험' AS item_name,
+                    '- ' || TO_CHAR(s.employment_ins, 'FM9G999G999') AS amount,
+                    '1.0%' AS remark,
+                    'TM02' AS tax_type,
+                    'SM02' AS pay_type,
+                    3 AS grp_order,
+                    2 AS row_order
+                FROM salary s
+                WHERE s.salary_idx = #{salaryIdx}
                 AND s.co_idx = #{coIdx}
 
-            UNION ALL
-            SELECT
-                '소득세' AS item_name,
-                '- '||TO_CHAR(s.tax, 'FM9G999G999') AS amount,
-                '자동계산' AS remark,
-                'TM02' AS tax_type,
-                'SM02' AS pay_type,
-                3 AS grp_order,
-                3 AS row_order
+                UNION ALL
 
-            FROM salary s
-            WHERE s.salary_idx = #{salaryIdx}
+                SELECT
+                    '소득세' AS item_name,
+                    '- ' || TO_CHAR(s.tax, 'FM9G999G999') AS amount,
+                    '자동계산' AS remark,
+                    'TM02' AS tax_type,
+                    'SM02' AS pay_type,
+                    3 AS grp_order,
+                    3 AS row_order
+                FROM salary s
+                WHERE s.salary_idx = #{salaryIdx}
                 AND s.co_idx = #{coIdx}
 
-            UNION ALL
+                UNION ALL
 
-            SELECT
-                '실수령액' AS item_name,
-                '+ '||TO_CHAR(s.total_salary, 'FM9G999G999') AS amount,
-                '자동계산' AS remark,
-                '-' AS tax_type,
-                '-' AS pay_type,
-                4 AS grp_order,
-                0  AS row_order
-            FROM salary s
-            WHERE s.salary_idx = #{salaryIdx}
+                SELECT
+                    '실수령액' AS item_name,
+                    '+ ' || TO_CHAR(s.total_salary, 'FM9G999G999') AS amount,
+                    '자동계산' AS remark,
+                    '-' AS tax_type,
+                    '-' AS pay_type,
+                    4 AS grp_order,
+                    0 AS row_order
+                FROM salary s
+                WHERE s.salary_idx = #{salaryIdx}
                 AND s.co_idx = #{coIdx}
             ) t
-        ORDER BY t.grp_order, t.row_order
+            ORDER BY t.grp_order, t.row_order
     </select>
 
     <update id="updateSalary" parameterType="SalaryDTO">
