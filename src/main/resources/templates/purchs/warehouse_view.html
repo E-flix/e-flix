@@ -135,6 +135,9 @@
 								resizable: true,
 								sortable: true
 							},
+							localeText: {
+								noRowsToShow: '⚠️입고된 제품이 없습니다.'
+							},
 							onGridReady: (params) => {
 								params.api.sizeColumnsToFit();
 							}
@@ -144,7 +147,7 @@
 							document.querySelector("#warehouseDetailGrid"),
 							detailOptions
 						);
-					} 
+					}
 
 					warehouseDetailGrid.setGridOption("rowData", data);
 
