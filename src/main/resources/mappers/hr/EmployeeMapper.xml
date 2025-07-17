@@ -384,6 +384,9 @@
             <if test="empMemo != null and empMemo != ''">
                 emp_memo = #{empMemo},
             </if>
+            <if test="roleId != null and roleId != ''">
+                role_id = #{roleId}
+            </if>
         </set>
         WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
     </update>
