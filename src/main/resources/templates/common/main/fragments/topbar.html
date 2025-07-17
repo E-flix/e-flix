@@ -61,7 +61,7 @@
 						<a class="text-decoration-none text-white" href="/mypage">내정보</a>
 					</span>
 				</button>
-				<button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0">
+				<button class="btn btn-primary rounded-pill px-3 mb-2 mb-lg-0" sec:authorize="hasRole('ADMIN')">
 					<span class="d-flex align-items-center justify-content-center">
 						<a class="text-decoration-none text-white" href="/admin">관리자</a>
 					</span>
