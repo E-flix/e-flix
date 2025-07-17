@@ -230,6 +230,7 @@
     <script th:inline="javascript">
         let userDataList;
         let originalUserDataList; // 검색 기능을 위한 원본 데이터 보관
+        let userMode = "insert";
 
         // AG-grid
         const userGridOptions = {
@@ -318,6 +319,19 @@
                 }
             });
         }
+        $("[data-bs-target='#employeeModal']").on("click", function () {
+            userMode = "insert";
+            $("#employeeModalLabel").text("사용자 등록");
+            $("#empIdx").val("");
+            $("#empName").val("");
+            $("#rrnPfx").val("");
+            $("#rrnSfx").val("");
+            $("#empEmail").val("");
+            $("#empPhone").val("");
+            $("#empPw").val("");
+            $("#empRegdate").val("");
+            $("#modalRoleId").val("");
+        });
 
         $("#modalBtn").on("click", function() {
             const userData = {
@@ -327,7 +341,7 @@
                     rrnPfx: $("#rrnPfx").val(),
                     rrnSfx: $("#rrnSfx").val(),
                     empEmail: $("#empEmail").val(),
-                    empTel: $("#empTel").val(),
+                    empPhone: $("#empPhone").val(),
                     empPw: $("#empPw").val(),
                     empRegdate: $("#empRegdate").val(),
                     deptIdx: $("#deptIdx").val(),
@@ -336,16 +350,25 @@
                 }
             }
 
+            let type = "POST";
+            let url = "/mgr/api/user";
+
+            if(userMode === "update") {
+                type = "PUT";
+                url = "/mgr/api/user"
+
+            }
             $.ajax({
-                type: "POST",
-                url: "/mgr/api/user",
+                type: type,
+                url: url,
                 data: JSON.stringify(userData),
                 contentType: "application/json",
                 success: function(res) {
                     if(res.head.res_code === "200") {
-                        Swal.fire('성공', '성공적으로 등록되었습니다.', 'success');
-                        $("#employeeModal").modal("hide");
-                        window.location.reload();
+                        Swal.fire('성공', '성공적으로 저장되었습니다.', 'success').then(() => {
+                            $("#employeeModal").modal("hide");
+                            window.location.reload();
+                        });
                     } else {
                         Swal.fire('실패', res.head.res_result, 'success');
                     }
@@ -357,9 +380,6 @@
             });
         });
 
-        function addUser() {
-        }
-
         function editUser() {
             const selectedRows = userGridOptions.api.getSelectedRows();
             if(selectedRows.length === 0) {
@@ -370,8 +390,22 @@
                 Swal.fire("알림", "수정할 사원을 한 명만 선택하세요.", "info");
                 return;
             }
-            console.log("사용자 수정:", selectedRows[0]);
-            // 수정 로직 구현
+
+            const data = selectedRows[0];
+            userMode = "update";
+
+            $("#employeeModalLabel").text("사용자 수정");
+            $("#empIdx").val(data.empIdx);
+            $("#empName").val(data.empName);
+            $("#rrnPfx").val(data.rrnPfx || "");
+            $("#rrnSfx").val(data.rrnSfx || "");
+            $("#empEmail").val(data.empEmail);
+            $("#empPhone").val(data.empPhone || "");
+            $("#empPw").val("");
+            $("#empRegdate").val(data.empRegdate ? data.empRegdate.substring(0, 10) : "");
+            $("#modalRoleId").val(data.roleId);
+
+            $("#employeeModal").modal("show");
         }
 
         function deleteUser() {
