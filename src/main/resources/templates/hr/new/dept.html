@@ -223,7 +223,7 @@
 
             $("#paginationArea").on("click", ".page-link", function(e) {
                 const page = parseInt($(this).data("page"), 10);
-                loadEmpList(page);
+                loadDepartment(page);
             });
 
             $(document).on("change", ".row-checkbox", function () {
