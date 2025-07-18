@@ -55,5 +55,7 @@ public interface EmployeeMapper {
 
     // 0713
     public EmployeeDTO findSummaryByEmpIdx(String empIdx);
+    
+    public EmployeeDTO findByEmpIdxV2(String empIdx);
 
 }

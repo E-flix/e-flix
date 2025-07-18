@@ -24,20 +24,22 @@
 			<h6 class="collapse-header">조직관리:</h6>
 			<a class="" th:class="${activeSubMenu == 'dept'} ? 'collapse-item active' : 'collapse-item'"
 				href="/hr/dept">부서관리</a>
+			<a class="" th:class="${activeSubMenu == 'grd'} ? 'collapse-item active' : 'collapse-item'"
+				href="/hr/grd">직급관리</a>
 			<a class="" th:class="${activeSubMenu == 'emp'} ? 'collapse-item active' : 'collapse-item'"
 				href="/hr/emp">사원관리</a>
 
 			<h6 class="collapse-header">근태관리:</h6>
 			<a class="" th:class="${activeSubMenu == 'attd' && active3rdMenu == ''} ? 'collapse-item active' : 'collapse-item'"
 				href="/hr/attd">근태현황</a>
-			<a class="" th:class="${activeSubMenu == 'attd' && active3rdMenu == 'req'} ? 'collapse-item active' : 'collapse-item'"
+			<!-- <a class="" th:class="${activeSubMenu == 'attd' && active3rdMenu == 'req'} ? 'collapse-item active' : 'collapse-item'"
 				href="/hr/attd/req">근태신청</a>
 			<div th:if="${session.roleId == 'RO01' || session.role == 'ROLE_MASTER'}">
 				<a class="" th:class="${activeSubMenu == 'attd' && active3rdMenu == 'mgr'} ? 'collapse-item active' : 'collapse-item'"
 					href="/hr/attd/mgr" >근태관리</a>
 				<a class="" th:class="${active3rdMenu == 'reqMgr'} ? 'collapse-item active' : 'collapse-item'"
 					href="/hr/attd/reqMgr">근태신청승인</a>
-			</div>
+			</div> -->
 
 			<h6 class="collapse-header">휴가관리:</h6>
 			<a class="" th:class="${activeSubMenu == 'va' && active3rdMenu == 'req'} ? 'collapse-item active' : 'collapse-item'"

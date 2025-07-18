@@ -116,9 +116,18 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public int update(EmployeeDTO employeeDTO) {
-        employeeDTO.setEmpPw(passwordEncoder.encode(employeeDTO.getEmpPw()));
-        return employeeMapper.update(employeeDTO);
+    EmployeeDTO existing = employeeMapper.findByEmpIdx(employeeDTO.getEmpIdx());
+    String existingPw = existing.getEmpPw();
+
+    String newPw = employeeDTO.getEmpPw();
+    if (newPw == null || newPw.isBlank()) {
+        employeeDTO.setEmpPw(existingPw);
+    } else {
+        employeeDTO.setEmpPw(passwordEncoder.encode(newPw));
     }
+
+    return employeeMapper.update(employeeDTO);
+}
 
     @Override
     public int mergeEmployee(EmployeeDTO employeeDTO) {
@@ -128,5 +137,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeDTO findSummaryByEmpIdx(String empIdx) {
         return employeeMapper.findSummaryByEmpIdx(empIdx);
+    }
+
+    @Override
+    public EmployeeDTO findByEmpIdxV2(String empIdx) {
+        return employeeMapper.findByEmpIdxV2(empIdx);
     }
 }

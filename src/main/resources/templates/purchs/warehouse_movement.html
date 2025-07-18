@@ -14,7 +14,7 @@
 </head>
 <div layout:fragment="content" class="container-fluid">
 	<div class="d-flex justify-content-between align-items-center mb-0">
-		<h2>창고이동관리</h2>
+		<h3>창고이동관리</h3>
 
 		<!-- 버튼 -->
 		<div class="d-flex justify-content-end mb-2 gap-2 mb-0">
@@ -32,6 +32,7 @@
 			<label class="btn btn-outline-secondary btn-sm" for="warehouse">창고관리</label>
 			<input type="radio" class="btn-check" name="accountFilter" id="warehouse_mnt" autocomplete="off" checked>
 			<label class="btn btn-outline-secondary btn-sm" for="warehouse_mnt">창고이동</label>
+					<small class="text-muted fw-light" style="font-size: 0.8rem;">※보내는 창고 를 선택 후 제품ID를 선택하세요.</small>
 		</div>
 	</div>
 
@@ -175,7 +176,9 @@
 					width: 100
 				}
 			],
-			rowSelection: 'multiple',
+			rowSelection: {
+			mode: "multiRow"
+		},
 
 			onGridReady: (params) => {
 				whmGridOptions.api = params.api;
@@ -265,16 +268,38 @@
 		saveToLocalStorage();
 	}
 
-	function deleteSelectedRows() {
-		const selectedRows = whmGridOptions.api.getSelectedRows();
-		if (selectedRows.length === 0) {
-			alert("삭제할 행을 선택하세요.");
-			return;
-		}
-		if (!confirm(`${selectedRows.length}개 행을 삭제하시겠습니까?`)) return;
-		whmGridOptions.api.applyTransaction({ remove: selectedRows });
-		saveToLocalStorage();
+function deleteSelectedRows() {
+	const selectedRows = whmGridOptions.api.getSelectedRows();
+
+	if (selectedRows.length === 0) {
+		Swal.fire({
+			icon: "warning",
+			title: "삭제할 행을 선택하세요.",
+			timer: 1500,
+			showConfirmButton: false,
+		});
+		return;
 	}
+
+	Swal.fire({
+		title: `${selectedRows.length}개 행을 삭제하시겠습니까?`,
+		icon: "warning",
+		showCancelButton: true,
+		confirmButtonText: "삭제",
+		cancelButtonText: "취소",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			whmGridOptions.api.applyTransaction({ remove: selectedRows });
+			saveToLocalStorage();
+			Swal.fire({
+				title: "삭제 완료",
+				icon: "success",
+				timer: 1000,
+				showConfirmButton: false,
+			});
+		}
+	});
+}
 
 	// 창고목록
 	async function getWh() {
@@ -297,6 +322,8 @@
 			Swal.fire({
 				icon: 'warning',
 				title: '저장할 데이터가 없습니다.',
+				timer: 1500,
+				showConfirmButton: false,
 			});
 			return;
 		}

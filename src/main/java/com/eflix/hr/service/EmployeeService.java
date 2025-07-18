@@ -49,4 +49,5 @@ public interface EmployeeService {
 
     // 0714
     public EmployeeDTO findSummaryByEmpIdx(String empIdx);
+    public EmployeeDTO findByEmpIdxV2(String empIdx);
 }

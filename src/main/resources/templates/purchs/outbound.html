@@ -112,6 +112,9 @@
 			{ headerName: "주문일", field: "orderDt" },
 			{ headerName: "출고의뢰일", field: "outboundDt" }
 		],
+		localeText: {
+				noRowsToShow: '⚠️요청된 출고의뢰서 가 없습니다.'
+			},
 		defaultColDef: { resizable: true, sortable: true },
 		onRowClicked: (event) => {
 			const outboundNo = event.data.outboundNo;
@@ -152,78 +155,92 @@
 	});
 
 	// 출고 버튼 클릭 이벤트
-document.getElementById("outboundBtn").addEventListener("click", function () {
-    if (!selectedOutboundNo) {
-        Swal.fire({
-            title: "주의",
-            icon: "warning",
-            text: "출고의뢰서를 먼저 선택해주세요.",
-            timer: 1500,
-            showConfirmButton: false
-        });
-        return;
-    }
+	document.getElementById("outboundBtn").addEventListener("click", function () {
+		if (!selectedOutboundNo) {
+			Swal.fire({
+				title: "주의",
+				icon: "warning",
+				text: "출고의뢰서를 먼저 선택해주세요.",
+				timer: 1500,
+				showConfirmButton: false
+			});
+			return;
+		}
 
-    Swal.fire({
-        title: "출고 처리 확인",
-        text: "선택된 출고의뢰서를 출고 처리하시겠습니까?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "예",
-        cancelButtonText: "아니오"
-    }).then((result) => {
-        if (!result.isConfirmed) return;
+		// ✅ 여기에 rowData 확인 추가
+		const currentRows = outboundListDetailGrid.getGridOption('rowData');
+		if (!currentRows || currentRows.length === 0) {
+			Swal.fire({
+				title: "주의",
+				icon: "warning",
+				text: "출고 품목이 비어 있습니다. 출고할 수 없습니다.",
+				timer: 1500,
+				showConfirmButton: false
+			});
+			return;
+		}
 
-        const payload = { outboundNo: selectedOutboundNo };
+		Swal.fire({
+			title: "출고 처리 확인",
+			text: "선택된 출고의뢰서를 출고 처리하시겠습니까?",
+			icon: "question",
+			showCancelButton: true,
+			confirmButtonText: "예",
+			cancelButtonText: "아니오"
+		}).then((result) => {
+			if (!result.isConfirmed) return;
 
-        fetch("/purchs/obp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        })
-            .then(async (res) => {
-                if (!res.ok) {
-                    const errorText = await res.text();
-                    let userMessage = "출고 처리 중 오류가 발생했습니다.";
+			const payload = { outboundNo: selectedOutboundNo };
 
-                    if (errorText.includes("대기 상태의 제품이 존재합니다")) {
-                        userMessage = "대기 상태의 제품이 존재합니다. 출고할 수 없습니다.";
-                    } else if (errorText.includes("재고가 부족")) {
-                        userMessage = "출고 직전에 재고가 부족한 품목이 있습니다.";
-                    }
+			fetch("/purchs/obp", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload)
+			})
+				.then(async (res) => {
+					if (!res.ok) {
+						const errorText = await res.text();
+						let userMessage = "출고 처리 중 오류가 발생했습니다.";
 
-                    await Swal.fire({
-                        title: "출고 실패",
-                        text: userMessage,
-                        icon: "error"
-                    });
-                    throw new Error(userMessage);
-                }
-                return res.json();
-            })
-            .then(() => {
-                Swal.fire({
-                    title: "출고 완료",
-                    text: "출고 처리가 완료되었습니다.",
-                    icon: "success",
-                    timer: 1500,
-                    showConfirmButton: false
-                });
+						if (errorText.includes("대기 상태의 제품이 존재합니다")) {
+							userMessage = "대기 상태의 제품이 존재합니다. 출고할 수 없습니다.";
+							// 여기 에러메세지 뜸
+						} else if (errorText.includes("재고가 부족")) {
+							userMessage = "출고 직전에 재고가 부족한 품목이 있습니다.";
+						}
 
-                // 출고 상세 새로고침
-                // return fetch(`/purchs/obrd?outboundNo=${selectedOutboundNo}`);
-				 outboundListDetailGrid.setGridOption("rowData", []);
-				
-            })
-            .then(res => res.json())
-            .then(data => {
-                outboundListDetailGrid.setGridOption("rowData", data);
-            })
-            .catch(err => {
-                console.error("출고 실패:", err.message);
-            });
-    });
-});
+						await Swal.fire({
+							title: "출고 실패",
+							text: userMessage,
+							icon: "error"
+						});
+						throw new Error(userMessage);
+					}
+					return res.json();
+				})
+				.then(() => {
+					Swal.fire({
+						title: "출고 완료",
+						text: "출고 처리가 완료되었습니다.",
+						icon: "success",
+						timer: 1500,
+						showConfirmButton: false
+					});
+
+					// 출고 상세 새로고침
+					// return fetch(`/purchs/obrd?outboundNo=${selectedOutboundNo}`);
+					outboundListDetailGrid.setGridOption("rowData", []);
+
+				})
+				.then(res => res.json())
+				.then(data => {
+					outboundListDetailGrid.setGridOption("rowData", data);
+				})
+				.catch(err => {
+					console.error("출고 실패:", err.message);
+				});
+		});
+	});
 </script>
 
 <script>

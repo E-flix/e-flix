@@ -70,7 +70,7 @@ public class MainController {
 
 	@GetMapping()
 	public String home() {
-		System.out.println(AuthUtil.getCoIdx());
+		
 		return "index";
 	}
 

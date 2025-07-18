@@ -86,49 +86,49 @@
         SELECT DISTINCT emp_status FROM employees WHERE co_idx = #{coIdx}
     </select>
 
-<!-- 사원 등록 -->
-<insert id="insertEmp" parameterType="EmployeeDTO">
-    <selectKey resultType="String" keyProperty="empIdx" order="BEFORE">
-        SELECT 'emp-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(emp_idx, 5))), 100) + 1) FROM employees
-    </selectKey>
-    INSERT INTO employees (
-        emp_idx,
-        emp_name,
-        rrn_pfx,
-        rrn_sfx,
-        emp_email,
-        dept_idx,
-        emp_grade,
-        emp_type,
-        emp_regdate,
-        emp_account,
-        emp_phone,
-        emp_pw,
-        emp_addr,
-        emp_addr_detail,
-        emp_addr_zip,
-        co_idx,
-        emp_img
-    ) VALUES (
-        #{empIdx},
-        #{empName},
-        #{rrnPfx},
-        #{rrnSfx},
-        #{empEmail},
-        #{deptIdx},
-        #{empGrade},
-        #{empType},
-        #{empRegdate},
-        #{empAccount},
-        #{empPhone},
-        #{empPw},
-        #{empAddr},
-        #{empAddrDetail},
-        #{empAddrZip},
-        #{coIdx},
-        #{empImg}
-    )
-</insert>
+    <!-- 사원 등록 -->
+    <insert id="insertEmp" parameterType="EmployeeDTO">
+        <selectKey resultType="String" keyProperty="empIdx" order="BEFORE">
+            SELECT 'emp-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(emp_idx, 5))), 100) + 1) FROM employees
+        </selectKey>
+        INSERT INTO employees (
+            emp_idx,
+            emp_name,
+            rrn_pfx,
+            rrn_sfx,
+            emp_email,
+            dept_idx,
+            emp_grade,
+            emp_type,
+            emp_regdate,
+            emp_account,
+            emp_phone,
+            emp_pw,
+            emp_addr,
+            emp_addr_detail,
+            emp_addr_zip,
+            co_idx,
+            emp_img
+        ) VALUES (
+            #{empIdx},
+            #{empName},
+            #{rrnPfx},
+            #{rrnSfx},
+            #{empEmail},
+            #{deptIdx},
+            #{empGrade},
+            #{empType},
+            #{empRegdate},
+            #{empAccount},
+            #{empPhone},
+            #{empPw},
+            #{empAddr},
+            #{empAddrDetail},
+            #{empAddrZip},
+            #{coIdx},
+            #{empImg}
+        )
+    </insert>
 
 <!-- 사원 수정 -->
 <!-- <update id="update" parameterType="EmployeeDTO">
@@ -384,6 +384,9 @@
             <if test="empMemo != null and empMemo != ''">
                 emp_memo = #{empMemo},
             </if>
+            <if test="roleId != null and roleId != ''">
+                role_id = #{roleId}
+            </if>
         </set>
         WHERE emp_idx = #{empIdx} AND co_idx = #{coIdx}
     </update>
@@ -429,12 +432,27 @@
     <!-- 0713 -->
     <!-- 사원 간단 정보 -->
     <select id="findSummaryByEmpIdx" parameterType="String" resultType="EmployeeDTO">
-        SELECT e.emp_idx, e.emp_name,
+        SELECT e.emp_idx, e.emp_name, e.emp_img
             d.dept_idx, d.dept_name,
             g.grd_name
         FROM employees e
             LEFT JOIN departments d ON e.dept_idx = d.dept_idx
             LEFT JOIN grade g ON e.grd_idx = g.grd_idx
         WHERE e.emp_idx = #{empIdx}
+    </select>
+
+    <select id="findByEmpIdxV2" parameterType="String" resultType="EmployeeDTO">
+        SELECT
+            e.emp_idx, e.emp_img, e.emp_name, e.rrn_pfx, e.rrn_sfx, e.emp_email, e.emp_phone,e.emp_pw, e.emp_regdate,
+            e.dept_idx,
+            d1.dept_up_idx AS dept_up_idx,
+            d2.dept_name   AS dept_up_name,
+            e.grd_idx, e.role_id, e.emp_type, e.bank_code, e.emp_account, e.base_salary, e.emp_addr_zip, e.emp_addr, e.emp_addr_detail, e.emp_memo, e.co_idx
+        FROM
+            employees e
+        LEFT JOIN departments d1 ON e.dept_idx = d1.dept_idx
+        LEFT JOIN departments d2 ON d1.dept_up_idx = d2.dept_idx
+        WHERE
+            e.emp_idx = #{empIdx}
     </select>
 </mapper>

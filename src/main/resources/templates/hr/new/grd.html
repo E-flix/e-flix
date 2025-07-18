@@ -1,0 +1,455 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{common/layouts/default}">
+
+<head>
+    <title>직급관리</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+
+<div layout:fragment="content">
+    <div class="w-100" id="gradeList">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h3>직급관리</h3>
+        </div>
+        <div class="">
+            <!-- 직급등록 버튼 -->
+            <div class="d-flex justify-content-end mb-2 gap-2">
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#gradeModal"
+                    id="insertGrade">
+                    직급등록
+                </button>
+            </div>
+
+            <!-- 검색 필터 -->
+            <div class="p-4 bg-light rounded mb-4">
+                <div class="row g-3 align-items-center mb-3">
+                    <div class="col-md-2">
+                        <label class="form-label">검색 기준</label>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="option" class="form-select form-select-sm" id="searchSelect">
+                            <option value="">전체</option>
+                            <option value="grdName">직급명</option>
+                            <option value="grdIdx">직급ID</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="keyword" class="form-control form-control-sm" id="searchKeyword"
+                            placeholder="검색어 입력 후 [enter]">
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-2">
+                        <label class="form-label">순서</label>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="grdOrder" class="form-select form-select-sm" id="searchOrder">
+                            <option value="">전체</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">연차</label>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="grdAnnual" class="form-select form-select-sm" id="searchAnnual">
+                            <option value="">전체</option>
+                            <option value="15">15일</option>
+                            <option value="20">20일</option>
+                            <option value="25">25일</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-sm btn-primary" id="searchBtn">조회</button>
+                    <button class="btn btn-sm btn-secondary">초기화</button>
+                </div>
+            </div>
+
+            <!-- 직급 목록 테이블 -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 text-primary">
+                            <i class="bi bi-list-ul me-2"></i>직급 목록
+                        </h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary">총 <span id="totalCount">10</span>개</span>
+                            <select class="form-select form-select-sm" style="width: auto;" id="itemSizeSelect">
+                                <option value="10">10개씩</option>
+                                <option value="25">25개씩</option>
+                                <option value="50">50개씩</option>
+                                <option value="100">100개씩</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="text-center">
+                                        <input type="checkbox" class="form-check-input position-static">
+                                    </th>
+                                    <th scope="col">직급번호</th>
+                                    <th scope="col">직급명</th>
+                                    <th scope="col">인원</th>
+                                    <th scope="col">순서</th>
+                                    <th scope="col">연차일수</th>
+                                    <th scope="col" class="text-center">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gradeListBody">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top">
+                    <nav aria-label="페이지 네비게이션">
+                        <ul class="pagination justify-content-center mb-0" id="paginationArea">
+                            
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- 직급등록/수정 모달 -->
+        <div class="modal fade" id="gradeModal" tabindex="-1" aria-labelledby="gradeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content shadow">
+                    <!-- 헤더 -->
+                    <div class="modal-header bg-primary text-white border-0">
+                        <h5 class="modal-title fw-bold" id="gradeModalLabel">
+                            <i class="bi bi-award me-2"></i>직급등록
+                        </h5>
+                        <button type="button" id="gradeModalCloseX" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <!-- 바디 -->
+                    <div class="modal-body p-4">
+                        <!-- 기본 정보 섹션 -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h6 class="text-primary fw-bold border-bottom border-primary pb-2 mb-3">
+                                    <i class="bi bi-info-circle me-2"></i>기본 정보
+                                </h6>
+                            </div>
+                        </div>
+
+                        <!-- 직급번호 / 직급명 -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="grdIdx" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-hash text-muted me-1"></i>직급번호
+                                </label>
+                                <input type="text" name="grdIdx" class="form-control form-control-sm bg-light"
+                                    placeholder="직급번호는 자동생성 됩니다." id="modalGrdIdx" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="grdName" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-award text-muted me-1"></i>직급명 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="grdName" class="form-control form-control-sm"
+                                    placeholder="직급명을 입력하세요" id="modalGrdName">
+                            </div>
+                        </div>
+
+                        <!-- 순서 / 연차일수 -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="grdOrder" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-sort-numeric-down text-muted me-1"></i>순서 <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" name="grdOrder" class="form-control form-control-sm"
+                                    placeholder="순서를 입력하세요" id="modalGrdOrder" min="1" max="99">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="grdAnnual" class="col-form-label fw-semibold text-dark">
+                                    <i class="bi bi-calendar-date text-muted me-1"></i>연차일수 <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" name="grdAnnual" class="form-control form-control-sm"
+                                    placeholder="연차일수를 입력하세요" id="modalGrdAnnual" min="0" max="99" step="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 푸터 -->
+                    <div class="modal-footer justify-content-end">
+                        <input name="mode" value="insert" hidden>
+                        <button type="button" class="btn btn-primary" id="modalBtn">저장</button>
+                        <button type="button" id="gradeModalCloseBtn" class="btn btn-secondary"
+                            data-bs-dismiss="modal">취소</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            let currentPage = 1;
+            let currentPageSize = parseInt($("#itemSizeSelect").val(), 10);
+            loadGradeList(1);
+
+            $("#insertGrade").on("click", function() {
+                $("#modalGrdIdx").val("");
+                $("#modalGrdName").val("");
+                $("#modalGrdOrder").val("");
+                $("#modalGrdAnnual").val("");
+                $("#modalCoIdx").val("");
+
+                $("#gradeModalLabel").text("직급 등록");
+                $("input[name='mode']").val("insert");
+            })
+
+            $("#searchBtn").on("click", function () {
+                loadGradeList(1);
+            });
+
+            $("#paginationArea").on("click", ".page-link", function(e) {
+                const page = parseInt($(this).data("page"), 10);
+                loadGradeList(page);
+            });
+
+            $("#gradeListBody").on("click", ".update-btn", function() {
+                const grdIdx = $(this).closest("tr").data("grd-idx");
+                updateGrade(grdIdx);
+            });
+
+            $("#gradeListBody").on("click", ".delete-btn", function() {
+                const grdIdx = $(this).closest("tr").data("grd-idx");
+                deleteGrade(grdIdx);
+            });
+
+            $("#modalBtn").on("click", function() {
+                const mode = $("input[name='mode']").val();
+                const grdIdx = $("#modalGrdIdx").val();
+                const grdName = $("#modalGrdName").val();
+                const grdOrder = parseInt($("#modalGrdOrder").val(), 10);
+                const grdAnnual = parseFloat($("#modalGrdAnnual").val());
+
+                const grdData = {
+                    grdIdx,
+                    grdName,
+                    grdOrder,
+                    grdAnnual,
+                }
+
+                if (!grdName || !grdOrder || !grdAnnual) {
+                    Swal.fire("알림", "필수 항목을 입력해주세요.", "info");
+                    return;
+                }
+
+                if (mode === "insert") {
+                    $.ajax({
+                        type: "POST",
+                        url: "/hr/grd/insert",
+                        contentType: "application/json",
+                        data: JSON.stringify(grdData),
+                        success: function (res) {
+                            if (res.head.res_code === "200") {
+                                Swal.fire("성공", "직급이 등록되었습니다.", "success");
+                                $("#gradeModal").modal("hide");
+                                loadGradeList(1);
+                            } else {
+                                Swal.fire("실패", res.head.res_result || "등록 실패", "error");
+                            }
+                        },
+                        error: function () {
+                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                        }
+                    });
+                } else if (mode === "update") {
+                    $.ajax({
+                        type: "PUT",
+                        url: `/hr/grd/update/${grdIdx}`,
+                        contentType: "application/json",
+                        data: JSON.stringify(grdData),
+                        success: function (res) {
+                            if (res.head.res_code === "200") {
+                                Swal.fire("성공", "직급이 수정되었습니다.", "success");
+                                $("#gradeModal").modal("hide");
+                                loadGradeList(currentPage);
+                            } else {
+                                Swal.fire("실패", res.head.res_result || "수정 실패", "error");
+                            }
+                        },
+                        error: function () {
+                            Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                        }
+                    });
+                }
+            });
+            
+            function loadGradeList(page = 1) {
+                currentPage = page;
+
+                const SearchData = {
+                    option: $("#searchSelect").val(),
+                    keyword: $("#searchKeyword").val(),
+                    grdOrder: $("#searchOrder").val(),
+                    grdAnnual: $("#searchAnnual").val()
+                }
+
+                const queryString = $.param(SearchData);
+
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/grd/list?${queryString}&page=${page}`,
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body;
+                            renderGradeListBdoy(data.grds);
+                            renderPagination(data.page, data.pageSize, data.total);
+                        } else {
+                            Swal.fire("실패", "데이터가 존재하지 않습니다.", "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function renderGradeListBdoy(grds) {
+                const $gradeListBody = $("#gradeListBody");
+                
+                let html = "";
+                $.each(grds, function(i, item) {
+                    html += `
+                        <tr data-grd-idx="${item.grdIdx}">
+                            <td class="text-center">
+                                <input type="checkbox" class="form-check-input position-static">
+                            </td>
+                            <td>${item.grdIdx}</td>
+                            <td>${item.grdName}</td>
+                            <td>${item.empCount} 명</td>
+                            <td><span class="badge bg-secondary">${item.grdOrder}</span></td>
+                            <td>${item.grdAnnual} 일</td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1 update-btn">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger delete-btn">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                $gradeListBody.html(html);
+            }
+
+            function renderPagination(page, pageSize, total) {
+                const totalPages = Math.ceil(total / pageSize);
+                const $pagination = $("#paginationArea");
+                $pagination.empty();
+
+                $pagination.append(`
+                    <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                        <a class="page-link" data-page="${page - 1}">이전</a>
+                    </li>
+                `);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    $pagination.append(`
+                        <li class="page-item ${i === page ? 'active' : ''}">
+                            <a class="page-link" data-page="${i}">${i}</a>
+                        </li>
+                    `);
+                }
+
+                $pagination.append(`
+                    <li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" data-page="${page + 1}">다음</a>
+                    </li>
+                `);
+            }
+
+            function updateGrade(grdIdx) {
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/grd/detail/${grdIdx}`,
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            const data = res.body;
+                            $("#modalGrdIdx").val(data.grdIdx);
+                            $("#modalGrdName").val(data.grdName);
+                            $("#modalGrdOrder").val(data.grdOrder);
+                            $("#modalGrdAnnual").val(data.grdAnnual);
+
+                            $("#gradeModalLabel").text("직급 수정");
+                            $("input[name='mode']").val("update");
+                            $("#gradeModal").modal("show");
+                        } else {
+                            Swal.fire("실패", "데이터가 존재하지 않습니다.", "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function editGrade2(grdIdx) {
+                $.ajax({
+                    type: "GET",
+                    url: `/hr/grd/update/${grdIdx}`,
+                    success: function(res) {
+                        if(res.head.res_code === "200") {
+                            Swal.fire("성공", "해당 직급이 수정 되었습니다.", "success");
+                        } else {
+                            Swal.fire("실패", "데이터가 존재하지 않습니다.", "error");
+                        }
+                    },
+                    error: function(xhr, status, err) {
+                        console.error(err);
+                        Swal.fire("오류", "서버와 통신 중 오류가 발생했습니다.", "error");
+                    }
+                });
+            }
+
+            function deleteGrade(grdIdx) {
+                Swal.fire({
+                    title: "삭제 확인",
+                    text: "해당 직급을 삭제하시겠습니까?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "삭제",
+                    cancelButtonText: "취소"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: `/hr/grd/delete/${grdIdx}`,
+                            method: "DELETE",
+                            success: function(res) {
+                                if (res.head.res_code === "200") {
+                                    Swal.fire("성공", "삭제되었습니다.", "success");
+                                    loadGradeList(currentPage);
+                                } else {
+                                    Swal.fire("실패", res.head.res_msg || "삭제 실패", "error");
+                                }
+                            },
+                            error: function() {
+                                Swal.fire("오류", "삭제 중 오류가 발생했습니다.", "error");
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</div>
+</html>
