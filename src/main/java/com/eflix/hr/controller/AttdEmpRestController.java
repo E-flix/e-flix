@@ -127,7 +127,7 @@ public class AttdEmpRestController {
         String ip = getClientIp(request);
         AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
 
-        if (!isCompanyIp(ip)) {
+        if (!isInternalIp(ip)) {
             result = ResUtil.makeResult("400", "사내 IP내에서만 퇴근이 가능합니다.", null);
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
