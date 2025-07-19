@@ -55,6 +55,9 @@ public class EmployeeDTO {
     private int leaveDays;
     private String empRole;
 
+    private String deptUpIdx;
+    private String dpetUpName;
+
     private String grdName;
     private int baseSalary;
 }

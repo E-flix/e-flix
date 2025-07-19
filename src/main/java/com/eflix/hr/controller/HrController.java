@@ -278,6 +278,12 @@ public class HrController {
         return "hr/new/dept";
     }
 
+    @GetMapping("/grd")
+    public String grd() {
+        return "hr/new/grd";
+    }
+    
+
     @GetMapping("/va/req")
     public String vaEmp(Model model) {
         EmployeeDTO employeeDTO = Optional.ofNullable(employeeService.findByEmpIdx(getEmpIdx()))

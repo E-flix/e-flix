@@ -57,9 +57,10 @@ public class AttdEmpRestController {
 
     public String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
-        System.out.println(request.getRemoteAddr());
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim(); // 첫 번째 IP만 사용
+        }
 
-        System.out.println(ip);
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
@@ -69,11 +70,19 @@ public class AttdEmpRestController {
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
+
+        // IPv6 localhost 대응
+        if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) {
+            ip = "127.0.0.1";
+        }
+
         return ip;
     }
 
-    private boolean isCompanyIp(String ip) {
-        return ip.startsWith("13.125.43.*") || ip.startsWith("10.");
+    public boolean isInternalIp(String ip) {
+        return ip.startsWith("10.") ||
+                ip.startsWith("192.168.") ||
+                ip.matches("^172\\.(1[6-9]|2[0-9]|3[0-1])\\..*");
     }
 
     @PostMapping("/in")
@@ -82,8 +91,8 @@ public class AttdEmpRestController {
 
         String ip = getClientIp(request);
         AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
-        if (!isCompanyIp(ip)) {
-            result = ResUtil.makeResult(ResStatus.OK, "사내 IP내에서만 출근이 가능합니다.");
+        if (!isInternalIp(ip)) {
+            result = ResUtil.makeResult("400", "사내 IP내에서만 출근이 가능합니다.", null);
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
 
@@ -118,8 +127,8 @@ public class AttdEmpRestController {
         String ip = getClientIp(request);
         AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
 
-        if (!isCompanyIp(ip)) {
-            result = ResUtil.makeResult(ResStatus.OK, "사내 IP내에서만 퇴근이 가능합니다.");
+        if (!isInternalIp(ip)) {
+            result = ResUtil.makeResult("400", "사내 IP내에서만 퇴근이 가능합니다.", null);
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
 

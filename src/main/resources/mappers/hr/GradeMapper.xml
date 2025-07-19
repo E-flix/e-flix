@@ -8,4 +8,120 @@
         FROM grade
         WHERE co_idx = #{coIdx}
     </select>
+
+    <select id="findAllGrdCount" parameterType="GradeSearchDTO" resultType="int">
+        SELECT COUNT(*)
+        FROM grade
+        <where>
+            <if test="grdIdx != null and grdIdx !=''">
+                AND  grd_idx = #{grdIdx}
+            </if>
+            <if test="grdOrder != null">
+                AND  grd_order = #{grdOrder}
+            </if>
+            <if test="grdAnnual != null">
+                AND  grd_annual = #{grdAnnual}
+            </if>
+            <if test="keyword != null and keyword != '' and keyword != '선택'">
+                <choose>
+                    <when test="option != null and option == 'grdIdx' and option != '전체'">
+                        AND grd_idx LIKE '%' || #{keyword} || '%'
+                    </when>
+                    <when test="option != null and option == 'grdName' and option != '전체'">
+                        AND grd_name LIKE '%' || #{keyword} || '%'
+                    </when>
+                    <otherwise>
+                        AND (
+                            grd_idx LIKE '%' || #{keyword} || '%'
+                            OR grd_name LIKE '%' || #{keyword} || '%'
+                        )
+                    </otherwise>
+                </choose>
+            </if>
+            AND co_idx = #{coIdx}
+        </where>
+    </select>
+
+    <select id="findAllGrdBySearch" parameterType="GradeSearchDTO" resultType="GradeDTO">
+        SELECT *
+        FROM (
+            SELECT a.*, ROWNUM AS rn
+            FROM (
+                SELECT g.grd_idx, g.grd_name, g.grd_order, g.co_idx, g.grd_annual,
+                    (
+                        SELECT COUNT(*)
+                        FROM employees e
+                        WHERE e.grd_idx = g.grd_idx
+                            AND e.co_idx = g.co_idx
+                    ) AS emp_count
+                FROM grade g
+                <where>
+                    <if test="grdIdx != null and grdIdx !=''">
+                        AND  g.grd_idx = #{grdIdx}
+                    </if>
+                    <if test="grdOrder != null">
+                        AND  g.grd_order = #{grdOrder}
+                    </if>
+                    <if test="grdAnnual != null">
+                        AND  g.grd_annual = #{grdAnnual}
+                    </if>
+                    <if test="keyword != null and keyword != '' and keyword != '선택'">
+                        <choose>
+                            <when test="option != null and option == 'grdIdx' and option != '전체'">
+                                AND g.grd_idx LIKE '%' || #{keyword} || '%'
+                            </when>
+                            <when test="option != null and option == 'grdName' and option != '전체'">
+                                AND g.grd_name LIKE '%' || #{keyword} || '%'
+                            </when>
+                            <otherwise>
+                                AND (
+                                    g.grd_idx LIKE '%' || #{keyword} || '%'
+                                        OR g.grd_name LIKE '%' || #{keyword} || '%'
+                                )
+                            </otherwise>
+                        </choose>
+                    </if>
+                    AND g.co_idx = #{coIdx}
+                </where>
+            ) a
+            WHERE ROWNUM &lt;= #{offset} + #{limit}
+        )
+        WHERE rn &gt; #{offset}
+    </select>
+
+    <insert id="insert" parameterType="GradeDTO">
+        <selectKey resultType="String" keyProperty="grdIdx" order="BEFORE">
+            SELECT 'grd-' || TO_CHAR(NVL(MAX(TO_NUMBER(SUBSTR(grd_idx, 5))), 100) + 1) FROM grade
+        </selectKey>
+        INSERT INTO grade(grd_idx, grd_name, grd_order, co_idx, grd_annual)
+        VALUES (#{grdIdx}, #{grdName}, #{grdOrder}, #{coIdx}, #{grdAnnual})
+    </insert>
+
+    <select id="findByGrdIdx" parameterType="String" resultType="GradeDTO">
+        SELECT grd_idx, grd_name, grd_order, grd_annual, co_idx
+        FROM grade
+        WHERE grd_idx = #{grdIdx}
+    </select>
+
+    <update id="updateByGrdIdx" parameterType="GradeDTO">
+        UPDATE grade
+        <set>
+            <if test="grdName != null and grdName != ''">
+                grd_name = #{grdName},
+            </if>
+            <if test="grdOrder != null">
+                grd_order = #{grdOrder},
+            </if>
+            <if test="grdAnnual != null">
+                grd_annual = #{grdAnnual},
+            </if>
+        </set>
+        WHERE grd_idx = #{grdIdx}
+    </update>
+
+    <delete id="deleteByGrdIdx" parameterType="String">
+        DELETE
+        FROM grade
+        WHERE grd_idx = #{grdIdx}
+    </delete>
 </mapper>
