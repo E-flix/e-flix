@@ -24,7 +24,7 @@
 	</variable>
 	<variable name="realTakeHome" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{itemName}.equals("실수령액")
-        ? Double.parseDouble($F{amount}.replaceAll("[^0-9.-]", ""))
+        ? $V{totalEarnings} - $V{totalDeductions}
         : 0.0]]></variableExpression>
 		<initialValueExpression><![CDATA[0.0]]></initialValueExpression>
 	</variable>

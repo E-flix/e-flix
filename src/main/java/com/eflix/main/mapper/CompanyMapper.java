@@ -3,6 +3,7 @@ package com.eflix.main.mapper;
 import java.util.Date;
 import java.util.List;
 
+import com.eflix.hr.dto.etc.CompanyIpDTO;
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
@@ -28,4 +29,6 @@ public interface CompanyMapper {
     public SubscriptionDTO findSubscriptionByCoIdx(String coIdx);
 
     public Date findCoRegdateByCoIdx(String coIdx);
+
+    public List<CompanyIpDTO> findWhiteListByCoIdx(String coIdx);
 }
