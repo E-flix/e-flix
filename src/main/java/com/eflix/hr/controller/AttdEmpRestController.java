@@ -10,9 +10,12 @@ import com.eflix.common.security.auth.AuthUtil;
 import com.eflix.hr.dto.AttendanceRecordDTO;
 import com.eflix.hr.dto.etc.AttdDetailDTO;
 import com.eflix.hr.dto.etc.AttdSummaryDTO;
+import com.eflix.hr.dto.etc.CompanyIpDTO;
 import com.eflix.hr.service.AttendanceRecordService;
 import com.eflix.hr.service.AttendanceRequestService;
 import com.eflix.hr.service.EmployeeService;
+import com.eflix.main.dto.CompanyDTO;
+import com.eflix.main.service.CompanyService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -21,6 +24,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +48,9 @@ public class AttdEmpRestController {
     @Autowired
     private AttendanceRequestService attdReqService;
 
+    @Autowired
+    private CompanyService companyService;
+
     @Value("${upload.path}")
     private String path;
 
@@ -58,7 +65,7 @@ public class AttdEmpRestController {
     public String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim(); // 첫 번째 IP만 사용
+            ip = ip.split(",")[0].trim();
         }
 
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
@@ -79,10 +86,21 @@ public class AttdEmpRestController {
         return ip;
     }
 
-    public boolean isInternalIp(String ip) {
-        return ip.startsWith("10.") ||
-                ip.startsWith("192.168.") ||
-                ip.matches("^172\\.(1[6-9]|2[0-9]|3[0-1])\\..*");
+    public boolean isCompanyTrustedIp(String coIdx, String clientIp) {
+        List<CompanyIpDTO> whitelist = companyService.findWhiteListByCoIdx(coIdx);
+
+        for (CompanyIpDTO ipRule : whitelist) {
+            if ("PREFIX".equalsIgnoreCase(ipRule.getIpType())) {
+                if (clientIp.startsWith(ipRule.getIpValue())) {
+                    return true;
+                }
+            } else if ("EXACT".equalsIgnoreCase(ipRule.getIpType())) {
+                if (clientIp.equals(ipRule.getIpValue())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @PostMapping("/in")
@@ -91,7 +109,7 @@ public class AttdEmpRestController {
 
         String ip = getClientIp(request);
         AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
-        if (!isInternalIp(ip)) {
+        if (!isCompanyTrustedIp(getCoIdx(), ip)) {
             result = ResUtil.makeResult("400", "사내 IP내에서만 출근이 가능합니다.", null);
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
@@ -127,7 +145,7 @@ public class AttdEmpRestController {
         String ip = getClientIp(request);
         AttendanceRecordDTO attendanceRecordDTO = new AttendanceRecordDTO();
 
-        if (!isInternalIp(ip)) {
+        if (!isCompanyTrustedIp(getCoIdx(), ip)) {
             result = ResUtil.makeResult("400", "사내 IP내에서만 퇴근이 가능합니다.", null);
             return new ResponseEntity<>(result, HttpStatus.OK);
         }

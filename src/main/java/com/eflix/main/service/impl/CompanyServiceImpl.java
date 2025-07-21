@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.eflix.hr.dto.etc.CompanyIpDTO;
 import com.eflix.main.dto.CompanyDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
@@ -62,5 +63,10 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public Date findCoRegdateByCoIdx(String coIdx) {
         return companyMapper.findCoRegdateByCoIdx(coIdx);
+    }
+
+    @Override
+    public List<CompanyIpDTO> findWhiteListByCoIdx(String coIdx) {
+        return companyMapper.findWhiteListByCoIdx(coIdx);
     }
 }
