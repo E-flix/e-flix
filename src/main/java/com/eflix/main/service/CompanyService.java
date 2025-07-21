@@ -3,13 +3,11 @@ package com.eflix.main.service;
 import java.util.Date;
 import java.util.List;
 
+import com.eflix.hr.dto.etc.CompanyIpDTO;
 import com.eflix.main.dto.CompanyDTO;
-import com.eflix.main.dto.ModuleDTO;
-import com.eflix.main.dto.SubscriptionBillDTO;
 import com.eflix.main.dto.SubscriptionDTO;
 import com.eflix.main.dto.etc.CompanySearchDTO;
 import com.eflix.main.dto.etc.CompanySubscriptionDTO;
-import com.eflix.main.dto.etc.SubscriptionInfoDTO;
 
 /**
  * ERP 회사 관리를 위한 Service 클래스
@@ -61,4 +59,6 @@ public interface CompanyService {
 
     // 0710
     public Date findCoRegdateByCoIdx(String coIdx);
+
+    public List<CompanyIpDTO> findWhiteListByCoIdx(String coIdx);
 }

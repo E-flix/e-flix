@@ -7,13 +7,13 @@
     <select id="getOnDutyCount" resultType="int">
         SELECT COUNT(*)
         FROM attendance_records
-        WHERE TRUNC(attd_date) = TRUNC(SYSDATE)
+        WHERE TRUNC(attd_date) = TRUNC(TO_DATE('2025-07-18', 'YYYY-MM-DD'))
         AND attd_status IN ('AR02','AR05')
     </select>
     <select id="getTardyCount" resultType="int">
         SELECT COUNT(*)
         FROM attendance_records
-        WHERE TRUNC(attd_date) = TRUNC(SYSDATE)
+        WHERE TRUNC(attd_date) = TRUNC(TO_DATE('2025-07-18', 'YYYY-MM-DD'))
         AND attd_status = 'AR03'
     </select>
 
@@ -54,7 +54,7 @@
                         WHEN attd_status = 'AR06' THEN '결근'
                         ELSE '기타' END AS statusLabel
             FROM attendance_records
-            WHERE TRUNC(attd_date) = TRUNC(SYSDATE)
+            WHERE TRUNC(attd_date) = TRUNC(TO_DATE('2025-07-18', 'YYYY-MM-DD'))
         )
         GROUP BY statusLabel
     </select>
