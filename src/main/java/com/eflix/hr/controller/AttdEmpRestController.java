@@ -78,7 +78,7 @@ public class AttdEmpRestController {
             ip = request.getRemoteAddr();
         }
 
-        // IPv6 localhost 대응
+        // IPv6
         if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) {
             ip = "127.0.0.1";
         }
